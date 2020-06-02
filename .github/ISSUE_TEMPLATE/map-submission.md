@@ -23,5 +23,8 @@ What gamemode(s) do your map use?
 ## Team Sizes
 How many teams and how large are they?
 
+## Screenshots
+Create an album on [Imgur](https://imgur.com) with screenshots of the map. Try to include at least one screenshot showing the entire map as a whole, from above, if possible.
+
 # Download Link
 [Package the map](https://pgm.dev/docs/guides/packaging/compiling-and-releasing) and upload it somewhere where we can download it, like **Google Drive** or **Dropbox**.
