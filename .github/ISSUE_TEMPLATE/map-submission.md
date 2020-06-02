@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 ### Checklist
-*Check what applies to you.*
+Check what applies to you. *Add an X between the brackets or click the checkboxes when you have submitted the issue.*
 - [ ] I have [pruned](https://pgm.dev/docs/guides/packaging/pruning-chunks) the map
 - [ ] I have assigned a license to the map
 - [ ] I have created an XML file
