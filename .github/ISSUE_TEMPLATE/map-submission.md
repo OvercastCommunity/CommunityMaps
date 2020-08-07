@@ -19,8 +19,8 @@ Check what applies to you. *Add an X between the brackets or click the checkboxe
 # Map Name
 What is the map called?
 
-## Gamemode
-What gamemode(s) do your map use?
+## Gamemode & Map Description  
+What gamemode(s) do your map use? Also provide a small description of the map and how you envision it playing.
 
 ## Team Sizes
 How many teams and how large are they?
