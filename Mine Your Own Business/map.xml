@@ -1,6 +1,6 @@
 <map proto="1.4.0">
 <name>Mine Your Own Business</name>
-<version>1.1.1</version>
+<version>1.1.2</version>
 <objective>Bring the other team's wools back to your side.</objective>
 <authors>
     <author uuid="f876b863-1ccd-4ae2-acad-8a09e2209e81"/>
@@ -107,7 +107,7 @@
 <kill-reward>
     <item>golden apple</item>
     <item amount="8">arrow</item>
-    <item>emerald</item>
+    <item amount="3">emerald</item>
 </kill-reward>
 <toolrepair>
     <tool>iron sword</tool>
@@ -172,6 +172,20 @@
             <objective>orange-wool</objective>
         </not>
     </all>
+    <not id="no-teams">
+        <any>
+            <team>red</team>
+            <team>blue</team>
+        </any>
+    </not>
+    <not id="no-touch-sign">
+        <any>
+            <material>wool</material>
+            <material>stone:6</material>
+            <material>double step:7</material>
+        </any>
+    </not>
+    <time id="15-mins">15m</time>
 </filters>
 <portals sound="false">
     <portal filter="cyan-portal" x="-4">
@@ -257,7 +271,18 @@
             <cuboid max="-19,30,78" min="-6,12,131"/>
             <cuboid max="20,30,78" min="7,12,131"/>
         </union>
+    </union>
 
+    <union id="wool-gear">
+        <cuboid max="-7,22,66" min="-8,21,61"/>
+        <cuboid max="-17,22,66" min="-18,21,61"/>
+        <cuboid max="8,22,66" min="9,21,61"/>
+        <cuboid max="18,22,66" min="19,21,61"/>
+
+        <cuboid max="-7,22,-65" min="-8,21,-60"/>
+        <cuboid max="-17,22,-65" min="-18,21,-60"/>
+        <cuboid max="8,22,-65" min="9,21,-60"/>
+        <cuboid max="18,22,-65" min="19,21,-60"/>
     </union>
 
     <union id="wools">
@@ -285,10 +310,12 @@
 
     <rectangle id="fountain" min="-4,5" max="5,-4"/>
 
-    <apply block-place="never" block-break="only-wool" message="You may only mine wool here!" region="wools"/>
-    <apply block-place="never" block-break="only-iron" message="You may only mine iron here!" region="irons"/>
-    <apply block-place="never" block-break="only-diamond" message="You may only mine diamonds here!" region="diamonds"/>
-    <apply block-place="never" block-break="only-emerald" message="You may only mine emeralds here!" region="emeralds"/>
+    <apply use="15-mins" region="wool-gear" message="These chests are locked! They open after 15 minutes."/>
+
+    <apply block-place="no-teams" block-break="only-wool" message="You may only mine wool here!" region="wools"/>
+    <apply block-place="no-teams" block-break="only-iron" message="You may only mine iron here!" region="irons"/>
+    <apply block-place="no-teams" block-break="only-diamond" message="You may only mine diamonds here!" region="diamonds"/>
+    <apply block-place="no-teams" block-break="only-emerald" message="You may only mine emeralds here!" region="emeralds"/>
 
     <apply enter="not-red" message="You may not enter your own wool room!" region="red-side-wool-rooms"/>
     <apply enter="not-blue" message="You may not enter your own wool room!" region="blue-side-wool-rooms"/>
@@ -298,11 +325,54 @@
 
     <apply block="never" region="fountain" message="You may not modify the fountain."/>
 
-    <apply block="always" region="buildable"/>
+    <apply block-place="always" block-break="no-touch-sign" message="You may not modify the signs." region="buildable"/>
 
-    <apply block="never" message="This part of the map cannot be modified." region="everywhere"/>
+    <apply block="no-teams" message="This part of the map cannot be modified." region="everywhere"/>
 
 </regions>
+<renewables>
+    <renewable interval="2m" region="irons">
+        <renew-filter>
+            <material>iron block</material>
+        </renew-filter>
+    </renewable>
+    <renewable interval="30m" region="diamonds">
+        <renew-filter>
+            <any>
+                <material>diamond block</material>
+                <material>diamond ore</material>
+            </any>
+        </renew-filter>
+    </renewable>
+    <renewable interval="30m" region="emeralds">
+        <renew-filter>
+            <any>
+                <material>emerald block</material>
+                <material>emerald ore</material>
+            </any>
+        </renew-filter>
+    </renewable>
+    <renewable interval="10m" region="cyan-wool-region">
+        <renew-filter>
+            <material>wool:9</material>
+        </renew-filter>
+    </renewable>
+    <renewable interval="10m" region="yellow-wool-region">
+        <renew-filter>
+            <material>wool:4</material>
+        </renew-filter>
+    </renewable>
+    <renewable interval="10m" region="orange-wool-region">
+        <renew-filter>
+            <material>wool:1</material>
+        </renew-filter>
+    </renewable>
+    <renewable interval="10m" region="lime-wool-region">
+        <renew-filter>
+            <material>wool:5</material>
+        </renew-filter>
+    </renewable>
+</renewables>
 <block-drops wrong-tool="true">
     <rule region="cyan-wool-region">
         <filter>
@@ -341,5 +411,9 @@
         </drops>
     </rule>
 </block-drops>
+<crafting>
+    <disable>boat</disable>
+    <disable>minecart</disable>
+</crafting>
 <timelock>on</timelock>
 </map>
