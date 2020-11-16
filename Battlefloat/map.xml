@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <map proto="1.4.0">
 <name>Battlefloat</name>
-<version>2.0.0</version>
+<version>2.1</version>
 <authors>
     <author uuid="5ebc601c-82b6-4cd2-88cf-1b5c552b8ace"/> <!--Pe241-->    
 </authors>
-<objective>Capture 3 your team color flags!</objective>
+<objective>Get cobblestone from generators to make a skybridge &amp; capture 3 your team color flags!</objective>
 <rules>
     <rule>Fall damage is disabled.</rule>
 </rules>
 <teams>
-    <team id="r" color="dark_red" max="10" max-overfill="16">Red</team>
-    <team id="b" color="blue" max="10" max-overfill="16">Blue</team>
+    <team id="r" color="dark_red" max="16" max-overfill="16">Red</team>
+    <team id="b" color="blue" max="16" max-overfill="16">Blue</team>
 </teams>
 <spawns>
     <default kit="obs">
@@ -38,38 +38,38 @@
         owner="b"
         pickup-filter="only-r"
         color="red"
-        carry-message="You have the flag! Return to your spawn point!" 
+        carry-message="You have the flag! Return to your base!" 
         pickup-kit="flagarmor-r"
         drop-kit="flagreset">
         <flag id="r-sku" name="Red Skull Flag">
-            <post yaw="90" recover-time="15s" respawn-time="10s">183,179,91</post>
+            <post yaw="90" recover-time="5s" respawn-time="10s">183,179,91</post>
         </flag>
         <flag id="r-flo" name="Red Flower Flag">
-            <post yaw="135" recover-time="15s" respawn-time="10s">154,185,156</post>
+            <post yaw="135" recover-time="5s" respawn-time="10s">154,185,156</post>
         </flag>
         <flag id="r-cre" name="Red Creeper Flag">
-            <post yaw="180" recover-time="15s" respawn-time="10s">89,179,183</post>
+            <post yaw="180" recover-time="5s" respawn-time="10s">89,179,183</post>
         </flag>
     </flags>
     <flags
         owner="r"
         pickup-filter="only-b"
         color="blue"
-        carry-message="You have the flag! Return to your spawn point!" 
+        carry-message="You have the flag! Return to your base!" 
         pickup-kit="flagarmor-b"
         drop-kit="flagreset">
         <flag id="b-sku" name="Blue Skull Flag">
-            <post yaw="90" recover-time="15s" respawn-time="10s">183,179,89</post>
+            <post yaw="90" recover-time="5s" respawn-time="10s">183,179,89</post>
         </flag>
         <flag id="b-flo" name="Blue Flower Flag">
-            <post yaw="135" recover-time="15s" respawn-time="10s">156,185,154</post>
+            <post yaw="135" recover-time="5s" respawn-time="10s">156,185,154</post>
         </flag>
         <flag id="b-cre" name="Blue Creeper Flag">
-            <post yaw="180" recover-time="15s" respawn-time="10s">91,179,183</post>
+            <post yaw="180" recover-time="5s" respawn-time="10s">91,179,183</post>
         </flag>
     </flags>
-    <net respawn-together="true" points="1" region="net-r" capture-filter="only-r"/>
-    <net respawn-together="true" points="1" region="net-b" capture-filter="only-b"/>
+    <net respawn-together="true" points="1" region="redbase" capture-filter="only-r"/>
+    <net respawn-together="true" points="1" region="bluebase" capture-filter="only-b"/>
 </flags>
 <filters>
     <team id="only-r">r</team>
@@ -114,14 +114,39 @@
     <deny id="hopper">
         <material>hopper</material>
     </deny>
+    <deny id="deny-water">
+        <any>
+            <material>water</material>
+            <material>stationary water</material>
+        </any>
+    </deny>
+    <any id="flags-r">
+        <carrying-flag>r-sku</carrying-flag>
+        <carrying-flag>r-flo</carrying-flag>
+        <carrying-flag>r-cre</carrying-flag>
+    </any>
+    <any id="flags-b">
+        <carrying-flag>b-sku</carrying-flag>
+        <carrying-flag>b-flo</carrying-flag>
+        <carrying-flag>b-cre</carrying-flag>
+    </any>
+    <all id="flagreward-r">
+        <team>r</team>
+        <filter id="flags-r"/>
+    </all>
+    <all id="flagreward-b">
+        <team>b</team>
+        <filter id="flags-b"/>
+    </all>
 </filters>
 <kits>
     <kit id="spawn">
         <item unbreakable="true" material="iron pickaxe"/>
-        <item amount="64" material="egg"/>
-        <item amount="2" material="ender pearl"/>
+        <item amount="64" material="snow ball"/>
+        <item material="ender pearl"/>
         <item material="golden apple"/>
         <potion amplifier="50" duration="oo">damage resistance</potion>
+        <knockback-reduction>0</knockback-reduction>
     </kit>
     <kit id="kit-b" parents="spawn">
         <helmet color="0000FF" unbreakable="true" enchantment="PROTECTION_PROJECTILE:2" material="leather helmet"/>
@@ -130,9 +155,11 @@
         <helmet color="FF0000" unbreakable="true" enchantment="PROTECTION_PROJECTILE:2" material="leather helmet"/>
     </kit>
     <kit id="baseef" force="true">
+        <knockback-reduction>0</knockback-reduction>
         <potion amplifier="50" duration="oo">damage resistance</potion>
     </kit>
     <kit id="nobaseef" force="true">
+        <knockback-reduction>1</knockback-reduction>
         <potion amplifier="50" duration="0">damage resistance</potion>
     </kit>
     <kit id="kill" force="true">
@@ -160,9 +187,12 @@
         <leggings material="air"/>
         <boots material="air"/>
     </kit>
+    <kit id="flagreward" force="true">
+        <item material="ender pearl"/>
+    </kit>
     <kit id="obs">
         <helmet name="Oxygen helmet" material="glass"/>
-    </kit>
+    </kit>    
 </kits>
 <regions>
     <cuboid id="bluebase" min="40,140,-9" max="59,190,10"/>
@@ -185,27 +215,70 @@
         <cuboid min="13,195,13" max="56,205,56"/>
         <cuboid min="-8,177,-8" max="8,198,8"/>
     </union>
-    <cuboid id="net-r" min="-4,147,45" max="-3,148,46"/>
-    <cuboid id="net-b" min="45,147,-4" max="46,148,-3"/>
-    <union id="renew">
-        <block>90,178,183</block>
-        <block>155,184,155</block>
-        <block>183,178,90</block>
+    <union id="nowater">
+        <!--Red base-->
+        <block>1,148,43</block>
+        <block>6,148,43</block>
+        <block>6,148,48</block>
+        <block>1,148,48</block>
+        <block>-1,148,50</block>
+        <block>-1,148,55</block>
+        <block>-6,148,55</block>
+        <block>-6,148,50</block>
+        <!--Blue base-->
+        <block>43,148,1</block>
+        <block>43,148,6</block>
+        <block>48,148,6</block>
+        <block>48,148,1</block>
+        <block>50,148,-1</block>
+        <block>55,148,-1</block>
+        <block>55,148,-6</block>
+        <block>50,148,-6</block>
+        <!--Red-2nd-->
+        <block>-6,153,126</block>
+        <block>-6,153,131</block>
+        <block>-1,153,131</block>
+        <block>-1,153,126</block>
+        <block>6,153,133</block>
+        <block>6,153,138</block>
+        <block>1,153,138</block>
+        <block>1,153,133</block>
+        <!--Blue-2nd-->
+        <block>126,153,-6</block>
+        <block>131,153,-6</block>
+        <block>131,153,-1</block>
+        <block>126,153,-1</block>
+        <block>133,153,6</block>
+        <block>138,153,6</block>
+        <block>138,153,1</block>
+        <block>133,153,1</block>
+        <!--Purple-->
+        <block>91,172,84</block>
+        <block>96,172,84</block>
+        <block>96,172,89</block>
+        <block>91,172,89</block>
+        <block>84,172,91</block>
+        <block>84,172,96</block>
+        <block>89,172,96</block>
+        <block>89,172,91</block>
     </union>
 
     <apply block="never" region="void" message="Oops! You can't edit outside!"/>
     <apply block-break="break" region="play" message="Oops! You can't break this!"/>
+    <apply block="deny-water" region="nowater"/>
     <apply kit="kill" region="die"/>
     <apply kit="baseef" filter="only-r" region="redbase"/>
     <apply kit="baseef" filter="only-b" region="bluebase"/>
     <apply kit="nobaseef" region="nobase"/>
+    <apply kit="flagreward" filter="flagreward-r" region="redbase"/>
+    <apply kit="flagreward" filter="flagreward-b" region="bluebase"/>
     <apply use="redchest" region="redbase" message="Hey! This is `4Red members `conly!"/>
     <apply use="bluechest" region="bluebase" message="Hey! This is `9Blue members `conly!"/>
     <apply use="hopper" region="play"/>
 </regions>
 <kill-rewards>
     <kill-reward>
-        <item amount="16" material="egg"/>
+        <item amount="16" material="snow ball"/>
         <item material="golden apple"/>
     </kill-reward>
     <kill-reward>
@@ -222,11 +295,11 @@
         </filter>
         <item amount="8" name="`cSkybridge Breaker" material="tnt"/>
         <item amount="4" material="redstone block"/>
-        <item amount="2" material="ender pearl"/>
+        <item material="ender pearl"/>
     </kill-reward>
 </kill-rewards>
 <itemremove>
-    <item>egg</item>
+    <item>snow ball</item>
     <item>ender pearl</item>
     <item>red rose</item>
     <item>sign</item>
@@ -256,25 +329,19 @@
         </drops>
     </rule>
 </block-drops>
-<respawn delay="3.5s"/>
 <broadcasts>
-    <tip after="1s">Get cobblestone from the cobblestone generator to make skybridge!</tip>
-    <tip after="2s">Item-keep enabled: Diamond pickaxe, Cobblestone</tip>
+    <alert after="1s" every="2m" count="2">`6Get `7cobblestone `6from `bthe `bcobblestone `bgenerator `6to `6make `6skybridge!</alert>
+    <alert after="2s" every="2m" count="2">`aItem-keep `aenabled: `bDiamond `bpickaxe`a, `7Cobblestone</alert>
+    <alert after="301s" every="5m">`6Get `7cobblestone `6from `bthe `bcobblestone `bgenerator `6to `6make `6skybridge!</alert>
+    <alert after="302s" every="5m">`aItem-keep `aenabled: `bDiamond `bpickaxe`a, `7Cobblestone</alert>
 </broadcasts>
 <disabledamage>
     <damage>fall</damage>
     <damage ally="true" self="false" enemy="false" other="false">block explosion</damage>
 </disabledamage>
-<renewables>
-    <renewable avoid-players="1" region="renew" rate="3">
-        <renew-filter>
-            <material>cobblestone</material>
-        </renew-filter>
-        <replace-filter>
-            <material>air</material>
-        </replace-filter>
-    </renewable>
-</renewables>
+<crafting>
+    <disable>snow block</disable>
+</crafting>
 <hunger>
     <depletion>off</depletion>
 </hunger>
