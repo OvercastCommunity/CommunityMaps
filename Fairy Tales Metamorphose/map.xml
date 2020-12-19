@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<map proto="1.4.0">
+<map proto="1.4.0" game="Capture the Wool">
 <name>Fairy Tales: Metamorphose</name>
-<version>1.1.2</version>
+<version>1.2.0</version>
 <objective>Capture both of the enemy's wools before the other team does!</objective>
 <gamemode>ctw</gamemode>
 <authors>
@@ -47,16 +47,14 @@
     </kit>
 </kits>
 <spawns>
-    <spawn team="red" kit="red-kit">
+    <spawn team="red" kit="red-kit" yaw="-90">
         <regions>
-            <cuboid min="-121.5,17.5,-22.5" max="-120.5,17.5,-21.5" yaw="0"/>
-            <cuboid min="-120.5,17.5,-14.5" max="-121.5,17.5,-15.5" yaw="180"/>
+            <point>-125,17.5,-18.5</point>
         </regions>
     </spawn>
-    <spawn team="blue" kit="blue-kit">
+    <spawn team="blue" kit="blue-kit" yaw="90">
         <regions>
-            <cuboid min="99.5,17.5,-14.5" max="98.5,17.5,-15.5" yaw="180"/>
-            <cuboid min="98.5,17.5,-22.5" max="99.5,17.5,-21.5" yaw="0"/>
+            <point>103.5,17.5,-18.5</point>
         </regions>
     </spawn>
     <default yaw="0">
@@ -77,9 +75,9 @@
             <material>stationary lava</material>
         </any>
     </deny>
+    <time id="at-5m">5m</time>
 </filters>
 <regions>
-    <everywhere/>
     <union id="spawns">
         <rectangle id="blue-spawn" min="91,-26" max="107,-11"/>
         <rectangle id="red-spawn" min="-113,-11" max="-129,-26"/>
@@ -97,11 +95,11 @@
     <union id="portal-regions">
         <union id="portals">
             <!-- blue -->
-            <cuboid id="blue-p-right" min="-115,20,-17" max="-116,24,-13"/>
-            <cuboid id="blue-p-left" min="-115,20,-21" max="-116,24,-25"/>
+            <cuboid id="blue-p-right" min="-116,16,-16" max="-115,20,-13"/>
+            <cuboid id="blue-p-left" min="-116,16,-21" max="-115,20,-24"/>
             <!-- red -->
-            <cuboid id="red-p-right" min="93,20,-21" max="94,24,-25"/>
-            <cuboid id="red-p-left" min="93,20,-17" max="94,24,-13"/>
+            <cuboid id="red-p-right" min="94,16,-21" max="93,20,-24"/>
+            <cuboid id="red-p-left" min="94,16,-16" max="93,20,-13"/>
         </union>
         <union id="destinations">
             <!-- blue -->
@@ -124,6 +122,10 @@
             <cuboid min="-76,0,-42" max="54,10,-51"/>
         </union>
     </union>
+    <union id="moving-walls">
+        <cuboid id="red-moving-walls" min="-124,17,-24" max="-118,21,-13"/>
+        <cuboid id="blue-moving-walls" min="102,17,-24" max="96,21,-13"/>
+    </union>
     <!-- Applicators -->
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the other team's spawn!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the other team's spawn!"/>
@@ -131,6 +133,7 @@
     <apply block="never" region="wool-rooms" message="You may not damage with the wool rooms!"/>
     <apply enter="only-blue" region="red-wools" message="You may not enter your own wool room!"/>
     <apply enter="only-red" region="blue-wools" message="You may not enter your own wool room!"/>
+    <apply enter="at-5m" region="portals" message="You may only use these portals after 5 minutes have passed!"/>
     <apply block="never" region="destinations-building" message="You may not build/break blocks here!"/>
     <apply block="never" region="anti-underbridge-lanes" message="You may not underbridge here!"/>
     <apply block-place="deny-lava" region="everywhere" message="You may not place down lava!"/>
@@ -152,7 +155,13 @@
         <monument><block>-128,18,-18</block></monument>
     </wool>
 </wools>
-<portals>
+<destroyables name="walls" required="false" show="false" owner="red" mode-changes="true" repairable="false" materials="log;wood;fence;spruce wood stairs">
+    <destroyable region="moving-walls"/>
+</destroyables>
+<modes>
+    <mode after="5m" material="air" name="Side lane portals are opening"/>
+</modes>
+<portals filter="at-5m">
     <!-- blue side -->
     <portal region="blue-p-right" destination="blue-d-right"/>
     <portal region="blue-p-left" destination="blue-d-left"/>
@@ -161,7 +170,7 @@
     <portal region="red-p-left" destination="red-d-left"/>
 </portals>
 <broadcasts>
-    <tip after="5s" every="3m">You can use portals in your spawn building to bring you to the side lanes!</tip>
+    <tip after="5s" every="3m">After 5 minutes, you can use portals in your spawn building to bring you to the side lanes!</tip>
 </broadcasts>
 <gamerules>
     <doFireTick>false</doFireTick>
