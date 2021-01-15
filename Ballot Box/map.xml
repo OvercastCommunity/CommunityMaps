@@ -13,15 +13,14 @@
     <team id="blue" color="blue" max="40" plural="true">Democrats</team>
 </teams>
 <kits>
-    <!-- fix ballotbox height limit -->
-    <!-- fix filter logic for the other thingy -->
     <kit id="spawn" force="true">
-        <item slot="0"  amount="1">stone sword</item>
-        <item slot="1" unbreakable="true">bow</item>
-        <item slot="2">diamond pickaxe</item>
-        <item slot="4" amount="2">golden apple</item>
-        <item slot="7" amount="20">arrow</item>
-        <item slot="8" unbreakable="true" name="Votin' Sign" material="sign">
+        <item slot="0"  unbreakable="true">stone sword</item>
+        <item slot="1"  unbreakable="true">bow</item>
+        <item slot="2"  unbreakable="true">diamond pickaxe</item>
+        <item slot="4"  amount="2">golden apple</item>
+        <item slot="7"  amount="64">arrow</item>
+        <item slot="34" amount="64">arrow</item>
+        <item slot="8"  name="Votin' Sign" material="sign">
             <enchantment level="1">knockback</enchantment>
         </item>
         <leggings>iron leggings</leggings>
@@ -55,18 +54,19 @@
         <effect duration="oo" amplifier="10">resistance</effect>
     </kit>
     <kit id="ballot-kit">
-        <item slot="0"  amount="1">iron sword</item>
+        <item slot="0"  unbreakable="true">iron sword</item>
         <item slot="1"  unbreakable="true">bow</item>
-        <item slot="2"  amount="1">stone axe</item>
+        <item slot="2"  unbreakable="true">stone axe</item>
         <item slot="3"  amount="64">vine</item>
         <item slot="4"  amount="64" damage="0">wood</item>
         <item slot="13" amount="64" damage="0">wood</item>
         <item slot="31" amount="64" damage="0">wood</item>
         <item slot="22" amount="64" damage="0">wood</item>
         <item slot="23" amount="64" damage="0">wood</item>
-        <item slot="29" amount="1">water bucket</item>
-        <item slot="20" amount="1">water bucket</item>
-        <item slot="11" amount="1">water bucket</item>
+        <item slot="10">water bucket</item>
+        <item slot="19">water bucket</item>
+        <item slot="28">water bucket</item>
+        <item slot="29" amount="16" damage="0">wood step</item>
         <item slot="21" amount="32">fence</item>
         <item slot="30" amount="32">ladder</item>
         <item slot="12" amount="32">trap door</item>
@@ -88,6 +88,8 @@
         <item slot="35" amount="64">tnt</item>
         <item slot="26" amount="64">tnt</item>
         <item slot="17" amount="64">tnt</item>
+        <item slot="18" amount="64">arrow</item>
+        <item slot="27" amount="64">arrow</item>
         <chestplate locked="true" unbreakable="true" enchantment="protection explosions:4;protection projectile">iron chestplate</chestplate>
         <leggings locked="true" unbreakable="true">iron leggings</leggings>
         <clear/>
@@ -122,9 +124,9 @@
     </default>
 </spawns>
 <broadcasts>
-    <alert after="1s" every="1m" count="2">Eliminate all the enemy players to win the state!</alert>
+    <alert after="1s" every="1m" count="2">Eliminate the opposition to win the state!</alert>
     <tip after="2s">After all four states are confirmed, it's a rush to the ballot box!</tip>
-    <tip after="45s">After our long campaign, we must wait until the state results are confirmed!</tip>
+    <tip after="45s">After our long campaign, we must wait until the states are called!</tip>
     <alert after="4m" every="1m" count="2">Despite the results, the votes have not been fully counted! We must rush and cast extra votes!</alert>
 </broadcasts>
 <rules>
@@ -137,20 +139,42 @@
     <kill-reward>
         <filter>
             <all>
+                <not>
+                    <all>
+                        <objective any="true">pi-cp</objective>
+                        <objective any="true">mi-cp</objective>
+                        <objective any="true">nc-cp</objective>
+                        <objective any="true">wi-cp</objective>
+                    </all>
+                </not>
                 <team>red</team>
             </all>
         </filter>
-        <item material="paper" enchantment="looting" name="Tampered Mail Ballot" lore="You stole this Biden vote and wrote Trump in."/>
-        <item slot="4" damage="14" amount="16">wool</item>
+        <item damage="14" amount="16">stained clay</item>
     </kill-reward>
     <kill-reward>
         <filter>
             <all>
+                <not>
+                    <all>
+                        <objective any="true">pi-cp</objective>
+                        <objective any="true">mi-cp</objective>
+                        <objective any="true">nc-cp</objective>
+                        <objective any="true">wi-cp</objective>
+                    </all>
+                </not>
                 <team>blue</team>
             </all>
         </filter>
+        <item damage="11" amount="16">stained clay</item>
+    </kill-reward>
+    <kill-reward filter="to-ballot-box-red">
+        <item material="paper" enchantment="looting" name="Tampered Mail Ballot" lore="You stole this Biden vote and wrote Trump in."/>
+        <item amount="16" damage="0">wood</item>
+    </kill-reward>
+    <kill-reward filter="to-ballot-box-blue">
         <item material="paper" enchantment="looting" name="Tampered Mail Ballot" lore="You stole this Trump vote and wrote Biden in."/>
-        <item slot="4" damage="11" amount="16">wool</item>
+        <item amount="16" damage="0">wood</item>
     </kill-reward>
 </kill-rewards>
 <toolrepair>
@@ -172,7 +196,6 @@
 </score>
 <portals>
     <!-- portal to prevent "respawning" in state battle -->
-    <!-- lookup how to disable pvp in this room -->
     <!-- make sure observers can't use these portals -->
     <portal filter="no-state-respawn" yaw="@90" region="spawn-portal" destination="waiting-room" observers="never"/>
     <portal filter="to-ballot-box-blue" yaw="@90" region="states-portal" destination="blue-ballot-box-spawn" observers="never"/>
@@ -188,7 +211,6 @@
 </portals>
 <control-points capture-rule="exclusive" incremental="true" show-progress="true" permanent="true" points="0">
     <!-- pen 20, nc 15, mi 16, wi 10 -->
-    <!-- add dummy control point to prevent winning -->
     <control-point name="Pennsylvania" id="pi-cp" capture-time="1s" owner-points="20">
         <capture><region id="pennsylvania"/></capture>
         <progress><region id="pennsylvania"/></progress>
@@ -240,7 +262,6 @@
     <cuboid id="pennsylvania" min="77,0,-4" max="43,2,58"/>
     <cuboid id="wisconson" min="90,0,-21" max="137,2,-68"/>
     
-    <!-- adjust height limit of the states too for this -->
     <cuboid id="state-height-limit" min="137,20,56" max="43,20,-100"/>
     <cuboid id="states-portal" min="140,0,56" max="43,1.5,-100"/>
     
@@ -349,6 +370,11 @@
             <material>wool</material>
             <material>grass</material>
             <material>stained glass pane</material>
+            <material>glass</material>
+            <!-- prevent sign placement -->
+            <material>sign</material>
+            <material>sign post</material>
+            <material>wall sign</material>
         </any>
     </not>
     <any id="only-blue">
@@ -360,13 +386,16 @@
 </filters>
 <itemremove>
     <item>leather chestplate</item>
+    <item>iron chestplate</item>
     <item>iron helmet</item>
     <item>leather helmet</item>
     <item>iron leggings</item>
     <item>iron boots</item>
+    <item>leather boots</item>
     <item>paper</item>
     <item>vine</item>
     <item>wood</item>
+    <item>wood step</item>
     <item>water bucket</item>
     <item>bucket</item>
     <item>fence</item>
@@ -382,7 +411,6 @@
     <item>diode</item>
     <item>redstone block</item>
     <item>tnt</item>
-    <item>wool</item>
     <item>stained clay</item>
     <item>arrow</item>
     <item>golden apple</item>
