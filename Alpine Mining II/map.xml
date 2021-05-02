@@ -1,20 +1,22 @@
 <map proto="1.4.0">
 <name>Alpine Mining II</name>
-<version>0.1.2</version>
+<version>0.2</version>
 <objective>Destroy the enemy's 2 monuments!</objective>
 <authors>
     <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
 </authors>
 <contributors>
     <contributor uuid="430ec559-364a-4363-ac7a-2529050440ac" contribution="XML"/> <!-- mame_BT -->
-    <contributor uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30" contribution="Quality of life additions to XML"/> <!-- Ruediger_LP -->
+    <contributor uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30" contribution="Quality of life additions to XML (bulk crafting)"/> <!-- Ruediger_LP -->
+    <contributor uuid="ced434fd-94ce-4750-8aab-86da9914d3a2" contribution="Building and feedback"/> <!-- _Its__me_ -->
+    <contributor uuid="dff980ed-9f69-491e-b79c-30c21350baf2" contribution="Original map"/> <!-- DoomyBoy -->
+    <contributor uuid="c2848337-b526-4db0-9130-fabd0a5c7cfb" contribution="Original map"/> <!-- Rasta_Jol -->
 </contributors>
 <created>2021-04-24</created>
 <phase>development</phase>
-<broadcasts>
-    <tip after="10s" every="8m">Try bulk crafting armor and buckets using iron blocks!</tip>
-    <tip after="11s" every="8m">If your team runs out of iron blocks, mine iron ore to obtain iron ingots!</tip>
-</broadcasts>
+<!-- <broadcasts>
+    <tip after="10s" every="6m">Try bulk crafting armor and buckets using iron blocks!</tip>
+</broadcasts> -->
 <teams>
     <team id="green" color="dark green" max="40" max-overfill="45">Green</team>
     <team id="orange" color="gold" max="40" max-overfill="45">Orange</team>
@@ -23,8 +25,10 @@
     <kit id="spawn-kit">
         <clear/>
         <item slot="0" material="iron sword"/>
-        <item slot="1" material="bow"/>
-        <item slot="28" amount="64" material="arrow"/>
+        <item slot="1" material="bow">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
         <item slot="2" material="diamond pickaxe">
             <enchantment level="3">unbreaking</enchantment>
         </item>
@@ -33,12 +37,12 @@
             <enchantment level="3">unbreaking</enchantment>
         </item>
         <item slot="30" material="iron spade">
-            <enchantment>efficiency</enchantment>
-            <enchantment level="3">unbreaking</enchantment>
+            <enchantment level="2">efficiency</enchantment>
         </item>
-        <item slot="4" amount="64" material="wood" damage="5"/>
-        <item slot="31" amount="64" material="wood" damage="5"/>
-        <item slot="5" amount="32" material="glass"/>
+        <item slot="4" amount="64" material="wood" damage="1"/>
+        <item slot="31" amount="32" material="wood" damage="1"/>
+        <item slot="5" amount="64" material="stone" damage="5"/>
+        <item slot="32" amount="32" material="stone" damage="5"/>
         <item slot="7" material="golden apple"/>
         <item slot="8" amount="64" material="golden carrot"/>
     </kit>
@@ -55,19 +59,19 @@
     </kit>
 </kits>
 <spawns>
-    <default yaw="0">
+    <default yaw="-90">
         <region>
-            <cuboid min="21,32,-172" max="22,32,-171"/>
+            <cuboid min="-72.5,11.5,-0.5" max="-71.5,11.5,0.5"/>
         </region>
     </default>
-    <spawn team="green" yaw="90" kit="green-kit">
+    <spawn team="green" yaw="0" kit="green-kit">
         <region>
-            <cuboid min="40.2,22.5,253.5" max="39.2,22.5,252.5"/>
+            <cuboid min="-40.5,29.5,164.5" max="-41.5,29.5,163.5"/>
         </region>
     </spawn>
-    <spawn team="orange" yaw="-90" kit="orange-kit">
+    <spawn team="orange" yaw="180" kit="orange-kit">
         <region>
-            <cuboid min="-39.2,22.5,-253.5" max="-38.2,22.5,-252.5"/>
+            <cuboid min="41.5,29.5,-164.5" max="42.5,29.5,-163.5"/>
         </region>
     </spawn>
 </spawns>
@@ -81,23 +85,41 @@
     <deny id="deny-beacon-use">
         <material>beacon</material>
     </deny>
+    <deny id="no-break">
+        <any>
+            <material>enchantment table</material>
+            <material>skull</material>
+        </any>
+    </deny>
+    <any id="only-mineable">
+        <material>gold block</material>
+        <material>gold ore</material>
+        <material>iron block</material>
+        <material>iron ore</material>
+    </any>
     <not id="deny-void">
         <void/>
     </not>
 </filters>
 <regions>
+    <rectangle id="obs-spawn" min="-61,19" max="-101,-21"/>
     <union id="spawns">
-        <rectangle id="green-spawn" min="-34,-250" max="-46,-259"/>
-        <rectangle id="orange-spawn" min="35,248" max="47,257"/>
+        <cuboid id="green-spawn" min="-46,0,161" max="-31,59,190"/>
+        <cuboid id="orange-spawn" min="47,0,-161" max="32,59,-190"/>
     </union>
-    <apply enter="only-green" message="You may not enter the enemy spawn!" region="green-spawn"/>
-    <apply enter="only-orange" message="You may not enter the enemy spawn!" region="orange-spawn"/>
-    <apply block="never" message="You may not break or place blocks in the spawn area!" region="spawns"/>
+    <union id="enchantment-huts">
+        <rectangle id="green-hut" min="-34,-250" max="-46,-259"/>
+        <rectangle id="orange-hut" min="35,248" max="47,257"/>
+    </union>
+    <apply block-="only-mineable" message="You may not break or place blocks in the spawn area!" region="spawns"/>
+    <apply block="never" message="You may not destroy the enchantment hut!" region="enchantment-huts"/>
     <apply use="deny-beacon-use"/>
+    <apply block-break="no-break" message="You may not break this block!"/>
     <apply block-place="deny-void" message="You may not build outside of the map!"/>
+    <apply block="never" message="You may not build outside of the map!" region="obs-spawn"/>
 </regions>
 <destroyables materials="obsidian" mode-changes="true">
-    <destroyables name="East Monument">
+    <destroyables name="Hill Monument">
         <destroyable owner="green">
             <region>
                 <cuboid min="20,43,183" max="23,46,186"/>
@@ -105,19 +127,19 @@
         </destroyable>
         <destroyable owner="orange">
             <region>
-                <cuboid min="14,24,-142" max="17,27,-139"/>
+                <cuboid min="-19,43,-183" max="-22,46,-186"/>
             </region>
         </destroyable>
     </destroyables>
-    <destroyables name="West Monument">
+    <destroyables name="River Monument">
         <destroyable owner="green">
             <region>
-                <cuboid min="-13,24,142" max="-16,27,139"/>
+                <cuboid min="-12,27,112" max="-9,30,115"/>
             </region>
         </destroyable>
         <destroyable owner="orange">
             <region>
-                <cuboid min="-19,43,-183" max="-22,46,-186"/>
+                <cuboid min="13,27,-112" max="10,30,-115"/>
             </region>
         </destroyable>
     </destroyables>
@@ -138,17 +160,6 @@
             <item>gravel</item>
         </drops>
     </rule>
-    <rule>
-        <region>
-            <region id="everywhere"/>
-        </region>
-        <filter>
-            <material>iron ore</material>
-        </filter>
-        <drops>
-            <item>iron ingot</item>
-        </drops>
-    </rule>
 </block-drops>
 <toolrepair>
     <tool>iron sword</tool>
@@ -156,9 +167,11 @@
     <tool>diamond pickaxe</tool>
     <tool>iron axe</tool>
     <tool>iron spade</tool>
+    <tool>arrow</tool>
 </toolrepair>
 <itemremove>
     <item>wood</item>
+    <item>stone:5</item>
     <item>golden carrot</item>
     <item>leather chestplate</item>
     <item>leather leggings</item>
@@ -169,15 +182,47 @@
 </itemremove>
 <kill-reward>
     <item material="golden apple"/>
-    <item amount="16" material="arrow"/>
     <kit id="kill-reward"/>
 </kill-reward>
 <itemkeep>
     <item>golden apple</item>
-    <item>arrow</item>
 </itemkeep>
 <crafting>
     <!-- bulkcrafting; credits to Ruediger_LP. sourced from Columbia CTW XML. -->
+    <shaped override="false">
+        <result material="gold helmet" amount="9"/>
+        <shape>
+            <row>III</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">gold block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="gold chestplate" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>III</row>
+            <row>III</row>
+        </shape>
+        <ingredient symbol="I">gold block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="gold leggings" amount="9"/>
+        <shape>
+            <row>III</row>
+            <row>I.I</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">gold block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="gold boots" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">gold block</ingredient>
+    </shaped>
     <shaped override="false">
         <result material="iron helmet" amount="9"/>
         <shape>
