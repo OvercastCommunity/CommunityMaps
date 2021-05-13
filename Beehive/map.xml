@@ -1,0 +1,233 @@
+<map proto="1.4.0">
+<name>Beehive</name>
+<version>1.1.3</version>
+<objective>Break the other team's obsidian monuments.</objective>
+<authors>
+    <author uuid="74e59389-2b3e-490d-954a-a7af1fb1eded"/> <!-- Dowly_ -->
+    <author uuid="2d372806-0e62-4e44-87f7-2394540f5203"/> <!-- ItsEloz -->
+</authors>
+<contributors>
+    <contributor uuid="2cef6d05-ec9a-44b3-bedc-53359c68ae65" contribution="XML help and testing"/> <!-- BGMP -->
+</contributors>
+<teams>
+    <team id="blue" color="blue" max="32">Blue</team>
+    <team id="red" color="dark red" max="32">Red</team>
+</teams>
+<kits>
+    <kit id="spawn" force="true"> <!-- Both teams kit -->
+        <clear/>
+        <item slot="0">iron sword</item>
+        <item slot="1" enchantment="arrow infinite:1">bow</item>
+        <item slot="2">diamond pickaxe</item>
+        <item slot="3" enchantment="dig speed:3">iron axe</item>
+        <item slot="5" amount="64">wood</item>
+        <item slot="7">golden apple</item>
+        <item slot="8" amount="64" name="Honey Carrot">golden carrot</item>
+        <item slot="28">arrow</item>
+        <leggings unbreakable="true">chainmail leggings</leggings>
+        <helmet unbreakable="true">chainmail helmet</helmet>
+    </kit>
+    <kit id="blue-kit" parents="spawn"> <!-- Specific blue items -->
+        <chestplate unbreakable="true" color="0066cc">leather chestplate</chestplate>
+        <boots unbreakable="true" color="0066cc">leather boots</boots>
+        <item slot="4" amount="32" damage="3">stained clay</item>
+    </kit>
+    <kit id="red-kit" parents="spawn"> <!-- Specific red items -->
+        <chestplate unbreakable="true" color="cd0000">leather chestplate</chestplate>
+        <boots unbreakable="true" color="cd0000">leather boots</boots>
+        <item slot="4" amount="32" damage="14">stained clay</item>
+    </kit>
+    <kit id="resistance">
+        <effect duration="3" amplifier="100">damage resistance</effect>
+    </kit>
+</kits>
+<spawns>
+    <default yaw="90"> <!-- Observer spawn -->
+        <region>
+            <cylinder base="-1637.5,73,-31.5" radius="2" height="0"/>
+        </region>
+    </default>
+    <spawn team="blue" kit="blue-kit" yaw="-90">  <!-- Blue spawn -->
+        <region>
+            <cuboid min="-1731.5,9,-32.5" max="-1730.5,9,-30.5"/>
+        </region>
+    </spawn>
+    <spawn team="red" kit="red-kit" yaw="90"> <!-- Red spawn -->
+        <region>
+            <cuboid min="-1543.5,9,-30.5" max="-1545.5,9,-32.5"/>
+        </region>
+    </spawn>
+</spawns>
+<filters>
+    <team id="only-blue">blue</team>
+    <team id="only-red">red</team>
+    <deny id="deny-players">
+        <any>
+            <team>blue</team>
+            <team>red</team>
+        </any>
+    </deny>
+    <material id="only-iron">iron block</material>
+    <not id="no-void">
+        <void/>
+    </not>
+</filters>
+<regions>
+    <negative id="everything">
+        <region id="red-spawn"/>
+        <region id="blue-spawn"/>
+    </negative>
+    <union id="top-drop-chutes"> <!-- This is the first few blocks into the drop chutes -->
+        <cuboid id="blue-drop-top" min="-1733.5,18,-33.5" max="-1729.5,19,-29.5"/>
+        <cuboid id="red-drop-top" min="-1546.5,18,-33.5" max="-1542.5,19,-29.5"/>
+    </union>
+    <union id="spawn-areas">
+        <union id="teleport-platforms">
+            <cylinder base="-1725.5,17,-31.5" radius="3.5" height="oo"/>
+            <cylinder base="-1550.5,17,-31.5" radius="3.5" height="oo"/>
+        </union>
+        <union id="drop-chutes">
+            <cuboid id="blue-drop" min="-1733.5,10,-33.5" max="-1729.5,88,-29.5"/>
+            <cuboid id="red-drop" min="-1546.5,10,-33.5" max="-1542.5,88,-29.5"/>
+        </union>
+    </union>
+    <union id="blue-spawn">
+        <cylinder base="-1724.5,5,-31.5" radius="12" height="8"/>
+        <cylinder base="-1725.5,13,-31.5" radius="6" height="3"/>
+        <cylinder base="-1723.5,16,-31.5" radius="6" height="1"/>
+        <cylinder base="-1718.5,13,-31.5" radius="4" height="2"/>
+    </union>
+    <union id="red-spawn">
+        <cylinder base="-1551.5,5,-31.5" radius="12" height="8"/>
+        <cylinder base="-1550.5,13,-31.5" radius="6" height="3"/>
+        <cylinder base="-1552.5,16,-31.5" radius="6" height="1"/>
+        <cylinder base="-1557.5,13,-31.5" radius="4" height="2"/>
+    </union>
+    <apply velocity="0,0.61,0" region="blue-drop-top" filter="only-red"/>
+    <apply velocity="0,0.61,0" region="red-drop-top" filter="only-blue"/>
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the other team's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the other team's spawn!"/>
+    <apply block-break="only-iron" block-place="deny-players" region="blue-spawn" message="You may only break iron in spawn!"/>
+    <apply block-break="only-iron" block-place="deny-players" region="red-spawn" message="You may only break iron in spawn!"/>
+    <apply block="no-void" region="everything" message="You may not modify the void!"/> <!-- Void filter -->
+    <cylinder id="blue-destination" base="-1726,19,-32" radius="2" height="0"/>
+    <cylinder id="red-destination" base="-1551,19,-32" radius="2" height="0"/>
+    <apply kit="resistance">
+        <region>
+            <!-- Blue side -->
+            <cuboid min="-1716,8,-32.5" max="-1718,10,-30.5"/>
+            <cuboid min="-1733.5,13,-33.5" max="-1729.5,14,-29.5"/>
+            <!-- Red side -->
+            <cuboid min="-1561,8,-31" max="-1559,10,-33"/>
+            <cuboid min="-1546.5,13,-33.5" max="-1542,14,-29.5"/>
+        </region>
+    </apply>
+</regions>
+<portals>
+    <portal> <!-- Blue portal -->
+        <region>
+            <cuboid min="-1716,8,-33.5" max="-1718,10,-29.5"/>
+        </region>
+        <destination>
+            <region id="blue-destination"/>
+        </destination>
+    </portal>
+    <portal> <!-- Red portal -->
+        <region>
+            <cuboid min="-1561,8,-33.5" max="-1559,10,-29.5"/>
+        </region>
+        <destination>
+            <region id="red-destination"/>
+        </destination>
+    </portal>
+</portals>
+<renewables>
+    <renewable rate="5" grow="true" particles="true" sound="true" avoid-players="2"> <!-- Blue iron generator -->
+        <region>
+            <cylinder base="-1724.5,8,-38.5" radius="10" height="4"/>
+        </region>
+        <renew-filter>
+            <any>
+                <material>iron block</material>
+            </any>
+        </renew-filter>
+        <replace-filter>
+            <any>
+                <material>air</material>
+            </any>
+        </replace-filter>
+    </renewable>
+    <renewable> <!-- Red iron generator -->
+        <region>
+            <region id="red-spawn"/>
+        </region>
+        <renew-filter>
+            <any>
+                <material>iron block</material>
+            </any>
+        </renew-filter>
+        <replace-filter>
+            <any>
+                <material>air</material>
+            </any>
+        </replace-filter>
+    </renewable>
+</renewables>
+<destroyables materials="obsidian" completion="100%">
+    <destroyable owner="blue" name="Back Monument" mode-changes="true">
+        <region> <!-- Blue back monument -->
+            <cuboid min="-1760.5,24,-33.5" max="-1763.5,34,-29.5"/>
+        </region>
+    </destroyable>
+    <destroyable owner="blue" name="Front Monument" mode-changes="true">
+        <region> <!-- Blue front monument -->
+            <cuboid min="-1683.5,14,-35.5" max="-1678.5,20,-29.5"/>
+        </region>
+    </destroyable>
+    <destroyable owner="red" name="Back Monument" mode-changes="true">
+        <region> <!-- Red back monument -->
+            <cuboid min="-1516.5,24,-28.5" max="-1511.5,35,-34.5"/>
+        </region>
+    </destroyable>
+    <destroyable owner="red" name="Front Monument" mode-changes="true">
+        <region> <!-- Red front monument -->
+            <cuboid min="-1592.5,14,-28.5" max="-1600.5,20,-34.5"/>
+        </region>
+    </destroyable>
+</destroyables>
+<modes>
+    <mode after="20m" material="beacon" name="`bBEACON MONUMENT MODE"/>
+    <mode after="40m" material="coal block" name="`8COAL MONUMENT MODE"/>
+    <mode after="60m" material="stained clay" name="`7STAINED CLAY MONUMENT MODE"/>
+</modes>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>obsidian</item>
+    <item>beacon</item>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>golden carrot</item>
+    <item>stained clay</item>
+    <item damage="12">log 2</item>
+    <item damage="0">log 2</item>
+    <item>wood:1</item>
+    <item>glowstone dust</item>
+    <item damage="3">skull item</item>
+    <item>stone plate</item>
+</itemremove>
+<itemkeep>
+    <item>golden apple</item>
+</itemkeep>
+<kill-reward>
+    <item>golden apple</item>
+</kill-reward>
+<maxbuildheight>38</maxbuildheight>
+</map>
