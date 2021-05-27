@@ -1,6 +1,6 @@
 <map proto="1.4.0">
 <name>Alpine Mining II</name>
-<version>0.3.3</version>
+<version>0.4</version>
 <objective>Destroy the enemy's 2 monuments!</objective>
 <authors>
     <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
@@ -13,7 +13,6 @@
     <contributor uuid="c2848337-b526-4db0-9130-fabd0a5c7cfb" contribution="Original map"/> <!-- Rasta_Jol -->
 </contributors>
 <created>2021-04-24</created>
-<phase>development</phase>
 <broadcasts>
     <tip after="30s" every="8m">Mine lapis and smelt ores for experience, you can use it to enchant your tools!</tip>
     <tip after="38s" every="8m">The enchantment room is in the back of your team's side, near the mine entrance!</tip>
@@ -22,7 +21,271 @@
     <team id="green" color="dark green" max="45" max-overfill="50">Green</team>
     <team id="orange" color="gold" max="45" max-overfill="50">Orange</team>
 </teams>
-<!-- <classes family="classes">
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="iron sword"/>
+        <item slot="1" material="bow">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <item slot="2" material="diamond pickaxe">
+            <enchantment level="3">unbreaking</enchantment>
+        </item>
+        <item slot="3" material="iron axe">
+            <enchantment>efficiency</enchantment>
+            <enchantment level="3">unbreaking</enchantment>
+        </item>
+        <item slot="30" material="iron spade">
+            <enchantment level="2">efficiency</enchantment>
+        </item>
+        <item slot="4" amount="64" material="wood" damage="1"/>
+        <item slot="31" amount="32" material="wood" damage="1"/>
+        <item slot="5" amount="64" material="stone" damage="5"/>
+        <item slot="32" amount="32" material="stone" damage="5"/>
+        <item slot="7" material="golden apple"/>
+        <item slot="8" amount="64" material="golden carrot"/>
+        <chestplate team-color="true" unbreakable="true" material="leather chestplate"/>
+        <leggings team-color="true" unbreakable="true" material="leather leggings"/>
+    </kit>
+    <kit id="kill-reward">
+       <effect duration="4" amplifier="2">speed</effect>
+    </kit>
+</kits>
+<spawns>
+    <default yaw="-90">
+        <region>
+            <cuboid min="-82.5,12.5,-11.5" max="-81.5,12.5,-10.5"/>
+        </region>
+    </default>
+    <spawn team="green" kit="spawn-kit" yaw="0">
+        <region>
+            <cuboid min="-40.5,29.5,128.5" max="-41.5,29.5,127.5"/>
+        </region>
+    </spawn>
+    <spawn team="orange" kit="spawn-kit" yaw="180">
+        <region>
+            <cuboid min="41.5,29.5,-164.5" max="42.5,29.5,-163.5"/>
+        </region>
+    </spawn>
+</spawns>
+<filters>
+    <deny id="deny-players-tnt">
+        <any>
+            <team>green</team>
+            <team>orange</team>
+            <cause>explosion</cause>
+        </any>
+    </deny>
+    <deny id="deny-beacon-use">
+        <material>beacon</material>
+    </deny>
+    <deny id="deny-trapdoor-use">
+        <material>trap door</material>
+    </deny>
+    <deny id="no-break">
+        <any>
+            <material>enchantment table</material>
+            <material>skull</material>
+        </any>
+    </deny>
+    <all id="only-mineable">
+        <any id="mineable">
+            <material>gold block</material>
+            <material>gold ore</material>
+            <material>iron block</material>
+            <material>iron ore</material>
+        </any>
+    </all>
+</filters>
+<regions>
+    <union id="spawns">
+        <cuboid id="green-spawn" min="-46,13,125" max="-31,59,154"/>
+        <cuboid id="orange-spawn" min="47,13,-161" max="32,59,-190"/>
+    </union>
+    <union id="enchantment-huts">
+        <rectangle id="green-hut" min="35,212" max="47,221"/>
+        <rectangle id="orange-hut" min="-34,-214" max="-46,-223"/>
+    </union>
+    <rectangle id="obs-spawn" min="-61,2" max="-101,-38"/>
+    <complement id="off-map">
+        <everywhere/>
+        <region id="obs-spawn"/>
+    </complement>
+    <apply use="deny-trapdoor-use" region="spawns"/>
+    <apply use="deny-beacon-use"/>
+    <!-- apply block-break="only-mineable" block-place="deny-players-tnt" message="You may not destroy the spawn area!" region="spawns"/ -->
+    <apply block="deny-players-tnt" message="You may not destroy the spawn region!" region="spawns"/>
+    <apply block="never" message="You may not destroy the enchantment hut!" region="enchantment-huts"/>
+    <apply block="never" message="You may not build outside of the map!" region="obs-spawn"/>
+    <apply block-place="never" message="You may not build outside of the map!" region="off-map"/>
+    <apply block-break="no-break" message="You may not break this block!"/>
+</regions>
+<destroyables materials="obsidian" mode-changes="true">
+    <destroyables name="Hill Monument">
+        <destroyable owner="green">
+            <region>
+                <cuboid min="20,43,146" max="23,46,149"/>
+            </region>
+        </destroyable>
+        <destroyable owner="orange">
+            <region>
+                <cuboid min="-19,43,-183" max="-22,46,-186"/>
+            </region>
+        </destroyable>
+    </destroyables>
+    <destroyables name="River Monument">
+        <destroyable owner="green">
+            <region>
+                <cuboid min="-11,24,106" max="-14,27,103"/>
+            </region>
+        </destroyable>
+        <destroyable owner="orange">
+            <region>
+                <cuboid min="12,24,-142" max="15,27,-139"/>
+            </region>
+        </destroyable>
+    </destroyables>
+</destroyables>
+<modes>
+    <mode after="30m" material="beacon"/>
+    <mode after="60m" material="coal block"/>
+</modes>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>wood</item>
+    <item>stone:5</item>
+    <item>golden carrot</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>obsidian</item>
+    <item>beacon</item>
+    <item>coal block</item>
+    <item>flint</item>
+</itemremove>
+<itemkeep>
+    <item>golden apple</item>
+</itemkeep>
+<kill-reward>
+    <item material="golden apple"/>
+    <kit id="kill-reward"/>
+</kill-reward>
+<block-drops>
+    <rule>
+        <filter>
+            <material>gravel</material>
+        </filter>
+        <drops>
+            <item>gravel</item>
+        </drops>
+    </rule>
+    <rule>
+        <filter>
+            <material>lapis ore</material>
+        </filter>
+        <drops>
+            <item amount="2" damage="4" material="ink sack"/>
+        </drops>
+        <experience>3</experience>
+    </rule>
+</block-drops>
+<crafting>
+    <!-- bulkcrafting; credits to Ruediger_LP. sourced from Columbia CTW XML. -->
+    <shaped override="false">
+        <result material="gold helmet" amount="9"/>
+        <shape>
+            <row>III</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">gold block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="gold chestplate" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>III</row>
+            <row>III</row>
+        </shape>
+        <ingredient symbol="I">gold block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="gold leggings" amount="9"/>
+        <shape>
+            <row>III</row>
+            <row>I.I</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">gold block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="gold boots" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">gold block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="iron helmet" amount="9"/>
+        <shape>
+            <row>III</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="iron chestplate" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>III</row>
+            <row>III</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="iron leggings" amount="9"/>
+        <shape>
+            <row>III</row>
+            <row>I.I</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="iron boots" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="bucket" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>.I.</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+</crafting>
+<maxbuildheight>50</maxbuildheight>
+<world>
+    <timeset>1</timeset>
+</world>
+<gamerules>
+    <doFireTick>false</doFireTick>
+</gamerules>
+</map>
+<!--
+Refactor classes at a later time
+<classes family="classes">
     <class name="Basic" default="true" icon="iron pickaxe">
         <kit id="basic-kit">
             <clear/>
@@ -140,135 +403,8 @@
             <item slot="14" amount="12" material="explosive minecart"/>
         </kit>
     </class>
-</classes> -->
-<kits>
-    <kit id="spawn-kit">
-        <clear/>
-        <item slot="0" material="iron sword"/>
-        <item slot="1" material="bow">
-            <enchantment>infinity</enchantment>
-        </item>
-        <item slot="28" material="arrow"/>
-        <item slot="2" material="diamond pickaxe">
-            <enchantment level="3">unbreaking</enchantment>
-        </item>
-        <item slot="3" material="iron axe">
-            <enchantment>efficiency</enchantment>
-            <enchantment level="3">unbreaking</enchantment>
-        </item>
-        <item slot="30" material="iron spade">
-            <enchantment level="2">efficiency</enchantment>
-        </item>
-        <item slot="4" amount="64" material="wood" damage="1"/>
-        <item slot="31" amount="32" material="wood" damage="1"/>
-        <item slot="5" amount="64" material="stone" damage="5"/>
-        <item slot="32" amount="32" material="stone" damage="5"/>
-        <item slot="7" material="golden apple"/>
-        <item slot="8" amount="64" material="golden carrot"/>
-    </kit>
-    <kit id="green-kit" parents="spawn-kit">
-        <chestplate color="00AA00" unbreakable="true" material="leather chestplate"/>
-        <leggings color="00AA00" unbreakable="true" material="leather leggings"/>
-    </kit>
-    <kit id="orange-kit" parents="spawn-kit">
-        <chestplate color="FFAA00" unbreakable="true" material="leather chestplate"/>
-        <leggings color="FFAA00" unbreakable="true" material="leather leggings"/>
-    </kit>
-    <kit id="kill-reward">
-       <effect duration="4" amplifier="2">speed</effect>
-    </kit>
-</kits>
-<spawns>
-    <default yaw="-90">
-        <region>
-            <cuboid min="-82.5,12.5,-11.5" max="-81.5,12.5,-10.5"/>
-        </region>
-    </default>
-    <spawn team="green" kit="green-kit" yaw="0">
-        <region>
-            <cuboid min="-40.5,29.5,128.5" max="-41.5,29.5,127.5"/>
-        </region>
-    </spawn>
-    <spawn team="orange" kit="orange-kit" yaw="180">
-        <region>
-            <cuboid min="41.5,29.5,-164.5" max="42.5,29.5,-163.5"/>
-        </region>
-    </spawn>
-</spawns>
-<filters>
-    <deny id="deny-beacon-use">
-        <material>beacon</material>
-    </deny>
-    <deny id="deny-trapdoor-use">
-        <material>trap door</material>
-    </deny>
-    <deny id="no-break">
-        <any>
-            <material>enchantment table</material>
-            <material>skull</material>
-        </any>
-    </deny>
-    <all id="only-mineable">
-        <any>
-            <material>gold block</material>
-            <material>gold ore</material>
-            <material>iron block</material>
-            <material>iron ore</material>
-        </any>
-    </all>
-    <not id="deny-void">
-        <void/>
-    </not>
-</filters>
-<regions>
-    <rectangle id="obs-spawn" min="-61,2" max="-101,-38"/>
-    <union id="spawns">
-        <cuboid id="green-spawn" min="-46,13,125" max="-31,59,154"/>
-        <cuboid id="orange-spawn" min="47,13,-161" max="32,59,-190"/>
-    </union>
-    <union id="enchantment-huts">
-        <rectangle id="green-hut" min="35,212" max="47,221"/>
-        <rectangle id="orange-hut" min="-34,-214" max="-46,-223"/>
-    </union>
-    <apply block="only-mineable" message="You may not break or place blocks in the spawn area!" region="spawns"/>
-    <apply block="never" message="You may not destroy the enchantment hut!" region="enchantment-huts"/>
-    <apply block="never" message="You may not build outside of the map!" region="obs-spawn"/>
-    <apply block-place="deny-void" message="You may not build outside of the map!"/>
-    <apply block-break="no-break" message="You may not break this block!"/>
-    <apply use="deny-trapdoor-use" region="spawns"/>
-    <apply use="deny-beacon-use"/>
-</regions>
-<destroyables materials="obsidian" mode-changes="true">
-    <destroyables name="Hill Monument">
-        <destroyable owner="green">
-            <region>
-                <cuboid min="20,43,146" max="23,46,149"/>
-            </region>
-        </destroyable>
-        <destroyable owner="orange">
-            <region>
-                <cuboid min="-19,43,-183" max="-22,46,-186"/>
-            </region>
-        </destroyable>
-    </destroyables>
-    <destroyables name="River Monument">
-        <destroyable owner="green">
-            <region>
-                <cuboid min="-12,27,76" max="-9,30,79"/>
-            </region>
-        </destroyable>
-        <destroyable owner="orange">
-            <region>
-                <cuboid min="13,27,-112" max="10,30,-115"/>
-            </region>
-        </destroyable>
-    </destroyables>
-</destroyables>
-<modes>
-    <mode after="30m" material="beacon"/>
-    <mode after="60m" material="coal block"/>
-</modes>
-<!-- <toolrepair>
+</classes>
+<toolrepair>
     <tool>iron sword</tool>
     <tool>bow</tool>
 </toolrepair>
@@ -306,137 +442,7 @@
     <item>lever</item>
     <item>explosive minecart</item>
     <item>iron chestplate</item>
-</itemkeep> -->
-<toolrepair>
-    <tool>iron sword</tool>
-    <tool>bow</tool>
-    <tool>diamond pickaxe</tool>
-    <tool>iron axe</tool>
-    <tool>iron spade</tool>
-    <tool>arrow</tool>
-</toolrepair>
-<itemremove>
-    <item>wood</item>
-    <item>stone:5</item>
-    <item>golden carrot</item>
-    <item>leather chestplate</item>
-    <item>leather leggings</item>
-    <item>obsidian</item>
-    <item>beacon</item>
-    <item>coal block</item>
-    <item>flint</item>
-</itemremove>
-<itemkeep>
-    <item>golden apple</item>
 </itemkeep>
 <kill-reward>
-    <item material="golden apple"/>
-    <!-- item amount="8" material="arrow"/-->
-    <kit id="kill-reward"/>
-</kill-reward>
-<block-drops>
-    <rule>
-        <filter>
-            <material>gravel</material>
-        </filter>
-        <drops>
-            <item>gravel</item>
-        </drops>
-    </rule>
-    <rule>
-        <filter>
-            <material>lapis ore</material>
-        </filter>
-        <drops>
-            <item amount="2" damage="4" material="ink sack"/>
-        </drops>
-        <experience>3</experience>
-    </rule>
-</block-drops>
-<crafting>
-    <!-- bulkcrafting; credits to Ruediger_LP. sourced from Columbia CTW XML. -->
-    <shaped override="false">
-        <result material="gold helmet" amount="9"/>
-        <shape>
-            <row>III</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">gold block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="gold chestplate" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>III</row>
-            <row>III</row>
-        </shape>
-        <ingredient symbol="I">gold block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="gold leggings" amount="9"/>
-        <shape>
-            <row>III</row>
-            <row>I.I</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">gold block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="gold boots" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">gold block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron helmet" amount="9"/>
-        <shape>
-            <row>III</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron chestplate" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>III</row>
-            <row>III</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron leggings" amount="9"/>
-        <shape>
-            <row>III</row>
-            <row>I.I</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron boots" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="bucket" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>.I.</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-</crafting>
-<maxbuildheight>50</maxbuildheight>
-<world>
-    <timeset>1</timeset>
-</world>
-<gamerules>
-    <doFireTick>false</doFireTick>
-</gamerules>
-</map>
+    <item amount="8" material="arrow"/>
+</kill-reward> -->
