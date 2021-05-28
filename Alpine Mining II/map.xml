@@ -1,13 +1,13 @@
 <map proto="1.4.0">
 <name>Alpine Mining II</name>
-<version>0.4.1</version>
+<version>1.0</version>
 <objective>Destroy the enemy's 2 monuments!</objective>
 <authors>
     <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
 </authors>
 <contributors>
     <contributor uuid="430ec559-364a-4363-ac7a-2529050440ac" contribution="XML"/> <!-- mame_BT -->
-    <contributor uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30" contribution="Quality of life additions to XML (bulk crafting)"/> <!-- Ruediger_LP -->
+    <contributor uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30" contribution="Quality of life additions to XML"/> <!-- Ruediger_LP -->
     <contributor uuid="ced434fd-94ce-4750-8aab-86da9914d3a2" contribution="Building and feedback"/> <!-- _Its__me_ -->
     <contributor uuid="dff980ed-9f69-491e-b79c-30c21350baf2" contribution="Original map"/> <!-- DoomyBoy -->
     <contributor uuid="c2848337-b526-4db0-9130-fabd0a5c7cfb" contribution="Original map"/> <!-- Rasta_Jol -->
@@ -15,7 +15,7 @@
 <created>2021-04-24</created>
 <broadcasts>
     <tip after="30s" every="8m">Mine lapis and smelt ores for experience, you can use it to enchant your tools!</tip>
-    <tip after="38s" every="8m">The enchantment room is in the back of your team's side, near the mine entrance!</tip>
+    <tip after="38s" every="8m">The enchantment room is in the back of your team's side! Follow the brick path!</tip>
 </broadcasts>
 <teams>
     <team id="green" color="dark green" max="45" max-overfill="50">Green</team>
@@ -25,10 +25,8 @@
     <kit id="spawn-kit">
         <clear/>
         <item slot="0" material="iron sword"/>
-        <item slot="1" material="bow">
-            <enchantment>infinity</enchantment>
-        </item>
-        <item slot="28" material="arrow"/>
+        <item slot="1" material="bow"/>
+        <item slot="28" amount="64" material="arrow"/>
         <item slot="2" material="diamond pickaxe">
             <enchantment level="3">unbreaking</enchantment>
         </item>
@@ -47,9 +45,6 @@
         <item slot="8" amount="64" material="golden carrot"/>
         <chestplate team-color="true" unbreakable="true" material="leather chestplate"/>
         <leggings team-color="true" unbreakable="true" material="leather leggings"/>
-    </kit>
-    <kit id="kill-reward">
-       <effect duration="4" amplifier="2">speed</effect>
     </kit>
 </kits>
 <spawns>
@@ -103,26 +98,35 @@
 </filters>
 <regions>
     <union id="spawns">
-        <cuboid id="green-spawn" min="-46,13,125" max="-31,59,154"/>
-        <cuboid id="orange-spawn" min="47,13,-161" max="32,59,-190"/>
+        <cuboid id="green-spawn" min="-46,13,121" max="-31,59,154"/>
+        <cuboid id="orange-spawn" min="47,13,-157" max="32,59,-190"/>
     </union>
     <union id="enchantment-huts">
         <rectangle id="green-hut" min="35,212" max="47,221"/>
         <rectangle id="orange-hut" min="-34,-214" max="-46,-223"/>
     </union>
-    <rectangle id="obs-spawn" min="-61,2" max="-101,-38"/>
-    <complement id="void-area">
+    <union id="obs-spawn">
+        <rectangle id="actual-spawn" min="-61,2" max="-101,-38"/>
+        <rectangle id="nameplate" min="62,-64" max="63,28"/>
+    </union>
+    <complement id="build-filter">
         <everywhere/>
         <region id="obs-spawn"/>
     </complement>
+    <complement id="not-fruit">
+        <everywhere/>
+        <rectangle min="-11,145" max="-3,154"/>
+        <rectangle min="-1,48" max="6,58"/>
+        <rectangle min="2,-189" max="11,-180"/>
+        <rectangle min="-4,-84" max="2,-94"/>
+    </complement>
     <apply use="deny-trapdoor-use" region="spawns"/>
     <apply use="deny-beacon-use"/>
-    <!-- apply block-break="only-mineable" block-place="deny-players-tnt" message="You may not destroy the spawn area!" region="spawns"/ -->
-    <apply block="deny-players-tnt" message="You may not destroy the spawn region!" region="spawns"/>
+    <apply block="never" message="You may not destroy the spawn region!" region="spawns"/>
     <apply block="never" message="You may not destroy the enchantment hut!" region="enchantment-huts"/>
     <apply block="never" message="You may not build outside of the map!" region="obs-spawn"/>
-    <apply block-place="deny-void" message="You may not build outside of the map!" region="void-area"/>
-    <apply block-break="no-break" message="You may not break this block!"/>
+    <apply block-place="deny-void" message="You may not build outside of the map!" region="build-filter"/>
+    <apply block-break="no-break" message="You may not break this block!" region="not-fruit"/>
 </regions>
 <destroyables materials="obsidian" mode-changes="true">
     <destroyables name="Hill Monument">
@@ -151,8 +155,8 @@
     </destroyables>
 </destroyables>
 <modes>
-    <mode after="30m" material="beacon"/>
-    <mode after="60m" material="coal block"/>
+    <mode after="45m" material="beacon" name="`bBEACON MONUMENT MODE"/>
+    <mode after="75m" material="coal block" name="`8COAL MONUMENT MODE"/>
 </modes>
 <toolrepair>
     <tool>iron sword</tool>
@@ -172,13 +176,14 @@
     <item>beacon</item>
     <item>coal block</item>
     <item>flint</item>
+    <item>skull item</item>
 </itemremove>
 <itemkeep>
     <item>golden apple</item>
 </itemkeep>
 <kill-reward>
     <item material="golden apple"/>
-    <kit id="kill-reward"/>
+    <item amount="16" material="arrow"/>
 </kill-reward>
 <block-drops>
     <rule>
@@ -286,9 +291,8 @@
     <doFireTick>false</doFireTick>
 </gamerules>
 </map>
-<!--
-Refactor classes at a later time
-<classes family="classes">
+<!-- Refactor classes at a later time -->
+<!-- <classes family="classes">
     <class name="Basic" default="true" icon="iron pickaxe">
         <kit id="basic-kit">
             <clear/>
@@ -445,7 +449,4 @@ Refactor classes at a later time
     <item>lever</item>
     <item>explosive minecart</item>
     <item>iron chestplate</item>
-</itemkeep>
-<kill-reward>
-    <item amount="8" material="arrow"/>
-</kill-reward> -->
+</itemkeep> -->
