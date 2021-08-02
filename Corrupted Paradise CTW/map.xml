@@ -1,7 +1,7 @@
 <?xml version="1.0"?> <!-- created july 2021 as a summer school project -->
 <map proto="1.4.0">
 <name>Corrupted Paradise CTW</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <objective>Capture all 6 wools!</objective>
 <phase>development</phase>
 <gamemode>ctw</gamemode>
@@ -115,8 +115,20 @@
         <team id="only-green">green-team</team>
     </not>
     <not id="not-void">
-        <void/>
+		<any>
+			<material>wool</material>
+			<void/>
+		</any>
     </not>
+	<not id="not-wool">
+		<material>wool</material>
+	</not>
+	<not id="not-web-and-wool">
+		<any>
+			<material>web</material>
+			<material>wool</material>
+		</any>
+	</not>
     <all id="blues-woolrooms-filter">
         <not>
             <team>blue-team</team>
@@ -289,7 +301,7 @@
         </union>
     </union>
     <negative id="not-build-area">
-        <union id="bluild-area">
+        <union id="build-area">
             <rectangle min="-65,-65" max="65,65"/> <!-- mid -->
         </union>
     </negative>
@@ -310,10 +322,24 @@
     <apply block="reds-woolrooms-filter" region="reds-woolrooms" message="You may not edit the wool room!"/>
     <apply block="yellows-woolrooms-filter" region="yellows-woolrooms" message="You may not edit the wool room!"/>
     <apply block="greens-woolrooms-filter" region="greens-woolrooms" message="You may not edit the wool room!"/>
-    <apply block-place="not-void" region="not-build-area" message="You may not edit the void"/>
+	<apply block-place="not-void" region="not-build-area" block-break="not-web-and-wool" message="You may not edit the void or place safeties!"/>
+	<apply block-place="not-wool" region="build-area" message="You may not place safeties!"/>
     <apply use="deny-woolroom-use" region="woolrooms"/>
     <apply kit="reset-resitance-kit" region="not-bases"/>
 </regions>
+	<damage>
+		<deny>
+			<all>
+				<relation>enemy</relation>
+				<attacker>
+					<region id="woolrooms"/>
+				</attacker>
+				<victim>
+					<region id="woolrooms"/>
+				</victim>
+			</all>
+		</deny>
+	</damage>
 <block-drops>
     <rule wrongtool="false" region="woolrooms" filter="only-iron">
         <drops>
@@ -558,6 +584,11 @@
 <rules>
     <rule>Teaming is allowed.</rule>
 </rules>
+<broadcasts>
+	<tip after="10s" every="6m">`lIron can be found left of spawn`r inside the cave!</tip>
+	<tip after="20s" every="6m">`lWools cannot be placed`r on the playing field of this map!</tip>
+	<tip after="30s" every="6m">Combat is disabled in the woolrooms!</tip>
+</broadcasts>
 <maxbuildheight>28</maxbuildheight>
 <kill-rewards>
     <kill-reward>
