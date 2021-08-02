@@ -1,6 +1,6 @@
 <map proto="1.4.0">
 <name>Beach Battles</name>
-<version>1.1.6</version>
+<version>1.1.12</version>
 <gamemode>koth</gamemode>
 <objective>Capture and have control over the sand-castles as long as possible!</objective>
 <authors>
@@ -16,10 +16,10 @@
 </rules>
 <broadcasts>
     <tip after="30s" every="4m">`e⚠  `7Glass cannot break... This makes it ideal to build on.</tip>
-    <tip after="1m" every="3m">`e⚠  `7Remeber, Dispensers are rewarded for kills!</tip>
+    <tip after="1m" every="3m">`e⚠  `7Remember, Dispensers are rewarded for kills!</tip>
 </broadcasts>
 <score>
-     <limit>750</limit>
+     <limit>1250</limit>
 </score>
 <!-- Spawns -->
 <spawns>
@@ -140,14 +140,14 @@
                     <material>REDSTONE_COMPARATOR_OFF</material>
                     <material>REDSTONE_COMPARATOR_ON</material>
                     <material>DIODE</material>
-		            <material>DIODE_BLOCK_OFF</material>
-		            <material>DIODE_BLOCK_ON</material>
+                    <material>DIODE_BLOCK_OFF</material>
+                    <material>DIODE_BLOCK_ON</material>
                     <material>WOOD_BUTTON</material>
                     <material>LEVER</material>
                     <material>WOOD_PLATE</material>
-					<material>WATER</material>
-					<material>STATIONARY_WATER</material>
-					<material>DISPENSER</material>
+                    <material>WATER</material>
+                    <material>STATIONARY_WATER</material>
+                    <material>DISPENSER</material>
                 </any>
             </not>
         </all>
@@ -159,13 +159,27 @@
         <cuboid min="-9,8,48" max="9,9,66"/>
         <cuboid min="-9,8,-66" max="9,9,-48"/>
         <cuboid min="-9,8,-9" max="9,9,9"/>
-    </union> 
+    </union>
+    <!-- Portal Regions -->
+    <union id="portals">
+        <cuboid id="red-north" min="36,10,-65" max="44,15,-67"/>
+        <cuboid id="red-south" min="36,10,65" max="44,15,67"/>
+        <cuboid id="blue-north" min="-37,10,-65" max="-45,15,-67"/>
+        <cuboid id="blue-south" min="-37,10,65" max="-45,15,67"/>
+    </union>
+        <cuboid id="red-north-exit" min="36,10,-65" max="44,11,-64"/>
+        <cuboid id="red-south-exit" min="36,10,65" max="44,11,64"/>
+        <cuboid id="blue-north-exit" min="-37,10,-65" max="-45,11,-64"/>
+        <cuboid id="blue-south-exit" min="-37,10,65" max="-45,11,64"/>
+
+    
     <!-- first I blacklist areas that can be destroyed in any way or form -->
     <apply block="never">
         <region> 
             <union>
                 <cuboid min="1,32,66" max="-1,40,-66"/>
                 <rectangle min="11,69" max="-11,91"/>
+                <region id="portals"/> 
             </union>
         </region>
     </apply>
@@ -181,13 +195,27 @@
         </region>
     </apply>
     <!-- calculate and add team restrictions -->
+    <apply block-place="only-players" message="You may not place blocks in spawn!">
+        <region> 
+            <union>
+                <!-- red base -->
+                <cuboid min="50,21,-52" max="56,oo,-67"/>
+                <cuboid min="50,21,-3" max="56,oo,3"/>
+                <cuboid min="50,21,52" max="56,oo,67"/>
+                <!-- blue base -->
+                <cuboid min="-51,21,-52" max="-57,oo,-67"/>
+                <cuboid min="-51,21,-3" max="-57,oo,3"/>
+                <cuboid min="-51,21,52" max="-57,oo,67"/>
+            </union>
+        </region>
+    </apply>
     <!-- Finally Calculate void area and other small bits -->
     <apply block-place="only-players" message="You may not bridge into the void!">
         <region> 
             <negative>
                 <union>
                     <rectangle  id="blue-base" min="-57, 67" max="-32,-67"/>
-                    <rectangle  id="red-base" min="57, -67" max="31,67"/>
+                    <rectangle  id="red-base" min="56, -67" max="31,67"/>
                     <rectangle min="32, 68" max="-32,46"/>
                     <rectangle min="32, 11" max="-32,-11"/>
                     <rectangle min="32, -46" max="-32,-68"/>
@@ -369,6 +397,13 @@
     </renewable>
 </renewables>
 <!-- Boring stuff -->
+<portals>
+    <!-- fast portals -->
+    <portal region="red-north" destination="red-south-exit"/>
+    <portal region="red-south" destination="red-north-exit"/>
+    <portal region="blue-north" destination="blue-south-exit"/>
+    <portal region="blue-south" destination="blue-north-exit"/>
+</portals>
 <disabledamage>
     <damage ally="true" self="false" enemy="false" other="false">block explosion</damage>
 </disabledamage>
@@ -384,11 +419,11 @@
 <tnt>
     <dispenser-tnt-limit>48</dispenser-tnt-limit>
     <dispenser-tnt-multiplier>0.75</dispenser-tnt-multiplier>
-	<friendly-defuse>true</friendly-defuse>
+    <friendly-defuse>true</friendly-defuse>
 </tnt>
 <!-- Fun game mechnic stuff -->
 <control-points capture-rule="lead" incremental="true" show-progress="true" capture-time="10s" points="1" required="false" neutral-state="true"> 
-    <control-point name="Castle A">
+    <control-point name="South Castle">
         <capture><cuboid min="-9,9,48" max="9,13,66"/></capture>
         <progress>
             <union>
@@ -397,7 +432,7 @@
             </union>
         </progress>
     </control-point>
-    <control-point name="Castle B">
+    <control-point name="North Castle">
         <capture><cuboid min="-9,9,-66" max="9,13,-48"/></capture>
         <progress>
             <union>
@@ -406,7 +441,7 @@
             </union>
         </progress>
     </control-point>
-    <control-point name="Castle C">
+    <control-point name="Center Castle">
         <capture><cuboid min="-9,9,-9" max="9,13,9"/></capture>
         <progress>
             <union>
@@ -416,5 +451,5 @@
         </progress>
     </control-point>
 </control-points>
-<!-- If you have made it this far, congratulations... this xml is huge and a I aboslutely despise it... it was worth it though -->
+<!-- If you have made it this far, congratulations... this xml is huge and a I aboslutely think it was worth it... -->
 </map>

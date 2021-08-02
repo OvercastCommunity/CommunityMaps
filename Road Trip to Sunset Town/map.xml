@@ -1,6 +1,6 @@
 <map proto="1.4.0">
 <name>Road Trip to Sunset Town</name>
-<version>2.1.1</version>
+<version>2.1.4</version>
 <objective>Capture the other seven teams' wools.</objective>
 <authors>
     <author uuid="f876b863-1ccd-4ae2-acad-8a09e2209e81"/>
@@ -97,6 +97,9 @@
         </region>
     </default>
 </spawns>
+<broadcasts>
+    <tip after="1m" every="2m" count="oo">`bAfter respawning, drink `fMILK `bto be teleported to the map's center.</tip>
+</broadcasts>
 <kits>
     <kit id="spawn">
         <item slot="0" unbreakable="true">iron sword</item>
@@ -110,10 +113,15 @@
         <item slot="9" amount="1">emerald</item>
         <item slot="26">flint and steel</item>
         <item slot="28" amount="64">arrow</item>
-        <helmet locked="true" unbreakable="true" name="`bChainmail Helmet" material="chainmail helmet"><enchantment level="1">protection explosions</enchantment></helmet>
-    </kit>
-    <kit id="new-helmet" force="true">
+        <item slot="35" lore="Drink this after respawning to be teleported to the map's center.">milk bucket</item>
         <helmet unbreakable="true" material="chainmail helmet"><enchantment level="1">protection explosions</enchantment></helmet>
+        <effect duration="oo" amplifier="1">saturation</effect>
+    </kit>
+    <kit id="spawn-effect" force="true">
+        <effect duration="oo" amplifier="1">saturation</effect>
+    </kit>
+    <kit id="remove-spawn-effect" force="true">
+        <effect duration="0s" amplifier="2">saturation</effect>
     </kit>
     <kit id="green-kit" parents="spawn">
         <item slot="5" amount="32" damage="13">stained glass</item>
@@ -364,6 +372,7 @@
     <tool>stone spade</tool>
     <tool>diamond boots</tool>
     <tool>flint and steel</tool>
+    <tool>bucket</tool>
 </toolrepair>
 <itemremove>
     <item>arrow</item>
@@ -431,7 +440,7 @@
             <point>-176.5,19,-67.5</point>
         </destination>
     </portal>
-    <portal yaw="@90" region="basement-portal" filter="no-wool">
+    <portal yaw="@90" region="portals" filter="no-wool">
         <destination>
             <point>16.5,2,0.5</point>
         </destination>
@@ -456,10 +465,11 @@
             <void/>
         </any>
     </not>
+    <not id="no-safeties">
+        <material>wool</material>
+    </not>
     <not id="not-new">
-        <wearing id="only-new">
-            <item material="chainmail helmet" unbreakable="true" name="`bChainmail Helmet"><enchantment level="1">protection explosions</enchantment></item>
-        </wearing>
+        <effect id="only-new" amplifier="1">saturation</effect>
     </not>
     <not id="not-green">
         <team id="only-green">green</team>
@@ -528,6 +538,12 @@
     <not id="no-tnt">
         <cause>explosion</cause>
     </not>
+    <not id="no-tnt-chests">
+        <all>
+            <cause>explosion</cause>
+            <material>chest</material>
+        </all>
+    </not>
     <not id="no-wool">
         <carrying>
             <item material="wool"/>
@@ -540,8 +556,18 @@
     </filter>
 </mobs>
 <regions>
+    <union id="portals">
+        <cuboid id="green-portal" min="-69,22,-177" max="-66,19,-178"/>
+        <cuboid id="lime-portal" min="67,22,-177" max="70,19,-178"/>
+        <cuboid id="red-portal" min="178,22,-69" max="179,19,-66"/>
+        <cuboid id="pink-portal" min="178,22,67" max="179,19,70"/>
+        <cuboid id="orange-portal" min="70,22,178" max="67,19,179"/>
+        <cuboid id="yellow-portal" min="-66,22,178" max="-69,19,179"/>
+        <cuboid id="blue-portal" min="-177,22,70" max="-178,19,67"/>
+        <cuboid id="cyan-portal" min="-177,22,-66" max="-178,19,-69"/>
+        <cuboid id="basement-portal" min="0,7,0" max="1,9,1"/>
+    </union>
     <cuboid id="portal-region" min="2,1.75,2" max="-1,1,-1"/>
-    <cuboid id="basement-portal" min="0,7,0" max="1,9,1"/>
     <union id="sunset-town">
         <rectangle min="-12,-64" max="13,-16"/>
         <rectangle min="65,-12" max="17,13"/>
@@ -617,8 +643,9 @@
             <half origin="-118,0,-118" normal="-1,0,1"/>
         </intersect>
     </union>
-    <apply kit="new-helmet" region="all-spawns" filter="only-new"/>
-    <apply enter="no-wool" message="You may not bring wool into this portal." region="basement-portal"/>
+    <apply kit="remove-spawn-effect" region="wool-lanes"/>
+    <apply kit="spawn-effect" region="all-spawns"/>
+    <apply enter="no-wool" message="You may not bring wool into this portal." region="portals"/>
     <apply enter="no-wool" message="You may not bring wool into Club Sunset." region="club-sunset"/>
     <apply block="never" message="You may not modify the wool rooms." region="all-wool-rooms"/>
     <apply enter="not-green" message="You may not enter your own wool room." region="green-wool-room"/>
@@ -639,7 +666,7 @@
     <apply enter="only-blue" message="You may not enter another team's spawn." region="blue-spawn"/>
     <apply enter="only-cyan" message="You may not enter another team's spawn." region="cyan-spawn"/>
     <apply block="only-world" message="You may not build or destroy blocks in the town." region="sunset-town"/>
-    <apply block-break="always" region="wool-lanes"/>
+    <apply block-break="no-tnt-chests" block-place="no-safeties" region="wool-lanes" message="You may not place safeties."/>
     <apply block-break="no-void-break" block-place="no-void-place" message="You may not build or destroy blocks outside the map, or place safeties." region="everywhere"/>
 </regions>
 <damage>
@@ -671,7 +698,7 @@
 <disabledamage>
     <damage ally="true" self="true" enemy="false" other="false">block explosion</damage>
 </disabledamage>
-<spawners delay="30s" player-region="sunset-town">
+<spawners max-entities="5" delay="30s" player-region="sunset-town">
     <spawner id="health-potion-spawner">
         <spawn-region>
             <point>0.5,26,0.5</point>
@@ -679,7 +706,7 @@
         <item amount="1" damage="16453">potion</item>
     </spawner>
 </spawners>
-<spawners delay="10s" player-region="all-wool-rooms">
+<spawners max-entities="5" delay="10s" player-region="all-wool-rooms">
     <spawner id="green-wool-spawner">
         <spawn-region>
             <point>-122.5,20,-126.5</point>
