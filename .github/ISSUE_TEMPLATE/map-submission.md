@@ -32,7 +32,7 @@ Create an album on [Imgur](https://imgur.com) with screenshots of the map. Try t
 Please [make](https://pgm.dev/docs/guides/packaging/compiling-and-releasing#the-maps-xml-file) an `map.xml` file for your map and upload it to https://gist.github.com and link it here.
 
 # Map Image
-Please attempt to [make](https://pgm.dev/docs/guides/packaging/compiling-and-releasing#the-map-image) a nice `map.png` and upload it by dragging it into this text box.
+Please attempt to [make](https://pgm.dev/docs/guides/packaging/compiling-and-releasing#the-map-image) a nice `map.png` in `290x246` resolution and upload it by dragging it into this text box.
 
 # Download Link
 [Package the map](https://pgm.dev/docs/guides/packaging/compiling-and-releasing#compressing-the-folder-to-a-zip-file) and upload it somewhere where we can download it, like **Google Drive** or **Dropbox**.
