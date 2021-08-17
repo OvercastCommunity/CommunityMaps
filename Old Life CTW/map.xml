@@ -1,7 +1,7 @@
 <?xml version="1.0"?> <!-- built in july 2021 for the occ mmc, resausaged to a normal ctw from "New Life CTW" -->
 <map proto="1.4.0">
 <name>Old Life CTW</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <objective>Capture all 6 wools!</objective>
 <phase>development</phase>
 <created>2021-08-08</created>
@@ -41,10 +41,14 @@
         <item slot="30" material="diamond spade" unbreakable="true"/>
         <helmet material="iron helmet" unbreakable="true"/>
         <chestplate material="chainmail chestplate" unbreakable="true"/>
+        <effect duration="oo" amplifier="2">haste</effect>
         <effect duration="oo" amplifier="100">damage resistance</effect>
     </kit>
     <kit id="reset-resistance-kit" force="true">
         <effect duration="0" amplifier="0">damage resistance</effect>
+    </kit>
+    <kit id="defense-kit" force="true">
+        <effect duration="oo" amplifier="2">haste</effect>
     </kit>
 	<kit id="blue-kit" parents="spawn-kit">
         <item slot="4" material="stained clay" damage="3" amount="64"/>
@@ -273,21 +277,47 @@
     <material id="only-iron">iron block</material>
     <all id="blue-and-stained-clay">
         <team>blue-team</team>
-        <material>stained clay</material>
+        <filter id="stained-clay"/>
     </all>
     <all id="red-and-stained-clay">
         <team>red-team</team>
-        <material>stained clay</material>
+        <filter id="stained-clay"/>
     </all>
     <all id="yellow-and-stained-clay">
         <team>yellow-team</team>
-        <material>stained clay</material>
+        <filter id="stained-clay"/>
     </all>
     <all id="green-and-stained-clay">
         <team>green-team</team>
-        <material>stained clay</material>
+        <filter id="stained-clay"/>
     </all>
-    <all id="block-physics-woolroom">
+    <any id="stained-clay">
+        <material>stained clay:3</material>
+        <material>stained clay:6</material>
+        <material>stained clay:4</material>
+        <material>stained clay:5</material>
+    </any>
+    <any id="block-physics-woolroom">
+        <all>
+            <any>
+                <material>slime block</material>
+                <material>piston base</material>
+                <material>piston sticky base</material>
+                <material>piston extension</material>
+                <material>piston moving piece</material>
+                <material>redstone block</material>
+            </any>
+            <not>
+                <any>
+                    <rectangle min="127,-42" max="140,-49"/>
+                    <rectangle min="-127,42" max="-140,49"/>
+                    <rectangle min="-42,-127" max="-49,-140"/>
+                    <rectangle min="42,127" max="49,140"/>
+                </any>
+            </not>
+        </all>
+    </any>
+    <all>
         <any>
             <material>iron door block</material>
             <material>iron trapdoor</material>
@@ -299,6 +329,20 @@
             <rectangle min="42,127" max="49,140"/>
         </any>
     </all>
+    <all id="maxbuildheight-filter">
+        <cause>world</cause>
+        <any>
+            <material>slime block</material>
+            <material>piston base</material>
+            <material>piston sticky base</material>
+            <material>piston extension</material>
+            <material>piston moving piece</material>
+            <material>redstone block</material>
+        </any>
+    </all>
+    <deny id="deny-wool-0">
+        <material>wool:0</material>
+    </deny>
 </filters>
 <regions>
     <cylinder id="blue-spawn" base="-88.5,120,-94.5" radius="1" height="0"/>
@@ -338,7 +382,7 @@
         <union id="woolrooms">
             <union id="blues-woolrooms">
                 <union id="cyan-woolroom">
-                    <rectangle min="-68,-119" max="-49,-134"/>
+                    <rectangle min="-67,-119" max="-49,-134"/>
                     <cuboid min="-48,19,-121" max="-49,oo,-134"/>
                     <rectangle min="-42,-126" max="-49,-140"/>
                 </union>
@@ -349,7 +393,7 @@
             </union>
             <union id="reds-woolrooms">
                 <union id="magenta-woolroom">
-                    <rectangle min="68,119" max="49,134"/>
+                    <rectangle min="67,119" max="49,134"/>
                     <cuboid min="48,19,121" max="49,oo,134"/>
                     <rectangle min="42,126" max="49,140"/>
                 </union>
@@ -360,7 +404,7 @@
             </union>
             <union id="yellows-woolrooms">
                 <union id="yellow-woolroom">
-                    <rectangle min="-119,68" max="-134,49"/>
+                    <rectangle min="-119,67" max="-134,49"/>
                     <cuboid min="-121,19,48" max="-134,oo,49"/>
                     <rectangle min="-126,42" max="-140,49"/>
                 </union>
@@ -371,7 +415,7 @@
             </union>
             <union id="greens-woolrooms">
                 <union id="lime-woolroom">
-                    <rectangle min="119,-68" max="134,-49"/>
+                    <rectangle min="119,-67" max="134,-49"/>
                     <cuboid min="121,19,-48" max="134,oo,-49"/>
                     <rectangle min="126,-42" max="140,-49"/>
                 </union>
@@ -468,8 +512,8 @@
     <union id="window-enter"> <!-- anti glitch -->
         <cuboid min="-74,18,-88" max="-73,21,-83"/> <!-- blue -->
         <cuboid min="-93,15,-59" max="-97,18,-60"/>
-        <cuboid min="74,18,-88" max="73,21,-83"/> <!-- red -->
-        <cuboid min="93,15,-59" max="97,18,-60"/>
+        <cuboid min="74,18,88" max="73,21,83"/> <!-- red -->
+        <cuboid min="93,15,59" max="97,18,60"/>
         <cuboid min="-88,18,74" max="-83,21,73"/> <!-- yellow -->
         <cuboid min="-59,15,93" max="-60,18,97"/>
         <cuboid min="88,18,-74" max="83,21,-73"/> <!-- green -->
@@ -493,16 +537,16 @@
     <sphere id="player-region" origin="0,12.2,0" radius="5"/>
     <intersect id="maxbuildheight">
         <intersect>
-            <above y="34"/>
+            <above y="28"/>
             <region id="not-woolrooms"/>
         </intersect>
         <intersect>
-            <above y="34"/>
+            <above y="28"/>
             <region id="not-mountains"/>
         </intersect>
     </intersect>
     <intersect id="maxbuildheight-woolrooms">
-        <above y="40"/>
+        <above y="50"/>
         <region id="woolrooms"/>
     </intersect>
     <union id="spawn-drop-protection">
@@ -518,19 +562,25 @@
         <cuboid id="blue-excavator" min="-42,14,155" max="-29,21,109"/> <!-- yellow side -->
         <cuboid id="red-excavator" min="42,14,-155" max="29,21,-109"/> <!-- green side -->
     </union>
+    <rectangle id="blue-defense-region" min="-33,-33" max="-200,-200"/>
+    <rectangle id="red-defense-region" min="33,33" max="200,200"/>
+    <rectangle id="yellow-defense-region" min="-33,33" max="-200,200"/>
+    <rectangle id="green-defense-region" min="33,-33" max="200,-200"/>
     <!-- applicators -->
-    <apply block-physics="never" block-break="only-blue" region="blue-excavator" message="You may not edit the wool room!"/>
-    <apply block-physics="never" block-break="only-red" region="red-excavator" message="You may not edit the wool room!"/>
-    <apply block-physics="never" block-break="only-yellow" region="orange-excavator" message="You may not edit the wool room!"/>
-    <apply block-physics="never" block-break="only-green" region="green-excavator" message="You may not edit the wool room!"/>
+    <apply block-place="deny-wool-0" region="everywhere"/>
+    <apply block-physics="block-physics-woolroom" region="woolrooms"/> 
+    <apply block-break="only-blue" region="blue-excavator" message="You may not edit the wool room!"/>
+    <apply block-break="only-red" region="red-excavator" message="You may not edit the wool room!"/>
+    <apply block-break="only-yellow" region="orange-excavator" message="You may not edit the wool room!"/>
+    <apply block-break="only-green" region="green-excavator" message="You may not edit the wool room!"/>
     <apply block="never" region="spawner-protection" message="You may not edit the spawner!"/>
     <apply block="never" region="maxbuildheight-woolrooms" message="You have reached the maximum build height!"/>
     <apply block="never" region="beacon-protection" message="You may not edit the wool room!"/>
-    <apply block-physics="block-physics-woolroom" block-break="blues-woolrooms-break-filter" block-place="blues-woolrooms-place-filter" region="blues-woolrooms" message="You may not edit the wool room!"/>
-    <apply block-physics="block-physics-woolroom" block-break="reds-woolrooms-break-filter" block-place="reds-woolrooms-place-filter" region="reds-woolrooms" message="You may not edit the wool room!"/>
-    <apply block-physics="block-physics-woolroom" block-break="yellows-woolrooms-break-filter" block-place="yellows-woolrooms-place-filter" region="yellows-woolrooms" message="You may not edit the wool room!"/>
-    <apply block-physics="block-physics-woolroom" block-break="greens-woolrooms-break-filter" block-place="greens-woolrooms-place-filter" region="greens-woolrooms" message="You may not edit the wool room!"/>
-    <apply block="never" region="maxbuildheight" message="You have reached the maximum build height!"/>
+    <apply block-break="blues-woolrooms-break-filter" block-place="blues-woolrooms-place-filter" region="blues-woolrooms" message="You may not edit the wool room!"/>
+    <apply block-break="reds-woolrooms-break-filter" block-place="reds-woolrooms-place-filter" region="reds-woolrooms" message="You may not edit the wool room!"/>
+    <apply block-break="yellows-woolrooms-break-filter" block-place="yellows-woolrooms-place-filter" region="yellows-woolrooms" message="You may not edit the wool room!"/>
+    <apply block-break="greens-woolrooms-break-filter" block-place="greens-woolrooms-place-filter" region="greens-woolrooms" message="You may not edit the wool room!"/>
+    <apply block="maxbuildheight-filter" region="maxbuildheight" message="You have reached the maximum build height!"/>
     <apply block="never" region="monumentrooms" message="You may not edit the monument room!"/>
     <apply block="never" region="spawn-drop-protection" message="You may not edit the mountain!"/>
     <apply block-place="mountains-place-filter" block-break="mountains-break-filter" region="mountains" message="You may not edit the mountain!"/>
@@ -549,6 +599,10 @@
     <apply enter="never" region="window-enter" message="You may not leave the playing field!"/>
     <apply use="deny-use" region="everywhere"/>
     <apply use="deny-woolroom-use" region="woolrooms"/>
+    <apply lend-kit="defense-kit" filter="only-blue" region="blue-defense-region"/>
+    <apply lend-kit="defense-kit" filter="only-red" region="red-defense-region"/>
+    <apply lend-kit="defense-kit" filter="only-yellow" region="yellow-defense-region"/>
+    <apply lend-kit="defense-kit" filter="only-green" region="green-defense-region"/>
     <apply kit="reset-resistance-kit" region="not-mountains"/>
 </regions>
 <block-drops>
@@ -649,6 +703,9 @@
     </rule>
 </item-mods>
 <crafting>
+    <disable>redstone</disable>
+    <disable>slime ball</disable>
+    <disable>carpet</disable>
     <!-- iron armor -->
     <shaped override="false">
         <result material="iron helmet" amount="9"/>
@@ -684,6 +741,55 @@
         </shape>
         <ingredient symbol="I">iron block</ingredient>
     </shaped>
+    <!-- wool washing -->
+    <smelt>
+        <result material="wool" damage="0" name="`fWhite Washed Wool" lore="`8Ist das neu?|`8Nein, mit Perwoll gewaschen!" show-enchantments="false">
+            <enchantment>arrow infinite</enchantment>
+        </result>
+        <ingredient>wool:9</ingredient>
+    </smelt>
+    <smelt>
+        <result material="wool" damage="0" name="`fWhite Washed Wool" lore="`8Ist das neu?|`8Nein, mit Perwoll gewaschen!" show-enchantments="false">
+            <enchantment>arrow infinite</enchantment>
+        </result>
+        <ingredient>wool:11</ingredient>
+    </smelt>
+    <smelt>
+        <result material="wool" damage="0" name="`fWhite Washed Wool" lore="`8Ist das neu?|`8Nein, mit Perwoll gewaschen!" show-enchantments="false">
+            <enchantment>arrow infinite</enchantment>
+        </result>
+        <ingredient>wool:2</ingredient>
+    </smelt>
+    <smelt>
+        <result material="wool" damage="0" name="`fWhite Washed Wool" lore="`8Ist das neu?|`8Nein, mit Perwoll gewaschen!" show-enchantments="false">
+            <enchantment>arrow infinite</enchantment>
+        </result>
+        <ingredient>wool:14</ingredient>
+    </smelt>
+    <smelt>
+        <result material="wool" damage="0" name="`fWhite Washed Wool" lore="`8Ist das neu?|`8Nein, mit Perwoll gewaschen!" show-enchantments="false">
+            <enchantment>arrow infinite</enchantment>
+        </result>
+        <ingredient>wool:4</ingredient>
+    </smelt>
+    <smelt>
+        <result material="wool" damage="0" name="`fWhite Washed Wool" lore="`8Ist das neu?|`8Nein, mit Perwoll gewaschen!" show-enchantments="false">
+            <enchantment>arrow infinite</enchantment>
+        </result>
+        <ingredient>wool:1</ingredient>
+    </smelt>
+    <smelt>
+        <result material="wool" damage="0" name="`fWhite Washed Wool" lore="`8Ist das neu?|`8Nein, mit Perwoll gewaschen!" show-enchantments="false">
+            <enchantment>arrow infinite</enchantment>
+        </result>
+        <ingredient>wool:5</ingredient>
+    </smelt>
+    <smelt>
+        <result material="wool" damage="0" name="`fWhite Washed Wool" lore="`8Ist das neu?|`8Nein, mit Perwoll gewaschen!" show-enchantments="false">
+            <enchantment>arrow infinite</enchantment>
+        </result>
+        <ingredient>wool:13</ingredient>
+    </smelt>
 </crafting>
 <itemkeep>
 	<item>iron sword</item>
@@ -727,6 +833,8 @@
     <item>cobble wall</item>
     <item>carpet</item>
     <item>lever</item>
+    <item>stained clay:9</item>
+    <item>stained clay:13</item>
 </itemremove>
 <toolrepair>
 	<tool>iron sword</tool>
