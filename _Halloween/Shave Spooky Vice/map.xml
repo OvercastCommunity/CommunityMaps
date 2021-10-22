@@ -1,0 +1,159 @@
+<map proto="1.4.0">
+<name>Shave Spooky Vice</name>
+<version>1.0.0</version>
+<objective>It's Halloween now but Vice needs a shave before he can go trick or treating!</objective>
+<authors>
+    <author uuid="715769c5-8c4c-4489-bdf8-f9cee2b2ae8a"/> <!-- amactus -->
+    <author uuid="a9f11454-beac-4cc3-a138-1780802c8794"/> <!-- Crazy_ -->
+    <author uuid="c88f74cc-51e7-43da-b893-54f8ec630701"/> <!-- Epicness -->
+</authors>
+<contributors>
+    <contributor uuid="bf331953-4f92-43ee-8abc-7544b8234936" contribution="literally just a cool dude what can I say"/> <!-- ViceTechnicolour -->
+</contributors>
+<teams>
+    <team id="purple" max="16" color="dark purple" plural="true" max-overfill="20">Spooky Skeletons</team>
+    <team id="red" color="dark red" max="16" plural="true" max-overfill="20">Scary Zombies</team>
+</teams>
+<kits>
+    <kit id="spawn">
+        <item slot="0" name="`bRazor" unbreakable="true" enchantment="damage all:5;dig speed:1">shears</item>
+        <item slot="1" unbreakable="true">bow</item>
+        <item slot="2" unbreakable="true" enchantment="dig speed:1">stone pickaxe</item>
+        <item slot="3" amount="32">arrow</item>
+        <item slot="6" amount="16">vine</item>
+        <item slot="7">golden apple</item>
+        <item slot="8" amount="64">golden carrot</item>
+    </kit>
+    <kit id="purple-kit" parents="spawn">
+        <helmet>skull</helmet>
+        <chestplate color="7F3FB2" unbreakable="true">leather chestplate</chestplate>
+        <leggings color="7F3FB2" unbreakable="true">leather leggings</leggings>
+        <boots color="7F3FB2" unbreakable="true">leather boots</boots>
+        <item slot="4" damage="10" amount="32">stained glass</item>
+        <item slot="5" damage="10" amount="32">stained clay</item>
+    </kit>
+    <kit id="red-kit" parents="spawn">
+        <helmet damage="2">skull</helmet> <!-- Zombie head -->
+        <chestplate color="993333" unbreakable="true">leather chestplate</chestplate>
+        <leggings color="993333" unbreakable="true">leather leggings</leggings>
+        <boots color="993333" unbreakable="true">leather boots</boots>
+        <item slot="4" damage="14" amount="32">stained glass</item>
+        <item slot="5" damage="14" amount="32">stained clay</item>
+    </kit>
+    <kit id="mining-fatigue" force="true">
+        <effect duration="oo" amplifier="1">mining_fatigue</effect>
+    </kit>
+</kits>
+<spawns>
+    <spawn team="purple" kit="purple-kit" yaw="-45">
+        <region><point>-0.5,27,-30.5</point></region>
+    </spawn>
+    <spawn team="red" kit="red-kit" yaw="135">
+        <region><point>2.5,27,31.5</point></region>
+    </spawn>
+    <default pitch="90" yaw="-90">
+        <region><cuboid min="-5,65,-20" max="7,66,21"/></region>
+    </default>
+</spawns>
+<filters>
+    <team id="only-purple">purple</team>
+    <team id="only-red">red</team>
+    <deny id="no-redstone">
+        <material>redstone</material>
+    </deny>
+    <not id="no-touchy">
+        <any>
+            <material>stained_clay:0</material>
+            <material>stained_clay:1</material>
+            <material>stained_clay:2</material>
+            <material>stained_clay:5</material>
+            <material>stained_clay:12</material>
+            <material>stained_clay:13</material>
+            <material>stained_clay:15</material>
+            <material>carpet</material>
+            <material>wool:0</material>
+            <material>wool:1</material>
+            <material>wool:4</material>
+            <material>wool:5</material>
+            <material>wool:10</material>
+            <material>wool:14</material>
+            <material>wool:11</material>
+            <material>wool:19</material>
+            <material>skull</material>
+            <material>web</material>
+            <material>flower_pot</material>
+            <material>wall_sign</material>
+            <material>ladder</material>
+            <material>stained_glass_pane:0</material>
+            <material>quartz_block</material>
+        </any>
+    </not>
+</filters>
+<regions>
+    <rectangle id="no-build-zone" min="-5,-20" max="7,21"/>
+    <union id="spawns">
+        <cuboid id="red-spawn" min="4,26,27" max="-2,30,33"/>
+        <cuboid id="purple-spawn" min="4,26,-32" max="-2,30,-26"/>
+    </union>
+    <union id="spawn-block-prot">
+        <union id="purple-prot">
+            <rectangle min="5,24" max="-3,34"/>
+            <rectangle min="-7,28" max="9,41"/>
+        </union>
+        <union id="red-prot">
+            <rectangle min="-3,-23" max="5,-33"/>
+            <rectangle min="-7,-27" max="9,-40"/>
+        </union>
+    </union>
+    <union id="cake-spawns">
+        <cuboid min="-3,26,-33" max="5,30,-25"/>
+        <cuboid min="5,26,25" max="-3,30,34"/>
+    </union>
+    <negative id="outside-map">
+        <rectangle id="map" min="-19,42" max="21,-41"/>
+    </negative>
+    <!-- Applicators -->
+    <apply enter="only-purple" region="purple-spawn" message="You may not enter the other team's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the other team's spawn!"/>
+    <apply block="never" region="cake-spawns" message=s"Don't touch Vice!"/>
+    <apply block="no-touchy" region="spawn-block-prot" message="Don't touch Vice!"/>
+    <apply block="never" region="no-build-zone" message="You can't build here!"/>
+    <apply block="never" region="outside-map" message="You can't build here!"/>
+    <apply block="no-redstone" region="map"/>
+    <!-- Mining fatigue at beard -->
+    <apply lend-kit="mining-fatigue" region="spawn-block-prot"/>
+</regions>
+<destroyables name="Beard" show-progress="true" completion="90%" materials="wool:12">
+    <destroyable owner="red">
+        <region><cuboid min="-8,30,36" max="6,40,31"/></region>
+    </destroyable>
+    <destroyable owner="purple">
+        <region><cuboid min="10,30,-35" max="-4,40,-30"/></region>
+    </destroyable>
+</destroyables>
+<itemremove>
+    <item>skull</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>stained glass</item>
+    <item>stained clay</item>
+    <item>vine</item>
+    <item>golden apple</item>
+    <item>golden carrot</item>
+    <item>arrow</item>
+    <item>wool</item>
+    <item>carpet</item>
+</itemremove>
+<toolrepair>
+    <tool>shears</tool>
+    <tool>bow</tool>
+    <tool>stone pickaxe</tool>
+</toolrepair>
+<kill-rewards>
+    <kill-reward>
+         <item>golden apple</item>
+    </kill-reward>
+</kill-rewards>
+<maxbuildheight>45</maxbuildheight>
+</map>
