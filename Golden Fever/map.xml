@@ -1,0 +1,220 @@
+<?xml version="1.2"?>
+<map proto="1.4.2">
+<name>Golden Fever</name>
+<version>1.0.2</version>
+<objective>Destroy enemy team's obsidian monuments!</objective>
+<authors>
+    <author uuid="345e7c1e-2b0f-4b6e-be83-5494ec6d4e7d"/> <!-- ElDanii -->
+</authors>
+<contributors>
+      <contributor uuid="75fd93dd-8e48-4698-81a2-97dae2ec5b5f"/> <!-- Pugzy - XML Help -->
+      <contributor uuid="5c79d2c9-a4f0-4343-a84b-e1720f13009b"/> <!-- CoWinkKeyDinkInc - XML Help -->
+      <contributor uuid="621b2aa8-4e5f-4ed8-bd36-0ae2f8952a06"/> <!-- Strangey - Playstyle feedback -->
+      <contributor uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609" contribution="Map feedback"/> <!-- Technodono- Map feedback -->
+</contributors>
+<gamemode>dtm</gamemode>
+<teams>
+    <team id="blue-team" color="blue" max="36">Blue</team>
+    <team id="red-team" color="red" max="36">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit"> <!-- Both teams kit -->
+        <item slot="0" material="gold sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <item slot="2" material="diamond pickaxe" unbreakable="true"/>
+        <item slot="3" material="gold axe" unbreakable="true"/>
+        <item slot="4" material="sandstone" amount="48"/>
+        <item slot="5" material="stained glass" damage="4" amount="48"/>
+        <item slot="6" material="wood" damage="2" amount="48"/>
+        <item slot="7" material="golden apple"/>
+        <item slot="8" material="golden carrot" amount="48"/>
+        <item slot="17" material="blaze powder" name="`6`lFeverish Gold" lore="`7Craft a `eglowstone `7block with nine (9) Feverish Gold`7.||`6⬛ ⬛ ⬛   `6⬛ `8= `6Feverish Gold|`6⬛ ⬛ ⬛|`6⬛ ⬛ ⬛"/>
+        <item slot="16" material="stained glass pane" damage="4"/>
+        <item slot="25" material="stained glass pane" damage="4"/>
+        <item slot="26" material="stained glass pane" damage="4"/>
+        <potion duration="8" amplifier="3">resistance</potion> <!-- Prevent spawnkill -->
+        <potion duration="8" amplifier="1">slowness</potion> <!-- Specific red armor -->
+        <potion duration="8" amplifier="1">strength</potion> <!-- Prevent spawnkill -->
+        <potion duration="11" amplifier="3">haste</potion> <!-- Prevent spawn blocking-->
+    </kit>
+    <kit id="red-kit" parents="spawn-kit"> <!-- Specific red armor -->
+        <helmet color="993333">leather helmet</helmet>
+        <leggings color="993333">leather leggings</leggings>
+    </kit>
+    <kit id="blue-kit" parents="spawn-kit"> <!-- Specific blue armor -->
+        <helmet color="6699d8">leather helmet</helmet>
+        <leggings color="6699d8">leather leggings</leggings>
+    </kit>
+</kits>
+<timelock>on</timelock>
+<spawns>
+    <default yaw="90"> <!-- Observer spawn -->
+      <region>
+          <cuboid min="70,40,1" max="70,40,-1"/>
+      </region>
+    </default>
+    <spawn team="red-team" kit="red-kit" yaw="0">  <!-- Red spawn -->
+      <region>
+          <point>0.5,42,-128.5</point>
+      </region>
+    </spawn>
+    <spawn team="blue-team" kit="blue-kit" yaw="180"> <!-- Blue spawn -->
+      <region>
+          <point>0.5,42,129.5</point>
+      </region>
+    </spawn>
+</spawns>
+<filters>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+</filters>
+<regions>
+    <apply block="never" message="`7You may not build outside the playing area!">
+        <region>
+            <negative id="not-build-area">
+                <region id="playable"/>
+            </negative>
+        </region>
+    </apply>
+    <apply block="never" enter="only-blue" region="blue-spawn"/>
+    <apply block="never" enter="only-red" region="red-spawn"/>
+    <union id="spawn-drop">
+        <region id="blue-spawn"/>
+        <region id="red-spawn"/>
+    </union>
+    <union id="gold-blocks">
+        <cuboid min="39,6,104" max="36,9,107"/>
+        <cuboid min="-36,6,104" max="-39,9,107"/>
+        <cuboid min="-36,6,-107" max="-39,9,-104"/>
+        <cuboid min="39,6,-107" max="36,9,-104"/>
+    </union>
+    <cuboid id="blue-spawn" min="11,0,112" max="-10,50,138"/>
+    <cuboid id="red-spawn" min="-10,0,-111" max="11,50,-139"/>
+    <rectangle id="playable" min="-45,122" max="46,-121"/>
+    <cylinder id="blue-destination" base="0.5,22,134.5" radius="1" height="0"/>
+    <cylinder id="red-destination" base="0.5,22,-133.5" radius="1" height="0"/>
+</regions>
+<maxbuildheight>38</maxbuildheight>
+<portals>
+    <portal yaw="180"> <!-- Blue portal -->
+        <region>
+            <cuboid min="3,5,133" max="-3,9,134"/>
+        </region>
+        <destination>
+            <region id="blue-destination"/>
+        </destination>
+    </portal>
+    <portal yaw="0"> <!-- Red portal -->
+        <region>
+            <cuboid min="-3,5,-132" max="3,9,-133"/>
+        </region>
+        <destination>
+            <region id="red-destination"/>
+        </destination>
+    </portal>
+</portals>
+<damage>
+    <deny>
+        <all>
+            <cause>fall</cause>
+            <region id="spawn-drop"/>
+        </all>
+    </deny>
+</damage>
+<renewables>
+    <renewable rate="3" grow="true" particles="true" sound="true" avoid-players="2"> <!-- Blue gold blocks generator -->
+        <region id="gold-blocks"/>
+        <renew-filter>
+            <material>gold block</material>
+        </renew-filter>
+        <replace-filter>
+            <material>air</material>
+        </replace-filter>
+    </renewable>
+</renewables>
+<destroyables materials="obsidian" completion="100%">
+    <destroyable owner="blue-team" name="Main Monument" mode-changes="true" show-progress="true">
+        <region> <!-- Blue main monument -->
+            <cuboid min="2,22,88" max="-1,26,92"/>
+        </region>
+    </destroyable>
+    <destroyable owner="blue-team" name="Front Monument" mode-changes="true" show-progress="true">
+        <region> <!-- Blue front monument -->
+            <cuboid min="2,18,47" max="-2,23,51"/>
+        </region>
+    </destroyable>
+    <destroyable owner="red-team" name="Main Monument" mode-changes="true" show-progress="true">
+        <region> <!-- Red main monument -->
+            <cuboid min="2,22,-91" max="-1,26,-87"/>
+        </region>
+    </destroyable>
+    <destroyable owner="red-team" name="Front Monument" mode-changes="true" show-progress="true">
+        <region> <!-- Red front monument -->
+            <cuboid min="2,18,-51" max="-2,23,-47"/>
+        </region>
+    </destroyable>
+</destroyables>
+<modes>
+    <mode after="30m" material="coal block" name="`l`0COAL MONUMENT MODE"/>
+    <mode after="45m" material="gold ore" name="`l`6GOLD ORE MONUMENT MODE"/>
+    <mode after="60m" material="stained glass:15" name="`l`8GLASS MONUMENT MODE"/>
+</modes>
+<toolrepair>
+    <tool>gold sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>gold axe</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>obsidian</item>
+    <item>coal block</item>
+    <item>gold ore</item>
+    <item>leather helmet</item>
+    <item>leather leggings</item>
+    <item>golden carrot</item>
+    <item>sandstone</item>
+    <item>sandstone stairs</item>
+    <item damage="2">wood</item>
+    <item damage="4">stained glass</item>
+    <item damage="4">stained glass pane</item>
+    <item>stained clay</item>
+    <item>glowstone dust</item>
+    <item>blaze powder</item>
+    <item>beacon</item>
+    <item>redstone</item>
+</itemremove>
+<itemkeep>
+    <item>golden apple</item>
+</itemkeep>
+<kill-reward>
+    <item>golden apple</item>
+    <item amount="16">sandstone</item>
+    <item name="`6`lFeverish Gold" lore="`7Craft a `eglowstone `7block with nine (9) Feverish Gold`7.||`6⬛ ⬛ ⬛   `6⬛ `8= `6Feverish Gold|`6⬛ ⬛ ⬛|`6⬛ ⬛ ⬛">blaze powder</item>
+</kill-reward>
+<crafting>
+    <shapeless>  <!-- FEVERISH PICKAXE -->
+        <result material="gold pickaxe" unbreakable="false" name="`e`lFeverish Pickaxe" damage="32" lore="`7Efficiency XX|`7Knockback Resistance III||`o`8Anti-1hour match tool." show-enchantments="false">
+            <enchantment level="20">efficiency</enchantment>
+            <attribute amount="1">generic.knockbackResistance</attribute>
+        </result>
+        <ingredient amount="3">glowstone</ingredient>
+        <ingredient amount="2">stick</ingredient>
+    </shapeless>
+    <shapeless>  <!-- FEVERISH SWORD -->
+        <result material="gold sword" unbreakable="false" name="`e`lFeverish Sword" damage="27" lore="`7Knockback III|`7Fire Aspect XX||`o`8Burn them to death!" show-enchantments="false">
+            <enchantment level="3">knockback</enchantment>
+            <enchantment level="20">fire_aspect</enchantment>
+        </result>
+        <ingredient amount="2">glowstone</ingredient>
+        <ingredient>stick</ingredient>
+    </shapeless>
+    <shapeless>  <!-- 3x3 recipe for one block of glowstone -->
+        <result material="glowstone" name="`6`lGolden Fever" lore="`7Craft a `e`oFeverish Pickaxe `7and `e`oSword`7 with glowstone.||`e⬛ ⬛ ⬛   `8⬛ `e⬛ `8⬛   `e⬛ `8= `eGlowstone block|`8⬛ `f⬛ `8⬛   ⬛ `e⬛ `8⬛   `f⬛ `8= `fSticks|`8⬛ `f⬛ `8⬛   ⬛ `f⬛ `8⬛"/>
+        <ingredient amount="9">blaze powder</ingredient>
+    </shapeless>
+</crafting>
+</map>
