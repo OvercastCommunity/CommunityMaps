@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Wild Isle</name>
-<version>1.1.1</version>
+<version>1.2</version>
 <objective>Destroy both enemy monuments!</objective>
 <authors>
     <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
@@ -31,10 +31,11 @@
         <item slot="4" unbreakable="true" material="iron spade"/>
         <item slot="6" amount="32" material="glass"/>
         <item slot="8" material="golden apple"/>
-        <helmet unbreakable="true" team-color="true" material="leather helmet">
-            <enchantment>depth_strider</enchantment>
-        </helmet>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+        <boots unbreakable="true" team-color="true" material="leather boots">
+            <enchantment>depth_strider</enchantment>
+        </boots>
     </kit>
     <kit id="blue-kit" parents="spawn-kit">
         <item slot="5" amount="64" damage="11" material="stained clay"/>
@@ -46,17 +47,17 @@
 <spawns>
     <default>
         <region yaw="180">
-            <cylinder base="35.5,28,67.5" radius="0.5" height="0"/>
+            <cylinder base="35.5,28,77.5" radius="0.5" height="0"/>
         </region>
     </default>
     <spawn team="blue" kit="blue-kit">
-        <region yaw="-90">
-            <cylinder base="-108.5,8,187.5" radius="0.5" height="0"/>
+        <region yaw="90">
+            <cylinder base="181.5,8,187.5" radius="0.5" height="0"/>
         </region>
     </spawn>
     <spawn team="red" kit="red-kit">
-        <region yaw="90">
-            <cylinder base="179.5,8,187.5" radius="0.5" height="0"/>
+        <region yaw="-90">
+            <cylinder base="-110.5,8,187.5" radius="0.5" height="0"/>
         </region>
     </spawn>
 </spawns>
@@ -75,23 +76,19 @@
     </deny>
 </filters>
 <regions>
-    <union id="spawn-islands"> <!-- potentially rest of main spawn island to this -->
-        <union id="blue-island">
-            <circle id="blue-spawn" center="-108.5,187.5" radius="16"/>
-        </union>
-        <union id="red-island">
-            <circle id="red-spawn" center="179.5,187.5" radius="16"/>
-        </union>
+    <union id="spawn-islands">
+        <rectangle id="blue-spawn" min="169,170" max="196,205"/>
+        <mirror id="red-spawn" origin="35.5,0,187.5" normal="1,0,0" region="blue-spawn"/>
     </union>
     <union id="iron">
-        <circle id="blue-iron" center="-85.5,187.5" radius="4.5"/>
-        <circle id="red-iron" center="156.5,187.5" radius="4.5"/>
+        <circle id="blue-iron" center="156.5,187.5" radius="6"/>
+        <circle id="red-iron" center="-85.5,187.5" radius="6"/>
     </union>
     <union id="monuments">
-        <cylinder id="blue-north" base="-44.5,9,143.5" radius="2.5" height="7"/>
-        <cylinder id="blue-south" base="-44.5,9,231.5" radius="2.5" height="7"/>
-        <cylinder id="red-north" base="115.5,9,143.5" radius="2.5" height="7"/>
-        <cylinder id="red-south" base="115.5,9,231.5" radius="2.5" height="7"/>
+        <cylinder id="blue-north" base="115.5,9,143.5" radius="2.5" height="7"/>
+        <cylinder id="blue-south" base="115.5,9,231.5" radius="2.5" height="7"/>
+        <cylinder id="red-north" base="-44.5,9,143.5" radius="2.5" height="7"/>
+        <cylinder id="red-south" base="-44.5,9,231.5" radius="2.5" height="7"/>
     </union>
     <union id="spawner-protection">
         <cylinder id="mid-gapple" base="35.5,5,187.5" radius="1.5" height="4"/>
@@ -102,17 +99,17 @@
         <everywhere/>
         <complement id="map">
             <rectangle min="-140,108" max="211,267"/>
-            <union id="bn-corner">
+            <union id="rn-corner">
                 <rectangle min="-140,108" max="-135,118"/>
                 <rectangle min="-140,108" max="-134,117"/>
                 <rectangle min="-140,108" max="-132,116"/>
                 <rectangle min="-140,108" max="-131,114"/>
                 <rectangle min="-140,108" max="-130,113"/>
             </union>
-            <mirror id="bs-corner" origin="35.5,0,187.5" normal="1,0,0" region="bn-corner"/>
-            <mirror id="rn-corner" origin="35.5,0,187.5" normal="0,0,1" region="bn-corner"/>
-            <mirror id="rs-corner" origin="35.5,0,187.5" normal="1,0,1" region="bn-corner"/>
-            <rectangle id="north-mid-void" min="12,108" max="59,124"/> <!-- this includes some water + edgepiece of the lily pad islands because it shouldn't impact anything -->
+            <mirror id="rs-corner" origin="35.5,0,187.5" normal="1,0,0" region="rn-corner"/>
+            <mirror id="bn-corner" origin="35.5,0,187.5" normal="0,0,1" region="rn-corner"/>
+            <mirror id="bs-corner" origin="35.5,0,187.5" normal="1,0,1" region="rn-corner"/>
+            <rectangle id="north-mid-void" min="12,108" max="59,124"/>
             <mirror id="south-mid-void" origin="35.5,0,187.5" normal="0,0,1" region="north-mid-void"/>
         </complement>
     </complement>
@@ -138,10 +135,6 @@
         <destroyable owner="red" region="red-south"/>
     </destroyables>
 </destroyables>
-<modes>
-    <mode after="25m" material="beacon" name="`bBEACON MONUMENT MODE"/>
-    <mode after="40m" material="coal block" name="`8COAL MONUMENT MODE"/>
-</modes>
 <renewables>
     <renewable region="iron" renew-filter="only-iron"/>
 </renewables>
@@ -183,8 +176,9 @@
     <tool>arrow</tool>
 </toolrepair>
 <itemremove>
-    <item>leather helmet</item>
     <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
     <item>emerald block</item>
     <item>coal block</item>
 </itemremove>
@@ -248,7 +242,7 @@
 <item-mods>
     <rule>
         <match>
-            <material>iron helmet</material>
+            <material>iron boots</material>
         </match>
         <modify>
             <enchantment>depth_strider</enchantment>
