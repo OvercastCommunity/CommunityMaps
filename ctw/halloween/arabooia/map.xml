@@ -1,0 +1,201 @@
+<map proto="1.4.2">
+<name>AraBOOia</name>
+<version>1.1.4</version>
+<objective>Capture the enemy team's wools!</objective>
+<authors>
+    <author uuid="b8add1ba-8e13-4673-bc73-4e3ed524d40e"/> <!--  Blazy36  -->
+</authors>
+<contributors>
+    <contributor uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30"/> <!-- Ruediger_LP -->
+    <contributor uuid="0c44ca5a-6a42-49b7-81f2-58dc6d2ae3e9" contribution="Halloween-ification Assistance"/> <!-- Xerocoles -->
+</contributors>
+<teams>
+    <team id="orange-team" color="gold" max="20">Orange</team>
+    <team id="purple-team" color="dark purple" max="20">Purple</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <item slot="2" unbreakable="true" material="iron pickaxe">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item slot="3" unbreakable="true" material="iron axe">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item slot="4" unbreakable="true" material="iron spade"/>
+        <item slot="5" amount="64" damage="1" material="wood"/>
+        <item slot="32" amount="64" damage="1" material="wood"/>
+        <item slot="6" amount="48" material="glass"/>
+        <item slot="7" material="golden apple"/>
+        <item slot="8" amount="64" material="golden carrot"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <region>
+            <cylinder base="210,30.1,-12" radius="1" height="0.1"/>
+        </region>
+    </default>
+    <spawn team="orange-team" kit="spawn-kit">
+        <region yaw="0">
+            <cylinder base="163,11.1,-109" radius="0.5" height="0"/>
+        </region>
+    </spawn>
+    <spawn team="purple-team" kit="spawn-kit">
+        <region yaw="180">
+            <cylinder base="167,11.1,85" radius="0.5" height="0"/>
+        </region>
+    </spawn>
+</spawns>
+<filters>
+    <not id="orange-in-wr">
+        <any>
+            <team id="only-purple">purple-team</team>
+            <material>chest</material>
+        </any>
+    </not>
+    <not id="purple-in-wr">
+        <any>
+            <team id="only-orange">orange-team</team>
+            <material>chest</material>
+        </any>
+    </not>
+    <all id="only-iron-regen">
+        <material id="only-iron">iron block</material>
+        <cause>world</cause>
+    </all>
+    <not id="deny-void">
+        <void/>
+    </not>
+</filters>
+<regions>
+    <union id="iron">
+        <union id="spawns">
+            <rectangle id="orange-spawn" min="159,-114" max="171,-95"/>
+            <rectangle id="purple-spawn" min="159,71" max="171,90"/>
+        </union>
+        <rectangle id="orange-iron" min="147,-98" max="171,-90"/>
+        <rectangle id="purple-iron" min="159,66" max="183,74"/>
+    </union>
+    <union id="wool-rooms">
+        <union id="orange-wool-rooms"> <!-- orange must get; purple defends -->
+            <rectangle id="magenta-wr" min="135,89" max="147,102"/>
+            <cuboid id="pink-wr" min="183,7,89" max="195,oo,102"/>
+        </union>
+        <union id="purple-wool-rooms"> <!-- purple must get; orange defends -->
+            <cuboid id="red-wr" min="134,7,-126" max="147,oo,-113"/>
+            <rectangle id="yellow-wr" min="183,-126" max="195,-113"/>
+        </union>
+    </union>
+    <complement id="void">
+        <everywhere/>
+        <complement id="map">
+            <rectangle min="135,-126" max="195,102"/>
+            <rectangle min="147,66" max="183,102"/>
+            <rectangle min="147,-126" max="183,-90"/>
+        </complement>
+        <region id="iron"/>
+        <region id="wool-rooms"/>
+    </complement>
+    <complement id="underbridge">
+        <intersect>
+            <union>
+                <rectangle min="135,-126" max="157,-78"/>
+                <rectangle min="173,54" max="195,102"/>
+            </union>
+            <below y="7"/>
+        </intersect>
+        <region id="iron"/>
+    </complement>
+    <apply enter="only-orange" region="orange-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply enter="only-purple" region="purple-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply enter="only-orange" region="orange-wool-rooms" message="You may not enter your team's own wool rooms!"/>
+    <apply enter="only-purple" region="purple-wool-rooms" message="You may not enter your team's own wool rooms!"/>
+    <apply block="orange-in-wr" use="only-orange" region="orange-wool-rooms"/>
+    <apply block="purple-in-wr" use="only-purple" region="purple-wool-rooms"/>
+    <apply block-break="only-iron" block-place="only-iron-regen" region="iron" message="You may only break iron blocks here!"/>
+    <apply block="never" region="underbridge" message="Underbridging is not permitted!"/>
+    <apply block="deny-void" region="void" message="You may not edit the void area!"/>
+</regions>
+<wools>
+    <wool team="orange-team" color="magenta" location="31,8,96">
+        <monument>
+            <block>161,12,-109</block>
+        </monument>
+    </wool>
+    <wool team="orange-team" color="pink" location="85,14,96">
+        <monument>
+            <block>164,12,-110</block>
+        </monument>
+    </wool>
+    <wool team="purple-team" color="red" location="31,14,-120">
+        <monument>
+            <block>165,12,85</block>
+        </monument>
+    </wool>
+    <wool team="purple-team" color="yellow" location="85,8,-120">
+        <monument>
+            <block>168,12,84</block>
+        </monument>
+    </wool>
+</wools>
+<renewables>
+    <renewable region="iron" particles="true" sound="true" renew-filter="only-iron"/>
+</renewables>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>golden carrot</item>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>sand</item>
+    <item>sandstone stairs</item>
+    <item>string</item>
+    <item>redstone</item>
+    <item>nether brick</item>
+    <item>nether brick stairs</item>
+    <item>string</item>
+</itemremove>
+<block-drops>
+    <rule>
+        <filter>
+            <material>wood</material>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+    <rule>
+        <filter>
+            <material>glass</material>
+        </filter>
+        <drops>
+            <item chance="0" material="glass"/>
+        </drops>
+    </rule>
+</block-drops>
+<itemkeep>
+    <item>wood</item>
+    <item>glass</item>
+    <item>golden apple</item>
+</itemkeep>
+<kill-reward>
+    <item material="golden apple"/>
+    <item amount="32" damage="1" material="wood"/>
+    <item amount="16" material="glass"/>
+</kill-reward>
+<maxbuildheight>21</maxbuildheight>
+<respawn auto="true" delay="3s"/>
+</map>

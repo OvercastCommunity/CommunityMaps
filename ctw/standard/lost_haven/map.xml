@@ -1,0 +1,723 @@
+<map proto="1.4.0">
+<name>Lost Haven</name>
+<version>1.1</version>
+<objective>Take the opponent's wools and place them on your victory monument! Capture the Old Sanctuary to gain speed and haste for your entire team!</objective>
+<created>2021-07-13</created>
+<authors>
+    <author uuid="93a2f790-e430-4742-94ac-e513660bef37"/> <!-- adenines -->
+    <author uuid="787c2738-70ba-4bfc-8faf-70ae9d87e5b9"/> <!-- uracils -->
+</authors>
+<broadcasts>
+    <tip after="5s" every="3m">Capture the Old Sanctuary at the centre of the map for a speed and haste boost!</tip>
+</broadcasts>
+<teams>
+    <team id="blue-team" color="blue" max="50">Blue</team>
+    <team id="orange-team" color="gold" max="50">Orange</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <item slot="2" material="diamond pickaxe" unbreakable="true">
+        </item>
+        <item slot="3" material="iron axe" unbreakable="true">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item slot="4" material="wood" amount="64"/>
+        <item slot="31" material="wood" amount="64"/>
+        <item slot="6" material="bucket"/>
+        <item slot="7" material="golden apple"/>
+        <item slot="8" material="golden carrot" amount="64"/>
+        <item slot="30" material="iron spade"/>
+        <leggings material="chainmail leggings" unbreakable="true"/>
+    </kit>
+    <kit id="blue-kit" parents="spawn-kit">
+        <item slot="5" material="stained_clay" damage="11" amount="64"/>
+        <item slot="32" material="stained_clay" damage="11" amount="64"/>
+        <chestplate material="leather chestplate" color="334CB2" unbreakable="true">
+            <enchantment level="2">projectile_protection</enchantment>
+        </chestplate>
+        <boots material="leather boots" color="334CB2" unbreakable="true"/>
+    </kit>
+    <kit id="orange-kit" parents="spawn-kit">
+        <item slot="5" material="stained_clay" damage="1" amount="64"/>
+        <item slot="32" material="stained_clay" damage="1" amount="64"/>
+        <chestplate material="leather chestplate" color="D87F33" unbreakable="true">
+            <enchantment level="2">projectile_protection</enchantment>
+        </chestplate>
+        <boots material="leather boots" color="D87F33" unbreakable="true"/>
+    </kit>
+    <kit id="potion-kit" force="true">
+        <effect>speed</effect>
+        <effect>fast_digging</effect>
+    </kit>
+    <kit id="main-kit" force="true">
+        <effect duration="0" amplifier="0">speed</effect>
+        <effect duration="0" amplifier="0">fast_digging</effect>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <region yaw="90">
+            <cylinder base="79.5,33,0.5" radius="1.5" height="0"/>
+        </region>
+    </default>
+    <spawn team="blue-team" kit="blue-kit">
+        <region yaw="180">
+            <cylinder base="0.5,22,185.5" radius="1.5" height="0"/>
+        </region>
+    </spawn>
+    <spawn team="orange-team" kit="orange-kit">
+        <region yaw="0">
+            <cylinder base="0.5,22,-184.5" radius="1.5" height="0"/>
+        </region>
+    </spawn>
+</spawns>
+<filters>
+    <deny id="deny-void">
+        <void/>
+    </deny>
+    <all id="blue-in-wr">
+        <team id="only-blue">blue-team</team>
+        <any id="woolroom-materials">
+            <material>web</material>
+            <material>vine</material>
+        </any>
+    </all>
+    <all id="orange-in-wr">
+        <team id="only-orange">orange-team</team>
+        <filter id="woolroom-materials"/>
+    </all>
+    <all id="only-renewable">
+        <material id="only-iron">iron block</material>
+        <not>
+            <cause>player</cause>
+        </not>
+    </all>
+    <any id="spawn-perms">
+        <material>vine</material>
+        <filter id="only-iron"/>
+    </any>
+    <material id="only-air">air</material>
+    <all id="blue-capture">
+        <objective>sanctuary</objective>
+        <filter id="only-blue"/>
+    </all>
+    <all id="orange-capture">
+        <objective>sanctuary</objective>
+        <filter id="only-orange"/>
+    </all>
+    <all id="blue-lost">
+        <not>
+            <objective>sanctuary</objective>
+        </not>
+        <filter id="only-blue"/>
+    </all>
+    <all id="orange-lost">
+        <not>
+            <objective>sanctuary</objective>
+        </not>
+        <filter id="only-orange"/>
+    </all>
+</filters>
+<regions>
+    <!-- main regions -->
+    <rectangle id="entire-map" min="-130,195" max="130,-195"/>
+    <union id="spawns">
+        <rectangle id="blue-spawn" min="-33,155" max="35,199"/>
+        <rectangle id="orange-spawn" min="34,-154" max="-34,-199"/>
+    </union>
+    <cylinder id="capture-point" base="0.5,10,0.5" radius="9" height="14"/>
+    <!-- woolrooms -->
+    <union id="woolrooms">
+        <union id="blue-wrs"> <!-- blue must retrieve from orange -->
+            <rectangle id="yellow-woolroom" min="126,-141" max="103,-163"/>
+            <cuboid id="red-woolroom" min="-6,27,-117" max="7,50,-104"/>
+            <rectangle id="pink-woolroom" min="-102,-141" max="-125,-163"/>
+        </union>
+        <union id="orange-wrs"> <!-- orange must retrieve from blue -->
+            <rectangle id="light-blue-woolroom" min="126,142" max="103,164"/>
+            <cuboid id="cyan-woolroom" min="7,27,118" max="-6,50,105"/>
+            <rectangle id="green-woolroom" min="-125,142" max="-102,164"/>
+        </union>
+    </union>
+    <union id="no-underbridge">
+        <cuboid min="-34,1,195" max="-130,11,32"/>
+        <cuboid min="35,1,195" max="130,11,32"/>
+        <cuboid min="35,1,-195" max="130,11,-31"/>
+        <cuboid min="-34,1,-195" max="-130,11,-31"/>
+        <cuboid min="35,1,-67" max="-34,5,68"/>
+    </union>
+    <union id="grid"> <!-- very long -->
+        <rectangle min="-128,195" max="-127,-195"/>
+        <rectangle min="-126,195" max="-125,-195"/>
+        <rectangle min="-124,195" max="-123,-195"/>
+        <rectangle min="-122,195" max="-121,-195"/>
+        <rectangle min="-120,195" max="-119,-195"/>
+        <rectangle min="-118,195" max="-117,-195"/>
+        <rectangle min="-116,195" max="-115,-195"/>
+        <rectangle min="-114,195" max="-113,-195"/>
+        <rectangle min="-112,195" max="-111,-195"/>
+        <rectangle min="-110,195" max="-109,-195"/>
+        <rectangle min="-108,195" max="-107,-195"/>
+        <rectangle min="-106,195" max="-105,-195"/>
+        <rectangle min="-104,195" max="-103,-195"/>
+        <rectangle min="-102,195" max="-101,-195"/>
+        <rectangle min="-100,195" max="-99,-195"/>
+        <rectangle min="-98,195" max="-97,-195"/>
+        <rectangle min="-96,195" max="-95,-195"/>
+        <rectangle min="-94,195" max="-93,-195"/>
+        <rectangle min="-92,195" max="-91,-195"/>
+        <rectangle min="-90,195" max="-89,-195"/>
+        <rectangle min="-88,195" max="-87,-195"/>
+        <rectangle min="-86,195" max="-85,-195"/>
+        <rectangle min="-84,195" max="-83,-195"/>
+        <rectangle min="-82,195" max="-81,-195"/>
+        <rectangle min="-80,195" max="-79,-195"/>
+        <rectangle min="-78,195" max="-77,-195"/>
+        <rectangle min="-76,195" max="-75,-195"/>
+        <rectangle min="-74,195" max="-73,-195"/>
+        <rectangle min="-72,195" max="-71,-195"/>
+        <rectangle min="-70,195" max="-69,-195"/>
+        <rectangle min="-68,195" max="-67,-195"/>
+        <rectangle min="-66,195" max="-65,-195"/>
+        <rectangle min="-64,195" max="-63,-195"/>
+        <rectangle min="-62,195" max="-61,-195"/>
+        <rectangle min="-60,195" max="-59,-195"/>
+        <rectangle min="-58,195" max="-57,-195"/>
+        <rectangle min="-56,195" max="-55,-195"/>
+        <rectangle min="-54,195" max="-53,-195"/>
+        <rectangle min="-52,195" max="-51,-195"/>
+        <rectangle min="-50,195" max="-49,-195"/>
+        <rectangle min="-48,195" max="-47,-195"/>
+        <rectangle min="-46,195" max="-45,-195"/>
+        <rectangle min="-44,195" max="-43,-195"/>
+        <rectangle min="-42,195" max="-41,-195"/>
+        <rectangle min="-40,195" max="-39,-195"/>
+        <rectangle min="-38,195" max="-37,-195"/>
+        <rectangle min="-36,195" max="-35,-195"/>
+        <rectangle min="-34,195" max="-33,-195"/>
+        <rectangle min="-32,195" max="-31,-195"/>
+        <rectangle min="-30,195" max="-29,-195"/>
+        <rectangle min="-28,195" max="-27,-195"/>
+        <rectangle min="-26,195" max="-25,-195"/>
+        <rectangle min="-24,195" max="-23,-195"/>
+        <rectangle min="-22,195" max="-21,-195"/>
+        <rectangle min="-20,195" max="-19,-195"/>
+        <rectangle min="-18,195" max="-17,-195"/>
+        <rectangle min="-16,195" max="-15,-195"/>
+        <rectangle min="-14,195" max="-13,-195"/>
+        <rectangle min="-12,195" max="-11,-195"/>
+        <rectangle min="-10,195" max="-9,-195"/>
+        <rectangle min="-8,195" max="-7,-195"/>
+        <rectangle min="-6,195" max="-5,-195"/>
+        <rectangle min="-4,195" max="-3,-195"/>
+        <rectangle min="-2,195" max="-1,-195"/>
+        <rectangle min="0,195" max="1,-195"/>
+        <rectangle min="2,195" max="3,-195"/>
+        <rectangle min="4,195" max="5,-195"/>
+        <rectangle min="6,195" max="7,-195"/>
+        <rectangle min="8,195" max="9,-195"/>
+        <rectangle min="10,195" max="11,-195"/>
+        <rectangle min="12,195" max="13,-195"/>
+        <rectangle min="14,195" max="15,-195"/>
+        <rectangle min="16,195" max="17,-195"/>
+        <rectangle min="18,195" max="19,-195"/>
+        <rectangle min="20,195" max="21,-195"/>
+        <rectangle min="22,195" max="23,-195"/>
+        <rectangle min="24,195" max="25,-195"/>
+        <rectangle min="26,195" max="27,-195"/>
+        <rectangle min="28,195" max="29,-195"/>
+        <rectangle min="30,195" max="31,-195"/>
+        <rectangle min="32,195" max="33,-195"/>
+        <rectangle min="34,195" max="35,-195"/>
+        <rectangle min="36,195" max="37,-195"/>
+        <rectangle min="38,195" max="39,-195"/>
+        <rectangle min="30,195" max="31,-195"/>
+        <rectangle min="32,195" max="33,-195"/>
+        <rectangle min="34,195" max="35,-195"/>
+        <rectangle min="36,195" max="37,-195"/>
+        <rectangle min="38,195" max="39,-195"/>
+        <rectangle min="40,195" max="41,-195"/>
+        <rectangle min="42,195" max="43,-195"/>
+        <rectangle min="44,195" max="45,-195"/>
+        <rectangle min="46,195" max="47,-195"/>
+        <rectangle min="48,195" max="49,-195"/>
+        <rectangle min="50,195" max="51,-195"/>
+        <rectangle min="52,195" max="53,-195"/>
+        <rectangle min="54,195" max="55,-195"/>
+        <rectangle min="56,195" max="57,-195"/>
+        <rectangle min="58,195" max="59,-195"/>
+        <rectangle min="60,195" max="61,-195"/>
+        <rectangle min="62,195" max="63,-195"/>
+        <rectangle min="64,195" max="65,-195"/>
+        <rectangle min="66,195" max="67,-195"/>
+        <rectangle min="68,195" max="69,-195"/>
+        <rectangle min="70,195" max="71,-195"/>
+        <rectangle min="72,195" max="73,-195"/>
+        <rectangle min="74,195" max="75,-195"/>
+        <rectangle min="76,195" max="77,-195"/>
+        <rectangle min="78,195" max="79,-195"/>
+        <rectangle min="80,195" max="81,-195"/>
+        <rectangle min="82,195" max="83,-195"/>
+        <rectangle min="84,195" max="85,-195"/>
+        <rectangle min="86,195" max="87,-195"/>
+        <rectangle min="88,195" max="89,-195"/>
+        <rectangle min="90,195" max="91,-195"/>
+        <rectangle min="92,195" max="93,-195"/>
+        <rectangle min="94,195" max="95,-195"/>
+        <rectangle min="96,195" max="97,-195"/>
+        <rectangle min="98,195" max="99,-195"/>
+        <rectangle min="100,195" max="101,-195"/>
+        <rectangle min="102,195" max="103,-195"/>
+        <rectangle min="104,195" max="105,-195"/>
+        <rectangle min="106,195" max="107,-195"/>
+        <rectangle min="108,195" max="109,-195"/>
+        <rectangle min="110,195" max="111,-195"/>
+        <rectangle min="112,195" max="113,-195"/>
+        <rectangle min="114,195" max="115,-195"/>
+        <rectangle min="116,195" max="117,-195"/>
+        <rectangle min="118,195" max="119,-195"/>
+        <rectangle min="120,195" max="121,-195"/>
+        <rectangle min="122,195" max="123,-195"/>
+        <rectangle min="124,195" max="125,-195"/>
+        <rectangle min="126,195" max="127,-195"/>
+        <rectangle min="128,195" max="129,-195"/>
+    </union>
+    <!-- apply -->
+    <apply kit="potion-kit" region="grid" filter="orange-capture"/>
+    <apply kit="potion-kit" region="grid" filter="blue-capture"/>
+    <apply kit="main-kit" region="grid" filter="orange-lost"/>
+    <apply kit="main-kit" region="grid" filter="blue-lost"/>
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter `9Blue's `Cspawn!"/>
+    <apply enter="only-orange" region="orange-spawn" message="You may not enter `6Orange's `Cspawn!"/>
+    <apply enter="only-blue" region="blue-wrs" message="You may not enter your team's own wool rooms!"/>
+    <apply enter="only-orange" region="orange-wrs" message="You may not enter your team's own wool rooms!"/>
+    <apply block-break="spawn-perms" block-place="only-renewable" region="spawns" message="You may only break iron in spawn!"/>
+    <apply block-break="blue-in-wr" block-place="never" use="only-blue" region="blue-wrs" message="You may only break cobwebs in the wool rooms!"/>
+    <apply block-break="orange-in-wr" block-place="never" use="only-orange" region="orange-wrs" message="You may only break cobwebs in the wool rooms!"/>
+    <apply block="never" region="capture-point" message="You may not edit the capture point region!"/>
+    <apply block-place="deny-void" region="entire-map" message="You may not build in the void!"/>
+    <apply block="never" region="no-underbridge" message="You may not build in the void!"/>
+</regions>
+<portals>
+    <portal yaw="@0">
+        <region>
+            <cuboid min="-1,19,-187" max="2,21,-188"/>
+        </region>
+        <destination>
+            <cuboid id="ospawn2" min="-1,32,-182" max="2,32,-184"/>
+        </destination>
+    </portal>
+    <portal yaw="@0">
+        <region>
+            <cuboid min="-1,32,-185" max="2,34,-186"/>
+        </region>
+        <destination>
+            <cuboid id="ospawn1" min="-1,19,-184" max="2,19,-186"/>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="110,22,-147" max="109,23,-146"/>
+        </region>
+        <destination>
+            <point id="YUL1">111.5,30,-148.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="110,22,-156" max="109,23,-157"/>
+        </region>
+        <destination>
+            <point id="YUL2">111.5,30,-154.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="119,22,-156" max="120,23,-157"/>
+        </region>
+        <destination>
+            <point id="YUL3">117.5,30,-154.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="119,22,-147" max="120,23,-146"/>
+        </region>
+        <destination>
+            <point id="YUL4">117.5,30,-148.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="111,30,-148" max="110,31,-147"/>
+        </region>
+        <destination>
+            <point id="YLL1">110.5,22,-147.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="111,30,-155" max="110,31,-156"/>
+        </region>
+        <destination>
+            <point id="YLL2">110.5,22,-155.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="118,30,-155" max="119,31,-156"/>
+        </region>
+        <destination>
+            <point id="YLL3">118.5,22,-155.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="118,30,-148" max="119,31,-147"/>
+        </region>
+        <destination>
+            <point id="YLL4">118.5,22,-147.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-109,22,-156" max="-108,23,-157"/>
+        </region>
+        <destination>
+            <point id="PUL1">-110.5,30,-154.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-109,22,-147" max="-108,23,-146"/>
+        </region>
+        <destination>
+            <point id="PUL2">-110.5,30,-148.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-118,22,-147" max="-119,23,-146"/>
+        </region>
+        <destination>
+            <point id="PUL3">-116.5,30,-148.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-118,22,-156" max="-119,23,-157"/>
+        </region>
+        <destination>
+            <point id="PUL4">-116.5,30,-154.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-110,30,-155" max="-109,31,-156"/>
+        </region>
+        <destination>
+            <point id="PLL1">-109.5,22,-155.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-110,30,-148" max="-109,31,-147"/>
+        </region>
+        <destination>
+            <point id="PLL2">-109.5,22,-147.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-117,30,-148" max="-118,31,-147"/>
+        </region>
+        <destination>
+            <point id="PLL3">-117.5,22,-147.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-117,30,-155" max="-118,31,-156"/>
+        </region>
+        <destination>
+            <point id="PLL4">-117.5,22,-155.5</point>
+        </destination>
+    </portal>
+    <portal yaw="@180">
+        <region>
+            <cuboid min="2,19,188" max="-1,21,189"/>
+        </region>
+        <destination>
+            <cuboid id="bspawn2" min="2,32,183" max="-1,32,185"/>
+        </destination>
+    </portal>
+    <portal yaw="@180">
+        <region>
+            <cuboid min="2,32,186" max="-1,34,187"/>
+        </region>
+        <destination>
+            <cuboid id="bspawn1" min="2,19,185" max="-1,19,187"/>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-109,22,148" max="-108,23,147"/>
+        </region>
+        <destination>
+            <point id="GUL1">-110.5,30,149.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-109,22,157" max="-108,23,158"/>
+        </region>
+        <destination>
+            <point id="GUL2">-110.5,30,155.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-118,22,157" max="-119,23,158"/>
+        </region>
+        <destination>
+            <point id="GUL3">-116.5,30,155.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-118,22,148" max="-119,23,147"/>
+        </region>
+        <destination>
+            <point id="GUL4">-116.5,30,149.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-110,30,149" max="-109,31,148"/>
+        </region>
+        <destination>
+            <point id="GLL1">-109.5,22,148.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-110,30,156" max="-109,31,157"/>
+        </region>
+        <destination>
+            <point id="GLL2">-109.5,22,156.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-117,30,156" max="-118,31,157"/>
+        </region>
+        <destination>
+            <point id="GLL3">-117.5,22,156.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="-117,30,149" max="-118,31,148"/>
+        </region>
+        <destination>
+            <point id="GLL4">-117.5,22,148.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="110,22,157" max="109,23,158"/>
+        </region>
+        <destination>
+            <point id="LBUL1">111.5,30,155.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="110,22,148" max="109,23,147"/>
+        </region>
+        <destination>
+            <point id="LBUL2">111.5,30,149.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="119,22,148" max="120,23,147"/>
+        </region>
+        <destination>
+            <point id="LBUL3">117.5,30,149.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="119,22,157" max="120,23,158"/>
+        </region>
+        <destination>
+            <point id="LBUL4">117.5,30,155.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="111,30,156" max="110,31,157"/>
+        </region>
+        <destination>
+            <point id="LBLL1">110.5,22,156.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="111,30,149" max="110,31,148"/>
+        </region>
+        <destination>
+            <point id="LBLL2">110.5,22,148.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="118,30,149" max="119,31,148"/>
+        </region>
+        <destination>
+            <point id="LBLL3">118.5,22,148.5</point>
+        </destination>
+    </portal>
+    <portal yaw="180">
+        <region>
+            <cuboid min="118,30,156" max="119,31,157"/>
+        </region>
+        <destination>
+            <point id="LBLL4">118.5,22,156.5</point>
+        </destination>
+    </portal>
+</portals>
+<wools craftable="false">
+    <wool team="blue-team" color="pink" location="-113.5,22,-151.5">
+        <monument>
+            <block>-1.5,33,174.5</block>
+        </monument>
+    </wool>
+    <wool team="blue-team" color="red" location="0.5,33,-110.5">
+        <monument>
+            <block>0.5,33,174.5</block>
+        </monument>
+    </wool>
+    <wool team="blue-team" color="yellow" location="114.5,22,-151.5">
+        <monument>
+            <block>2.5,33,174.5</block>
+        </monument>
+    </wool>
+    <wool team="orange-team" color="cyan" location="0.5,33,111.5">
+        <monument>
+            <block>0.5,33,-173.5</block>
+        </monument>
+    </wool>
+    <wool team="orange-team" color="green" location="-113.5,22,152.5">
+        <monument>
+            <block>-1.5,33,-173.5</block>
+        </monument>
+    </wool>
+    <wool team="orange-team" color="light blue" location="114.5,22,152.5">
+        <monument>
+            <block>2.5,33,-173.5</block>
+        </monument>
+    </wool>
+</wools>
+<control-points incremental="true" show-progress="true" neutral-state="true" required="false">
+    <control-point id="sanctuary" name="Old Sanctuary" capture-time="10s">
+        <capture>
+            <cylinder base="0.5,10,0.5" radius="8" height="14"/>
+        </capture>
+        <progress>
+            <cylinder base="0.5,10,0.5" radius="8" height="14"/>
+        </progress>
+        <captured>
+            <cylinder base="0.5,10,0.5" radius="8" height="14"/>
+        </captured>
+    </control-point>
+</control-points>
+<renewables>
+    <renewable sound="true" particles="true" renew-filter="only-iron" replace-filter="only-air" avoid-players="2"/>
+</renewables>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>golden carrot</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>wood step:5</item>
+    <item>dark oak stairs</item>
+    <item>wood step:1</item>
+    <item>spruce wood stairs</item>
+    <item>leaves</item>
+    <item>gravel</item>
+    <item>flint</item>
+    <item>stone:5</item>
+    <item>stone:3</item>
+    <item>mossy cobblestone</item>
+    <item>spruce fence</item>
+    <item>dark oak fence</item>
+    <item>seeds</item>
+    <item>vine</item>
+    <item>string</item>
+    <item>sapling</item>
+    <item>31</item>
+    <item>37</item>
+    <item>38</item>
+    <item>175</item>
+    <item>338</item>
+    <item>66</item>
+    <item>book</item>
+    <item>bed</item>
+    <item>dirt:1</item>
+    <item>log:1</item>
+</itemremove>
+<block-drops>
+    <rule>
+        <filter>
+            <material>wood</material>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+    <rule>
+        <filter>
+            <material>stained clay</material>
+        </filter>
+        <drops>
+            <item chance="0" material="stained clay"/>
+        </drops>
+    </rule>
+</block-drops>
+<itemkeep>
+    <item>wood</item>
+    <item>stained clay</item>
+    <item>bucket</item>
+    <item>water bucket</item>
+    <item>golden apple</item>
+</itemkeep>
+<kill-rewards>
+    <kill-reward>
+        <item amount="32" material="wood"/>
+        <item material="golden apple"/>
+    </kill-reward>
+    <kill-reward filter="only-blue">
+        <item amount="16" damage="11" material="stained clay"/>
+    </kill-reward>
+    <kill-reward filter="only-orange">
+        <item amount="16" damage="1" material="stained clay"/>
+    </kill-reward>
+</kill-rewards>
+<maxbuildheight>40</maxbuildheight>
+</map>
