@@ -1,7 +1,7 @@
 ---
 name: Map Update
 about: Update a map submitted to the CommunityMaps repo
-title: "[GAMEMODE] Map Name - Version"
+title: "[Update] Map Name, Version"
 labels: map, update
 assignees: ''
 
