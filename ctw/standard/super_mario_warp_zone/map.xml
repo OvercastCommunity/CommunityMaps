@@ -1,0 +1,242 @@
+<map proto="1.4.2">
+<name>Super Mario Warp Zone</name>
+<version>1.0</version>
+<objective>Capture the enemy team's wool!</objective>
+<phase>development</phase>
+<authors>
+    <author uuid="74948888-fdb8-4446-9340-f7688c2435cc"/> <!-- Zero_Frosty -->
+</authors>
+<contributors>
+    <contributor uuid="621b2aa8-4e5f-4ed8-bd36-0ae2f8952a06"/> <!-- Strangey -->
+    <contributor uuid="430ec559-364a-4363-ac7a-2529050440ac"/> <!-- mameBT -->
+</contributors>
+<teams>
+    <team id="blue" color="blue" max="16">Blue</team>
+    <team id="red" color="dark red" max="16">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="2" unbreakable="true" material="iron pickaxe">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item slot="3" unbreakable="true" material="iron axe">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item slot="4" unbreakable="true" material="iron spade"/>
+        <item slot="5" amount="64" damage="1" material="wood"/>
+        <item slot="32" amount="32" damage="1" material="wood"/>
+        <item slot="6" amount="48" damage="7" material="stained glass"/>
+        <item slot="8" material="golden apple"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" team-color="true" material="leather leggings"/>
+        <boots unbreakable="true" team-color="true" material="leather boots"/>
+        <effect amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="portal-kit" force="true">
+        <effect duration="0" amplifier="0">damage resistance</effect>
+        <effect duration="3" amplifier="255">jump_boost</effect>
+    </kit>
+    <kit id="team-kit" parents="portal-kit" force="true">
+        <item slot="28" material="arrow"/>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <region yaw="0">
+            <block>-324,122,125</block>
+        </region>
+    </default>
+    <spawn team="blue" kit="spawn-kit">
+        <region yaw="180">
+            <block>-347,20,269</block>
+        </region>
+    </spawn>
+    <spawn team="red" kit="spawn-kit">
+        <region yaw="0">
+            <block>-301,20,25</block>
+        </region>
+    </spawn>
+</spawns>
+<filters>
+    <deny id="blue-in-wr">
+        <any>
+            <team id="only-red">red</team>
+            <material>chest</material>
+            <material>mob spawner</material>
+            <material>gold plate</material>
+            <material>obsidian</material>
+            <material>bedrock</material>
+        </any>
+    </deny>
+    <deny id="red-in-wr">
+        <any>
+            <team id="only-blue">blue</team>
+            <material>chest</material>
+            <material>mob spawner</material>
+            <material>gold plate</material>
+            <material>obsidian</material>
+            <material>bedrock</material>
+        </any>
+    </deny>
+    <all id="only-iron-regen">
+        <cause>world</cause>
+        <material id="only-iron">iron block</material>
+    </all>
+    <deny id="deny-void">
+        <void/>
+    </deny>
+</filters>
+<regions>
+    <complement id="void">
+        <everywhere/>
+        <rectangle id="mid" min="-373,98" max="-274,197"/>
+        <!-- Some areas use block 36, sue me -->
+    </complement>
+    <union id="wool-rooms">
+        <rectangle id="magenta-for-blue" min="-243,97" max="-22,116"/>
+        <rectangle id="orange-for-red" min="-425,179" max="-404,198"/>
+    </union>
+    <union id="spawns">
+        <union id="blue-spawn">
+            <rectangle id="blue-spawn-main" min="-370,225" max="-320,295"/>
+            <rectangle id="blue-spawn-tp-1" min="-371,176" max="-358,195"/>
+            <rectangle id="blue-spawn-tp-2" min="-371,182" max="-352,195"/>
+        </union>
+        <union id="red-spawn">
+            <rectangle id="red-spawn-main" min="-277,0" max="-327,70"/>
+            <rectangle id="red-spawn-tp-1" min="-295,100" max="-276,113"/>
+            <rectangle id="red-spawn-tp-2" min="-289,100" max="-276,119"/>
+        </union>
+    </union>
+    <union id="side-portals">
+        <cylinder id="emerald-portal" base="-270.5,11,200.5" height="8" radius="5"/>
+        <cylinder id="melon-portal" base="-376.5,11,94.5" height="8" radius="5"/>
+    </union>
+    <union id="spawn-portals">
+        <cylinder id="blue-spawn-portal" base="-346.5,11,234.5" height="3" radius="6.5"/>
+        <cylinder id="red-spawn-portal" base="-300.5,11,60.5" height="3" radius="6.5"/>
+    </union>
+    <union id="portal-protection">
+        <cylinder id="-364.5,32,106.5" height="8" radius="6.5"/>
+        <cylinder id="-282.5,32,188.5" height="8" radius="6.5"/>
+    </union>
+    <cylinder id="gapple-spawn-circle" base="-323.5,16,147.5" radius="3" height="5"/>
+    <above id="height-limit" y="40"/>
+    <apply kit="portal-kit" region="side-portals"/>
+    <apply kit="team-kit" region="spawn-portals"/>
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy spawn!"/>
+    <apply enter="only-blue" region="magenta-for-blue" message="You may not enter your team's own wool room!"/>
+    <apply enter="only-red" region="orange-for-red" message="You may not enter your team's own wool room!"/>
+    <apply block-place="only-iron-regen" block-break="only-iron" region="spawns" message="You may only break iron blocks in the spawns!"/>
+    <apply block="blue-in-wr" use="only-blue" region="magenta-for-blue"/>
+    <apply block="red-in-wr" use="only-red" region="orange-for-red"/>
+    <apply block="never" region="gapple-spawn-circle" message="You may not destroy the golden apple spawner!"/>
+    <apply block="never" region="portal-protection" message="You may not cover up the portal exits!"/>
+    <apply block="never" region="height-limit">
+        <message>
+            {"translate":"match.maxBuildHeight"}
+        </message>
+    </apply>
+    <apply block="deny-void" region="void" message="You may not build in the void!"/>
+</regions>
+<renewables>
+    <renewable renew-filter="only-iron"/>
+</renewables>
+<wools>
+    <wool team="blue" color="magenta" craftable="false" location="-233,19,106">
+        <monument>
+            <block>-367,23,190</block>
+        </monument>
+    </wool>
+    <wool team="red" color="orange" craftable="false" location="-415,19,188">
+        <monument>
+            <block>-281,23,104</block>
+        </monument>
+    </wool>
+</wools>
+<spawners>
+    <spawner player-region="magenta-for-blue" filter="only-blue" delay="3s">
+        <spawn-region>
+            <block>-233,19,106</block>
+        </spawn-region>
+        <item damage="2" material="wool"/>
+    </spawner>
+    <spawner player-region="orange-for-red" filter="only-red" delay="3s">
+        <spawn-region>
+            <block>-415,19,188</block>
+        </spawn-region>
+        <item damage="1" material="wool"/>
+    </spawner>
+    <spawner delay="10s" player-region="gapple-spawn-circle">
+        <spawn-region>
+            <block>-324,17,147</block>
+        </spawn-region>
+        <item material="golden apple"/>
+    </spawner>
+</spawners>
+<portals>
+    <portal x="@-364.5" y="@22" z="@188.5" yaw="@-135" region="blue-spawn-portal"/>
+    <portal x="@-282.5" y="@22" z="@106.5" yaw="@45" region="red-spawn-portal"/>
+    <portal x="@-365" y="@38" z="@106" yaw="@-45" region="emerald-portal"/>
+    <portal x="@-283" y="@38" z="@188" yaw="@135" region="melon-portal"/>
+</portals>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>apple</item>
+    <item>sapling</item>
+    <item>long grass</item>
+    <item>seeds</item>
+    <item>red rose</item>
+    <item>item frame</item>
+    <item>string</item>
+</itemremove>
+<block-drops>
+    <rule>
+        <filter>
+            <material>wood</material>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+    <rule>
+        <filter>
+            <material>stained glass</material>
+        </filter>
+        <drops>
+            <item chance="0" material="stained glass"/>
+        </drops>
+    </rule>
+</block-drops>
+<itemkeep>
+    <item>golden apple</item>
+    <item>wood</item>
+    <item>stained glass</item>
+</itemkeep>
+<kill-reward>
+    <item material="golden apple"/>
+    <item amount="24" damage="1" material="wood"/>
+    <item amount="12" damage="7" material="stained glass"/>
+</kill-reward>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
