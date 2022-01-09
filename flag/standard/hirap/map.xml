@@ -1,7 +1,7 @@
-<map proto="1.4.0">
+<map proto="1.4.2">
 <name>Hirap</name>
-<version>1.0</version>
-<objective>Capture the Flag!</objective>
+<version>1.0.1</version>
+<objective>Capture both enemy flags as many times as possible!</objective>
 <gamemode>ctf</gamemode>
 <phase>development</phase>
 <time result="score" overtime="1m" max-overtime="2m">12m</time>
@@ -27,119 +27,104 @@
         <item slot="0" unbreakable="true" material="stone sword"/>
         <item slot="1" unbreakable="true" material="bow"/>
         <item slot="2" material="golden apple"/>
-        <item slot="8" amount="16" material="arrow"/>
+        <item slot="8" amount="20" material="arrow"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
         <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="3">projectile_protection</enchantment>
+            <enchantment level="2">projectile_protection</enchantment>
         </leggings>
         <boots unbreakable="true" material="iron boots"/>
-        <effect duration="5" amplifier="10">damage resistance</effect>
-        <game-mode>adventure</game-mode>
+        <effect duration="4" amplifier="255">resistance</effect>
     </kit>
     <kit id="flag-pickup" force="true">
-        <effect duration="1" amplifier="2">absorption</effect>
-        <effect duration="200" amplifier="1">slowness</effect>
-        <game-mode>adventure</game-mode>
+        <effect>slowness</effect>
     </kit>
-    <kit id="reset-pickup" force="true">
-        <effect duration="0" amplifier="1">slowness</effect>
-        <game-mode>adventure</game-mode>
+    <kit id="flag-dropped" force="true">
+        <effect duration="0" amplifier="0">slowness</effect>
+    </kit>
+    <kit id="flag-captured" force="true">
+        <effect duration="2" amplifier="10">regeneration</effect>
     </kit>
 </kits>
-<!--SPAWNS-->
 <spawns>
     <default>
         <region yaw="90">
-            <cylinder base="130.5,57,31.5" height="1" radius="0.5"/>
+            <point>130.5,57,31.5</point>
         </region>
     </default>
     <spawn team="blue" kit="spawn-kit">
         <region yaw="180">
-            <cylinder base="132.5,18,100.5" height="0" radius="0.5"/>
+            <point>132.5,18,100.5</point>
         </region>
     </spawn>
     <spawn team="red" kit="spawn-kit">
         <region yaw="0">
-            <cylinder base="128.5,18,-37.5" height="0" radius="0.5"/>
+            <point>128.5,18,-37.5</point>
         </region>
     </spawn>
 </spawns>
 <filters>
-    <team id="only-blue">blue</team>
-    <team id="only-red">red</team>
+    <time id="flag-respawns">0</time>
+    <all id="blue-captures-flag">
+        <team id="only-blue">blue</team>
+        <any>
+            <carrying-flag>left-red-flag</carrying-flag>
+            <carrying-flag>right-red-flag</carrying-flag>
+        </any>
+    </all>
+    <all id="red-captures-flag">
+        <team id="only-red">red</team>
+        <any>
+            <carrying-flag>left-blue-flag</carrying-flag>
+            <carrying-flag>right-blue-flag</carrying-flag>
+        </any>
+    </all>
 </filters>
-<!--Flags-->
-<flags>
-    <!--red team flags-->
-    <!--Hard flag-->
-    <flag id="red-flag1" name="Right Flag" owner="red" color="red"
-      pickup-filter="only-blue" recover-time="15s" respawn-time="15s"
-      pickup-kit="flag-pickup" drop-kit="reset-pickup">
-        <post yaw="0">156,14,-15</post>
-        <net points="1">
-            <region>
-                <cylinder base="135.5,7,78.5" radius="4" height="2"/>
-            </region>
-            <capture-filter>
-                <not>
-                    <flag-carried>blue-flag1</flag-carried>
-                </not>
-            </capture-filter>
-        </net>
+<regions>
+    <cylinder id="blue-flag-reward" base="138.5,7,78.5" radius="4.5" height="2"/>
+    <cylinder id="blue-net" base="138.5,7,78.5" radius="4" height="2"/>
+    <cylinder id="red-flag-reward" base="122.5,7,-15.5" radius="4.5" height="2"/>
+    <cylinder id="red-net" base="122.5,7,-15.5" radius="4" height="2"/>
+    <apply kit="flag-captured" filter="blue-captures-flag" region="blue-flag-reward"/>
+    <apply kit="flag-captured" filter="red-captures-flag" region="red-flag-reward"/>
+    <apply block="never" use="never"/>
+</regions>
+<flags flag-proximity-metric="none" net-proximity-metric="none">
+    <flag id="left-blue-flag"
+          name="Left Blue Flag"
+          owner="blue"
+          pickup-kit="flag-pickup"
+          drop-kit="flag-dropped">
+        <post pickup-filter="only-red" recover-time="15s" respawn-time="10s">150,14,72</post>
     </flag>
-    <!--easy flag-->
-    <flag id="red-flag2" name="Left Flag" owner="red" color="red"
-      pickup-filter="only-blue" recover-time="15s" respawn-time="15s"
-       pickup-kit="flag-pickup" drop-kit="reset-pickup">
-        <post yaw="0">110,14,-10</post>
-        <net points="1">
-            <region>
-                <cylinder base="135.5,7,78.5" radius="4" height="2"/>
-            </region>
-            <capture-filter>
-                <not>
-                    <flag-carried>blue-flag2</flag-carried>
-                </not>
-            </capture-filter>
-        </net>
+    <flag id="right-blue-flag"
+          name="Right Blue Flag"
+          owner="blue"
+          pickup-kit="flag-pickup"
+          drop-kit="flag-dropped">
+        <post pickup-filter="only-red" recover-time="15s" respawn-time="10s">104,14,77</post>
     </flag>
-    <!--Blue team flags-->
-    <!--hard flag-->
-    <flag id="blue-flag1" name="Right Flag" owner="blue" color="blue"
-      pickup-filter="only-red" 
-     pickup-kit="flag-pickup" drop-kit="reset-pickup">
-        <post yaw="180">104,14,77</post>
-        <net points="1">
-            <region>
-                <cylinder base="125.5,7,-15.5" radius="4" height="2"/>
-            </region>
-            <capture-filter>
-                <not>
-                    <flag-carried>red-flag1</flag-carried>
-                </not>
-            </capture-filter>
-        </net>
+    <flag id="left-red-flag"
+          name="Left Red Flag"
+          owner="red"
+          pickup-kit="flag-pickup"
+          drop-kit="flag-dropped">
+        <post pickup-filter="only-blue" recover-time="15s" respawn-time="10s">110,14,-10</post>
     </flag>
-    <!--Easy Flag-->
-    <flag id="blue-flag2" name="Left Flag" owner="blue" color="blue"
-        pickup-filter="only-red" recover-time="15s" respawn-time="15s"
-        pickup-kit="flag-pickup" drop-kit="reset-pickup">
-        <post yaw="180">150,14,72</post>
-        <net points="1">
-            <region>
-                <cylinder base="125.5,7,-15.5" radius="4" height="2"/>
-            </region>
-            <capture-filter>
-                <not>
-                <flag-carried>red-flag2</flag-carried>
-                </not>
-            </capture-filter>
-        </net>
+    <flag id="right-red-flag"
+          name="Right Red Flag"
+          owner="red"
+          pickup-kit="flag-pickup"
+          drop-kit="flag-dropped">
+        <post pickup-filter="only-blue" recover-time="15s" respawn-time="10s">156,14,-15</post>
     </flag>
+    <flags points="1">
+        <net region="blue-net" flag="left-red-flag right-red-flag" respawn-filter="flag-respawns"/>
+        <net region="red-net" flag="left-blue-flag right-blue-flag" respawn-filter="flag-respawns"/>
+    </flags>
 </flags>
 <score>
-    <mercy>5</mercy>
+    <mercy>4</mercy>
 </score>
 <spawners>
     <spawner id="gapple-spawner" delay="8s">
@@ -168,7 +153,7 @@
 </itemkeep>
 <kill-reward>
     <item material="golden apple"/>
-    <item amount="8" material="arrow"/>
+    <item amount="10" material="arrow"/>
 </kill-reward>
 <hunger>
     <depletion>off</depletion>
