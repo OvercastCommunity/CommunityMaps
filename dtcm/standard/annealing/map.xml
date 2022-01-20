@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <map proto="1.4.0">
 <name>Annealing</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <objective>Destroy the monument!</objective>
 <gamemode>dtm</gamemode>
 <created>2021-01-20</created>
@@ -70,10 +70,19 @@
             <void/>
         </not>
     </any>
-    <material id="only-gold">gold block</material>
-    <deny id="deny-flower-pot">
-        <material>flower pot</material>
+    <deny id="deny-use-spawn-filter">
+        <any>
+            <material>flower pot</material>
+            <material>bucket</material>
+            <material>cauldron</material>
+        </any>
     </deny>
+    <kill-streak id="4-streak-filter" count="3"/>
+    <all id="only-gold-cause-world">
+        <material id="only-gold">gold block</material>
+        <cause>world</cause>
+    </all>
+    <material id="only-air">air</material>
 </filters>
 <regions>
     <cylinder id="blue-spawn-point" base="-44,14.5,-9" radius="0" height="0"/>
@@ -90,13 +99,17 @@
     <negative id="not-build-area">
         <rectangle id="build-area" min="-24,-21" max="24,21"/>
     </negative>
+    <union id="gold-regen">
+        <cuboid min="-52,14,-25" max="-38,18,-24"/> <!-- blue gold -->
+        <cuboid min="52,14,25" max="38,18,24"/> <!-- red gold -->
+    </union>
     <!-- applicators -->
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
-    <apply block-break="only-gold" block-place="never" region="spawns" message="You may not edit spawn!"/>
+    <apply block-break="only-gold" block-place="only-gold-cause-world" region="spawns" message="You may not edit spawn!"/>
     <apply block-place="block-place-void-filter" block-break="block-break-void-filter" region="not-build-area" message="You may not edit the void!"/>
     <apply kit="reset-resitance-kit" region="not-spawns"/>
-    <apply use="deny-flower-pot" region="spawns"/>
+    <apply use="deny-use-spawn-filter" region="spawns"/>
 </regions>
 <itemkeep>
     <item>iron sword</item>
@@ -118,6 +131,15 @@
     <item>leather boots</item>
     <item>stone</item>
     <item>emerald block</item>
+    <item>snowball</item>
+    <item>dirt</item>
+    <item>long grass</item>
+    <item>seeds</item>
+    <item>red rose</item>
+    <item>stained clay:9</item>
+    <item>cobblestone</item>
+    <item>step</item>
+    <item>quartz block</item>
 </itemremove>
 <toolrepair>
     <tool>iron sword</tool>
@@ -145,9 +167,10 @@
 </item-mods>
 <crafting>
     <disable>gold nugget</disable>
+    <disable>bucket</disable>
     <!-- bulkcrafting -->
     <shaped override="false">
-        <result material="iron helmet" amount="9"/>
+        <result material="gold helmet" amount="9"/>
         <shape>
             <row>III</row>
             <row>I.I</row>
@@ -155,7 +178,7 @@
         <ingredient symbol="I">gold block</ingredient>
     </shaped>
     <shaped override="false">
-        <result material="iron chestplate" amount="9"/>
+        <result material="gold chestplate" amount="9"/>
         <shape>
             <row>I.I</row>
             <row>III</row>
@@ -164,7 +187,7 @@
         <ingredient symbol="I">gold block</ingredient>
     </shaped>
     <shaped override="false">
-        <result material="iron leggings" amount="9"/>
+        <result material="gold leggings" amount="9"/>
         <shape>
             <row>III</row>
             <row>I.I</row>
@@ -173,18 +196,24 @@
         <ingredient symbol="I">gold block</ingredient>
     </shaped>
     <shaped override="false">
-        <result material="bucket" amount="9"/>
+        <result material="gold boots" amount="9"/>
         <shape>
             <row>I.I</row>
-            <row>.I.</row>
+            <row>I.I</row>
         </shape>
         <ingredient symbol="I">gold block</ingredient>
     </shaped>
 </crafting>
+<renewables>
+    <renewable rate="5" sound="false" region="gold-regen" renew-filter="only-gold" replace-filter="only-air" avoid-players="3"/>
+</renewables>
+<tnt>
+    <instantignite>on</instantignite>
+</tnt>
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<maxbuildheight>30</maxbuildheight>
+<maxbuildheight>25</maxbuildheight>
 <kill-rewards>
     <kill-reward>
         <item material="golden apple" amount="1"/>
@@ -195,6 +224,9 @@
     </kill-reward>
     <kill-reward filter="only-red">
         <item material="stained clay" damage="14" amount="48"/>
+    </kill-reward>
+    <kill-reward filter="4-streak-filter">
+        <item material="tnt" amount="2"/>
     </kill-reward>
 </kill-rewards>
 </map>
