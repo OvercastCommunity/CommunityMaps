@@ -1,0 +1,158 @@
+<map proto="1.4.2">
+<name>Bob-Omb Battlefield</name>
+<version>1.0</version>
+<objective>Kill enemies for stars, drop into the pipe with them for points!</objective>
+<gamemode>scorebox</gamemode>
+<authors>
+    <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4"/> <!-- Cazadorian/dragonstomper64 -->
+</authors>
+<rules>
+    <rule>The cannons to the scorebox open every 30 seconds!.</rule>
+</rules>
+<broadcasts>
+    <alert after="1s" every="3m">Nether Stars are awarded on kill, land in the Scorebox Pipe with Nether Stars to score points!</alert>
+    <tip after="2s">The cannons to the Scorebox Pipe reopen every 30 seconds.</tip>
+    <tip after="30s" every="120s">The cannons to the Scorebox Pipe are open! Jumping into the Scorebox Pipe with Nether Stars is the only way to score.</tip>
+</broadcasts>
+<teams>
+    <team id="yellow" color="yellow" max="20">Yellow</team>
+    <team id="red" color="dark red" max="20">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" material="golden apple"/>
+        <item slot="8" amount="16" material="arrow"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="3">projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" material="iron boots">
+            <enchantment>feather_falling</enchantment>
+        </boots>
+        <effect duration="2">instant_health</effect>
+    </kit>
+    <kit id="score-heal" force="true">
+        <effect duration="2s" amplifier="10">regeneration</effect>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <region yaw="90">
+            <point>0.5,105,-19.5</point>
+        </region>
+    </default>
+    <spawn team="yellow" kit="spawn-kit" yaw="90" region="yellow-spawn"/>
+    <spawn team="red" kit="spawn-kit" yaw="-90" region="red-spawn"/>
+</spawns>
+<filters>
+    <team id="only-yellow">yellow</team>
+    <team id="only-red">red</team>
+</filters>
+<regions>
+    <point id="yellow-spawn">47.5,65,-19.5</point>
+    <point id="red-spawn">-46.5,65,-19.5</point>
+    <cuboid id="gold-apple-north" min="-0.5,64.5,-27.5" max="1.5,66.5,-25.5"/>
+    <cuboid id="gold-apple-south" min="-0.5,64.5,-13.5" max="1.5,66.5,-11.5"/>
+    <cuboid id="arrow-north" min="1.5,69.5,-30.5" max="-0.5,71.5,-32.5"/>
+    <cuboid id="arrow-south" min="1.5,69.5,-6.5" max="-0.5,71.5,-8.5"/>
+    <cylinder id="score-box" base="0.5,60,-19.5" radius="4" height="3"/>
+    <union id="jump-pads">
+        <cuboid id="north-cannon" min="-1,80,-44" max="2,82,-43"/> <!-- +x -->
+        <cuboid id="south-cannon" min="-1,80,4" max="2,82,5"/> <!-- -z -->
+        <cuboid id="north-tunnel" min="-1,70,-60.5" max="2,72,-62"/> <!-- +y -->
+        <cuboid id="south-tunnel" min="-1,70,21.5" max="2,72,32"/> <!-- +y -->
+    </union>
+    <apply velocity="@0,1.5,5" region="north-cannon"/>
+    <apply velocity="@0,1.5,-5" region="south-cannon"/>
+    <apply velocity="@0,1.2,0" region="north-tunnel"/>
+    <apply velocity="@0,1.2,0" region="south-tunnel"/>
+    <apply kit="score-heal" region="score-box"/>
+    <apply block="never" region="everywhere"/>
+</regions>
+<time result="score">10m</time>
+<score>
+    <box region="score-box">
+        <redeemables>
+            <item points="1">nether star</item>
+        </redeemables>
+    </box>
+</score>
+<portals>
+    <portal filter="only-yellow" yaw="@90" region="score-box" destination="yellow-spawn"/>
+    <portal filter="only-red" yaw="@-90" region="score-box" destination="red-spawn"/>
+</portals>
+<spawners>
+    <spawner spawn-region="gold-apple-north" player-region="gold-apple-north" delay="5s">
+        <item amount="1" material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gold-apple-south" player-region="gold-apple-south" delay="5s">
+        <item amount="1" material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="arrow-north" player-region="arrow-north" delay="2s">
+        <item amount="4" material="arrow"/>
+    </spawner>
+    <spawner spawn-region="arrow-south" player-region="arrow-south" delay="2s">
+        <item amount="4" material="arrow"/>
+    </spawner>
+</spawners>
+<destroyables show="false" required="false" mode-changes="true">
+    <destroyable name="north-cannon" owner="red" materials="iron block">
+        <region><cuboid min="2,79,-54" max="-1,81,-53"/></region>
+    </destroyable>
+    <destroyable name="south-cannon" owner="red" materials="iron block">
+        <region><cuboid min="2,79,15" max="-1,81,14"/></region>
+    </destroyable>
+</destroyables>
+<modes>
+    <!-- 10 minutes = 600 seconds No need for final iron mode as the match would be over -->
+    <mode after="1s" material="iron block"/>
+    <mode after="30s"  show-before="6" name="Scorebox platform opening" material="air"/>
+    <mode after="60s"  show-before="6" name="Scorebox platform closing" material="iron block"/>
+    <mode after="90s"  show-before="6" name="Scorebox platform opening" material="air"/>
+    <mode after="120s" show-before="6" name="Scorebox platform closing" material="iron block"/>
+    <mode after="150s" show-before="6" name="Scorebox platform opening" material="air"/>
+    <mode after="180s" show-before="6" name="Scorebox platform closing" material="iron block"/>
+    <mode after="210s" show-before="6" name="Scorebox platform opening" material="air"/>
+    <mode after="240s" show-before="6" name="Scorebox platform closing" material="iron block"/>
+    <mode after="270s" show-before="6" name="Scorebox platform opening" material="air"/>
+    <mode after="300s" show-before="6" name="Scorebox platform closing" material="iron block"/>
+    <mode after="330s" show-before="6" name="Scorebox platform opening" material="air"/>
+    <mode after="360s" show-before="6" name="Scorebox platform closing" material="iron block"/>
+    <mode after="390s" show-before="6" name="Scorebox platform opening" material="air"/>
+    <mode after="420s" show-before="6" name="Scorebox platform closing" material="iron block"/>
+    <mode after="450s" show-before="6" name="Scorebox platform opening" material="air"/>
+    <mode after="480s" show-before="6" name="Scorebox platform closing" material="iron block"/>
+    <mode after="510s" show-before="6" name="Scorebox platform opening" material="air"/>
+    <mode after="540s" show-before="6" name="Scorebox platform closing" material="iron block"/>
+    <mode after="570s" show-before="6" name="Scorebox platform opening" material="air"/>
+</modes>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+</itemremove>
+<itemkeep>
+    <item>arrow</item>
+    <item>golden apple</item>
+</itemkeep>
+<kill-reward>
+    <item amount="8" material="arrow"/>
+    <item material="golden apple"/>
+    <item material="nether star"/>
+</kill-reward>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<world>
+    <timeset>6000</timeset>
+</world>
+</map>
