@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+<map proto="1.4.0">
+<name>Exogrid</name>
+<version>1.0.0</version>
+<objective>Capture the wool!</objective>
+<gamemode>ctw</gamemode>
+<created>2022-03-12</created>
+<authors>
+    <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
+    <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e"/> <!-- Mewzzy -->
+    <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
+</authors>
+<contributors>
+    <contributor uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30" contribution="xml"/> <!-- Ruediger_LP -->
+</contributors>
+<teams>
+    <team id="blue-team" color="blue" max="8">Blue</team>
+    <team id="red-team" color="red" max="8">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" enchantment="infinity" unbreakable="true"/>
+        <item slot="2" material="iron pickaxe" enchantment="dig speed" unbreakable="true"/>
+        <item slot="3" material="iron axe" enchantment="dig speed:2" unbreakable="true"/>
+        <item slot="4" material="wood" damage="2" amount="64"/>
+        <item slot="5" material="glass" amount="32"/>
+        <item slot="6" material="bucket"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <item slot="30" material="iron spade" enchantment="dig speed" unbreakable="true"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" enchantment="protection projectile:2" unbreakable="true"/>
+        <leggings material="chainmail leggings" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <effect duration="oo" amplifier="100">damage resistance</effect>
+    </kit>
+    <kit force="true" id="reset-resistance-kit">
+        <effect duration="0" amplifier="0">damage resistance</effect>
+    </kit>
+</kits>
+<spawns>
+    <spawn team="blue-team" kit="spawn-kit" yaw="0" region="blue-spawn-point"/>
+    <spawn team="red-team" kit="spawn-kit" yaw="180" region="red-spawn-point"/>
+    <default yaw="-90" region="obs-spawn-point"/>
+</spawns>
+<wools craftable="false">
+    <wool team="blue-team" color="red" monument="blue-team-red-wool" location="18.5,14,33.5"/>
+    <wool team="red-team" color="blue" monument="red-team-blue-wool" location="-17.5,14,-32.5"/>
+</wools>
+<filters>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <not id="not-void">
+        <void/>
+    </not>
+    <all id="reds-woolroom-filter">
+        <team>blue-team</team>
+        <filter id="woolroom-filter"/>
+    </all>
+    <all id="blues-woolroom-filter">
+        <team>red-team</team>
+        <filter id="woolroom-filter"/>
+    </all>
+    <any id="woolroom-filter">
+        <material>stained glass pane:11</material>
+        <material>stained glass pane:14</material>
+        <material>wood:2</material>
+        <material>glass</material>
+        <all>
+            <cause>player</cause>
+            <any>
+                <material>stationary water</material>
+                <material>water</material>
+            </any>
+        </all>
+    </any>
+    <deny id="deny-redstone">
+        <material>redstone wire</material>
+    </deny>
+</filters>
+<regions>
+    <cylinder id="blue-spawn-point" base="6.5,8,-37.5" radius="0" height="0"/>
+    <cylinder id="red-spawn-point" base="-5.5,8,38.5" radius="0" height="0"/>
+    <cylinder id="obs-spawn-point" base="-32.5,19,0.5" radius="2" height="0"/>
+    <block id="blue-team-red-wool">6,9,-40</block>
+    <block id="red-team-blue-wool">-6,9,40</block>
+    <negative id="not-spawns">
+        <union id="spawns">
+            <rectangle id="blue-spawn" min="2,-42" max="11,-33"/>
+            <rectangle id="red-spawn" min="-10,34" max="-1,43"/>
+        </union>
+    </negative>
+    <union id="woolrooms">
+        <rectangle id="blues-woolroom" min="-20,-35" max="-14,-29"/> <!-- blue defends / red attacks -->
+        <rectangle id="reds-woolroom" min="15,30" max="21,36"/> <!-- red defends / blue attacks -->
+    </union>
+    <negative id="not-build-area">
+        <rectangle id="build-area" min="-14,-18" max="15,19"/> <!-- mid -->
+    </negative>
+    <!-- applicators -->
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-red" region="blues-woolroom" message="You may not enter your own wool room!"/>
+    <apply enter="only-blue" region="reds-woolroom" message="You may not enter your own wool room!"/>
+    <apply block="never" region="spawns" message="You may not edit spawn!"/>
+    <apply block="blues-woolroom-filter" region="blues-woolroom" message="You may not edit the wool room!"/>
+    <apply block="reds-woolroom-filter" region="reds-woolroom" message="You may not edit the wool room!"/>
+    <apply block="not-void" region="not-build-area" message="You may not edit the void!"/>
+    <apply kit="reset-resistance-kit" region="not-spawns"/>
+    <apply block-physics="deny-redstone" region="woolrooms"/>
+</regions>
+<itemkeep>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>arrow</item>
+    <item>iron spade</item>
+    <item>wood</item>
+    <item>glass</item>
+    <item>bucket</item>
+    <item>water bucket</item>
+    <item>golden apple</item>
+</itemkeep>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>stone</item>
+</itemremove>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>arrow</tool>
+    <tool>iron spade</tool>
+</toolrepair>
+<crafting>
+    <shaped override="false">
+        <result material="leather helmet" color="F1C40F" unbreakable="true" enchantment="oxygen" show-enchantments="false" show-color="false" name="`r`eRuediger's Helmet" lore="`r`7forged by the xml author :)|`r`e`k∞`r`bRuediger_LP`r: hi!"/>
+        <shape>
+            <row>WWW</row>
+            <row>W.W</row>
+        </shape>
+        <ingredient symbol="W">wood:2</ingredient>
+    </shaped>
+</crafting>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>18</maxbuildheight>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item material="wood" damage="2" amount="16"/>
+        <item material="glass" amount="8"/>
+    </kill-reward>
+</kill-rewards>
+</map>
