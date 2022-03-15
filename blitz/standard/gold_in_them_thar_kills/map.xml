@@ -1,15 +1,16 @@
 <map proto="1.4.2">
 <name>Gold in Them Thar Kills</name>
-<version>1.1</version>
+<version>1.2</version>
 <objective>Destroy the enemy team's monuments and then eliminate them!</objective>
 <gamemode>dtm</gamemode>
 <gamemode>blitz</gamemode>
+<time>20m</time>
 <authors>
     <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Map building, theming, concept, XML, etc"/> <!-- Cazadorian -->
     <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa" contribution="Map building"/> <!-- lunaceee -->
 </authors>
 <broadcasts>
-    <alert after="1s" every="3m">If a team's monument is destroyed they are no longer able to respawn, last team standing wins!</alert>
+    <alert after="1s" every="3m">If a team's monument is destroyed they are no longer able to respawn but receive potion buffs, last team standing wins!</alert>
 </broadcasts>
 <teams>
     <team id="blue" color="blue" max="8">Blue</team>
@@ -24,16 +25,23 @@
         <item slot="1" unbreakable="true" material="bow"/>
         <item slot="2" unbreakable="true" material="stone pickaxe"/>
         <item slot="3" unbreakable="true" material="stone axe"/>
-        <item slot="4" amount="64" material="wood"/>
+        <item slot="4" unbreakable="true" material="stone spade"/>
+        <item slot="5" amount="64" material="wood"/>
         <item slot="28" amount="64" material="wood"/>
         <item slot="7" amount="32" material="arrow"/>
         <item slot="8" material="golden apple"/>
         <effect duration="4" amplifier="255">damage resistance</effect>
+        <effect amplifier="1">night vision</effect>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
         <leggings unbreakable="true" team-color="true" material="leather leggings"/>
         <boots material="leather boots" team-color="true" unbreakable="true"/>
     </kit>
+    <kit id="blitz-buff">
+        <effect amplifier="1">strength</effect>
+        <effect amplifier="1">fast digging</effect>
+    </kit>
+    <give kit="blitz-buff" filter="mon-destroyed"/>
 </kits>
 <spawns>
     <default yaw="0">
@@ -114,9 +122,9 @@
         <rectangle id="green-lane" min="59,-2" max="37,5"/> 
         <rectangle id="yellow-lane" min="-36,-2" max="-58,5"/>  
     </union>
-    <union id="gapple-spawner">
-      <cylinder id="gapple" base="0.5,10,1.5" height="5" radius="5"/>
-      <point id="gapple-point">0.5,10,1.5</point>
+    <union id="diamond-spawner">
+      <cylinder id="diamond" base="0.5,10,1.5" height="5" radius="5"/>
+      <point id="diamond-point">0.5,10,1.5</point>
     </union>
     <union id="nw-iron-spawner">
       <rectangle id="nw-iron" min="-50.5,-28.5" max="-29.5,-49.5"/>
@@ -135,7 +143,7 @@
       <point id="se-iron-point">42.5,11,43.5</point>
     </union>
     <union id="spawner-prot">
-      <cuboid id="gap-prot" min="0.5,9,-0.5" max="-0.5,11,1.5"/>
+      <cuboid id="dia-prot" min="0.5,9,-0.5" max="-0.5,11,1.5"/>
       <cuboid id="nw-prot" min="-42,10,-40" max="-41,12,-41"/>
       <cuboid id="ne-prot" min="42,10,-40" max="43,12,-41"/>
       <cuboid id="sw-prot" min="-42,10,43" max="-41,12,44"/>
@@ -149,17 +157,13 @@
         <circle id="middle" center="0.5,1.5" radius="25"/>
         <region id="mid-lanes"/>
     </complement>
-    <apply enter="only-blue" region="blue-protection" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-red" region="red-protection" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-green" region="green-protection" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-yellow" region="yellow-protection" message="You may not enter the opponent's spawn!"/>
     <apply block="deny-void" region="void-area" message="You may not build in the void area!"/>
     <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
     <apply block="never" region="spawner-prot" message="You may not break the spawner!"/>
 </regions>
 <spawners>
-    <spawner player-region="gapple-spawner" spawn-region="gapple-point" delay="6s">
-        <item material="golden apple"/>
+    <spawner player-region="diamond-spawner" spawn-region="diamond-point" delay="5s">
+        <item material="diamond"/>
     </spawner>
     <spawner player-region="nw-iron" spawn-region="nw-iron-point" delay="1s">
         <item material="iron ingot"/>
@@ -188,6 +192,12 @@
     <item>gold block</item>
     <item>coal block</item>
     <item>flint</item>
+    <item>sand</item>
+    <item>sandstone</item>
+    <item>gravel</item>
+    <item>step:1</item>
+    <item>log:1</item>
+    <item>stained clay</item>
 </itemremove>
 <block-drops>
     <rule>
@@ -222,7 +232,7 @@
     </destroyable>
 </destroyables>
 <modes>
-    <mode id="packed-ice-mode" show-before="15s" after="15m" material="packed ice" name="`6Packed Ice Mode"/>
+    <mode id="packed-ice-mode" show-before="15s" after="10m" material="packed ice" name="`6Packed Ice Mode"/>
 </modes>
 <itemkeep>
     <item>wood</item>
