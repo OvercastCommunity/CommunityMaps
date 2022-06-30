@@ -1,49 +1,37 @@
 <map proto="1.4.0">
 <name>Tulog</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <objective>Destroy the emerald Monument and obsidian Core!</objective>
+<gamemode>dtc</gamemode>
+<gamemode>dtm</gamemode>
 <authors>
     <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
     <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
     <author uuid="bd133f12-724a-4ca9-af7b-f808810aa835"/> <!-- ref -->
 </authors>
-<broadcasts>
-    <tip after="1s" every="120s">Use the water on the void as a guide to know where to build!</tip>
-</broadcasts>
 <teams>
-    <team id="blue" color="blue" max="16">Blue</team>
-    <team id="red" color="dark red" max="16">Red</team>
+    <team id="blue-team" color="blue" max="16">Blue</team>
+    <team id="red-team" color="dark red" max="16">Red</team>
 </teams>
 <kits>
-    <!--PARENT SPAWN KIT-->
     <kit id="spawn-kit">
         <clear/>
-        <item slot="0" unbreakable="true" material="iron sword"/>
-        <item slot="1" unbreakable="true" material="bow">
-            <enchantment>infinity</enchantment>
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true">
+            <enchantment>arrow infinite</enchantment>
         </item>
+        <item slot="2" material="diamond pickaxe" unbreakable="true"/>
+        <item slot="3" material="iron axe" unbreakable="true"/>
+        <item slot="4" material="wood" amount="64"/>
+        <item slot="5" material="wood" amount="64"/>
+        <item slot="6" material="glass" amount="32"/>
+        <item slot="8" material="golden apple"/>
         <item slot="28" material="arrow"/>
-        <item slot="2" unbreakable="true" material="diamond pickaxe"/>
-        <item slot="3" unbreakable="true" material="iron axe"/>
-        <item slot="4" amount="64" material="wood"/>
-        <item slot="5" amount="64" material="wood"/>
-        <item slot="6" amount="32" material="glass"/>
-        <item slot="7" material="golden apple"/>
-        <item slot="8" amount="64" material="cooked beef"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true">
+            <enchantment>protection projectile</enchantment>
+        </chestplate>
         <effect duration="2" amplifier="10">damage resistance</effect>
-    </kit>
-    <!--BLUE AND RED SPAWN KIT-->
-    <kit id="blue-kit" parents="spawn-kit">
-        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
-        <chestplate unbreakable="true" team-color="true" material="leather chestplate">
-            <enchantment>projectile_protection</enchantment>
-        </chestplate>
-    </kit>
-    <kit id="red-kit" parents="spawn-kit">
-        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
-        <chestplate unbreakable="true" team-color="true" material="leather chestplate">
-            <enchantment>projectile_protection</enchantment>
-        </chestplate>
     </kit>
 </kits>
 <spawns>
@@ -52,41 +40,64 @@
             <cylinder base="4.5,9,1.5" height="1" radius="1"/>
         </region>
     </default>
-    <spawn team="blue" kit="blue-kit">
+    <spawn team="blue-team" kit="spawn-kit">
         <region yaw="-90">
             <cylinder base="-78.5,15,-8.5" height="0" radius="0.5"/>
         </region>
     </spawn>
-    <spawn team="red" kit="red-kit">
+    <spawn team="red-team" kit="spawn-kit">
         <region yaw="90">
             <cylinder base="87.5,15,11.5" height="0" radius="0.5"/>
         </region>
     </spawn>
 </spawns>
+<destroyables name="Monument" materials="emerald block" completion="100%" required="true">
+    <destroyable owner="blue-team">
+        <region>
+            <cuboid min="-54.5,13,27.5" max="-62.5,29,35.5"/>
+        </region>
+    </destroyable>
+    <destroyable owner="red-team">
+        <region>
+            <cuboid min="63.5,13,-24.5" max="71.5,27,-32.5"/>
+        </region>
+    </destroyable>
+</destroyables>
+<cores material="obsidian" leak="3" modes="gold-mode glass-mode">
+    <core team="blue-team">
+        <region>
+            <cuboid min="-39.5,19,-52.5" max="-48.5,26,-61.5"/>
+        </region>
+    </core>
+    <core team="red-team">
+        <region>
+            <cuboid min="48.5,19,55.5" max="58.5,26,65.5"/>
+        </region>
+    </core>
+</cores>
+<modes>
+    <mode id="gold-mode" after="15m" material="gold block" name="`6Gold Mode"/>
+    <mode id="glass-mode" after="25m" material="glass" name="`fGlass Mode"/>
+</modes>
 <filters>
-    <not id="deny-void">
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <not id="not-void">
         <void/>
     </not>
-
     <deny id="deny-players">
         <participating/>
     </deny>
     <material id="only-coal">coal block</material>
     <material id="only-iron">iron block</material>
-    <team id="only-blue">blue</team>
-    <team id="only-red">red</team>
 </filters>
 <regions>
-    <complement id="void-area">
-        <everywhere/>
-        <!--Blue side-->
-        <rectangle min="-29.5,-24.5" max="50.5,-40.5"/>
-        <!--red side-->
-        <rectangle min="38.5,27.5" max="-41.5,43.5"/>
-        <!--middle-->
-        <rectangle min="-3.5,25.5" max="12.5,-23.5"/>
+    <negative id="void-area">
+        <rectangle min="-29.5,-24.5" max="50.5,-40.5"/> <!-- blue side -->
+        <rectangle min="38.5,27.5" max="-41.5,43.5"/> <!-- red side -->
+        <rectangle min="-3.5,25.5" max="12.5,-23.5"/> <!-- mid -->
         <rectangle min="29.5,-8.5" max="-21.5,10.5"/>
-    </complement>
+    </negative>
     <union id="spawns">
         <rectangle id="red-spawn" min="70.5,21.5" max="92.5,-3.5"/>
         <rectangle id="blue-spawn" min="-61.5,-18.5" max="-84.5,6.5"/>
@@ -95,51 +106,29 @@
         <cuboid id="gapple" min="5.5,8,0.5" max="3.5,12,2.5"/>
         <point id="goldblock">4,8,1</point>
     </union>
-    <apply block-break="only-coal" block-place="deny-players" region="spawner" message="You may not place or break any blocks near the spawner!"/>
+    <!-- applicators -->
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the opponent's spawn!"/>
+    <apply block-break="only-coal" block-place="deny-players" region="spawner" message="You may not place or break any blocks near the spawner!"/>
     <apply block-break="only-iron" block-place="deny-players" region="spawns" message="You may not place or break blocks in spawn!"/>
-    <apply block="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block="not-void" region="void-area" message="You may not build in the void area!"/>
 </regions>
-<destroyables name="Monument" materials="emerald block" completion="100%" required="true">
-    <destroyable owner="blue">
-        <region>
-            <cuboid min="-54.5,13,27.5" max="-62.5,29,35.5"/>
-        </region>
-    </destroyable>
-
-    <destroyable owner="red">
-        <region>
-            <cuboid min="63.5,13,-24.5" max="71.5,27,-32.5"/>
-        </region>
-    </destroyable>
-</destroyables>
-<modes>
-    <mode id="gold-mode" after="15m" material="gold block" name="`6Gold Mode"/>
-    <mode id="glass-mode" after="25m" material="glass" name="`fGlass Mode"/>
-</modes>
-<cores material="obsidian" leak="3">
-    <core team="blue" modes="gold-mode glass-mode">
-        <region>
-            <cuboid min="-39.5,19,-52.5" max="-48.5,26,-61.5"/>
-        </region>
-    </core>
-</cores>
-<cores material="obsidian" leak="3">
-    <core team="red" modes="gold-mode glass-mode">
-        <region>
-            <cuboid min="48.5,19,55.5" max="58.5,26,65.5"/>
-        </region>
-    </core>
-</cores>
 <spawners>
     <spawner player-region="spawner" spawn-region="goldblock" max-entities="50" min-delay="20s" max-delay="30s">
         <item material="golden apple"/>
     </spawner>
 </spawners>
-<renewables>
-    <renewable region="spawns" renew-filter="only-iron" rate="2" grow="false" particles="true" sound="true"/>
-</renewables>
+<itemkeep>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>iron spade</item>
+    <item>arrow</item>
+    <item>wood</item>
+    <item>glass</item>
+    <item>golden apple</item>
+</itemkeep>
 <toolrepair>
     <tool>stone sword</tool>
     <tool>bow</tool>
@@ -151,9 +140,6 @@
 <itemremove>
     <item>leather helmet</item>
     <item>leather chestplate</item>
-    <item>chainmail leggings</item>
-    <item>leather boots</item>
-    <item>cooked beef</item>
     <item>redstone</item>
     <item>emerald block</item>
 </itemremove>
@@ -167,17 +153,37 @@
         </drops>
     </rule>
 </block-drops>
-<itemkeep>
-    <item>wood</item>
-    <item>glass</item>
-    <item>golden apple</item>
-</itemkeep>
+<item-mods>
+    <rule>
+        <match>
+            <material>iron helmet</material>
+            <material>iron chestplate</material>
+            <material>iron leggings</material>
+            <material>iron boots</material>
+            <material>iron sword</material>
+            <material>iron pickaxe</material>
+            <material>iron axe</material>
+            <material>iron spade</material>
+            <material>shears</material>
+        </match>
+        <modify unbreakable="true"/>
+    </rule>
+</item-mods>
+<renewables>
+    <renewable region="spawns" renew-filter="only-iron" rate="2" grow="false" particles="true" sound="true"/>
+</renewables>
+<broadcasts>
+    <tip after="1s" every="120s">Use the water on the void as a guide to know where to build!</tip>
+</broadcasts>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>32</maxbuildheight>
 <kill-rewards>
     <kill-reward>
-        <item amount="8" material="wood"/>
-        <item amount="8" material="glass"/>
+        <item material="wood" amount="8"/>
+        <item material="glass" amount="8"/>
         <item material="golden apple"/>
     </kill-reward>
 </kill-rewards>
-<maxbuildheight>32</maxbuildheight>
 </map>
