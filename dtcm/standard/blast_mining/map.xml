@@ -1,14 +1,15 @@
+<?xml version="1.0"?>
 <map proto="1.4.0">
 <name>Blast Mining</name>
-<version>1.2.1</version>
+<version>1.2.2</version>
 <objective>Blast your way through the map to destroy the enemy's monument!</objective>
 <authors>
     <author uuid="a1e6faac-7bfa-4f5c-b5df-06942518d218"/> <!-- EpicPuppy613 -->
 </authors>
 <gamemode>dtm</gamemode>
 <teams>
-    <team id="blue-team" color="blue" overhead-color="blue" max="20">Blue</team>
-    <team id="red-team" color="red" overhead-color="red" max="20">Red</team>
+    <team id="blue-team" color="blue" max="20">Blue</team>
+    <team id="red-team" color="red" max="20">Red</team>
 </teams>
 <spawns>
     <default>
@@ -61,7 +62,7 @@
     <boots material="leather boots" color="cd0000" locked="true" unbreakable="true"/>
 </kit>
 </kits>
-<destroyables materials="gold block;log;glass">
+<destroyables materials="gold block">
     <destroyable name="South Monument" owner="blue-team">
         <region>
             <cuboid min="-62,58,17" max="-53,64,24"/>
@@ -84,18 +85,8 @@
     </destroyable>
 </destroyables>
 <filters>
-    <any id="monument-blocks">
-        <material>gold block</material>
-        <material>log</material>
-        <material>glass</material>
-    </any>
-    <any id="mine-blocks">
-        <material>stone</material>
-        <material>cobblestone</material>
-        <material>iron block</material>
-        <material>diamond ore</material>
-    </any>
-    <material id="tnt">tnt</material>
+    <material id="only-gold">gold block</material>
+    <material id="only-tnt">tnt</material>
 </filters>
 <regions>
     <union id="corridor-protection">
@@ -106,13 +97,9 @@
         <cuboid min="54,50,-32" max="66,72,33"/>
         <cuboid min="-65,50,-32" max="-53,72,33"/>
     </union>
-    <union id="mine-protection">
-        <cuboid min="76,57,-10" max="89,66,11"/>
-        <cuboid min="-88,57,-10" max="-75,66,11"/>
-    </union>
     <!-- applicators -->
     <apply block-break="never" block-place="never" region="corridor-protection" message="You may not edit the corridors!"/>
-    <apply block-break="monument-blocks" block-place="tnt" region="front-protection" message="You may only place TNT at the fronlines!"/>
+    <apply block-break="only-gold" block-place="only-tnt" region="front-protection" message="You may only place TNT at the fronlines!"/>
 </regions>
 <itemkeep>
     <item>iron sword</item>
@@ -133,24 +120,30 @@
     <item>stone</item>
     <item>gold block</item>
 </itemremove>
-<renewables>
-    <renewable rate="1.5" avoid-players="5" region="mine-protection" renew-filter="mine-blocks"/>
-</renewables>
+<block-drops>
+    <rule>
+        <filter>
+            <material>stained clay</material>
+        </filter>
+        <drops>
+            <item chance="0" material="stained clay"/>
+        </drops>
+    </rule>
+</block-drops>
 <disabledamage>
-    <damage ally="false">block explosion</damage>
+    <damage ally="false" self="true">block explosion</damage>
 </disabledamage>
 <tnt>
     <instantignite>true</instantignite>
     <fuse>2s</fuse>
-    <yield>1</yield>
+    <yield>0</yield>
 </tnt>
 <broadcasts>
-    <tip after="2s">There are 3 main areas to the spawn, iron mines, corridors, and frontlines</tip>
-    <alert after="4s">TNT explodes after 2 seconds (2x faster than normal)</alert>
-    <tip after="6s">The color of the terracotta in the blocks shows how close you are to the other side</tip>
-    <tip after="8s">You gain tnt on kill</tip>
-    <tip after="10s">A killstreak of 3 will upgrade your armor's blast protection</tip>
-    <tip after="10m" count="oo">The color of the terracotta in the blocks shows how close you are to the other side</tip>
+    <alert after="2s">TNT explodes after 2 seconds (2x faster than normal)</alert>
+    <tip after="4s">The color of the terracotta in the blocks shows how close you are to the other side</tip>
+    <tip after="6s">You gain tnt on kill</tip>
+    <tip after="8s">A killstreak of 3 will upgrade your armor's blast protection</tip>
+    <tip after="10m" count="oo">The color of the stained clay indicates how close you are to the other side</tip>
     <alert after="10m" count="oo">TNT explodes after 2 seconds (2x faster than normal)</alert>
 </broadcasts>
 <hunger>
