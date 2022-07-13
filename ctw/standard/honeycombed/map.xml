@@ -1,0 +1,225 @@
+<?xml version="1.0"?>
+<map proto="1.4.0">
+<name>Honeycombed</name>
+<version>1.0.2</version>
+<objective>Capture the wool!</objective>
+<gamemode>ctw</gamemode>
+<created>2022-03-14</created>
+<authors>
+    <author uuid="74271a2f-47c0-4bd7-9a9f-4dc7eaedabe0"/> <!-- killtrixy -->
+</authors>
+<contributors>
+    <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contributor="feedback"/> <!-- Cazadorian -->
+    <contributor uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30" contribution="xml"/> <!-- Ruediger_LP -->
+</contributors>
+<teams>
+    <team id="cyan-team" color="dark aqua" max="8">Cyan</team>
+    <team id="magenta-team" color="light purple" max="8">Magenta</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true" enchantment="arrow infinite"/>
+        <item slot="2" material="iron pickaxe" unbreakable="true"/>
+        <item slot="3" material="iron axe" unbreakable="true"/>
+        <item slot="4" material="leaves" amount="50"/>
+        <item slot="5" material="wood" damage="1" amount="20"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <item slot="29" material="shears" unbreakable="true"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+        <leggings material="leather leggings" team-color="true" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <effect duration="oo" amplifier="100">damage resistance</effect>
+    </kit>
+    <kit force="true" id="reset-resistance-kit">
+        <effect duration="0" amplifier="0">damage resistance</effect>
+    </kit>
+</kits>
+<spawns>
+    <spawn team="cyan-team" kit="spawn-kit" yaw="180" region="cyan-spawn-point"/>
+    <spawn team="magenta-team" kit="spawn-kit" yaw="0" region="magenta-spawn-point"/>
+    <default yaw="-145" region="obs-spawn-point"/>
+</spawns>
+<wools craftable="false">
+    <wool team="magenta-team" color="magenta" monument="magenta-team-magenta-wool" location="15.5,5.2,47.5"/>
+    <wool team="cyan-team" color="cyan" monument="cyan-team-cyan-wool" location="-14.5,5.2,-46.5"/>
+</wools>
+<filters>
+    <team id="only-cyan">cyan-team</team>
+    <team id="only-magenta">magenta-team</team>
+    <any id="block-break-void-filter">
+        <all>
+            <any>
+                <material>skull</material>
+            </any>
+            <void/>
+        </all>
+        <not id="block-place-void-filter">
+            <void/>
+        </not>
+    </any>
+    <all id="magentas-woolroom-filter">
+        <team>cyan-team</team>
+        <filter id="woolroom-filter"/>
+    </all>
+    <all id="cyans-woolroom-filter">
+        <team>magenta-team</team>
+        <filter id="woolroom-filter"/>
+    </all>
+    <any id="woolroom-filter">
+        <material>web</material>
+        <material>leaves</material>
+        <material>wood:1</material>
+    </any>
+    <all id="only-gold-cause-world">
+        <material id="only-gold">gold block</material>
+        <cause>world</cause>
+    </all>
+    <material id="only-air">air</material>
+    <deny id="deny-redstone">
+        <material>redstone wire</material>
+    </deny>
+    <all id="magentas-woolroom-use-filter">
+        <team>cyan-team</team>
+        <material>chest</material>
+    </all>
+    <all id="cyans-woolroom-use-filter">
+        <team>magenta-team</team>
+        <material>chest</material>
+    </all>
+</filters>
+<regions>
+    <cylinder id="cyan-spawn-point" base="43,2,35.5" radius="0" height="0"/>
+    <cylinder id="magenta-spawn-point" base="-42,2,-34.5" radius="0" height="0"/>
+    <cylinder id="obs-spawn-point" base="-21.5,9,21" radius="0" height="0"/>
+    <block id="cyan-team-cyan-wool">43,3,37</block>
+    <block id="magenta-team-magenta-wool">-43,3,-37</block>
+    <point id="cyan-wool-spawn">-14.5,5.2,-46.5</point>
+    <point id="magenta-wool-spawn">15.5,5.2,47.5</point>
+    <negative id="not-spawns">
+        <union id="spawns">
+            <union id="cyan-spawn">
+                <rectangle min="39,31" max="47,38"/>
+                <cuboid id="cyan-gold-regen" min="33,0,24" max="47,5,32"/>
+            </union>
+            <union id="magenta-spawn">
+                <rectangle min="-46,-37" max="-38,-30"/>
+                <cuboid id="magenta-gold-regen" min="-46,0,-31" max="-32,5,-23"/>
+            </union>
+        </union>
+    </negative>
+    <union id="woolrooms">
+        <rectangle id="cyans-woolroom" min="9,41" max="22,54"/> <!-- cyan defends / magenta attacks -->
+        <rectangle id="magentas-woolroom" min="-21,-53" max="-8,-40"/> <!-- magenta defends / cyan attacks -->
+    </union>
+    <negative id="not-build-area">
+        <union id="build-area">
+            <rectangle min="-13,-14" max="14,15"/> <!-- mid -->
+            <rectangle min="-18,-40" max="-11,-23"/> <!-- lane to cyan wool -->
+            <rectangle min="12,24" max="19,41"/> <!-- lane to magenta wool -->
+            <complement> <!-- cyan lane from spawn -->
+                <rectangle min="21,7" max="41,27"/>
+                <half origin="41,0,23" normal="1,0,-1"/> <!-- right / north/east -->
+                <half origin="32,0,27" normal="-1,0,1"/> <!-- left / south/west -->
+            </complement>
+            <complement> <!-- magenta lane from spawn -->
+                <rectangle min="-40,-26" max="-20,-6"/>
+                <half origin="-40,0,-22" normal="-1,0,1"/> <!-- right / south/west -->
+                <half origin="-31,0,-26" normal="1,0,-1"/> <!-- left / north/east -->
+            </complement>
+        </union>
+    </negative>
+    <union id="gold-regen">
+        <region id="cyan-gold-regen"/>
+        <region id="magenta-gold-regen"/>
+    </union>
+    <!-- applicators -->
+    <apply enter="only-cyan" region="cyan-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-magenta" region="magenta-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-magenta" region="cyans-woolroom" message="You may not enter your own wool room!"/>
+    <apply enter="only-cyan" region="magentas-woolroom" message="You may not enter your own wool room!"/>
+    <apply block-place="only-gold-cause-world" block-break="only-gold" region="spawns" message="You may not edit spawn!"/>
+    <apply block="cyans-woolroom-filter" region="cyans-woolroom" message="You may not edit the wool room!"/>
+    <apply block="magentas-woolroom-filter" region="magentas-woolroom" message="You may not edit the wool room!"/>
+    <apply block-place="block-place-void-filter" block-break="block-break-void-filter" region="not-build-area" message="You may not edit the void!"/>
+    <apply kit="reset-resistance-kit" region="not-spawns"/>
+    <apply block-physics="deny-redstone" region="woolrooms"/>
+    <apply use="cyans-woolroom-use-filter" region="cyans-woolroom"/>
+    <apply use="magentas-woolroom-use-filter" region="magentas-woolroom"/>
+</regions>
+<spawners max-entities="2">
+    <spawner spawn-region="magenta-wool-spawn" player-region="cyans-woolroom" delay="2s">
+        <item material="wool" amount="1" damage="2"/>
+    </spawner>
+    <spawner spawn-region="cyan-wool-spawn" player-region="magentas-woolroom" delay="2s">
+        <item material="wool" amount="1" damage="9"/>
+    </spawner>
+</spawners>
+<itemkeep>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>leaves</item>
+    <item>wood</item>
+    <item>golden apple</item>
+    <item>arrow</item>
+    <item>shears</item>
+</itemkeep>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+</itemremove>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>arrow</tool>
+    <tool>shears</tool>
+</toolrepair>
+<item-mods>
+    <rule>
+        <match>
+            <material>gold helmet</material>
+            <material>gold chestplate</material>
+            <material>gold leggings</material>
+            <material>gold boots</material>
+            <material>diamond helmet</material>
+        </match>
+        <modify unbreakable="true"/>
+    </rule>
+</item-mods>
+<block-drops>
+    <rule>
+        <filter>
+            <material>gold block</material>
+        </filter>
+        <drops>
+            <item material="gold block"/>
+        </drops>
+    </rule>
+</block-drops>
+<crafting>
+    <disable>gold nugget</disable>
+</crafting>
+<renewables>
+    <renewable rate="1" sound="false" region="gold-regen" renew-filter="only-gold" replace-filter="only-air" avoid-players="3"/>
+</renewables>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>13</maxbuildheight>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item material="leaves" amount="20"/>
+        <item material="wood" damage="1" amount="10"/>
+    </kill-reward>
+</kill-rewards>
+</map>

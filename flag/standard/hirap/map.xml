@@ -1,0 +1,161 @@
+<map proto="1.4.2">
+<name>Hirap</name>
+<version>1.0.3</version>
+<objective>Capture both enemy flags as many times as possible!</objective>
+<time result="score" overtime="1m" max-overtime="2m">12m</time>
+<authors>
+    <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
+    <author uuid="2d372806-0e62-4e44-87f7-2394540f5203"/> <!-- Tkes -->
+    <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!--Tundren-->
+</authors>
+<contributors>
+    <contributor uuid="621b2aa8-4e5f-4ed8-bd36-0ae2f8952a06" contribution="Feedback"/> <!--strangey-->
+</contributors>
+<broadcasts>
+    <tip after="1s" every="120s">The Right side Flags are harder to get to, but easier to escape from!</tip>
+    <tip after="1s" every="120s">The Left side Flags are easier to get to, but harder to escape from!</tip>
+</broadcasts>
+<teams>
+    <team id="blue" color="blue" max="16">Blue</team>
+    <team id="red" color="dark red" max="16">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" material="golden apple"/>
+        <item slot="8" amount="20" material="arrow"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="2">projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" material="iron boots"/>
+        <effect duration="4" amplifier="255">resistance</effect>
+    </kit>
+    <kit id="flag-pickup" force="true">
+        <effect>slowness</effect>
+        <effect amplifier="-2">health boost</effect>
+    </kit>
+    <kit id="flag-dropped" force="true">
+        <effect duration="0" amplifier="0">slowness</effect>
+        <effect duration="0" amplifier="1">health boost</effect>
+    </kit>
+    <kit id="flag-captured" force="true">
+        <effect duration="2" amplifier="10">regeneration</effect>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <region yaw="90">
+            <point>130.5,57,31.5</point>
+        </region>
+    </default>
+    <spawn team="blue" kit="spawn-kit">
+        <region yaw="180">
+            <point>132.5,18,100.5</point>
+        </region>
+    </spawn>
+    <spawn team="red" kit="spawn-kit">
+        <region yaw="0">
+            <point>128.5,18,-37.5</point>
+        </region>
+    </spawn>
+</spawns>
+<filters>
+    <time id="flag-respawns">0</time>
+    <all id="blue-captures-flag">
+        <team id="only-blue">blue</team>
+        <any>
+            <carrying-flag>left-red-flag</carrying-flag>
+            <carrying-flag>right-red-flag</carrying-flag>
+        </any>
+    </all>
+    <all id="red-captures-flag">
+        <team id="only-red">red</team>
+        <any>
+            <carrying-flag>left-blue-flag</carrying-flag>
+            <carrying-flag>right-blue-flag</carrying-flag>
+        </any>
+    </all>
+</filters>
+<regions>
+    <cylinder id="blue-flag-reward" base="138.5,7,78.5" radius="4.5" height="2"/>
+    <cylinder id="blue-net" base="138.5,7,78.5" radius="3.5" height="2"/>
+    <cylinder id="red-flag-reward" base="122.5,7,-15.5" radius="4.5" height="2"/>
+    <cylinder id="red-net" base="122.5,7,-15.5" radius="3.5" height="2"/>
+    <apply kit="flag-captured" filter="blue-captures-flag" region="blue-flag-reward"/>
+    <apply kit="flag-captured" filter="red-captures-flag" region="red-flag-reward"/>
+    <apply block="never" use="never"/>
+</regions>
+<flags flag-proximity-metric="none" net-proximity-metric="none">
+    <flag id="left-blue-flag"
+          name="Left Blue Flag"
+          owner="blue"
+          pickup-kit="flag-pickup"
+          drop-kit="flag-dropped">
+        <post pickup-filter="only-red" recover-time="15s" respawn-time="15s">150,14,72</post>
+    </flag>
+    <flag id="right-blue-flag"
+          name="Right Blue Flag"
+          owner="blue"
+          pickup-kit="flag-pickup"
+          drop-kit="flag-dropped">
+        <post pickup-filter="only-red" recover-time="15s" respawn-time="15s">104,14,77</post>
+    </flag>
+    <flag id="left-red-flag"
+          name="Left Red Flag"
+          owner="red"
+          pickup-kit="flag-pickup"
+          drop-kit="flag-dropped">
+        <post pickup-filter="only-blue" recover-time="15s" respawn-time="15s">110,14,-10</post>
+    </flag>
+    <flag id="right-red-flag"
+          name="Right Red Flag"
+          owner="red"
+          pickup-kit="flag-pickup"
+          drop-kit="flag-dropped">
+        <post pickup-filter="only-blue" recover-time="15s" respawn-time="15s">156,14,-15</post>
+    </flag>
+    <flags points="1">
+        <net region="blue-net" flag="left-red-flag right-red-flag" respawn-filter="flag-respawns"/>
+        <net region="red-net" flag="left-blue-flag right-blue-flag" respawn-filter="flag-respawns"/>
+    </flags>
+</flags>
+<score>
+    <mercy>4</mercy>
+</score>
+<spawners>
+    <spawner id="gapple-spawner" delay="8s">
+        <spawn-region>
+            <point>130,9,31</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="130.5,9,31.5" radius="3" height="6"/>
+        </player-region>
+        <item material="golden apple"/>
+    </spawner>
+</spawners>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+</itemremove>
+<itemkeep>
+    <item>golden apple</item>
+    <item>arrow</item>
+</itemkeep>
+<kill-reward>
+    <item material="golden apple"/>
+    <item amount="10" material="arrow"/>
+</kill-reward>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>

@@ -1,0 +1,274 @@
+<map proto="1.4.0">
+<name>Annealing III</name>
+<version>1.0.1</version>
+<objective>Destroy both cores!</objective>
+<gamemode>dtc</gamemode>
+<created>2022-09-07</created>
+<authors>
+    <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
+    <author uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30"/> <!-- Ruediger_LP -->
+</authors>
+<contributors>
+    <contributor uuid="f1ff7ecc-2e79-4320-85de-adb392eb2822"/> <!-- DerStiv -->
+</contributors>
+<teams>
+    <team id="purple-team" color="dark purple" max="20">Purple</team>
+    <team id="green-team" color="green" max="20">Green</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true" enchantment="arrow infinite"/>
+        <item slot="2" material="diamond pickaxe" unbreakable="true"/>
+        <item slot="3" material="gold axe" unbreakable="true"/>
+        <item slot="4" material="wood" damage="1" amount="64"/>
+        <item slot="6" material="vine" amount="24"/>
+        <item slot="7" material="seeds" amount="24"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <item slot="29" material="shears" unbreakable="true"/>
+        <item slot="30" material="iron spade" unbreakable="true"/>
+        <helmet material="iron helmet" unbreakable="true"/>
+        <chestplate material="chainmail chestplate" unbreakable="true"/>
+        <leggings material="leather leggings" team-color="true" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <effect duration="oo" amplifier="100">damage resistance</effect>
+    </kit>
+    <kit force="true" id="reset-resistance-kit">
+        <effect duration="0" amplifier="0">damage resistance</effect>
+    </kit>
+    <kit id="purple-kit" parent="spawn-kit">
+        <item slot="5" material="stained clay" damage="10" amount="48"/>
+    </kit>
+    <kit id="green-kit" parent="spawn-kit">
+        <item slot="5" material="stained clay" damage="5" amount="48"/>
+    </kit>
+</kits>
+<spawns>
+    <spawn team="purple-team" kit="purple-kit" yaw="45" region="purple-spawn-point"/>
+    <spawn team="green-team" kit="green-kit" yaw="-135" region="green-spawn-point"/>
+    <default yaw="20" region="obs-spawn-point"/>
+</spawns>
+<cores material="obsidian" leak="5">
+    <core team="purple-team" region="purple-core-a" name="Core A"/>
+    <core team="purple-team" region="purple-core-b" name="Core B"/>
+    <core team="green-team" region="green-core-a" name="Core A"/>
+    <core team="green-team" region="green-core-b" name="Core B"/>
+</cores>
+<filters>
+    <team id="only-purple">purple-team</team>
+    <team id="only-green">green-team</team>
+    <any id="block-break-void-filter">
+        <all>
+            <not>
+                <any>
+                    <material>web</material>
+                    <material>obsidian</material>
+                </any>
+            </not>
+            <void/>
+        </all>
+        <not id="block-place-void-filter">
+            <void/>
+        </not>
+    </any>
+    <all id="only-iron-cause-world">
+        <material id="only-iron">iron block</material>
+        <cause>world</cause>
+    </all>
+    <material id="only-air">air</material>
+    <deny id="deny-chest-before-1h">
+        <all>
+            <material>chest</material>
+            <not>
+                <time>1h</time>
+            </not>
+        </all>
+    </deny>
+</filters>
+<regions>
+    <cylinder id="purple-spawn-point" base="56,14,-47" radius="1" height="0"/>
+    <cylinder id="green-spawn-point" base="-56,14,47" radius="1" height="0"/>
+    <cylinder id="obs-spawn-point" base="-2,43,1" radius="1" height="0"/>
+    <cuboid id="purple-core-a" min="2,15,-52" max="7,20,-47"/>
+    <cuboid id="purple-core-b" min="56,15,-16" max="61,20,-11"/>
+    <cuboid id="green-core-a" min="-2,15,52" max="-7,20,47"/>
+    <cuboid id="green-core-b" min="-56,15,16" max="-61,20,11"/>
+    <negative id="not-spawns">
+        <union id="spawns">
+            <complement id="purple-spawn">
+                <rectangle min="42,-39" max="85,-72"/>
+                <half origin="52.4,0,-43.4" normal="-1,0,2"/>
+            </complement>
+            <complement id="green-spawn">
+                <rectangle min="-42,39" max="-85,72"/>
+                <half origin="-52.4,0,43.4" normal="1,0,-2"/>
+            </complement>
+        </union>
+    </negative>
+    <negative id="not-build-region">
+        <union id="build-region">
+            <rectangle min="-5,-31" max="40,-14"/> <!-- purple -->
+            <rectangle min="5,31" max="-40,14"/> <!-- green -->
+            <rectangle min="35,-14" max="-35,14"/> <!-- mid -->
+        </union>
+    </negative>
+    <union id="iron-regen">
+        <cuboid min="75,19,-59" max="72,22,-63"/> <!-- purple iron -->
+        <cuboid min="-75,19,59" max="-72,22,63"/> <!-- green iron -->
+    </union>
+    <!-- applicators -->
+    <apply enter="only-purple" region="purple-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-green" region="green-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply block-place="only-iron-cause-world" block-break="only-iron" region="spawns" message="You may not edit spawn!"/>
+    <apply block-place="block-place-void-filter" block-break="block-break-void-filter" region="not-build-region" message="You may not edit the void!"/>
+    <apply kit="reset-resistance-kit" region="not-spawns"/>
+    <apply use="deny-chest-before-1h" region="spawns" message="Chests are currently under maintainance, we apologize for the inconvenience. Full functionality will be restored after 1h of elapsed game time. For further support please contact brott@oc.tc. We appriciate your patience and suggest trying to break the core!"/>
+</regions>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>gold axe</tool>
+    <tool>arrow</tool>
+    <tool>shears</tool>
+    <tool>iron spade</tool>
+</toolrepair>
+<itemkeep>
+    <item>iron sword</item>
+    <item>bow</item>
+    <item>diamond pickaxe</item>
+    <item>gold axe</item>
+    <item>arrow</item>
+    <item>shears</item>
+    <item>iron spade</item>
+    <item>wood:1</item>
+    <item>stained clay:10</item>
+    <item>stained clay:5</item>
+    <item>vine</item>
+    <item>seeds</item>
+    <item>golden apple</item>
+</itemkeep>
+<itemremove>
+    <item>iron helmet</item>
+    <item>chainmail chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>stone</item>
+    <item>obsidian</item>
+</itemremove>
+<block-drops>
+    <rule>
+        <filter>
+            <any>
+                <material>wood:1</material>
+                <material>stained clay:10</material>
+                <material>stained clay:5</material>
+            </any>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+</block-drops>
+<item-mods>
+    <rule>
+        <match>
+            <material>iron helmet</material>
+            <material>iron chestplate</material>
+            <material>iron leggings</material>
+            <material>iron boots</material>
+            <material>iron sword</material>
+            <material>iron pickaxe</material>
+            <material>iron axe</material>
+            <material>iron spade</material>
+            <material>shears</material>
+            <material>diamond pickaxe</material>
+            <material>diamond axe</material>
+            <material>diamond spade</material>
+            <material>diamond helmet</material>
+            <material>diamond chestplate</material>
+            <material>bow</material>
+        </match>
+        <modify unbreakable="true"/>
+    </rule>
+</item-mods>
+<crafting>
+    <!-- bulkcrafting -->
+    <shaped override="false">
+        <result material="iron helmet" amount="9"/>
+        <shape>
+            <row>III</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="iron chestplate" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>III</row>
+            <row>III</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="iron leggings" amount="9"/>
+        <shape>
+            <row>III</row>
+            <row>I.I</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="iron boots" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="bucket" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>.I.</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+</crafting>
+<renewables>
+    <renewable rate="1" region="iron-regen" renew-filter="only-iron" replace-filter="only-air" avoid-players="2"/>
+</renewables>
+<gamerules>
+    <radomtickspeed>3</radomtickspeed>
+</gamerules>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>23</maxbuildheight>
+<broadcasts>
+    <alert after="1h">Chest maintainance has concluded, full functionality has been restored. We want to thank you for your patience and wish you an enjoyable stay on Annealing III.</alert>
+</broadcasts>
+<kill-rewards>
+    <kill-reward>
+        <filter>
+            <kill-streak count="5"/>
+        </filter>
+        <item material="gold hoe" name="`6Farmers Hoe" unbreakable="true"/>
+    </kill-reward>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item material="wood" damage="1" amount="16"/>
+        <item material="monster egg" damage="93"/>
+    </kill-reward>
+    <kill-reward filter="only-purple">
+        <item material="stained clay" damage="10" amount="48"/>
+    </kill-reward>
+    <kill-reward filter="only-green">
+        <item material="stained clay" damage="5" amount="48"/>
+    </kill-reward>
+</kill-rewards>
+</map>

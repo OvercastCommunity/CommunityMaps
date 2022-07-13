@@ -1,0 +1,233 @@
+<?xml version="1.0"?>
+<map proto="1.4.0">
+<name>Annealing</name>
+<version>1.0.2</version>
+<objective>Destroy the monument!</objective>
+<gamemode>dtm</gamemode>
+<created>2021-01-20</created>
+<authors>
+    <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
+    <author uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30"/> <!-- Ruediger_LP -->
+</authors>
+<teams>
+    <team id="blue-team" color="blue" max="16">Blue</team>
+    <team id="red-team" color="red" max="16">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true" enchantment="arrow infinite"/>
+        <item slot="2" material="iron pickaxe" unbreakable="true"/>
+        <item slot="3" material="iron axe" unbreakable="true"/>
+        <item slot="4" material="wood" amount="64"/>
+        <item slot="6" material="vine" amount="24"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <item slot="29" material="shears" unbreakable="true"/>
+        <item slot="30" material="iron spade" unbreakable="true"/>
+        <leggings material="chainmail leggings" locked="true" unbreakable="true"/>
+        <effect duration="oo" amplifier="100">damage resistance</effect>
+    </kit>
+    <kit force="true" id="reset-resitance-kit">
+        <effect duration="0" amplifier="0">damage resistance</effect>
+    </kit>
+    <kit id="blue-kit" parent="spawn-kit">
+        <item slot="5" material="stained clay" damage="11" amount="48"/>
+        <chestplate material="leather chestplate" color="2471A3" unbreakable="true"/>
+        <boots material="leather boots" color="2471A3" unbreakable="true"/>
+    </kit>
+    <kit id="red-kit" parent="spawn-kit">
+        <item slot="5" material="stained clay" damage="14" amount="48"/>
+        <chestplate material="leather chestplate" color="CB4335" unbreakable="true"/>
+        <boots material="leather boots" color="CB4335" unbreakable="true"/>
+    </kit>
+</kits>
+<spawns>
+    <spawn team="blue-team" kit="blue-kit" yaw="180" region="blue-spawn-point"/>
+    <spawn team="red-team" kit="red-kit" yaw="0" region="red-spawn-point"/>
+    <default yaw="180" region="obs-spawn-point"/>
+</spawns>
+<destroyables name="Monument" materials="emerald block" show-progress="true">
+    <destroyable owner="blue-team" region="blue-monument"/>
+    <destroyable owner="red-team" region="red-monument"/>
+</destroyables>
+<filters>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <any id="block-break-void-filter">
+        <all>
+            <any>
+                <material>leaves</material>
+                <material>log</material>
+                <material>snow</material>
+                <material>snow block</material>
+            </any>
+            <void/>
+        </all>
+        <not id="block-place-void-filter">
+            <void/>
+        </not>
+    </any>
+    <deny id="deny-use-spawn-filter">
+        <any>
+            <material>flower pot</material>
+            <material>bucket</material>
+            <material>cauldron</material>
+        </any>
+    </deny>
+    <kill-streak id="4-streak-filter" count="3"/>
+    <all id="only-gold-cause-world">
+        <material id="only-gold">gold block</material>
+        <cause>world</cause>
+    </all>
+    <material id="only-air">air</material>
+    <deny id="monument-break-filter">
+        <all>
+            <material>emerald block</material>
+            <cause>explosion</cause>
+        </all>
+    </deny>
+</filters>
+<regions>
+    <cylinder id="blue-spawn-point" base="-44,14.5,-9" radius="0" height="0"/>
+    <cylinder id="red-spawn-point" base="44,14.5,9" radius="0" height="0"/>
+    <cylinder id="obs-spawn-point" base="0,42.5,0" radius="1" height="0"/>
+    <union id="monuments">
+        <cuboid id="blue-monument" min="-25,13,-53" max="-22,16,-50"/>
+        <cuboid id="red-monument" min="25,13,53" max="22,16,50"/>
+    </union>
+    <negative id="not-spawns">
+        <union id="spawns">
+            <rectangle id="blue-spawn" min="-58,-27" max="-33,-1"/>
+            <rectangle id="red-spawn" min="58,27" max="33,1"/>
+        </union>
+    </negative>
+    <negative id="not-build-area">
+        <rectangle id="build-area" min="-24,-21" max="24,21"/>
+    </negative>
+    <union id="gold-regen">
+        <cuboid min="-52,14,-25" max="-38,18,-24"/> <!-- blue gold -->
+        <cuboid min="52,14,25" max="38,18,24"/> <!-- red gold -->
+    </union>
+    <!-- applicators -->
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply block-break="monument-break-filter" region="monuments"/>
+    <apply block-break="only-gold" block-place="only-gold-cause-world" region="spawns" message="You may not edit spawn!"/>
+    <apply block-place="block-place-void-filter" block-break="block-break-void-filter" region="not-build-area" message="You may not edit the void!"/>
+    <apply kit="reset-resitance-kit" region="not-spawns"/>
+    <apply use="deny-use-spawn-filter" region="spawns"/>
+</regions>
+<itemkeep>
+    <item>iron sword</item>
+    <item>bow</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>shears</item>
+    <item>arrow</item>
+    <item>iron spade</item>
+    <item>wood</item>
+    <item>stained clay</item>
+    <item>leaves</item>
+    <item>vine</item>
+    <item>golden apple</item>
+</itemkeep>
+<itemremove>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>stone</item>
+    <item>emerald block</item>
+    <item>snowball</item>
+    <item>dirt</item>
+    <item>long grass</item>
+    <item>seeds</item>
+    <item>red rose</item>
+    <item>stained clay:9</item>
+    <item>cobblestone</item>
+    <item>step</item>
+    <item>quartz block</item>
+</itemremove>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>arrow</tool>
+    <tool>shears</tool>
+    <tool>iron spade</tool>
+</toolrepair>
+<item-mods>
+    <rule>
+        <match>
+            <material>gold helmet</material>
+            <material>gold chestplate</material>
+            <material>gold leggings</material>
+            <material>gold boots</material>
+            <material>gold sword</material>
+            <material>gold pickaxe</material>
+            <material>gold axe</material>
+            <material>gold spade</material>
+        </match>
+        <modify unbreakable="true"/>
+    </rule>
+</item-mods>
+<crafting>
+    <disable>gold nugget</disable>
+    <disable>bucket</disable>
+    <!-- bulkcrafting -->
+    <shaped override="false">
+        <result material="gold helmet" amount="9"/>
+        <shape>
+            <row>III</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">gold block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="gold chestplate" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>III</row>
+            <row>III</row>
+        </shape>
+        <ingredient symbol="I">gold block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="gold boots" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">gold block</ingredient>
+    </shaped>
+</crafting>
+<renewables>
+    <renewable rate="5" sound="false" region="gold-regen" renew-filter="only-gold" replace-filter="only-air" avoid-players="3"/>
+</renewables>
+<tnt>
+    <instantignite>on</instantignite>
+    <power>2.5</power>
+    <friendl-defuse>false</friendl-defuse>
+</tnt>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>25</maxbuildheight>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple" amount="1"/>
+        <item material="wood" amount="16"/>
+    </kill-reward>
+    <kill-reward filter="only-blue">
+        <item material="stained clay" damage="11" amount="48"/>
+    </kill-reward>
+    <kill-reward filter="only-red">
+        <item material="stained clay" damage="14" amount="48"/>
+    </kill-reward>
+    <kill-reward filter="4-streak-filter">
+        <item material="tnt" amount="2"/>
+    </kill-reward>
+</kill-rewards>
+</map>

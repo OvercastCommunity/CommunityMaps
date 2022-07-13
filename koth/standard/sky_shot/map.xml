@@ -1,0 +1,153 @@
+<map proto="1.4.2">
+<name>Sky Shot</name>
+<version>1.1.6</version>
+<objective>Control the hills to score points for your team</objective>
+<gamemode>koth</gamemode>
+<created>2022-03-05</created>
+<authors>
+    <author uuid="2ee523ce-6bf2-430f-aba5-2a2cd8608f64"/> <!-- Le0nardo_ -->
+    <author uuid="f6f5dce8-a158-461d-b26d-dc8acfaeedd7"/> <!-- Suavely -->
+</authors>
+<teams>
+    <team max="16" color="red" id="red-team">Red</team>
+    <team max="16" color="yellow" id="yellow-team">Yellow</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true"/>
+        <item slot="2" material="water bucket"/>
+        <item slot="3" material="golden apple"/>
+        <item slot="4" material="leaves" damage="3" amount="64"/>
+        <item slot="8" material="glass" amount="16"/>
+        <item slot="5" material="shears" unbreakable="true"/>
+        <item slot="28" material="arrow" amount="16"/>
+        <helmet material="leather helmet" team-color="true" locked="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" locked="true" unbreakable="true"/>
+        <leggings material="chainmail leggings" locked="true" unbreakable="true">
+            <enchantment level="2">projectile_protection</enchantment>
+        </leggings>
+        <boots material="iron boots" locked="true" unbreakable="true"/>
+        <potion amplifier="255" duration="10">damage resistance</potion>
+    </kit>
+</kits>
+<spawns>
+    <spawn team="red-team" kit="spawn-kit">
+        <region yaw="90">
+            <cylinder base="-108.5,63.2,0.5" height="0" radius="1"/>
+        </region>
+    </spawn>
+    <spawn team="yellow-team" kit="spawn-kit">
+        <region yaw="180">
+            <cylinder base="0.5,63.2,-108.5" height="0" radius="1"/>
+        </region>
+    </spawn>
+    <default>
+        <region yaw="135">
+            <cylinder base="25.5,54.2,25.5" height="0" radius="2"/>
+        </region>
+    </default>
+</spawns>
+<score>
+    <limit>2000</limit>
+</score>
+<king>
+    <hills required="false" capture-time="7s" points="1.5" time-multiplier="0" show-progress="true" neutral-state="true" incremental="true" permanent="false">
+        <hill name="Top">
+            <capture>
+                <cylinder base="-55.5,29,-55.5" radius="4.6" height="4"/>
+            </capture>
+            <progress>
+                <cylinder base="-55.5,29,-55.5" radius="4.6" height="1"/>
+            </progress>
+            <captured>
+                <cuboid min="-45,13,-66" max="-66,60,-45"/>
+            </captured>
+        </hill>
+        <hill name="Mid">
+            <capture>
+                <cylinder base="-27.5,22,-27.5" radius="4.6" height="4"/>
+            </capture>
+            <progress>
+                <cylinder base="-27.5,22,-27.5" radius="4.6" height="1"/>
+            </progress>
+            <captured>
+                <cuboid min="-18,8,-37" max="-37,76,-18"/>
+            </captured>
+        </hill>
+        <hill name="Bottom">
+            <capture>
+                <cylinder base="0.5,15,0.5" radius="4.6" height="4"/>
+            </capture>
+            <progress>
+                <cylinder base="0.5,15,0.5" radius="4.6" height="1"/>
+            </progress>
+            <captured>
+                <cuboid min="11,2,-10" max="-10,43,11"/>
+            </captured>
+        </hill>
+    </hills>
+</king>
+<filters>
+    <team id="only-yellow">yellow-team</team>
+    <team id="only-red">red-team</team>
+    <any id="can-break">
+        <material>leaves</material>
+        <material>glass</material>
+        <material>water</material>
+        <material>stationary water</material>
+    </any>
+</filters>
+<regions>
+    <negative id="not-spawns">
+        <union id="spawns">
+            <rectangle id="yellow-spawn" min="11,-102" max="-14,-135"/>
+            <rectangle id="red-spawn" min="-102,11" max="-135,-14"/>
+        </union>
+    </negative>
+    <negative id="not-hills-area">
+        <union id="Hills">
+            <cylinder id="top-hill" base="-55.5,0,-55.5" radius="9.4" height="100"/>
+            <cylinder id="mid-hill" base="-27.5,0,-27.5" radius="9.4" height="100"/>
+            <cylinder id="bottom-hill" base="0.5,0,0.5" radius="9.4" height="100"/>
+        </union>
+    </negative>
+    <union id="build-area">
+        <rectangle min="12,12" max="-81,-81"/>
+        <rectangle min="-80,-11" max="-102,11"/>
+        <rectangle min="11,-102" max="-11,-80"/>
+    </union>
+    <negative id="void">
+        <region id="build-area"/>
+    </negative>
+    <!--applicators-->
+    <apply enter="only-yellow" region="yellow-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply block="never" region="Hills" message="You may not edit the hills!"/>
+    <apply block="can-break" region="build-area"/>
+    <apply block="never" region="void" message="You may not build outside the playable region!"/>
+</regions>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+</itemremove>
+<itemkeep>
+    <item>golden apple</item>
+    <item>arrow</item>
+</itemkeep>
+<kill-reward>
+    <item material="golden apple"/>
+    <item material="arrow" amount="8"/>
+</kill-reward>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<respawn delay="1s"/>
+</map>

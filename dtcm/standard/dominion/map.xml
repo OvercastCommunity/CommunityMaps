@@ -1,0 +1,228 @@
+<map proto="1.4.2">
+<name>Dominion</name>
+<version>1.0.4</version>
+<objective>Destroy the enemy's two monuments!</objective>
+<authors>
+    <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
+    <author uuid="6c5d7783-27fd-4ac5-8a1d-ba35206edf53"/> <!--  _Nathy  -->
+    <author uuid="053b574d-2fa7-40d6-bfec-a1cefeda0da1"/> <!-- Gaul05 -->
+</authors>
+<contributors>
+    <contributor uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="map BUILDING!"/> <!-- Tundren -->
+    <contributor uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa" contribution="Yes."/> <!-- Eliminate -->
+    <contributor uuid="74948888-fdb8-4446-9340-f7688c2435cc" contribution="DRAGOOOOOOOOOOOON "/> <!-- Zero_Frosty -->
+</contributors>
+<broadcasts>
+    <tip after="1s">You are free to bridge anywhere in the map except the middle hole at frontlines!</tip>
+    <tip after="180s" every="180s" count="oo">You are free to bridge anywhere in the map except the middle hole at frontlines!</tip>
+</broadcasts>
+<teams>
+    <team id="blue" color="blue" max="20">Eleanor</team>
+    <team id="red" color="dark red" max="20">Victoria</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <item slot="2" unbreakable="true" material="diamond pickaxe"/>
+        <item slot="3" unbreakable="true" material="iron axe">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item slot="4" unbreakable="true" material="iron spade"/>
+        <item slot="5" amount="64" material="wood"/>
+        <item slot="32" amount="64" material="wood"/>
+        <item slot="6" amount="64" material="glass"/>
+        <item slot="8" material="golden apple"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" team-color="true" material="leather leggings"/>
+        <boots unbreakable="true" team-color="true" material="leather boots"/>
+        <effect duration="5" amplifier="5">damage resistance</effect>
+    </kit>
+</kits>
+<!--SPAWNS-->
+<spawns>
+    <default>
+        <region yaw="0">
+            <cylinder base="11,65,-81" height="1" radius="0.5"/>
+        </region>
+    </default>
+    <spawn team="blue" kit="spawn-kit">
+        <region yaw="90">
+            <cylinder base="123.5,32,1.5" height="0" radius="0.5"/>
+        </region>
+    </spawn>
+    <spawn team="red" kit="spawn-kit">
+        <region yaw="-90">
+            <cylinder base="-102.5,32,1.5" height="0" radius="0.5"/>
+        </region>
+    </spawn>
+</spawns>
+<!-- FILTERS -->
+<filters>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+    <material id="only-iron">iron block</material>
+    <not id="blue-in-wr">
+        <any>
+            <team id="only-red">red</team>
+            <material>chest</material>
+            <material>beacon</material>
+            <material>iron block</material>
+        </any>
+    </not>
+    <not id="red-in-wr">
+        <any>
+            <team id="only-blue">blue</team>
+            <material>chest</material>
+            <material>beacon</material>
+            <material>iron block</material>
+        </any>
+    </not>
+    <not id="deny-void">
+        <void/>
+    </not>
+</filters>
+<!-- REGIONS -->
+<regions>
+    <complement id="void-area">
+        <everywhere/>
+        <!-- Blue side -->
+        <rectangle min="42,16" max="55,29"/> <!-- Left front -->
+        <rectangle min="55,-14" max="42,-27"/> <!-- Right front -->
+        <!-- Red side -->
+        <rectangle min="-22,-14" max="-35,-27"/> <!-- Left front -->
+        <rectangle min="-35,16" max="-22,29"/> <!-- Right front -->
+        <rectangle min="31.5,35.5" max="-9.5,-32.5"/>
+    </complement>
+    <union id="spawns">
+        <union id="red-spawn">
+            <rectangle min="-108,22" max="-136,-19"/>
+            <rectangle min="-99.5,-8.5" max="-115.5,11.5"/>
+        </union>
+        <union id="blue-spawn">
+            <rectangle min="129,-19" max="156,22"/>
+            <rectangle min="121.5,11.5" max="135.5,-8.5"/>
+        </union>
+    </union>
+    <union id="blue-void">
+        <cuboid min="113,0,-5" max="65,1,-39"/> <!-- Crescent Right A -->
+        <cuboid min="113,0,-39.5" max="78,1,-49"/> <!-- Crescent Right B -->
+        <cuboid min="65,0,41" max="113,1,7"/> <!-- Crescent Left A -->
+        <cuboid min="78.5,0,41.5" max="111,1,52"/> <!-- Crescent Left B -->
+    </union>
+    <union id="red-void">
+        <cuboid min="-92.5,0,8" max="-46.5,1,41.5"/> <!-- Crescent Right A-->
+        <cuboid min="-92.5,0,42.5" max="-57.5,1,53.5"/> <!-- Crescent Right B-->
+        <cuboid min="-95.5,0,-5.5" max="-45.5,1,-39.5"/> <!-- Crescent Left A -->
+        <cuboid min="-58,0,-39.5" max="-93,1,-50"/> <!--Crescent Left B -->
+    </union>
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the opponent's spawn!"/>
+    <apply block-break="only-iron" block-place="deny-players" region="spawns" message="Only iron blocks may be broken in the spawns!"/>
+    <apply block="deny-void" region="void-area" message="You may not build in the void area!"/>
+</regions>
+<modes>
+    <mode id="side-lane" after="10s" name="Crescent Void gaps will be bridgeable in" material="water" show-before="10s"/>
+</modes>
+<destroyables name="lanes" materials="air;water" completion="0%" required="false" show="false" modes="side-lane" repairable="false">
+    <destroyable owner="blue" region="blue-void"/>
+    <destroyable owner="red" region="red-void"/>
+</destroyables>
+<!-- MONUMENTS -->
+<destroyables name="Left Monument" materials="emerald block" completion="100%" required="true">
+    <destroyable owner="blue">
+        <region>
+            <cuboid min="92.5,13,-38.5" max="105.5,35,-66.5"/>
+        </region>
+    </destroyable>
+    <destroyable owner="red">
+        <region>
+            <cuboid min="-69.5,13,50.5" max="-101,35,72.5"/>
+        </region>
+    </destroyable>
+</destroyables>
+<destroyables name="Right Monument" materials="emerald block" completion="100%" required="true">
+    <destroyable owner="blue">
+        <region>
+            <cuboid min="93.5,13,52.5" max="103.5,35,63.5"/>
+        </region>
+    </destroyable>
+    <destroyable owner="red">
+        <region>
+            <cuboid min="-68.5,13,-47.5" max="-98.5,35,-72"/>
+        </region>
+    </destroyable>
+</destroyables>
+<!-- Misc -->
+<renewables>
+    <renewable region="spawns" renew-filter="only-iron" rate="2" grow="false" particles="true" sound="true"/>
+</renewables>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>sapling</item>
+    <item>31</item>
+    <item>37</item>
+    <item>38</item>
+    <item>338</item>
+    <item>yellow flower</item>
+    <item>string</item>
+    <item>redstone</item>
+    <item>redstone torch on</item>
+    <item>seeds</item>
+    <item>147</item>
+    <item>torch</item>
+    <item>emerald block</item>
+</itemremove>
+<block-drops>
+    <rule>
+        <filter>
+            <material>wood</material>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+    <rule wrong-tool="true">
+        <filter>
+            <material>iron block</material>
+        </filter>
+        <drops>
+            <item chance="100" material="chainmail chestplate"/>
+            <item chance="100" material="chainmail leggings"/>
+        </drops>
+    </rule>
+</block-drops>
+<itemkeep>
+    <item>wood</item>
+    <item>glass</item>
+    <item>golden apple</item>
+</itemkeep>
+<kill-rewards>
+    <kill-reward>
+        <item amount="32" material="wood"/>
+        <item amount="16" material="glass"/>
+        <item material="golden apple"/>
+    </kill-reward>
+</kill-rewards>
+<maxbuildheight>32</maxbuildheight>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
