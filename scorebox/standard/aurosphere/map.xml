@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Aurosphere</name>
-<version>1.0.1</version>
+<version>1.1</version>
 <objective>Collect gold nuggets and jump in the scorebox with them for points!</objective>
 <created>2022-03-09</created>
 <gamemode>scorebox</gamemode>
@@ -9,14 +9,13 @@
 </authors>
 <time result="score">5m</time>
 <rules>
-    <rule>The scorebox opens and closes again every 30 seconds</rule>
+    <rule>The scorebox opens and closes again every 15 seconds</rule>
 </rules>
 <broadcasts>
-    <alert after="1s" every="3m">Gold Nuggets spawn on the side islands and are also awarded on kill!</alert>
-    <alert after="1s" every="3m">Jump into the Scorebox with Gold Nuggets to score</alert>
-    <tip after="5s">The Scorebox opens after 30 seconds and closes 30 seconds later</tip>
-    <tip after="15s" every="2m">Run onto the jump pads, jumping onto them will send you flying into the void!</tip>
-    <alert after="30s" every="60s">The Scorebox is open! Jumping into the Scorebox with gold nuggets is the only way to score.</alert>
+    <alert after="1s" every="100s">Gold Nuggets spawn on the side islands and are also awarded on kill!</alert>
+    <alert after="1s" every="100s">Jump into the Scorebox with Gold Nuggets to score</alert>
+    <tip after="5s">The Scorebox opens after 15 seconds and closes 15 seconds later</tip>
+    <alert after="15s" every="60s">The Scorebox is open! Jumping into the Scorebox with gold nuggets is the only way to score.</alert>
 </broadcasts>
 <teams>
     <team id="blue" color="blue" max="8">Blue</team>
@@ -69,10 +68,10 @@
     <point id="red-spawn">46.5,31,1.5</point>
     <point id="blue-spawn">-45.5,31,1.5</point>
     <cylinder id="score-box" base="0.5,25.5,1.5" radius="2" height="2"/>
+    <circle id="red-protection" center="46.5,1.5" radius="5"/>
+    <circle id="blue-protection" center="-45.5,1.5" radius="5"/>
     <cuboid id="scorebox-monument" min="-1,32,3" max="2,34,0"/>
     <cuboid id="beacon-monument" min="0,16,1" max="1,17,2"/>
-    <apply kit="score-heal" region="score-box"/>
-    <apply block="never"/>
     <union id="north-spawner">
       <cylinder id="north-nugget" base="0.5,37,28.5" radius="7" height="5"/>
       <point id="north-nugget-point">0.5,39,28.5</point>
@@ -82,45 +81,16 @@
       <point id="south-nugget-point">0.5,39,-25.5</point>
     </union>
     <union id="jump-pads">
-        <union id="red-jump-pads">
-            <cuboid id="red-left-main" min="34,30,8" max="31,32,9"/>
-            <cuboid id="red-mid-main" min="25,30,3" max="26,32,0"/>
-            <cuboid id="red-right-main" min="34,30,-5" max="31,32,-6"/>
-            <cuboid id="red-left-island" min="26,34,30" max="27,36,27"/>
-            <cuboid id="red-right-island" min="26,34,-24" max="27,36,-27"/>
-        </union>
-        <union id="blue-jump-pads">
-            <cuboid id="blue-left-main" min="-30,30,-5" max="-33,32,-6"/>
-            <cuboid id="blue-mid-main" min="-24,30,3" max="-25,32,0"/>
-            <cuboid id="blue-right-main" min="-30,30,8" max="-33,32,9"/>
-            <cuboid id="blue-left-island" min="-25,34,-24" max="-26,36,-27"/>
-            <cuboid id="blue-right-island" min="-25,34,27" max="-26,36,30"/>
-        </union>
-        <union id="middle-jump-pads">
-            <cuboid id="nw-mid" min="-8,33,-5.5" max="-6.5,35,-7"/>
-            <cuboid id="ne-mid" min="7.5,33,-5.5" max="9,35,-7"/>
-            <cuboid id="se-mid" min="7.5,33,8.5" max="9,35,10"/>
-            <cuboid id="sw-mid" min="-8,33,8.5" max="-6.5,35,10"/>
-        </union>
+        <cuboid id="red-mid-main" min="25,30,3" max="26,32,0"/>
+        <cuboid id="blue-mid-main" min="-24,30,3" max="-25,32,0"/>
     </union>
+    <apply kit="score-heal" region="score-box"/>
+    <apply block="never"/>
     <apply kit="Jump-pad-fall-damage" region="jump-pads"/>
-    <!-- blue velocity -->
-    <apply velocity="@0,1,-3" region="blue-left-main"/>
+    <apply enter="only-red" region="red-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-blue" region="blue-protection" message="You may not enter the opponent's spawn!"/>
     <apply velocity="@2.6,1,0" region="blue-mid-main"/>
-    <apply velocity="@0,1,3" region="blue-right-main"/>
-    <apply velocity="@3.3,1.2,0" region="blue-left-island"/>
-    <apply velocity="@3.3,1.2,0" region="blue-right-island"/>
-    <!-- red velocity -->
-    <apply velocity="@0,1,3" region="red-left-main"/>
     <apply velocity="@-2.6,1,0" region="red-mid-main"/>
-    <apply velocity="@0,1,-3" region="red-right-main"/>
-    <apply velocity="@-3.3,1.2,0" region="red-left-island"/>
-    <apply velocity="@-3.3,1.2,0" region="red-right-island"/>
-    <!-- mid velocity-->
-    <apply velocity="@-4,1,-2.5" region="nw-mid"/>
-    <apply velocity="@4,1,-2.5" region="ne-mid"/>
-    <apply velocity="@4,1,2.5" region="se-mid"/>
-    <apply velocity="@-4,1,2.5" region="sw-mid"/>
 </regions>
 <score>
     <box region="score-box">
@@ -146,24 +116,39 @@
     </spawner>
 </spawners>
 <destroyables show="false" required="false">
-    <destroyable name="scorebox-glass" modes="airs-01 glass-01 airs-02 glass-02 airs-03 glass-03 airs-04 glass-04 airs-05" owner="blue" region="scorebox-monument" materials="stained glass:4"/>
-    <destroyable name="beacon-glass" modes="airs-01 wool-01 airs-02 wool-02 airs-03 wool-03 airs-04 wool-04 airs-05" owner="blue" region="beacon-monument" materials="wool:15"/>
+    <destroyable name="scorebox-glass" modes="airs-01 glass-01 airs-02 glass-02 airs-03 glass-03 airs-04 glass-04 airs-05 glass-05 airs-06 glass-06 airs-07 glass-07 airs-08 glass-08 airs-09 glass-09 airs-10" owner="blue" region="scorebox-monument" materials="stained glass:4"/>
+    <destroyable name="beacon-glass" modes="airs-01 wool-01 airs-02 wool-02 airs-03 wool-03 airs-04 wool-04 airs-05 wool-05 airs-06 wool-06 airs-07 wool-07 airs-08 wool-08 airs-09 wool-09 airs-10" owner="blue" region="beacon-monument" materials="wool:15"/>
 </destroyables>
 <modes>
     <!-- 5 minutes = 300 seconds -->
-    <mode after="30s" id="airs-01" show-before="6" name="Scorebox opening" material="air"/>
-    <mode after="60s" id="glass-01" show-before="6" name="Scorebox closing" material="stained glass:4"/>
-    <mode after="60s" id="wool-01" show-before="0" material="wool:15"/>
-    <mode after="90s" id="airs-02" show-before="6" name="Scorebox opening" material="air"/>
-    <mode after="120s" id="glass-02" show-before="6" name="Scorebox closing" material="stained glass:4"/>
-    <mode after="120s" id="wool-02" show-before="0" material="wool:15"/>
-    <mode after="150s" id="airs-03" show-before="6" name="Scorebox opening" material="air"/>
-    <mode after="180s" id="glass-03" show-before="6" name="Scorebox closing" material="stained glass:4"/>
-    <mode after="180s" id="wool-03" show-before="0" material="wool:15"/>
-    <mode after="210s" id="airs-04" show-before="6" name="Scorebox opening" material="air"/>
-    <mode after="240s" id="glass-04" show-before="6" name="Scorebox closing" material="stained glass:4"/>
-    <mode after="240s" id="wool-04" show-before="0" material="wool:15"/>
-    <mode after="270s" id="airs-05" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="15s" id="airs-01" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="30s" id="glass-01" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="30s" id="wool-01" show-before="0" material="wool:15"/>
+    <mode after="45s" id="airs-02" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="60s" id="glass-02" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="60s" id="wool-02" show-before="0" material="wool:15"/>
+    <mode after="75s" id="airs-03" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="90s" id="glass-03" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="90s" id="wool-03" show-before="0" material="wool:15"/>
+    <mode after="105s" id="airs-04" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="120s" id="glass-04" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="120s" id="wool-04" show-before="0" material="wool:15"/>
+    <mode after="135s" id="airs-05" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="150s" id="glass-05" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="150s" id="wool-05" show-before="0" material="wool:15"/>
+    <mode after="165s" id="airs-06" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="180s" id="glass-06" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="180s" id="wool-06" show-before="0" material="wool:15"/>
+    <mode after="195s" id="airs-07" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="210s" id="glass-07" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="210s" id="wool-07" show-before="0" material="wool:15"/>
+    <mode after="225s" id="airs-08" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="240s" id="glass-08" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="255s" id="wool-08" show-before="0" material="wool:15"/>
+    <mode after="255s" id="airs-09" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="270s" id="glass-09" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="270s" id="wool-09" show-before="0" material="wool:15"/>
+    <mode after="285s" id="airs-10" show-before="6" name="Scorebox opening" material="air"/>
 </modes>
 <toolrepair>
     <tool>stone sword</tool>
