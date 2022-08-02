@@ -1,12 +1,17 @@
-<?xml version="1.0"?>
-<map proto="1.0.0">
+<map proto="1.4.2">
 <name>Transit</name>
-<version>1.0.4</version>
+<version>1.1</version>
 <phase>development</phase>
 <objective>Bombers should get to the scorebox and Guards should block their way!</objective>
 <created>2022-07-27</created>
 <gamemode>Rage</gamemode>
 <gamemode>AD</gamemode>
+<time>5m</time>
+<score>
+    <box points="8" filter="only-bombers" region="bomber-scoreboxes"/>
+    <kills>2</kills>
+    <deaths>0</deaths>
+</score>
 <authors>
     <author uuid="5876ff18-006d-4a1d-83d8-53abd8002578"/> <!-- LKFJimmy -->
     <author uuid="f2efb814-9e02-4d17-bdf5-8ed449f9df77"/> <!-- Alexander_ -->
@@ -20,54 +25,59 @@
     <tip after="4s" every="1m">Don't fall onto the rail!</tip>
     <tip after="7s" every="1m">The scorebox is located in the last compartment!</tip>
     <tip after="7s" every="1m">Stained glass panes are breakable and will renew over time!</tip>
-    <tip after="10s">Two jump boost potions are hidden somewhere near the bombers' spawn. Use them strategically!</tip>
+    <tip after="10s">Two jump boost effects are hidden somewhere near the bombers' spawn. Use them strategically!</tip>
 </broadcasts>
 <teams>
-    <team color="red" max="8" max-overfill="10">Bombers</team>
-    <team color="yellow" max="8" max-overfill="10">Guards</team>
+    <team id="bombers" color="red" max="8" max-overfill="10">Bombers</team>
+    <team id="guards" color="yellow" max="8" max-overfill="10">Guards</team>
 </teams>
-<score>
-    <time>5m</time>
-    <box value="8" filter="only-red">
-        <region name="red-score"/>
-    </box>
-    <kills>2</kills>
-    <deaths>0</deaths>
-</score>
-<rage/>
 <kits>
-    <kit name="spawn">
+    <kit id="spawn">
         <clear/>
-        <item slot="0" enchantment="damage all:10" unbreakable="true" name="`bSword">iron sword</item>
-        <potion duration="oo" amplifier="-4">health boost</potion>
-        <potion duration="oo" amplifier="1">night vision</potion>
-        <potion duration="3" amplifier="25">heal</potion>
-        <potion duration="3" amplifier="25">damage resistance</potion>
+        <item slot="0" enchantment="damage all:10" unbreakable="true" id="`bSword">iron sword</item>
+        <chestplate team-color="true" unbreakable="true">leather chestplate</chestplate>
+        <leggings team-color="true" unbreakable="true">leather leggings</leggings>
+        <boots team-color="true" unbreakable="true">leather boots</boots>
+        <effect amplifier="-3">health boost</effect>
+        <effect amplifier="1">night vision</effect>
+        <effect duration="3" amplifier="25">heal</effect>
+        <effect duration="3" amplifier="25">damage resistance</effect>
     </kit>
-    <kit name="red" parents="spawn">
-	<potion duration="oo" amplifier="3">speed</potion>
-        <chestplate color="FF0C0C" unbreakable="true">leather chestplate</chestplate>
-        <leggings color="FF0C0C" unbreakable="true">leather leggings</leggings>
-        <boots color="FF0C0C" unbreakable="true">leather boots</boots>
-        <item slot="1" amount="3" name="`4Landmine `6| `bFuse: 0.7s `6| `bPower: 2" lore="`9Use this strategically! It could be helpful...">tnt</item>
+    <kit id="bomber-kit" parents="spawn">
+	<effect amplifier="3">speed</effect>
+        <item slot="1" amount="3" id="`4Landmine `6| `bFuse: 0.7s `6| `bPower: 2" lore="`9Use this strategically! It could be helpful...">tnt</item>
     </kit>
-    <kit name="yellow" parents="spawn">
-	<potion duration="oo" amplifier="1">speed</potion>
-        <chestplate color="FFCC0C" unbreakable="true">leather chestplate</chestplate>
-        <leggings color="FFCC0C" unbreakable="true">leather leggings</leggings>
-        <boots color="FFCC0C" unbreakable="true">leather boots</boots>
-        <item slot="1" enchantment="arrow damage:10" unbreakable="true" name="`cBow">bow</item>
+    <kit id="guard-kit" parents="spawn">
+	<effect amplifier="1">speed</effect>
+        <item slot="1" enchantment="arrow damage:10" unbreakable="true" id="`cBow">bow</item>
         <item slot="2" amount="5">web</item>
         <item slot="8" amount="1">arrow</item>
     </kit>
-	<kit name="default">
-	    <potion duration="oo" amplifier="1">night vision</potion>
-	</kit>
-        <kit name="force-kill" force="true">
+    <kit id="default">
+       <effect duration="oo" amplifier="1">night vision</effect>
+    </kit>
+    <kit id="force-kill" force="true">
         <health>1</health>
-        <effect duration="oo" amplifier="25">wither</effect>
+        <effect amplifier="25">wither</effect>
     </kit>
 </kits>
+<spawns>
+    <spawn team="bombers" kit="bomber-kit">
+        <region yaw="-90">
+            <cylinder id="bomber-spawn" base="-20.5,32,0.5" radius="1" height="0"/>
+        </region>
+    </spawn>
+    <spawn team="guards" kit="guard-kit" yaw="90">
+        <region yaw="90">
+            <cylinder id="guard-spawn" base="146.5,18,0.5" radius="1" height="0"/>
+        </region>
+    </spawn>
+    <default yaw="90" kit="default">
+        <region yaw="90">
+            <cylinder base="148.5,25.5,0.5" radius="2" height="0"/>
+        </region>
+    </default>
+</spawns>
 <tnt>
     <instantignite>on</instantignite>
     <licensing>off</licensing>
@@ -77,33 +87,24 @@
     <blockdamage>true</blockdamage>
 </tnt>
 <filters>
-    <team name="only-red">Bombers</team>
-    <team name="only-yellow">Guards</team>
-    <any name="interactable">
-        <block>tnt</block>
-        <block>web</block>
-        <block damage="8">stained_glass_pane</block>
+    <team id="only-bombers">bombers</team>
+    <team id="only-guards">guards</team>
+    <any id="interactable">
+        <material>tnt</material>
+        <material>web</material>
+        <material damage="8">stained_glass_pane</material>
     </any>
 </filters>
 <regions>
-    <apply block="interactable" message="You may only break glass panes and cobwebs!">
-        <rectangle min="-oo,-oo" max="oo,oo"/>
-    </apply>
-    <apply enter="only-red" message="You may not enter this area!">
-            <union>
-                <cuboid min="-18,32,-2" max="-23,34,3"/>
-                <cuboid min="142,18,18" max="145,22,13"/>
-                <cuboid min="142,18,-12" max="145,22,-17"/>
-            </union>
-    </apply>
-    <union name="red-score">
+    <union>
+        <cuboid id="bomber-spawn-prot" min="-18,32,-2" max="-23,34,3"/>
+        <cuboid id="guard-spawn-prot" min="144,18,-2" max="149,22,3"/>
+    </union>
+    <union id="bomber-scoreboxes">
         <cuboid min="141,18,18" max="148,22,13"/>
         <cuboid min="141,18,-12" max="148,22,-17"/>
     </union>
-    <apply enter="only-yellow" message="You may not enter this area!">
-        <cuboid min="144,18,-2" max="149,22,3"/>
-    </apply>
-    <union name="restricted">
+    <union id="restricted">
         <cuboid min="-18,32,-2" max="-23,37,3"/>
         <cuboid min="144,18,-2" max="149,23,3"/>
         <cuboid min="141,18,18" max="148,22,13"/>
@@ -114,29 +115,27 @@
         <cuboid min="24,17,19" max="159,22,20"/>
         <cuboid min="-oo,-oo,-oo" max="oo,17,oo"/>
     </union>
-    <apply block="deny-all" region="restricted"/>
-    <apply kit="force-kill">
-        <cuboid min="-oo,-oo,-oo" max="oo,15.5,oo"/>
-    </apply>
+    <cuboid id="tracks" min="-oo,-oo,-oo" max="oo,15.5,oo"/>
+    <apply block="interactable" message="You may only break glass panes and cobwebs!"/>
+    <apply block="never" region="restricted"/>
+    <apply kit="force-kill" region="tracks"/>
+    <apply enter="only-bombers" region="bomber-scoreboxes" message="You may not enter this area!"/>
+    <apply enter="only-guards" region="guard-spawn-prot" message="You may not enter this area!"/>
+    <apply enter="only-bombers" region="bomber-spawn-prot" message="You may not enter this area!"/>
 </regions>
 <portals>
     <!-- portals from score zones to bases -->
-    <portal observers="deny-all" x="@-19.5" y="@32" z="@0.5" yaw="@-90" filter="only-red">
-        <region name="red-score"/>
+    <portal observers="never" x="@-19.5" y="@32" z="@0.5" yaw="@-90" filter="only-bombers">
+        <region id="bomber-scoreboxes"/>
     </portal>
+    <portal filter="only-bombers" yaw="@-90" region="bomber-scoreboxes" destination="bomber-spawn"/>
 </portals>
-<!-- Spawn -->
-<spawns>
-    <spawn team="Bombers" kit="red" yaw="-90">
-        <cylinder base="-20.5,32,0.5" radius="1" height="0"/>
-    </spawn>
-    <spawn team="Guards" kit="yellow" yaw="90">
-        <cylinder base="146.5,18,0.5" radius="1" height="0"/>
-    </spawn>
-    <default yaw="90" kit="default">
-        <cylinder base="148.5,25.5,0.5" radius="2" height="0"/>
-    </default>
-</spawns>
+<renewables>
+    <renewable rate="1" particles="true" sound="false" avoid-players="5">
+        <region><cuboid min="-oo,18,-oo" max="oo,21,oo"/></region>
+        <renew-filter><any><material damage="8">stained_glass_pane</material></any></renew-filter>
+    </renewable>
+</renewables>
 <itemremove>
     <item>leather chestplate</item>
     <item>leather leggings</item>
@@ -163,10 +162,10 @@
     <tool>iron sword</tool>
     <tool>bow</tool>
 </toolrepair>
-<kill-reward filter="only-red">
-    <item amount="2" name="`4Landmine `6| `bFuse: 0.7s `6| `bPower: 2" lore="`9Use this strategically! It could be helpful...">tnt</item>
+<kill-reward filter="only-bombers">
+    <item amount="2" id="`4Landmine `6| `bFuse: 0.7s `6| `bPower: 2" lore="`9Use this strategically! It could be helpful...">tnt</item>
 </kill-reward>
-<kill-reward filter="only-yellow">
+<kill-reward filter="only-guards">
     <item amount="2">web</item>
     <item>arrow</item>
 </kill-reward>
@@ -177,10 +176,5 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<renewables>
-    <renewable rate="1" particles="true" sound="false" avoid-players="5">
-        <region><cuboid min="-oo,18,-oo" max="oo,21,oo"/></region>
-        <renew-filter><any><material damage="8">stained_glass_pane</material></any></renew-filter>
-    </renewable>
-</renewables>
+<rage/>
 </map>
