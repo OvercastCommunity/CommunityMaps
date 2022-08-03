@@ -1,0 +1,237 @@
+<map proto="1.4.2">
+<name>Stratosphere TDM</name>
+<version>1.0</version>
+<objective>Kill enemies for nether stars, teleport to the arena, and jump in the scorebox with them for points!</objective>
+<gamemode>scorebox</gamemode>
+<created>2021-12-06</created>
+<authors>
+    <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4"/> <!-- Cazadorian -->
+</authors>
+<contributors>
+    <contributor uuid="5c79d2c9-a4f0-4343-a84b-e1720f13009b" contribution="Made my XML actually work"/> <!-- CoWinkKeyDinkInc -->
+</contributors>
+<rules>
+    <rule>The staircases to the scorebox teleporters reappear every thirty seconds.</rule>
+</rules>
+<broadcasts>
+    <alert after="1s" every="3m">A Nether star is awarded on kill, teleport to the scorebox arena and jump in the scorebox with stars to score points!</alert>
+    <tip after="2s">The staircases to the scorebox reappear every 30 seconds.</tip>
+    <tip after="30s" every="120s">The way scorebox is open! Jumping into the scorebox with nether quartz is the only way to score.</tip>
+</broadcasts>
+<teams>
+    <team id="blue" color="blue" max="20">Blue</team>
+    <team id="red" color="red" max="20">Red</team>
+</teams>
+<spawns>
+    <spawn team="red" kit="spawn-kit" yaw="0">
+        <regions>
+            <region id="red-spawn"/>
+        </regions>
+    </spawn>
+    <spawn team="blue" kit="spawn-kit" yaw="180">
+        <regions>
+            <region id="blue-spawn"/>
+        </regions>
+    </spawn>
+    <default yaw="90">
+        <regions>
+            <point>0.5,130,1.5</point>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" material="golden apple"/>
+        <item slot="8" amount="16" material="arrow"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="3">projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" material="iron boots">
+            <enchantment>feather_falling</enchantment>
+        </boots>
+        <effect duration="2">instant_health</effect>
+        <effect duration="oo">speed</effect>
+    </kit>
+    <kit id="wither">
+        <effect amplifier="2">wither</effect>
+    </kit>
+    <kit id="score-heal" force="true">
+        <effect duration="2s" amplifier="10">regeneration</effect>
+    </kit>
+    <kit id="Jump-pad-fall-damage">
+        <effect amplifier="255">jump_boost</effect>
+    </kit>
+    <take kit="Jump-pad-fall-damage">
+        <filter>
+            <grounded/>
+        </filter>
+    </take>
+</kits>
+<regions>
+    <point id="red-spawn">0.5,78,-71.5</point>
+    <point id="blue-spawn">0.5,78,74.5</point>
+    <cuboid id="arena-teleporter" min="-0.5,88,2.5" max="1.5,93,0.5"/>
+    <point id="red-arena">0,62,-30</point>
+    <point id="blue-arena">0,62,33</point>
+    <cuboid id="gold-apple-west-island" min="-47,92,2" max="-45,94,0"/>
+    <cuboid id="gold-apple-east-island" min="46,92,2" max="48,94,0"/>
+    <cuboid id="gold-apple-bottom" min="-0,67,2" max="1,69,0"/>
+    <cuboid id="arrow-north-east" min="25,77,-41" max="23,78,-39"/>
+    <cuboid id="arrow-north-west" min="-23,77,-41" max="-25,78,-39"/>
+    <cuboid id="arrow-south-west" min="-25,77,43" max="-23,78,41"/>
+    <cuboid id="arrow-south-east" min="23,77,43" max="25,78,41"/>
+    <cuboid id="arrow-blue-arena" min="-0.5,60,24.5" max="1.5,62,22.5"/>
+    <cuboid id="arrow-red-arena" min="-0.5,60,-19.5" max="1.5,62,-21.5"/>
+    <cuboid id="arena" min="4,60,37" max="-14,67,-35"/>
+    <cuboid id="east-stairs" min="12,84,3" max="9,87,0"/>
+    <cuboid id="west-stairs" min="-11,84,3" max="-8,87,0"/>
+    <cylinder id="score-box" base="0.5,54,1.5" radius="3" height="4"/>
+    <apply kit="score-heal" region="score-box"/>
+    <apply block="never"/>
+    <apply lend-kit="wither" region="arena"/>
+    <union id="jump-pads">
+        <union id="red-jump-pads">
+            <cuboid id="red-left-main" min="30,78,-33" max="31,80,-30"/> <!-- +x -->
+            <cuboid id="red-left-island" min="49,85,-25" max="46,87,-26"/> <!-- +z -->
+            <cuboid id="red-right-main" min="-30,78,-30" max="-29,80,-33"/> <!-- -x -->
+            <cuboid id="red-right-island" min="-45,85,-25" max="-48,87,-26"/> <!-- +z -->
+        </union>
+        <union id="blue-jump-pads">
+            <cuboid id="blue-left-main" min="-30,78,36" max="-29,80,33"/> <!-- -x -->
+            <cuboid id="blue-left-island" min="-48,85,28" max="-45,87,29"/> <!-- -z -->
+            <cuboid id="blue-right-main" min="31,78,33" max="30,80,36"/> <!-- +x -->
+            <cuboid id="blue-right-island" min="46,85,28" max="49,87,29"/> <!-- -z -->
+        </union>
+        <union id="middle-jump-pads">
+            <cuboid id="east-to-island" min="22,82,-1" max="23,84,2"/> <!-- +x -->
+            <cuboid id="west-to-island" min="-21,82,3" max="-22,84,0"/> <!-- -x -->
+            <cuboid id="west-bottom" min="6,67,0" max="5,68,3"/> <!-- -x +y -->
+            <cuboid id="east-bottom" min="-5,67,3" max="-4,68,0"/> <!-- +x +y -->
+        </union>
+    </union>
+    <apply kit="Jump-pad-fall-damage" region="jump-pads"/>
+    <apply velocity="@-1.5,1.3,0" region="blue-left-main"/>
+    <apply velocity="@-1.5,1.3,0" region="red-right-main"/>
+    <apply velocity="@1.5,1.3,0" region="blue-right-main"/>
+    <apply velocity="@1.5,1.3,0" region="red-left-main"/>
+    <apply velocity="@0,1.7,-2.4" region="blue-left-island"/>
+    <apply velocity="@0,1.7,2.4" region="red-right-island"/>
+    <apply velocity="@0,1.7,-2.4" region="blue-right-island"/>
+    <apply velocity="@0,1.7,2.4" region="red-left-island"/>
+    <apply velocity="@-3,1.5,0" region="west-to-island"/>
+    <apply velocity="@3,1.5,0" region="east-to-island"/>
+    <apply velocity="@0.2,1.6,0" region="west-bottom"/>
+    <apply velocity="@-0.2,1.6,0" region="east-bottom"/>
+</regions>
+<time result="score">10m</time>
+<score>
+    <box region="score-box">
+        <redeemables>
+            <item points="1">nether star</item>
+        </redeemables>
+    </box>
+</score>
+<filters>
+    <team id="only-blue">blue</team>
+    <team id="only-red">red</team>
+</filters>
+<portals>
+    <portal filter="only-blue" yaw="@180" region="score-box" destination="blue-spawn"/>
+    <portal filter="only-red" yaw="@0" region="score-box" destination="red-spawn"/>
+    <portal filter="only-blue" yaw="@180" region="arena-teleporter" destination="blue-arena"/>
+    <portal filter="only-red" yaw="@0" region="arena-teleporter" destination="red-arena"/>
+</portals>
+<spawners>
+    <spawner spawn-region="gold-apple-west-island" player-region="gold-apple-west-island" delay="6s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gold-apple-east-island" player-region="gold-apple-east-island" delay="6s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gold-apple-bottom" player-region="gold-apple-bottom" delay="6s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="arrow-north-east" player-region="arrow-north-east" delay="3s">
+        <item amount="4" material="arrow"/>
+    </spawner>
+    <spawner spawn-region="arrow-north-west" player-region="arrow-north-west" delay="3s">
+        <item amount="4" material="arrow"/>
+    </spawner>
+    <spawner spawn-region="arrow-south-west" player-region="arrow-south-west" delay="3s">
+        <item amount="4" material="arrow"/>
+    </spawner>
+    <spawner spawn-region="arrow-south-east" player-region="arrow-south-east" delay="3s">
+        <item amount="4" material="arrow"/>
+    </spawner>
+    <spawner spawn-region="arrow-blue-arena" player-region="arrow-blue-arena" delay="2s">
+        <item amount="4" material="arrow"/>
+    </spawner>
+    <spawner spawn-region="arrow-red-arena" player-region="arrow-red-arena" delay="2s">
+        <item amount="4" material="arrow"/>
+    </spawner>
+</spawners>
+<destroyables show="false" required="false">
+    <destroyable name="east-stairs" modes="airs-01 east-01 airs-02 east-02 airs-03 east-03 airs-04 east-04 airs-05 east-05 airs-06 east-06 airs-07 east-07 airs-08 east-08 airs-09 east-09 airs-10 east-10" owner="blue" region="east-stairs" materials="quartz stairs:1"/>
+    <destroyable name="West Stairs" modes="airs-01 west-01 airs-02 west-02 airs-03 west-03 airs-04 west-04 airs-05 west-05 airs-06 west-06 airs-07 west-07 airs-08 west-08 airs-09 west-09 airs-10 west-10" owner="blue" region="west-stairs" materials="quartz_stairs:0"/>
+</destroyables>
+<modes>
+    <!-- 10 minutes = 600 seconds -->
+    <mode after="1s" id="airs-01" show-before="0" material="air"/>
+    <mode after="30s" id="east-01" show-before="6" name="Stairs to the Scorebox appearing" material="quartz_stairs:1"/>
+    <mode after="30s" id="west-01" show-before="0" material="quartz_stairs:0"/>/>
+    <mode after="60s" id="airs-02" show-before="6" name="Stairs to the Scorebox disappearing" material="air"/>
+    <mode after="90s" id="east-02" show-before="6" name="Stairs to the Scorebox appearing" material="quartz_stairs:1"/>
+    <mode after="90s" id="west-02" show-before="0" material="quartz_stairs:0"/>/>
+    <mode after="120s" id="airs-03" show-before="6" name="Stairs to the Scorebox disappearing" material="air"/>
+    <mode after="150s" id="east-03" show-before="6" name="Stairs to the Scorebox appearing" material="quartz_stairs:1"/>
+    <mode after="150s" id="west-03" show-before="0" material="quartz_stairs:5"/>/>
+    <mode after="180s" id="airs-04" show-before="6" name="Stairs to the Scorebox disappearing" material="air"/>
+    <mode after="210s" id="east-04" show-before="6" name="Stairs to the Scorebox appearing" material="quartz_stairs:1"/>
+    <mode after="210s" id="west-04" show-before="0" material="quartz_stairs:0"/>/>
+    <mode after="240s" id="airs-05" show-before="6" name="Stairs to the Scorebox disappearing" material="air"/>
+    <mode after="270s" id="east-05" show-before="6" name="Stairs to the Scorebox appearing" material="quartz_stairs:1"/>
+    <mode after="270s" id="west-05" show-before="0" material="quartz_stairs:0"/>/>
+    <mode after="300s" id="airs-06" show-before="6" name="Stairs to the Scorebox disappearing" material="air"/>
+    <mode after="330s" id="east-06" show-before="6" name="Stairs to the Scorebox appearing" material="quartz_stairs:1"/>
+    <mode after="330s" id="west-06" show-before="0" material="quartz_stairs:0"/>/>
+    <mode after="360s" id="airs-07" show-before="6" name="Stairs to the Scorebox disappearing" material="air"/>
+    <mode after="390s" id="east-07" show-before="6" name="Stairs to the Scorebox appearing" material="quartz_stairs:1"/>
+    <mode after="390s" id="west-07" show-before="0" material="quartz_stairs:0"/>/>
+    <mode after="420s" id="airs-08" show-before="6" name="Stairs to the Scorebox disappearing" material="air"/>
+    <mode after="450s" id="east-08" show-before="6" name="Stairs to the Scorebox appearing" material="quartz_stairs:1"/>
+    <mode after="450s" id="west-08" show-before="0" material="quartz_stairs:0"/>/>
+    <mode after="480s" id="airs-09" show-before="6" name="Stairs to the Scorebox disappearing" material="air"/>
+    <mode after="510s" id="east-09" show-before="6" name="Stairs to the Scorebox appearing" material="quartz_stairs:1"/>
+    <mode after="510s" id="west-09" show-before="0" material="quartz_stairs:0"/>/>
+    <mode after="540s" id="airs-10" show-before="6" name="Stairs to the Scorebox disappearing" material="air"/>
+    <mode after="570s" id="east-10" show-before="6" name="Stairs to the Scorebox appearing" material="quartz_stairs:1"/>
+    <mode after="570s" id="west-10" show-before="0" material="quartz_stairs:0"/>/>
+</modes>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+</itemremove>
+<itemkeep>
+    <item>arrow</item>
+    <item>golden apple</item>
+</itemkeep>
+<kill-reward>
+    <item amount="6" material="arrow"/>
+    <item material="golden apple"/>
+    <item material="quartz"/>
+</kill-reward>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
