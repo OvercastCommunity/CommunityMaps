@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Transit</name>
-<version>1.1.1</version>
+<version>1.1.2</version>
 <phase>development</phase>
 <objective>Bombers should get to the scorebox and Guards should block their way!</objective>
 <created>2022-07-27</created>
@@ -24,8 +24,9 @@
     <tip after="1s" every="1m">Use TNT to break the Cobweb from Guards!</tip>
     <tip after="4s" every="1m">Don't fall onto the rail!</tip>
     <tip after="7s" every="1m">The scorebox is located in the last compartment!</tip>
-    <tip after="7s" every="1m">Stained glass panes are breakable and will renew over time!</tip>
-    <tip after="10s">Two jump boost effects are hidden somewhere near the bombers' spawn. Use them strategically!</tip>
+    <tip after="7s" every="1m">Stained glass panes are breakable and renewable!</tip>
+    <tip after="10s" every="1m">Guards can gain speed from kill!</tip>
+    <tip after="10s" every="1m">Two jump boost effects are hidden somewhere near the bombers' spawn. Use them strategically!</tip>
 </broadcasts>
 <teams>
     <team id="bombers" color="red" max="8" max-overfill="10">Bombers</team>
@@ -34,10 +35,7 @@
 <kits>
     <kit id="spawn">
         <clear/>
-        <item slot="0" enchantment="damage all:10" unbreakable="true" id="`bSword">iron sword</item>
-        <chestplate team-color="true" unbreakable="true">leather chestplate</chestplate>
-        <leggings team-color="true" unbreakable="true">leather leggings</leggings>
-        <boots team-color="true" unbreakable="true">leather boots</boots>
+        <item slot="0" enchantment="damage all:10" unbreakable="true" name="`bSword">iron sword</item>
         <effect amplifier="-3">health boost</effect>
         <effect amplifier="1">night vision</effect>
         <effect duration="3" amplifier="25">heal</effect>
@@ -45,12 +43,18 @@
     </kit>
     <kit id="bomber-kit" parents="spawn">
 	<effect amplifier="3">speed</effect>
-        <item slot="1" amount="3" id="`4Landmine `6| `bFuse: 0.7s `6| `bPower: 2" lore="`9Use this strategically! It could be helpful...">tnt</item>
+        <chestplate color="FF0C0C" unbreakable="true">leather chestplate</chestplate>
+        <leggings color="FF0C0C" unbreakable="true">leather leggings</leggings>
+        <boots color="FF0C0C" unbreakable="true">leather boots</boots>
+        <item slot="1" amount="3" name="`cBomb `6| `bFuse: 0.7s `6| `bPower: 2" lore="`9Use this strategically! It could be helpful...">tnt</item>
     </kit>
     <kit id="guard-kit" parents="spawn">
 	<effect amplifier="1">speed</effect>
-        <item slot="1" enchantment="arrow damage:10" unbreakable="true" id="`cBow">bow</item>
-        <item slot="2" amount="5">web</item>
+        <chestplate color="FFCC0C" unbreakable="true">leather chestplate</chestplate>
+        <leggings color="FFCC0C" unbreakable="true">leather leggings</leggings>
+        <boots color="FFCC0C" unbreakable="true">leather boots</boots>
+        <item slot="1" enchantment="arrow damage:10" unbreakable="true" name="`cBow">bow</item>
+        <item slot="2" amount="5" lore="`9Use this strategically! It could be helpful...">web</item>
         <item slot="8" amount="1">arrow</item>
     </kit>
     <kit id="default">
@@ -59,6 +63,12 @@
     <kit id="force-kill" force="true">
         <health>1</health>
         <effect amplifier="25">wither</effect>
+    </kit>
+    <kit id="guard-kill-reward-one" force="true">
+        <effect amplifier="2">speed</effect>
+    </kit>
+    <kit id="guard-kill-reward-two" force="true">
+        <effect amplifier="3">speed</effect>
     </kit>
 </kits>
 <spawns>
@@ -162,13 +172,33 @@
     <tool>iron sword</tool>
     <tool>bow</tool>
 </toolrepair>
-<kill-reward filter="only-bombers">
-    <item amount="2" id="`4Landmine `6| `bFuse: 0.7s `6| `bPower: 2" lore="`9Use this strategically! It could be helpful...">tnt</item>
-</kill-reward>
-<kill-reward filter="only-guards">
-    <item amount="2">web</item>
-    <item>arrow</item>
-</kill-reward>
+<kill-rewards>
+    <kill-reward filter="only-bombers">
+        <item amount="2" name="`cBomb `6| `bFuse: 0.7s `6| `bPower: 2" lore="`9Use this strategically! It could be helpful...">tnt</item>
+    </kill-reward>
+    <kill-reward filter="only-guards">
+        <item amount="2" lore="`9Use this strategically! It could be helpful...">web</item>
+        <item>arrow</item>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <all>
+                <team>guards</team>
+                <kill-streak count="1" repeat="false"/>
+            </all>
+        </filter>
+        <kit id="guard-kill-reward-one"/>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <all>
+                <team>guards</team>
+                <kill-streak count="2"/>
+            </all>
+        </filter>
+        <kit id="guard-kill-reward-two"/>
+    </kill-reward>
+</kill-rewards>
 <disabledamage>
     <damage ally="true" self="true" enemy="false" other="false">block explosion</damage>
     <damage>fall</damage>
