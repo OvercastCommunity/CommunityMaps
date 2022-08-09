@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Keeper</name>
-<version>1.0.1</version>
+<version>1.1</version>
 <objective>Capture the flag at the goal on the enemies side!</objective>
 <created>2022-01-07</created>
 <time result="score" overtime="1m" max-overtime="2m">12m</time>
@@ -11,6 +11,7 @@
 <contributors>
     <contributor uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
     <contributor uuid="f1ff7ecc-2e79-4320-85de-adb392eb2822"/> <!-- DerStiv -->
+    <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4"/> <!-- Cazadorian -->
 </contributors>
 <rules>
     <rule>Fall damage is disabled!</rule>
@@ -18,8 +19,7 @@
 <gamemode>ffb</gamemode>
 <broadcasts>
     <tip after="0m" every="1m">The goal you need to score in is on the enemies side!</tip>
-    <tip after="20s" every="3m">Every team has 4 `6"defence sniper bows"`b!</tip>
-    <tip after="5s" every="1m">You can leave the spawn castle, but you can't get back in it!</tip>
+    <tip after="20s" every="3m">Every team has 2 `6"defence sniper bows"`b!</tip>
     <tip after="10s" every="2m">Use the side portals to switch sides</tip>
 </broadcasts>
 <teams>
@@ -34,6 +34,7 @@
         <clear/>
         <item slot="0" unbreakable="true" material="stone sword"/>
         <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" amount="4" material="leaves" name="`6Body Block"/>
         <item slot="8" amount="20" material="arrow"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
@@ -41,7 +42,9 @@
             <enchantment>projectile_protection</enchantment>
         </leggings>
         <boots unbreakable="true" material="iron boots"/>
-        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="speed">
+        <effect amplifier="3">speed</effect>
     </kit>
 </kits>
 <spawns>
@@ -63,19 +66,34 @@
 </spawns>
 <respawn auto="true" delay="5s"/>
 <regions>
-    <apply block="never"/>
     <union id="nets">
-        <cuboid id="blue_net" min="131,6,105" max="126,9,183"/>
-        <cuboid id="red_net" min="-21,6,183" max="-16,9,105"/>
+        <cuboid id="blue_net" min="132,6,112" max="126,9,177"/>
+        <cuboid id="red_net" min="-21,6,177" max="-16,9,112"/>
     </union>
     <union id="sides">
         <rectangle id="red-side" min="34, 183" max="-14,-105"/>
         <rectangle id="blue-side" min="76, 105" max="124,183"/>
     </union>
+    <union id="speedlanes">
+        <cuboid id="north-lane" min="-21,17,93" max="132,20,99"/>
+        <cuboid id="south-lane" min="-21,17,189" max="132,20,195"/>
+        <cuboid id="westleft-lane" min="-17,17,141" max="-21,20,99"/>
+        <cuboid id="westright-lane" min="-17,17,147" max="-21,20,189"/>
+        <cuboid id="eastleft-lane" min="127,17,147" max="132,20,189"/>
+        <cuboid id="eastright-lane" min="127,17,141" max="132,20,99"/>
+    </union>
      <union id="spawn-points">
         <point id="red-spawn-point">-31.5,17,144.5</point>
         <point id="blue-spawn-point">141.5,17,144.5</point>
     </union>
+    <negative id="not-playing-field">
+        <region id="playing-field"/>
+    </negative>
+    <cuboid id="playing-field" min="-15,0,105" max="126,8,184"/>
+    <apply block="never" region="nets" message="You may not place blocks in the net"/>
+    <apply block="deny-void" region="playing-field" message="You may only place and break leaves on the playing field"/>
+    <apply block="never" region="not-playing-field" message="You may not build over the void or off the playing field"/>
+    <apply lend-kit="speed" region="speedlanes"/>
 </regions>
 <portals>
     <portal x="@55.5" y="@6" z="@105.5">
@@ -88,6 +106,8 @@
             <cuboid min="57,6,104" max="54,9,105"/>
         </region>
     </portal>
+    <portal observers="never" filter="only-red" region="blue_net" destination="red-spawn-point" yaw="@-90"/>
+    <portal observers="never" filter="only-blue" region="red_net" destination="blue-spawn-point" yaw="@90"/>
 </portals>
 <proximity-alarms>
     <proximity-alarm message="You are running towards the wrong goal!" flare-radius="0" region="red-side" detect="red-team-carrying-flag" notify="red-team-carrying-flag"/>
@@ -95,7 +115,7 @@
 </proximity-alarms>
 <flags>
     <flag id="flag" name="Flag" color="white" shared="true">
-        <post id="center-post" recover-time="10s" respawn-time="15s">
+        <post id="center-post" recover-time="10s" respawn-time="25s">
             <block>55.5,11,144.5</block>
         </post>
         <net points="1" region="red_net" capture-filter="only-blue"/>
@@ -113,6 +133,12 @@
         <team>blue-team</team>
         <carrying-flag>flag</carrying-flag>
     </all>
+    <all id="deny-void">
+        <material id="leaves">leaves</material>
+        <not>
+           <void/>
+        </not>
+    </all>
 </filters>
 <toolrepair>
     <tool>stone sword</tool>
@@ -123,6 +149,8 @@
     <item>leather chestplate</item>
     <item>chainmail leggings</item>
     <item>iron boots</item>
+    <item>leaves</item>
+    <item>sapling</item>
 </itemremove>
 <itemkeep>
     <item>golden apple</item>
@@ -132,6 +160,7 @@
     <kill-reward>
         <item material="golden apple"/>
         <item material="arrow" amount="10"/>
+        <item material="leaves" amount="2"/>
     </kill-reward>
 </kill-rewards>
 <disabledamage>
@@ -140,5 +169,8 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<score/>
+<score>
+    <mercy>4</mercy>
+</score>
+<maxbuildheight>8</maxbuildheight>
 </map>
