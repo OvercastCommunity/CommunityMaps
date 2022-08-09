@@ -1,0 +1,158 @@
+<map proto="1.4.0">
+<name>Totem Crusaders</name>
+<version>1.0.0</version>
+<phase>development</phase>
+<objective>
+    Take the flag to the end of the path back to your spawn!
+</objective>
+
+<authors>
+    <author uuid="065c76d6-32b8-4b3a-8270-db350f876844"/>
+</authors>
+
+<contributors>
+    <contributor uuid="3a3f756e-7925-409a-be5e-e8c1694b3e2c" contribution="Moral contribution" /> <!-- Shimane -->   
+    <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="XML fix and improvement" /> <!-- Cazadorian -->
+    <contributor uuid="ce4f01b0-00c4-4977-aaaf-ffcab2bff29d" contribution="XML review" /> <!-- Ruediger -->
+</contributors>
+
+<broadcasts>
+    <tip after="1s" every="4m">`bReach the flag passing by the Totems`b.</tip>
+</broadcasts>
+
+<teams>
+    <team id="red" color="dark red" max="25" max-overfill="32">Red</team>
+    <team id="blue" color="blue" max="25" max-overfill="32">Blue</team>
+</teams>
+
+<kits>
+    <kit id="spawn">
+        <item slot="0" unbreakable="true">stone sword</item>
+        <item slot="1" unbreakable="true" enchantment="arrow infinite:1">bow</item>
+        <item slot="28">arrow</item>
+        <item slot="2" unbreakable="true">stone pickaxe</item>
+        <item slot="3" unbreakable="true">stone axe</item>
+        <item slot="4" amount="64">cooked beef</item>
+        <item slot="5">water bucket</item>
+        <item slot="8" amount="64" damage="2">wood</item>
+    </kit>
+    <kit id="red-kit" parents="spawn">
+        <helmet color="cd0000" unbreakable="true">leather helmet</helmet>
+        <chestplate color="cd0000" unbreakable="true">leather chestplate</chestplate>
+    </kit>
+    <kit id="blue-kit" parents="spawn">
+        <helmet color="0066cc" unbreakable="true">leather helmet</helmet>
+        <chestplate color="0066cc" unbreakable="true">leather chestplate</chestplate>
+    </kit>
+    <kit id="flag-kit">
+        <potion amplifier="-2">health boost</potion>
+        <potion amplifier="2">slow</potion>
+    </kit>
+    <kit id="reset" force="true">
+        <potion duration="1" amplifier="0">health boost</potion>
+        <potion duration="1" amplifier="20">regeneration</potion>
+        <potion duration="1" amplifier="0">slow</potion>
+    </kit>
+</kits>
+
+<spawns>
+    <spawn team="red" kit="red-kit">
+        <regions yaw="90">
+            <cuboid min="122.655,85,-323.676" max="116.655,85,-317.64"/>
+        </regions>
+    </spawn>
+    <spawn team="blue" kit="blue-kit">
+        <regions yaw="90">
+            <cuboid min="117.188,85,-209.23" max="121.189,85,-213.20"/>
+        </regions>
+    </spawn>
+    <default>
+        <regions yaw="-90">
+            <cylinder base="-270.265,89,-265.637" radius="4" height="0"/>
+        </regions>
+    </default>
+</spawns>
+
+<regions>
+    <union id="flagandgap">
+        <cuboid id="flag-base" min="-216,54,-309" max="-314,139,-209"/>
+        <rectangle id="bases-gap" min="163,-277" max="65,-268"/>
+    </union>
+    <union id="bases">
+        <rectangle id="red-base" min="163,-377" max="65,-277"/>
+        <rectangle id="blue-base" min="163,-168" max="65,-268"/>
+    </union>
+    <union id="nets">
+        <cuboid id="blue_net" min="117.188,85,-209.23" max="121.189,90,-213.20"/>
+        <cuboid id="red_net" min="122.655,85,-323.676" max="116.655,90,-317.64"/>
+    </union>
+
+    <complement id="deny-lane">
+        <cuboid id="first-totem" min="15.574,28,-198.528" max="-24.824,5,-332.57"/> 
+        <cuboid id="second-totem" min="-65.7,16,-332.64" max="-103.32,3,-198.239"/>
+        <cuboid id="third-totem" min="-143.70,28,-198.425" max="183.555,14,332.43"/>
+        <cuboid id="first-border" min="63.333,31,-197.241" max="-315.765,140,-162.311"/>
+        <cuboid id="second-border" min="63.3,31,-333.55" max="-314.738,132,-342.76"/>
+        <cuboid id="dst-bases" min="64.282,31,-197.291" max="-313.473,122,-159.62"/>
+    </complement>
+
+    <complement id="void">
+        <everywhere/>
+        <rectangle min="163,-377" max="-314,-168"/>
+    </complement>
+    <apply block="never" region="flagandgap" message="You may not modify this area!"/>
+    <apply block-break="only-iron" block-place="deny-players" region="bases" message="You may only break iron blocks here!"/>
+    <apply block="never" region="deny-lane" message="You can't cross under the platforms!"/>
+    <apply block="deny-void" region="void" message="You may not build in the void!"/>
+
+</regions>
+
+<flags>
+    <flag id="flag" name="Flag" color="white" shared="true" pickup-kit="flag-kit" drop-kit="reset">
+        <post id="center-post" recover-time="60s" respawn-time="30s">
+            <block>-271,106,-266</block>
+        </post>
+        <net points="1" region="red_net" capture-filter="only-red"/>
+        <net points="1" region="blue_net" capture-filter="only-blue"/>
+    </flag>
+</flags>
+
+<filters>
+    <team id="only-red">red</team>
+    <team id="only-blue">blue</team>
+    <all id="red-team-carrying-flag">
+        <team>red</team>
+        <carrying-flag>flag</carrying-flag>
+    </all>
+    <all id="blue-team-carrying-flag">
+        <team>blue</team>
+        <carrying-flag>flag</carrying-flag>
+    </all>
+    <deny id="deny-players">
+          <participating/>
+    </deny>
+    <material id="only-iron">iron block</material>
+    <not id="deny-void">
+       <void/>
+    </not>
+</filters>
+
+<score>
+   <limit>2</limit>
+</score>
+
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>stone sword</item>
+    <item>stone pickaxe</item>
+    <item>stone axe</item>
+    <item>bow</item>
+    <item>arrow</item>
+    <item>cooked beef</item>
+    <item>water bucket</item>
+    <item>bucket</item>
+</itemremove>
+
+<maxbuildheight>105</maxbuildheight>
+</map>
