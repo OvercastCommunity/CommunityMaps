@@ -1,12 +1,16 @@
 <map proto="1.4.2">
 <name>Happy Rainbow</name>
-<version>1.2.2</version>
+<version>1.2.3</version>
 <objective>Capture the enemy team's wools.</objective>
 <created>2022-08-15</created>
 <gamemode>ctw</gamemode>
 <authors>
-    <author uuid="5876ff18-006d-4a1d-83d8-53abd8002578"/> <!-- LKFJimmy -->
+    <author uuid="5876ff18-006d-4a1d-83d8-53abd8002578" contribution="Map Building and XML"/> <!-- LKFJimmy -->
 </authors>
+<contributors>
+    <contributor uuid="f2efb814-9e02-4d17-bdf5-8ed449f9df77" contribution="Testing"/> <!-- Alexander_ -->
+    <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Feedback"/> <!-- Cazadorian -->
+</contributors>
 <broadcasts>
     <tip after="1s" every="30s">Fragile Glass! Keep Running! Don't Stop!</tip>
     <tip after="2s" every="40s">Get string in the centre or from kill, craft it into wool and combine it with the dyes!</tip>
@@ -51,9 +55,7 @@
     </kit>
     <kit id="spawn-kit" parent="default">
         <clear/>
-        <item slot="0" unbreakable="true" material="stone sword">
-            <enchantment>knockback</enchantment>
-        </item>
+        <item slot="0" unbreakable="true" material="stone sword"/>
         <item slot="1" amount="8" material="snowball"/>
         <item slot="2" material="golden apple"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
@@ -61,6 +63,12 @@
         <leggings unbreakable="true" team-color="true" material="leather leggings"/>
         <boots unbreakable="true" team-color="true" material="leather boots"/>
         <effect duration="3" amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="kb-resist">
+        <knockback-reduction>0.5</knockback-reduction>
+    </kit>
+    <kit id="death-kit" force="true">
+        <health>1</health>
     </kit>
 </kits>
 <filters>
@@ -158,10 +166,6 @@
     <cuboid id="green-dye-spawn" min="25.5,3.5,-24.5" max="25.5,3.5,-24.5"/>
     <cuboid id="blue-dye-spawn" min="25.5,3.5,25.5" max="25.5,3.5,25.5"/>
     <cuboid id="string-point" min="0.5,3,0.5" max="0.5,3,0.5"/>
-    <union id="string">
-        <rectangle min="-2,-1" max="3,2"/>
-        <rectangle min="-1,-2" max="2,3"/>
-    </union>
     <union id="spawn-protection">
         <union id="red-protection">
             <cuboid min="-37,2,17" max="-32,8,20"/>
@@ -218,21 +222,27 @@
             <cuboid min="24,2,31" max="31,8,24"/>
         </union>
     </union>
-    <union id="red-dye-platform">
-        <cuboid min="-26,2,28" max="-23,4,23"/>
-        <cuboid min="-27,2,27" max="-22,4,24"/>
-    </union>
-    <union id="yellow-dye-platform">
-        <cuboid min="-26,2,-22" max="-23,4,-27"/>
-        <cuboid min="-27,2,-23" max="-22,4,-26"/>
-    </union>
-    <union id="green-dye-platform">
-        <cuboid min="24,2,-22" max="27,4,-27"/>
-        <cuboid min="23,2,-23" max="28,4,-26"/>
-    </union>
-    <union id="blue-dye-platform">
-        <cuboid min="24,2,28" max="27,4,23"/>
-        <cuboid min="23,2,27" max="28,4,24"/>
+    <union id="platform">
+        <union id="red-dye-platform">
+            <cuboid min="-26,2,28" max="-23,4,23"/>
+            <cuboid min="-27,2,27" max="-22,4,24"/>
+        </union>
+        <union id="yellow-dye-platform">
+            <cuboid min="-26,2,-22" max="-23,4,-27"/>
+            <cuboid min="-27,2,-23" max="-22,4,-26"/>
+        </union>
+        <union id="green-dye-platform">
+            <cuboid min="24,2,-22" max="27,4,-27"/>
+            <cuboid min="23,2,-23" max="28,4,-26"/>
+        </union>
+        <union id="blue-dye-platform">
+            <cuboid min="24,2,28" max="27,4,23"/>
+            <cuboid min="23,2,27" max="28,4,24"/>
+        </union>
+        <union id="string">
+            <rectangle min="-2,-1" max="3,2"/>
+            <rectangle min="-1,-2" max="2,3"/>
+        </union>
     </union>
     <apply block="never" region="spawn-protection"/>
     <apply block="interactable"/>
@@ -245,6 +255,9 @@
     <apply enter="not-yellow" region="yellow-dye-platform" message="You may not enter your own dye platform!"/>
     <apply enter="not-green" region="green-dye-platform" message="You may not enter your own dye platform!"/>
     <apply enter="not-blue" region="blue-dye-platform" message="You may not enter your own dye platform!"/>
+    <apply lend-kit="kb-resist" region="platform"/>
+    <cuboid id="death" min="-oo,-oo,-oo" max="oo,-60,oo"/>
+    <apply kit="death-kit" region="death"/>
 </regions>
 <kill-rewards>
     <kill-reward>
