@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Columbia CTW</name>
-<version>2.0.1</version>
+<version>2.0.2</version>
 <objective>Capture both enemy wools!</objective>
 <authors>
     <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!--  rockymine  -->
@@ -14,7 +14,10 @@
     <team id="red-team" color="dark red" max="32">Red</team>
 </teams>
 <kits>
-    <kit id="spawn-kit">
+    <kit id="resistance-kit">
+        <effect amplifier="255">resistance</effect>
+    </kit>
+    <kit id="spawn-kit" parent="resistance-kit">
         <clear/>
         <item slot="0" unbreakable="true" material="iron sword"/>
         <item slot="1" unbreakable="true" material="bow">
@@ -31,13 +34,10 @@
         <item slot="30" unbreakable="true" material="shears"/>
         <item slot="5" amount="64" damage="1" material="wood"/>
         <item slot="8" material="golden apple"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
         <leggings unbreakable="true" material="chainmail leggings"/>
         <boots unbreakable="true" team-color="true" material="leather boots"/>
-        <effect amplifier="255">damage resistance</effect>
-    </kit>
-    <kit id="reset-resitance-kit" force="true">
-        <effect duration="0" amplifier="0">damage resistance</effect>
     </kit>
     <kit id="blue-kit" parent="spawn-kit">
         <item slot="4" material="stained clay" damage="11" amount="64"/>
@@ -47,11 +47,12 @@
         <item slot="4" material="stained clay" damage="14" amount="64"/>
         <item slot="31" material="stained clay" damage="14" amount="64"/>
     </kit>
+    <take kit="resistance-kit" filter="not-spawns"/>
 </kits>
 <spawns>
     <default>
         <region yaw="90">
-            <cylinder base="-2.5,53,0.5" radius="1" height="0"/>
+            <cylinder base="-2.5,63,0.5" radius="1" height="0"/>
         </region>
     </default>
     <spawn team="blue-team" kit="blue-kit">
@@ -101,7 +102,7 @@
             <material>stationary water</material>
         </any>
     </any>
-    <all id="only-iron-regen">
+    <all id="only-iron-renew">
         <material id="only-iron">iron block</material>
         <cause>world</cause>
     </all>
@@ -120,20 +121,21 @@
     <deny id="deny-participating">
         <participating/>
     </deny>
+    <not id="not-spawns">
+        <region id="spawns"/>
+    </not>
 </filters>
 <regions>
-    <negative id="not-spawns">
-        <union id="spawns">
-            <union id="blue-spawn">
-                <rectangle min="120,-15" max="171,16"/>
-                <cuboid min="103,-oo,-9" max="120,15,10"/>
-            </union>
-            <union id="red-spawn">
-                <rectangle min="-170,-15" max="-119,16"/>
-                <cuboid min="-119,-oo,-9" max="-102,15,10"/>
-            </union>
+    <union id="spawns">
+        <union id="blue-spawn">
+            <rectangle min="120,-15" max="171,16"/>
+            <cuboid min="103,-oo,-9" max="120,15,10"/>
         </union>
-    </negative>
+        <union id="red-spawn">
+            <rectangle min="-170,-15" max="-119,16"/>
+            <cuboid min="-119,-oo,-9" max="-102,15,10"/>
+        </union>
+    </union>
     <union id="blue-woolrooms"> <!-- blue defends -->
         <rectangle id="yellow-woolroom" min="109,-76" max="128,-51"/>
         <rectangle id="orange-woolroom" min="109,52" max="128,77"/>
@@ -142,38 +144,22 @@
         <rectangle id="pink-woolroom" min="-127,52" max="-108,77"/>
         <rectangle id="purple-woolroom" min="-127,-76" max="-108,-51"/>
     </union>
-    <complement id="void">
-        <everywhere/>
-        <!-- subtract mid but subtract parts of spawn lane from mid -->
-        <complement>
-            <rectangle min="-109,-45" max="110,46"/> <!-- mid -->
-            <rectangle min="97,10" max="110,21"/> <!-- blue left intersect -->
-            <rectangle min="97,-20" max="110,-9"/> <!-- blue right intersect -->
-            <rectangle min="-109,-20" max="-96,-9"/> <!-- red left intersect -->
-            <rectangle min="-109,10" max="-96,21"/> <!-- red right intersect -->
-        </complement>
-        <rectangle min="-127,21" max="-108,53"/> <!-- pink -->
-        <rectangle min="-127,-52" max="-108,-20"/> <!-- purple -->
-        <rectangle min="109,-52" max="128,-20"/> <!-- yellow -->
-        <rectangle min="109,21" max="128,53"/> <!-- orange -->
-    </complement>
-    <cuboid id="obs-spawn" min="-11,47,-8" max="13,66,9"/>
+    <cuboid id="obs-spawn" min="-11,57,-8" max="13,76,9"/>
     <below id="below-10" y="10"/>
     <!-- applicators -->
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-red" region="blue-woolrooms" message="You may not enter your own wool room!"/>
     <apply enter="only-blue" region="red-woolrooms" message="You may not enter your own wool room!"/>
-    <apply enter="deny-participating" use="deny-participating" block="never" region="obs-spawn" message="You may not enter the observer spawn!"/>
-    <apply block-place="only-iron-regen" block-break="only-iron" region="spawns" message="You may not edit spawn!"/>
+    <apply block="never" use="deny-participating" region="obs-spawn"/>
+    <apply block-place="only-iron-renew" block-break="only-iron" region="spawns" message="You may not edit spawn!"/>
     <apply block="red-in-wr" use="only-red" region="blue-woolrooms" message="You may not edit the wool rooms!"/>
     <apply block="blue-in-wr" use="only-blue" region="red-woolrooms" message="You may not edit the wool rooms!"/>
-    <apply block-place="not-void" region="void" message="You may not edit the void"/>
+    <apply block-place="not-void" message="You may not edit the void"/> <!-- block 36 -->
     <apply block="never" region="below-10" message="You may not edit the void"/>
-    <apply kit="reset-resitance-kit" region="not-spawns"/>
 </regions>
 <renewables>
-    <renewable region="spawns" renew-filter="only-iron"/>
+    <renewable region="spawns" renew-filter="only-iron" rate="0.5"/>
 </renewables>
 <wools craftable="false">
     <wool team="blue-team" color="pink" location="-127.5,23.2,72.5" id="pink-wool">
@@ -235,18 +221,13 @@
 <block-drops>
     <rule>
         <filter>
-            <material>stained clay</material>
+            <any>
+                <material>stained clay</material>
+                <material>wood</material>
+            </any>
         </filter>
         <drops>
             <item chance="0" material="stained clay"/>
-        </drops>
-    </rule>
-    <rule>
-        <filter>
-            <material>wood</material>
-        </filter>
-        <drops>
-            <item chance="0" material="wood"/>
         </drops>
     </rule>
 </block-drops>
@@ -256,6 +237,7 @@
     <item>golden apple</item>
 </itemkeep>
 <itemremove>
+    <item>leather helmet</item>
     <item>leather chestplate</item>
     <item>chainmail leggings</item>
     <item>leather boots</item>
