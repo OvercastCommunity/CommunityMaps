@@ -1,0 +1,178 @@
+<map proto="1.4.2">
+<name>Röntgen</name>
+<version>1.0.0</version>
+<objective>Capture the enemy team's wool!</objective>
+<created>2022-08-25</created>
+<authors>
+    <author uuid="924c4e61-57b6-4931-afdb-6525b2ed34c0"/> <!-- OAF6 -->
+    <author uuid="654a9fe7-c75c-4b45-91df-8d48c4a5e072"/> <!-- Flamiix -->
+</authors>
+<contributors>
+    <contributor uuid="660a9502-4872-43ba-b7f7-1f49ab588526" contribution="Feedback"/> <!-- FbprZ7 -->
+    <contributor uuid="74948888-fdb8-4446-9340-f7688c2435cc" contribution="Built the cool skull"/> <!-- Zero_Frosty -->
+    <contributor uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Feedback"/> <!-- Tundren -->
+    <contributor uuid="2ee523ce-6bf2-430f-aba5-2a2cd8608f64" contribution="Feedback"/> <!-- Tartxglia -->
+    <contributor uuid="5876ff18-006d-4a1d-83d8-53abd8002578" contribution="Feedback"/> <!-- LKFJimmy -->
+    <contributor uuid="63ddf58a-ba2c-4d39-8481-6358bb46c63a" contribution="xml"/> <!-- samschaap -->
+</contributors>
+<teams>
+    <team id="red-team" color="dark red" max="18">Red</team>
+    <team id="green-team" color="dark green" max="18">Green</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <item slot="2" unbreakable="true" material="iron pickaxe">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item slot="3" unbreakable="true" material="iron axe">
+            <enchantment level="2">efficiency</enchantment>
+        </item>
+        <item slot="4" amount="64" material="quartz block"/>
+        <item slot="31" amount="64" material="quartz block"/>
+        <item slot="5" amount="64" material="smooth brick"/>
+        <item slot="6" material="water bucket"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment>projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" team-color="true" material="leather boots">
+            <enchantment>feather_falling</enchantment>
+        </boots>
+        <effect duration="3" amplifier="255">damage resistance</effect>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <region yaw="90">
+            <cylinder base="-61,44,157" radius="1" height="1"/>
+        </region>
+    </default>
+    <spawn team="red-team" kit="spawn-kit">
+        <region yaw="0">
+            <point>-161.5,8,56.5</point>
+        </region>
+    </spawn>
+    <spawn team="green-team" kit="spawn-kit">
+        <region yaw="180">
+            <point>-153.5,8,261.5</point>
+        </region>
+    </spawn>
+</spawns>
+<filters>
+    <all id="only-red-cobweb">
+        <team id="only-red">red-team</team>
+        <material>web</material>
+    </all>
+    <all id="only-green-cobweb">
+        <team id="only-green">green-team</team>
+        <material>web</material>
+    </all>
+    <all id="only-iron-renew">
+        <material id="only-iron">iron block</material>
+        <cause>world</cause>
+    </all>
+    <not id="deny-void">
+        <void/>
+    </not>
+</filters>
+<regions>
+    <union id="spawns">
+        <rectangle id="red-spawn" min="-166,72" max="-150,47"/>
+        <rectangle id="green-spawn" min="-149,246" max="-165,272"/>
+    </union>
+    <union id="iron">
+        <cuboid id="red-iron" min="-156,8,58" max="-152,11,54"/>
+        <cuboid id="green-iron" min="-159,8,259" max="-163,11,263"/>
+    </union>
+    <union id="wool-rooms">
+        <rectangle id="green-wool-room" min="-118,58" max="-101,42"/> <!-- green capture, red defend -->
+        <rectangle id="red-wool-room" min="-197,260" max="-214,276"/> <!-- red capture, green defend -->
+    </union>
+    <point id="red-wool-spawn">-205.5,12,269</point>
+    <point id="green-wool-spawn">-109.5,12,49</point>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply enter="only-green" region="green-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply enter="only-red" region="red-wool-room" message="You may not enter your own wool room!"/>
+    <apply enter="only-green" region="green-wool-room" message="You may not enter your own wool room!"/>
+    <apply block="only-red-cobweb" use="only-red" region="red-wool-room" message="You may not modify the wool room!"/>
+    <apply block="only-green-cobweb" use="only-green" region="green-wool-room" message="You may not modify the wool room!"/>
+    <apply block-break="only-iron" block-place="only-iron-renew" region="iron" message="You may only break iron blocks here!"/>
+    <apply block="never" region="spawns" message="You may not modify spawn!"/>
+    <apply block="deny-void" message="You may not modify the void area!"/>
+</regions>
+<wools craftable="false">
+    <wool team="red-team" color="red" location="-205.5,12,269">
+        <monument>
+            <block>-162,10,51</block>
+        </monument>
+    </wool>
+    <wool team="green-team" color="green" location="-109.5,12,49">
+        <monument>
+            <block>-154,10,266</block>
+        </monument>
+    </wool>
+</wools>
+<spawners>
+    <spawner spawn-region="green-wool-spawn" player-region="green-wool-room" delay="2s">
+        <item material="wool" amount="2" damage="13"/>
+    </spawner>
+    <spawner spawn-region="red-wool-spawn" player-region="red-wool-room" delay="2s">
+        <item material="wool" amount="2" damage="14"/>
+    </spawner>
+</spawners>
+<renewables>
+    <renewable region="iron" renew-filter="only-iron"/>
+</renewables>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+    <tool>arrow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>bucket</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>string</item>
+    <item>redstone</item>
+</itemremove>
+<block-drops>
+    <rule>
+        <filter>
+            <any>
+                <material>quartz block</material>
+                <material>smooth brick</material>
+            </any>
+        </filter>
+        <drops>
+            <item chance="0" material="quartz block"/>
+        </drops>
+    </rule>
+</block-drops>
+<itemkeep>
+    <item>quartz block</item>
+    <item>smooth brick</item>
+    <item>golden apple</item>
+    <item>bucket</item>
+    <item>water bucket</item>
+</itemkeep>
+<kill-reward>
+    <item material="golden apple"/>
+    <item amount="16" material="quartz block"/>
+    <item amount="32" material="smooth brick"/>
+</kill-reward>
+<maxbuildheight>32</maxbuildheight>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
