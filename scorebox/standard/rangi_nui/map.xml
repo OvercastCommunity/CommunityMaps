@@ -1,7 +1,7 @@
 <map proto="1.4.2">
 <name>Rangi-nui</name>
-<version>1.0.2</version>
-<objective>Score 300 points before the enemy team!</objective>
+<version>1.0.3</version>
+<objective>Score more points than the enemy team before time limit ends!</objective>
 <gamemode>scorebox</gamemode>
 <created>2022-08-22</created>
 <authors>
@@ -15,8 +15,8 @@
 <time result="objectives">450s</time>
 <broadcasts>
     <alert after="2s">Collect coins from golden pads and score at the middle pit!</alert>
-    <tip after="1m" every="1m" count="6">Collect coins from golden pads and score at the middle pit!</tip>
-    <alert after="405">All pads are active. Score as much as you can before the time ends!</alert>
+    <tip after="1m" every="1m" count="6">You can collect coins from golden pads.</tip>
+    <alert after="405">All pads are active. Score as much as you can!</alert>
 </broadcasts>
 <teams>
     <team id="red" color="red" max="7">Red</team>
@@ -125,7 +125,7 @@
     </all>
     <time id="time-interval-10">405s</time>
     <!--
-    Points Active:
+    Pads Active:
     
     R1,4,7 10: Top
     R2,5,8,11: Mid
@@ -153,10 +153,10 @@
 </filters>
 <regions>
     <!-- Red Spawn Protection -->
-    <cylinder id="red-spawn" base="19.5,30,-18.5" radius="9" height="50"/>
+    <cylinder id="red-spawn" base="19.5,27,-18.5" radius="9" height="50"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the enemy team's spawn!"/>
     <!-- Cyan Spawn Protection -->
-    <cylinder id="cyan-spawn" base="-18.5,30,19.5" radius="9" height="50"/>
+    <cylinder id="cyan-spawn" base="-18.5,27,19.5" radius="9" height="50"/>
     <apply enter="only-cyan" region="cyan-spawn" message="You may not enter the enemy team's spawn!"/>
     <!-- Void Acceleration -->
     <apply velocity="@0,-40,0">
@@ -165,19 +165,13 @@
     <!-- Red Spawn to Mid Jumppad -->
     <apply velocity="@-0.65,1.6,0.65">
         <region>
-            <union id="cyan-spawn-to-mid">
-                <cuboid min="15,43,-15" max="17.5,46,-13.5"/>
-                <cuboid min="14.5,43,-14" max="14,46,-16.5"/>
-            </union>
+            <cuboid id="red-spawn-to-mid" min="14.8,43.7,-16.2" max="17.2,45,-13.8"/>
         </region>
     </apply>
     <!-- Cyan Spawn to Mid Jumppad -->
     <apply velocity="@0.65,1.6,-0.65">
         <region>
-            <union id="red-spawn-to-mid">
-                <cuboid min="-16.5,43,14.5" max="-14,46,16"/>
-                <cuboid min="-15,43,15" max="-13.5,46,17.5"/>
-            </union>
+            <cuboid id="cyan-spawn-to-mid" min="-13.8,43.7,17.2" max="-16.2,45,14.8"/>
         </region>
     </apply>
     <!-- Mid to Cyan Top Jumppad -->
@@ -223,7 +217,7 @@
         <cuboid min="-0.5,55,-26.5" max="-6.5,59,28.5"/>
         <cuboid min="-5.5,55,25.5" max="-1.5,59,29.5"/>
     </union>
-    <!-- Indicators (Black Stained Clay to Yellow Stained Glass) -->
+    <!-- Indicators (Outer Rings) -->
     <union id="top-rings-clay">
         <cylinder base="-25.5,59.5,0.5" radius="9" height="1"/>
         <cylinder base="26.5,59.5,0.5" radius="9" height="1"/>
@@ -236,7 +230,7 @@
         <cylinder base="4.5,54.5,-26.5" radius="5" height="1"/>
         <cylinder base="-3.5,54.5,27.5" radius="5" height="1"/>
     </union>
-    <!-- Indicators (From Stained Glass to Gold Blocks) -->
+    <!-- Indicators (Pads) -->
     <union id="top-rings-glass">
         <cylinder base="-25.5,58.5,0.5" radius="4" height="1"/>
         <cylinder base="26.5,58.5,0.5" radius="4" height="1"/>
@@ -249,21 +243,34 @@
         <cylinder base="4.5,54.5,-26.5" radius="4" height="1"/>
         <cylinder base="-3.5,54.5,27.5" radius="4" height="1"/>
     </union>
+    <!-- Indicators (Beacon Blockers) -->
+    <union id="top-rings-beacon">
+        <cuboid min="-25,57,0" max="-26,59,1"/>
+		<cuboid min="26,57,0" max="27,59,1"/>
+    </union>
+    <union id="mid-rings-beacon">
+        <cuboid min="-19,52,-19" max="-20,54,-20"/>
+        <cuboid min="20,52,20" max="21,54,21"/>
+    </union>
+    <union id="bot-rings-beacon">
+        <cuboid min="-3,53,27" max="-4,55,28"/>
+        <cuboid min="4,53,-26" max="5,55,-27"/>
+    </union>
     <!--Scorebox Region-->
     <cylinder id="scorebox" base="0.5,29,0.5" radius="2.5" height="3"/>
 </regions>
-<!-- Indicator Rings Monument Modes (Black Stained Clay to Hay Block) -->
+<!-- Indicator (Outer Rings) -->
 <modes material="hay_block" show-before="15s">
-    <mode id="active-0s" after="0s" name="`cTop Points active"/>
-    <mode id="active-45s" after="45s" name="`cMid Points active"/>
-    <mode id="active-90s" after="90s" name="`cBottom Points active"/>
-    <mode id="active-135s" after="135s" name="`cTop Points active"/>
-    <mode id="active-180s" after="180s" name="`cMid Points active"/>
-    <mode id="active-225s" after="225s" name="`cBottom Points active"/>
-    <mode id="active-270s" after="270s" name="`cTop Points active"/>
-    <mode id="active-315s" after="315s" name="`cMid Points active"/>
-    <mode id="active-360s" after="360s" name="`cBottom Points active"/>
-    <mode id="active-405s" after="405s" name="`cAll points activated"/>
+    <mode id="active-0s" after="0s" name="`cTop pads active"/>
+    <mode id="active-45s" after="45s" name="`cMid pads active"/>
+    <mode id="active-90s" after="90s" name="`cBottom pads active"/>
+    <mode id="active-135s" after="135s" name="`cTop pads active"/>
+    <mode id="active-180s" after="180s" name="`cMid pads active"/>
+    <mode id="active-225s" after="225s" name="`cBottom pads active"/>
+    <mode id="active-270s" after="270s" name="`cTop pads active"/>
+    <mode id="active-315s" after="315s" name="`cMid pads active"/>
+    <mode id="active-360s" after="360s" name="`cBottom pads active"/>
+    <mode id="active-405s" after="405s" name="`cAll pads activate"/>
 </modes>
 <modes material="stained_clay:15" show-before="0s">
     <mode id="deactivate-45s" after="45s"/>
@@ -276,22 +283,22 @@
     <mode id="deactivate-360s" after="360s"/>
 </modes>
 <destroyables owner="red" show="false" materials="stained_clay:15">
-    <destroyable name="top-rings-clay" region="top-rings-clay" modes="active-0s deactivate-45s active-135s deactivate-180s active-270s deactivate-315s active-405s"/>
-    <destroyable name="mid-rings-clay" region="mid-rings-clay" modes="active-45s deactivate-90s active-180s deactivate-225s active-315s deactivate-360s active-405s"/>
-    <destroyable name="bottom-rings-clay" region="bot-rings-clay" modes="active-90s deactivate-135s active-225s deactivate-270s active-360s"/>
+    <destroyable name="Top coin rings" region="top-rings-clay" modes="active-0s deactivate-45s active-135s deactivate-180s active-270s deactivate-315s active-405s"/>
+    <destroyable name="Middle coin rings" region="mid-rings-clay" modes="active-45s deactivate-90s active-180s deactivate-225s active-315s deactivate-360s active-405s"/>
+    <destroyable name="Bottom coin rings" region="bot-rings-clay" modes="active-90s deactivate-135s active-225s deactivate-270s active-360s"/>
 </destroyables>
-<!-- Indicator Rings Monument Modes (Stained Glass to Yellow Stained Glass) -->
-<modes material="stained_glass:4" show-before="15s">
-    <mode id="active-0s-2" after="0s" name="`cTop Points active"/>
-    <mode id="active-45s-2" after="45s" name="`cMid Points active"/>
-    <mode id="active-90s-2" after="90s" name="`cBottom Points active"/>
-    <mode id="active-135s-2" after="135s" name="`cTop Points active"/>
-    <mode id="active-180s-2" after="180s" name="`cMid Points active"/>
-    <mode id="active-225s-2" after="225s" name="`cBottom Points active"/>
-    <mode id="active-270s-2" after="270s" name="`cTop Points active"/>
-    <mode id="active-315s-2" after="315s" name="`cMid Points active"/>
-    <mode id="active-360s-2" after="360s" name="`cBottom Points active"/>
-    <mode id="active-405s-2" after="405s" name="`cAll points activated"/>
+<!-- Indicator (Pads) -->
+<modes material="stained_glass:4" show-before="0s">
+    <mode id="active-0s-2" after="0s"/>
+    <mode id="active-45s-2" after="45s"/>
+    <mode id="active-90s-2" after="90s"/>
+    <mode id="active-135s-2" after="135s"/>
+    <mode id="active-180s-2" after="180s"/>
+    <mode id="active-225s-2" after="225s"/>
+    <mode id="active-270s-2" after="270s"/>
+    <mode id="active-315s-2" after="315s"/>
+    <mode id="active-360s-2" after="360s"/>
+    <mode id="active-405s-2" after="405s"/>
 </modes>
 <modes material="stained_glass" show-before="0s">
     <mode id="deactivate-45s-2" after="45s"/>
@@ -304,9 +311,62 @@
     <mode id="deactivate-360s-2" after="360s"/>
 </modes>
 <destroyables owner="red" show="false" materials="stained_glass">
-    <destroyable name="top-rings-glass" region="top-rings-glass" modes="active-0s-2 deactivate-45s-2 active-135s-2 deactivate-180s-2 active-270s-2 deactivate-315s-2 active-405s-2"/>
-    <destroyable name="mid-rings-glass" region="mid-rings-glass" modes="active-45s-2 deactivate-90s-2 active-180s-2 deactivate-225s-2 active-315s-2 deactivate-360s-2 active-405s-2"/>
-    <destroyable name="bottom-rings-glass" region="bot-rings-glass" modes="active-90s-2 deactivate-135s-2 active-225s-2 deactivate-270s-2 active-360s-2"/>
+    <destroyable name="Top coin pads" region="top-rings-glass" modes="active-0s-2 deactivate-45s-2 active-135s-2 deactivate-180s-2 active-270s-2 deactivate-315s-2 active-405s-2"/>
+    <destroyable name="Middle coin pads" region="mid-rings-glass" modes="active-45s-2 deactivate-90s-2 active-180s-2 deactivate-225s-2 active-315s-2 deactivate-360s-2 active-405s-2"/>
+    <destroyable name="Bottom coin pads" region="bot-rings-glass" modes="active-90s-2 deactivate-135s-2 active-225s-2 deactivate-270s-2 active-360s-2"/>
+</destroyables>
+<!-- Indicator (Beacons Blockers - Sandstone) -->
+<modes material="stained_glass:1" show-before="0s">
+    <mode id="active-0s-3" after="0s"/>
+    <mode id="active-45s-3" after="45s"/>
+    <mode id="active-90s-3" after="90s"/>
+    <mode id="active-135s-3" after="135s"/>
+    <mode id="active-180s-3" after="180s"/>
+    <mode id="active-225s-3" after="225s"/>
+    <mode id="active-270s-3" after="270s"/>
+    <mode id="active-315s-3" after="315s"/>
+    <mode id="active-360s-3" after="360s"/>
+    <mode id="active-405s-3" after="405s"/>
+</modes>
+<modes material="sandstone" show-before="0s">
+    <mode id="deactivate-45s-3" after="45s"/>
+    <mode id="deactivate-90s-3" after="90s"/>
+    <mode id="deactivate-135s-3" after="135s"/>
+    <mode id="deactivate-180s-3" after="180s"/>
+    <mode id="deactivate-225s-3" after="225s"/>
+    <mode id="deactivate-270s-3" after="270s"/>
+    <mode id="deactivate-315s-3" after="315s"/>
+    <mode id="deactivate-360s-3" after="360s"/>
+</modes>
+<destroyables owner="red" show="false" materials="sandstone">
+    <destroyable name="Top beacon blockers" region="top-rings-beacon" modes="active-0s-3 deactivate-45s-3 active-135s-3 deactivate-180s-3 active-270s-3 deactivate-315s-3 active-405s-3"/>
+    <destroyable name="Bottom beacon blockers" region="bot-rings-beacon" modes="active-90s-3 deactivate-135s-3 active-225s-3 deactivate-270s-3 active-360s-3"/>
+</destroyables>
+<!-- Indicator (Beacons Blockers - Acacia Logs) -->
+<modes material="stained_glass:1" show-before="0s">
+    <mode id="active-0s-4" after="0s"/>
+    <mode id="active-45s-4" after="45s"/>
+    <mode id="active-90s-4" after="90s"/>
+    <mode id="active-135s-4" after="135s"/>
+    <mode id="active-180s-4" after="180s"/>
+    <mode id="active-225s-4" after="225s"/>
+    <mode id="active-270s-4" after="270s"/>
+    <mode id="active-315s-4" after="315s"/>
+    <mode id="active-360s-4" after="360s"/>
+    <mode id="active-405s-4" after="405s"/>
+</modes>
+<modes material="log_2:12" show-before="0s">
+    <mode id="deactivate-45s-4" after="45s"/>
+    <mode id="deactivate-90s-4" after="90s"/>
+    <mode id="deactivate-135s-4" after="135s"/>
+    <mode id="deactivate-180s-4" after="180s"/>
+    <mode id="deactivate-225s-4" after="225s"/>
+    <mode id="deactivate-270s-4" after="270s"/>
+    <mode id="deactivate-315s-4" after="315s"/>
+    <mode id="deactivate-360s-4" after="360s"/>
+</modes>
+<destroyables owner="red" show="false" materials="log_2">
+    <destroyable name="Middle beacon blockers" region="mid-rings-beacon" modes="active-45s-4 deactivate-90s-4 active-180s-4 deactivate-225s-4 active-315s-4 deactivate-360s-4 active-405s-4"/>
 </destroyables>
 <spawners>
     <!-- Red Top Spawner -->
@@ -369,6 +429,15 @@
         </player-region>
         <item material="double_plant" damage="0" name="`e`lCoin" lore="`7`oJump into the middle pit with coins to earn points."/>
     </spawner>
+	    <spawner delay="1s">
+        <spawn-region>
+            <cylinder base="31.5,61.5,32.5" radius="1" height="1"/>
+        </spawn-region>
+        <player-region>
+            <cylinder base="31.5,61.5,32.5" radius="2" height="3"/>
+        </player-region>
+        <item material="snowball" name="`f`lsam's furball" lore="`7`oPelt haters down!"/>
+    </spawner>
 </spawners>
 <portals>
     <portal filter="only-red" yaw="@45">
@@ -387,9 +456,9 @@
             <cylinder base="-19,44,19" radius="2" height="0"/>
         </destination>
     </portal>
-    <portal y="-100" smooth="true" sound="false">
+    <portal y="-90" smooth="true" sound="false">
         <region>
-            <below y="-5"/>
+            <below y="0"/>
         </region>
     </portal>
 </portals>
@@ -416,6 +485,7 @@
     <item>golden apple</item>
     <item>arrow</item>
     <item>double plant</item>
+	<item>snowball</item>
 </itemkeep>
 <kill-reward>
     <item material="golden apple"/>
