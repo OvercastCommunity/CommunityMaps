@@ -1,20 +1,25 @@
 <map proto="1.4.2">
 <name>Transit</name>
-<version>1.1.5</version>
+<version>1.1.6</version>
 <objective>Bombers should get to the scorebox and Guards should block their way!</objective>
 <created>2022-07-27</created>
 <gamemode>Rage</gamemode>
 <gamemode>AD</gamemode>
 <time>5m</time>
 <score>
-    <box points="5" filter="only-bombers" region="bomber-scoreboxes"/>
+    <box points="3" filter="only-bombers" region="bomber-scoreboxes"/>
     <kills>1</kills>
     <deaths>0</deaths>
 </score>
 <authors>
-    <author uuid="5876ff18-006d-4a1d-83d8-53abd8002578"/> <!-- LKFJimmy -->
-    <author uuid="f2efb814-9e02-4d17-bdf5-8ed449f9df77"/> <!-- Alexander_ -->
+    <author uuid="5876ff18-006d-4a1d-83d8-53abd8002578" contribution="Map Building and XML"/> <!-- LKFJimmy -->
+    <author uuid="f2efb814-9e02-4d17-bdf5-8ed449f9df77" contribution="Map Building"/> <!-- Alexander_ -->
 </authors>
+<contributors>
+    <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="XML Assistance"/> <!-- Cazadorian -->
+    <contributor uuid="a538a00d-fdd6-401a-8ed6-190bc41717e6" contribution="Feedback"/> <!-- Lucas_Slam -->
+    <contributor uuid="8c82e83e-4d7e-40d4-9eb7-3b3eaf08c048" contribution="Feedback"/> <!-- JacketJack_ -->
+</contributors>
 <broadcasts>
     <alert after="1s" every="30s">Don't fall onto the rail!</alert>
     <tip after="2s" every="40s">The scorebox is located in the last compartment!</tip>
@@ -34,8 +39,7 @@
         <item slot="0" enchantment="damage all:10" unbreakable="true" name="`bSword">iron sword</item>
         <effect amplifier="-4">health boost</effect>
         <effect amplifier="1">night vision</effect>
-        <effect duration="3" amplifier="25">heal</effect>
-        <effect duration="3" amplifier="25">damage resistance</effect>
+        <effect duration="5" amplifier="255">damage resistance</effect>
     </kit>
     <kit id="bomber-kit" parents="spawn">
 	<effect amplifier="2">speed</effect>
@@ -46,6 +50,7 @@
     </kit>
     <kit id="guard-kit" parents="spawn">
 	<effect amplifier="1">speed</effect>
+	<effect amplifier="255">haste</effect>
         <chestplate color="FFCC0C" unbreakable="true">leather chestplate</chestplate>
         <leggings color="FFCC0C" unbreakable="true">leather leggings</leggings>
         <boots color="FFCC0C" unbreakable="true">leather boots</boots>
@@ -58,7 +63,7 @@
     </kit>
     <kit id="force-kill" force="true">
         <health>1</health>
-        <effect amplifier="25">wither</effect>
+        <effect amplifier="255">wither</effect>
     </kit>
     <kit id="guard-kill-reward-one" force="true">
         <effect amplifier="2">speed</effect>
@@ -68,6 +73,11 @@
     </kit>
     <kit id="guard-kill-reward-arrow" force="true">
         <item slot="8" amount="2">arrow</item>
+    </kit>
+    <kit id="bomber-scorebox-reward" force="true">
+        <item material="potion" damage="11" lore="Lucky! You've got a potion.">
+            <effect duration="3s" amplifier="3">jump_boost</effect>
+        </item>
     </kit>
 </kits>
 <spawns>
@@ -131,6 +141,11 @@
     <apply enter="only-bombers" region="bomber-scoreboxes" message="You may not enter this area!"/>
     <apply enter="only-guards" region="guard-spawn-prot" message="You may not enter this area!"/>
     <apply enter="only-bombers" region="bomber-spawn-prot" message="You may not enter this area!"/>
+    <apply kit="bomber-scorebox-reward" region="bomber-scoreboxes">
+        <filter>
+            <random>0.25</random>
+        </filter>
+    </apply>
 </regions>
 <portals>
     <!-- portals from score zones to bases -->
@@ -196,7 +211,6 @@
         <filter>
             <all>
                 <team>guards</team>
-                <kill-streak count="2" repeat="true"/>
                 <not>
                     <carrying><item material="arrow"/></carrying>
                 </not>
