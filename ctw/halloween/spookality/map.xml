@@ -1,0 +1,229 @@
+<map proto="1.4.2">
+<name>SpOOkality</name>
+<version>1.0</version> <!-- Regular 1.0.2 -->
+<phase>development</phase>
+<objective>Capture both enemy wools!</objective>
+<created>2021-12-28</created>
+<authors>
+    <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e"/> <!-- Mewzzy -->
+    <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
+    <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
+</authors>
+<contributors>
+    <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="XML"/> <!-- Cazadorian -->
+</contributors>
+<teams>
+    <team id="orange" color="gold" max="20">Orange</team>
+    <team id="purple" color="dark purple" max="20">Purple</team>
+</teams>
+<kits>
+    <kit id="default-kit">
+        <effect>night vision</effect>
+    </kit>
+    <kit id="spawn-kit" parents="default-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow" enchantment="infinity"/>
+        <item slot="2" unbreakable="true" material="iron pickaxe" enchantment="dig speed"/>
+        <item slot="3" material="iron axe" unbreakable="true">
+            <enchantment level="2">dig_speed</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <item slot="4" unbreakable="true" material="iron spade" enchantment="dig speed"/>
+        <item slot="5" amount="64" damage="2" material="wood"/>
+        <item slot="6" amount="32" material="glass"/>
+        <item slot="8" material="bucket"/>
+        <item slot="7" material="golden apple"/>
+        <effect duration="4" amplifier="255">damage resistance</effect>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate" enchantment="protection projectile:2"/>
+        <leggings material="chainmail leggings" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+    </kit>
+</kits>
+<spawns>
+    <default kit="default-kit" yaw="90">
+        <regions>
+            <point>-37.5,20,13.5</point>
+        </regions>
+    </default>
+    <spawn team="purple" kit="spawn-kit" yaw="0">
+        <regions>
+            <point>-118.5,6,-79.5</point>
+        </regions>
+    </spawn>
+    <spawn team="orange" kit="spawn-kit" yaw="180">
+        <regions>
+            <point>-118.5,6,106.5</point>
+        </regions>
+    </spawn>
+</spawns>
+<filters>
+    <deny id="deny-players">
+          <participating/>
+    </deny>
+    <not id="deny-void">
+        <void/>
+    </not>
+    <not id="orange-in-wr">
+        <any>
+            <team id="only-purple">purple</team>
+            <filter id="wr-filter"/>
+        </any>
+    </not>
+    <not id="purple-in-wr">
+        <any>
+            <team id="only-orange">orange</team>
+            <filter id="wr-filter"/>
+        </any>
+    </not>
+    <any id="wr-filter">
+        <material>chest</material>
+        <material>wool</material>
+        <material>wood stairs</material>
+        <material>dark oak stairs</material>
+        <material>trap door</material>
+        <material>wood:1</material>
+        <material>wood:5</material>
+        <material>dark oak fence</material>
+        <material>wood step:5</material>
+        <material>wood step:13</material>
+        <material>step:6</material>
+        <material>step:14</material>
+        <material>log 2</material>
+        <material>stained clay</material>
+        <material>nether brick</material>
+        <material>nether fence</material>
+        <material>nether brick stairs</material>
+        <material>leaves</material>
+        <material>cauldron</material>
+        <material>glowstone</material>
+        <material>piston base</material>
+    </any>
+</filters>
+<regions>
+    <union id="spawn-protection">
+        <rectangle id="purple-protection" min="-98,-99" max="-138,-46"/>
+        <rectangle id="orange-protection" min="-139,126" max="-99,73"/>
+    </union>
+    <complement id="void-area">
+        <everywhere/>
+        <!-- Middle-->
+        <region id="spawn-protection"/>
+        <region id="wool-rooms"/>
+        <rectangle id="orange-bridge" min="-85,41" max="-72,16"/>
+        <rectangle id="middle-bridge" min="-127,20" max="-110,7"/>
+        <rectangle id="purple-bridge" min="-152,-14" max="-165,12"/>
+    </complement>
+    <union id="wool-rooms">
+        <union id="orange-wool-rooms"> <!-- orange defends -->
+            <rectangle id="yellow-woolroom" min="-88,93" max="-67,114"/>
+            <rectangle id="magenta-woolroom" min="-149,93" max="-170,114"/>
+        </union>
+        <union id="purple-wool-rooms"> <!-- purple defends -->
+            <rectangle id="pink-woolroom" min="-88,-66" max="-67,-87"/>
+            <rectangle id="light-blue-woolroom" min="-149,-66" max="-170,-87"/>
+        </union>
+    </union>
+    <point id="light-blue-point">-159.5,10,-78.5</point>
+    <point id="pink-point">-77.5,10,-78.5</point>
+    <point id="yellow-point">-77.5,10,105.5</point>
+    <point id="magenta-point">-159.5,10,105.5</point>
+    <apply enter="only-orange" region="orange-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-purple" region="purple-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-orange" region="purple-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply enter="only-purple" region="orange-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply block="orange-in-wr" region="purple-wool-rooms" message="You may not modify the wool rooms!"/>
+    <apply block="purple-in-wr" region="orange-wool-rooms" message="You may not modify the wool rooms!"/>
+    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
+</regions>
+<spawners>
+    <spawner spawn-region="pink-point" player-region="pink-woolroom" max-entities="16" delay="2s">
+        <item amount="1" material="wool" damage="6"/>
+    </spawner>
+    <spawner spawn-region="light-blue-point" player-region="light-blue-woolroom" max-entities="16" delay="2s">
+        <item amount="1" material="wool" damage="3"/>
+    </spawner>
+    <spawner spawn-region="yellow-point" player-region="yellow-woolroom" max-entities="16" delay="2s">
+        <item amount="1" material="wool" damage="4"/>
+    </spawner>
+    <spawner spawn-region="magenta-point" player-region="magenta-woolroom" max-entities="16" delay="2s">
+        <item amount="1" material="wool" damage="2"/>
+    </spawner>
+</spawners>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>seeds</item>
+    <item>wheat</item>
+    <item>double plant</item>
+    <item>sapling</item>
+    <item>string</item>
+    <item>red rose</item>
+    <item>glass</item>
+    <item>wood</item>
+    <item>glowstone dust</item>
+    <item>brown mushroom</item>
+</itemremove>
+<block-drops>
+    <rule>
+        <filter>
+            <material>wood</material>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+</block-drops>
+<wools team="orange" craftable="false">
+    <wool color="pink" location="-77.5,10,-78.5">
+        <monument>
+            <block>-118,7,114</block>
+        </monument>
+    </wool>
+    <wool color="light blue" location="-159.5,10,-78.5">
+        <monument>
+            <block>-120,7,114</block>
+        </monument>
+    </wool>
+</wools>
+<wools team="purple" craftable="false">
+    <wool color="yellow" location="-77.5,10,105.5">
+        <monument>
+            <block>-118,7,-88</block>
+        </monument>
+   </wool>
+    <wool color="magenta" location="-159.5,10,105.5">
+        <monument>
+            <block>-120,7,-88</block>
+        </monument>
+   </wool>
+</wools>
+<itemkeep>
+    <item>wood:2</item>
+    <item>golden apple</item>
+    <item>bucket</item>
+    <item>water bucket</item>
+</itemkeep>
+<kill-reward>
+    <item material="golden apple"/>
+    <item amount="16" damage="2" material="wood"/>
+    <item amount="8" material="glass"/>
+</kill-reward>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>28</maxbuildheight>
+<timelock>on</timelock>
+</map>
