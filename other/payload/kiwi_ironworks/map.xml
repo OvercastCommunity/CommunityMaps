@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Kiwi Ironworks</name>
-<version>0.1.1</version>
+<version>0.2</version>
 <phase>development</phase>
 <objective>Attackers must push the payload to the end of the map, defenders must stop them from doing so!</objective>
 <game>Payload</game>
@@ -16,9 +16,9 @@
     <contributor uuid="74271a2f-47c0-4bd7-9a9f-4dc7eaedabe0" contribution="Misc additions"/> <!-- envyother-->
     <contributor uuid="74948888-fdb8-4446-9340-f7688c2435cc" contribution="Aesthetics" /> <!-- Zero_Frosty -->
 </contributors>
-<time result="blue">10m30s</time>
+<time result="blue">10m25s</time>
 <broadcasts>
-    <alert after="2s" filter="only-red">Your spawn will open up after 30 seconds have passed, push the payload to the end of the map to win!</alert>
+    <alert after="2s" filter="only-red">Your spawn will open up after 25 seconds have passed, push the payload to the end of the map to win!</alert>
     <alert after="2s" filter="only-blue">Follow the rails right of your spawn to the payload you must defend, stop the Attackers getting it to the end of the map!</alert>
 </broadcasts>
 <teams>
@@ -34,19 +34,12 @@
         <item slot="8" amount="16" material="arrow"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
-        <boots unbreakable="true" material="iron boots"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="2">projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" material="iron boots" enchantment="feather_falling"/>
         <effect duration="3s" amplifier="255">resistance</effect>
         <game-mode>adventure</game-mode>
-    </kit>
-    <kit id="red-kit" parent="spawn-kit">
-        <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="2">projectile_protection</enchantment>
-        </leggings>
-    </kit>
-    <kit id="blue-kit" parent="spawn-kit">
-        <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="2">projectile_protection</enchantment>
-        </leggings>
     </kit>
 </kits>
 <spawns>
@@ -55,7 +48,7 @@
             <point>4.5,21,-8.5</point>
         </region>
     </default>
-    <spawns team="red" kit="red-kit">
+    <spawns team="red" kit="spawn-kit">
         <spawn id="red-first" filter="first-spawn">
             <region yaw="0">
                 <point>0.5,7,-10.5</point>
@@ -72,7 +65,7 @@
             </region>
         </spawn>
     </spawns>
-    <spawns team="blue" kit="blue-kit">
+    <spawns team="blue" kit="spawn-kit">
         <spawn id="blue-first" filter="first-spawn">
             <region yaw="90">
                 <point>53.5,6,68.5</point>
@@ -127,8 +120,8 @@
             <cuboid id="west-warmup" min="-11,5,6" max="-6,10,7"/>
         </union>
         <union id="first-gates">
-            <cuboid id="bottom-red-first" min="33,9,36" max="34,12,38"/>
-            <cuboid id="top-red-first" min="39,11,53" max="42,15,52"/>
+            <cuboid id="north-red-first" min="33,9,36" max="34,12,38"/>
+            <cuboid id="south-red-first" min="34,7,52" max="35,10,57"/>
         </union>
         <union id="second-gates">
             <cuboid id="bottom-red-second" min="34,7,96" max="37,11,97"/>
@@ -138,10 +131,10 @@
     </union>
     <union id="captured-display-regions">
         <cuboid id="first-captured-region" min="17,4,46" max="20,5,49"/>
-        <cuboid id="second-captured-region" min="17,5,94" max="20,6,91"/>
+        <cuboid id="second-captured-region" min="28,8,82" max="31,9,85"/>
     </union>
     <rectangle id="blue-first-spawn-protection" min="36,71" max="58,66"/>
-    <rectangle id="blue-second-spawn-protection" min="1,70" max="-12,102"/>
+    <rectangle id="blue-second-spawn-protection" min="5,86" max="-12,102"/>
     <union id="blue-third-spawn-protection">
         <rectangle min="-1,138" max="6,151"/>
         <rectangle min="41,140" max="45,151"/>
@@ -189,10 +182,10 @@
     <trigger filter="first-checkpoint-completed" trigger="spawns-forward-1" scope="player"/>
     <trigger filter="second-checkpoint-completed" trigger="spawns-forward-2" scope="player"/>
 </actions>
-<payloads permanent="true" radius="3.5" capture-filter="only-red" capture-time="55s" decay-rate="0.25" recovery-rate="0.25" contested-rate="0">
+<payloads permanent="true" radius="3.5" capture-filter="only-red" capture-time="75s" decay-rate="0.1" recovery-rate="0.5" contested-rate="0" time-multiplier="0.1">
   <payload id="first-checkpoint" name="Checkpoint A" location="-8.5,5,13.5" captured="first-captured-region" display-filter="first-spawn"/>
-  <payload id="second-checkpoint" name="Checkpoint B" location="19.5,5,47.5" captured="second-captured-region" player-filter="first-checkpoint-completed" display-filter="second-spawn"/>
-  <payload id="third-checkpoint" name="Checkpoint C" location="17.5,6,92.5" player-filter="second-checkpoint-completed" display-filter="third-spawn"/>
+  <payload id="second-checkpoint" name="Checkpoint B" location="18.5,3,47.5" captured="second-captured-region" player-filter="first-checkpoint-completed" display-filter="second-spawn"/>
+  <payload id="third-checkpoint" name="Checkpoint C" location="29.5,9,84.5" player-filter="second-checkpoint-completed" display-filter="third-spawn"/>
 </payloads>
 <destroyables show="false" required="false">
     <!-- Gates, will eventually be phased out in favour of structures -->
@@ -201,7 +194,7 @@
     <destroyable region="second-gates" id="second-gates-monuments" name="secondgates" owner="blue" materials="iron fence" modes="second-checkpoint-gates"/>
 </destroyables>
 <modes>
-    <mode after="30s" show-before="30s" id="warmup-gates-mode" name="Attackers will be released" material="air"/>
+    <mode after="25s" show-before="25s" id="warmup-gates-mode" name="Attackers will be released" material="air"/>
     <mode after="0s" filter="first-checkpoint-completed" show-before="0" id="first-checkpoint-gates" material="air"/>
     <mode after="0s" filter="second-checkpoint-completed" show-before="0" id="second-checkpoint-gates" material="air"/>
 </modes>
@@ -246,8 +239,8 @@
     <item amount="8" material="arrow"/>
 </kill-reward>
 <respawns>
-    <respawn delay="2s" filter="only-red"/>
-    <respawn delay="3s" filter="only-blue"/>
+    <respawn delay="3s" filter="only-red"/>
+    <respawn delay="4.5s" filter="only-blue"/>
 </respawns>
 <hunger>
     <depletion>off</depletion>
