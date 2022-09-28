@@ -1,0 +1,217 @@
+<map proto="1.4.2">
+<name>Tulip Mania II</name>
+<version>1.0</version>
+<phase>development</phase>
+<objective>Capture the enemy team's wools!</objective>
+<created>2022-09-28</created>
+<gamemode>ctw</gamemode>
+<authors>
+    <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Layout, theming, XML"/> <!-- Cazadorian -->
+    <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Aesthetics"/> <!-- Tundren -->
+</authors>
+<contributors>
+    <contributor uuid="b2539be1-8f98-4375-b653-9d91cd04c30e" contribution="Aesthetics"/> <!-- Mewzzy -->
+</contributors>
+<teams>
+    <team id="purple" color="dark purple" max="14">Purple</team>
+    <team id="orange" color="gold" max="14">Orange</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow" enchantment="infinity"/>
+        <item slot="2" unbreakable="true" material="iron pickaxe"/>
+        <item slot="3" unbreakable="true" material="iron axe"/>
+        <item slot="5" amount="48" material="wood"/>
+        <item slot="7" material="golden apple"/>
+        <item slot="8" material="water bucket"/>
+        <item slot="28" material="arrow"/>
+        <item slot="29" unbreakable="true" material="iron spade"/>
+        <item slot="30" unbreakable="true" material="shears"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" team-color="true" material="leather leggings" />
+        <boots unbreakable="true" team-color="true" material="leather boots" />
+        <effect duration="4" amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="orange-kit" parent="spawn-kit">
+        <item slot="4" material="stained glass" damage="1" amount="64"/>
+    </kit>
+    <kit id="purple-kit" parent="spawn-kit">
+        <item slot="4" material="stained glass" damage="10" amount="64"/>
+    </kit>
+</kits>
+<spawns>
+    <default yaw="90">
+        <regions>
+            <point>74.5,15,42.5</point>
+        </regions>
+    </default>
+    <spawn team="orange" kit="orange-kit" yaw="180">
+        <regions>
+            <point>0.5,13,137.5</point>
+        </regions>
+    </spawn>
+    <spawn team="purple" kit="purple-kit" yaw="0">
+        <regions>
+            <point>0.5,13,-52.5</point>
+        </regions>
+    </spawn>
+</spawns>
+<wools craftable="false">
+    <wool team="purple" color="cyan" location="51.5,12,69.5">
+        <monument>
+            <block>-1,13,-38</block>
+        </monument>
+    </wool>
+    <wool team="purple" color="blue" location="-50.5,12,69.5">
+        <monument>
+            <block>1,13,-38</block>
+        </monument>
+    </wool>
+    <wool team="orange" color="red" location="-50.5,12,15.5">
+        <monument>
+            <block>-1,13,122</block>
+        </monument>
+   </wool>
+    <wool team="orange" color="pink" location="51.5,12,15.5">
+        <monument>
+            <block>1,13,122</block>
+        </monument>
+   </wool>
+</wools>
+<filters>
+    <all id="purple-in-wr">
+        <filter id="deny-void"/>
+        <not>
+            <any>
+                <team id="only-orange">orange</team>
+                <filter id="wr-filter"/>
+            </any>
+        </not>
+    </all>
+    <all id="orange-in-wr">
+        <filter id="deny-void"/>
+        <not>
+            <any>
+                <team id="only-purple">purple</team>
+                <filter id="wr-filter"/>
+            </any>
+        </not>
+    </all>
+    <any id="wr-filter">
+        <material>chest</material>
+    </any>
+    <not id="deny-void">
+       <void/>
+    </not>
+    <deny id="deny-players">
+          <participating/>
+    </deny>
+    <material id="only-iron">iron block</material>
+</filters>
+<regions>
+    <union id="spawn-protection">
+        <rectangle id="purple-prot" min="-9,-35" max="10,-62"/>
+        <rectangle id="orange-prot" min="-9,120" max="10,147"/>
+    </union>
+    <union id="wool-rooms">
+        <union id="purple-wool-rooms">
+            <rectangle id="red-wool-room" min="-52.5,6" max="-40.5,24"/> <!-- purple defends -->
+            <rectangle id="pink-wool-room" min="41.5,6" max="53.5,24"/> <!-- purple defends -->
+        </union>
+        <union id="orange-wool-rooms">
+            <rectangle id="cyan-wool-room" min="-52.5,79" max="-40.5,61"/> <!-- orange defends -->
+            <rectangle id="blue-wool-room" min="41.5,79" max="53.5,61"/> <!-- orange defends -->
+        </union>
+    </union>
+    <negative id="void-area">
+        <region id="spawn-protection"/>
+        <region id="wool-rooms"/>
+        <rectangle id="middle" min="-24,76" max="25,9"/>
+        <rectangle id="orange-west-gap" min="-27,88" max="-41,106"/>
+        <rectangle id="orange-east-gap" min="28,88" max="42,106"/>
+        <rectangle id="purple-east-gap" min="-27,-21" max="-41,-3"/>
+        <rectangle id="purple-west-gap" min="28,-21" max="42,-3"/>
+    </negative>
+    <union id="gapple-spawner">
+        <point id="gap-point">0.5,7,42.5</point>
+        <cylinder id="gap-player" base="0.5,7,42.5" radius="3" height="3"/>
+        <cuboid id="gap-protection" min="0,6,42" max="1,8,43"/>
+    </union>
+    <apply enter="only-purple" region="purple-prot" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-orange" region="orange-prot" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-purple" region="orange-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply enter="only-orange" region="purple-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply block="purple-in-wr" use="only-purple" region="orange-wool-rooms" message="You may not interact with this block!"/>
+    <apply block="orange-in-wr" use="only-orange" region="purple-wool-rooms" message="You may not interact with this block!"/>
+    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block="never" region="gap-protection" message="You may not break the spawner!"/>
+    <apply block-break="only-iron" block-place="deny-players" region="spawn-protection" message="You may not modify the spawns!"/>
+</regions>
+<spawners>
+    <spawner spawn-region="gap-point" player-region="gap-player" delay="8s">
+        <item material="golden apple" amount="1"/>
+    </spawner>
+</spawners>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>shears</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>string</item>
+    <item>redstone</item>
+    <item>redstone torch off</item>
+    <item>sapling</item>
+    <item>dirt</item>
+    <item>stained clay</item>
+</itemremove>
+<itemkeep>
+    <item>arrow</item>
+    <item>wood</item>
+    <item>stained glass</item>
+    <item>golden apple</item>
+    <item>water bucket</item>
+    <item>bucket</item>
+</itemkeep>
+<block-drops>
+    <rule>
+        <filter>
+            <material>wood</material>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+</block-drops>
+<renewables>
+    <renewable region="spawn-protection" renew-filter="only-iron" interval="3" grow="false" particles="true" sound="true"/>
+</renewables>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>25</maxbuildheight>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item amount="16" material="wood"/>
+    </kill-reward>
+    <kill-reward>
+       <kill-reward filter="only-purple">
+           <item amount="8" material="stained glass" damage="10" />
+       </kill-reward>
+       <kill-reward filter="only-orange">
+           <item amount="16" material="stained glass" damage="1" />
+       </kill-reward>
+    </kill-reward>
+</kill-rewards>
+</map>
