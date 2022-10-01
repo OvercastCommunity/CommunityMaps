@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Miner Sixty Niner</name>
-<version>1.2</version>
+<version>1.3</version>
 <objective>Kill enemies for gold nuggets, drop into the chute with them for points!</objective>
 <gamemode>scorebox</gamemode>
 <created>2020-10-16</created>
@@ -17,6 +17,7 @@
 </rules>
 <broadcasts>
     <alert after="1s" every="3m">Gold Nuggets are awarded on kill, jump into the central scorebox with Gold Nuggets to score points!</alert>
+    <alert after="7m">Points from the scorebox have been doubled!</alert>
     <tip after="2s">The platforms to jump into the scorebox reappears every 30 seconds.</tip>
     <tip after="30s" every="120s">The scorebox is open! Jumping into the scorebox with Gold Nuggets is the only way to score.</tip>
 </broadcasts>
@@ -40,6 +41,7 @@
             <enchantment>feather_falling</enchantment>
         </boots>
         <effect duration="2">instant_health</effect>
+        <game-mode>adventure</game-mode>
     </kit>
     <kit id="score-heal" force="true">
         <effect duration="2s" amplifier="10">regeneration</effect>
@@ -47,8 +49,8 @@
 </kits>
 <spawns>
     <default>
-        <region yaw="90">
-            <point>-168.5,75,-10.5</point>
+        <region yaw="-90">
+            <point>-175.5,76,-10.5</point>
         </region>
     </default>
     <spawn team="blue" kit="spawn-kit" yaw="90" region="blue-spawn"/>
@@ -57,6 +59,9 @@
 <filters>
     <team id="only-blue">blue</team>
     <team id="only-red">red</team>
+    <not id="before-7m">
+        <time id="after-7m">7m</time>
+    </not>
 </filters>
 <regions>
     <point id="blue-spawn">-116.5,56,33.5</point>
@@ -65,6 +70,16 @@
     <cuboid id="arrows" min="-124.5,60,-9.5" max="-126.5,60,-11.5"/>
     <cuboid id="arrow-spawn" min="-124.5,62,-9.5" max="-126.5,62,-11.5"/>
     <cylinder id="score-box" base="-138.5,41,-10.5" radius="5" height="5"/>
+    <union id="speed-spawners">
+        <union id="top-spawner">
+            <cylinder id="top-spawner-player" base="-163.5,68,-10.5" radius="2" height="3"/>
+            <point id="top-spawner-point">-163.5,69,-10.5</point>
+        </union>
+        <union id="bottom-spawner">
+            <cylinder id="bottom-spawner-player" base="-145.5,55,-10.5" radius="2" height="3"/>
+            <point id="bottom-spawner-point">-145.5,56,-10.5</point>
+        </union>
+    </union>
     <union id="disable-fence">
         <cuboid min="-124,56,-57" max="-125,57,-54"/>
         <cuboid min="-125,56,36" max="-124,57,33"/>
@@ -215,9 +230,14 @@
 </regions>
 <time result="score">10m</time>
 <score>
-    <box region="score-box">
+    <box region="score-box" filter="before-7m">
         <redeemables>
             <item points="1">gold nugget</item>
+        </redeemables>
+    </box>
+    <box region="score-box" filter="after-7m">
+        <redeemables>
+            <item points="2">gold nugget</item>
         </redeemables>
     </box>
 </score>
@@ -231,6 +251,16 @@
     </spawner>
     <spawner spawn-region="arrows" player-region="arrows" delay="5s">
         <item amount="4" material="arrow"/>
+    </spawner>
+    <spawner spawn-region="bottom-spawner-point" player-region="bottom-spawner-player" delay="10s">
+        <potion damage="2">
+            <effect duration="30">speed</effect>
+        </potion>
+    </spawner>
+    <spawner spawn-region="top-spawner-point" player-region="top-spawner-player" delay="10s">
+        <potion damage="2">
+            <effect duration="30">speed</effect>
+        </potion>
     </spawner>
 </spawners>
 <!-- used as a "gate" mechanic -->
@@ -362,11 +392,4 @@
 <world>
     <timeset>22350</timeset>
 </world>
-<!--
-top spawner
-/setblock ~ ~ ~ minecraft:mob_spawner 0 replace {EntityId:ThrownPotion,SpawnData:{Pos:[-163.5,68.5,-10.5],Potion:{id:potion,Damage:16386,tag:{CustomPotionEffects:[{Id:1,Amplifier:0,Duration:1200}]}}},SpawnCount:1,SpawnRange:3,RequiredPlayerRange:5,Delay:300,MinSpawnDelay:300,MaxSpawnDelay:300}
-
-bottom speed potion spawner
-/setblock ~ ~ ~ minecraft:mob_spawner 0 replace {EntityId:ThrownPotion,SpawnData:{Pos:[-145.5,55.5,-10.5],Potion:{id:potion,Damage:16386,tag:{CustomPotionEffects:[{Id:1,Amplifier:0,Duration:1200}]}}},SpawnCount:1,SpawnRange:3,RequiredPlayerRange:5,Delay:300,MinSpawnDelay:300,MaxSpawnDelay:300}
--->
 </map>
