@@ -12,7 +12,7 @@ Check what applies to you. *Add an X between the brackets or click the checkboxe
 - [ ] I have [pruned](https://pgm.dev/docs/guides/packaging/pruning-chunks) the map
 - [ ] I have agreed with assigning the CC BY-SA license to this map, as mentioned in the README
 - [ ] I have created an XML file
-- [ ] I have created an map image
+- [ ] I have created a map image
 - [ ] I have uploaded the map zip file to a file sharing service
 - [ ] The map has been tested locally to make sure it works
 
@@ -35,4 +35,4 @@ Please [make](https://pgm.dev/docs/guides/packaging/compiling-and-releasing#the-
 Please attempt to [make](https://pgm.dev/docs/guides/packaging/compiling-and-releasing#the-map-image) a nice `map.png` in `290x246` resolution and upload it by dragging it into this text box.
 
 # Download Link
-[Package the map](https://pgm.dev/docs/guides/packaging/compiling-and-releasing#compressing-the-folder-to-a-zip-file) and upload it somewhere where we can download it, like **Google Drive** or **Dropbox**.
+[Package the map](https://pgm.dev/docs/guides/packaging/compiling-and-releasing#compressing-the-folder-to-a-zip-file) and upload it somewhere where we can download it, like **Google Drive**, **Dropbox**, or by dragging it into this text box. Make sure your file contains a region folder, a level.dat, a map.xml, and a map.png.
