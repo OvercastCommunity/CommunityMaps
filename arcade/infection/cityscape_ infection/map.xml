@@ -1,0 +1,170 @@
+<?xml version="1.0"?>
+<map proto="1.4.2" game="Infection">
+<name>Cityscape: Infection</name>
+<created>2022-10-07</created>
+<version>1.0.0</version>
+<objective>Survive against the Zombies for 8 minutes!</objective>
+<time result="human-team">8m</time>
+<authors>
+    <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
+    <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e"/> <!-- Mewzzy -->
+    <author uuid="6ff4ade9-e968-4acd-80eb-1a6fa89629fb" contribution="XML creation"/> <!-- _Pear -->
+</authors>
+<gamemode>arcade</gamemode>
+<broadcasts>
+    <alert after="2s">The zombies will deploy in 13 seconds!</alert>
+    <alert after="15s">The zombies are deploying!</alert>
+    <tip after="4s" filter="only-humans">You are a Human, You must survive for as long as possible against the waves of Zombies. If you die, you become a Zombie!</tip>
+    <tip after="4s" filter="only-zombies">You are a Zombie, You must kill all of the Humans to win!</tip>
+    <tip after="20s" every="2m">Zombies are able to double-jump every 7 seconds.</tip>
+</broadcasts>
+<teams>
+    <team id="human-team" color="gold" plural="true" min="1" max="30" max-overfill="30">Humans</team>
+    <team id="zombie-team" color="dark green" show-name-tags="false" plural="true" min="1" max="8" max-overfill="8">Zombies</team>
+</teams>
+<spawns>
+    <default>
+        <region yaw="180">
+            <point>0.5,57,1.5</point>
+        </region>
+    </default>
+    <!-- Humans -->
+    <spawn filter="before-13s" team="human-team" kit="human-kit">
+        <region yaw="-45">
+            <point>-21.5,6,-20.5</point>
+        </region>
+    </spawn>
+    <spawn filter="before-13s" team="human-team" kit="human-kit">
+        <region yaw="-135">
+            <point>-21.5,6,-23.5</point>
+        </region>
+    </spawn>
+    <spawn filter="before-13s" team="human-team" kit="human-kit">
+        <region yaw="135">
+            <point>22.5,6,23.5</point>
+        </region>
+    </spawn>
+    <spawn filter="before-13s" team="human-team" kit="human-kit">
+        <region yaw="45">
+            <point>22.5,6,-20.5</point>
+        </region>
+    </spawn>
+    <spawn filter="after-13s" team="human-team" kit="zombie-switch-kit">
+        <region>
+            <point>0.5,5,10.5</point>
+        </region>
+    </spawn>
+    <!-- Zombies -->
+    <spawn team="zombie-team" kit="zombie-kit">
+        <region yaw="180">
+            <point>0.5,56,14.5</point>
+        </region>
+    </spawn>
+    <spawn team="zombie-team" kit="zombie-kit">
+        <region yaw="0">
+            <point>0.5,56,6.5</point>
+        </region>
+    </spawn>
+</spawns>
+<kits>
+    <kit id="human-kit">
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" material="arrow" amount="48"/>
+        <helmet locked="true" unbreakable="true" material="chainmail helmet"/>
+        <chestplate locked="true" unbreakable="true" material="chainmail chestplate"/>
+        <leggings locked="true" unbreakable="true" material="chainmail leggings"/>
+        <boots locked="true" unbreakable="true" material="iron boots"/>
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="zombie-kit">
+        <item slot="0" unbreakable="true" material="stone sword" name="`2`lInfection Sword"/>
+        <helmet locked="true" material="skull item" damage="2"/>
+        <chestplate locked="true" unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings locked="true" unbreakable="true" team-color="true" material="leather leggings"/>
+        <boots locked="true" unbreakable="true" team-color="true" material="leather boots"/>
+        <effect duration="5s">increase damage</effect>
+        <effect duration="oo" amplifier="1">speed</effect>
+        <double-jump recharge-time="7s"/>
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="zombie-switch-kit" force="true">
+        <team-switch team="zombie-team"/>
+    </kit>
+    <kit id="attacker-kill-reward">
+        <effect duration="5s" amplifier="2">regeneration</effect>
+    </kit>
+</kits>
+<filters>
+    <team id="only-humans">human-team</team>
+    <team id="only-zombies">zombie-team</team>
+    <not id="after-13s">
+        <countdown id="before-13s" duration="13s" message="Zombies will be deployed in {0}">
+            <match-running/>
+        </countdown>
+    </not>
+    <deny id="deny-participating">
+        <participating/>
+    </deny>
+</filters>
+<regions>
+    <!-- Launchpads -->
+    <apply velocity="0,2.0,0">
+        <region>
+            <cuboid id="brick-building-pad" min="-39,8,36" max="-35,9,40"/>
+        </region>
+    </apply>
+    <apply velocity="0,1.8,0">
+        <region>
+            <cuboid id="bank-building-pad" min="43,10,48" max="39,11,44"/>
+        </region>
+    </apply>
+    <!-- Environmental control -->
+    <apply block="deny-participating"/>
+</regions>
+<control-points>
+    <control-point id="win-point" name="Zombies Win!" required="true" capture-time="10s" show-progress="true" capture="everywhere"/>
+</control-points>
+<destroyables name="Glass" required="false" show="false" show-sidebar="true" materials="stained_glass" modes="zombie-deployment">
+    <destroyable owner="zombie-team">
+        <region>
+            <cuboid id="helicopter-floor" min="2.5,53,8.5" max="-1.5,55,12.5"/>
+        </region>
+    </destroyable>
+</destroyables>
+<modes>
+    <mode id="zombie-deployment" after="13s" material="air"/>
+</modes>
+<itemremove>
+    <item>lever</item>
+    <item>arrow</item>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>chainmail chestplate</item>
+    <item>chainmail leggings</item>
+    <item>chainmail boots</item>
+    <item>chainmail helmet</item>
+    <item>iron chestplate</item>
+    <item>iron leggings</item>
+    <item>iron boots</item>
+    <item>iron helmet</item>
+    <item>skull item</item>
+    <item>stone sword</item>
+    <item>iron sword</item>
+    <item>armor stand</item>
+    <item>bow</item>
+    <item>iron boots</item>
+</itemremove>
+<kill-rewards>
+    <kill-reward filter="only-humans" kit="attacker-kill-reward"/>
+</kill-rewards>
+<respawn auto="true"/>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<disabledamage>
+    <damage>fall</damage>
+</disabledamage>
+</map>
