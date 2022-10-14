@@ -1,0 +1,139 @@
+<map proto="1.4.2">
+<name>Tuscany Hills</name>
+<version>1.0</version>
+<phase>development</phase>
+<objective>Capture the enemy's flag 3 times to win!</objective>
+<gamemode>ctf</gamemode>
+<authors>
+    <author uuid="1fd982ab-8941-474b-b51e-6ce2346f4cd5"/> <!-- Zynnphony -->
+</authors>
+<contributors>
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="Map XML"/> <!-- zzuf -->
+</contributors>
+<teams>
+    <team id="red-team" color="dark red" max="16">Red</team>
+    <team id="blue-team" color="blue" max="16">Blue</team>
+</teams>
+<broadcasts>
+    <tip after="5s" every="4m">Flags can be captured both at your `l`fmonastery`r or at `l`fyour spawn`r!</tip>
+    <alert after="8m" every="2m">If both teams' scores are tied after the timer reaches zero, the first team to capture a flag wins!</alert>
+</broadcasts>
+<spawns>
+    <spawn team="blue-team" kit="blue-kit" yaw="90" region="blue-spawn"/>
+    <spawn team="red-team" kit="red-kit" yaw="-90" region="red-spawn"/>
+    <default>
+        <regions yaw="0">
+            <cuboid min="1267.5,204.5,722.5" max="1263.5,204.5,720.5"/>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="spawn-kit">
+        <game-mode>adventure</game-mode>
+        <effect duration="1s" amplifier="255">regeneration</effect>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true">
+            <enchantment>infinity</enchantment>
+            <enchantment>power</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <leggings unbreakable="true">chainmail leggings</leggings>
+        <boots unbreakable="true">iron boots</boots>
+    </kit>
+    <kit id="red-kit" parents="spawn-kit">
+        <helmet color="aa0000" unbreakable="true">leather helmet</helmet>
+        <chestplate color="aa0000" unbreakable="true">leather chestplate</chestplate>
+    </kit>
+    <kit id="blue-kit" parents="spawn-kit">
+        <helmet color="5555ff" unbreakable="true">leather helmet</helmet>
+        <chestplate color="5555ff" unbreakable="true">leather chestplate</chestplate>
+    </kit>
+</kits>
+<flags>
+    <!-- Blue flag -->
+    <flag id="blue-flag" name="Blue Flag" color="blue" post="blue-flag-post" carry-message="You are carrying the flag, bring it to your spawn or to your monastery!" drop-kit="red-kit"/>
+    <post id="blue-flag-post" owner="blue-team" pickup-filter="only-red" respawn-time="2s" recover-time="5s">1387.5,207,768.5</post>
+    <net post="blue-flag-post" points="1" region="red-net-monastery" capture-filter="only-red" flag="blue-flag"/>
+    <net post="blue-flag-post" points="1" region="red-net-spawn" capture-filter="only-red" flag="blue-flag"/>
+    <!-- Red flag -->
+    <flag id="red-flag" name="Red Flag" color="red" post="red-flag-post" carry-message="You are carrying the flag, bring it to your spawn or to your monastery!" drop-kit="blue-kit"/>
+    <post id="red-flag-post" owner="red-team" pickup-filter="only-blue" respawn-time="2s" recover-time="5s">1135.5,207,768.5</post>
+    <net post="red-flag-post" points="1" region="blue-net-monastery" capture-filter="only-blue" flag="red-flag"/>
+    <net post="red-flag-post" points="1" region="blue-net-spawn" capture-filter="only-blue" flag="red-flag"/>
+</flags>
+<regions>
+    <cuboid id="blue-spawn" min="1380.5,202.5,816.5" max="1382.5,202.5,814.5"/>
+    <cuboid id="red-spawn" min="1142.5,202.5,814.5" max="1140.5,202.5,816.5"/>
+    <cuboid id="red-net-monastery" min="1137,207,767" max="1134,209,770"/>
+    <cuboid id="blue-net-monastery" min="1386,207,770" max="1389,209,767"/>
+    <cuboid id="red-net-spawn" min="1143,202,814" max="1140,204,817"/>
+    <cuboid id="blue-net-spawn" min="1380,202,817" max="1383,204,814"/>
+    <apply block="never">
+        <rectangle min="-oo,-oo" max="oo,oo"/>
+    </apply>
+</regions>
+<filters>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <flag-carried id="holding-red-flag">red-flag</flag-carried>
+    <flag-carried id="holding-blue-flag">blue-flag</flag-carried>
+    <flag-captured id="captured-red-flag">red-flag</flag-captured>
+    <flag-captured id="captured-blue-flag">blue-flag</flag-captured>
+    <flag-dropped id="dropped-red-flag">red-flag</flag-dropped>
+    <flag-dropped id="dropped-blue-flag">blue-flag</flag-dropped>
+</filters>
+<actions>
+    <action id="take-items" scope="player">
+        <message text="`e⚠ `cYour weapons are removed while you're holding the flag!"/>
+        <replace-item>
+            <find material="stone sword" unbreakable="true"/>
+            <replace material="air"/>
+        </replace-item>
+        <replace-item>
+            <find material="bow" unbreakable="true" enchantment="arrow damage:1;infinity"/>
+            <replace material="air"/>
+        </replace-item>
+        <replace-item>
+            <find material="arrow"/>
+            <replace material="air"/>
+        </replace-item>
+    </action>
+    <trigger filter="holding-red-flag" action="take-items" scope="player"/>
+    <trigger filter="holding-blue-flag" action="take-items" scope="player"/>
+    <action id="give-items" scope="player">
+        <message text="`e⚠ `aYour weapons are back!"/>
+    </action>
+    <trigger filter="dropped-red-flag" action="give-items" scope="player"/>
+    <trigger filter="dropped-blue-flag" action="give-items" scope="player"/>
+</actions>
+<score>
+    <kills>0</kills>
+    <deaths>0</deaths>
+    <limit>3</limit>
+</score>
+<time result="score" overtime="1s" max-overtime="2m">10m</time>
+<toolrepair>
+    <item>arrow</item>
+</toolrepair>
+<itemremove>
+    <item>arrow</item>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+    <item>golden apple</item>
+</itemremove>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+    </kill-reward>
+</kill-rewards>
+<disabledamage>
+    <damage>fall</damage>
+</disabledamage>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
