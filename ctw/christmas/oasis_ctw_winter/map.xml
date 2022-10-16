@@ -1,0 +1,219 @@
+<map proto="1.4.2">
+<name>Oasis CTW Winter</name>
+<version>1.0.0</version>
+<objective>Capture the enemy team's wool!</objective>
+<created>2022-10-15</created>
+<gamemode>ctw</gamemode>
+<authors>
+    <author uuid="f1ff7ecc-2e79-4320-85de-adb392eb2822"/> <!-- DerStiv -->
+</authors>
+<contributors>
+    <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="XML"/> <!-- Cazadorian -->
+</contributors>
+<teams>
+    <team id="blue-team" color="blue" max="24">Blue</team>
+    <team id="red-team" color="dark red" max="24">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true" enchantment="arrow infinite"/>
+        <item slot="2" material="iron pickaxe" unbreakable="true"/>
+        <item slot="3" material="iron axe" unbreakable="true"/>
+        <item slot="4" material="wood" amount="64"/>
+        <item slot="6" material="bucket"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <item slot="29" material="shears" unbreakable="true"/>
+        <item slot="30" material="iron spade" unbreakable="true"/>
+        <helmet team-color="true" material="leather helmet" unbreakable="true"/>
+        <chestplate material="chainmail chestplate" unbreakable="true"/>
+        <leggings material="leather leggings" team-color="true" unbreakable="true"/>
+        <boots material="chainmail boots" unbreakable="true"/>
+        <effect duration="4" amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="blue-kit" parent="spawn-kit">
+        <item slot="5" material="stained glass" damage="11" amount="64"/>
+    </kit>
+    <kit id="red-kit" parent="spawn-kit">
+        <item slot="5" material="stained glass" damage="14" amount="64"/>
+    </kit>
+</kits>
+<spawns>
+    <default yaw="90">
+        <region>
+            <point>38.5,25,180.5</point>
+        </region>
+    </default>
+    <spawn team="red-team" kit="red-kit" yaw="0">
+        <regions>
+            <point>0.5,19,61.5</point>
+            <point>-70.5,19,61.5</point>
+        </regions>
+    </spawn>
+    <spawn team="blue-team" kit="blue-kit" yaw="180">
+        <regions>
+            <point>-70.5,19,299.5</point>
+            <point>0.5,19,299.5</point>
+        </regions>
+    </spawn>
+</spawns>
+<wools craftable="false">
+    <wool team="blue-team" color="blue" location="-35.5,14,30.5">
+        <monument>
+            <block>-36,10,263</block>
+        </monument>
+    </wool>
+    <wool team="red-team" color="red" location="-35.5,14,329.5">
+        <monument>
+            <block>-35,10,97</block>
+        </monument>
+   </wool>
+</wools>
+<filters>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <any id="block-break-void-filter">
+        <all>
+            <any>
+                <material>leaves</material>
+                <material>log</material>
+            </any>
+            <void/>
+        </all>
+        <not id="block-place-void-filter">
+            <void/>
+        </not>
+    </any>
+    <all id="reds-woolrooms-filter">
+        <team>blue-team</team>
+        <filter id="woolrooms-filter"/>
+    </all>
+    <all id="blues-woolrooms-filter">
+        <team>red-team</team>
+        <filter id="woolrooms-filter"/>
+    </all>
+    <any id="woolrooms-filter">
+        <material>web</material>
+        <material>wood:0</material>
+        <material>stained glass:14</material>
+        <material>stained glass:11</material>
+        <all>
+            <cause>player</cause>
+            <any>
+                <material>stationary water</material>
+                <material>water</material>
+            </any>
+        </all>
+    </any>
+    <all id="only-iron-cause-world">
+        <material id="only-iron">iron block</material>
+        <cause>world</cause>
+    </all>
+    <material id="only-air">air</material>
+    <deny id="deny-redstone">
+        <material>redstone wire</material>
+    </deny>
+</filters>
+<regions>
+    <union id="spawns">
+        <union id="red-spawn">
+            <rectangle min="-77,81" max="-64,53"/> <!-- west -->
+            <rectangle min="7,81" max="-6,53"/> <!-- east -->
+        </union>
+        <union id="blue-spawn">
+            <rectangle min="-64,280" max="-77,308"/> <!-- west -->
+            <rectangle min="7,280" max="-6,308"/> <!-- east -->
+        </union>
+    </union>
+    <union id="woolrooms">
+        <rectangle id="blues-woolrooms" min="-24,321" max="-46,340"/> <!-- blue defends / red attacks -->
+        <rectangle id="reds-woolrooms" min="-24,40" max="-46,21"/> <!-- red defends / blue attacks -->
+    </union>
+    <negative id="not-build-region">
+        <union id="build-region">
+            <union id="team-sides">
+                <rectangle min="-81,81" max="11,131"/> <!-- red side -->
+                <rectangle min="-81,280" max="11,230"/> <!-- blue side -->
+            </union>
+            <rectangle min="-27,40" max="-43,45"/> <!-- blue wool offset -->
+            <rectangle min="-27,321" max="-43,316"/> <!-- red wool offset -->
+            <rectangle min="-45,130" max="-81,230"/> <!-- west middle -->
+            <rectangle min="-25,130" max="11,230"/> <!-- east middle -->
+        </union>
+    </negative>
+    <union id="wool-monuments">
+        <cuboid min="-37,9,262" max="-33,13,265"/> <!-- blue side -->
+        <cuboid min="-37,9,96" max="-33,13,99"/> <!-- red side -->
+    </union>
+    <!-- applicators -->
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-blue" region="reds-woolrooms" message="You may not enter your own wool room!"/>
+    <apply enter="only-red" region="blues-woolrooms" message="You may not enter your own wool room!"/>
+    <apply block="never" region="spawns" message="You may not edit the spawns!"/>
+    <apply block="never" region="wool-monuments" message="You may not edit the wool monument!"/>
+    <apply block="reds-woolrooms-filter" region="reds-woolrooms" message="You may not edit the wool room!"/>
+    <apply block="blues-woolrooms-filter" region="blues-woolrooms" message="You may not edit the wool room!"/>
+    <apply block-place="block-place-void-filter" block-break="block-break-void-filter" region="not-build-region" message="You may not edit the void!"/>
+    <apply block-physics="deny-redstone" region="woolrooms"/>
+</regions>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>shears</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>chainmail chestplate</item>
+    <item>leather leggings</item>
+    <item>chainmail boots</item>
+    <item>red rose</item>
+    <item>yellow flower</item>
+    <item>string</item>
+    <item>redstone</item>
+    <item>redstone torch off</item>
+</itemremove>
+<itemkeep>
+    <item>iron sword</item>
+    <item>bow</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>iron spade</item>
+    <item>shears</item>
+    <item>arrow</item>
+    <item>wood</item>
+    <item>stained glass</item>
+    <item>golden apple</item>
+    <item>water bucket</item>
+    <item>bucket</item>
+</itemkeep>
+<block-drops>
+    <rule>
+        <filter>
+            <material>wood</material>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+</block-drops>
+<renewables>
+    <renewable region="team-sides" renew-filter="only-iron" interval="3" grow="false" particles="true" sound="true"/>
+</renewables>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>32</maxbuildheight>
+<kill-rewards>
+    <kill-reward>
+        <item material="wood" amount="16"/>
+        <item material="golden apple"/>
+    </kill-reward>
+</kill-rewards>
+</map>
