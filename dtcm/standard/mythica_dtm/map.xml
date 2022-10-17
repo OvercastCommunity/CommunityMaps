@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Mythica DTM</name>
-<version>1.0</version>
+<version>1.0.1</version>
 <phase>development</phase>
 <objective>Destroy the enemy team's monuments!</objective>
 <created>2022-10-15</created>
@@ -27,7 +27,6 @@
         <item slot="6" amount="16" material="vine"/>
         <item slot="7" material="golden apple"/>
         <item slot="8" material="bucket"/>
-        <item slot="31" amount="64" material="wood" damage="5"/>
         <item slot="32" unbreakable="true" material="iron spade"/>
         <item slot="28" material="arrow"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
@@ -92,7 +91,7 @@
           <participating/>
     </deny>
     <material id="only-gold">gold block</material>
-    <deny id="original-block-protection">
+    <deny id="original-block-protection"> <!-- Swap over to blocks when PGM is updated --> 
         <not>
             <any>
                 <material>air</material>
@@ -102,6 +101,14 @@
             </any>
         </not>
     </deny>
+    <all id="blue-spawn-block-protection">
+        <filter id="only-blue"/>
+        <filter id="original-block-protection"/>
+    </all>
+    <all id="red-spawn-block-protection">
+        <filter id="only-red"/>
+        <filter id="original-block-protection"/>
+    </all>
 </filters>
 <regions>
     <union id="spawn-protection">
@@ -110,10 +117,10 @@
     </union>
     <union id="lanes">
         <union id="spawn-lanes">
-            <cuboid id="blue-spawn-lanes" min="-37,0,-133" max="-136,35,-187"/>
-            <cuboid id="red-spawn-lanes" min="-37,0,-14" max="-136,35,42"/>
+            <cuboid id="blue-spawn-lanes" min="-37,0,-153" max="-136,35,-187"/>
+            <cuboid id="red-spawn-lanes" min="-37,0,8" max="-136,35,42"/>
         </union>
-        <rectangle id="middle" min="-30,-114" max="-143,-30"/>
+        <rectangle id="playable-area" min="-15,43" max="-158,-188"/>
     </union>
     <negative id="void-area">
         <region id="spawn-protection"/>
@@ -125,10 +132,11 @@
         <cuboid id="iron-protection" min="-86,13,-73" max="-87,15,-72"/>
     </union>
     <!-- filtering -->
-    <apply enter="only-red" region="red-spawn-protection" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-blue" region="blue-spawn-protection" message="You may not enter the opponent's spawn!"/>
-    <apply block="never" region="spawn-protection" message="You may not modify around your spawn!"/>
-    <apply block="original-block-protection" region="spawn-lanes" message="You may not break spawn!"/>
+    <apply enter="only-red" region="red-spawn-lanes" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-blue" region="blue-spawn-lanes" message="You may not enter the opponent's spawn!"/>
+    <apply block="never" region="spawn-protection" message="You may not modify around your spawn point!"/>
+    <apply block="blue-spawn-block-protection" region="blue-spawn-lanes" message="You may only break or place gold blocks, wood, and glass in your team's spawn!"/>
+    <apply block="red-spawn-block-protection" region="red-spawn-lanes" message="You may only break or place gold blocks, wood, and glass in your team's spawn!"/>
     <apply block="never" region="iron-protection" message="You may not modify the spawner!"/>
     <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
     <apply use="no-beacons"/>
