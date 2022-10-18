@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Tuscany Hills</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <phase>development</phase>
 <objective>Capture the enemy's flag 3 times to win!</objective>
 <gamemode>ctf</gamemode>
@@ -10,12 +10,18 @@
 <contributors>
     <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="Map XML"/> <!-- zzuf -->
 </contributors>
+<rules>
+    <rule>Players may not take fall damage.</rule>
+    <rule>Players who carry a flag may have their weapons replaced with a Stick.</rule>
+    <rule>Players who carry a flag get Speed I.</rule>
+</rules>
 <teams>
-    <team id="red-team" color="dark red" max="16">Red</team>
-    <team id="blue-team" color="blue" max="16">Blue</team>
+    <team id="red-team" color="dark red" max="20">Red</team>
+    <team id="blue-team" color="blue" max="20">Blue</team>
 </teams>
 <broadcasts>
-    <tip after="5s" every="4m">Flags can be captured both at your `l`fmonastery`r or at `l`fyour spawn`r!</tip>
+    <tip after="5s" every="4m">Flags can be captured both at your `f`lmonastery`r or at `f`lyour spawn`r!</tip>
+    <tip after="7s" every="4m">When you're carrying a flag, you get a Stick with Knockback I and Speed I.</tip>
     <alert after="8m" every="2m">If both teams' scores are tied after the timer reaches zero, the first team to capture a flag wins!</alert>
 </broadcasts>
 <spawns>
@@ -56,19 +62,27 @@
             <enchantment>power</enchantment>
         </item>
         <item slot="28" material="arrow"/>
+        <kit id="take-speed-kit"/>
     </kit>
     <kit id="flag-kit">
         <action id="take-items" scope="player"/>
+        <item slot="0" material="stick" name="`fFlag-Carrier Stick">
+            <enchantment>knockback</enchantment>
+        </item>
+        <effect duration="oo">speed</effect>
+    </kit>
+    <kit id="take-speed-kit" force="true">
+        <effect duration="0s">speed</effect>
     </kit>
 </kits>
 <flags>
     <!-- Blue flag -->
     <flag id="blue-flag" name="Blue Flag" color="blue" post="blue-flag-post" carry-message="You are carrying the flag, bring it to your spawn or to your monastery!" pickup-kit="flag-kit" drop-kit="drop-kit"/>
-    <post id="blue-flag-post" owner="blue-team" pickup-filter="only-red" respawn-time="2s" recover-time="5s">1387.5,207,768.5</post>
+    <post id="blue-flag-post" owner="blue-team" pickup-filter="only-red" respawn-time="2s" recover-time="10s">1387.5,207,768.5</post>
     <net post="blue-flag-post" points="1" region="red-nets" capture-filter="only-red" flag="blue-flag"/>
     <!-- Red flag -->
     <flag id="red-flag" name="Red Flag" color="red" post="red-flag-post" carry-message="You are carrying the flag, bring it to your spawn or to your monastery!" pickup-kit="flag-kit" drop-kit="drop-kit"/>
-    <post id="red-flag-post" owner="red-team" pickup-filter="only-blue" respawn-time="2s" recover-time="5s">1135.5,207,768.5</post>
+    <post id="red-flag-post" owner="red-team" pickup-filter="only-blue" respawn-time="2s" recover-time="10s">1135.5,207,768.5</post>
     <net post="red-flag-post" points="1" region="blue-nets" capture-filter="only-blue" flag="red-flag"/>
 </flags>
 <regions>
@@ -82,15 +96,19 @@
         <cuboid min="1386,207,770" max="1389,209,767"/> <!-- Blue monastery -->
         <cuboid min="1380,202,817" max="1383,204,814"/> <!-- Blue spawn -->
     </union>
-    <apply block="never"/>
+    <apply block="never" use="no-beacons"/>
 </regions>
 <filters>
     <team id="only-blue">blue-team</team>
     <team id="only-red">red-team</team>
+    <deny id="no-beacons">
+        <material>beacon</material>
+    </deny>
 </filters>
 <actions>
     <action id="take-items" scope="player">
-        <message text="`e⚠ `cYour weapons are removed while you're holding the flag!"/>
+        <message text="`e⚠ `cYour regular weapons are removed while you're holding the flag!"/>
+        <message text="`e⚠ `aYou have been given a Stick with Knockback I, and Speed I."/>
         <replace-item>
             <find material="stone sword" unbreakable="true"/>
             <replace material="air"/>
@@ -105,6 +123,10 @@
         </replace-item>
     </action>
     <action id="msg-weapons-back" scope="player">
+        <replace-item>
+            <find material="stick" enchantment="knockback:1" name="`fFlag-Carrier Stick"/>
+            <replace material="air"/>
+        </replace-item>
         <message text="`e⚠ `aYour weapons are back!"/>
     </action>
 </actions>
@@ -121,6 +143,7 @@
     <item>arrow</item>
     <item>stone sword</item>
     <item>bow</item>
+    <item>stick</item>
     <item>leather helmet</item>
     <item>leather chestplate</item>
     <item>chainmail leggings</item>
