@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <map proto="1.4.0">
 <name>Prisma CTW</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <phase>development</phase>
 <objective>Get the enemy's wool to win!</objective>
 <authors>
@@ -18,19 +18,19 @@
     <team id="blue" color="blue" max="6">Blue</team>
 </teams>
 <spawns>
-    <spawn team="red" kit="red-kit">
-        <regions yaw="135">
-            <point>58.5,6,-37.5</point>
+    <spawn team="red" kit="spawn-kit">
+        <regions yaw="-90">
+            <point>36.5,6,-41</point>
         </regions>
     </spawn>
-    <spawn team="blue" kit="blue-kit">
-        <regions yaw="-45">
-            <point>-25.5,6,-123.5</point>
+    <spawn team="blue" kit="spawn-kit">
+        <regions yaw="90">
+            <point>-3.5,6,-120</point>
         </regions>
     </spawn>
     <default>
-        <regions yaw="0">
-            <cylinder base="16.5,21,-120.5" radius="3" height="1"/>
+        <regions yaw="180">
+            <point>16.5,21,-117.5</point>
         </regions>
     </default>
 </spawns>
@@ -45,28 +45,18 @@
         <item slot="3" material="iron axe">
             <enchantment level="2">efficiency</enchantment>
         </item>
+        <item slot="4" amount="64" team-color="true" material="stained clay"/>
         <item slot="7" material="arrow" amount="16"/>
         <item slot="8" material="golden apple"/>
+        <helmet team-color="true" material="leather helmet"/>
+        <chestplate team-color="true" material="leather chestplate"/>
         <leggings material="chainmail leggings">
             <enchantment>projectile_protection</enchantment>
         </leggings>
+        <boots team-color="true" material="leather boots">
+            <enchantment>feather_falling</enchantment>
+        </boots>
         <effect duration="5" amplifier="1">instant_health</effect>
-    </kit>
-    <kit id="red-kit" parents="spawn-kit">
-        <helmet color="993333" material="leather helmet"/>
-        <chestplate color="993333" material="leather chestplate"/>
-        <boots color="993333" material="leather boots">
-            <enchantment>feather_falling</enchantment>
-        </boots>
-        <item slot="4" amount="32" damage="14" material="stained clay"/>
-    </kit>
-    <kit id="blue-kit" parents="spawn-kit">
-        <helmet color="334CB2" material="leather helmet"/>
-        <chestplate color="334CB2" material="leather chestplate"/>
-        <boots color="334CB2" material="leather boots">
-            <enchantment>feather_falling</enchantment>
-        </boots>
-        <item slot="4" amount="32" damage="11" material="stained clay"/>
     </kit>
 </kits>
 <wools>
@@ -80,26 +70,29 @@
 <regions>
     <negative id="void">
         <union id="playable">
-            <rectangle id="middle" min="4,-66" max="29,-95"/>
-            <rectangle id="blue-section" min="0,-113" max="-15,-95"/>
-            <rectangle id="to-magenta-wr" min="-16,-65" max="-39,-94"/>
-            <rectangle id="red-section" min="33,-48" max="48,-66"/>
-            <rectangle id="to-pink-wr" min="49,-96" max="72,-67"/>
+            <rectangle id="middle" min="72,-95" max="-39,-66"/>
+            <rectangle id="blue-spawn-section" min="0,-95" max="-15,-113"/>
+            <rectangle id="red-spawn-section" min="33,-48" max="48,-66"/>
         </union>
     </negative>
     <union id="woolrooms">
-        <rectangle id="pink-woolroom" min="85,-74" max="97,-89"/>
-        <rectangle id="magenta-woolroom" min="-52,-87" max="-64,-72"/>
+        <rectangle id="pink-woolroom" min="85,-73" max="97,-88"/>
+        <rectangle id="magenta-woolroom" min="-52,-88" max="-64,-73"/>
+    </union>
+    <union id="wool-monuments">
+        <cylinder id="pink-monument" base="-25.5,3,-123.5" radius="3" height="10"/>
+        <cylinder id="magenta-monument" base="58.5,3,-37.5" radius="3" height="10"/>
     </union>
     <union id="spawn-areas">
-        <cylinder id="blue-spawn" base="-25.5,3,-123.5" radius="5" height="10"/>
-        <cylinder id="red-spawn" base="58.5,3,-37.5" radius="5" height="10"/>
+        <rectangle id="blue-spawn" min="-8,-127" max="0,-113"/>
+        <rectangle id="red-spawn" min="33,-48" max="41,-34"/>
     </union>
-    <apply region="pink-woolroom" enter="only-blue" message="You may not enter your own woolroom!"/>
-    <apply region="magenta-woolroom" enter="only-red" message="You may not enter your own woolroom!"/>
-    <apply region="pink-woolroom" block="only-blue-cobweb" message="You may not modify the woolroom!"/>
-    <apply region="magenta-woolroom" block="only-red-cobweb" message="You may not modify the woolroom!"/>
-    <apply region="spawn-areas" block="never" message="You may not modify the spawns!"/>
+    <apply region="pink-woolroom" enter="only-blue" block="only-blue-cobweb"/>
+    <apply region="magenta-woolroom" enter="only-red" block="only-red-cobweb"/>
+    <apply region="blue-spawn" enter="only-blue" message="You may not enter the enemy team's spawn area!"/>
+    <apply region="red-spawn" enter="only-red" message="You may not enter the enemy team's spawn area!"/>
+    <apply region="spawn-areas" block="never" message="You may not modify spawn!"/>
+    <apply region="wool-monuments" block="never" message="You may not obstruct the wool monuments!"/>
     <apply region="void" block="deny-void" message="You can't build outside the playable area!"/>
 </regions>
 <filters>
@@ -118,6 +111,7 @@
 <toolrepair>
     <tool>stone sword</tool>
     <tool>bow</tool>
+    <tool>arrow</tool>
     <tool>iron pickaxe</tool>
     <tool>iron axe</tool>
 </toolrepair>
@@ -146,10 +140,13 @@
     <item>golden apple</item>
     <item>arrow</item>
 </itemkeep>
-<kill-reward>
-    <item material="golden apple"/>
-    <item amount="4" material="arrow"/>
-</kill-reward>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item amount="8" material="arrow"/>
+        <item amount="16" team-color="true" material="stained clay"/>
+    </kill-reward>
+</kill-rewards>
 <maxbuildheight>18</maxbuildheight>
 <hunger>
     <depletion>off</depletion>
