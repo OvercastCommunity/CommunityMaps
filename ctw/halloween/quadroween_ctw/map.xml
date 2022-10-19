@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Quadroween CTW</name>
-<version>1.0</version> <!-- Regular 1.2.1 -->
+<version>1.0.1</version> <!-- Regular 1.2.2 -->
 <phase>production</phase>
 <objective>Collect dyes from each spawner, get string from kills and craft them together to make the wools for your victory monuments!</objective>
 <gamemode>ctw</gamemode>
@@ -49,6 +49,13 @@
     <team id="only-red">red</team>
     <team id="only-green">green</team>
     <team id="only-yellow">yellow</team>
+    <all id="reset-antifall">
+        <not>
+            <region id="jump-pads"/>
+        </not>
+        <variable var="fall_variable">1</variable>
+        <grounded/>
+    </all>
 </filters>
 <kits>
     <kit id="spawn-kit">
@@ -66,23 +73,7 @@
         <effect duration="2">instant_health</effect>
         <effect duration="oo">speed</effect>
     </kit>
-    <kit id="Jump-pad-fall-damage">
-        <effect>water_breathing</effect>
-    </kit>
-    <take kit="Jump-pad-fall-damage">
-        <filter>
-            <grounded/>
-        </filter>
-    </take>
 </kits>
-<damage>
-    <deny id="nofall">
-        <all>
-            <cause>fall</cause>
-            <effect>water_breathing</effect>
-        </all>
-    </deny>
-</damage>
 <kill-rewards>
     <kill-reward>
         <item amount="8">arrow</item>
@@ -203,7 +194,6 @@
         <rectangle id="green-protection" min="54,52" max="68,41"/> 
         <rectangle id="yellow-protection" min="-53,52" max="-67,41"/>  
     </union>
-    <apply kit="Jump-pad-fall-damage" region="jump-pads"/>
     <apply velocity="@0,1,6" region="red-pad"/>
     <apply velocity="@0,1,-6" region="blue-pad"/>
     <apply velocity="@6,1,0" region="yellow-pad"/>
@@ -286,4 +276,21 @@
         </monument>
     </wool>
 </wools>
+<actions> <!-- Disables fall damage when using jump pads, reenables it after landing -->
+    <set id="fall-var-0" var="fall_variable" value="0" scope="player"/>
+    <set id="fall-var-1" var="fall_variable" value="1" scope="player"/>
+    <trigger filter="jump-pads" trigger="fall-var-1" scope="player"/>
+    <trigger filter="reset-antifall" trigger="fall-var-0" scope="player"/>
+</actions>
+<variables>
+    <variable id="fall_variable" scope="player"/>
+</variables>
+<damage>
+    <deny id="nofall">
+        <all>
+            <cause>fall</cause>
+            <variable var="fall_variable">1</variable>
+        </all>
+    </deny>
+</damage>
 </map>
