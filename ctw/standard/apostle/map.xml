@@ -1,0 +1,208 @@
+<?xml version="1.0"?>
+<map proto="1.4.0">
+<name>Apostle</name>
+<version>1.0.0</version>
+<objective>Capture the enemies wool and place it at your wool monuments</objective>
+<!-- Map authors & contributors. -->
+<authors>
+    <author uuid="b03360db-b8cd-49de-8ba1-b7920c2238a9" contribution="Map design, aesthetics and XML"/> <!-- Obelistics -->
+</authors>
+<!-- Map modules, i.e. objectives, regions, spawns. -->
+<teams>
+    <team id="red-team" color="red" max="24">Red Team</team>
+    <team id="blue-team" color="blue" max="24">Blue Team</team>
+</teams>
+<!-- Kits -->
+<kits>
+    <kit id="spawn-kit" force="true">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow" enchantment="infinity"/>
+        <item slot="2" unbreakable="true" material="iron pickaxe"/>
+        <item slot="3" unbreakable="true" material="iron axe"/>
+        <item slot="4" amount="64" damage="2" material="wood"/>
+        <item slot="5" amount="64" material="stained clay" team-color="true"/>
+        <item slot="6" material="golden apple" amount="1"/>
+        <item slot="28" material="arrow"/>
+        <item slot="29" unbreakable="true" material="iron spade"/>
+        <item slot="31" amount="64" damage="2" material="wood"/>
+        <helmet team-color="true" unbreakable="true" material="leather helmet"/>
+        <chestplate team-color="true" unbreakable="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+        <boots team-color="true" unbreakable="true" material="leather boots"/>
+        <effect duration="2s" amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="wool-gear" parent="wool-chestplate">
+        <action>
+            <replace-item>
+                <find material="bow" unbreakable="true" enchantment="infinity"/>
+                <replace material="bow" unbreakable="true" enchantment="infinity;power" name="`c`lPower Bow"/>
+            </replace-item>
+        </action>
+        <item material="golden apple" amount="16" />
+    </kit>
+    <kit id="wool-chestplate" force="true">
+        <chestplate unbreakable="true" material="diamond chestplate"/>
+    </kit>
+</kits>
+<!-- Wools -->
+<wools>
+    <wool team="red-team" color="light blue" location="-29.5,16,162.5">
+        <monument><block>13,11,-130</block></monument>
+    </wool>
+    <wool team="red-team" color="purple" location="87.5,19,117.5">
+        <monument><block>19,11,-136</block></monument>
+    </wool>
+    <wool team="blue-team" color="orange" location="-29.5,16,-157.5">
+        <monument><block>13,11,134</block></monument>
+    </wool>
+    <wool team="blue-team" color="pink" location="87.5,19,-112.5">
+        <monument><block>19,11,140</block></monument>
+    </wool>
+</wools>
+<!-- Spawns -->
+<spawns>
+    <spawn team="red-team" kit="spawn-kit">
+        <regions yaw="-20">
+            <cuboid min="19,10,-130" max="16,10,-133"/>
+        </regions>
+    </spawn>
+    <spawn team="blue-team" kit="spawn-kit">
+        <regions yaw="-160">
+            <cuboid min="19,10,135" max="16,10,138"/>
+        </regions>
+    </spawn>
+    <default>
+        <region yaw="90">
+            <cuboid min="94.5,36,0.5" max="90.5,36,4.5"/>
+        </region>
+    </default>
+</spawns>
+<!-- Filters -->
+<filters>
+    <!--No Void-->
+    <deny id="no-void"><void/></deny>
+    <!-- Team filters -->
+    <team id="filter-red-team">red-team</team>
+    <team id="filter-blue-team">blue-team</team>
+    <!-- Block filters -->
+    <material id="only-iron">iron block</material>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+</filters>
+<regions>
+    <union id="wool-rooms">
+        <!-- Wools red is capturing -->
+        <union id="red-wool-rooms">
+            <rectangle id="purple-wool-room" min="81,111" max="93,123"/>
+            <rectangle id="light-blue-wool-room" min="-23,156" max="-35,168"/>
+        </union>
+        <!-- Wools blue is capturing -->
+        <union id="blue-wool-rooms">
+            <rectangle id="pink-wool-room" min="81,-106" max="93,-118"/>
+            <rectangle id="orange-wool-room" min="-23,-151" max="-35,-163"/>
+        </union>
+    </union>
+    <union id="spawn-rooms">
+        <rectangle id="blue-spawn-room" min="24,130" max="9,145"/>
+        <rectangle id="red-spawn-room" min="24,-125" max="9,-140"/>
+    </union>
+    <cuboid id="gapple-spawner-region" min="17,7,1" max="20,11,4"/>
+    <cuboid id="gapple-player-region" min="21,9,0" max="16,11,5"/>
+    <cuboid id="gapple-spawn-region" min="18.5,10,2.5" max="18.5,10,2.5"/>
+    <point id="pink-spawner">87.5,20,-112.5</point>
+    <point id="orange-spawner">-29.5,17,-157.5</point>
+    <point id="purple-spawner">87.5,20,117.5</point>
+    <point id="light-blue-spawner">-29.5,17,162.5</point>
+    <!-- No void -->
+    <apply block="no-void" message="You may not edit the void!"/>
+    <apply block="never" region="gapple-spawner-region" message="You may not edit the spawners!"/>
+    <!-- Spawn protection -->
+    <apply block-place="deny-players" block-break="only-iron" region="spawn-rooms" message="You may not modify spawns!"/>
+    <apply enter="filter-red-team" region="red-spawn-room" message="You may not enter the red' spawn!"/>
+    <apply enter="filter-blue-team" region="blue-spawn-room" message="You may not enter the blue's spawn!"/>
+    <!-- Wool room protection-->
+    <apply block="never" region="wool-rooms" message="You may not modify wool rooms!"/>
+    <apply enter="filter-red-team" region="red-wool-rooms" message="You may not enter red's wool rooms!"/>
+    <apply enter="filter-blue-team" region="blue-wool-rooms" message="You may not enter blue's wool room!"/>
+    <apply kit="wool-gear" region="wool-rooms"/>
+</regions>
+<!-- Renewables -->
+<renewables>
+    <renewable region="spawn-rooms" renew-filter="only-iron" rate="1.5" grow="true" particles="true" sound="true" avoid-players="1.5"/>
+</renewables>
+<!-- Stop boat crafting -->
+<crafting>
+    <disable>boat</disable>
+</crafting>
+<!-- Spawners -->
+<spawners>
+    <spawner spawn-region="gapple-spawn-region" player-region="gapple-player-region" delay="4s">
+        <item amount="1" material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="pink-spawner" player-region="pink-wool-room" delay="10s">
+        <item amount="2" material="wool" damage="6"/>
+    </spawner>
+    <spawner spawn-region="orange-spawner" player-region="orange-wool-room" delay="10s">
+        <item amount="2" material="wool" damage="1"/>
+    </spawner>
+    <spawner spawn-region="purple-spawner" player-region="purple-wool-room" delay="10s">
+        <item amount="2" material="wool" damage="10"/>
+    </spawner>
+    <spawner spawn-region="light-blue-spawner" player-region="light-blue-wool-room" delay="10s">
+        <item amount="2" material="wool" damage="3"/>
+    </spawner>
+</spawners>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item amount="16" damage="2" material="wood"/>
+        <item amount="8" material="stained clay" team-color="true"/>
+    </kill-reward>
+</kill-rewards>
+<maxbuildheight>36</maxbuildheight>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemkeep>
+    <item>iron sword</item>
+    <item>bow</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>iron spade</item>
+    <item>arrow</item>
+    <item>wood</item>
+    <item>stained clay</item>
+    <item>golden apple</item>
+</itemkeep>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>seeds</item>
+    <item>water lily</item>
+</itemremove>
+<block-drops>
+    <rule>
+        <filter>
+            <any>
+                <material>wood</material>
+                <material>stained clay</material>
+            </any>
+        </filter>
+        <drops>
+            <item chance="0" material="glass"/>
+        </drops>
+    </rule>
+</block-drops>
+</map>
