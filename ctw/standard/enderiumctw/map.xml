@@ -1,0 +1,171 @@
+﻿<map proto="1.4.2">
+<name>EnderiumCTW</name>
+<version>2.0.0</version>
+<objective>Capture the enemy wool and defend yours!</objective>
+<authors>
+    <author uuid="2c222e01-fc43-4a35-8a61-9b4af9202094" contribution="Building the map, XML"/> <!-- Quanteey -->
+    <author uuid="fe3608b7-d105-4029-8800-34b3147065b6" contribution="Building the map layout"/> <!-- Rockymine -->
+</authors>
+<contributors>
+    <contributor uuid="a9f11454-beac-4cc3-a138-1780802c8794" contribution="Help with the XML for version 1.0"/> <!-- Crazy_ -->
+    <contributor uuid="924c4e61-57b6-4931-afdb-6525b2ed34c0" contribution="Minor map aesthetics"/> <!-- OAF6 -->
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="Used an XML they made as a template"/> <!-- zzuf -->
+</contributors>
+<created>2022-10-21</created>
+<maxbuildingheight>28</maxbuildingheight>
+<world>
+    <timeset>6000</timeset>
+</world>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>gold helmet</item>
+    <item>gold chestplate</item>
+    <item>gold leggings</item>
+    <item>gold boots</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>stone sword</item>
+    <item>redstone block</item>
+    <item>lapis block</item>
+    <item>bow</item>
+    <item>arrow</item>
+    <item>bucket</item>
+    <item>water bucket</item>
+    <item>diamond chestplate</item>
+    <item>golden apple</item>
+</itemremove>
+<teams>
+    <team id="red-team" color="dark red" max="8" max-overfill="13" dye-color="red">Red</team>
+    <team id="blue-team" color="blue" max="8" max-overfill="13" dye-color="blue">Blue</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true" enchantment="arrow infinite:1"/>
+        <item slot="2" material="iron axe" unbreakable="true"/>
+        <item slot="3" material="iron pickaxe" unbreakable="true"/>
+        <item slot="4" material="bucket"/>
+        <item slot="5" amount="64" material="wood" damage="2"/>
+        <item slot="7" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+        <leggings material="chainmail leggings" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" enchantment="protection fall" unbreakable="true"/>
+        <effect duration="1s" amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="wool-kit-parent" force="true">
+        <chestplate material="diamond chestplate" unbreakable="true" locked="true"/>
+        <item material="golden apple" amount="16"/>
+        <item material="wood" damage="2" amount="128"/>
+        <effect duration="2s" amplifier="255">regeneration</effect>
+    </kit>
+    <kit id="red-team-wool-kit" parents="wool-kit-parent" force="true">
+        <item material="wool" damage="11" amount="4"/>
+    </kit>
+    <kit id="blue-team-wool-kit" parents="wool-kit-parent" force="true">
+        <item material="wool" damage="14" amount="4"/>
+    </kit>
+    <give kit="red-team-wool-kit" filter="eligible-for-red-wool-kit"/>
+    <give kit="blue-team-wool-kit" filter="eligible-for-blue-wool-kit"/>
+</kits>
+<filters>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+    <material id="gold-only">gold block</material>
+    <deny id="deny-blue">
+        <team id="blue-only">blue-team</team>
+    </deny>
+    <deny id="deny-red">
+        <team id="red-only">red-team</team>
+    </deny>
+    <all id="red-in-wr">
+        <team>red-team</team>
+        <any>
+            <material>web</material>
+            <material>gold block</material>
+        </any>
+    </all>
+    <all id="blue-in-wr">
+        <team>blue-team</team>
+        <any>
+            <material>web</material>
+            <material>gold block</material>
+        </any>
+    </all>
+    <deny id="void">
+        <void/>
+    </deny>
+    <all id="eligible-for-red-wool-kit">
+        <not>
+            <wearing ignore-metadata="true"><item material="diamond chestplate"/></wearing>
+        </not>
+        <region id="blue-wr-spawner"/>
+        <participating/>
+    </all>
+    <all id="eligible-for-blue-wool-kit">
+        <not>
+            <wearing ignore-metadata="true"><item material="diamond chestplate"/></wearing>
+        </not>
+        <region id="red-wr-spawner"/>
+        <participating/>
+    </all>
+</filters>
+<spawns>
+    <spawn kit="spawn-kit" team="red-team" yaw="-90">
+        <region><point>-60,12,-11</point></region>
+    </spawn>
+    <spawn kit="spawn-kit" team="blue-team" yaw="90">
+        <region><point>61,12,-11</point></region>
+    </spawn>
+    <default>
+        <regions><point yaw="179.9">0.5,7,0</point></regions>
+    </default>
+</spawns>
+<wools>
+    <wool team="red-team" color="blue" location="-42,63,7">
+      <monument><block>-66,13,-12</block></monument>
+    </wool>
+    <wool team="blue-team" color="red" location="-4,63,7">
+      <monument><block>66,13,-12</block></monument>
+    </wool>
+</wools>
+<regions>
+    <cuboid id="red-wr" min="-39,0,19" max="-28,28,32"/>
+    <cuboid id="blue-wr" min="29,0,19" max="40,28,32"/>
+    <union id="spawns">
+        <complement id="red-spawn">
+            <cuboid min="-68,0,-17" max="-50,28,-6"/>
+            <block>-66,13,-12</block>
+        </complement>
+        <complement id="blue-spawn">
+            <cuboid min="69,0,-17" max="51,28,-6"/>
+            <block>66,13,-12</block>
+        </complement>
+    </union>
+    <cuboid id="red-wr-spawner" min="-35,12,27" max="-32,14,30"/>
+    <cuboid id="blue-wr-spawner" min="33,12,27" max="36,14,30"/>
+    <apply block="deny-blue" enter="deny-blue" region="blue-wr" message="You may not modify or enter your own woolroom"/>
+    <apply block="deny-red" enter="deny-red" region="red-wr" message="You may not modify or enter your own woolroom"/>
+    <apply block-place="deny-players" block-break="gold-only" region="spawns" message="You may not edit your spawn"/>
+    <apply enter="blue-only" region="blue-spawn" message="You may not enter your enemies' spawn"/>
+    <apply enter="red-only" region="red-spawn" message="You may not enter your enemies' spawn"/>
+    <apply block-break="red-in-wr" region="blue-wr" message="You may only break gold blocks in the woolrooms"/>
+    <apply block-place="red-in-wr" region="blue-wr" message="You may not place blocks in the woolrooms"/>
+    <apply block-break="blue-in-wr" region="red-wr" message="You may only break gold blocks in the woolrooms"/>
+    <apply block-place="blue-in-wr" region="red-wr" message="You may not place blocks in the woolrooms"/>
+    <apply block-place="void" message="You may not place blocks in the void"/>
+</regions>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+    </kill-reward>
+</kill-rewards>
+</map>
