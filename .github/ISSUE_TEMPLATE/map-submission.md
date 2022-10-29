@@ -10,7 +10,7 @@ assignees: ''
 ### Checklist
 Check what applies to you. *Add an X between the brackets or click the checkboxes when you have submitted the issue.*
 - [ ] I have [pruned](https://pgm.dev/docs/guides/packaging/pruning-chunks) the map
-- [ ] I have agreed with assigning the CC BY-SA license to this map, as mentioned in the README
+- [ ] I have agreed with assigning the CC BY-SA license to this map, as mentioned in the [README](https://github.com/OvercastCommunity/CommunityMaps#readme)
 - [ ] I have created an XML file
 - [ ] I have created a map image
 - [ ] I have uploaded the map zip file to a file sharing service
