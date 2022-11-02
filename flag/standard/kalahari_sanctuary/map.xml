@@ -1,0 +1,175 @@
+<map proto="1.4.0">
+<name>Kalahari Sanctuary</name>
+<version>1.0.0</version>
+<phase>development</phase>
+<objective>Score your flag in the enemy goals, Most points wins!</objective>
+<created>2022-10-31</created>
+<authors>
+    <author uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609"/> <!--  Technodono  -->
+</authors>
+<rules>
+    <rule>Fall damage is disabled!</rule>
+</rules>
+<gamemode>ctf</gamemode>
+<game>Flag Assault</game>
+<!--  Tips -->
+<broadcasts>
+    <tip after="1s" every="2m">Remeber to defend your teams goals from the enemy flag carrier!</tip>
+</broadcasts>
+<!--  Teams and Kits  -->
+<teams>
+    <team id="red-team" color="red" max="12">Red</team>
+    <team id="blue-team" color="blue" max="12">Blue</team>
+</teams>
+<kits>
+    <kit id="spawn">
+        <item slot="0" unbreakable="true">stone sword</item>
+        <item slot="1" unbreakable="true">bow</item>
+        <item slot="2" amount="6" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
+        <item slot="3">golden apple</item>
+        <item slot="8" amount="12">arrow</item>
+        <chestplate unbreakable="true">chainmail chestplate</chestplate>
+        <boots unbreakable="true">chainmail boots</boots>
+        <potion duration="2" amplifier="10">regeneration</potion>
+        <potion duration="2" amplifier="10">damage_resistance</potion>
+    </kit>
+    <kit id="red-kit" parents="spawn">
+        <helmet color="ff0000" unbreakable="true">leather helmet</helmet>
+        <leggings color="ff0000" unbreakable="true">leather leggings</leggings>
+    </kit>
+    <kit id="blue-kit" parents="spawn">
+        <helmet color="004aff" unbreakable="true">leather helmet</helmet>
+        <leggings color="004aff" unbreakable="true">leather leggings</leggings>
+    </kit>
+    <kit id="flag-pickup" force="true">
+        <max-health>10</max-health>
+    </kit>
+    <kit id="reset-health" force="true">
+        <max-health>20</max-health>
+    </kit>
+</kits>
+<!--  Spawns and respawns  -->
+<spawns>
+    <spawn team="red-team" kit="red-kit" yaw="-90">
+        <region>
+            <block id="red-spawnpoint">-60,14,1</block>
+        </region>
+    </spawn>
+    <spawn team="blue-team" kit="blue-kit" yaw="90">
+        <region>
+            <block id="blue-spawnpoint">60,14,1</block>
+        </region>
+    </spawn>
+    <default yaw="0">
+        <region>
+            <block id="obs-spawnpoint">0,17,-38</block>
+        </region>
+    </default>
+</spawns>
+<projectiles> 
+    <projectile
+        id="arrow"
+        name="crossbow bolt"
+        velocity="4"
+        damage="7"
+        throwable="true"
+        cooldown="3s"/>
+</projectiles>
+<!-- spawn region stuff   -->
+<regions>
+    <apply block="never">
+        <everywhere/>
+    </apply>
+    <!-- Enter -->
+    <apply enter="blue-not-flag" region="blue-spawn" message="You may not enter the opposing team's spawn!"/>
+    <apply enter="red-not-flag" region="red-spawn" message="You may not enter the opposing team's spawn!"/>
+    <!-- Apply Kits -->
+    <apply kit="red-kit" region="red-goals" filter="only-red"/>
+    <apply kit="blue-kit" region="blue-goals" filter="only-blue"/>
+    <!--  Goal regions  -->
+    <union id="blue-goals">
+        <cuboid id="blue-goal-left" min="-46,12,11" max="-47,16,14"/>
+        <mirror id="blue-goal-right" normal="0,0,1" origin="0.5,0,1.5">
+            <region id="blue-goal-left"/>
+        </mirror>
+    </union>
+    <union id="red-goals">
+        <cuboid id="red-goal-left" min="47,12,11" max="48,16,14"/>
+        <mirror id="red-goal-right" normal="0,0,1" origin="0.5,0,1.5">
+            <region id="red-goal-left"/>
+        </mirror>
+    </union>
+    <!--  Spawns regions  -->
+    <rectangle id="blue-spawn" min="50,8" max="65,-5"/>
+    <rectangle id="red-spawn" min="-49,-5" max="-64,8"/>
+</regions>
+<portals>
+    <!-- portals to ref chairs -->
+    <portal region="red-goals" destination="red-spawnpoint" filter="only-red"/>
+    <portal region="blue-goals" destination="blue-spawnpoint" filter="only-blue"/>
+</portals>
+<!--  Filters  -->
+<filters>
+    <all id="blue-not-flag">
+        <team id="only-blue">blue-team</team>
+        <not id="not-blue-carrying-flag">
+            <carrying-flag id="-blue-carrying-flag">blue-flag</carrying-flag>
+        </not>
+    </all>
+    <all id="red-not-flag">
+        <team id="only-red">red-team</team>
+        <not id="not-red-carrying-flag">
+            <carrying-flag id="-red-carrying-flag">red-flag</carrying-flag>
+        </not>
+    </all>
+</filters>
+
+<!--  Tools and Misc item stuff  -->
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather leggings</item>
+    <item>chainmail boots</item>
+    <item>chainmail chestplate</item>
+    <item>cooked beef</item>
+    <item>arrow</item>
+    <item>golden apple</item>
+    <item>firework charge</item>
+</itemremove>
+<disabledamage>
+    <!-- Disable fall damage -->
+    <damage>fall</damage>
+</disabledamage>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<world>
+    <timelock>on</timelock>
+    <timeset>12000</timeset>
+</world>
+<!-- Gamemode -->
+<game-mode>adventure</game-mode>
+<!-- Scogoal and Flag settings  -->
+<killreward>
+    <item amount="4">arrow</item>
+    <item amount="1">golden apple</item>
+    <item amount="3" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
+</killreward>
+<score>
+    <mercy>3</mercy>
+</score>
+<time overtime="1s" max-overtime="2m">8m</time>
+<flags>
+    <flag id="red-flag" name="Red Flag" color="red" pickup-filter="only-red" required="false" carry-message="Score this in the enemy's goals!" pickup-kit="flag-pickup" drop-kit="reset-health">
+        <post id="red-post" recover-time="10s" respawn-time="7s">-42,10,1</post>
+        <net points="1" region="red-goals" capture-filter="only-red"/>
+    </flag>
+    <flag id="blue-flag" name="Blue Flag" color="blue" pickup-filter="only-blue" required="false" carry-message="Score this in the enemy's goals!" pickup-kit="flag-pickup" drop-kit="reset-health">
+        <post id="blue-post" recover-time="10s" respawn-time="7s">42,10,1</post>
+        <net points="1" region="blue-goals" capture-filter="only-blue"/>
+    </flag>
+</flags>
+</map>
