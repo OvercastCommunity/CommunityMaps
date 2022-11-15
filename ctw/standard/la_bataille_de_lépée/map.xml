@@ -1,0 +1,213 @@
+<map proto="1.4.2">
+<name>La Bataille de l'épée</name>
+<version>1.0</version>
+<phase>development</phase>
+<objective>Take the enemy's wool located above their base and place it back at your spawn!</objective>
+<created>2022-11-07</created>
+<authors>
+    <author uuid="654a9fe7-c75c-4b45-91df-8d48c4a5e072"/> <!-- Flamiix -->
+    <author uuid="0dcb9fb5-bd18-4cd9-a265-0c24eb41e086"/> <!-- Aaewe -->
+    <author uuid="510dae51-f405-4cf4-9fb6-6f1fd3f07d69"/> <!-- Zuiuzz -->
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
+</authors>
+<teams>
+    <team id="red-team" color="dark red" dye-color="red" max="5">Red</team>
+    <team id="blue-team" color="blue" dye-color="blue" max="5">Blue</team>
+</teams>
+<spawns>
+    <spawn team="blue-team" kit="spawn-kit" yaw="0">
+        <regions>
+            <point yaw="180">0.5,12.5,41.5</point>
+        </regions>
+    </spawn>
+    <spawn team="red-team" kit="spawn-kit" yaw="180">
+        <regions>
+            <point yaw="0">0.5,12.5,-40.5</point>
+        </regions>
+    </spawn>
+    <default>
+        <regions>
+            <point yaw="90">0.5,47.5,0.5</point>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true"/>
+        <item slot="2" material="wood" amount="64"/>
+        <item slot="3" material="water bucket"/>
+        <item slot="4" material="golden apple"/>
+        <item slot="5" material="iron spade" unbreakable="true"/>
+        <item slot="6" material="iron pickaxe" unbreakable="true"/>
+        <item slot="7" material="iron axe" unbreakable="true"/>
+        <item slot="8" material="wood" amount="64"/>
+        <item slot="28" material="arrow" amount="32"/>
+        <item slot="32" material="ladder" amount="16"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+        <leggings material="leather leggings" color="664c33" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <effect duration="2s" amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="adventure-kit"> <!-- overkill blockglitch prevention for the sword area that's below the bedrock - similar to certain areas in RFV2 -->
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="survival-kit"> <!-- in the rare case someone gets thrown to the void then shot/pushed from below and gets back up...  -->
+        <game-mode>survival</game-mode>
+    </kit>
+</kits>
+<filters>
+    <deny id="deny-void">
+        <void/>
+    </deny>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+    <any id="red-in-wr">
+        <all>
+            <team id="only-red">red-team</team>
+            <material>web</material>
+        </all>
+        <all>
+            <not>
+                <team>red-team</team>
+            </not>
+            <any>
+                <material>cobblestone stairs</material>
+                <material>piston extension</material>
+                <material>piston moving piece</material>
+                <material>piston sticky base</material>
+            </any>
+        </all>
+    </any>
+    <any id="blue-in-wr">
+        <all>
+            <team id="only-blue">blue-team</team>
+            <material>web</material>
+        </all>
+        <all>
+            <not>
+                <team>blue-team</team>
+            </not>
+            <any>
+                <material>cobblestone stairs</material>
+                <material>piston extension</material>
+                <material>piston moving piece</material>
+                <material>piston sticky base</material>
+            </any>
+        </all>
+    </any>
+    <any id="allow-in-iron-regen">
+        <material id="only-iron">iron block</material>
+        <material>rails</material>
+    </any>
+    <deny id="deny-in-wr">
+        <any>
+            <material>furnace</material>
+            <material>burning furnace</material>
+        </any>
+    </deny>
+</filters>
+<regions>
+    <above y="26" id="ceiling"/>
+    <apply block="never" region="ceiling"> <!-- intentionally prevent breaking past the build limit as well -->
+        <message>{"translate":"match.maxBuildHeight"}</message>
+    </apply>
+    <negative id="void-area">
+        <cuboid id="middle" min="17,7,-21" max="-16,oo,23"/> <!-- middle -->
+    </negative>
+    <apply block-place="deny-void" region="void-area" message="You may not build in the void."/>
+    <apply block-break="deny-void" region="void-area" message="You may not break this block."/>
+    <negative id="playing-area">
+        <below y="7" id="floor"/>
+        <cuboid min="-20,0,28" max="20,10,50"/> <!-- below blue spawn -->
+        <cuboid min="21,0,-27" max="-20,10,-49"/> <!-- below red spawn -->
+    </negative>
+    <apply block-place="never" kit="adventure-kit" region="floor" message="You may not build below the cobweb lines!"/>
+    <apply block-break="never" region="floor" message="You may not break this block."/>
+    <apply kit="survival-kit" region="playing-area"/>
+    <cuboid id="sword-in-bedrock" min="-4,7,-1" max="5,8,2"/> <!-- not part of floor so adventure mode doesn't get set when breaking while standing on quartz-->
+    <apply block-break="never" region="sword-in-bedrock" message="You may not break this block."/>
+    <block id="red-team-victory-monument">0,13,-44</block> <!-- place blue wool -->
+    <block id="blue-team-victory-monument">0,13,44</block> <!-- place red wool -->
+    <union id="spawn-areas">
+        <complement id="blue-spawn-area">
+            <union>
+                <cuboid min="8,0,34" max="-7,17,46"/>
+            </union>
+            <region id="blue-team-victory-monument"/>
+        </complement>
+        <complement id="red-spawn-area">
+            <union>
+                <cuboid min="-7,0,-33" max="8,17,-45"/>
+            </union>
+            <region id="red-team-victory-monument"/>
+        </complement>
+    </union>
+    <apply block="never" region="spawn-areas" message="You may not edit spawn areas!"/>
+    <apply enter="only-blue" region="blue-spawn-area" message="You may not enter your enemy's spawn!"/>
+    <apply enter="only-red" region="red-spawn-area" message="You may not enter your enemy's spawn!"/>
+    <union id="wool-rooms">
+        <union id="blue-wool-room">
+            <cuboid min="8,17,34" max="-7,oo,50"/> <!-- contains blue wool -->
+            <cuboid min="8,0,50" max="-7,17,46"/>
+        </union>
+        <union id="red-wool-room">
+            <cuboid min="-7,17,-33" max="8,oo,-49"/> <!-- contains red wool -->
+            <cuboid min="-7,0,-45" max="8,17,-49"/>
+        </union>
+    </union>
+    <apply enter="only-blue" region="red-wool-room" message="You may not enter your own wool room!"/>
+    <apply enter="only-red" region="blue-wool-room" message="You may not enter your own wool room!"/>
+    <apply block="blue-in-wr" region="red-wool-room" use="deny-in-wr" message="You may not modify the wool room!"/>
+    <apply block="red-in-wr" region="blue-wool-room" use="deny-in-wr" message="You may not modify the wool room!"/>
+    <union id="iron-areas">
+        <cuboid min="-2,12,25" max="3,14,28"/> <!-- blue side -->
+        <cuboid min="3,12,-24" max="-2,14,-27"/> <!-- red side -->
+    </union>
+    <apply block-place="deny-players" block-break="allow-in-iron-regen" region="iron-areas" message="You may only break iron blocks here"/>
+</regions>
+<wools team="red-team" craftable="false">
+    <wool color="blue" location="0.5,28,36.5" monument="red-team-victory-monument"/>
+</wools>
+<wools team="blue-team" craftable="false">
+    <wool color="red" location="0.5,28,-35.5" monument="blue-team-victory-monument"/>
+</wools>
+<toolrepair>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>iron spade</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+</toolrepair>
+<itemkeep>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>wood</item>
+    <item>water bucket</item>
+    <item>iron spade</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>ladder</item>
+</itemkeep>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+</itemremove>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item material="wood" amount="8"/>
+    </kill-reward>
+</kill-rewards>
+<renewables>
+    <renewable region="iron-areas" renew-filter="only-iron" rate="2" avoid-players="1"/>
+</renewables>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
