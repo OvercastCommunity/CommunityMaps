@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Tuscany Hills</name>
-<version>1.0.4</version>
+<version>1.0.5</version>
 <phase>development</phase>
 <objective>Capture the enemy's flag 3 times to win!</objective>
 <gamemode>ctf</gamemode>
@@ -12,8 +12,7 @@
 </contributors>
 <rules>
     <rule>Players may not take fall damage.</rule>
-    <rule>Players who carry a flag may have their weapons replaced with a Stick.</rule>
-    <rule>Players who carry a flag get Speed I.</rule>
+    <rule>Players who carry a flag get Slowness I and their Projectile Protection is removed.</rule>
 </rules>
 <teams>
     <team id="red-team" color="dark red" max="20">Red</team>
@@ -21,7 +20,7 @@
 </teams>
 <broadcasts>
     <tip after="5s" every="4m">Flags can be captured both at your `f`lmonastery`r or at `f`lyour spawn`r!</tip>
-    <tip after="7s" every="4m">When you're carrying a flag, you get a Stick with Knockback I and Speed I.</tip>
+    <alert after="7s" every="4m">When you're carrying a flag, you get Slowness I and your Projectile Projection is removed.</alert>
     <alert after="8m" every="2m">If both teams' scores are tied after the timer reaches zero, the first team to capture a flag wins!</alert>
 </broadcasts>
 <spawns>
@@ -43,7 +42,9 @@
             <enchantment>power</enchantment>
         </item>
         <item slot="28" material="arrow"/>
-        <leggings unbreakable="true">chainmail leggings</leggings>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="1">protection projectile</enchantment>
+        </leggings>
         <boots unbreakable="true">iron boots</boots>
     </kit>
     <kit id="red-kit" parents="spawn-kit">
@@ -54,25 +55,13 @@
         <helmet color="5555ff" unbreakable="true">leather helmet</helmet>
         <chestplate color="5555ff" unbreakable="true">leather chestplate</chestplate>
     </kit>
-    <kit id="drop-kit">
-        <action id="msg-weapons-back" scope="player"/>
-        <item slot="0" material="stone sword" unbreakable="true"/>
-        <item slot="1" material="bow" unbreakable="true">
-            <enchantment>infinity</enchantment>
-            <enchantment>power</enchantment>
-        </item>
-        <item slot="28" material="arrow"/>
-        <kit id="take-speed-kit"/>
+    <kit id="drop-kit" force="true">
+        <action id="give-prot" scope="player"/>
+        <effect duration="0">slowness</effect>
     </kit>
     <kit id="flag-kit">
-        <action id="take-items" scope="player"/>
-        <item slot="0" material="stick" name="`fFlag-Carrier Stick">
-            <enchantment>knockback</enchantment>
-        </item>
-        <effect duration="oo">speed</effect>
-    </kit>
-    <kit id="take-speed-kit" force="true">
-        <effect duration="0s">speed</effect>
+        <action id="take-prot" scope="player"/>
+        <effect duration="oo">slowness</effect>
     </kit>
 </kits>
 <flags>
@@ -106,28 +95,19 @@
     </deny>
 </filters>
 <actions>
-    <action id="take-items" scope="player">
-        <message text="`e⚠ `cYour regular weapons are removed while you're holding the flag!"/>
-        <message text="`e⚠ `aYou have been given a Stick with Knockback I, and Speed I."/>
+    <action id="take-prot" scope="player">
+        <message text="`e⚠ `cYou have Slowness I and no Projectile Protection while carrying the flag!"/>
         <replace-item>
-            <find material="stone sword" unbreakable="true"/>
-            <replace material="air"/>
-        </replace-item>
-        <replace-item>
-            <find material="bow" unbreakable="true" enchantment="arrow damage:1;infinity"/>
-            <replace material="air"/>
-        </replace-item>
-        <replace-item>
-            <find material="arrow"/>
-            <replace material="air"/>
+            <find material="chainmail leggings" unbreakable="true" enchantment="protection projectile:1"/>
+            <replace material="chainmail leggings" unbreakable="true"/>
         </replace-item>
     </action>
-    <action id="msg-weapons-back" scope="player">
+    <action id="give-prot" scope="player">
+        <message text="`e⚠ `aYour Slowness effect and Projectile Protection are back!"/>
         <replace-item>
-            <find material="stick" enchantment="knockback:1" name="`fFlag-Carrier Stick"/>
-            <replace material="air"/>
+            <find material="chainmail leggings" unbreakable="true"/>
+            <replace material="chainmail leggings" unbreakable="true" enchantment="protection projectile:1"/>
         </replace-item>
-        <message text="`e⚠ `aYour weapons are back!"/>
     </action>
 </actions>
 <score>
@@ -137,18 +117,21 @@
 </score>
 <time result="score" overtime="1s" max-overtime="2m">10m</time>
 <toolrepair>
-    <item>arrow</item>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+    <tool>arrow</tool>
 </toolrepair>
-<itemremove>
-    <item>arrow</item>
+<itemkeep>
     <item>stone sword</item>
     <item>bow</item>
-    <item>stick</item>
+    <item>arrow</item>
+    <item>golden apple</item>
+</itemkeep>
+<itemremove>
     <item>leather helmet</item>
     <item>leather chestplate</item>
     <item>chainmail leggings</item>
     <item>iron boots</item>
-    <item>golden apple</item>
 </itemremove>
 <kill-rewards>
     <kill-reward>
