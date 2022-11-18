@@ -1,0 +1,202 @@
+<map proto="1.4.0">
+<name>Total Beesness</name>
+<version>1.0.0</version>
+<phase>development</phase>
+<objective>Destroy the enemies monuments!</objective>
+<!-- Map authors & contributors. -->
+<authors>
+    <author uuid="b03360db-b8cd-49de-8ba1-b7920c2238a9" contribution="Map author"/> <!-- Obelistics -->
+</authors>
+<contributors>
+    <contributor  uuid="63ddf58a-ba2c-4d39-8481-6358bb46c63a" contribution="Ideas"/> <!-- samschaap -->
+</contributors>
+<!-- Map modules, i.e. objectives, regions, spawns. -->
+<teams>
+    <team id="orange-team" color="gold" max="20">Orange</team>
+    <team id="green-team" color="green" max="20">Green</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" material="bow" unbreakable="true"/>
+        <item slot="2" unbreakable="true" material="stone pickaxe"/>
+        <item slot="3" unbreakable="true" material="stone axe"/>
+        <item slot="4" amount="48" material="wood" damage="2"/>
+        <item slot="5" amount="48" material="leaves" damage="0"/>
+        <item slot="7" material="golden apple"/>
+        <item slot="8" material="arrow" amount="16"/>
+        <effect duration="4" amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="orange-kit" parent="spawn-kit">
+        <helmet unbreakable="true" color="D87F33" material="leather helmet"/>
+        <chestplate unbreakable="true" color="D87F33" material="leather chestplate"/>
+        <leggings material="chainmail leggings" unbreakable="true"/>
+        <boots material="leather boots" color="D87F33" unbreakable="true"/>
+    </kit>
+    <kit id="green-kit" parent="spawn-kit">
+        <helmet unbreakable="true" color="7FCC19" material="leather helmet"/>
+        <chestplate unbreakable="true" color="7FCC19" material="leather chestplate"/>
+        <leggings material="chainmail leggings" unbreakable="true"/>
+        <boots material="leather boots" color="7FCC19" unbreakable="true"/>
+    </kit>
+</kits>
+<spawns>
+    <default yaw="0">
+        <regions>
+            <cylinder base="80.5,37,47.5" radius="3" height="1"/>
+        </regions>
+    </default>
+    <spawn team="orange-team" kit="orange-kit" yaw="-90">
+        <regions>
+            <cylinder base="-25,5,-9" radius="1" height="0"/>
+        </regions>
+    </spawn>
+    <spawn team="green-team" kit="green-kit" yaw="90">
+        <regions>
+            <cylinder base="186,5,-9" radius="1" height="0"/>
+        </regions>
+    </spawn>
+</spawns>
+<filters>
+    <material id="only-iron">iron block</material>
+    <not id="deny-void">
+        <void/>
+    </not>
+    <team id="only-orange">orange-team</team>
+    <team id="only-green">green-team</team>
+</filters>
+<regions>
+    <union id="spawn-protection">
+        <rectangle id="orange-protection" min="-10,-28" max="-32,10"/>
+        <rectangle id="green-protection" min="171,10" max="193,-28"/>
+    </union>    
+    <complement id="void-area">
+        <everywhere/>
+        <region id="spawn-protection"/>
+        <rectangle id="lane-1" min="32,-2" max="129,19"/>
+        <rectangle id="lane-2" min="32,-16" max="129,-37"/>
+        <rectangle id="orange-bridge" min="74,-17" max="59,-1"/>
+        <rectangle id="green-bridge" min="102,-1" max="87,-17"/>
+        <rectangle id="mid" min="67,35" max="94,-53"/>
+    </complement>
+    <union id="arrow-spawners">
+        <cuboid id="orange-left-spawner" min="26,13,-44" max="28,10,-46"/>
+        <cuboid id="orange-right-spawner" min="26,13,26" max="28,10,28"/>
+        <cuboid id="green-left-spawner" min="135,13,26" max="133,10,28"/>
+        <cuboid id="green-right-spawner" min="135,13,-44" max="133,10,-46"/>
+    </union>
+    <apply enter="only-orange" region="orange-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-green" region="green-protection" message="You may not enter the opponent's spawn!"/>
+    <apply block-break="never" block-place="never" region="arrow-spawners" message="You may not modify the arrow spawners!"/>
+    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block-break="never" block-place="never" region="spawn-protection" message="You may not modify the spawns!"/>
+    <point id="orange-left-spawner-point">26.5,12,-44.5</point>
+    <cylinder id="orange-left-spawner-player" base="27,11,-45" radius="2" height="2"/>
+    <point id="orange-right-spawner-point">26.5,12,26.5</point>
+    <cylinder id="orange-right-spawner-player" base="27,11,27" radius="2" height="2"/>
+    <point id="green-left-spawner-point">134.5,12,26.5</point>
+    <cylinder id="green-left-spawner-player" base="134,11,27" radius="2" height="2"/>
+    <point id="green-right-spawner-point">134.5,12,-44.5</point>
+    <cylinder id="green-right-spawner-player" base="134,11,-45" radius="2" height="2"/>
+</regions>
+<!-- Arrow spawners -->
+<spawners>
+    <spawner spawn-region="orange-left-spawner-point" player-region="orange-left-spawner-player" delay="5s">
+        <item amount="4" material="arrow"/>
+    </spawner>
+    <spawner spawn-region="orange-right-spawner-point" player-region="orange-right-spawner-player" delay="5s">
+        <item amount="4" material="arrow"/>
+    </spawner>
+    <spawner spawn-region="green-left-spawner-point" player-region="green-left-spawner-player" delay="5s">
+        <item amount="4" material="arrow"/>
+    </spawner>
+    <spawner spawn-region="green-right-spawner-point" player-region="green-right-spawner-player" delay="5s">
+        <item amount="4" material="arrow"/>
+    </spawner>
+</spawners>
+<!-- Iron -->
+<renewables>
+    <renewable region="everywhere" renew-filter="only-iron" interval="3" grow="true" particles="true" sound="true"/>
+</renewables>
+<block-drops>
+    <rule region="everywhere">
+        <filter>
+            <material>iron block</material>
+        </filter>
+        <drops>
+            <item material="iron chestplate"/>
+        </drops>
+    </rule>
+</block-drops>
+<!-- Destroyables -->
+<destroyables show-progress="true" completion="100%" required="true">
+    <destroyable owner="orange-team" materials="gold block" name="Left Monument" modes="mode-1-edge mode-2-edge">
+        <region>
+            <cuboid min="19,18,-34" max="17,16,-32"/>
+        </region>
+    </destroyable>
+    <destroyable owner="orange-team" materials="emerald block" name="Center Monument" modes="mode-1-center mode-2-center mode-3-center">
+        <region>
+            <cuboid min="18,16,-10" max="16,14,-8"/>
+        </region>
+    </destroyable>
+    <destroyable owner="orange-team" materials="gold block" name="Right Monument" modes="mode-1-edge mode-2-edge">
+        <region>
+            <cuboid min="19,18,14" max="17,16,16"/>
+        </region>
+    </destroyable>
+    <destroyable owner="green-team" materials="gold block" name="Left Monument" modes="mode-1-edge mode-2-edge">
+        <region>
+            <cuboid min="142,18,16" max="144,16,14"/>
+        </region>
+    </destroyable>
+    <destroyable owner="green-team" materials="emerald block" name="Center Monument" modes="mode-1-center mode-2-center mode-3-center">
+        <region>
+            <cuboid min="143,16,-8" max="145,14,-10"/>
+        </region>
+    </destroyable>
+    <destroyable owner="green-team" materials="gold block" name="Right Monument" modes="mode-1-edge mode-2-edge">
+        <region>
+            <cuboid min="142,18,-32" max="144,16,-34"/>
+        </region>
+    </destroyable>
+</destroyables>
+<!-- Modes -->
+<modes>
+    <mode after="15m" material="coal block" id="mode-1-edge" name="BEESWAX MODE"/>
+    <mode after="15m" material="gold block" id="mode-1-center" name="BEESWAX MODE"/>
+    <mode after="25m" material="glass" id="mode-2-edge" name="HONEYCOMB MODE"/>
+    <mode after="25m" material="coal block" id="mode-2-center" name="HONEYCOMB MODE"/>
+    <mode after="35m" material="glass" id="mode-3-center" name="HONEY MODE"/>
+</modes>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>stone pickaxe</tool>
+    <tool>stone axe</tool>
+</toolrepair>
+<itemkeep>
+    <item>golden apple</item>
+    <item>arrow</item>
+</itemkeep>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>emerald block</item>
+    <item>gold block</item>
+    <item>stained clay</item>
+</itemremove>
+<kill-reward>
+    <item material="golden apple"/>
+    <item material="arrow" amount="8"/>
+    <item amount="12" material="wood" damage="1"/>
+    <item amount="8" material="leaves" damage="1"/>
+</kill-reward>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>23</maxbuildheight>
+</map>
