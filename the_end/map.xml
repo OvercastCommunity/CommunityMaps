@@ -1,0 +1,122 @@
+<map proto="1.4.2">
+<name>The End</name>
+<version>1.2.2</version>
+<edition>standard</edition>
+<objective>Be the first team to reach 750 points!</objective>
+<authors>
+    <author uuid="5198dc37-537f-4ea5-8ee8-1e0952d4a36b"/> <!-- _3Each -->
+    <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
+</authors>
+<contributors>
+    <contributor uuid="74948888-fdb8-4446-9340-f7688c2435cc" contribution="Building and Feedback"/> <!-- Zero_Frosty -->
+    <contributor uuid="430ec559-364a-4363-ac7a-2529050440ac" contribution="XML template"/> <!-- mameBT -->
+</contributors>
+<teams>
+    <team id="blue" color="blue" max="16">Blue</team>
+    <team id="red" color="dark red" max="16">Red</team>
+</teams>
+<kits>
+    <kit id="default-kit">
+        <effect>night vision</effect>
+    </kit>
+    <kit id="spawn-kit" parents="default-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" material="golden apple"/>
+        <item slot="8" amount="10" material="arrow"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="3">projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" material="iron boots"/>
+        <effect duration="4" amplifier="255">resistance</effect>
+        <game-mode>adventure</game-mode>
+    </kit>
+</kits>
+<spawns>
+    <default kit="default-kit">
+        <region yaw="135">
+            <block>14.5,14,49.5</block>
+        </region>
+    </default>
+    <spawn team="blue" kit="spawn-kit">
+        <region yaw="45">
+            <block>28.5,4,7.5</block>
+        </region>
+    </spawn>
+    <spawn team="red" kit="spawn-kit">
+        <region yaw="-135">
+            <block>-27.5,4,63.5</block>
+        </region>
+    </spawn>
+</spawns>
+<regions>
+    <apply block="never" use="never"/>
+    <cuboid id="hill-a-capture" min="-21,6,14" max="-15,9,20"/>
+    <cuboid id="hill-b-capture" min="16,6,51" max="22,9,57"/>
+    <cuboid id="mid-capture" min="4,11,32" max="-3,14,39"/>
+    <union id="jump-pads">
+        <cuboid id="blue-jump-pad" min="14,2,22" max="16,3,20"/>
+        <cuboid id="red-jump-pad" min="-13,2,49" max="-15,3,51"/>
+    </union>
+    <apply velocity="0,1.7,0" region="jump-pads"/>
+</regions>
+<king>
+    <hills required="false" capture-time="5s" points="1" time-multiplier="0" show-progress="true" neutral-state="true" incremental="true" permanent="false">
+        <hill name="Hill A" capture="hill-a-capture" progress="hill-a-capture"/>
+        <hill name="Mid" capture="mid-capture" progress="mid-capture"/>
+        <hill name="Hill B" capture="hill-b-capture" progress="hill-b-capture"/>
+    </hills>
+</king>
+<score>
+    <limit>750</limit>
+</score>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+</itemremove>
+<itemkeep>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>golden apple</item>
+    <item>arrow</item>
+</itemkeep>
+<kill-reward>
+    <item material="golden apple"/>
+    <item amount="5" material="arrow"/>
+</kill-reward>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<respawn delay="3s" auto="true"/>
+<actions> <!-- Jump pad fall damage disabling -->
+    <trigger filter="jump-pads" scope="player">
+        <action><set var="fall_variable" value="1"/></action>
+    </trigger>
+    <trigger scope="player">
+        <action><set var="fall_variable" value="0"/></action>
+        <filter>
+            <grounded/>
+        </filter>
+    </trigger>
+</actions>
+<variables>
+    <variable id="fall_variable" scope="player"/>
+</variables>
+<damage>
+    <deny id="nofall">
+        <all>
+            <cause>fall</cause>
+            <variable var="fall_variable">1</variable>
+        </all>
+    </deny>
+</damage>
+</map>
