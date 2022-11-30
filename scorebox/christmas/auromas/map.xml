@@ -1,0 +1,160 @@
+<map proto="1.4.2">
+<name>Auromas</name> <!-- Aurosphere -->
+<version>1.0</version> <!-- Regular 1.2 -->
+<objective>Collect gold nuggets and jump in the scorebox with them for points!</objective>
+<created>2022-11-29</created>
+<gamemode>scorebox</gamemode>
+<authors>
+    <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4"/> <!-- Cazadorian -->
+</authors>
+<time result="score">5m</time>
+<rules>
+    <rule>The scorebox opens and closes again every 15 seconds</rule>
+</rules>
+<broadcasts>
+    <alert after="1s" every="100s">Gold Nuggets spawn on the side islands and are also awarded on kill!</alert>
+    <alert after="1s" every="100s">Jump into the Scorebox with Gold Nuggets to score</alert>
+    <tip after="5s">The Scorebox opens after 15 seconds and closes 15 seconds later</tip>
+    <alert after="15s" every="60s">The Scorebox is open! Jumping into the Scorebox with gold nuggets is the only way to score.</alert>
+</broadcasts>
+<teams>
+    <team id="blue" color="blue" max="10">Blue</team>
+    <team id="red" color="red" max="10">Red</team>
+</teams>
+<spawns>
+    <default yaw="0">
+        <regions>
+            <point>0.5,70,1.5</point>
+        </regions>
+    </default>
+    <spawn team="red" kit="spawn-kit" yaw="90">
+        <regions>
+            <region id="red-spawn"/>            
+        </regions>
+    </spawn>
+    <spawn team="blue" kit="spawn-kit" yaw="-90">
+        <regions>
+            <region id="blue-spawn"/>            
+        </regions>
+    </spawn>
+</spawns>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" material="golden apple"/>
+        <item slot="8" amount="16" material="arrow"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings material="leather leggings" team-color="true" unbreakable="true"/>
+        <boots material="iron boots" unbreakable="true"/>
+        <effect duration="2">instant_health</effect>
+        <effect duration="oo">speed</effect>
+    </kit>
+    <kit id="score-heal" force="true">
+        <effect duration="2s" amplifier="10">regeneration</effect>
+    </kit>
+</kits>
+<regions>
+    <point id="red-spawn">46.5,31,1.5</point>
+    <point id="blue-spawn">-45.5,31,1.5</point>
+    <cylinder id="score-box" base="0.5,25.5,1.5" radius="2" height="2"/>
+    <circle id="red-protection" center="46.5,1.5" radius="5"/>
+    <circle id="blue-protection" center="-45.5,1.5" radius="5"/>
+    <cuboid id="scorebox-monument" min="-1,32,3" max="2,34,0"/>
+    <cuboid id="beacon-monument" min="0,16,1" max="1,17,2"/>
+    <union id="north-spawner">
+      <cylinder id="north-nugget" base="0.5,37,28.5" radius="7" height="5"/>
+      <point id="north-nugget-point">0.5,39,28.5</point>
+    </union>
+    <union id="south-spawner">
+      <cylinder id="south-nugget" base="0.5,37,-25.5" radius="7" height="5"/>
+      <point id="south-nugget-point">0.5,39,-25.5</point>
+    </union>
+    <apply kit="score-heal" region="score-box"/>
+    <apply block="never"/>
+    <apply enter="only-red" region="red-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-blue" region="blue-protection" message="You may not enter the opponent's spawn!"/>
+</regions>
+<score>
+    <box region="score-box">
+        <redeemables>
+            <item points="1">gold nugget</item>
+        </redeemables>
+    </box>
+</score>
+<filters>
+    <team id="only-blue">blue</team>
+    <team id="only-red">red</team>
+</filters>
+<portals>
+    <portal filter="only-blue" yaw="@-90" region="score-box" destination="blue-spawn"/>
+    <portal filter="only-red" yaw="@90" region="score-box" destination="red-spawn"/>
+</portals>
+<spawners>
+    <spawner spawn-region="south-nugget-point" player-region="south-nugget" delay="4s">
+        <item material="gold nugget"/>
+    </spawner>
+    <spawner spawn-region="north-nugget-point" player-region="north-nugget" delay="4s">
+        <item material="gold nugget"/>
+    </spawner>
+</spawners>
+<destroyables show="false" required="false">
+    <destroyable name="scorebox-glass" modes="airs-01 glass-01 airs-02 glass-02 airs-03 glass-03 airs-04 glass-04 airs-05 glass-05 airs-06 glass-06 airs-07 glass-07 airs-08 glass-08 airs-09 glass-09 airs-10" owner="blue" region="scorebox-monument" materials="stained glass:4"/>
+    <destroyable name="beacon-glass" modes="airs-01 wool-01 airs-02 wool-02 airs-03 wool-03 airs-04 wool-04 airs-05 wool-05 airs-06 wool-06 airs-07 wool-07 airs-08 wool-08 airs-09 wool-09 airs-10" owner="blue" region="beacon-monument" materials="wool:15"/>
+</destroyables>
+<modes>
+    <!-- 5 minutes = 300 seconds -->
+    <mode after="15s" id="airs-01" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="30s" id="glass-01" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="30s" id="wool-01" show-before="0" material="wool:15"/>
+    <mode after="45s" id="airs-02" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="60s" id="glass-02" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="60s" id="wool-02" show-before="0" material="wool:15"/>
+    <mode after="75s" id="airs-03" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="90s" id="glass-03" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="90s" id="wool-03" show-before="0" material="wool:15"/>
+    <mode after="105s" id="airs-04" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="120s" id="glass-04" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="120s" id="wool-04" show-before="0" material="wool:15"/>
+    <mode after="135s" id="airs-05" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="150s" id="glass-05" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="150s" id="wool-05" show-before="0" material="wool:15"/>
+    <mode after="165s" id="airs-06" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="180s" id="glass-06" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="180s" id="wool-06" show-before="0" material="wool:15"/>
+    <mode after="195s" id="airs-07" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="210s" id="glass-07" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="210s" id="wool-07" show-before="0" material="wool:15"/>
+    <mode after="225s" id="airs-08" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="240s" id="glass-08" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="255s" id="wool-08" show-before="0" material="wool:15"/>
+    <mode after="255s" id="airs-09" show-before="6" name="Scorebox opening" material="air"/>
+    <mode after="270s" id="glass-09" show-before="6" name="Scorebox closing" material="stained glass:4"/>
+    <mode after="270s" id="wool-09" show-before="0" material="wool:15"/>
+    <mode after="285s" id="airs-10" show-before="6" name="Scorebox opening" material="air"/>
+</modes>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>iron boots</item>
+</itemremove>
+<itemkeep>
+    <item>arrow</item>
+    <item>golden apple</item>
+</itemkeep>
+<kill-reward>
+    <item amount="8" material="arrow"/>
+    <item material="golden apple"/>
+    <item material="gold nugget"/>
+</kill-reward>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
