@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Tulip Mania II</name>
-<version>1.0.2</version>
+<version>1.1</version>
 <objective>Capture the enemy team's wools!</objective>
 <created>2022-09-28</created>
 <gamemode>ctw</gamemode>
@@ -22,23 +22,19 @@
         <item slot="1" unbreakable="true" material="bow" enchantment="infinity"/>
         <item slot="2" unbreakable="true" material="diamond pickaxe" enchantment="efficiency"/>
         <item slot="3" unbreakable="true" material="iron axe"/>
-        <item slot="5" amount="48" material="wood"/>
+        <item slot="4" material="stained glass" team-color="true" amount="64"/>
+        <item slot="5" amount="64" material="wood"/>
         <item slot="7" material="golden apple"/>
         <item slot="8" material="water bucket"/>
         <item slot="28" material="arrow"/>
         <item slot="29" unbreakable="true" material="iron spade"/>
         <item slot="30" unbreakable="true" material="shears"/>
+        <item slot="32" amount="64" material="wood"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
         <leggings unbreakable="true" team-color="true" material="leather leggings" />
         <boots unbreakable="true" team-color="true" material="leather boots" />
         <effect duration="4" amplifier="255">damage resistance</effect>
-    </kit>
-    <kit id="orange-kit" parent="spawn-kit">
-        <item slot="4" material="stained glass" damage="1" amount="64"/>
-    </kit>
-    <kit id="purple-kit" parent="spawn-kit">
-        <item slot="4" material="stained glass" damage="10" amount="64"/>
     </kit>
 </kits>
 <spawns>
@@ -47,12 +43,12 @@
             <point>74.5,15,42.5</point>
         </regions>
     </default>
-    <spawn team="orange" kit="orange-kit" yaw="180">
+    <spawn team="orange" kit="spawn-kit" yaw="180">
         <regions>
             <point>0.5,13,137.5</point>
         </regions>
     </spawn>
-    <spawn team="purple" kit="purple-kit" yaw="0">
+    <spawn team="purple" kit="spawn-kit" yaw="0">
         <regions>
             <point>0.5,13,-52.5</point>
         </regions>
@@ -108,9 +104,86 @@
     <deny id="deny-players">
           <participating/>
     </deny>
+    <any id="water-lane-building">
+        <filter id="waterlanes-2"/>
+        <filter id="deny-void"/>
+    </any>
+    <all id="water-lane-starting">
+        <time>44m30s</time>
+        <not>
+            <filter id="waterlanes-2"/>
+        </not>
+    </all>
+    <all id="after-15m">
+        <time>15m</time>
+        <not>
+            <time>30m</time>
+        </not>
+    </all>
+    <all id="after-30m">
+        <time>30m</time>
+        <not>
+            <time>45m</time>
+       </not>
+    </all>
+    <all id="after-45m">
+        <time>45m</time>
+        <not>
+            <time>60m</time>
+        </not>
+    </all>
+    <all id="after-60m">
+        <time>60m</time>
+        <not>
+            <time>75m</time>
+       </not>
+    </all>
+    <all id="after-75m">
+        <time>75m</time>
+        <not>
+            <time>90m</time>
+        </not>
+    </all>
+    <all id="after-90m">
+        <time>90m</time>
+        <not>
+            <time>105m</time>
+       </not>
+    </all>
+    <all id="after-105m">
+        <time>105m</time>
+        <not>
+            <time>120m</time>
+        </not>
+    </all>
+    <time id="after-120m">120m</time>
     <material id="only-iron">iron block</material>
+    <material id="only-air">air</material>
+    <variable id="waterlanes-0" var="water_lane_variable">0</variable>
+    <variable id="waterlanes-1" var="water_lane_variable">1</variable>
+    <variable id="waterlanes-2" var="water_lane_variable">2</variable>
 </filters>
+<variables>
+    <variable id="water_lane_variable" scope="match"/>
+</variables>
+<actions>
+    <action id="water-lanes" expose="true" filter="waterlanes-0" scope="match">
+        <set var="water_lane_variable" value="1"/>
+    </action>
+    <trigger action="water-lanes" scope="match" filter="water-lane-starting"/>
+    <trigger scope="match">
+        <filter>
+            <after message="`cWater Lanes `rWill Spawn In {0}" duration="30s" filter="waterlanes-1"/>
+        </filter>
+        <action>
+            <message text="`bWater lanes have been added!"/>
+            <set var="water_lane_variable" value="2"/>
+            <fill region="water-lane-fill-regions" material="water" filter="only-air"/>
+        </action>
+    </trigger>
+</actions>
 <regions>
+    <above id="heightlimit" y="25"/>
     <union id="spawn-protection">
         <rectangle id="purple-prot" min="-9,-35" max="10,-62"/>
         <rectangle id="orange-prot" min="-9,120" max="10,147"/>
@@ -125,10 +198,25 @@
             <rectangle id="blue-wool-room" min="41.5,79" max="53.5,61"/> <!-- orange defends -->
         </union>
     </union>
+    <union id="water-lane-regions">
+        <union id="water-lane-build-regions">
+            <rectangle id="orange-west-gap" min="-27,88" max="-41,106"/>
+            <rectangle id="orange-east-gap" min="28,88" max="42,106"/>
+            <rectangle id="purple-east-gap" min="-27,-21" max="-41,-3"/>
+            <rectangle id="purple-west-gap" min="28,-21" max="42,-3"/>
+        </union>
+        <union id="water-lane-fill-regions">
+            <cuboid id="orange-west-gap-water" min="-27,0,88" max="-41,1,106"/>
+            <cuboid id="orange-east-gap-water" min="28,0,88" max="42,1,106"/>
+            <cuboid id="purple-east-gap-water" min="-27,0,-21" max="-41,1,-3"/>
+            <cuboid id="purple-west-gap-water" min="28,0,-21" max="42,1,-3"/>
+        </union>
+    </union>
     <negative id="void-area">
         <region id="spawn-protection"/>
         <region id="wool-rooms"/>
         <rectangle id="middle" min="-24,76" max="25,9"/>
+        <region id="water-lane-regions"/>
     </negative>
     <union id="gapple-spawner">
         <point id="gap-point">0.5,7,42.5</point>
@@ -139,8 +227,12 @@
     <apply enter="only-orange" region="orange-prot" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-purple" region="orange-wool-rooms" message="You may not enter your own wool room!"/>
     <apply enter="only-orange" region="purple-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply block="never" use="never" region="heightlimit">
+        <message>{"translate":"match.maxBuildHeight"}</message>
+    </apply>
     <apply block="purple-in-wr" use="only-purple" region="orange-wool-rooms" message="You may not interact with this block!"/>
     <apply block="orange-in-wr" use="only-orange" region="purple-wool-rooms" message="You may not interact with this block!"/>
+    <apply block="water-lane-building" region="water-lane-build-regions" message="You may not build in the void area!"/>
     <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
     <apply block="never" region="gap-protection" message="You may not break the spawner!"/>
     <apply block-break="only-iron" block-place="deny-players" region="spawn-protection" message="You may not modify the spawns!"/>
@@ -194,19 +286,21 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<maxbuildheight>25</maxbuildheight>
 <kill-rewards>
     <kill-reward>
         <item material="golden apple"/>
         <item amount="16" material="wood"/>
-    </kill-reward>
-    <kill-reward>
-       <kill-reward filter="only-purple">
-           <item amount="8" material="stained glass" damage="10" />
-       </kill-reward>
-       <kill-reward filter="only-orange">
-           <item amount="16" material="stained glass" damage="1" />
-       </kill-reward>
+        <item amount="16" material="stained glass" team-color="true"/>
     </kill-reward>
 </kill-rewards>
+<respawns>
+    <respawn delay="3s" filter="after-15m"/>
+    <respawn delay="4s" filter="after-30m"/>
+    <respawn delay="5s" filter="after-45m"/>
+    <respawn delay="6s" filter="after-60m"/>
+    <respawn delay="7s" filter="after-75m"/>
+    <respawn delay="8s" filter="after-90m"/>
+    <respawn delay="9s" filter="after-105m"/>
+    <respawn delay="10s" filter="after-120m"/>
+</respawns>
 </map>
