@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Totem Crusaders</name>
-<version>1.2</version>
+<version>1.2.1</version>
 <objective>Take the flag to the end of the path back to your spawn!</objective>
 <phase>development</phase>
 <authors>
@@ -13,7 +13,8 @@
     <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML review" /> <!-- zzuf -->
 </contributors>
 <broadcasts>
-    <tip after="1s" every="4m">`bReach the flag passing by the Totems`b.</tip>
+    <tip after="1s" every="4m">`bReach the flag by passing through the Totem`b.</tip>
+    <tip after="1s" every="4m">`bReturn the flag to your spawn`b.</tip>
 </broadcasts>
 <teams>
     <team id="blue" color="blue" dye-color="blue" max="25" max-overfill="30">Blue</team>
@@ -31,6 +32,7 @@
         <item slot="6" amount="64" damage="2">wood</item>
         <item slot="7" amount="64" damage="2">wood</item>
         <item slot="8" amount="64" damage="2">wood</item>
+        <helmet unbreakable="true">iron helmet</helmet>
         <chestplate team-color="true" unbreakable="true">leather chestplate</chestplate>
         <leggings team-color="true" unbreakable="true">leather leggings</leggings>
         <boots team-color="true" unbreakable="true">leather boots</boots>
@@ -48,12 +50,12 @@
 <spawns>
     <spawn team="red" kit="spawn-kit">
         <regions yaw="90">
-            <cuboid min="191,81,-217" max="187,84,-213"/>
+            <cuboid min="186,81,-212" max="192,81,-218"/>
         </regions>
     </spawn>
     <spawn team="blue" kit="spawn-kit">
         <regions yaw="90">
-            <cuboid min="187,81,-304" max="191,84,-300"/>
+            <cuboid min="192,81,-305" max="186,81,-299"/>
         </regions>
     </spawn>
     <default>
@@ -66,7 +68,7 @@
     <union id="flagandgap">
         <cuboid id="flag-base" min="-305,20,-209" max="-205,147,-309"/>
         <rectangle id="bases-gap" min="251,-252"  max="116,-266"/>
-        <rectangle id="portals-gap" min="63,-271"  max="17,-247"/>
+        <rectangle id="portals-gap" min="64,-271"  max="17,-246"/>
     </union>
     <union id="supports">
         <cuboid id="rock-totem" min="16,31,-291" max="-13,31,-227"/>
@@ -76,32 +78,34 @@
     <union id="bases">
         <rectangle id="red-base" min="251,-252" max="121,-179"/>
         <rectangle id="blue-base" min="116,-266" max="236,-339"/>
-        <cuboid id="red-portal" min="63,63,-246" max="47,137,-227"/>
-        <cuboid id="blue-portal" min="63,63,-272" max="47,136,-291"/>
+        <rectangle id="red-portal" min="47,-226" max="64,-246"/>
+        <rectangle id="blue-portal" min="47,-271" max="64,-291"/>
     </union>
     <union id="nets">
         <cuboid id="blue_net" min="187,81,-304" max="191,84,-300"/>
         <cuboid id="red_net" min="191,81,-217" max="187,84,-213"/>
     </union>
     <complement id="deny-lane">
-        <cuboid id="first-border" min="46,5,-289" max="-323,156,-347"/>
-        <cuboid id="second-border" min="46,0,-229" max="-312,156,-167"/>
+        <cuboid id="first-border" min="64,12,-290" max="-315,140,-340"/>
+        <cuboid id="second-border" min="64,12,-226" max="-308,144,-188"/>
+        <cuboid id="third-border" min="64,63,-291" max="97,81,-225"/>
         <region id="rock-totem"/> 
         <region id="nether-totem"/>
         <region id="quartz-totem"/>
     </complement>
     <negative id="void">
         <rectangle min="63,-227" max="-328,-293"/>
+        <region id="bases"/>
     </negative>
     <apply enter="only-blue" region="blue-base" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-red" region="red-base" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-blue" region="blue-portal" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-red" region="red-portal" message="You may not enter the opponent's spawn!"/>
     <apply block="never" region="flagandgap" message="You may not modify this area!"/>
-    <apply block-break="only-iron" block-place="deny-players" region="bases" message="You may only break iron blocks here!"/>
+    <apply block-place="deny-players" block-break="only-iron" region="bases" message="You may only break iron blocks here!"/>
     <apply block-break="never" region="supports" message="You can't break blocks here.!"/>
     <apply block="never" region="deny-lane" message="You can't cross under the platforms!"/>
-    <apply block="deny-void" region="void" message="You may not build in the void!"/>
+    <apply block-place="deny-void" block-break="deny-cobwebs" region="void" message="You may not build in the void!"/>
 </regions>
 <flags>
     <flag id="flag" name="Flag" color="white" shared="true" pickup-kit="flag-kit" drop-kit="reset">
@@ -113,6 +117,12 @@
     </flag>
 </flags>
 <filters>
+    <deny id="deny-void">
+       <void/>
+    </deny>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
     <team id="only-red">red</team>
     <team id="only-blue">blue</team>
     <all id="red-team-carrying-flag">
@@ -123,13 +133,10 @@
         <team>blue</team>
         <carrying-flag>flag</carrying-flag>
     </all>
-    <deny id="deny-players">
-          <participating/>
-    </deny>
     <material id="only-iron">iron block</material>
-    <not id="deny-void">
-       <void/>
-    </not>
+    <deny id="deny-cobwebs">
+        <material>web</material>
+    </deny>
 </filters>
 <score>
    <limit>2</limit>
@@ -150,6 +157,9 @@
         <region><cuboid min="126,59,-304" max="127,62,-300"/></region>
     </portal>
 </portals>
+<renewables>
+    <renewable region="bases" renew-filter="only-iron"/>
+</renewables>
 <itemremove>
     <item>leather helmet</item>
     <item>leather chestplate</item>
