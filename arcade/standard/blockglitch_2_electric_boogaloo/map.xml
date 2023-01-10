@@ -1,0 +1,187 @@
+<map proto="1.4.2"> <!-- Renewable air version -->
+<name>BlockGlitch 2: Electric Boogaloo</name>
+<version>1.0</version>
+<objective>Get to the finish line!</objective>
+<game>Race</game>
+<created>2022-11-15</created>
+<phase>development</phase>
+<authors>
+    <author uuid="59655bfd-1fda-4e15-b6f7-eb6b6f84b406"/> <!-- Digitalight -->
+    <author uuid="ca25df12-cc0b-4812-a85b-7aa134561f88"/> <!-- _pkb -->
+</authors>
+<contributors>
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML"/> <!-- zzuf -->
+</contributors>
+<rules>
+    <rule>Blockglitching is allowed.</rule>
+    <rule>Fall damage and player attacks are disabled.</rule>
+</rules>
+<players max="50" colors="true"/>
+<kits>
+    <kit id="players-kit" force="true">
+        <item slot="0" amount="64" material="bedrock"/>
+        <item slot="1" amount="64" material="bedrock"/>
+        <item slot="2" amount="64" material="bedrock"/>
+        <item slot="3" amount="64" material="bedrock"/>
+        <item slot="4" amount="64" material="bedrock"/>
+        <item slot="5" amount="64" material="bedrock"/>
+        <item slot="6" amount="64" material="bedrock"/>
+        <item slot="7" amount="64" material="bedrock"/>
+        <item slot="8" amount="64" material="bedrock"/>
+    </kit>
+    <kit id="instadeath" force="true">
+        <health>1</health>
+        <effect duration="oo" amplifier="66">wither</effect>
+    </kit>
+</kits>
+<filters>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+    <material id="renew-air">air</material>
+    <deny id="uninteractable-blocks">
+        <any>
+            <material>vine</material>
+            <material>water</material>
+            <material>long grass</material>
+            <material>water</material>
+            <material>stone plate</material>
+            <material>wood plate</material>
+            <material>gold plate</material>
+            <material>iron plate</material>
+        </any>
+    </deny>
+    <any id="allowed-use">
+        <material>stone button</material>
+        <material>wood button</material>
+        <material>note block</material>
+        <material>fence</material>
+        <material>daylight detector</material>
+        <material>daylight detector inverted</material>
+        <material>cobble wall</material>
+    </any>
+    <any id="allowed-blocks">
+        <material id="only-bedrock">bedrock</material>
+        <material>tripwire</material>
+        <all>
+            <cause>world</cause>
+            <any id="allowed-physics">
+                <material>piston extension</material>
+                <material>piston moving piece</material>
+                <material>piston sticky base</material>
+                <material>log</material>
+                <material>log 2</material>
+                <material>redstone wire</material>
+            </any>
+        </all>
+    </any>
+    <score id="no-checkpoints">0</score>
+    <score id="1-checkpoint">1</score>
+    <score id="2-checkpoints">2</score>
+    <score id="3-checkpoints">3</score>
+    <score id="lap-completed">4</score>
+    <players id="special" min="1">
+        <all>
+            <region id="special-finish-line-area"/>
+            <filter id="3-checkpoints"/>
+            <variable var="special_shown">0</variable>
+        </all>
+    </players>
+</filters>
+<variables>
+    <variable id="special_shown" scope="player" default="0"/>
+</variables>
+<actions>
+    <action id="special-msg" scope="match">
+        <message text="`6`l u l t r a f l e x" title="`6`l u l t r a f l e x" actionbar="`6`l u l t r a f l e x" scope="match"/>
+        <switch-scope outer="match" inner="player">
+            <set var="special_shown" value="1" scope="player"/>
+        </switch-scope>
+    </action>
+    <trigger filter="special" action="special-msg" scope="match"/>
+</actions>
+<score>
+    <limit>4</limit>
+    <box points="1" region="first-checkpoint" filter="no-checkpoints"/>
+    <box points="1" region="second-checkpoint" filter="1-checkpoint"/>
+    <box points="1" region="third-checkpoint" filter="2-checkpoints"/>
+    <box points="4" region="finish-line" filter="3-checkpoints"/>
+    <box points="100" region="special-finish-line" filter="3-checkpoints"/>
+</score>
+<spawns>
+    <spawn kit="players-kit" filter="no-checkpoints">
+        <regions yaw="180" pitch="90">
+            <cuboid min="-3.5,26,27.5" max="10.5,26,30.5"/>
+        </regions>
+    </spawn>
+    <spawn kit="players-kit" filter="1-checkpoint" yaw="90" region="r-first-checkpoint"/>
+    <spawn kit="players-kit" filter="2-checkpoints" yaw="90" region="r-second-checkpoint"/>
+    <spawn kit="players-kit" filter="3-checkpoints" yaw="90" region="r-third-checkpoint"/>
+    <default>
+        <regions yaw="0">
+            <point>-70.5,49.5,-131.5</point>
+        </regions>
+    </default>
+</spawns>
+<regions>
+    <apply use="allowed-use" block-break="allowed-blocks" block-physics="allowed-physics"/>
+    <union id="actual-bg-areas">
+        <rectangle id="pressure-plates" min="-60,-54" max="-87,-44"/>
+        <rectangle id="nether-wart-beginning" min="-4,10" max="12,2"/>
+        <rectangle id="piston-log-area" min="0,-42" max="11,-41"/>
+        <rectangle id="1st-trapdoor-area" min="-5,-65" max="12,-68"/>
+        <rectangle id="door-area" min="-13,-104" max="-19,-89"/>
+        <rectangle id="fence-area" min="-51,-97" max="-37,-83"/>
+        <rectangle id="iron-trapdoor-area" min="-44,-36" max="-61,-34"/>
+        <rectangle id="2nd-trapdoor-area" min="-74,1" max="-81,16"/>
+        <rectangle id="nether-brick-fence-area" min="-152,-7" max="-150,-22"/>
+    </union>
+    <apply block="deny-players" use="never" kit="players-kit" region="actual-bg-areas"/>
+    <negative id="regen-area">
+        <region id="piston-log-area"/>
+    </negative>
+    <!-- Checkpoint areas -->
+    <union id="checkpoints">
+        <cuboid id="first-checkpoint" min="-24,14,-105" max="-25,24,-39"/>
+        <cuboid id="second-checkpoint" min="-74,12,17" max="-73,22,-52"/>
+        <cuboid id="third-checkpoint" min="-141,12,-24" max="-142,22,-5"/>
+    </union>
+    <apply kit="players-kit" region="checkpoints"/>
+    <cuboid id="finish-line" min="-123,38,-38" max="-124,35,-28"/>
+    <cuboid id="special-finish-line" min="-123,57,-34" max="-124,56,-32"/>
+    <cuboid id="special-finish-line-area" min="-122,56,-31" max="-125,61,-35"/>
+    <!-- Respawn areas -->
+    <cuboid id="r-first-checkpoint" min="-24,15,-104" max="-25,15,-91"/>
+    <cuboid id="r-second-checkpoint" min="-74,13,16" max="-73,13,3"/>
+    <cuboid id="r-third-checkpoint" min="-141,13,-21" max="-142,13,-8"/>
+    <!-- Finish line launchpad -->
+    <cuboid id="end-launchpad" min="-122,38,-38" max="-118,34,-28"/>
+    <apply velocity="5,5,0" region="end-launchpad"/>
+    <!-- Misc. -->
+    <below y="1" id="floor"/>
+    <apply kit="instadeath" region="floor"/>
+</regions>
+<renewables>
+    <renewable interval="0.1" renew-filter="renew-air" avoid-players="0" grow="false" region="regen-area"/>
+</renewables>
+<timelock>on</timelock>
+<disabledamage>
+    <damage>fall</damage>
+    <damage>entity attack</damage>
+</disabledamage>
+<itemremove>
+    <item>barrier</item>
+    <item>bedrock</item>
+    <item>string</item>
+</itemremove>
+<respawn auto="true"/>
+<tnt>
+    <instantignite>true</instantignite>
+    <blockdamage>false</blockdamage>
+    <power>0</power>
+    <fuse>0</fuse>
+</tnt>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
