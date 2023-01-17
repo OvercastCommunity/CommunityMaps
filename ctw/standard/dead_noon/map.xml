@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Dead Noon</name>
-<version>1.1.1</version>
+<version>1.1.2</version>
 <objective>Capture the wool!</objective>
 <created>2022-08-07</created>
 <authors>
@@ -49,8 +49,8 @@
     <default yaw="-90" region="obs-spawn-point"/>
 </spawns>
 <wools craftable="false">
-    <wool team="blue-team" color="red" monument="blue-team-red-wool" location="6.5,16.2,-96.5"/>
-    <wool team="red-team" color="blue" monument="red-team-blue-wool" location="-6.5,16.2,96.5"/>
+    <wool team="blue-team" color="blue" monument="blue-team-blue-wool" location="-6.5,16.2,96.5"/>
+    <wool team="red-team" color="red" monument="red-team-red-wool" location="6.5,16.2,-96.5"/>
 </wools>
 <filters>  
     <deny id="deny-blue">
@@ -59,12 +59,14 @@
     <deny id="deny-red">
         <team id="only-red">red-team</team>
     </deny>
-    <deny id="deny-in-wr">
-        <any>
-            <material>chest</material>
-            <material>beacon</material>
-        </any>
-    </deny>
+    <all id="blue-in-wr">
+        <filter id="only-blue"/>
+        <material>web</material>
+    </all>
+    <all id="red-in-wr">
+        <filter id="only-red"/>
+        <material>web</material>
+    </all>
     <deny id="deny-beacon">
         <material>beacon</material>
     </deny>
@@ -80,18 +82,18 @@
     <cylinder id="blue-spawn-point" base="42,12.5,84.5" radius="1" height="0"/>
     <cylinder id="red-spawn-point" base="-42,12.5,-84.5" radius="1" height="0"/>
     <cuboid id="obs-spawn-point" min="-50,76.5,-1" max="-52,76.5,1"/>
-    <block id="blue-team-red-wool">38,12,81</block>
-    <block id="red-team-blue-wool">-39,12,-82</block>
-    <point id="blue-wool-spawn">-6.5,16.2,96.5</point>
-    <point id="red-wool-spawn">6.5,16.2,-96.5</point>
+    <block id="blue-team-blue-wool">38,12,81</block>
+    <block id="red-team-red-wool">-39,12,-82</block>
+    <point id="red-wool-spawn">-6.5,16.2,96.5</point>
+    <point id="blue-wool-spawn">6.5,16.2,-96.5</point>
     <union id="spawns">
         <union id="blue-spawn">
-            <cuboid min="38,0,66" max="48,oo,78"/>
-            <cuboid min="38,0,78" max="48,oo,90"/>
+            <rectangle min="38,66" max="48,78"/>
+            <rectangle min="36,78" max="48,90"/>
         </union>
         <union id="red-spawn">
-            <cuboid min="-38,0,-66" max="-48,oo,-78"/>
-            <cuboid min="-36,0,-78" max="-48,oo,-90"/>
+            <rectangle min="-38,-66" max="-48,-78"/>
+            <rectangle min="-36,-78" max="-48,-90"/>
         </union>
     </union>
     <union id="woolrooms">
@@ -117,16 +119,17 @@
     <apply enter="only-blue" region="red-woolroom" message="You may not enter your team's own wool room!"/>
     <apply enter="only-red" region="blue-woolroom" message="You may not enter your team's own wool room!"/>
     <apply block-place="only-iron-renew" block-break="only-iron" region="spawns" message="You may not edit spawns!"/>
-    <apply block="deny-in-wr" region="woolrooms" message="You may not break or place this block in the wool room!"/>
+    <apply block="blue-in-wr" region="red-woolroom" message="You may not break or place this block in the wool room!"/>
+    <apply block="red-in-wr" region="blue-woolroom" message="You may not break or place this block in the wool room!"/>
     <apply block="deny-blue" region="blue-woolroom" message="You may not interfere with your team's own wool room!"/>
     <apply block="deny-red" region="red-woolroom" message="You may not interfere with your team's own wool room!"/>
     <apply block="deny-void" region="void-area" message="You may not edit the void!"/>
 </regions>
 <spawners>
-    <spawner spawn-region="blue-wool-spawn" player-region="blue-woolroom" delay="2s">
+    <spawner spawn-region="blue-wool-spawn" player-region="red-woolroom" delay="2s">
         <item material="wool" amount="1" damage="11"/>
     </spawner>
-    <spawner spawn-region="red-wool-spawn" player-region="red-woolroom" delay="2s">
+    <spawner spawn-region="red-wool-spawn" player-region="blue-woolroom" delay="2s">
         <item material="wool" amount="1" damage="14"/>
     </spawner>
 </spawners>
