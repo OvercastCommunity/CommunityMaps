@@ -1,0 +1,192 @@
+<map proto="1.4.2">
+<name>Deepwood</name>
+<version>1.0</version>
+<objective>Destroy the enemy's monuments at the sides of their spawn!</objective>
+<phase>development</phase>
+<created>2023-01-23</created>
+<maxbuildheight>44</maxbuildheight>
+<gamemode>dtm</gamemode>
+<authors>
+    <author uuid="86b8ea93-6936-4b28-9d0c-19004d0dcb51"/> <!-- Wyviryn -->
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML"/> <!-- zzuf -->
+</authors>
+<teams>
+    <team id="blue-team" color="blue" max="24">Blue</team>
+    <team id="orange-team" color="gold" max="24">Orange</team>
+</teams>
+<spawns>
+    <spawn team="blue-team" kit="spawn-kit" yaw="0">
+        <regions>
+            <point>-9.5,30,-103.5</point>
+        </regions>
+    </spawn>
+    <spawn team="orange-team" kit="spawn-kit" yaw="180">
+        <regions>
+            <point>10.5,30,106.5</point>
+        </regions>
+    </spawn>
+    <default>
+        <regions>
+            <point yaw="-90">0.5,103,1.5</point>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="diamond sword" unbreakable="true"/>
+        <item slot="1" material="bow" enchantment="infinity" unbreakable="true"/>
+        <item slot="2" material="diamond pickaxe" unbreakable="true"/>
+        <item slot="3" material="diamond axe" unbreakable="true"/>
+        <item slot="4" material="diamond spade" unbreakable="true"/>
+        <item slot="5" amount="64" damage="2" material="wood"/>
+        <item slot="6" amount="32" material="glass"/>
+        <item slot="7"  amount="64" material="cooked beef"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+        <leggings material="iron leggings" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <effect duration="5" amplifier="255">resistance</effect>
+    </kit>
+</kits>
+<filters>
+    <deny id="deny-void">
+        <void/>
+    </deny>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+    <deny id="deny-orange">
+        <team id="only-orange">orange-team</team>
+    </deny>
+    <deny id="deny-blue">
+        <team id="only-blue">blue-team</team>
+    </deny>
+    <deny id="deny-iron">
+        <all>
+            <cause>player</cause>
+            <material id="only-iron">iron block</material>
+        </all>
+    </deny>
+    <deny id="only-ceiling">
+        <not>
+            <any>
+                <material>leaves</material>
+                <material>log</material>
+            </any>
+        </not>
+    </deny>
+</filters>
+<regions>
+    <negative id="void-area">
+        <region id="spawn-areas"/>
+        <region id="middle"/>
+        <rectangle min="-32,-65" max="8,-45"/> <!-- Blue void gap-->
+        <rectangle min="33,68" max="-7,48"/> <!-- Red void gap-->
+    </negative>
+    <apply block="deny-void" region="void-area" message="You may not edit the void!"/>
+    <rectangle id="middle" min="66,-26" max="-65,29"/> <!-- Middle -->
+    <!-- iron mines -->
+    <union id="iron-mines">
+        <union id="blue-iron-mine">
+            <cuboid min="-17,9,-73" max="5,19,-61"/> <!-- closest to spawn -->
+            <cuboid min="-12,10,-36" max="-2,16,-41"/>
+        </union>
+        <union id="orange-iron-mine">
+            <cuboid min="18,9,76" max="-4,19,64"/> <!-- closest to spawn -->
+            <cuboid min="13,10,39" max="3,16,44"/>
+        </union>
+    </union>
+    <apply block-place="deny-iron" region="iron-mines" message="You may not place `7iron blocks`r here"/>
+    <!-- spawns -->
+    <union id="spawn-areas">
+        <rectangle id="blue-spawn-area" min="-37,-83" max="37,-120"/>
+        <rectangle id="orange-spawn-area" min="38,86" max="-36,123"/>
+    </union>
+    <apply block="never" region="spawn-areas" message="You may not modify the spawn areas!"/>
+    <apply enter="only-orange" region="orange-spawn-area" message="You may not enter you enemy's spawn area!"/>
+    <apply enter="only-blue" region="blue-spawn-area" message="You may not enter you enemy's spawn area!"/>
+    <!-- other -->
+    <complement id="ceiling">
+        <above y="44"/>
+        <region id="super-ceiling"/>
+    </complement>
+    <apply block-break="only-ceiling" region="ceiling" message="You may not break this block!"/>
+    <above y="70" id="super-ceiling"/>
+    <apply block="never" region="super-ceiling" message="You may not modify blocks here"/>
+</regions>
+<destroyables materials="obsidian" completion="100%" required="true" mode-changes="true">
+    <destroyable owner="blue-team" name="Waterfall Monument"> <!-- East Monument -->
+        <region>
+            <cuboid min="34,30,-53" size="1,3,1"/>
+        </region>
+    </destroyable>
+    <destroyable owner="blue-team" name="Orchard Monument"> <!-- West Monument -->
+        <region>
+            <cuboid min="-48,23,-42" size="1,3,1"/>
+        </region>
+    </destroyable>
+    <destroyable owner="orange-team" name="Orchard Monument"> <!-- East Monument -->
+        <region>
+            <cuboid min="48,23,44" size="1,3,1"/>
+        </region>
+    </destroyable>
+    <destroyable owner="orange-team" name="Waterfall Monument"> <!-- West Monument -->
+        <region>
+            <cuboid min="-34,30,55" size="1,3,1"/>
+        </region>
+    </destroyable>
+</destroyables>
+<modes>
+    <mode after="30m" material="beacon" name="`bBEACON MONUMENT MODE"/>
+</modes>
+<itemkeep>
+    <item>golden apple</item>
+    <item>wood</item>
+    <item>glass</item>
+    <item>cooked beef</item>
+    <item>arrow</item>
+</itemkeep>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>iron leggings</item>
+    <item>leather boots</item>
+    <item>obsidian</item>
+    <item>beacon</item>
+</itemremove>
+<toolrepair>
+    <tool>diamond sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>diamond axe</tool>
+    <tool>diamond spade</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<renewables>
+    <renewable region="iron-mines" renew-filter="only-iron"/>
+</renewables>
+<block-drops>
+    <rule>
+        <filter>
+            <material>gravel</material>
+        </filter>
+        <drops>
+            <item chance="0" material="flint"/>
+            <item chance="1" material="gravel"/>
+        </drops>
+    </rule>
+</block-drops>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item material="wood" damage="1" amount="16"/>
+        <item material="glass" amount="8"/>
+    </kill-reward>
+</kill-rewards>
+<gamerules>
+    <doDaylightCycle>true</doDaylightCycle>
+</gamerules>
+</map>
