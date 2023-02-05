@@ -1,0 +1,178 @@
+<map proto="1.4.2">
+<name>Voodoo</name>
+<version>1.0</version>
+<objective>Leak lava from the enemy core and destroy the enemy monuments!</objective>
+<created>2023-01-29</created>
+<time result="objectives">30m</time>
+<phase>development</phase>
+<maxbuildheight>25</maxbuildheight>
+<authors>
+    <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
+    <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
+</authors>
+<contributors> 
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML"/> <!-- zzuf -->
+</contributors>
+<teams>
+    <team id="purple-team" color="dark purple" max="20">Purple</team>
+    <team id="cyan-team" color="dark aqua" max="20">Cyan</team>
+</teams>
+<spawns>
+    <spawn team="cyan-team" kit="spawn-kit" yaw="-90">
+        <regions>
+            <point>-87.5,15,0.5</point>
+        </regions>
+    </spawn>
+    <spawn team="purple-team" kit="spawn-kit" yaw="90">
+        <regions>
+            <point>89.5,15,0.5</point>
+        </regions>
+    </spawn>
+    <default>
+        <regions>
+            <point yaw="180">1,46,0.5</point>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="spawn-kit" parents="default-kit">
+        <clear/>
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" material="bow" enchantment="infinity" unbreakable="true"/>
+        <item slot="2" material="diamond pickaxe" unbreakable="true"/>
+        <item slot="3" material="iron axe" enchantment="dig speed:2" unbreakable="true"/>
+        <item slot="4" material="stained clay" team-color="true" amount="64"/>
+        <item slot="5" material="glass" amount="32"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <item slot="30" material="iron spade" unbreakable="true"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" enchantment="protection projectile:2" unbreakable="true"/>
+        <leggings material="chainmail leggings" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <effect duration="2s" amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="default-kit">
+        <effect duration="oo">night vision</effect>
+    </kit>
+</kits>
+<filters>
+    <deny id="deny-void">
+        <void/>
+    </deny>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+    <deny id="deny-purple">
+        <team id="only-purple">purple-team</team>
+    </deny>
+    <deny id="deny-cyan">
+        <team id="only-cyan">cyan-team</team>
+    </deny>
+    <deny id="deny-web">
+        <all>
+            <material>web</material>
+            <void/>
+        </all>
+    </deny>
+    <material id="only-workbench">workbench</material>
+    <material id="only-iron">iron block</material>
+</filters>
+<regions>
+    <!-- Void -->
+    <negative id="void-area">
+        <region id="build-area"/>
+    </negative>
+    <apply block-place="deny-void" block-break="deny-web" region="void-area" message="You may not build in the void."/>
+    <rectangle id="build-area" min="-70,-43" max="72,44"/>
+    <!-- Spawns -->
+    <union id="spawn-areas">
+        <complement id="purple-spawn-area">
+            <rectangle min="64,-23" max="95,28"/>
+            <rectangle min="64,-23" max="72,-9"/>
+            <rectangle min="64,28" max="72,10"/>
+        </complement>
+        <mirror id="cyan-spawn-area" region="purple-spawn-area" origin="1,0,0.5" normal="1,0,0"/>
+    </union>
+    <apply enter="deny-cyan" region="purple-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply enter="deny-purple" region="cyan-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply block-place="deny-players" block-break="only-iron" region="spawn-areas" message="You may only break iron blocks here."/>
+    <apply use="only-workbench" region="spawn-areas"/>
+</regions>
+<destroyables materials="emerald block" show-progress="true" completion="100%" required="true" modes="gold-mode clay-mode">
+    <destroyable owner="purple-team" name="South Monument">
+        <region>
+            <cuboid id="south-mon" min="47,17,33" size="3,3,3"/>
+        </region>
+    </destroyable>
+    <destroyable owner="purple-team" name="North Monument">
+        <region>
+            <cuboid id="north-mon" min="47,17,-35" size="3,3,3"/>
+        </region>
+    </destroyable>
+    <destroyable owner="cyan-team" name="South Monument">
+        <region>
+            <mirror region="south-mon" origin="1,0,0.5" normal="1,0,0"/>
+        </region>
+    </destroyable>
+    <destroyable owner="cyan-team" name="North Monument">
+        <region>
+            <mirror region="north-mon" origin="1,0,0.5" normal="1,0,0"/>
+        </region>
+    </destroyable>
+</destroyables>
+<cores material="obsidian" leak="4" modes="gold-mode">
+    <core team="purple-team" name="Purple Core">
+        <region><cuboid id="center-core" min="34,16,-2" size="5,5,5"/></region>
+    </core>
+    <core team="cyan-team" name="Cyan Core">
+        <region><mirror region="center-core" origin="1,0,0.5" normal="1,0,0"/></region>
+    </core>
+</cores>
+<modes>
+    <mode id="gold-mode" after="15m" name="`6GOLD CORE AND MONUMENT MODE" material="gold block"/>
+    <mode id="clay-mode" after="30m" name="`eCLAY MONUMENT MODE" material="stained clay:4"/>
+</modes>
+<renewables>
+    <renewable region="spawn-areas" renew-filter="only-iron"/>
+</renewables>
+<itemkeep>
+    <item>iron sword</item>
+    <item>bow</item>
+    <item>diamond pickaxe</item>
+    <item>iron axe</item>
+    <item>iron spade</item>
+    <item>arrow</item>
+    <item>wood</item>
+    <item>glass</item>
+    <item>golden apple</item>
+</itemkeep>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>emerald block</item>
+    <item>obsidian</item>
+    <item>gold block</item>
+    <item>stained clay</item>
+</itemremove>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item material="stained clay" team-color="true" amount="12"/>
+        <item material="glass" amount="6"/>
+    </kill-reward>
+</kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>

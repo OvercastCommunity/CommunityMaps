@@ -1,0 +1,166 @@
+<map proto="1.4.2">
+<name>MissingNo</name>
+<version>1.0.5</version>
+<objective>Destroy the enemy team's obsidian monument!</objective>
+<time result="objectives">30m</time>
+<phase>development</phase>
+<gamemode>dtm</gamemode>
+<authors>
+    <author uuid="38ef938a-7020-4c04-9d12-4875ed0598ca"/> <!-- Kazoha -->
+    <author uuid="f6f5dce8-a158-461d-b26d-dc8acfaeedd7"/> <!-- Shuliett -->
+</authors>
+<teams>
+    <team id="blue-team" color="blue" max="16">Blue</team>
+    <team id="red-team" color="red" max="16">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+		<item slot="1" material="bow" unbreakable="true" enchantment="arrow infinite"/>
+        <item slot="2" material="diamond pickaxe" unbreakable="true"/>
+		<item slot="3" material="iron axe" unbreakable="true"/>
+        <item slot="31" material="iron spade" unbreakable="true"/>
+        <item slot="4" material="golden apple"/>
+        <item slot="5" material="bucket"/>
+		<item slot="6" material="wood" amount="64" damage="2"/>
+        <item slot="7" material="leaves" amount="32"/>
+        <item slot="28" material="arrow"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+        <leggings material="chainmail leggings" enchantment="protection projectile:2" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <effect duration="2s" amplifier="255">damage resistance</effect>
+    </kit>
+</kits>
+<spawns>
+    <default yaw="180">
+        <region>
+            <cylinder base="0.5,52,1.5" radius="2" height="0"/>
+        </region>
+    </default>
+    <spawn team="blue-team" kit="spawn-kit">
+        <region yaw="90">
+            <cylinder base="90.5,44,1.5" radius="1" height="0"/>
+        </region>
+    </spawn>
+    <spawn team="red-team" kit="spawn-kit">
+        <region yaw="-90">
+            <cylinder base="-89.5,44,1.5" radius="1" height="0"/>
+        </region>
+    </spawn>
+</spawns>
+<destroyables materials="obsidian" completion="100%" mode-changes="true">
+    <destroyable owner="red-team" name="Red Monument">
+      <region>
+        <cuboid min="-49,16,1" max="-47,14,2"/>
+      </region>
+    </destroyable>
+    <destroyable owner="blue-team" name="Blue Monument">
+      <region>
+        <cuboid min="49,16,1" max="50,14,2"/>
+      </region>
+    </destroyable>
+</destroyables>
+<modes>
+    <mode after="30m" material="beacon" name="`bBEACON MONUMENT MODE"/>
+    <mode after="50m" material="coal block" name="`8COAL MONUMENT MODE"/>
+</modes>
+<filters>
+    <deny id="deny-void">
+        <void/>
+    </deny>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <all id="only-iron-cause-world">
+      <material id="only-iron">iron block</material>
+      <cause>world</cause>
+    </all>
+    <material id="only-air">air</material>
+</filters>
+<regions>
+    <negative id="void-area">
+        <region id="build-area"/>
+        <region id="spawns"/>
+        <region id="void-filter-protection"/>
+    </negative>
+    <negative id="not-spawns">
+        <union id="spawns">
+            <union id="blue-spawn">
+                <rectangle min="100,19" max="74,-16"/>
+                <above z="72"/>
+            </union>
+            <union id="red-spawn">
+                <rectangle min="-99,-16" max="-73,19"/>
+                <below z="-71"/>
+            </union>
+        </union>
+    </negative>
+    <union id="build-area">
+        <rectangle min="34,-14" max="65,17"/> <!-- blue team -->
+        <rectangle min="-43,-27" max="44,30"/> <!-- Middle Zone -->
+        <rectangle min="-33,17" max="-64,-14"/> <!-- red team -->
+    </union>
+    <below y="1" id="void-filter-protection"/>
+   <!-- applicators -->
+   <apply block-place="only-iron-cause-world" block-break="only-iron" region="spawns" message="You may not edit spawn!"/>
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply block="never" message="You may not edit this area!" region="spawns"/>
+    <apply block-place="deny-void" message="You may not build in the void!" region="void-area"/>
+    <apply block="never" region="void-filter-protection"/>
+</regions>
+<itemkeep>
+    <item>wood</item>
+    <item>glass</item>
+    <item>golden apple</item>
+    <item>leaves</item>
+</itemkeep>
+<itemremove>
+    <item>glass</item>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>stone</item>
+    <item>string</item>
+    <item>wood step</item>
+    <item>obsidian</item>
+    <item>bucket</item>
+</itemremove>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>arrow</tool>
+    <tool>iron spade</tool>
+</toolrepair>
+<item-mods>
+    <rule>
+        <match>
+            <material>iron helmet</material>
+            <material>iron chestplate</material>
+            <material>iron leggings</material>
+            <material>iron boots</material>
+            <material>iron sword</material>
+            <material>diamond pickaxe</material>
+            <material>iron axe</material>
+            <material>iron spade</material>
+        </match>
+        <modify unbreakable="true"/>
+    </rule>
+</item-mods>
+<renewables>
+  <renewable rate="0.5" sound="false" region="spawns" renew-filter="only-iron" replace-filter="only-air" avoid-players="1"/>
+</renewables>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>32</maxbuildheight>
+<kill-reward>
+    <item material="golden apple"/>
+    <item material="wood" amount="16"/>
+    <item material="leaves" amount="8"/>
+</kill-reward>
+</map>
