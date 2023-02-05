@@ -1,0 +1,212 @@
+<map proto="1.4.2">
+<name>Ulcinj</name>
+<version>1.0.2</version>
+<objective>Destroy the other team's wool orb and obsidian monument.</objective>
+<created>2023-01-29</created>
+<phase>development</phase>
+<gamemode>dtm</gamemode>
+<authors>
+    <author uuid="8c82e83e-4d7e-40d4-9eb7-3b3eaf08c048" contribution="Building and XML"/> <!-- JacketJack_ -->
+    <author uuid="62b6d081-8df8-4c09-aa15-71141ca7df76" contribution="Building"/> <!-- Arzanex -->
+    <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e" contribution="Building"/> <!-- Mewzzy -->
+</authors>
+<contributor uuid="95763a18-eb88-44e7-8a10-780acffceae8"/> <!-- Creephunter -->
+<teams>
+    <team id="blue" color="blue" max="20">Blue</team>
+    <team id="pink" color="light purple" max="20">Pink</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow" enchantment="infinity"/>
+        <item slot="2" unbreakable="true" material="diamond pickaxe"/>
+        <item slot="3" unbreakable="true" material="iron axe"/>
+        <item slot="4" unbreakable="true" material="iron spade"/>
+        <item slot="5" amount="64" material="wood"/>
+        <item slot="32" amount="64" material="wood"/>
+        <item slot="7" amount="16" material="vine"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <helmet unbreakable="true" material="iron helmet"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+        <effect duration="3" amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="blue-kit" parent="spawn-kit">
+        <chestplate unbreakable="true" color="7fccff" material="leather chestplate"/>
+        <boots unbreakable="true" color="7fccff" material="leather boots"/>
+    </kit>
+    <kit id="pink-kit" parent="spawn-kit">
+        <chestplate unbreakable="true" color="ff9999" material="leather chestplate"/>
+        <boots unbreakable="true" color="ff9999" material="leather boots"/>
+    </kit>
+</kits>
+<spawns>
+    <default yaw="0">
+        <region>
+            <point>-0.5,65.5,-79.5</point>
+        </region>
+    </default>
+    <spawn team="pink" kit="pink-kit" yaw="-45">
+        <regions>
+            <point>-114.5,25.5,-30.5</point>
+        </regions>
+    </spawn>
+    <spawn team="blue" kit="blue-kit" yaw="135">
+        <regions>
+            <point>113.5,25.5,31.5</point>
+        </regions>
+    </spawn>
+</spawns>
+<filters>
+    <team id="only-blue">blue</team>
+    <team id="only-pink">pink</team>
+</filters>
+<regions>
+    <!-- Spawn Protection -->
+    <rectangle id="blue-spawn" min="103.5,21.5" max="120.5,38.5"/>
+    <rectangle id="pink-spawn" min="-104.5,-20.5" max="-121.5,-37.5"/>
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-pink" region="pink-spawn" message="You may not enter the opponent's spawn!"/>
+    <union id="spawn-protection">
+        <region id="pink-spawn"/>
+        <region id="blue-spawn"/>
+    </union>
+    <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
+    <!-- Buildable Region -->
+    <negative id="void-region">
+        <rectangle id="playable-region" min="-121,-37" max="120,38"/>
+    </negative>
+    <apply region="void-region" block-place="never" message="You may not build in the void area!"/>
+    <!-- Disable Physics -->
+    <!--<rectangle id="everywhere-region" min="-126,-37" max="124,37"/>
+    <apply region="everywhere-region" block-physics="never"/>-->
+</regions>
+
+<!-- Monuments -->
+<destroyables completion="100%" required="true">
+    <destroyable name="Monument" id="blue-monument" materials="obsidian" owner="blue" modes="beacon-mode gold-mode glass-mode">
+        <region>
+           <cuboid min="113.5,26.5,-15.5" max="115.5,28.5,-17.5"/>
+        </region>
+    </destroyable>
+    <destroyable name="Monument" id="pink-monument" materials="obsidian" owner="pink" modes="beacon-mode gold-mode glass-mode">
+        <region>
+           <cuboid min="-114.5,26.5,15.5" max="-116.5,28.5,17.5"/>
+        </region>
+    </destroyable>
+    <destroyable name="Wool Orb" id="blue-wool-orb" materials="wool:3" owner="blue">
+        <region>
+           <cuboid min="58.5,28.5,9.5" max="64.5,33.5,3.5"/>
+        </region>
+    </destroyable>
+    <destroyable name="Wool Orb" id="pink-wool-orb" materials="wool:6" owner="pink">
+        <region>
+           <cuboid min="-59.5,28.5,-8.5" max="-65.5,33.5,-2.5"/>
+        </region>
+    </destroyable>
+</destroyables>
+
+<!-- Indicator Arrows -->
+<destroyables>
+    <destroyable name="Indicator Arrows" owner="blue" show="false" materials="stained glass" modes="after-0s">
+        <region>
+            <union>
+                <cuboid id="blue-monu-arrow" min="113,46,-12" max="115,55,-19"/>
+                <cuboid id="blue-orb-arrow" min="60,44,9" max="62,53,3"/>
+                <cuboid id="red-monu-arrow" min="-115,46,13" max="-117,55,19"/>
+                <cuboid id="red-orb-arrow" min="-64,44,-3" max="-62,53,-9"/>
+            </union>
+        </region>
+    </destroyable>
+</destroyables>
+<modes>
+    <mode id="beacon-mode" after="20m" name="`3BACON MONUMENT MODE" material="beacon"/>
+	<mode id="gold-mode" after="40m" name="`eGOLD MONUMENT MODE" material="gold_block"/>
+    <mode id="glass-mode" after="60m" name="`0GLASS MONUMENT MODE" material="glass"/>
+    <mode id="after-0s" after="0s" name="Match Start" material="air"/>
+</modes>
+<spawners>
+    <spawner delay="6s">
+        <spawn-region>
+            <cylinder base="-0.5,25,0.5" radius="1" height="1"/>
+        </spawn-region>
+        <player-region>
+            <cylinder base="-0.5,24,0.5" radius="2" height="3"/>
+        </player-region>
+        <item material="golden apple"/>
+    </spawner>
+</spawners>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+</toolrepair>
+<itemremove>
+    <item>iron helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>red rose</item>
+    <item>yellow flower</item>
+    <item>double plant</item>
+    <item>grass</item>
+    <item>stained clay</item>
+    <item>lever</item>
+    <item>sponge</item>
+    <item>sand:1</item>
+    <item>hay block</item>
+    <item>carrot item</item>
+    <item>iron ingot</item>
+    <item>leaves</item>
+    <item>sign</item>
+    <item>ladder</item>
+    <item>step</item>
+    <item>stone slab2</item>
+    <item>trap door</item>
+    <item>gravel</item>
+    <item>flint</item>
+    <item>leaves</item>
+    <item>iron fence</item>
+    <item>iron trapdoor</item>
+    <item>sugar cane</item>
+    <item>seeds</item>
+    <item>wheat</item>
+    <item>wool</item>
+    <item>clay_ball</item>
+    <item>obsidian</item>
+</itemremove>
+<itemkeep>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>diamond pickaxe</item>
+    <item>iron axe</item>
+    <item>iron spade</item>
+    <item>arrow</item>
+    <item>wood</item>
+    <item>vine</item>
+    <item>golden apple</item>
+</itemkeep>
+<block-drops>
+    <rule>
+        <filter>
+            <material>wood</material>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+</block-drops>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>44</maxbuildheight>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item amount="24" material="wood"/>
+    </kill-reward>
+</kill-rewards>
+</map>
