@@ -1,0 +1,145 @@
+<map proto="1.4.2">
+<name>Mushroom Kingdoms</name>
+<version>1.0.0</version>
+<objective>First team to 750 points wins!</objective>
+<created>2019-06-01</created> <!-- idk exactly when this was made, but it was before Shave Vice, which is about 2 weeks after this date. Could be older? -->
+<phase>development</phase>
+<authors>
+    <author uuid="5198dc37-537f-4ea5-8ee8-1e0952d4a36b" contribution="Made most of this map sometime in 2019"/> <!-- _3Each -->
+    <author uuid="a9f11454-beac-4cc3-a138-1780802c8794" contribution="Finished up the map in 2023/xml goat"/> <!-- Crazy_ -->
+</authors>
+<teams>
+    <team id="red" color="dark red" max="12">Red</team>
+    <team id="green" color="green" max="12">Green</team>
+</teams>
+<kits>
+    <kit id="spawn">
+        <clear/>
+        <item slot="0" unbreakable="true">stone sword</item>
+        <item slot="1" unbreakable="true">bow</item>
+        <item slot="8" amount="16">arrow</item>
+        <item slot="2">golden apple</item>
+        <helmet unbreakable="true" team-color="true">leather helmet</helmet>
+        <chestplate unbreakable="true" team-color="true">leather chestplate</chestplate>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="2">projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true">iron boots</boots>
+        <effect duration="4s" amplifier="20">damage resistance</effect>
+        <effect duration="oo">haste</effect>
+    </kit>
+    <kit id="red-kit" parent="spawn">
+        <item slot="2" amount="16" damage="14">stained glass</item>
+    </kit>
+    <kit id="green-kit" parent="spawn">
+        <item slot="2" amount="16" damage="5">stained glass</item>
+    </kit>
+</kits>
+<spawns>
+    <spawn team="red" kit="red-kit" region="red-spawn-point" yaw="90"/>
+    <spawn team="green" kit="green-kit" region="green-spawn-point" yaw="-90"/>
+    <default region="obs-spawn" yaw="180"/>
+</spawns>
+<filters>
+    <deny id="deny-void">
+        <all>
+            <any>
+                <void/>
+                <not>
+                    <material>stained glass</material>
+                </not>
+            </any>
+        </all>
+    </deny>
+    <any id="only-spawn-blocks">
+        <material>stained glass</material>
+    </any>
+    <any id="only-wool">
+        <material>wool:0</material>
+        <material>wool:14</material>
+        <material>wool:5</material>
+    </any>
+    <team id="only-red">red</team>
+    <team id="only-green">green</team>
+    <deny id="not-red"><team>red</team></deny>
+    <deny id="not-green"><team>green</team></deny>
+</filters>
+<regions>
+    <union id="spawns-protection">
+        <rectangle id="red-spawn" min="19,21" max="38,46"/>
+        <rectangle id="green-spawn" min="97,46" max="116,21"/>
+    </union>
+    <union id="hill-protection">
+        <cuboid id="green-side-hill" min="89,10,14" max="80,20,5"/>
+        <cuboid id="mid-hill" min="63,14,37" max="71,20,29"/>
+        <cuboid id="red-side-hill" min="55,10,53" max="46,20,62"/>
+    </union>
+    <union id="spawn-points">
+        <point id="red-spawn-point">28.5,5,33.5</point>
+        <point id="green-spawn-point">106.5,5,33.5</point>
+        <cuboid id="obs-spawn" min="75,12,106" max="73,12,105"/>
+    </union>
+    <union id="actual-hills">
+        <cuboid id="green-hill-capture" min="88,9,13" max="81,20,6"/>
+        <cuboid id="mid-hill-capture" min="63,13,37" max="71,20,29"/>
+        <cuboid id="red-hill-capture" min="54,9,54" max="47,20,61"/>
+    </union>
+    <union id="hill-capture-displays">
+        <cuboid id="green-display" min="92,6,94" max="119,48,95"/> <!-- Mario/Luigi -->
+        <cuboid id="mid-display" min="82,6,95" max="66,22,94"/> <!-- Mushroom -->
+        <cuboid id="red-display" min="53,6,95" max="19,47,94"/> <!-- Bowser -->
+    </union>
+
+    <apply enter="only-red" region="red-spawn" message="You may not enter the other team's spawn!"/>
+    <apply enter="only-green" region="green-spawn" message="You may not enter the other team's spawn!"/>
+
+    <apply block="never" region="hill-protection" message="You may not place blocks at the hills!"/>
+    <apply block="never" region="spawns-protection" message="You may not place blocks in the spawn castles!"/>
+
+    <apply block="deny-void" message="You may only interact with stained glass within the map bounds!"/>
+</regions>
+<control-points required="false" show-progress="true" neutral-state="false" time-multiplier="0" decay="0" recovery="1" visual-materials="only-wool">
+    <control-point name="Green Kingdom Pipe" capture-time="5s" points="1" capture="green-hill-capture" progress="green-hill-capture" captured="green-display"/>
+    <control-point name="Lucky Block" capture-time="5s" points="1.5" capture="mid-hill-capture" progress="mid-hill-capture" captured="mid-display"/>
+    <control-point name="Red Kingdom Pipe" capture-time="5s" points="1" capture="red-hill-capture" progress="red-hill-capture" captured="red-display"/>
+</control-points>
+<score>
+    <limit>750</limit>
+    <kills>0</kills>
+</score>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+    <item>stained glass</item>
+</itemremove>
+<itemkeep>
+    <item>golden apple</item>
+    <item>arrow</item>
+</itemkeep>
+<kill-rewards>
+    <item>golden apple</item>
+    <item amount="8">arrow</item>
+    <filter>
+        <team>red</team>
+        <item amount="6" damage="14">stained glass</item>
+    </filter>
+    <filter>
+        <team>green</team>
+        <item amount="6" damage="5">stained glass</item>
+    </filter>
+</kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>20</maxbuildheight>
+<timelock>on</timelock>
+<broadcasts>
+    <tip after="10s" every="2m">The hill on the middle `eLucky Block `rgives more points every second!</tip>
+</broadcasts>
+</map>
