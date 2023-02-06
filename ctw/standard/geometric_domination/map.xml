@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Geometric Domination</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <gamemode>ctw</gamemode>
 <created>2023-01-21</created>
 <objective>Collect the enemy's wool and return them to your monument!</objective>
@@ -8,8 +8,8 @@
     <author uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609" contribution="Map author and creator"/> <!-- Technodono -->
 </authors>
 <teams>
-    <team id="blue" color="blue" max="14">Cuboids</team>
-    <team id="red" color="red" max="14">Spheroids</team>
+    <team id="blue" color="blue" max="20">Cuboids</team>
+    <team id="red" color="red" max="20">Spheroids</team>
 </teams>
 <rules>
     <rule>Water is restricted for cannoning only!</rule>
@@ -95,7 +95,6 @@
             <material>gold plate</material>
         </any>
     </deny>
-
     <deny id="deny-water-bucket">
         <material id="water-bucket">water bucket</material>
     </deny>
@@ -108,47 +107,39 @@
             <material>cobble wall</material>
         </any>
     </blocks>
-    
     <material id="only-wool">wool</material>
     <not id="tnt-disallowed">
         <variable id="tnt-allowed" var="tnt_allowed_variable">1</variable>
     </not>
+    <time id="match-start">0s</time>
+    <after id="after-msg" message="`cTNT `rWill Start Spawning In {0}" duration="2m" filter="match-start"/>
 </filters>
-
 <regions>
 <!-- Regions -->
-
     <!-- Areas -->
-    
     <union id="all-wool-rooms">
         <cuboid id="purple-woolroom" min="15,0,-127" max="28,100,-145"/>
         <cuboid id="silver-woolroom" min="-7,0,110" max="-20,100,128"/>
     </union>
-    
     <union id="all-wool-rooms-entrances">
         <cylinder id="purple-woolroom-entrance" base="23.5,11,-131.5" radius="3.4" height="6"/>
         <cylinder id="silver-woolroom-entrance" base="-15.5,11,114.5" radius="3.4" height="6"/>
     </union>
-    
     <cylinder id="purple-wool-spawner-player-region" base="20.5,11,-137.5" radius="3" height="8"/>
     <cylinder id="silver-wool-spawner-player-region" base="-12.5,11,120.5" radius="3" height="8"/>
-    
     <union id="all-spawn-rooms">
         <rectangle id="blue-spawn-room" min="22,95" max="37,75"/>
         <rectangle id="red-spawn-room" min="-14,-112" max="-29,-92"/>
     </union>
-    
     <negative id="not-tnt-platforms">
         <rectangle id="tnt-platforms" min="-20,21" max="28,-38"/>
     </negative>
-    
     <negative id="not-all-wool-lanes">
         <union id="all-wool-lanes">
             <rectangle id="blue-wool-lane" min="-7,76" max="-20,110"/>
             <rectangle id="red-wool-lane" min="15,-93" max="28,-127"/>
         </union>
     </negative>
-    
     <union id="all-wool-walls">
         <union id="red-wool-walls">
             <cuboid min="15,0,-127" max="28,1,-93"/>
@@ -160,73 +151,54 @@
             </mirror>
         </mirror>
     </union>
-    
     <cuboid id="tnt-spawner-player-region" min="10,11,-14" max="-1,14,-4"/>
-    
     <!-- Points -->
     <block id="silver-wool-spawner">-13,11,120</block>
     <block id="purple-wool-spawner">20,11,-137</block>
-    
     <block id="silver-wool-monument">-20,8,-98</block>
     <block id="purple-wool-monument">27,8,80</block>
-    
     <block id="tnt-spawner-point-ne">7,11,-12</block>
     <block id="tnt-spawner-point-se">7,11,-6</block>
     <block id="tnt-spawner-point-sw">1,11,-6</block>
     <block id="tnt-spawner-point-nw">1,11,-12</block>
-    
     <!-- Rules Applied (order is important!) -->
-    
-   
     <apply block="only-wool" region="all-spawn-rooms"/>
-    
-        <apply block="deny-blue" region="silver-woolroom"/>
+    <apply block="deny-blue" region="silver-woolroom"/>
     <apply block="deny-red" region="purple-woolroom"/>
     <apply block="woolroom-blocks" region="all-wool-rooms"/>
-    
     <apply block="never" region="all-wool-walls" message="You may not break the &quot;bedrock&quot; walls!"/>
     <apply block-break="not-chest" region="everywhere"/>
-    
     <apply enter="only-red" region="silver-woolroom" message="You may not enter you own woolroom!"/>
     <apply enter="only-blue" region="purple-woolroom" message="You may not enter you own woolroom!"/>
-    
     <apply kit="woolroom-gear" region="all-wool-rooms-entrances"/>
-
     <apply block="deny-void" message="You may not modify the void area!"/>
-    
     <apply use="deny-water-bucket" block="deny-water" region="not-tnt-platforms" message="You may only place water in mid!"/>
-    
-
 </regions>
 <variables>
     <variable id="tnt_allowed_variable" scope="match" default="0"/>
 </variables>
 <actions>
-    <trigger scope="match">
-        <filter>
-            <after message="`cTNT `rWill Start Spawning In {0}" duration="2m" filter="tnt-disallowed"/>
-        </filter>
-        <action>
-            <message text="`bTNT is now spawning in mid!"/>
-            <set var="tnt_allowed_variable" value="1"/>
-        </action>
-    </trigger>
+    <action id="tnt-msg" scope="match">
+        <message text="`bTNT is now spawning in mid!"/>
+        <set var="tnt_allowed_variable" value="1"/>
+    </action>
+    <trigger filter="after-msg" action="tnt-msg" scope="match"/>
 </actions>
 <!--  Spawners  -->
 <spawners>
-    <spawner spawn-region="tnt-spawner-point-ne" player-region="tnt-spawner-player-region" max-entities="1" delay="12s" filter="tnt-allowed">
+    <spawner spawn-region="tnt-spawner-point-ne" player-region="tnt-spawner-player-region" max-entities="2" delay="12s" filter="tnt-allowed">
         <item amount="16" material="tnt"/>
         <item amount="1" material="redstone torch on"/>
     </spawner>
-    <spawner spawn-region="tnt-spawner-point-nw" player-region="tnt-spawner-player-region" max-entities="1" delay="12s" filter="tnt-allowed">
+    <spawner spawn-region="tnt-spawner-point-nw" player-region="tnt-spawner-player-region" max-entities="2" delay="12s" filter="tnt-allowed">
         <item amount="16" material="tnt"/>
         <item amount="1" material="redstone torch on"/>
     </spawner>
-    <spawner spawn-region="tnt-spawner-point-se" player-region="tnt-spawner-player-region" max-entities="1" delay="12s" filter="tnt-allowed">
+    <spawner spawn-region="tnt-spawner-point-se" player-region="tnt-spawner-player-region" max-entities="2" delay="12s" filter="tnt-allowed">
         <item amount="16" material="tnt"/>
         <item amount="1" material="redstone torch on"/>
     </spawner>
-    <spawner spawn-region="tnt-spawner-point-sw" player-region="tnt-spawner-player-region" max-entities="1" delay="12s" filter="tnt-allowed">
+    <spawner spawn-region="tnt-spawner-point-sw" player-region="tnt-spawner-player-region" max-entities="2" delay="12s" filter="tnt-allowed">
         <item amount="16" material="tnt"/>
         <item amount="1" material="redstone torch on"/>
     </spawner>
@@ -310,7 +282,6 @@
         <item amount="16" damage="11">stained clay</item>
     </killreward>
 </kill-rewards>
-
 <!-- map regen -->
 <renewables>
     <renewable interval="8s" grow="true" particles="false" sound="false"  avoid-players="2">
@@ -329,7 +300,6 @@
         </renew-filter>
     </renewable>
 </renewables>
-
 <!-- Red wools -->
 <wools team="red">
     <wool color="silver" location="124.5,22,0.5" monument="silver-wool-monument"/>
