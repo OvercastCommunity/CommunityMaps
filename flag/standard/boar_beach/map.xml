@@ -1,9 +1,8 @@
 <map proto="1.4.2">
 <name>Boar Beach</name>
-<version>1.0.0</version>
+<version>1.1.0</version>
 <objective>Get the most points in 7 minutes!</objective>
 <created>2023-01-26</created>
-<phase>development</phase>
 <authors>
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
 </authors>
@@ -16,8 +15,7 @@
         <clear/>
         <item slot="0" unbreakable="true" material="stone sword"/>
         <item slot="1" unbreakable="true" material="bow"/>
-        <item slot="2"                    material="golden apple"/>
-        <item slot="8" amount="20"        material="arrow"/>
+        <item slot="8" amount="36"        material="arrow"/>
         <chestplate    unbreakable="true" material="chainmail chestplate"/>
         <boots         unbreakable="true" material="iron boots"/>
         <effect duration="3" amplifier="10">resistance</effect>
@@ -81,9 +79,9 @@
             <flag-returned post="red-post-red-flag">red-flag</flag-returned>
         </all>
     </not>
-    <time id="begin-release-0">1m15s</time>
-    <time id="begin-release-1">2m15s</time>
-    <time id="begin-release-2">3m15s</time>
+    <time id="begin-release-0">0m10s</time>
+    <time id="begin-release-1">1m40s</time>
+    <time id="begin-release-2">3m10s</time>
     <variable id="release-order-0" var="release_order">0</variable>
     <variable id="release-order-1" var="release_order">1</variable>
     <variable id="release-order-2" var="release_order">2</variable>
@@ -159,9 +157,9 @@
             <filter id="begin-release-2"/>
         </all>
     </any>
-    <after id="trigger-diamond-release" message="Diamond Flag will be released in {0}" duration="15s" filter="begin-diamond-release"/>
-    <after id="trigger-gold-release"    message="Gold Flag will be released in {0}"    duration="15s" filter="begin-gold-release"/>
-    <after id="trigger-emerald-release" message="Emerald Flag will be released in {0}" duration="15s" filter="begin-emerald-release"/>
+    <after id="trigger-diamond-release" message="Diamond Flag will be released in {0}" duration="45s" filter="begin-diamond-release"/>
+    <after id="trigger-gold-release"    message="Gold Flag will be released in {0}"    duration="45s" filter="begin-gold-release"/>
+    <after id="trigger-emerald-release" message="Emerald Flag will be released in {0}" duration="45s" filter="begin-emerald-release"/>
     <any id="enable-diamond-post-spawner">
         <flag-returned post="blue-post-diamond-flag">diamond-flag</flag-returned>
         <flag-returned post="red-post-diamond-flag">diamond-flag</flag-returned>
@@ -174,6 +172,29 @@
         <flag-returned post="blue-post-emerald-flag">emerald-flag</flag-returned>
         <flag-returned post="red-post-emerald-flag">emerald-flag</flag-returned>
     </any>
+    <all id="send-flag-unreleased-alert">
+        <participating/>
+        <any>
+            <all>
+                <region id="diamond-flag-alert"/>
+                <not>
+                    <filter id="trigger-diamond-release"/>
+                </not>
+            </all>
+            <all>
+                <region id="gold-flag-alert"/>
+                <not>
+                    <filter id="trigger-gold-release"/>
+                </not>
+            </all>
+            <all>
+                <region id="emerald-flag-alert"/>
+                <not>
+                    <filter id="trigger-emerald-release"/>
+                </not>
+            </all>
+        </any>
+    </all>
     <any id="block-whitelist">
         <material>tnt</material>
         <material>long grass</material>
@@ -182,6 +203,8 @@
         <material>red mushroom</material>
         <material>brown mushroom</material>
     </any>
+    <material id="only-stained-clay">stained clay</material>
+    <material id="only-stained-glass">stained glass</material>
 </filters>
 <regions>
     <cuboid id="blue-spawn-safety" min="17,7.75,-38" max="-17,8.5,-27"/>
@@ -192,40 +215,36 @@
     <sphere id="red-alert" origin="0.5,18,21" radius="7"/>
     <point id="diamond-point">13.5,9,0.5</point>
     <cuboid id="diamond-flag-indicator" min="13,14,0" max="14,18,1"/>
-    <cuboid id="diamond-flag-box" min="12,9,-1"  max="15,12,2"/>
-    <point id="gold-point">0.5,8,0.5</point>
-    <cuboid id="gold-flag-indicator" min="0,13,0" max="1,17,1"/>
-    <cuboid id="gold-flag-box" min="-1,8,-1" max="2,11,2"/>
+    <cuboid id="diamond-flag-box" min="12,9,-1" max="15,12,2"/>
+    <sphere id="diamond-flag-alert" origin="13.5,9,0.5" radius="4.5"/>
+    <point id="gold-point">0.5,7,0.5</point>
+    <cuboid id="gold-flag-indicator" min="0,12,0" max="1,16,1"/>
+    <cuboid id="gold-flag-box" min="-1,7,-1" max="2,10,2"/>
+    <sphere id="gold-flag-alert" origin="0.5,7,0.5" radius="4.5"/>
     <point id="emerald-point">-13.5,9,0.5</point>
     <cuboid id="emerald-flag-indicator" min="-13,14,0" max="-12,18,1"/>
     <cuboid id="emerald-flag-box" min="-14,9,-1" max="-11,12,2"/>
+    <sphere id="emerald-flag-alert" origin="-13.5,9,0.5" radius="4.5"/>
+    <below id="yeet-into-the-void" y="-10"/>
     
     <apply block="block-whitelist" message="You may not interact with that material here"/>
-    <apply kit="void-kit">
-        <region>
-            <below y="0"/>
-        </region>
-    </apply>
+    <apply kit="void-kit" region="yeet-into-the-void"/>
 </regions>
 <portals sound="false">
     <portal region="blue-spawn-safety" x="@0.5" y="@9" z="@-32.5" filter="only-blue"/>
     <portal region="red-spawn-safety" x="@0.5" y="@9" z="@33.5" filter="only-red"/>
-    <portal y="-100">
-        <region>
-            <below y="0"/>
-        </region>
-    </portal>
+    <portal region="yeet-into-the-void" y="-100"/>
 </portals>
 <score/>
 <time result="score">7m</time>
-<flags shared="true">
+<flags shared="true" carry-message="Return the flag to your team's skull!" deny-message="Return the flag to your team's skull!">
     <flag id="blue-flag"    name="Blue Flag"    color="blue"   shared="true" post="blue-post-blue-flag"/>
     <flag id="red-flag"     name="Red Flag"     color="red"    shared="true" post="red-post-red-flag"/>
     <flag id="diamond-flag" name="Diamond Flag" color="cyan"   shared="true" post="diamond-init-post"/>
     <flag id="gold-flag"    name="Gold Flag"    color="yellow" shared="true" post="gold-init-post"/>
     <flag id="emerald-flag" name="Emerald Flag" color="lime"   shared="true" post="emerald-init-post"/>
     <post id="diamond-init-post" recover-time="3s" yaw="90">13,9,0</post>
-    <post id="gold-init-post"    recover-time="3s" yaw="90">0,8,0</post>
+    <post id="gold-init-post"    recover-time="3s" yaw="90">0,7,0</post>
     <post id="emerald-init-post" recover-time="3s" yaw="-90">-13,9,0</post>
     <!-- blue specific posts and nets -->
     <post id="blue-post-blue-flag"    owner="blue-team"  points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="deny-blue-own-pickup" yaw="0">0,18,-21</post>
@@ -288,61 +307,29 @@
             </all>
         </trigger>
     </dynamic>
-    <!-- removal for glass boxes around flags -->
-    <structure id="diamond-flag-box-struc">
-        <region>
-            <complement>
-                <region id="diamond-flag-box"/>
-                <cuboid min="13,9,0" max="14,10,1"/>
-            </complement>
-        </region>
-    </structure>
-    <dynamic structure="diamond-flag-box-struc">
-        <trigger>
-            <not>
-                <filter id="trigger-diamond-release"/>
-            </not>
-        </trigger>
-    </dynamic>
-    <structure id="gold-flag-box-struc">
-        <region>
-            <complement>
-                <region id="gold-flag-box"/>
-                <cuboid min="0,8,0" max="1,9,1"/>
-            </complement>
-        </region>
-    </structure>
-    <dynamic structure="gold-flag-box-struc">
-        <trigger>
-            <not>
-                <filter id="trigger-gold-release"/>
-            </not>
-        </trigger>
-    </dynamic>
-    <structure id="emerald-flag-box-struc">
-        <region>
-            <complement>
-                <region id="emerald-flag-box"/>
-                <cuboid min="-13,9,0" max="-12,10,1"/>
-            </complement>
-        </region>
-    </structure>
-    <dynamic structure="emerald-flag-box-struc">
-        <trigger>
-            <not>
-                <filter id="trigger-emerald-release"/>
-            </not>
-        </trigger>
-    </dynamic>
 </structures>
 <actions>
     <!-- randomly pick which order to release flags -->
     <set id="set-release-order" var="release_order" value="floor(random() * 6)" scope="match"/>
     <trigger filter="always" action="set-release-order" scope="match"/>
+    <!-- replace boxes with glass -->
+    <fill id="replace-diamond-box-glass" region="diamond-flag-box" material="stained glass:3" filter="only-stained-clay"/>
+    <fill id="replace-gold-box-glass"    region="gold-flag-box"    material="stained glass:4" filter="only-stained-clay"/>
+    <fill id="replace-emerald-box-glass" region="emerald-flag-box" material="stained glass:5" filter="only-stained-clay"/>
+    <trigger filter="begin-diamond-release" action="replace-diamond-box-glass" scope="match"/>
+    <trigger filter="begin-gold-release"    action="replace-gold-box-glass"    scope="match"/>
+    <trigger filter="begin-emerald-release" action="replace-emerald-box-glass" scope="match"/>
+    <!-- replace boxes with air -->
+    <fill id="replace-diamond-box-air" region="diamond-flag-box" material="air" filter="only-stained-glass"/>
+    <fill id="replace-gold-box-air"    region="gold-flag-box"    material="air" filter="only-stained-glass"/>
+    <fill id="replace-emerald-box-air" region="emerald-flag-box" material="air" filter="only-stained-glass"/>
+    <trigger filter="trigger-diamond-release" action="replace-diamond-box-air" scope="match"/>
+    <trigger filter="trigger-gold-release"    action="replace-gold-box-air"    scope="match"/>
+    <trigger filter="trigger-emerald-release" action="replace-emerald-box-air" scope="match"/>
     <!-- countdown alert msg -->
-    <message id="msg-diamond-flag-countdown" text="`3Diamond Flag `rwill be released in `b15 seconds"/>
-    <message id="msg-gold-flag-countdown"    text="`eGold Flag `rwill be released in `b15 seconds"/>
-    <message id="msg-emerald-flag-countdown" text="`aEmerald Flag `rwill be released in `b15 seconds"/>
+    <message id="msg-diamond-flag-countdown" text="`3Diamond Flag `rwill be released in `b45 seconds"/>
+    <message id="msg-gold-flag-countdown"    text="`eGold Flag `rwill be released in `b45 seconds"/>
+    <message id="msg-emerald-flag-countdown" text="`aEmerald Flag `rwill be released in `b45 seconds"/>
     <trigger filter="begin-diamond-release"  action="msg-diamond-flag-countdown" scope="match"/>
     <trigger filter="begin-gold-release"     action="msg-gold-flag-countdown"    scope="match"/>
     <trigger filter="begin-emerald-release"  action="msg-emerald-flag-countdown" scope="match"/>
@@ -353,7 +340,14 @@
     <trigger filter="trigger-diamond-release" action="msg-diamond-flag-released"  scope="match"/>
     <trigger filter="trigger-gold-release"    action="msg-gold-flag-released"     scope="match"/>
     <trigger filter="trigger-emerald-release" action="msg-emerald-flag-released"  scope="match"/>
+    <!-- not yet released alert tip -->
+    <message id="msg-flag-not-released" actionbar="`c`lThis flag has not been released yet"/>
+    <trigger filter="send-flag-unreleased-alert" action="msg-flag-not-released" scope="player"/>
 </actions>
+<broadcasts>
+    <tip after="0m30s" every="1m" count="3">Your gains points for every flag you have captured at your skull flag post!</tip>
+    <tip after="4m30s" every="1m" count="3">Steal flags from the enemy team's skull to earn more points for your team!</tip>
+</broadcasts>
 <spawners>
     <spawner spawn-region="diamond-point" player-region="everywhere" max-entities="1" delay="8s" filter="enable-diamond-post-spawner">
         <item amount="6" material="arrow"/>
@@ -402,8 +396,21 @@
     <item>stone sword</item>
     <item>bow</item>
     <item>arrow</item>
-    <item>golden apple</item>
 </itemkeep>
+<damage>
+    <!-- deny fall damage outside spawns -->
+    <deny>
+        <all>
+            <cause>gravity</cause>
+            <any>
+                <cylinder base="-12.5,9,-22.5" radius="4.5" height="1"/> <!-- blue right -->
+                <cylinder base="13.5,9,-22.5" radius="4.5" height="1"/> <!-- blue left -->
+                <cylinder base="13.5,9,23.5" radius="4.5" height="1"/> <!-- red right -->
+                <cylinder base="-12.5,9,23.5" radius="4.5" height="1"/> <!-- red left -->
+            </any>
+        </all>
+    </deny>
+</damage>
 <tnt>
     <instantignite>on</instantignite>
     <fuse>2s</fuse>
