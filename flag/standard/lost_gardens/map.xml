@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Lost Gardens</name>
-<version>1.0.0</version>
+<version>1.1.0</version>
 <objective>Score your flag in the enemy goals, Most points wins!</objective>
 <created>2022-01-28</created>
 <phase>development</phase>
@@ -24,7 +24,6 @@
 </teams>
 <kits>
     <kit id="spawn">
-        <clear/>
         <item slot="0" unbreakable="true">stone sword</item>
         <item slot="1" unbreakable="true" enchantment="infinity">bow</item>
         <item slot="2" amount="6" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
@@ -92,10 +91,10 @@
     <!-- Apply Kits -->
     <apply kit="red-kit" region="red-goals" filter="only-red"/>
     <apply kit="blue-kit" region="blue-goals" filter="only-blue"/>
-	
-	<apply velocity="-1,2,0" region="east-jump-pad"/>
+    
+    <apply velocity="-1,2,0" region="east-jump-pad"/>
     <apply velocity="1,2,0" region="west-jump-pad"/>
-	
+    
     <!--  Goal regions  -->
     <union id="blue-goals">
         <cuboid id="blue-goal-left" min="-17,7,70" max="-14,11,71"/>
@@ -111,11 +110,11 @@
     </union>
     <!--  Spawns regions  -->
     <rectangle id="blue-spawn" min="-12,-68" max="13,-84"/>
-	<mirror id="red-spawn" normal="0,0,1" origin="0.5,0,1.5">
+    <mirror id="red-spawn" normal="0,0,1" origin="0.5,0,1.5">
         <region id="blue-spawn"/>
-	</mirror>
-	
-	<cuboid id="east-jump-pad" min="20,8,3" max="18,9,0"/>
+    </mirror>
+    
+    <cuboid id="east-jump-pad" min="20,8,3" max="18,9,0"/>
     <mirror id="west-jump-pad" normal="-1,0,0" origin="0.5,0,1.5">
         <region id="east-jump-pad"/>
     </mirror>
@@ -130,13 +129,19 @@
     <all id="blue-not-flag">
         <team id="only-blue">blue-team</team>
         <not id="not-blue-carrying-flag">
-            <carrying-flag id="-blue-carrying-flag">blue-flag</carrying-flag>
+            <any id="blue-carrying-flag">
+                <carrying-flag>blue-flag-east</carrying-flag>
+                <carrying-flag>blue-flag-west</carrying-flag>
+            </any>
         </not>
     </all>
     <all id="red-not-flag">
         <team id="only-red">red-team</team>
         <not id="not-red-carrying-flag">
-            <carrying-flag id="-red-carrying-flag">red-flag</carrying-flag>
+            <any id="red-carrying-flag">
+                <carrying-flag>red-flag-east</carrying-flag>
+                <carrying-flag>red-flag-west</carrying-flag>
+            </any>
         </not>
     </all>
     <deny id="deny-use">
@@ -152,7 +157,6 @@
         </any>
     </deny>
 </filters>
-
 <!--  Tools and Misc item stuff  -->
 <toolrepair>
     <tool>stone sword</tool>
@@ -165,11 +169,9 @@
     <item>leather chestplate</item>
     <item>cooked beef</item>
     <item>arrow</item>
+    <item>golden apple</item>
     <item>firework charge</item>
 </itemremove>
-<itemkeep>
-    <item>golden apple</item>
-</itemkeep>
 <disabledamage>
     <!-- Disable fall damage -->
     <damage>fall</damage>
@@ -181,7 +183,6 @@
     <timelock>on</timelock>
     <timeset>12000</timeset>
 </world>
-
 <!-- Scogoal and Flag settings  -->
 <killreward>
     <item amount="1">golden apple</item>
@@ -192,12 +193,20 @@
 </score>
 <time overtime="1s" max-overtime="2m">8m</time>
 <flags>
-    <flag id="red-flag" name="Red Flag" color="red" pickup-filter="only-red" required="false" carry-message="Score this in the enemy's goals!" pickup-kit="flag-pickup" drop-kit="reset-health">
-        <post id="red-post" recover-time="12s" respawn-time="7s">0,6,61</post>
+    <flag id="red-flag-east" name="Red Flag East" color="red" pickup-filter="only-red" required="false" carry-message="Score this in the enemy's goals!" pickup-kit="flag-pickup" drop-kit="reset-health">
+        <post id="red-post-east" recover-time="15s" respawn-time="5s">4,6,61</post>
         <net points="1" region="red-goals" capture-filter="only-red"/>
     </flag>
-    <flag id="blue-flag" name="Blue Flag" color="blue" pickup-filter="only-blue" required="false" carry-message="Score this in the enemy's goals!" pickup-kit="flag-pickup" drop-kit="reset-health">
-        <post id="blue-post" recover-time="12s" respawn-time="7s">0,6,-59</post>
+    <flag id="red-flag-west" name="Red Flag West" color="red" pickup-filter="only-red" required="false" carry-message="Score this in the enemy's goals!" pickup-kit="flag-pickup" drop-kit="reset-health">
+        <post id="red-post-west" recover-time="15s" respawn-time="5s">-4,6,61</post>
+        <net points="1" region="red-goals" capture-filter="only-red"/>
+    </flag>
+    <flag id="blue-flag-east" name="Blue Flag East" color="blue" pickup-filter="only-blue" required="false" carry-message="Score this in the enemy's goals!" pickup-kit="flag-pickup" drop-kit="reset-health">
+        <post id="blue-post-east" recover-time="15s" respawn-time="5s">4,6,-59</post>
+        <net points="1" region="blue-goals" capture-filter="only-blue"/>
+    </flag>
+    <flag id="blue-flag-west" name="Blue Flag West" color="blue" pickup-filter="only-blue" required="false" carry-message="Score this in the enemy's goals!" pickup-kit="flag-pickup" drop-kit="reset-health">
+        <post id="blue-post-west" recover-time="15s" respawn-time="5s">-4,6,-59</post>
         <net points="1" region="blue-goals" capture-filter="only-blue"/>
     </flag>
 </flags>
