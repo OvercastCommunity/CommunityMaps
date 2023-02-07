@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Ulcinj</name>
-<version>1.0.2</version>
+<version>1.1</version>
 <objective>Destroy the other team's wool orb and obsidian monument.</objective>
 <created>2023-01-29</created>
 <phase>development</phase>
@@ -45,28 +45,34 @@
 <spawns>
     <default yaw="0">
         <region>
-            <point>-0.5,65.5,-79.5</point>
+            <point>-0.5,65,-79.5</point>
         </region>
     </default>
     <spawn team="pink" kit="pink-kit" yaw="-45">
         <regions>
-            <point>-114.5,25.5,-30.5</point>
+            <point>-106.5,26,-30.5</point>
         </regions>
     </spawn>
     <spawn team="blue" kit="blue-kit" yaw="135">
         <regions>
-            <point>113.5,25.5,31.5</point>
+            <point>105.5,26,31.5</point>
         </regions>
     </spawn>
 </spawns>
 <filters>
     <team id="only-blue">blue</team>
     <team id="only-pink">pink</team>
+    <deny id="not-gold">
+        <any>
+            <material>gold block</material>
+            <material>gold plate</material>
+        </any>
+    </deny>
 </filters>
 <regions>
     <!-- Spawn Protection -->
-    <rectangle id="blue-spawn" min="103.5,21.5" max="120.5,38.5"/>
-    <rectangle id="pink-spawn" min="-104.5,-20.5" max="-121.5,-37.5"/>
+    <rectangle id="blue-spawn" min="94.5,21.5" max="112.5,38.5"/>
+    <rectangle id="pink-spawn" min="-96.5,-20.5" max="-113.5,-37.5"/>
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-pink" region="pink-spawn" message="You may not enter the opponent's spawn!"/>
     <union id="spawn-protection">
@@ -74,36 +80,37 @@
         <region id="blue-spawn"/>
     </union>
     <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
+
+    <!-- Mid Protection -->
+    <cuboid id="mid-spawner" min="-1.5,23,-0.5" max="0.5,26,1.5"/>
+    <apply block-break="not-gold" region="mid-spawner" message="You may not modify the mid spawner!"/>
     <!-- Buildable Region -->
     <negative id="void-region">
-        <rectangle id="playable-region" min="-121,-37" max="120,38"/>
+        <cuboid id="playable-region" min="-113,12,-37" max="112,50,38"/>
     </negative>
     <apply region="void-region" block-place="never" message="You may not build in the void area!"/>
-    <!-- Disable Physics -->
-    <!--<rectangle id="everywhere-region" min="-126,-37" max="124,37"/>
-    <apply region="everywhere-region" block-physics="never"/>-->
 </regions>
 
 <!-- Monuments -->
 <destroyables completion="100%" required="true">
     <destroyable name="Monument" id="blue-monument" materials="obsidian" owner="blue" modes="beacon-mode gold-mode glass-mode">
         <region>
-           <cuboid min="113.5,26.5,-15.5" max="115.5,28.5,-17.5"/>
+           <cuboid min="105.5,26.5,-19.5" max="107.5,28.5,-21.5"/>
         </region>
     </destroyable>
     <destroyable name="Monument" id="pink-monument" materials="obsidian" owner="pink" modes="beacon-mode gold-mode glass-mode">
         <region>
-           <cuboid min="-114.5,26.5,15.5" max="-116.5,28.5,17.5"/>
+           <cuboid min="-106.5,26.5,19.5" max="-108.5,28.5,21.5"/>
         </region>
     </destroyable>
     <destroyable name="Wool Orb" id="blue-wool-orb" materials="wool:3" owner="blue">
         <region>
-           <cuboid min="58.5,28.5,9.5" max="64.5,33.5,3.5"/>
+           <cuboid min="50.5,28.5,9.5" max="56.5,33.5,3.5"/>
         </region>
     </destroyable>
     <destroyable name="Wool Orb" id="pink-wool-orb" materials="wool:6" owner="pink">
         <region>
-           <cuboid min="-59.5,28.5,-8.5" max="-65.5,33.5,-2.5"/>
+           <cuboid min="-51.5,28.5,-8.5" max="-57.5,33.5,-2.5"/>
         </region>
     </destroyable>
 </destroyables>
@@ -113,24 +120,24 @@
     <destroyable name="Indicator Arrows" owner="blue" show="false" materials="stained glass" modes="after-0s">
         <region>
             <union>
-                <cuboid id="blue-monu-arrow" min="113,46,-12" max="115,55,-19"/>
-                <cuboid id="blue-orb-arrow" min="60,44,9" max="62,53,3"/>
-                <cuboid id="red-monu-arrow" min="-115,46,13" max="-117,55,19"/>
-                <cuboid id="red-orb-arrow" min="-64,44,-3" max="-62,53,-9"/>
+                <cuboid id="blue-monu-arrow" min="105,46,-12" max="107,55,-23"/>
+                <cuboid id="blue-orb-arrow" min="52,44,9" max="54,53,3"/>
+                <cuboid id="pink-monu-arrow" min="-107,46,13" max="-109,55,23"/>
+                <cuboid id="pink-orb-arrow" min="-56,44,-3" max="-54,53,-9"/>
             </union>
         </region>
     </destroyable>
 </destroyables>
 <modes>
     <mode id="beacon-mode" after="20m" name="`3BACON MONUMENT MODE" material="beacon"/>
-	<mode id="gold-mode" after="40m" name="`eGOLD MONUMENT MODE" material="gold_block"/>
+    <mode id="gold-mode" after="40m" name="`eGOLD MONUMENT MODE" material="gold_block"/>
     <mode id="glass-mode" after="60m" name="`0GLASS MONUMENT MODE" material="glass"/>
     <mode id="after-0s" after="0s" name="Match Start" material="air"/>
 </modes>
 <spawners>
     <spawner delay="6s">
         <spawn-region>
-            <cylinder base="-0.5,25,0.5" radius="1" height="1"/>
+            <cylinder base="-0.5,24.5,0.5" radius="0.5" height="1"/>
         </spawn-region>
         <player-region>
             <cylinder base="-0.5,24,0.5" radius="2" height="3"/>
@@ -156,7 +163,6 @@
     <item>grass</item>
     <item>stained clay</item>
     <item>lever</item>
-    <item>sponge</item>
     <item>sand:1</item>
     <item>hay block</item>
     <item>carrot item</item>
@@ -197,6 +203,14 @@
         </filter>
         <drops>
             <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+    <rule>
+        <filter>
+            <material>sponge</material>
+        </filter>
+        <drops>
+            <item chance="0.2" material="sponge"/>
         </drops>
     </rule>
 </block-drops>
