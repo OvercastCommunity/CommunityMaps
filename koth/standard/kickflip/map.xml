@@ -1,13 +1,16 @@
 <map proto="1.4.2">
 <name>Kickflip</name>
-<version>1.0</version>
+<version>1.0.1</version>
 <objective>Be the first team to reach 750 points!</objective>
 <created>2023-01-14</created>
+<gamemode>koth</gamemode>
 <phase>development</phase>
 <authors>
     <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
-    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML"/> <!-- zzuf -->
 </authors>
+<contributors>
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML"/> <!-- zzuf -->
+</contributors>
 <teams>
     <team id="red-team" color="dark red" dye-color="red" max="16">Red</team>
     <team id="blue-team" color="blue" dye-color="blue" max="16">Blue</team>
@@ -69,16 +72,12 @@
     <circle id="red-spawn-area" center="28.5,-45.5" radius="6.5"/>
     <apply enter="only-blue" region="blue-spawn-area" message="You may not enter your opponent's spawn!"/>
     <apply enter="only-red" region="red-spawn-area" message="You may not enter your opponent's spawn!"/>
-    <apply velocity="7,2.5,2">
-        <region>
-            <cuboid min="-14,11,-23" size="2,1,2"/>
-        </region>
-    </apply>
-    <apply velocity="-7,2.5,-2">
-        <region>
-            <cuboid min="13,11,20" size="2,1,2"/>
-        </region>
-    </apply>
+    <union id="jump-pads">
+        <cuboid id="jump-pad-1" min="-14,11,-23" size="2,1,2"/>
+        <cuboid id="jump-pad-2" min="13,11,20" size="2,1,2"/>
+    </union>
+    <apply velocity="7,2.5,2" region="jump-pad-1"/>
+    <apply velocity="-7,2.5,-2" region="jump-pad-2"/>
 </regions>
 <spawners>
     <spawner spawn-region="gapple-point" player-region="everywhere" max-entities="1" delay="8s">
@@ -90,6 +89,28 @@
     <control-point name="Hill B" capture="capture-b" progress="capture-b" captured="signal-b"/>
     <control-point name="Hill C" capture="capture-c" progress="capture-c" captured="signal-c"/>
 </control-points>
+<actions> <!-- Following section removes fall damage from jump pads but keeps it elsewhere -->
+    <trigger filter="jump-pads" scope="player">
+        <action><set var="fall_variable" value="1"/></action>
+    </trigger>
+    <trigger scope="player">
+        <action><set var="fall_variable" value="0"/></action>
+        <filter>
+            <grounded/>
+        </filter>
+    </trigger>
+</actions>
+<variables>
+    <variable id="fall_variable" scope="player"/>
+</variables>
+<damage>
+    <deny id="nofall">
+        <all>
+            <cause>fall</cause>
+            <variable var="fall_variable">1</variable>
+        </all>
+    </deny>
+</damage>
 <score>
     <limit>750</limit>
 </score>
@@ -114,7 +135,4 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<disabledamage>
-    <damage>fall</damage>
-</disabledamage>
 </map>
