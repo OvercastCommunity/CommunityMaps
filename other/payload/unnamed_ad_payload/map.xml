@@ -1,0 +1,291 @@
+<map proto="1.4.2">
+<name>Unnamed A/D Payload</name>
+<version>0.1</version>
+<phase>development</phase>
+<objective>Attackers must push the payload to the end of the map, defenders must stop them from doing so!</objective>
+<game>Payload</game>
+<authors>
+    <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
+    <author uuid="6c5d7783-27fd-4ac5-8a1d-ba35206edf53"/> <!-- _Nathy -->
+</authors>
+<contributors>
+    <contributuir uuid="6863869b-4b8c-4445-b778-a8e016775ae4"/> <!-- Cazadorian -->
+</contributors>
+<time result="blue">10m25s</time>
+<broadcasts>
+    <alert after="2s" filter="only-red">Your spawn will open up after 25 seconds have passed, push the payload to the end of the map to win!</alert>
+    <alert after="2s" filter="only-blue">Follow the rails to the right out of your spawn to the payload you must defend, stop the Attackers getting it to the end of the map!</alert>
+</broadcasts>
+<teams>
+    <team id="red" color="dark red" max="10">Attackers</team>
+    <team id="blue" color="blue" max="10">Defenders</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" material="golden apple"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="3">projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" material="iron boots">
+            <enchantment>feather_falling</enchantment>
+        </boots>
+        <effect duration="3s" amplifier="255">resistance</effect>
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="red-kit" parent="spawn-kit">
+        <item slot="8" amount="8" material="arrow"/>
+    </kit>
+    <kit id="blue-kit" parent="spawn-kit">
+        <item slot="8" amount="12" material="arrow"/>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <region yaw="90">
+            <cylinder base="83,25,26.5" height="0" radius="0.5"/>
+        </region>
+    </default>
+    <spawns team="red" kit="red-kit">
+        <spawn id="red-first" filter="first-spawn">
+            <region yaw="-90">
+                <point>-4.5,57,-38.5</point>
+            </region>
+        </spawn>
+        <spawn id="red-second" filter="second-spawn">
+            <region yaw="-90">
+                <point>15.5,44,4.5</point>
+            </region>
+        </spawn>
+        <spawn id="red-third" filter="third-spawn">
+            <region yaw="90">
+                <point>77.5,47,9.5</point>
+            </region>
+        </spawn>
+        <spawn id="red-fourth" filter="third-checkpoint-completed">
+            <region yaw="90">
+                <point>99,27,63.5</point>
+            </region>
+        </spawn>
+    </spawns>
+    <spawns team="blue" kit="blue-kit">
+        <spawn id="blue-first" filter="first-spawn">
+            <region yaw="90">
+                <point>91.5,46,26.5</point>
+            </region>
+        </spawn>
+        <spawn  id="blue-second" filter="second-spawn">
+            <region yaw="-90">
+                <point>-0.5,51,62.5</point>
+            </region>
+        </spawn>
+        <spawn id="blue-third" filter="third-spawn">
+            <region yaw="180">
+                <point>49.5,43,127.5</point>
+            </region>
+        </spawn>
+    </spawns>
+</spawns>
+<regions>
+    <cuboid id="attackers-gate" min="-1,17,-45" size="1,1,13"/>
+    <apply block="never" use="never"/>
+</regions>
+<filters>
+    <not id="first-spawn">
+        <completed>first-checkpoint</completed>
+    </not>
+    <all id="second-spawn">
+        <completed>first-checkpoint</completed>
+        <not>
+            <completed>second-checkpoint</completed>
+        </not>
+    </all>
+    <all id="third-spawn">
+        <completed id="first-checkpoint-completed" team="red">first-checkpoint</completed>
+        <completed id="second-checkpoint-completed" team="red">second-checkpoint</completed>
+    </all>
+    <completed id="third-checkpoint-completed" team="red">third-checkpoint</completed>
+    <team id="only-blue">blue</team>
+    <team id="only-red">red</team>
+</filters>
+<actions>
+    <message id="spawns-forward-1" text="`b`lSpawns have been moved forward!"/>
+    <message id="spawns-forward-2" text="`b`lSpawns have been moved forward again!"/>
+    <message id="spawns-forward-3" text="`b`lAttackers' spawn has been moved forward again!"/>
+    <trigger filter="first-checkpoint-completed" trigger="spawns-forward-1" scope="player"/>
+    <trigger filter="second-checkpoint-completed" trigger="spawns-forward-2" scope="player"/>
+    <trigger filter="third-checkpoint-completed" trigger="spawns-forward-3" scope="player"/>
+</actions>
+<payloads permanent="true" radius="3.5" capture-filter="only-red" capture-time="65s" decay-rate="0.1" recovery-rate="0.5" contested-rate="0" time-multiplier="0.1">
+    <payload id="first-checkpoint" name="Checkpoint A" location="18,11,-38" display-filter="first-spawn"/>
+    <payload id="second-checkpoint" name="Checkpoint B" location="39,9,8" player-filter="first-checkpoint-completed" display-filter="second-spawn"/>
+    <payload id="third-checkpoint" name="Checkpoint C" location="62,9,54" player-filter="second-checkpoint-completed" display-filter="third-spawn"/>
+    <payload id="fourth-checkpoint" name="Checkpoint D" location="44,9,63" player-filter="third-checkpoint-completed" display-filter="third-checkpoint-completed"/>
+</payloads>
+<destroyables show="false" required="false">
+    <!-- to-do bug report after/countdown to use fill action? -->
+    <destroyable region="attackers-gate" id="attackers-gate-monument" name="attackers_gate" owner="blue" materials="fence" modes="attackers-gate-mode"/>
+</destroyables>
+<modes>
+    <mode after="25s" show-before="25s" id="attackers-gate-mode" name="Attackers will be released" material="air"/>
+</modes>
+<spawners>
+    <spawner delay="8s" max-entities="1">
+        <spawn-region>
+            <point>57.5,15.1,-87.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="57.5,15,-87.5" height="3" radius="2.5"/>
+        </player-region>
+        <item material="golden apple"/>
+    </spawner>
+    <spawner delay="8s" max-entities="1">
+        <spawn-region>
+            <point>77.5,12.1,45.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="77.5,12,45.5" height="3" radius="2.5"/>
+        </player-region>
+        <item material="golden apple"/>
+    </spawner>
+    <spawner delay="8s" max-entities="1">
+        <spawn-region>
+            <point>29.5,17.1,26.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="29.5,17,26.5" height="3" radius="2.5"/>
+        </player-region>
+        <item material="golden apple"/>
+    </spawner>
+    <spawner delay="8s" max-entities="1">
+        <spawn-region>
+            <point>43.5,14.1,-14.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="43.5,14,-14.5" height="3" radius="2.5"/>
+        </player-region>
+        <item material="golden apple"/>
+    </spawner>
+    <spawner delay="2s" max-entities="2">
+        <spawn-region>
+            <point>5.5,19.1,78.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="5.5,19,78.5" height="3" radius="2.5"/>
+        </player-region>
+        <item amount="2" material="arrow"/>
+    </spawner>
+    <spawner delay="2s" max-entities="2">
+        <spawn-region>
+            <point>77.5,13.1,72.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="77.5,13,72.5" height="3" radius="2.5"/>
+        </player-region>
+        <item amount="2" material="arrow"/>
+    </spawner>
+    <spawner delay="2s" max-entities="2">
+        <spawn-region>
+            <point>27.5,22.1,58.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="27.5,22,58.5" height="3" radius="2.5"/>
+        </player-region>
+        <item amount="2" material="arrow"/>
+    </spawner>
+    <spawner delay="2s" max-entities="2">
+        <spawn-region>
+            <point>47.5,16.1,52.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="47.5,16,52.5" height="3" radius="2.5"/>
+        </player-region>
+        <item amount="2" material="arrow"/>
+    </spawner>
+    <spawner delay="2s" max-entities="2">
+        <spawn-region>
+            <point>45.5,22.1,34.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="45.5,22,34.5" height="3" radius="2.5"/>
+        </player-region>
+        <item amount="2" material="arrow"/>
+    </spawner>
+    <spawner delay="2s" max-entities="2">
+        <spawn-region>
+            <point>69.5,18.1,16.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="69.5,18,16.5" height="3" radius="2.5"/>
+        </player-region>
+        <item amount="2" material="arrow"/>
+    </spawner>
+    <spawner delay="2s" max-entities="2">
+        <spawn-region>
+            <point>50.5,16.1,5.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="50.5,16,5.5" height="3" radius="2.5"/>
+        </player-region>
+        <item amount="2" material="arrow"/>
+    </spawner>
+    <spawner delay="2s" max-entities="2">
+        <spawn-region>
+            <point>34.5,14.1,5.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="34.5,14,5.5" height="3" radius="2.5"/>
+        </player-region>
+        <item amount="2" material="arrow"/>
+    </spawner>
+    <spawner delay="2s" max-entities="2">
+        <spawn-region>
+            <point>52.5,22.1,-15.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="52.5,22,-15.5" height="3" radius="2.5"/>
+        </player-region>
+        <item amount="2" material="arrow"/>
+    </spawner>
+    <spawner delay="2s" max-entities="2">
+        <spawn-region>
+            <point>27.5,15.1,-19.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="27.5,15,-19.5" height="3" radius="2.5"/>
+        </player-region>
+        <item amount="2" material="arrow"/>
+    </spawner>
+</spawners>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+</itemremove>
+<itemkeep>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>golden apple</item>
+    <item>arrow</item>
+</itemkeep>
+<kill-reward>
+    <item material="golden apple"/>
+    <item amount="3" material="arrow"/>
+</kill-reward>
+<respawns>
+    <respawn delay="2s" filter="only-red"/>
+    <respawn delay="3s" filter="only-blue"/>
+</respawns>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
