@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Boar Beach</name>
-<version>1.1.1</version>
+<version>1.2</version>
 <objective>Get the most points in 7 minutes!</objective>
 <created>2023-01-26</created>
 <phase>development</phase>
@@ -46,14 +46,12 @@
         <regions>
             <point yaw="90">0.5,9,-32.5</point>
             <point yaw="-90">0.5,9,-32.5</point>
-            <point yaw="180">0.5,9,-32.5</point>
         </regions>
     </spawn>
     <spawn team="red-team" kit="red-kit">
         <regions>
             <point yaw="90">0.5,9,33.5</point>
             <point yaw="-90">0.5,9,33.5</point>
-            <point yaw="0">0.5,9,33.5</point>
         </regions>
     </spawn>
 </spawns>
@@ -210,8 +208,19 @@
 <regions>
     <cuboid id="blue-spawn-safety" min="17,7.75,-38" max="-17,8.5,-27"/>
     <cuboid id="red-spawn-safety" min="-17,7.75,39" max="18,8.5,28"/>
-    <sphere id="blue-net" origin="0.5,18,-21" radius="3"/>
-    <sphere id="red-net" origin="0.5,18,21" radius="3"/>
+    <union id="spawn-exits">
+        <union id="blue-spawn-exits">
+            <!-- defined from blue west exit points -->
+            <union id="blue-west-exits">
+                <cuboid min="-11,12,-30" max="-14,15,-26"/> <!-- lower -->
+                <cuboid min="-16,21,-31" max="-20,24,-36"/> <!-- upper -->
+            </union>
+            <mirror normal="1,0,0" origin="0.5,0,0.5" region="blue-west-exits"/>
+        </union>
+        <mirror id="red-spawn-exits" normal="0,0,1" origin="0.5,0,0.5" region="blue-spawn-exits"/>
+    </union>
+    <sphere id="blue-net" origin="0.5,18,-23" radius="3"/>
+    <sphere id="red-net" origin="0.5,18,23" radius="3"/>
     <sphere id="blue-alert" origin="0.5,18,-21" radius="7"/>
     <sphere id="red-alert" origin="0.5,18,21" radius="7"/>
     <point id="diamond-point">13.5,9,0.5</point>
@@ -222,13 +231,15 @@
     <cuboid id="gold-flag-indicator" min="0,12,0" max="1,16,1"/>
     <cuboid id="gold-flag-box" min="-1,7,-1" max="2,10,2"/>
     <sphere id="gold-flag-alert" origin="0.5,7,0.5" radius="4.5"/>
-    <point id="emerald-point">-13.5,9,0.5</point>
+    <point id="emerald-point">-12.5,9,0.5</point>
     <cuboid id="emerald-flag-indicator" min="-13,14,0" max="-12,18,1"/>
     <cuboid id="emerald-flag-box" min="-14,9,-1" max="-11,12,2"/>
     <sphere id="emerald-flag-alert" origin="-13.5,9,0.5" radius="4.5"/>
     <below id="yeet-into-the-void" y="-10"/>
     
     <apply block="block-whitelist" message="You may not interact with that material here"/>
+    <apply enter="only-blue" region="blue-spawn-exits"/>
+    <apply enter="only-red" region="red-spawn-exits"/>
     <apply kit="void-kit" region="yeet-into-the-void"/>
 </regions>
 <portals sound="false">
@@ -248,27 +259,27 @@
     <post id="gold-init-post"    recover-time="3s" yaw="90">0,7,0</post>
     <post id="emerald-init-post" recover-time="3s" yaw="-90">-13,9,0</post>
     <!-- blue specific posts and nets -->
-    <post id="blue-post-blue-flag"    owner="blue-team"  points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="deny-blue-own-pickup" yaw="0">0,18,-21</post>
-    <post id="blue-post-red-flag"     owner="blue-team"  points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-red" yaw="0">-1,18,-21</post>
-    <post id="blue-post-diamond-flag" owner="blue-team"  points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-red" yaw="0">1,18,-22</post>
-    <post id="blue-post-gold-flag"    owner="blue-team"  points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-red" yaw="0">0,18,-22</post>
-    <post id="blue-post-emerald-flag" owner="blue-team"  points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-red" yaw="0">-1,18,-22</post>
-    <net id="blue-net-blue-flag"    region="blue-net" post="blue-post-blue-flag"    flag="blue-flag"    capture-filter="only-blue" respawn-filter="always" location="0.5,18,-21"/>
-    <net id="blue-net-red-flag"     region="blue-net" post="blue-post-red-flag"     flag="red-flag"     capture-filter="only-blue" respawn-filter="always" location="0.5,18,-21"/>
-    <net id="blue-net-diamond-flag" region="blue-net" post="blue-post-diamond-flag" flag="diamond-flag" capture-filter="only-blue" respawn-filter="always" location="0.5,18,-21"/>
-    <net id="blue-net-gold-flag"    region="blue-net" post="blue-post-gold-flag"    flag="gold-flag"    capture-filter="only-blue" respawn-filter="always" location="0.5,18,-21"/>
-    <net id="blue-net-emerald-flag" region="blue-net" post="blue-post-emerald-flag" flag="emerald-flag" capture-filter="only-blue" respawn-filter="always" location="0.5,18,-21"/>
+    <post id="blue-post-blue-flag"    owner="blue-team"  points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="deny-blue-own-pickup" yaw="0">0,18,-23</post>
+    <post id="blue-post-red-flag"     owner="blue-team"  points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-red" yaw="0">-1,18,-23</post>
+    <post id="blue-post-diamond-flag" owner="blue-team"  points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-red" yaw="0">1,18,-24</post>
+    <post id="blue-post-gold-flag"    owner="blue-team"  points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-red" yaw="0">0,18,-24</post>
+    <post id="blue-post-emerald-flag" owner="blue-team"  points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-red" yaw="0">-1,18,-24</post>
+    <net id="blue-net-blue-flag"    region="blue-net" post="blue-post-blue-flag"    flag="blue-flag"    capture-filter="only-blue" respawn-filter="always" location="0.5,18,-23"/>
+    <net id="blue-net-red-flag"     region="blue-net" post="blue-post-red-flag"     flag="red-flag"     capture-filter="only-blue" respawn-filter="always" location="0.5,18,-23"/>
+    <net id="blue-net-diamond-flag" region="blue-net" post="blue-post-diamond-flag" flag="diamond-flag" capture-filter="only-blue" respawn-filter="always" location="0.5,18,-23"/>
+    <net id="blue-net-gold-flag"    region="blue-net" post="blue-post-gold-flag"    flag="gold-flag"    capture-filter="only-blue" respawn-filter="always" location="0.5,18,-23"/>
+    <net id="blue-net-emerald-flag" region="blue-net" post="blue-post-emerald-flag" flag="emerald-flag" capture-filter="only-blue" respawn-filter="always" location="0.5,18,-23"/>
     <!-- red specific posts and nets -->
-    <post id="red-post-blue-flag"    owner="red-team" points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-blue" yaw="180">1,18,21</post>
-    <post id="red-post-red-flag"     owner="red-team" points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="deny-red-own-pickup" yaw="180">0,18,21</post>
-    <post id="red-post-diamond-flag" owner="red-team" points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-blue" yaw="180">1,18,22</post>
-    <post id="red-post-gold-flag"    owner="red-team" points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-blue" yaw="180">0,18,22</post>
-    <post id="red-post-emerald-flag" owner="red-team" points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-blue" yaw="180">-1,18,22</post>
-    <net id="red-net-blue-flag"    region="red-net" post="red-post-blue-flag"    flag="blue-flag"    capture-filter="only-red" respawn-filter="always" location="0.5,18,21"/>
-    <net id="red-net-red-flag"     region="red-net" post="red-post-red-flag"     flag="red-flag"     capture-filter="only-red" respawn-filter="always" location="0.5,18,21"/>
-    <net id="red-net-diamond-flag" region="red-net" post="red-post-diamond-flag" flag="diamond-flag" capture-filter="only-red" respawn-filter="always" location="0.5,18,21"/>
-    <net id="red-net-gold-flag"    region="red-net" post="red-post-gold-flag"    flag="gold-flag"    capture-filter="only-red" respawn-filter="always" location="0.5,18,21"/>
-    <net id="red-net-emerald-flag" region="red-net" post="red-post-emerald-flag" flag="emerald-flag" capture-filter="only-red" respawn-filter="always" location="0.5,18,21"/>
+    <post id="red-post-blue-flag"    owner="red-team" points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-blue" yaw="180">1,18,23</post>
+    <post id="red-post-red-flag"     owner="red-team" points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="deny-red-own-pickup" yaw="180">0,18,23</post>
+    <post id="red-post-diamond-flag" owner="red-team" points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-blue" yaw="180">1,18,24</post>
+    <post id="red-post-gold-flag"    owner="red-team" points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-blue" yaw="180">0,18,24</post>
+    <post id="red-post-emerald-flag" owner="red-team" points-rate="1.0" recover-time="8s" respawn-time="1s" pickup-filter="only-blue" yaw="180">-1,18,24</post>
+    <net id="red-net-blue-flag"    region="red-net" post="red-post-blue-flag"    flag="blue-flag"    capture-filter="only-red" respawn-filter="always" location="0.5,18,23"/>
+    <net id="red-net-red-flag"     region="red-net" post="red-post-red-flag"     flag="red-flag"     capture-filter="only-red" respawn-filter="always" location="0.5,18,23"/>
+    <net id="red-net-diamond-flag" region="red-net" post="red-post-diamond-flag" flag="diamond-flag" capture-filter="only-red" respawn-filter="always" location="0.5,18,23"/>
+    <net id="red-net-gold-flag"    region="red-net" post="red-post-gold-flag"    flag="gold-flag"    capture-filter="only-red" respawn-filter="always" location="0.5,18,23"/>
+    <net id="red-net-emerald-flag" region="red-net" post="red-post-emerald-flag" flag="emerald-flag" capture-filter="only-red" respawn-filter="always" location="0.5,18,23"/>
 </flags>
 <structures>
     <!-- exclamation point indicator above the flag when release countdown has begun -->
@@ -346,8 +357,8 @@
     <trigger filter="send-flag-unreleased-alert" action="msg-flag-not-released" scope="player"/>
 </actions>
 <broadcasts>
-    <tip after="0m30s" every="1m" count="3">Your gains points for every flag you have captured at your skull flag post!</tip>
-    <tip after="4m30s" every="1m" count="3">Steal flags from the enemy team's skull to earn more points for your team!</tip>
+    <tip after="0m30s" every="1m" count="3">Your team gains points for every flag you have captured at your skull flag post!</tip>
+    <tip after="4m30s" every="1m" count="3">Steal flags from the enemy team's skull flag post to earn more points for your team!</tip>
 </broadcasts>
 <spawners>
     <spawner spawn-region="diamond-point" player-region="everywhere" max-entities="1" delay="8s" filter="enable-diamond-post-spawner">
@@ -404,10 +415,14 @@
         <all>
             <cause>gravity</cause>
             <any>
-                <cylinder base="-12.5,9,-22.5" radius="4.5" height="1"/> <!-- blue right -->
-                <cylinder base="13.5,9,-22.5" radius="4.5" height="1"/> <!-- blue left -->
-                <cylinder base="13.5,9,23.5" radius="4.5" height="1"/> <!-- red right -->
-                <cylinder base="-12.5,9,23.5" radius="4.5" height="1"/> <!-- red left -->
+                <union id="blue-fall">
+                    <union id="blue-west-fall">
+                        <cylinder base="-15.5,18,-30.5" radius="8" height="1"/> <!-- blue west upper -->
+                        <cylinder base="-12.5,9,-22.5" radius="4.5" height="1"/> <!-- blue west lower -->
+                    </union>
+                    <mirror normal="1,0,0" origin="0.5,0,0.5" region="blue-west-fall"/>
+                </union>
+                <mirror id="red-fall" normal="0,0,1" origin="0.5,0,0.5" region="blue-fall"/>
             </any>
         </all>
     </deny>
