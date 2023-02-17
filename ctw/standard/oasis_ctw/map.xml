@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Oasis CTW</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <objective>Capture the enemy team's wool!</objective>
 <created>2022-01-24</created>
 <gamemode>ctw</gamemode>
@@ -88,26 +88,22 @@
         </not>
     </any>
     <all id="reds-woolrooms-filter">
-        <team>blue-team</team>
+        <filter id="only-blue"/>
         <filter id="woolrooms-filter"/>
     </all>
     <all id="blues-woolrooms-filter">
-        <team>red-team</team>
+        <filter id="only-red"/>
         <filter id="woolrooms-filter"/>
     </all>
-    <any id="woolrooms-filter">
-        <material>web</material>
-        <material>wood:0</material>
-        <material>stained glass:14</material>
-        <material>stained glass:11</material>
-        <all>
-            <cause>player</cause>
+    <all id="woolrooms-filter">
+        <blocks region="woolrooms-blocks">
             <any>
-                <material>stationary water</material>
-                <material>water</material>
+                <material>air</material>
+                <material>web</material>
             </any>
-        </all>
-    </any>
+        </blocks>
+        <void/>
+    </all>
     <all id="only-iron-cause-world">
         <material id="only-iron">iron block</material>
         <cause>world</cause>
@@ -132,21 +128,35 @@
         <rectangle id="blues-woolrooms" min="-24,321" max="-46,340"/> <!-- blue defends / red attacks -->
         <rectangle id="reds-woolrooms" min="-24,40" max="-46,21"/> <!-- red defends / blue attacks -->
     </union>
+    <union id="woolrooms-blocks">
+        <cuboid id="blues-woolrooms-blocks" min="-27,0,321" max="-43,128,338"/> <!-- blue defends / red attacks -->
+        <cuboid id="reds-woolrooms-blocks" min="-27,0,40" max="-43,128,23"/> <!-- red defends / blue attacks -->
+    </union>
     <negative id="not-build-region">
-        <union id="build-region">
-            <union id="team-sides">
-                <rectangle min="-81,81" max="11,131"/> <!-- red side -->
-                <rectangle min="-81,280" max="11,230"/> <!-- blue side -->
+        <union>
+            <union id="build-region">
+                <union id="team-sides">
+                    <rectangle min="-81,81" max="11,131"/> <!-- red side -->
+                    <rectangle min="-81,280" max="11,230"/> <!-- blue side -->
+                </union>
+                <rectangle min="-27,40" max="-43,45"/> <!-- blue wool offset -->
+                <rectangle min="-27,321" max="-43,316"/> <!-- red wool offset -->
+                <rectangle min="-45,130" max="-81,230"/> <!-- west middle -->
+                <rectangle min="-25,130" max="11,230"/> <!-- east middle -->
             </union>
-            <rectangle min="-27,40" max="-43,45"/> <!-- blue wool offset -->
-            <rectangle min="-27,321" max="-43,316"/> <!-- red wool offset -->
-            <rectangle min="-45,130" max="-81,230"/> <!-- west middle -->
-            <rectangle min="-25,130" max="11,230"/> <!-- east middle -->
+        <region id="wool-lane-pillars"/>
         </union>
     </negative>
     <union id="wool-monuments">
         <cuboid min="-37,9,262" max="-33,13,265"/> <!-- blue side -->
         <cuboid min="-37,9,96" max="-33,13,99"/> <!-- red side -->
+    </union>
+    <union id="wool-lane-pillars">
+        <complement id="red-side-pillars">
+            <rectangle min="-26,42" max="-44,44"/>
+            <region id="build-region"/>
+        </complement>
+        <mirror region="red-side-pillars" origin="-35,0,180.5" normal="0,0,1"/>
     </union>
     <!-- applicators -->
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
@@ -159,6 +169,7 @@
     <apply block="blues-woolrooms-filter" region="blues-woolrooms" message="You may not edit the wool room!"/>
     <apply block-place="block-place-void-filter" block-break="block-break-void-filter" region="not-build-region" message="You may not edit the void!"/>
     <apply block-physics="deny-redstone" region="woolrooms"/>
+    <apply block-place="block-place-void-filter" region="wool-lane-pillars" message="You may not place blocks here!"/>
 </regions>
 <toolrepair>
     <tool>iron sword</tool>
