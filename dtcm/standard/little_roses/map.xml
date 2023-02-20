@@ -1,0 +1,177 @@
+<map proto="1.4.2">
+<name>Little Roses</name>
+<version>1.0</version>
+<phase>development</phase>
+<objective>Destroy the enemy team's obsidian monument!</objective>
+<gamemode>dtm</gamemode>
+<authors>
+    <author uuid="38ef938a-7020-4c04-9d12-4875ed0598ca"/> <!-- Kazoha -->
+    <author uuid="f6f5dce8-a158-461d-b26d-dc8acfaeedd7"/> <!-- Shuliett -->
+</authors>
+<contributors>
+    <contributor uuid="cc3a70bf-2702-4bf8-81b7-4b19a748e0a2"/> <!-- Ben_The_Conquer -->
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML fixes"/> <!-- zzuf -->
+</contributors>
+<teams>
+    <team id="yellow-team" color="yellow" max="8">Yellow</team>
+    <team id="purple-team" color="dark purple" max="8">Purple</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+		<item slot="1" material="bow" unbreakable="true" enchantment="arrow infinite"/>
+        <item slot="2" material="bucket"/>
+		<item slot="3" material="golden apple"/>
+		<item slot="4" material="wood" amount="64" damage="2"/>
+		<item slot="6" material="diamond pickaxe" unbreakable="true"/>
+		<item slot="7" material="iron axe" unbreakable="true"/>
+        <item slot="8" team-color="true" material="stained glass" amount="64"/>
+        <item slot="28" material="arrow"/>
+        <item slot="30" material="iron spade" unbreakable="true"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+        <leggings material="chainmail leggings" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <effect duration="2s" amplifier="255">damage resistance</effect>
+    </kit>
+</kits>
+<spawns>
+    <default yaw="180">
+        <region>
+            <cylinder base="0.5,40,0.5" radius="2" height="0"/>
+        </region>
+    </default>
+    <spawn team="yellow-team" kit="spawn-kit">
+        <region yaw="90">
+            <cylinder base="7.5,19,62" radius="1" height="0"/>
+        </region>
+    </spawn>
+    <spawn team="purple-team" kit="spawn-kit">
+        <region yaw="-90">
+            <cylinder base="-6.5,19,-61" radius="1" height="0"/>
+        </region>
+    </spawn>
+</spawns>
+<destroyables materials="obsidian" completion="100%" mode-changes="true">
+    <destroyable owner="yellow-team" name="Yellow Monument">
+      <region>
+        <cuboid min="-11,15,36" max="-12,18,37"/>
+      </region>
+    </destroyable>
+    <destroyable owner="purple-team" name="Purple Monument">
+      <region>
+        <cuboid min="11,15,-35" max="13,18,-36"/>
+      </region>
+    </destroyable>
+</destroyables>
+<modes>
+    <mode after="15m" material="beacon" name="`bBEACON MONUMENT MODE"/>
+    <mode after="30m" material="coal block" name="`8COAL MONUMENT MODE"/>
+</modes>
+<filters>
+    <deny id="deny-void">
+        <void/>
+    </deny>
+    <team id="only-yellow">yellow-team</team>
+    <team id="only-purple">purple-team</team>
+    <all id="only-iron-cause-world">
+      <material id="only-iron">iron block</material>
+      <cause>world</cause>
+    </all>
+    <deny id="deny-wool">
+        <material>wool</material>
+    </deny>
+</filters>
+<regions>
+    <negative id="void-area">
+        <region id="build-area"/>
+        <region id="spawns"/>
+        <region id="void-filter-protection"/>
+    </negative>
+    <negative id="not-spawns">
+        <union id="spawns">
+            <union id="yellow-spawn">
+                <rectangle min="16,72" max="-4,52"/>
+                <above z="72"/>
+            </union>
+            <union id="purple-spawn">
+                <rectangle min="-15,-71" max="5,-51"/>
+                <below z="-71"/>
+            </union>
+        </union>
+    </negative>
+    <union id="build-area">
+        <rectangle min="-4,17" max="-28,57"/> <!-- yellow team -->
+        <rectangle min="20,38" max="-19,-37"/> <!-- Middle Zone -->
+        <rectangle min="5,-16" max="29,-56"/> <!-- purple team -->
+    </union>
+    <below y="1" id="void-filter-protection"/>
+    <complement id="ceiling">
+        <above y="26"/>
+        <region id="spawns"/>
+    </complement>
+    <!-- applicators -->
+    <apply block-place="never" region="ceiling">
+        <message>{"translate":"match.maxBuildHeight"}</message>
+    </apply>
+    <apply block-place="only-iron-cause-world" block-break="only-iron" region="spawns" message="You may not edit spawn!"/>
+    <apply enter="only-yellow" region="yellow-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply enter="only-purple" region="purple-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply block-place="deny-void" message="You may not build in the void!" region="void-area"/>
+    <apply block-break="deny-wool" region="void-filter-protection"/>
+</regions>
+<itemkeep>
+    <item>wood</item>
+    <item>glass</item>
+    <item>golden apple</item>
+</itemkeep>
+<itemremove>
+    <item>glass</item>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>stone</item>
+    <item>string</item>
+    <item>wood step</item>
+    <item>obsidian</item>
+    <item>beacon</item>
+    <item>coal block</item>
+    <item>wool</item>
+</itemremove>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>arrow</tool>
+    <tool>iron spade</tool>
+</toolrepair>
+<item-mods>
+    <rule>
+        <match>
+            <material>iron helmet</material>
+            <material>iron chestplate</material>
+            <material>iron leggings</material>
+            <material>iron boots</material>
+            <material>iron sword</material>
+            <material>diamond pickaxe</material>
+            <material>iron axe</material>
+            <material>iron spade</material>
+        </match>
+        <modify unbreakable="true"/>
+    </rule>
+</item-mods>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<renewables>
+  <renewable sound="false" region="spawns" renew-filter="only-iron"/>
+</renewables>
+<kill-reward>
+    <item material="golden apple"/>
+    <item material="wood" damage="2" amount="8"/>
+    <item material="glass" amount="8"/>
+</kill-reward>
+</map>
