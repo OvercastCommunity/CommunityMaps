@@ -1,9 +1,9 @@
 <map proto="1.4.2">
 <name>Geometric Domination</name>
-<version>1.0.7</version>
+<version>1.0.8</version>
 <gamemode>ctw</gamemode>
 <created>2023-01-21</created>
-<objective>Collect the enemy's wool and return them to your monument!</objective>
+<objective>Collect the enemy's wool and return it to your monument!</objective>
 <authors>
     <author uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609" contribution="Map author and creator"/> <!-- Technodono -->
 </authors>
@@ -15,15 +15,15 @@
     <rule>Water is restricted for cannoning only!</rule>
 </rules>
 <broadcasts>
-    <tip after="0m" every="2m">`e⚠  `7There's a tnt spawner in the center of the map!</tip>
+    <tip after="0m" every="2m">`e⚠  `7There's a TNT spawner in the center of the map!</tip>
 </broadcasts>
 <spawns>
-    <spawn team="blue" kit="blue-kit" yaw="-135">
+    <spawn team="blue" kit="spawn-kit" yaw="-135">
         <regions>
             <point>26.5,7,89.5</point>
         </regions>
     </spawn>
-    <spawn team="red" kit="red-kit" yaw="45">
+    <spawn team="red" kit="spawn-kit" yaw="45">
         <regions>
             <point>-18.5,7,-106.5</point>
         </regions>
@@ -38,7 +38,7 @@
     <kit id="obs">
         <potion amplifier="25" duration="oo">night vision</potion>
     </kit>
-    <kit id="spawn">
+    <kit id="spawn-kit">
         <item slot="0" name="`6Prism Blade" unbreakable="true">iron sword</item>
         <item slot="1" unbreakable="true" material="bow">
             <enchantment level="1">infinity</enchantment>
@@ -49,26 +49,20 @@
         <item slot="3" name="`7`oLog-Matic 3000" unbreakable="true" material="iron axe">
             <enchantment level="1">dig_speed</enchantment>
         </item>
-        <item slot="5" amount="16" lore="`7Blast resistant!|`7A good choice for a tnt absorbing wall." >ender stone</item>
+        <item slot="4" team-color="true" amount="64" material="stained clay"/>
+        <item slot="5" amount="16" lore="`7Blast resistant!|`7A good choice for a TNT absorbing wall.">ender stone</item>
         <item slot="17" amount="1">arrow</item>
         <item slot="32" amount="2">sponge</item>
         <item slot="6" amount="1">golden apple</item>
         <potion duration="oo" amplifier="1">night vision</potion>
         <potion duration="2" amplifier="25">heal</potion>
         <potion duration="2" amplifier="25">damage resistance</potion>
+        <helmet team-color="true" unbreakable="true">leather helmet</helmet>
         <leggings unbreakable="true">chainmail leggings</leggings>
         <chestplate color="4C4C4C" unbreakable="true">leather chestplate</chestplate>
         <boots color="4C4C4C" unbreakable="true">leather boots</boots>
         <!-- Important! gamemode -->
         <game-mode>survival</game-mode>
-    </kit>
-    <kit id="blue-kit" parents="spawn">
-        <helmet color="002fff" unbreakable="true">leather helmet</helmet>
-        <item slot="4" damage="11" amount="64">stained clay</item>
-    </kit>
-    <kit id="red-kit" parents="spawn">
-        <helmet color="ff0000" unbreakable="true">leather helmet</helmet>
-        <item slot="4" damage="14" amount="64">stained clay</item>
     </kit>
     <kit id="woolroom-gear" force="true">
         <leggings unbreakable="true" material="diamond leggings">
@@ -114,6 +108,12 @@
     <after id="after-msg" message="`cTNT `rWill Start Spawning In {0}" duration="1s">
         <match-started/>
     </after>
+    <deny id="blast-proof">
+        <all>
+            <cause>explosion</cause>
+            <material>glass</material>
+        </all>
+    </deny>
 </filters>
 <regions>
 <!-- Regions -->
@@ -174,13 +174,14 @@
     <apply kit="woolroom-gear" region="all-wool-rooms-entrances"/>
     <apply block="deny-void" message="You may not modify the void area!"/>
     <apply use="deny-water-bucket" block="deny-water" region="not-tnt-platforms" message="You may only place water in mid!"/>
+    <apply block-break="blast-proof"/>
 </regions>
 <variables>
     <variable id="tnt_allowed_variable" scope="match" default="0"/>
 </variables>
 <actions>
     <action id="tnt-msg" scope="match">
-        <message text="`bTNT is now spawning in mid!"/>
+        <message text="`bTNT is now spawning at Mid!"/>
         <set var="tnt_allowed_variable" value="1"/>
     </action>
     <trigger filter="after-msg" action="tnt-msg" scope="match"/>
@@ -210,7 +211,6 @@
         <item amount="1" material="wool" damage="10"/>
     </spawner>
 </spawners>
-
 <toolrepair>
     <tool>iron sword</tool>
     <tool>iron axe</tool>
@@ -266,22 +266,12 @@
     <depletion>off</depletion>
 </hunger>
 <kill-rewards>
-    <killreward>
-        <item amount="1">golden apple</item>
-        <item amount="4" lore="`7Blast resistant!|`7A good choice for a tnt absorbing wall.">ender stone</item>
-    </killreward>
-    <killreward>
-        <filter>
-            <team>red</team>
-        </filter>
-        <item amount="16" damage="14">stained clay</item>
-    </killreward>
-    <killreward>
-        <filter>
-            <team>blue</team>
-        </filter>
-        <item amount="16" damage="11">stained clay</item>
-    </killreward>
+    <kill-reward>
+        <item amount="1" material="golden apple"/>
+        <item amount="4" lore="`7Blast resistant!|`7A good choice for a TNT absorbing wall." material="ender stone"/>
+        <item amount="16" team-color="true" material="stained clay"/>
+        <item amount="8" material="ender stone"/>
+    </kill-reward>
 </kill-rewards>
 <!-- map regen -->
 <renewables>
@@ -295,7 +285,7 @@
                 <material>tnt</material>
                 <material>redstone torch on</material>
                 <material>redstone torch off</material>
-                <material>air</material>                
+                <material>air</material>
             </any>
         </not>
         </renew-filter>
@@ -322,6 +312,7 @@
                     <material>burning furnace</material>
                     <material>cobble wall</material>
                     <material>cobble wall</material>
+                    <material>tnt</material>
                 </any>
             </not>
         </replace-filter>
