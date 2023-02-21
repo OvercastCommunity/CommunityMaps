@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Hobbit CTW</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Take the enemy's wool located near their base and place it back at your spawn!</objective>
 <created>2023-01-24</created>
 <maxbuildheight>23</maxbuildheight>
@@ -66,6 +66,7 @@
     <deny id="no-void">
         <void/>
     </deny>
+    <material id="only-gold-block">gold block</material>
     <blocks id="only-wool-room" region="wool-rooms">
         <any>
             <material>air</material>
@@ -76,7 +77,10 @@
 <regions>
     <!-- Void -->
     <negative id="void-area">
-        <rectangle min="167,241" max="134,186"/> <!-- Middle -->
+        <complement> <!-- Middle -->
+            <rectangle min="165,241" max="136,186"/>
+            <rectangle min="157,206" max="144,221"/>
+        </complement>
         <region id="red-wool-room"/>
         <region id="blue-wool-room"/>
         <region id="red-spawn-area"/>
@@ -107,11 +111,17 @@
         <cuboid id="blue-wool-room" min="163,0,275" max="176,128,290"/> <!-- Contains blue wool -->
         <cuboid id="red-wool-room" min="138,0,152" max="124,128,137"/> <!-- Contains red wool -->
     </union>
+    <!-- Gold area -->
+    <union id="gold-area">
+        <cylinder id="red-gold" base="152,10,169" radius="5" height="6"/>
+        <cylinder id="blue-gold" base="149,10,258" radius="5" height="6"/>
+    </union>
     <apply block="deny-red" region="red-wool-room" message="You may not modify the wool room!"/>
     <apply block="deny-blue" region="blue-wool-room" message="You may not modify the wool room!"/>
     <apply block="only-wool-room" region="wool-rooms" message="You may not modify the wool room!"/>
     <apply enter="only-blue" region="red-wool-room" message="You may not enter your team's wool room!"/>
     <apply enter="only-red" region="blue-wool-room" message="You may not enter your team's wool room!"/>
+    <apply block="only-gold-block" region="gold-area" message="You may only break gold blocks here!"/>
     <apply kit="wool-room-armor" region="wool-rooms"/>
     <apply kit="wool-room-kit" region="wool-rooms"/>
     <point id="red-wool-spawner">130.5,14.2,143.5</point>
@@ -154,6 +164,7 @@
     <item>leather chestplate</item>
     <item>chainmail leggings</item>
     <item>leather boots</item>
+    <item>string</item>
 </itemremove>
 <toolrepair>
     <tool>iron sword</tool>
@@ -170,6 +181,16 @@
         <item material="glass" amount="8"/>
     </kill-reward>
 </kill-rewards>
+<renewables>
+    <renewable region="gold-area" renew-filter="only-gold-block" rate="0.5"/>
+</renewables>
+<block-drops>
+    <rule filter="only-gold-block">
+        <drops>
+            <item material="gold chestplate" unbreakable="true"/>
+        </drops>
+    </rule>
+</block-drops>
 <hunger>
     <depletion>off</depletion>
 </hunger>
