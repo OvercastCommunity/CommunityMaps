@@ -1,9 +1,9 @@
 <map proto="1.4.0">
 <name>Oaken Meadow Mini</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <objective>Capture both wools!</objective>
 <gamemode>ctw</gamemode>
-<created>2023-02-27</created> <!-- yyyy-mm-dd -->
+<created>2023-02-27</created>
 <authors>
     <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
 </authors>
@@ -61,6 +61,10 @@
                 <material>spruce wood stairs</material>
                 <material>wood step:1</material>
                 <material>wood step:9</material>
+                <material>stone</material>
+                <material>dirt</material>
+                <material>grass</material>
+                <material>stained clay</material>
             </any>
             <void/>
         </all>
@@ -94,7 +98,21 @@
     <deny id="deny-redstone">
         <material>redstone wire</material>
     </deny>
+    <participating id="participating"/>
 </filters>
+<actions>
+    <trigger filter="anti-jump-area" scope="player">
+        <action scope="player" filter="participating">
+            <message>
+                <text>`cYou may not jump here!</text>
+            </message>
+            <replace-item ignore-metadata="true">
+                <find material="boat"/>
+                <replace material="air"/>
+            </replace-item>
+        </action>
+    </trigger>
+</actions>
 <regions>
     <cylinder id="blue-spawn-point" base="56,9,5" radius="0.2" height="0"/>
     <cylinder id="red-spawn-point" base="-55,9,-4" radius="0.2" height="0"/>
@@ -144,6 +162,12 @@
         <cuboid min="45,4,3" max="47,7,5"/> <!-- blue -->
         <cuboid min="-46,4,-4" max="-44,7,-2"/> <!-- red -->
     </union>
+    <union id="anti-jump-area">
+        <rectangle min="35,-27" max="21,-26"/> <!-- lime -->
+        <rectangle min="26,28" max="12,27"/> <!-- green -->
+        <rectangle min="-34,28" max="-20,27"/> <!-- purple -->
+        <rectangle min="-25,-27" max="-11,-26"/> <!-- pink -->
+    </union>
     <!-- applicators -->
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
@@ -157,6 +181,9 @@
     <apply kit="reset-resistance-kit" region="not-spawns"/>
     <apply block-physics="deny-redstone" region="woolrooms"/>
 </regions>
+<portals>
+    <portal region="anti-jump-area" y="-0.00001" sound="false" observers="never"/>
+</portals>
 <spawners>
     <spawner spawn-region="purple-wool-spawn" player-region="purple-woolroom" delay="1.5s">
         <item material="wool" amount="1" damage="10"/>
