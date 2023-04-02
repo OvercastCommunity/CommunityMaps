@@ -1,0 +1,109 @@
+<map proto="1.4.2">
+<name>Double Take</name>
+<version>1.0</version>
+<objective>Jump into the enemy team's portals, located to either side of their spawn point!</objective>
+<created>2023-03-31</created>
+<phase>development</phase>
+<include id="bridge"/>
+<include id="void-death"/>
+<authors>
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
+</authors>
+<teams>
+    <team id="team-one" color="dark red" max="15">Red</team>
+    <team id="team-two" color="yellow" max="15">Yellow</team>
+</teams>
+<spawns>
+    <spawn team="team-one" kit="spawn-kit" yaw="-90" region="team-one-spawn-point"/>
+    <spawn team="team-two" kit="spawn-kit" yaw="90" region="team-two-spawn-point"/>
+    <default>
+        <regions>
+            <point yaw="0">0.5,28,-47.5</point>
+            <point yaw="180">0.5,28,48.5</point>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="adventure-kit">
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="survival-kit">
+        <game-mode>survival</game-mode>
+    </kit>
+</kits>
+<filters>
+    <not id="other-blocks">
+        <any id="some-blocks">
+            <material>stained clay:14</material>
+            <material>stained clay:4</material>
+            <material>stained clay:0</material>
+            <material>32</material>
+        </any>
+    </not>
+</filters>
+<regions>
+    <negative id="not-buildable">
+        <complement>
+            <cuboid min="-41,0,38" max="42,14,-37"/>
+            <union id="team-one-buildings">
+                <rectangle min="-24,-15" max="-38,16"/> <!-- Center building -->
+                <rectangle min="-38,26" max="-41,38"/> <!-- South portal building -->
+                <union id="team-one-front-south-building">
+                    <complement>
+                        <cuboid min="-17,14,22" max="-29,7,38"/>
+                        <cuboid min="-26,7,22" max="-29,14,28"/>
+                        <cuboid min="-26,11,22" max="-20,14,25"/>
+                        <cuboid min="-20,0,35" size="3,14,3"/>
+                    </complement>
+                    <rectangle min="-35,34" max="-32,35"/>
+                </union>
+                <mirror region="team-one-front-south-building" origin="0.5,0,0.5" normal="0,0,1"/>
+            </union>
+            <mirror region="team-one-buildings" origin="0.5,0,0.5" normal="1,0,0"/>
+        </complement>
+    </negative>
+    <apply block="some-blocks"/>
+    <!-- Portals -->
+    <union id="team-one-portal">
+        <cuboid id="team-one-south-portal" min="-49,1,29" size="3,1,3"/>
+        <mirror region="team-one-south-portal" origin="0.5,0,0.5" normal="0,0,1"/>
+    </union>
+    <mirror id="team-two-portal" region="team-one-portal" origin="0.5,0,0.5" normal="1,0,0"/>
+    <!-- Spawn points -->
+    <point id="team-one-spawn-point">-40.5,28,0.5</point>
+    <point id="team-two-spawn-point">41.5,28,0.5</point>
+    <union id="cages"> <!-- Same base coordinates as spawn points -->
+        <cylinder id="team-one-spawn-cage" base="-40.5,28,0.5" height="3" radius="2"/>
+        <cylinder id="team-two-spawn-cage" base="41.5,28,0.5" height="3" radius="2"/>
+    </union>
+    <!-- Double Take -->
+    <negative id="survival-area">
+        <union id="adventure-area">
+            <above y="24"/>
+            <negative>
+                <rectangle min="-44,38" max="45,-37"/>
+            </negative>
+        </union>
+    </negative>
+    <apply kit="survival-kit" region="survival-area"/>
+    <apply kit="adventure-kit" region="adventure-area"/>
+    <union id="team-one-jump-pads">
+        <cuboid id="team-one-south-jump-pad" min="-53.5,7,11.5" size="1.5,1,1.5"/>
+        <mirror region="team-one-south-jump-pad" origin="0.5,0,0.5" normal="0,0,1"/>
+    </union>
+    <apply velocity="0.8,1.2,0" region="team-one-jump-pads"/>
+    <mirror id="team-two-jump-pads" region="team-one-jump-pads" origin="0.5,0,0.5" normal="1,0,0"/>
+    <apply velocity="-0.8,1.2,0" region="team-two-jump-pads"/>
+</regions>
+<portals sound="true">
+    <!-- Falling on own team's portal -->
+    <portal destination="team-one-spawn-point" filter="only-team-one" region="team-one-portal" yaw="@-90" pitch="@0"/>
+    <portal destination="team-two-spawn-point" filter="only-team-two" region="team-two-portal" yaw="@90" pitch="@0"/>
+    <!-- Scoring -->
+    <portal destination="team-one-spawn-point" forward="should-teleport" filter="only-team-one" yaw="@-90" pitch="@0"/>
+    <portal destination="team-two-spawn-point" forward="should-teleport" filter="only-team-two" yaw="@90" pitch="@0"/>
+</portals>
+<itemremove>
+    <item>seeds</item>
+</itemremove>
+</map>
