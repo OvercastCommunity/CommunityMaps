@@ -1,19 +1,19 @@
 <map proto="1.4.2">
 <name>Do Not Press The Button For Two Minutes</name>
 <created>2023-03-11</created>
-<version>1.0.0</version>
+<version>2.0.0</version>
 <objective>Do literally anything besides press the button, which is represented by an endstone block, for two whole minutes.</objective>
 <gamemode>arcade</gamemode>
 <phase>development</phase>
 <authors>
     <author uuid="f610e558-a3c8-44fb-8622-68cc49dbc18f"/> <!-- Dawthon -->
-    <author uuid="6ff4ade9-e968-4acd-80eb-1a6fa89629fb" contribution="Map XML"/> <!-- _Pear -->
+    <author uuid="6ff4ade9-e968-4acd-80eb-1a6fa89629fb" contribution="XML"/> <!-- _Pear -->
 </authors>
 <contributors>
     <contributor uuid="63ddf58a-ba2c-4d39-8481-6358bb46c63a" contribution="Placed a couple blocks"/> <!-- samschaap -->
     <contributor uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa" contribution="Placed a couple more blocks"/> <!-- Eliminate -->
 </contributors>
-<time result="subjects">2m</time>
+<time result="subjects">2m30s</time>
 <blitz>
     <lives>1</lives>
     <broadcastLives>false</broadcastLives>
@@ -24,16 +24,17 @@
 </teams>
 <kits>
     <kit id="subjects-kit">
-        <item slot="0" unbreakable="true" name="`r`6Button Presser" material="wood_pickaxe">
+        <item slot="0" unbreakable="true" name="`r`6Button Presser" material="wood pickaxe">
             <can-destroy>
-                <material>ender_stone</material>
+                <material>ender stone</material>
             </can-destroy>
         </item>
         <game-mode>adventure</game-mode>
         <effect amplifier="-3">health boost</effect>
+        <effect>slow digging</effect>
     </kit>
     <kit id="researchers-kit">
-        <item slot="0" amount="64" material="golden apple"/>
+        <item slot="8" amount="64" material="golden apple"/>
     </kit>
 </kits>
 <spawns>
@@ -56,49 +57,56 @@
 <!-- Filters and Regions -->
 <filters>
     <team id="only-subjects">subjects</team>
-    <material id="only-endstone">ender_stone</material>
-    <material id="only-stonebutton">stone_button</material>
+    <material id="only-endstone">ender stone</material>
+    <any id="interactables">
+        <material>stone button</material>
+        <material>workbench</material>
+        <material>chest</material>
+        <material>jukebox</material>
+    </any>
 </filters>
 <regions>
+    <cuboid id="island" min="41,0,-32" max="-43,35,-98"/>
     <negative id="not-button">
         <block id="the-button">-1,10,-66</block>
     </negative>
-    <!-- applicators -->
-    <apply region="not-button" block="only-endstone" use="only-stonebutton" message="You may not edit the map!"/>
+    <apply region="not-button" block="only-endstone" use="interactables"/>
 </regions>
-<!-- Objectives and Structures -->
-<destroyables material="ender_stone" required="false" repairable="false" sparks="true">
+<!-- Objectives -->
+<destroyables material="bedrock" required="false" repairable="false" sparks="true" mode-changes="true">
     <destroyable owner="researchers" name="The Button" region="the-button" id="the-button-pressed"/>
 </destroyables>
-<structures>
-    <structure id="island" clear="false">
-        <region>
-            <cuboid min="41,0,-32" max="-43,35,-98"/>
-        </region>
-    </structure>
-    <structure id="clear-island" air="true" clear="false">
-        <region>
-            <cuboid min="41,100,-32" max="-43,135,-98"/>
-        </region>
-    </structure>
-    <dynamic structure="clear-island" offset="0,-100,0">
-        <trigger>
+<modes>
+    <mode name="`aThe Button is now pressable!" after="30s" showbefore="0" material="ender stone"/>
+</modes>
+<actions>
+    <action id="destruction" scope="match">
+        <fill id="clear-island" region="island" material="air"/>
+        <switch-scope outer="match" inner="team">
+            <message title="`cThe button was pressed!"/>
+            <switch-scope outer="team" inner="player">
+                <kit filter="only-subjects">
+                    <effect amplifier="2">wither</effect>
+                </kit>
+            </switch-scope>
+        </switch-scope>
+    </action>
+    <trigger action="destruction" scope="match">
+        <filter>
             <objective team="subjects">the-button-pressed</objective>
-        </trigger>
-    </dynamic>
-</structures>
+        </filter>
+    </trigger>
+</actions>
+<broadcasts>
+    <alert after="1s" filter="only-subjects">You have 30 seconds to strategize with your team to come up with a plan to not press the button!</alert>
+</broadcasts>
 <!-- Misc -->
 <itemremove>
-    <item>wood_pickaxe</item>
-    <item>ender_stone</item>
-    <item>wool</item>
-    <item>golden_apple</item>
-    <item>mutton</item>
-    <item>raw_chicken</item>
-    <item>cooked_chicken</item>
-    <item>egg</item>
-    <item>leash</item>
-    <item>feather</item>
+    <item>bow</item>
+    <item>arrow</item>
+    <item>wood pickaxe</item>
+    <item>ender stone</item>
+    <item>golden apple</item>
 </itemremove>
 <hunger>
     <depletion>off</depletion>
