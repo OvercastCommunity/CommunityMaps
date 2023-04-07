@@ -1,0 +1,99 @@
+<map proto="1.4.2">
+<name>Over Troubled Water</name>
+<version>1.0</version>
+<objective>Jump into the enemy team's portal, located behind their spawn point!</objective>
+<created>2023-04-05</created>
+<include id="bridge"/>
+<include id="void-death"/>
+<authors>
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
+</authors>
+<teams>
+    <team id="team-one" color="red" dye-color="pink" max="18">Pink</team>
+    <team id="team-two" color="dark gray" max="18">Gray</team>
+</teams>
+<spawns>
+    <spawn team="team-one" kit="spawn-kit" yaw="-90" region="team-one-spawn-point"/>
+    <spawn team="team-two" kit="spawn-kit" yaw="90" region="team-two-spawn-point"/>
+    <default>
+        <regions>
+            <point yaw="0">0.5,15,-48.5</point>
+            <point yaw="180">0.5,15,49.5</point>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="adventure-kit">
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="survival-kit">
+        <game-mode>survival</game-mode>
+    </kit>
+</kits>
+<filters>
+    <not id="other-blocks">
+        <any id="some-blocks">
+            <material>stained clay:6</material>
+            <material>stained clay:7</material>
+            <material>stained clay:0</material>
+            <material>32</material>
+            <material>long grass</material>
+            <material>red rose</material>
+            <material>yellow flower</material>
+            <material>double plant</material>
+        </any>
+    </not>
+</filters>
+<regions>
+    <negative id="not-buildable">
+        <complement>
+            <cuboid min="-56,5,37" max="57,21,-36"/>
+            <rectangle id="gray-void" min="57,-24" max="52,25"/>
+            <mirror region="gray-void" origin="0.5,0,0.5" normal="1,0,0"/>
+        </complement>
+    </negative>
+    <apply block="some-blocks"/>
+    <!-- Portals -->
+    <cylinder id="team-one-portal" base="-69.5,7,0.5" height="1" radius="2.5"/>
+    <mirror id="team-two-portal" region="team-one-portal" origin="0.5,0,0.5" normal="1,0,0"/>
+    <!-- Spawn points -->
+    <point id="team-one-spawn-point">-57.5,21,0.5</point>
+    <point id="team-two-spawn-point">58.5,21,0.5</point>
+    <union id="cages"> <!-- Same base coordinates as spawn points -->
+        <cylinder id="team-one-spawn-cage" base="-57.5,21,0.5" height="3" radius="2"/>
+        <cylinder id="team-two-spawn-cage" base="58.5,21,0.5" height="3" radius="2"/>
+    </union>
+    <!-- Over Troubled Water  -->
+    <negative id="survival-area">
+        <union id="adventure-area">
+            <above y="24"/>
+            <negative>
+                <rectangle min="-60,38" max="61,-37"/>
+            </negative>
+        </union>
+    </negative>
+    <apply kit="survival-kit" region="survival-area"/>
+    <apply kit="adventure-kit" region="adventure-area"/>
+    <complement id="water-plane">
+        <below y="1.5"/>
+        <below y="0"/>
+    </complement>
+</regions>
+<portals sound="true">
+    <!-- Falling on own team's portal -->
+    <portal destination="team-one-spawn-point" filter="only-team-one" region="team-one-portal" yaw="@-90" pitch="@0"/>
+    <portal destination="team-two-spawn-point" filter="only-team-two" region="team-two-portal" yaw="@90" pitch="@0"/>
+    <!-- Scoring -->
+    <portal destination="team-one-spawn-point" forward="should-teleport" filter="only-team-one" yaw="@-90" pitch="@0"/>
+    <portal destination="team-two-spawn-point" forward="should-teleport" filter="only-team-two" yaw="@90" pitch="@0"/>
+</portals>
+<portals sound="false">
+    <!-- Over Troubled Water -->
+    <portal y="@-5" region="water-plane"/>
+</portals>
+<itemremove>
+    <item>yellow flower</item>
+    <item>red rose</item>
+    <item>seeds</item>
+</itemremove>
+</map>
