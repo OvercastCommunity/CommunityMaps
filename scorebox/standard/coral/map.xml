@@ -1,0 +1,60 @@
+<map proto="1.4.2">
+<name>Coral</name>
+<version>1.0.2</version>
+<objective>Jump into the enemy team's portal, located below their spawn point!</objective>
+<created>2023-04-06</created>
+<include id="bridge"/>
+<include id="void-death"/>
+<authors>
+    <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
+    <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e"/> <!-- Mewzzy -->
+</authors>
+<contributors>
+    <contributor uuid="6ff4ade9-e968-4acd-80eb-1a6fa89629fb" contribution="XML"/> <!-- _Pear -->
+    <contributor uuid="f610e558-a3c8-44fb-8622-68cc49dbc18f"/> <!-- Dawthon -->
+</contributors>
+<teams>
+    <team id="team-one" color="dark red" max="5">Red</team>
+    <team id="team-two" color="blue" max="5">Blue</team>
+</teams>
+<spawns>
+    <spawn team="team-one" kit="spawn-kit" yaw="-90" region="team-one-spawn-point"/>
+    <spawn team="team-two" kit="spawn-kit" yaw="90" region="team-two-spawn-point"/>
+    <default>
+        <regions>
+            <point yaw="180">0.5,21,46.5</point>
+        </regions>
+    </default>
+</spawns>
+<filters>
+    <not id="other-blocks">
+        <any id="only-clay">
+            <material>stained clay:11</material>
+            <material>stained clay:14</material>
+            <material>stained clay:0</material>
+        </any>
+    </not>
+</filters>
+<regions>
+    <negative id="not-buildable">
+        <cuboid min="-26,0,-15" max="29,17,18"/>
+    </negative>
+    <apply block="only-clay"/>
+    <cuboid id="team-one-portal" min="-41,3,-2" size="6,1,6"/>
+    <mirror id="team-two-portal" region="team-one-portal" origin="0.5,0,0.5" normal="1,0,0"/>
+    <point id="team-one-spawn-point">-37.5,16,1.5</point>
+    <point id="team-two-spawn-point">38.5,16,1.5</point>
+    <union id="cages">
+        <cylinder id="team-one-spawn-cage" base="-37.5,16,1.5" height="3" radius="2"/>
+        <cylinder id="team-two-spawn-cage" base="38.5,16,1.5" height="3" radius="2"/>
+    </union>
+</regions>
+<portals sound="true" pitch="@0">
+    <!-- Falling on own team's portal -->
+    <portal destination="team-one-spawn-point" filter="only-team-one" region="team-one-portal" yaw="@-90"/>
+    <portal destination="team-two-spawn-point" filter="only-team-two" region="team-two-portal" yaw="@90"/>
+    <!-- Scoring -->
+    <portal destination="team-one-spawn-point" forward="should-teleport" filter="only-team-one" yaw="@-90"/>
+    <portal destination="team-two-spawn-point" forward="should-teleport" filter="only-team-two" yaw="@90"/>
+</portals>
+</map>
