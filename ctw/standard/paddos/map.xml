@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Paddo's</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Capture the two wools of the enemy team!</objective>
 <created>2023-01-09</created>
 <phase>development</phase>
@@ -62,20 +62,21 @@
     </spawn>
 </spawns>
 <filters>
-    <blocks id="wool-room-blocks" region="wool-rooms">
+    <blocks id="wool-room-blocks" region="wool-rooms-blocks-region">
         <any>
             <material>air</material>
             <material>web</material>
         </any>
     </blocks>
-    <all id="only-red-wr">
+    <deny id="deny-red">
         <team id="only-red">red-team</team>
-        <filter id="wool-room-blocks"/>
-    </all>
-    <all id="only-blue-wr">
+    </deny>
+    <deny id="deny-blue">
         <team id="only-blue">blue-team</team>
-        <filter id="wool-room-blocks"/>
-    </all>
+    </deny>
+    <deny id="deny-iron-trapdoor">
+        <material>iron trapdoor</material>
+    </deny>
     <all id="only-iron-renew">
         <material id="only-iron">iron block</material>
         <cause>world</cause>
@@ -91,12 +92,22 @@
     </union>
     <union id="wool-rooms">
         <union id="red-wool-rooms">  <!-- blue capture, red defend -->
-            <cuboid id="magenta-wool-room" min="-69,0,32" max="-59,15,22"/>
-            <cuboid id="red-wool-room" min="-69,0,-28" max="-59,15,-38"/>
+            <rectangle id="magenta-wool-room" min="-69,32" max="-59,22"/>
+            <rectangle id="red-wool-room" min="-69,-28" max="-59,-38"/>
         </union>
         <union id="blue-wool-rooms"> <!-- red capture, blue defend -->
-            <cuboid id="light-blue-wool-room" min="106,0,-28" max="116,15,-38"/>
-            <cuboid id="blue-wool-room" min="106,0,32" max="116,15,22"/>
+            <rectangle id="light-blue-wool-room" min="106,-28" max="116,-38"/>
+            <rectangle id="blue-wool-room" min="106,32" max="116,22"/>
+        </union>
+    </union>
+    <union id="wool-rooms-blocks-region">
+        <union id="red-wool-rooms-blocks">
+            <cuboid id="magenta-wool-room-blocks" min="-69,0,32" max="-59,15,22"/>
+            <cuboid id="red-wool-room-blocks" min="-69,0,-28" max="-59,15,-38"/>
+        </union>
+        <union id="blue-wool-rooms-blocks">
+            <cuboid id="light-blue-wool-room-blocks" min="106,0,-28" max="116,15,-38"/>
+            <cuboid id="blue-wool-room-blocks" min="106,0,32" max="116,15,22"/>
         </union>
     </union>
     <negative id="void-area">
@@ -118,8 +129,9 @@
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy team's spawn!"/>
     <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool rooms!"/>
     <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool rooms!"/>
-    <apply block="only-red-wr" use="only-red" region="blue-wool-rooms" message="You may not modify the wool rooms!"/>
-    <apply block="only-blue-wr" use="only-blue" region="red-wool-rooms" message="You may not modify the wool rooms!"/>
+    <apply block="deny-red" region="red-wool-rooms" message="You may not modify your own wool rooms!"/>
+    <apply block="deny-blue" region="blue-wool-rooms" message="You may not modify your own wool rooms!"/>
+    <apply block="wool-room-blocks" block-physics="deny-iron-trapdoor" region="wool-rooms-blocks-region" message="You may not modify the wool rooms!"/>
     <apply block-break="only-iron" block-place="only-iron-renew" region="spawns" message="You may only break iron blocks here!"/>
     <apply block="deny-void" region="void-area" message="You may not modify the void area!"/>
 </regions>
