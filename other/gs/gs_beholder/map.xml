@@ -1,0 +1,99 @@
+<map proto="1.4.2">
+<name>GS: Beholder</name>
+<version>1.0</version>
+<include id="gs"/>
+<objective>Kill the enemy squadron!</objective>
+<authors>
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
+</authors>
+<teams>
+    <team id="red-team" show-name-tags="allies" color="dark red" max="16">Red</team>
+    <team id="yellow-team" show-name-tags="allies" color="yellow" max="16">Yellow</team>
+</teams>
+<spawns>
+    <spawn team="red-team" yaw="180">
+        <region>
+            <cuboid min="17.5,11,33.5" size="2,0,2"/>
+        </region>
+    </spawn>
+    <spawn team="yellow-team" yaw="0">
+        <region>
+            <cuboid min="-18.5,11,-34.5" size="2,0,2"/>
+        </region>
+    </spawn>
+    <default>
+        <regions>
+            <point yaw="-90">-41.5,34,0.5</point>
+            <point yaw="90">42.5,34,0.5</point>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="pressure-plate-kit" filter="no-msg">
+        <effect duration="10s">regeneration</effect>
+        <action>
+            <message text="`e⚠ `aYou have been given Regeneration for 10 seconds!"/>
+            <set var="regen_msg" value="1"/>
+        </action>
+    </kit>
+</kits>
+<filters>
+    <variable id="no-msg" var="regen_msg">0</variable>
+    <variable id="during-msg" var="regen_msg">1</variable>
+    <after id="after-10s" duration="10s" filter="during-msg"/>
+    <deny id="deny-physics">
+        <any>
+            <material>ladder</material>
+            <material>31</material>
+            <material>32</material>
+            <material>yellow flower</material>
+            <material>red rose</material>
+        </any>
+    </deny>
+</filters>
+<actions>
+    <action id="reset-regen" scope="player">
+        <set var="regen_msg" value="0"/>
+    </action>
+    <trigger action="reset-regen" filter="after-10s" scope="player"/>
+</actions>
+<variables>
+    <variable id="regen_msg" scope="player" default="0"/>
+</variables>
+<spawners>
+    <spawner delay="1"> <!-- Red spawn -->
+        <spawn-region>
+            <cuboid min="16,11,32" size="5,5,5"/>
+        </spawn-region>
+        <player-region>
+            <cuboid min="16,11,32" size="5,5,5"/>
+        </player-region>
+        <potion duration="8" damage="4">
+            <effect amplifier="3">hunger</effect>
+            <effect>nausea</effect>
+        </potion>
+    </spawner>
+    <spawner delay="1"> <!-- Yellow spawn -->
+        <spawn-region>
+            <cuboid min="-20,11,-36" size="5,5,5"/>
+        </spawn-region>
+        <player-region>
+            <cuboid min="-20,11,-36" size="5,5,5"/>
+        </player-region>
+        <potion duration="8" damage="4">
+            <effect amplifier="3">hunger</effect>
+            <effect>nausea</effect>
+        </potion>
+    </spawner>
+</spawners>
+<regions>
+    <cuboid id="playable-area" min="-37,0,-36" max="38,17,37"/>
+    <apply region="playable-area" leave="never" message="You may not leave the playable area!"/>
+    <union id="regen-pressure-plates">
+        <cuboid min="-19,14,23" size="1,1,1"/>
+        <cuboid min="19,14,-23" size="1,1,1"/>
+    </union>
+    <apply region="regen-pressure-plates" kit="pressure-plate-kit"/>
+    <apply block-physics="deny-physics"/>
+</regions>
+</map>
