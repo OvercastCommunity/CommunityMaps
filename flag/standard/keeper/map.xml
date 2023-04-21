@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Keeper</name>
-<version>1.1.2</version>
+<version>1.2</version>
 <objective>Capture the flag at the goal on the enemies side!</objective>
 <created>2022-01-07</created>
 <time result="score" overtime="1m" max-overtime="2m">12m</time>
@@ -18,14 +18,15 @@
 </rules>
 <gamemode>ffb</gamemode>
 <broadcasts>
-    <tip after="0m" every="1m">The goal you need to score in is on the enemies side!</tip>
+    <tip after="0m" every="1m">The goal you need to score in is on the `c`nenemies'`r side!</tip>
+    <tip after="2s" every="1m">When a team scores, all players will be teleported to their spawns!</tip>
+    <tip after="10s" every="2m">Use the side portals to switch sides!</tip>
     <tip after="20s" every="3m">Every team has 2 `6"defence sniper bows"`b!</tip>
-    <tip after="10s" every="2m">Use the side portals to switch sides</tip>
 </broadcasts>
 <teams>
     <team id="red-team" color="dark red" max="16">Red</team>
     <team id="blue-team" color="blue" max="16">Blue</team>
-    </teams>
+</teams>
 <kits>
     <kit id="default-kit">
         <effect>night vision</effect>
@@ -50,25 +51,25 @@
 <spawns>
     <spawn team="red-team" kit="spawn-kit" yaw="-90">
         <region>
-            <cuboid min="-31.5,17.5,144.5" max="-31.5,18,144.5"/>
+            <cuboid id="red-spawn-point" min="-31.5,17,145.5" max="-29.5,17,143.5"/>
         </region>
     </spawn>
     <spawn team="blue-team" kit="spawn-kit" yaw="90">
         <region>
-            <cuboid min="141.5,17.5,144.5" max="141.5,18,144.5"/>
+            <cuboid id="blue-spawn-point" min="142.5,17,143.5" max="140.5,17,145.5"/>
         </region>
     </spawn>
     <default kit="default-kit" yaw="-90">
-        <region>
-            <cuboid min="52.5,65.5,144.5" max="52.5,67,144.5"/>
-        </region>
+        <regions>
+            <point>52.5,65,144.5</point>
+        </regions>
     </default>
 </spawns>
 <respawn auto="true" delay="5s"/>
 <regions>
     <union id="nets">
-        <cuboid id="blue_net" min="132,6,112" max="126,9,177"/>
-        <cuboid id="red_net" min="-21,6,177" max="-16,9,112"/>
+        <cuboid id="blue_net" min="132,6,112" max="126,15,177"/> <!-- where red scores -->
+        <cuboid id="red_net" min="-21,6,177" max="-15,15,112"/> <!-- where blue scores -->
     </union>
     <union id="sides">
         <rectangle id="red-side" min="34, 183" max="-14,-105"/>
@@ -82,18 +83,16 @@
         <cuboid id="eastleft-lane" min="127,17,147" max="132,20,189"/>
         <cuboid id="eastright-lane" min="127,17,141" max="132,20,99"/>
     </union>
-     <union id="spawn-points">
-        <point id="red-spawn-point">-31.5,17,144.5</point>
-        <point id="blue-spawn-point">141.5,17,144.5</point>
-    </union>
     <negative id="not-playing-field">
         <region id="playing-field"/>
     </negative>
     <cuboid id="playing-field" min="-15,0,105" max="126,8,184"/>
     <apply block="never" region="nets" message="You may not place blocks in the net"/>
-    <apply block="deny-void" region="playing-field" message="You may only place and break leaves on the playing field"/>
-    <apply block="never" region="not-playing-field" message="You may not build over the void or off the playing field"/>
+    <apply block="deny-void" region="playing-field" message="You may only place and break leaves on the playing field!"/>
+    <apply block="never" region="not-playing-field" message="You may not modify blocks over the void or off the playing field!"/>
     <apply lend-kit="speed" region="speedlanes"/>
+    <apply enter="red-team-carrying-flag" region="blue_net" message="You may not enter goals without a flag!"/>
+    <apply enter="blue-team-carrying-flag" region="red_net" message="You may not enter goals without a flag!"/>
 </regions>
 <portals>
     <portal x="@55.5" y="@6.5" z="@105.5">
@@ -106,8 +105,8 @@
             <cuboid min="57,6,104" max="54,10,105"/>
         </region>
     </portal>
-    <portal observers="never" filter="only-red" region="blue_net" destination="red-spawn-point" yaw="@-90"/>
-    <portal observers="never" filter="only-blue" region="red_net" destination="blue-spawn-point" yaw="@90"/>
+    <portal destination="red-spawn-point" forward="should-tp" filter="only-red" yaw="@-90" pitch="@0"/>
+    <portal destination="blue-spawn-point" forward="should-tp" filter="only-blue" yaw="@90" pitch="@0"/>
 </portals>
 <proximity-alarms>
     <proximity-alarm message="You are running towards the wrong goal!" flare-radius="0" region="red-side" detect="red-team-carrying-flag" notify="red-team-carrying-flag"/>
@@ -125,13 +124,27 @@
 <filters>
     <team id="only-red">red-team</team>
     <team id="only-blue">blue-team</team>
-    <all id="red-team-carrying-flag">
-        <team>red-team</team>
-        <carrying-flag>flag</carrying-flag>
+    <any id="carry">
+        <all id="red-team-carrying-flag">
+            <team>red-team</team>
+            <carrying-flag>flag</carrying-flag>
+        </all>
+        <all id="blue-team-carrying-flag">
+            <team>blue-team</team>
+            <carrying-flag>flag</carrying-flag>
+        </all>
+    </any>
+    <all id="red-scored">
+        <filter id="only-red"/>
+        <region id="blue_net"/>
+        <match-running/>
+        <participating/>
     </all>
-    <all id="blue-team-carrying-flag">
-        <team>blue-team</team>
-        <carrying-flag>flag</carrying-flag>
+    <all id="blue-scored">
+        <filter id="only-blue"/>
+        <region id="red_net"/>
+        <match-running/>
+        <participating/>
     </all>
     <all id="deny-void">
         <material id="leaves">leaves</material>
@@ -139,7 +152,27 @@
            <void/>
         </not>
     </all>
+    <variable id="should-tp" var="teleport_players">1</variable>
+    <after id="shouldnt-tp" duration="0.1" filter="should-tp"/>
 </filters>
+<variables>
+    <variable id="teleport_players" scope="match" default="0"/>
+</variables>
+<actions>
+    <action id="teleport-players" scope="player">
+        <switch-scope outer="player" inner="match">
+            <set var="teleport_players" value="1"/>
+        </switch-scope>
+    </action>
+    <trigger filter="red-scored" action="teleport-players" scope="player"/>
+    <trigger filter="blue-scored" action="teleport-players" scope="player"/>
+    <action id="dont-teleport" scope="player">
+        <switch-scope outer="player" inner="match">
+            <set var="teleport_players" value="0"/>
+        </switch-scope>
+    </action>
+    <trigger filter="shouldnt-tp" action="dont-teleport" scope="player"/>
+</actions>
 <toolrepair>
     <tool>stone sword</tool>
     <tool>bow</tool>
