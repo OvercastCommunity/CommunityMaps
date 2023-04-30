@@ -1,0 +1,121 @@
+<map proto="1.4.2">
+<name>Rockaway Bridge</name>
+<version>1.0</version>
+<objective>Jump into the enemy team's portal, located behind their spawn point!</objective>
+<created>2023-04-29</created>
+<include id="bridge"/>
+<authors>
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
+</authors>
+<teams>
+    <team id="team-one" color="red" dye-color="pink" max="22">Pink</team>
+    <team id="team-two" color="yellow" max="22">Yellow</team>
+</teams>
+<spawns>
+    <spawn team="team-one" kit="spawn-kit" yaw="-90" region="team-one-spawn-point"/>
+    <spawn team="team-two" kit="spawn-kit" yaw="90" region="team-two-spawn-point"/>
+    <default>
+        <regions>
+            <point yaw="0">0.5,25,-64.5</point>
+            <point yaw="180">0.5,25,65.5</point>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="adventure-kit">
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="survival-kit">
+        <game-mode>survival</game-mode>
+    </kit>
+</kits>
+<filters>
+    <not id="other-blocks">
+        <any id="some-blocks">
+            <material>stained clay:6</material>
+            <material>stained clay:4</material>
+            <material>stained clay:0</material>
+            <material>32</material>
+            <material>long grass</material>
+            <material>red rose</material>
+            <material>yellow flower</material>
+            <material>double plant</material>
+            <material>sand:1</material>
+            <material>147</material>
+        </any>
+    </not>
+    <deny id="deny-physics">
+        <any>
+            <material>long grass</material>
+            <material>double plant</material>
+            <material>redstone wire</material>
+            <material>32</material>
+        </any>
+    </deny>
+</filters>
+<regions>
+    <negative id="not-buildable">
+        <complement>
+            <cuboid min="-73,5,52" max="74,21,-51"/>
+            <rectangle id="pink-portal-zone" min="-50,-37" max="-73,38"/>
+            <mirror region="pink-portal-zone" origin="0.5,0,0.5" normal="1,0,0"/>
+            <rectangle id="south-void" min="31,37" max="-30,53"/>
+            <mirror region="south-void" origin="0.5,0,0.5" normal="0,0,1"/>
+        </complement>
+    </negative>
+    <apply block="some-blocks" block-physics="deny-physics"/>
+    <!-- Portals -->
+    <cuboid id="team-one-portal" min="-71,7,-2" max="-65,8,3"/>
+    <mirror id="team-two-portal" region="team-one-portal" origin="0.5,0,0.5" normal="1,0,0"/>
+    <!-- Spawn points -->
+    <point id="team-one-spawn-point">-55.5,21,0.5</point>
+    <point id="team-two-spawn-point">56.5,21,0.5</point>
+    <union id="cages"> <!-- Same base coordinates as spawn points -->
+        <complement id="team-one-spawn-cage">
+            <cuboid min="-58,21,-3" size="6,7,7"/>
+            <cuboid min="-57,21,-2" size="4,5,5"/>
+        </complement>
+        <mirror region="team-one-spawn-cage" origin="0.5,0,0.5" normal="1,0,0"/>
+    </union>
+    <!-- Rockaway Bridge  -->
+    <negative id="survival-area">
+        <union id="adventure-area">
+            <above y="27"/>
+            <complement id="yellow-adventure-area">
+                <rectangle min="55,33" max="90,-32"/>
+                <rectangle min="55,13" max="61,-12"/>
+            </complement>
+            <mirror region="yellow-adventure-area" origin="0.5,0,0.5" normal="1,0,0"/>
+        </union>
+    </negative>
+    <apply kit="survival-kit" region="survival-area"/>
+    <apply kit="adventure-kit" region="adventure-area"/>
+    <complement id="water-plane">
+        <below y="1.5"/>
+        <below y="0"/>
+    </complement>
+    <above y="27" id="ceiling"/>
+    <apply enter="never" region="ceiling" message="You may not climb higher!"/>
+    <apply kit="void-death" region="water-plane"/>
+</regions>
+<portals sound="true">
+    <!-- Falling on own team's portal -->
+    <portal destination="team-one-spawn-point" filter="only-team-one" region="team-one-portal" yaw="@-90" pitch="@0"/>
+    <portal destination="team-two-spawn-point" filter="only-team-two" region="team-two-portal" yaw="@90" pitch="@0"/>
+    <!-- Scoring -->
+    <portal destination="team-one-spawn-point" forward="should-teleport" filter="only-team-one" yaw="@-90" pitch="@0"/>
+    <portal destination="team-two-spawn-point" forward="should-teleport" filter="only-team-two" yaw="@90" pitch="@0"/>
+</portals>
+<portals sound="false">
+    <!-- Rockaway Bridge -->
+    <portal y="@-110" region="water-plane"/>
+</portals>
+<itemremove>
+    <item>yellow flower</item>
+    <item>red rose</item>
+    <item>seeds</item>
+    <item>double plant</item>
+    <item>sand</item>
+    <item>147</item>
+</itemremove>
+</map>
