@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Knockout Stadium</name>
-<version>1.0</version>
+<version>1.0.1</version>
 <objective>Capture and keep control of the ring!</objective>
 <created>2023-04-01</created>
 <phase>development</phase>
@@ -13,29 +13,35 @@
     <team id="blue-team" color="blue" max="20">Blue</team>
 </teams>
 <spawns>
-    <spawn team="red-team" kit="spawn-kit" yaw="180">
+    <spawn team="red-team" kit="spawn-kit" yaw="180" filter="no-point">
         <region yaw="-90">
             <point>-81.5,5,1.5</point>
         </region>
     </spawn>
-    <spawn team="blue-team" kit="spawn-kit" yaw="0">
+    <spawn team="blue-team" kit="spawn-kit" yaw="0" filter="no-point">
         <region yaw="90">
             <point>82.5,5,1.5</point>
         </region>
     </spawn>
-    <default>
+    <default kit="default-kit">
         <regions>
             <point yaw="0">0.5,26,-1.5</point>
         </regions>
     </default>
 </spawns>
+<respawn spectate="true" auto="true" message="You will respawn once the Ring is no longer captured by your team."/>
 <kits>
-    <kit id="spawn-kit">
-        <item slot="0" material="stone sword" unbreakable="true"/>
-        <item slot="1" material="stick" enchantments="knockback:10"/>
+    <kit id="default-kit">
+        <effect>night vision</effect>
+    </kit>
+    <kit id="spawn-kit" force="true" parents="default-kit">
+        <clear/>
+        <item slot="0" material="stick" enchantments="knockback:10"/>
         <game-mode>adventure</game-mode>
         <double-jump recharge-before-landing="true" recharge-time="2s"/>
         <effect duration="8s" amplifier="1">speed</effect>
+        <effect amplifier="-4">health boost</effect>
+        <health>4</health>
     </kit>
 </kits>
 <filters>
@@ -47,6 +53,11 @@
     <any id="visual-materials">
         <material>stained clay</material>
     </any>
+    <not id="no-point">
+        <same-team>
+            <captured>ring</captured>
+        </same-team>
+    </not>
 </filters>
 <regions>
     <cuboid id="capture-area" min="-4,4,-3" size="9,4,9"/>
@@ -63,9 +74,13 @@
     <apply velocity="0,1.2,-5" region="south-jump-pad"/>
     <apply velocity="0,1.2,5" region="north-jump-pad"/>
     <apply block="deny-players"/>
+    <cuboid id="blue-spawn-tunnel" min="52,8,-3" size="9,5,9"/>
+    <mirror id="red-spawn-tunnel" region="blue-spawn-tunnel" origin="0.5,0,1.5" normal="1,0,0"/>
+    <apply enter="only-blue" region="blue-spawn-tunnel" message="You may not enter your enemy's spawn tunnel!"/>
+    <apply enter="only-red" region="red-spawn-tunnel" message="You may not enter your enemy's spawn tunnel!"/>
 </regions>
-<control-points capture-rule="lead" show-progress="true" incremental="true" neutral-state="true" required="false" capture-time="7s" points="1" visual-materials="visual-materials">
-    <control-point name="Ring" capture="capture-area" progress="progress-area" captured="captured-area"/>
+<control-points capture-rule="lead" show-progress="true" neutral-state="true" required="false" capture-time="7s" points="1" visual-materials="visual-materials">
+    <control-point owned-decay-rate="0.5" decay-rate="0.5" id="ring" name="Ring" capture="capture-area" progress="progress-area" captured="captured-area"/>
 </control-points>
 <score>
     <limit>200</limit>
@@ -85,10 +100,13 @@
     <item>chainmail leggings</item>
     <item>iron boots</item>
 </itemremove>
-<kill-reward>
-    <item material="golden apple"/>
-    <item amount="8" material="arrow"/>
-</kill-reward>
+<kill-rewards>
+    <kill-reward>
+        <kit>
+            <effect duration="5s" amplifier="2">jump_boost</effect>
+        </kit>
+    </kill-reward>
+</kill-rewards>
 <hunger>
     <depletion>off</depletion>
 </hunger>
