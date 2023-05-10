@@ -1,0 +1,171 @@
+<map proto="1.4.2">
+<name>Arcane CTW</name>
+<version>1.0</version>
+<phase>development</phase>
+<objective>Capture the enemy team's wool!</objective>
+<created>2023-05-07</created>
+<gamemode>ctw</gamemode>
+<authors>
+    <author uuid="cc01304f-907b-4c80-b9c2-8f61872969d1"/> <!-- Just_ -->
+</authors>
+<contributors>
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML"/> <!-- zzuf -->
+</contributors>
+<teams>
+    <team id="pink-team" color="light purple" dye-color="pink" max="20" plural="true">Witches</team>
+    <team id="blue-team" color="blue" max="20" plural="true">Wizards</team>
+</teams>
+<spawns>
+    <spawn team="pink-team" kit="spawn-kit" yaw="-90">
+        <regions>
+            <point>12,14,104</point>
+        </regions>
+    </spawn>
+    <spawn team="blue-team" kit="spawn-kit" yaw="90">
+        <regions>
+            <point>-10,14,-102</point>
+        </regions>
+    </spawn>
+    <default yaw="90">
+        <regions>
+            <point>1,57,1</point>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" unbreakable="true" material="bow">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="2" material="iron pickaxe" unbreakable="true">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item slot="3" unbreakable="true" material="iron axe">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item slot="4" material="wood" amount="64" damage="5"/>
+        <item slot="31" material="wood" amount="64" damage="5"/>
+        <item slot="5" material="glass" amount="64" damage="0"/>
+        <item slot="7" material="golden apple"/>
+        <item slot="8" material="water bucket"/>
+        <item slot="28" material="arrow"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+        <leggings material="leather leggings" team-color="true" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <effect duration="3s" amplifier="255">damage resistance</effect>
+    </kit>
+</kits>
+<filters>
+    <deny id="deny-void">
+        <void/>
+    </deny>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+    <deny id="deny-blue">
+        <team id="only-blue">blue-team</team>
+    </deny>
+    <deny id="deny-pink">
+        <team id="only-pink">pink-team</team>
+    </deny>
+    <all id="blue-in-wr">
+        <filter id="only-blue"/>
+        <filter id="wool-room-filter"/>
+    </all>
+    <all id="pink-in-wr">
+        <filter id="only-pink"/>
+        <filter id="wool-room-filter"/>
+    </all>
+    <blocks id="wool-room-filter" region="wool-room-blocks">
+        <any>
+            <material>air</material>
+            <material>web</material>
+            <material>stained glass:0</material>
+        </any>
+    </blocks>
+    <material id="only-iron">iron block</material>
+</filters>
+<regions>
+    <negative id="void-area">
+        <rectangle min="22,27" max="-20,-25"/>
+    </negative>
+    <apply block="deny-void" region="void-area" message="You may not edit the void!"/>
+    <union id="spawn-areas">
+        <complement id="blue-spawn-area">
+            <rectangle min="-6,-81" max="-34,-109"/>
+            <region id="magenta-monument"/>
+            <void/>
+        </complement>
+        <complement id="pink-spawn-area">
+            <rectangle min="8,83" max="36,111"/>
+            <region id="purple-monument"/>
+            <void/>
+        </complement>
+    </union>
+    <apply block-place="deny-players" block-break="only-iron" region="spawn-areas" message="You may only break iron blocks here!"/>
+    <union id="wool-rooms">
+        <rectangle id="magenta-wool-room" min="-6,98" max="-20,111"/>
+        <rectangle id="purple-wool-room" min="8,-96" max="22,-109"/>
+    </union>
+    <union id="wool-room-blocks">
+        <cuboid id="magenta-wool-room-blocks" min="-6,11,98" max="-20,30,111"/>
+        <cuboid id="purple-wool-room-blocks" min="8,11,-96" max="22,30,-109"/>
+    </union>
+    <block id="magenta-monument">-33,14,-108</block>
+    <block id="purple-monument">34,14,109</block>
+    <apply use="only-blue" region="magenta-wool-room"/>
+    <apply use="only-pink" region="purple-wool-room"/>
+    <apply enter="only-blue" region="blue-spawn-area" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-pink" region="pink-spawn-area" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-blue" region="magenta-wool-room" message="You may not enter your own team's wool room!"/>
+    <apply enter="only-pink" region="purple-wool-room" message="You may not enter your own team's wool room!"/>
+    <apply block="blue-in-wr" region="magenta-wool-room" message="You may not edit the wool room!"/>
+    <apply block="pink-in-wr" region="purple-wool-room" message="You may not edit the wool room!"/>
+</regions>
+<wools craftable="false">
+    <wool team="blue-team" color="magenta" monument="magenta-monument" location="-6.5,16.2,96.5"/>
+    <wool team="pink-team" color="purple" monument="purple-monument" location="6.5,16.2,-96.5"/>
+</wools>
+<renewables>
+    <renewable region="spawn-areas" renew-filter="only-iron"/>
+</renewables>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+</itemremove>
+<itemkeep>
+    <item>iron sword</item>
+    <item>bow</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>arrow</item>
+    <item>wood</item>
+    <item>glass</item>
+    <item>golden apple</item>
+    <item>water bucket</item>
+    <item>bucket</item>
+</itemkeep>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item material="wood" amount="16" damage="6"/>
+        <item material="glass" amount="8"/>
+    </kill-reward>
+</kill-rewards>
+<maxbuildheight>30</maxbuildheight>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
