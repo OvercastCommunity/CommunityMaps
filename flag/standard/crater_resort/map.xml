@@ -1,0 +1,198 @@
+<map proto="1.4.2">
+<name>Crater Resort</name>
+<version>1.0</version>
+<objective>Hold the flag for 150 seconds to win!</objective>
+<gamemode>kotf</gamemode>
+<authors>
+    <author uuid="060ae7e1-43a0-42ad-8b5d-7240c5ec05af"/> <!-- EsotericSorcery -->
+</authors>
+<broadcasts>
+    <tip after="1m" every="2m">Arrows can be collected at the iron spawners!</tip>
+    <tip after="30s" every="2m">3 consecutive kills reward you 1 TNT!</tip>
+</broadcasts>
+<teams>
+    <team id="cyan-team" color="dark aqua" max="5">Cyan</team>
+    <team id="orange-team" color="gold" max="5">Orange</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <game-mode>adventure</game-mode>
+        <item slot="0" unbreakable="true" material="gold sword" enchantment="sharpness" name="`e`k1`r`e`lGolden Sword`r`e`k1"/>
+        <item slot="1" unbreakable="true" material="bow" enchantment="power" name="`f`k1`r`f`lBow`r`f`k1"/>
+        <item slot="2" material="golden apple"/>
+        <item slot="8" amount="8" material="arrow"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" color="FFFFFF" material="leather chestplate">
+            <enchantment level="1">protection</enchantment>
+        </chestplate>
+        <leggings unbreakable="true" color="FFFFFF" material="leather leggings">
+            <enchantment level="1">protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" team-color="true" material="leather boots"/>
+        <effect duration="oo" amplifier="1">jump_boost</effect>
+        <effect duration="3" amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="flag-kit" force="true">
+        <chestplate unbreakable="true" color="FFFFFF" material="leather chestplate">
+            <enchantment level="1">protection</enchantment>
+            <enchantment level="1">projectile_protection</enchantment>
+        </chestplate>
+        <effect>slowness</effect>
+        <effect amplifier="-2">health boost</effect>
+    </kit>
+    <kit id="reset-health" force="true">
+        <effect duration="0" amplifier="0">slowness</effect>
+        <effect duration="0" amplifier="1">health boost</effect>
+    </kit>
+    <kit id="force-kill" force="true">
+        <health>1</health>
+        <effect duration="oo" amplifier="255">wither</effect>
+    </kit>
+</kits>
+<spawns>
+     <default yaw="180">
+        <region>
+            <point>0.5,52,0.5</point>
+        </region>
+    </default>
+    <spawn team="cyan-team" kit="spawn-kit" filter="has-flag">
+        <region yaw="20">
+            <point>38.5,9,12.5</point>
+        </region>
+    </spawn>
+    <spawn team="orange-team" kit="spawn-kit" filter="has-flag"> 
+        <region yaw="-160">
+            <point>-37.5,9,-11.5</point>
+        </region>
+    </spawn>
+</spawns>
+<filters>
+    <all id="only-cyan">
+        <team>cyan-team</team>
+        <not>
+            <effect>slowness</effect>
+        </not>
+    </all>
+    <all id="only-orange">
+        <team>orange-team</team>
+        <not>
+            <effect>slowness</effect>
+        </not>
+    </all>
+    <any id="has-flag">
+        <carrying-flag>flag</carrying-flag>
+        <not>
+            <same-team>
+                <carrying-flag>flag</carrying-flag>
+            </same-team>
+        </not>
+    </any>
+    <any id="interactable">
+        <material>tnt</material>
+    </any>
+</filters>
+<regions>
+    <union id="arrow spawners">
+        <point id="cyan-spawner">17.5,6,-2</point>
+        <cuboid id="cyan-spawner-platform" min="16,6,-4" max="19,9,-1"/>
+        <point id="orange-spawner">-16.5,6,3</point>
+        <cuboid id="orange-spawner-platform" min="-15,6,5" max="-18,9,2"/>
+    </union>
+    <apply kit="force-kill">
+        <region>
+            <cuboid min="-oo,-oo,-oo" max="oo,5,oo"/>
+        </region>
+    </apply>
+    <apply block-place="interactable" block-break="never" use="never"/>
+    <apply enter="only-cyan" message="You may not enter the opposing team's spawn or your own spawn while holding the flag!">
+        <region>
+            <cuboid min="31,9,14" max="35,13,19"/>
+        </region>
+    </apply>
+    <apply enter="only-orange" message="You may not enter the opposing team's spawn or your own spawn while holding the flag!">
+        <region>
+            <cuboid min="-30,9,-13" max="-34,13,-18"/>
+        </region>
+    </apply>
+</regions>
+<flags>
+    <flag id="flag"
+          name="Flag"
+          color="yellow"
+          shared="true"
+          points-rate="1"
+          pickup-kit="flag-kit"
+          drop-kit="reset-health"
+          flag-proximity-metric="none"
+          show-respawn-on-pickup="true">
+        <post return-time="0s" respawn-time="20s">
+            <post name="Center Post" yaw="-135">0.5,11,0.5</post>
+            <post name="Cyan-side Cave" yaw="-120">-18.5,7,21.5</post>
+            <post name="Orange-side Cave" yaw="60">19.5,7,-20.5</post>
+        </post>
+    </flag>
+</flags>
+<score>
+    <limit>150</limit>
+</score>
+<spawners max-entities="8" delay="1.2s">
+    <spawner player-region="cyan-spawner-platform" spawn-region="cyan-spawner">
+        <item amount="1" material="arrow"/>
+    </spawner>
+    <spawner player-region="orange-spawner-platform" spawn-region="orange-spawner">
+        <item amount="1" material="arrow"/>
+    </spawner>
+</spawners>
+<toolrepair>
+    <tool>gold sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>potion</item>
+    <item>banner</item>
+</itemremove>
+<itemkeep>
+    <item>golden apple</item>
+    <item>arrow</item>
+</itemkeep>
+<respawn spectate="true" auto="true">
+    <message>
+        {"translate":"death.respawn.confirmed.waiting.flagDropped"}
+    </message>
+</respawn>
+<tnt>
+    <instantignite>on</instantignite>
+    <licensing>off</licensing>
+    <friendly-defuse>off</friendly-defuse>
+    <fuse>1.5s</fuse>
+    <power>3</power>
+    <blockdamage>true</blockdamage>
+</tnt>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item amount="4" material="arrow"/>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="3" repeat="true"/>
+        </filter>
+        <item amount="1" material="tnt" name="`4`k1`r`4`lTNT`r`4`k1" lore="WARNING: Run away after ignition to avoid serious injuries." show-can-place-on="false">
+            <can-place-on>
+                <all-blocks/>
+            </can-place-on>
+        </item>
+    </kill-reward>
+</kill-rewards>
+<disabledamage>
+    <damage>fall</damage>
+</disabledamage>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
