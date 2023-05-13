@@ -1,0 +1,1936 @@
+<map proto="1.4.2">
+<name>Nyxis</name>
+<version>1.0</version>
+<objective>Obtain the enemy's wool and return it to one of your spawn monuments!</objective>
+<gamemode>ctw</gamemode>
+<authors>
+    <author uuid="060ae7e1-43a0-42ad-8b5d-7240c5ec05af"/> <!-- EsotericSorcery -->
+</authors>
+<broadcasts>
+    <alert after="5s">You can buy upgrades at the shops with emeralds, earned from mining, kills and the middle spawner!</alert>
+    <tip after="5m" every="5m">You can buy upgrades at the shops with emeralds, earned from mining, kills, and the middle spawner!</tip>
+</broadcasts>
+<!-- TEAMS -->
+<teams>
+    <team id="black-team" color="gray" max="20">Shadow Sorcerers</team>
+    <team id="purple-team" color="dark purple" max="20">Arcane Artificers</team>
+</teams>
+<!-- KITS -->
+<kits>
+    <kit id="spawn-kit">
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true" enchantment="arrow infinite"/>
+        <item slot="2" material="iron pickaxe" unbreakable="true" enchantment="dig speed"/>
+        <item slot="3" material="iron axe" unbreakable="true" enchantment="dig speed"/>
+        <item slot="4" material="water bucket"/>
+        <item slot="5" material="wood" damage="2" amount="64"/>
+        <item slot="7" material="cooked fish" amount="32"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <item slot="29" material="iron spade" unbreakable="true"/>
+        <item slot="32" material="wood" damage="2" amount="64"/>
+        <item slot="34" material="torch" amount="16"/>
+        <item slot="35" material="shears"/>
+        <chestplate material="chainmail chestplate" enchantment="protection fire:2" unbreakable="true"/>
+        <boots material="chainmail boots" enchantment="protection fire:2" unbreakable="true"/>
+        <effect duration="oo" amplifier="100">damage resistance</effect>
+    </kit>
+    <kit id="resistance-kit" force="true">
+        <effect duration="oo" amplifier="100">damage resistance</effect>
+    </kit>
+    <kit id="reset-resistance-kit" force="true" >
+        <effect duration="0" amplifier="0">damage resistance</effect>
+    </kit>
+    <kit id="portal-kit" force="true">
+        <effect duration="2.5" amplifier="100">damage resistance</effect>
+        <effect duration="4">confusion</effect>
+        <effect duration="1.5">slow digging</effect>
+    </kit>
+    <kit id="black-kit" parent="spawn-kit">
+        <item slot="6" material="stained glass" damage="7" amount="64"/>
+        <helmet color="000000" material="leather helmet" unbreakable="true"/>
+        <leggings color="000000" material="leather leggings" unbreakable="true"/>
+    </kit>
+    <kit id="purple-kit" parent="spawn-kit">
+        <item slot="6" material="stained glass" damage="10" amount="64"/>
+        <helmet team-color="true" material="leather helmet" unbreakable="true"/>
+        <leggings team-color="true" material="leather leggings" unbreakable="true"/>
+    </kit>
+    <kit id="golden-glory-kit" deduct-tools="false" filter="golden-glory-equipped">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="iron sword"/>
+                <replace material="air"/>
+            </replace-item>
+            <set var="sword_upgrade" value="1"/>
+        </action>
+        <item material="gold sword" unbreakable="true" enchantment="sharpness:3" name="`6`lGolden Glory"/>
+    </kit>
+    <kit id="shardblade-kit" deduct-tools="false" filter="shardblade-equipped">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="iron sword"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item>
+                <find material="gold sword" unbreakable="true" enchantment="sharpness:3" name="`6`lGolden Glory"/>
+                <replace material="air"/>
+            </replace-item>
+            <set var="sword_upgrade" value="2"/>
+        </action>
+        <item material="diamond sword" unbreakable="true" enchantment="sharpness:1;knockback:1" name="`b`lShardblade"/>
+    </kit>
+    <kit id="scorpion-kit" deduct-tools="false" filter="scorpion-equipped">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="bow"/>
+                <replace material="air"/>
+            </replace-item>
+            <set var="bow_upgrade" value="1"/>
+        </action>
+        <item material="bow" unbreakable="true" enchantment="arrow damage:1;arrow infinite" name="`2`lScorpion"/>
+    </kit>
+    <kit id="dragons-breath-kit" deduct-tools="false" filter="dragons-breath-equipped">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="bow"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item>
+                <find material="bow" unbreakable="true" enchantment="arrow damage:1;arrow infinite" name="`2`lScorpion"/>
+                <replace material="air"/>
+            </replace-item>
+            <set var="bow_upgrade" value="2"/>
+        </action>
+        <item material="bow" unbreakable="true" enchantment="arrow damage:2;arrow fire:4;arrow infinite" name="`4`lDragon's Breath"/>
+    </kit>
+    <kit id="crystal-crown-kit" force="true">
+        <action>
+            <set var="helmet_upgrade" value="1"/>
+        </action>
+        <helmet material="diamond helmet" unbreakable="true" enchantment="protection fire:2" name="`b`lCrystal Crown"/>
+    </kit>
+    <kit id="phoenix-plate-kit" force="true">
+        <action>
+            <set var="chestplate_upgrade" value="1"/>
+        </action>
+        <chestplate material="gold chestplate" unbreakable="true" enchantment="protection environmental:3;thorns:1" name="`6`lPhoenix Plate"/>
+    </kit>
+    <kit id="crystal-crusaders-kit" force="true">
+        <action>
+            <set var="leggings_upgrade" value="1"/>
+        </action>
+        <leggings material="diamond leggings" unbreakable="true" enchantment="protection fire:2" name="`b`lCrystal Crusaders"/>
+    </kit>
+    <kit id="kings-kicks-kit" force="true">
+        <action>
+            <set var="boots_upgrade" value="1"/>
+        </action>
+        <boots material="gold boots" unbreakable="true" enchantment="protection environmental:2;depth strider:2" name="`6`lKing's Kicks"/>
+    </kit>
+    <kit id="experts-pickaxe-kit" deduct-tools="false" filter="experts-pickaxe-equipped">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="iron pickaxe"/>
+                <replace material="air"/>
+            </replace-item>
+            <set var="pickaxe_upgrade" value="1"/>
+        </action>
+        <item material="diamond pickaxe" unbreakable="true" enchantment="dig speed" name="`b`lExpert's Pickaxe"/>
+    </kit>
+    <kit id="masters-pickaxe-kit" deduct-tools="false" filter="masters-pickaxe-equipped">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="iron pickaxe"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item>
+                <find material="diamond pickaxe" unbreakable="true" enchantment="dig speed" name="`b`lExpert's Pickaxe"/>
+                <replace material="air"/>
+            </replace-item>
+            <set var="pickaxe_upgrade" value="2"/>
+        </action>
+        <item material="diamond pickaxe" unbreakable="true" enchantment="dig speed:2" name="`9`lMaster's Pickaxe"/>
+    </kit>
+    <kit id="experts-axe-kit" deduct-tools="false" filter="experts-axe-equipped">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="iron axe"/>
+                <replace material="air"/>
+            </replace-item>
+            <set var="axe_upgrade" value="1"/>
+        </action>
+        <item material="diamond axe" unbreakable="true" enchantment="dig speed" name="`b`lExpert's Axe"/>
+    </kit>
+    <kit id="masters-axe-kit" deduct-tools="false" filter="masters-axe-equipped">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="iron axe"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item>
+                <find material="diamond axe" unbreakable="true" enchantment="dig speed" name="`b`lExpert's Axe"/>
+                <replace material="air"/>
+            </replace-item>
+            <set var="axe_upgrade" value="2"/>
+        </action>
+        <item material="diamond axe" unbreakable="true" enchantment="dig speed:2" name="`9`lMaster's Axe"/>
+    </kit>
+    <kit id="experts-spade-kit" fdeduct-tools="false" ilter="experts-spade-equipped">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="iron spade"/>
+                <replace material="air"/>
+            </replace-item>
+            <set var="spade_upgrade" value="1"/>
+        </action>
+        <item material="diamond spade" unbreakable="true" name="`b`lExpert's Spade"/>
+    </kit>
+    <kit id="masters-spade-kit" deduct-tools="false" filter="masters-spade-equipped">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="iron spade"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item>
+                <find material="diamond spade" unbreakable="true" name="`b`lExpert's Spade"/>
+                <replace material="air"/>
+            </replace-item>
+            <set var="spade_upgrade" value="2"/>
+        </action>
+        <item material="diamond spade" unbreakable="true" enchantment="dig speed" name="`9`lMaster's Spade"/>
+    </kit>
+    <kit id="cooked-fish-kit" deduct-items="false">
+        <item slot="7" material="cooked fish" amount="16"/>
+    </kit>
+    <kit id="team-hunger-kit">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="cooked fish"/>
+                <replace material="air"/>
+           </replace-item>
+            <set var="team_hunger_upgrade" value="1"/>
+        </action>
+        <effect duration="oo">saturation</effect>
+    </kit>
+    <kit id="team-health-kit-1">
+        <action>
+            <set var="team_health_upgrade" value="1"/>
+        </action>
+        <max-health>24</max-health>
+    </kit>
+    <kit id="team-health-kit-2">
+        <action>
+            <set var="team_health_upgrade" value="2"/>
+        </action>
+        <max-health>28</max-health>
+    </kit>
+    <kit id="team-health-kit-3">
+        <action>
+            <set var="team_health_upgrade" value="3"/>
+        </action>
+        <max-health>30</max-health>
+    </kit>
+    <kit id="team-speed-kit">
+        <action>
+            <set var="team_speed_upgrade" value="1"/>
+        </action>
+        <effect duration="oo">speed</effect>
+    </kit>
+    <kit id="team-haste-kit">
+        <action>
+            <set var="team_haste_upgrade" value="1"/>
+        </action>
+        <effect duration="oo">haste</effect>
+    </kit>
+    <kit id="creeper-egg-kit" deduct-items="false">
+        <item material="monster egg" damage="50"/>
+    </kit>
+    <kit id="flame-wand-kit">
+        <action>
+            <set var="flame_wand_upgrade" value="1"/>
+        </action>
+        <item slot="27" projectile="wand" material="stick" enchantment="fire aspect:2" name="`6`lFlame Wand"/>
+    </kit>
+    <kit id="black-wr-animation-kit">
+        <action>
+            <set var="black_wr_animation" value="1"/>
+        </action>
+    </kit>
+    <kit id="purple-wr-animation-kit">
+        <action>
+            <set var="purple_wr_animation" value="1"/>
+        </action>
+    </kit>
+</kits>
+<!-- PROJECTILES -->
+<projectiles>
+    <projectile
+        id="wand"
+        name="`6`lFlame Wand"
+        projectile="SmallFireball"
+        velocity="3.5"
+        damage="20"
+        throwable="false"
+        cooldown="5s"/>
+</projectiles>
+<!-- SPAWN LOCATIONS -->
+<spawns>
+    <default yaw="-90">
+        <regions>
+            <point>0.5,35,0.5</point>
+        </regions>
+    </default>
+    <spawn team="black-team" kit="black-kit">
+        <regions>
+            <point yaw="-45">-54.5,15,-95.5</point>
+            <point yaw="45">55.5,15,-95.5</point>
+        </regions>
+    </spawn>
+    <spawn team="purple-team" kit="purple-kit">
+        <regions>
+            <point yaw="135">55.5,15,96.5</point>
+            <point yaw="-135">-54.5,15,96.5</point>
+        </regions>
+    </spawn>
+</spawns>
+<!-- WOOLS -->
+<wools craftable="false">
+    <wool team="black-team" color="magenta" location="0.5,12,-107.5" monument="black-monuments"/>
+    <wool team="purple-team" color="gray" location="0.5,12,108.5" monument="purple-monuments"/>
+</wools>
+<variables>
+    <variable id="sword_upgrade" scope="player" default="0"/>
+    <variable id="bow_upgrade" scope="player" default="0"/>
+    <variable id="helmet_upgrade" scope="player" default="0"/>
+    <variable id="chestplate_upgrade" scope="player" default="0"/>
+    <variable id="leggings_upgrade" scope="player" default="0"/>
+    <variable id="boots_upgrade" scope="player" default="0"/>
+    <variable id="pickaxe_upgrade" scope="player" default="0"/>
+    <variable id="axe_upgrade" scope="player" default="0"/>
+    <variable id="spade_upgrade" scope="player" default="0"/>
+    <variable id="team_hunger_upgrade" scope="team" default="0"/>
+    <variable id="team_health_upgrade" scope="team" default="0"/>
+    <variable id="team_speed_upgrade" scope="team" default="0"/>
+    <variable id="team_haste_upgrade" scope="team" default="0"/>
+    <variable id="flame_wand_upgrade" scope="player" default="0"/>
+    <variable id="black_wr_animation" scope="match" default="0"/>
+    <variable id="purple_wr_animation" scope="match" default="0"/>
+</variables>
+<!-- FILTERS -->
+<filters>
+    <team id="only-black">black-team</team>
+    <team id="only-purple">purple-team</team>
+    <deny id="deny-usage-spawn">
+        <any>
+            <material>anvil</material>
+            <material>enchantment table</material>
+            <material>trap door</material>
+        </any>
+    </deny>
+    <deny id="black-deny-usage-spawn">
+        <all>
+            <material>chest</material>
+            <filter id="only-black"/>
+        </all>
+    </deny>
+    <deny id="purple-deny-usage-spawn">
+        <all>
+            <material>chest</material>
+            <filter id="only-purple"/>
+        </all>
+    </deny>
+    <deny id="participating-max-height">
+        <participating/>
+    </deny>
+    <any id="wr-filter">
+        <material>fire</material>
+        <material>web</material>
+    </any>
+    <any id="black-wr-filter">
+        <all>
+            <filter id="only-black"/>
+            <filter id="wr-filter"/>
+        </all>
+        <cause>world</cause>
+    </any>
+    <any id="purple-wr-filter">
+        <all>
+            <filter id="only-purple"/>
+            <filter id="wr-filter"/>
+        </all>
+        <cause>world</cause>
+    </any>
+    <all id="black-wr-breakable-filter">
+        <filter id="only-black"/>
+        <filter id="anti-wall-climbing-filter"/>
+    </all>
+    <all id="purple-wr-breakable-filter">
+        <filter id="only-purple"/>
+        <filter id="anti-wall-climbing-filter"/>
+    </all>
+    <all id="only-iron-cause-world">
+        <material id="only-iron">iron block</material>
+        <any id="cause-world">
+            <cause>world</cause>
+        </any>
+    </all>
+    <deny id="anti-wall-climbing-filter">
+        <any id="awcf-blocks">
+            <material>wool:15</material>
+            <material>stained clay:15</material>
+            <material>coal block</material>
+        </any>
+    </deny>
+    <deny id="black-awcf">
+        <all>
+            <filter id="only-black"/>
+            <filter id="awcf-blocks"/>
+        </all>
+    </deny>
+    <deny id="purple-awcf">
+        <all>
+            <filter id="only-purple"/>
+            <filter id="awcf-blocks"/>
+        </all>
+    </deny>
+    <deny id="end-portal-filter">
+        <material>obsidian</material>
+    </deny>
+    <all id="been-through-portal">
+        <effect>slow digging</effect>
+    </all>
+    <deny id="golden-glory-equipped">
+        <carrying id="golden-glory">
+            <item material="gold sword" unbreakable="true" enchantment="sharpness:3" name="`6`lGolden Glory"/>
+        </carrying>
+    </deny>
+    <deny id="shardblade-equipped">
+        <carrying>
+            <item material="diamond sword" unbreakable="true" enchantment="sharpness:1;knockback:1" name="`b`lShardblade"/>
+        </carrying>
+    </deny>
+    <deny id="scorpion-equipped">
+        <carrying>
+            <item material="bow" unbreakable="true" enchantment="arrow damage:1;arrow infinite" name="`2`lScorpion"/>
+        </carrying>
+    </deny>
+    <deny id="dragons-breath-equipped">
+        <carrying>
+            <item material="bow" unbreakable="true" enchantment="arrow damage:2;arrow fire:3;arrow infinite" name="`4`lDragon's Breath"/>
+        </carrying>
+    </deny>
+    <deny id="experts-pickaxe-equipped">
+        <carrying>
+            <item material="diamond pickaxe" unbreakable="true" enchantment="dig speed" name="`b`lExpert's Pickaxe"/>
+        </carrying>
+    </deny>
+    <deny id="masters-pickaxe-equipped">
+        <carrying>
+            <item material="diamond pickaxe" unbreakable="true" enchantment="dig speed:2" name="`9`lMaster's Pickaxe"/>
+        </carrying>
+    </deny>
+    <deny id="experts-axe-equipped">
+        <carrying>
+            <item material="diamond axe" unbreakable="true" enchantment="dig speed" name="`b`lExpert's Axe"/>
+        </carrying>
+    </deny>
+    <deny id="masters-axe-equipped">
+        <carrying>
+            <item material="diamond axe" unbreakable="true" enchantment="dig speed:2" name="`9`lMaster's Axe"/>
+        </carrying>
+    </deny>
+    <deny id="experts-spade-equipped">
+        <carrying>
+            <item material="diamond axe" unbreakable="true" name="`b`lExpert's Spade"/>
+        </carrying>
+    </deny>
+    <deny id="masters-spade-equipped">
+        <carrying>
+            <item material="diamond spade" unbreakable="true" enchantment="dig speed" name="`9`lMaster's Spade"/>
+        </carrying>
+    </deny>
+    <deny id="flame-wand-equipped">
+        <carrying>
+            <item slot="27" projectile="wand" material="stick" enchantment="fire aspect:2" name="`6`lFlame Wand"/>
+        </carrying>
+    </deny>
+    <!-- Variable IDs -->
+    <variable id="sword-upgrade-0" var="sword_upgrade">0</variable>
+    <variable id="sword-upgrade-1" var="sword_upgrade">1</variable>
+    <variable id="sword-upgrade-2" var="sword_upgrade">2</variable>
+    <variable id="bow-upgrade-0" var="bow_upgrade">0</variable>
+    <variable id="bow-upgrade-1" var="bow_upgrade">1</variable>
+    <variable id="bow-upgrade-2" var="bow_upgrade">2</variable>
+    <variable id="helmet-upgrade-0" var="helmet_upgrade">0</variable>
+    <variable id="helmet-upgrade-1" var="helmet_upgrade">1</variable>
+    <variable id="chestplate-upgrade-0" var="chestplate_upgrade">0</variable>
+    <variable id="chestplate-upgrade-1" var="chestplate_upgrade">1</variable>
+    <variable id="leggings-upgrade-0" var="leggings_upgrade">0</variable>
+    <variable id="leggings-upgrade-1" var="leggings_upgrade">1</variable>
+    <variable id="boots-upgrade-0" var="boots_upgrade">0</variable>
+    <variable id="boots-upgrade-1" var="boots_upgrade">1</variable>
+    <variable id="pickaxe-upgrade-0" var="pickaxe_upgrade">0</variable>
+    <variable id="pickaxe-upgrade-1" var="pickaxe_upgrade">1</variable>
+    <variable id="pickaxe-upgrade-2" var="pickaxe_upgrade">2</variable>
+    <variable id="axe-upgrade-0" var="axe_upgrade">0</variable>
+    <variable id="axe-upgrade-1" var="axe_upgrade">1</variable>
+    <variable id="axe-upgrade-2" var="axe_upgrade">2</variable>
+    <variable id="spade-upgrade-0" var="spade_upgrade">0</variable>
+    <variable id="spade-upgrade-1" var="spade_upgrade">1</variable>
+    <variable id="spade-upgrade-2" var="spade_upgrade">2</variable>
+    <variable id="team-hunger-upgrade-0" var="team_hunger_upgrade">0</variable>
+    <variable id="team-hunger-upgrade-1" var="team_hunger_upgrade">1</variable>
+    <variable id="team-health-upgrade-0" var="team_health_upgrade">0</variable>
+    <variable id="team-health-upgrade-1" var="team_health_upgrade">1</variable>
+    <variable id="team-health-upgrade-2" var="team_health_upgrade">2</variable>
+    <variable id="team-health-upgrade-3" var="team_health_upgrade">3</variable>
+    <variable id="team-speed-upgrade-0" var="team_speed_upgrade">0</variable>
+    <variable id="team-speed-upgrade-1" var="team_speed_upgrade">1</variable>
+    <variable id="team-haste-upgrade-0" var="team_haste_upgrade">0</variable>
+    <variable id="team-haste-upgrade-1" var="team_haste_upgrade">1</variable>
+    <variable id="flame-wand-upgrade-0" var="flame_wand_upgrade">0</variable>
+    <variable id="flame-wand-upgrade-1" var="flame_wand_upgrade">1</variable>
+    <variable id="black-wr-animation-0" var="black_wr_animation">0</variable>
+    <variable id="black-wr-animation-1" var="black_wr_animation">1</variable>
+    <variable id="purple-wr-animation-0" var="purple_wr_animation">0</variable>
+    <variable id="purple-wr-animation-1" var="purple_wr_animation">1</variable>
+    <all id="golden-glory-enable-give">
+        <filter id="sword-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="shardblade-enable-give">
+        <filter id="sword-upgrade-2"/>
+        <alive/>
+    </all>
+    <all id="scorpion-enable-give">
+        <filter id="bow-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="dragons-breath-enable-give">
+        <filter id="bow-upgrade-2"/>
+        <alive/>
+    </all>
+    <all id="crystal-crown-enable-give">
+        <filter id="helmet-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="phoenix-plate-enable-give">
+        <filter id="chestplate-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="crystal-crusaders-enable-give">
+        <filter id="leggings-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="kings-kicks-enable-give">
+        <filter id="boots-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="experts-pickaxe-enable-give">
+        <filter id="pickaxe-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="masters-pickaxe-enable-give">
+        <filter id="pickaxe-upgrade-2"/>
+        <alive/>
+    </all>
+    <all id="experts-axe-enable-give">
+        <filter id="axe-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="masters-axe-enable-give">
+        <filter id="axe-upgrade-2"/>
+        <alive/>
+    </all>
+    <all id="experts-spade-enable-give">
+        <filter id="spade-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="masters-spade-enable-give">
+        <filter id="spade-upgrade-2"/>
+        <alive/>
+    </all>
+    <all id="team-hunger-enable-give">
+        <filter id="team-hunger-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="team-health-enable-give-1">
+        <filter id="team-health-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="team-health-enable-give-2">
+        <filter id="team-health-upgrade-2"/>
+        <alive/>
+    </all>
+    <all id="team-health-enable-give-3">
+        <filter id="team-health-upgrade-3"/>
+        <alive/>
+    </all>
+    <all id="team-speed-enable-give">
+        <filter id="team-speed-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="team-haste-enable-give">
+        <filter id="team-haste-upgrade-1"/>
+        <alive/>
+    </all>
+    <all id="flame-wand-enable-give">
+        <filter id="flame-wand-upgrade-1"/>
+        <alive/>
+    </all>
+</filters>
+<actions>
+    <action id="golden-glory-give" scope="player">
+        <kit id="golden-glory-kit"/>
+    </action>
+    <action id="shardblade-give" scope="player">
+        <kit id="shardblade-kit"/>
+    </action>
+    <action id="scorpion-give" scope="player">
+        <kit id="scorpion-kit"/>
+    </action>
+    <action id="dragons-breath-give" scope="player">
+        <kit id="dragons-breath-kit"/>
+    </action>
+    <action id="crystal-crown-give" scope="player">
+        <kit id="crystal-crown-kit"/>
+    </action>
+    <action id="phoenix-plate-give" scope="player">
+        <kit id="phoenix-plate-kit"/>
+    </action>
+    <action id="crystal-crusaders-give" scope="player">
+        <kit id="crystal-crusaders-kit"/>
+    </action>
+    <action id="kings-kicks-give" scope="player">
+        <kit id="kings-kicks-kit"/>
+    </action>
+    <action id="experts-pickaxe-give" scope="player">
+        <kit id="experts-pickaxe-kit"/>
+    </action>
+    <action id="masters-pickaxe-give" scope="player">
+        <kit id="masters-pickaxe-kit"/>
+    </action>
+    <action id="experts-axe-give" scope="player">
+        <kit id="experts-axe-kit"/>
+    </action>
+    <action id="masters-axe-give" scope="player">
+        <kit id="masters-axe-kit"/>
+    </action>
+    <action id="experts-spade-give" scope="player">
+        <kit id="experts-spade-kit"/>
+    </action>
+    <action id="masters-spade-give" scope="player">
+        <kit id="masters-spade-kit"/>
+    </action>
+    <action id="team-hunger-give" scope="player">
+        <kit id="team-hunger-kit"/>
+    </action>
+    <action id="team-health-give-1" scope="player">
+        <kit id="team-health-kit-1"/>
+    </action>
+    <action id="team-health-give-2" scope="player">
+        <kit id="team-health-kit-2"/>
+    </action>
+    <action id="team-health-give-3" scope="player">
+        <kit id="team-health-kit-3"/>
+    </action>
+    <action id="team-speed-give" scope="player">
+        <kit id="team-speed-kit"/>
+    </action>
+    <action id="team-haste-give" scope="player">
+        <kit id="team-haste-kit"/>
+    </action>
+    <action id="flame-wand-give" scope="player">
+        <kit id="flame-wand-kit"/>
+    </action>
+    <trigger filter="golden-glory-enable-give" action="golden-glory-give" scope="player"/>
+    <trigger filter="shardblade-enable-give" action="shardblade-give" scope="player"/>
+    <trigger filter="scorpion-enable-give" action="scorpion-give" scope="player"/>
+    <trigger filter="dragons-breath-enable-give" action="dragons-breath-give" scope="player"/>
+    <trigger filter="crystal-crown-enable-give" action="crystal-crown-give" scope="player"/>
+    <trigger filter="phoenix-plate-enable-give" action="phoenix-plate-give" scope="player"/>
+    <trigger filter="crystal-crusaders-enable-give" action="crystal-crusaders-give" scope="player"/>
+    <trigger filter="kings-kicks-enable-give" action="kings-kicks-give" scope="player"/>
+    <trigger filter="experts-pickaxe-enable-give" action="experts-pickaxe-give" scope="player"/>
+    <trigger filter="masters-pickaxe-enable-give" action="masters-pickaxe-give" scope="player"/>
+    <trigger filter="experts-axe-enable-give" action="experts-axe-give" scope="player"/>
+    <trigger filter="masters-axe-enable-give" action="masters-axe-give" scope="player"/>
+    <trigger filter="experts-spade-enable-give" action="experts-spade-give" scope="player"/>
+    <trigger filter="masters-spade-enable-give" action="masters-spade-give" scope="player"/>
+    <trigger filter="team-hunger-enable-give" action="team-hunger-give" scope="player"/>
+    <trigger filter="team-health-enable-give-1" action="team-health-give-1" scope="player"/>
+    <trigger filter="team-health-enable-give-2" action="team-health-give-2" scope="player"/>
+    <trigger filter="team-health-enable-give-3" action="team-health-give-3" scope="player"/>
+    <trigger filter="team-speed-enable-give" action="team-speed-give" scope="player"/>
+    <trigger filter="team-haste-enable-give" action="team-haste-give" scope="player"/>
+    <trigger filter="flame-wand-enable-give" action="flame-wand-give" scope="player"/>
+    <message id="team-hunger-alert" text="`b Your team has unlocked `6`lHunger, Begone!"/>
+    <trigger filter="team-hunger-upgrade-1" trigger="team-hunger-alert" scope="player"/>
+    <message id="team-health-alert-1" text="`b Your team has unlocked `c`lLifespan Extension"/>
+    <trigger filter="team-health-upgrade-1" trigger="team-health-alert-1" scope="player"/>
+    <message id="team-health-alert-2" text="`b Your team has unlocked `e`lLifespan Extension+"/>
+    <trigger filter="team-health-upgrade-2" trigger="team-health-alert-2" scope="player"/>
+    <message id="team-health-alert-3" text="`b Your team has unlocked `6`lLifespan Extension++"/>
+    <trigger filter="team-health-upgrade-3" trigger="team-health-alert-3" scope="player"/>
+    <message id="team-speed-alert" text="`b Your team has unlocked `d`lRushing Rhapsody"/>
+    <trigger filter="team-speed-upgrade-1" trigger="team-speed-alert" scope="player"/>
+    <message id="team-haste-alert" text="`b Your team has unlocked `3`lDigging Swiftness"/>
+    <trigger filter="team-haste-upgrade-1" trigger="team-haste-alert" scope="player"/>
+</actions>
+<!-- REGIONS -->
+<regions>
+    <union id="black-monuments">
+        <block>31,7,-80</block>
+        <block>-31,7,-80</block>
+    </union>
+    <union id="purple-monuments">
+        <block>31,7,80</block>
+        <block>-31,7,80</block>
+    </union>
+    <rectangle id="anti-wall-climbing-region-mid" min="-44,-64" max="45,65"/>
+    <above id="max-interaction-height" y="31"/>
+    <!-- Spawn regions -->
+    <union id="spawns">
+        <!-- Black -->
+        <union id="black-spawns">
+            <!-- West -->
+            <complement>
+                <rectangle min="-23,-76" max="-oo,-oo"/>
+                <region id="black-wr"/>
+            </complement>
+            <complement>
+                <rectangle min="-23,-76" max="-48,-64"/>
+                <half origin="-31,0,-68" normal="1,0,1"/>
+            </complement>
+            <!-- East -->
+            <complement>
+                <rectangle min="24,-76" max="oo,-oo"/>
+                <region id="black-wr"/>
+            </complement>
+            <complement>
+                <rectangle min="24,-76" max="49,-64"/>
+                <half origin="32,0,-68" normal="-1,0,1"/>
+            </complement>
+        </union>
+        <!-- Purple -->
+        <union id="purple-spawns">
+            <!-- West -->
+            <complement>
+                <rectangle min="-23,77" max="-oo,oo"/>
+                <region id="purple-wr"/>
+            </complement>
+            <complement>
+                <rectangle min="-23,77" max="-48,65"/>
+                <half origin="-31,0,69" normal="1,0,-1"/>
+            </complement>
+            <!-- East -->
+            <complement>
+                <rectangle min="24,77" max="oo,oo"/>
+                <region id="purple-wr"/>
+            </complement>
+            <complement>
+                <rectangle min="24,77" max="49,65"/>
+                <half origin="32,0,69" normal="-1,0,-1"/>
+            </complement>
+        </union>
+    </union>
+    <union id="jumping-area">
+        <rectangle min="-34,-75" max="-oo,-oo"/>
+        <rectangle min="35,-75" max="oo,-oo"/>
+        <rectangle min="35,76" max="oo,oo"/>
+        <rectangle min="-34,76" max="-oo,oo"/>
+    </union>
+    <negative id="outside-jumping-area"><region id="jumping-area"/></negative>
+    <!-- Wool rooms -->
+    <union id="teams-anti-wall-climbing-regions">
+        <union id="black-anti-wall-climbing-region">
+            <rectangle min="-23,-75" max="24,-94"/>
+            <complement id="black-wr">
+                <rectangle min="-28,-94" max="29,-125"/>
+                <region id="wool-spawners"/>
+                <region id="wr-breakable"/>
+            </complement>
+        </union>
+        <union id="purple-anti-wall-climbing-region">
+            <rectangle min="24,76" max="-23,95"/>
+            <complement id="purple-wr">
+                <rectangle min="29,95" max="-28,126"/>
+                <region id="wool-spawners"/>
+                <region id="wr-breakable"/>
+            </complement>
+        </union>
+    </union>
+    <union id="wr-breakable">
+        <complement id="black-wr-breakable">
+            <rectangle min="17,-94" max="-16,-105"/>
+            <region id="wool-spawners"/>
+        </complement>
+        <complement id="purple-wr-breakable">
+            <rectangle min="-16,95" max="17,106"/>
+            <region id="wool-spawners"/>
+        </complement>
+    </union>
+    <!-- Spawners -->
+    <point id="gapple-spawner">0.5,7,0.5</point>
+    <cuboid id="gapple-spawner-region" min="-1,6,2" max="2,10,-1"/>
+    <union id="wool-spawners">
+        <point id="black-wool-spawner">0.5,12,-107.5</point>
+        <union id="black-wool-spawner-platform">
+            <cuboid min="-2,12,-104" max="3,13,-111"/>
+            <cuboid min="-3,12,-105" max="4,12,-110"/>
+        </union>
+        <union id="black-wool-spawner-region">
+            <rectangle min="-2,-103" max="3,-112"/>
+            <rectangle min="-4,-105" max="5,-110"/>
+            <rectangle min="-3,-104" max="4,-111"/>
+        </union>
+        <point id="purple-wool-spawner">0.5,12,108.5</point>
+        <union id="purple-wool-spawner-platform">
+            <cuboid min="3,12,103" max="-2,13,112"/>
+            <cuboid min="4,12,104" max="-3,12,111"/>
+        </union>
+        <union id="purple-wool-spawner-region">
+            <rectangle min="3,104" max="-2,113"/>
+            <rectangle min="5,106" max="-4,111"/>
+            <rectangle min="4,105" max="-3,112"/>
+        </union>
+    </union>
+    <!-- End-portals -->
+    <union id="portals">
+        <cylinder id="west-portal" base="-26.5,5,0.5" radius="3" height="0.5"/>
+        <cylinder id="east-portal" base="27.5,5,0.5" radius="3" height="0.5"/>
+    </union>
+    <union id="portal-vel-regions">
+        <cylinder id="west-portal-vel" base="-26.5,6,0.5" radius="3" height="1"/>
+        <cylinder id="east-portal-vel" base="27.5,6,0.5" radius="3" height="1"/>
+    </union>
+    <union id="portal-destinations">
+        <cylinder id="west-portal-destination" base="-26.5,7,0.5" radius="1.5" height="0.5"/>
+        <cylinder id="east-portal-destination" base="27.5,7,0.5" radius="1.5" height="0.5"/>
+    </union>
+    <union id="portal-regions">
+        <cylinder id="west-portal-region" base="-26.5,4,0.5" radius="3.5" height="15"/>
+        <cylinder id="east-portal-region" base="27.5,4,0.5" radius="3.5" height="15"/>
+    </union>
+    <!-- Drop-offs -->
+    <union id="dropoff-regions">
+        <point id="black-dropoff-west">-36.5,8,-66.5</point>
+        <point id="black-dropoff-east">37.5,8,-66.5</point>
+        <point id="purple-dropoff-west">-36.5,8,67.5</point>
+        <point id="purple-dropoff-east">37.5,8,67.5</point>
+    </union>
+    <!-- Applicators -->
+    <apply region="spawns" block-place="only-iron-cause-world" block-break="only-iron" block-physics="never" message="You may not edit spawn."/>
+    <apply region="spawns" use="deny-usage-spawn"/>
+    <apply region="black-spawns" use="purple-deny-usage-spawn"/>
+    <apply region="purple-spawns" use="black-deny-usage-spawn"/>
+    <apply region="black-spawns" enter="only-black" message="You may not enter the opposite team's spawn"/>
+    <apply region="purple-spawns" enter="only-purple" message="You may not enter the opposite team's spawn"/>
+    <apply region="jumping-area" kit="resistance-kit"/>
+    <apply region="outside-jumping-area" kit="reset-resistance-kit"/>
+    <apply region="anti-wall-climbing-region-mid" block-place-against="anti-wall-climbing-filter" message="You may not directly place blocks against this part of the map."/>
+    <apply region="anti-wall-climbing-region-mid" block-break="anti-wall-climbing-filter" block-physics="anti-wall-climbing-filter" message="You may not edit this part of the map."/>
+    <apply region="max-interaction-height" block="never" enter="participating-max-height" message="You may not interact with this part of the map."/>
+    <apply region="teams-anti-wall-climbing-regions" block-break="anti-wall-climbing-filter" message="You may not edit this part of the map."/>
+    <apply region="black-anti-wall-climbing-region" block-place-against="purple-awcf" message="You may not directly place blocks against this part of the map."/>
+    <apply region="purple-anti-wall-climbing-region" block-place-against="black-awcf" message="You may not directly place blocks against this part of the map."/>
+    <apply region="black-wr-breakable" enter="only-purple" message="You may not enter your own wool room."/>
+    <apply region="purple-wr-breakable" enter="only-black" message="You may not enter your own wool room."/>
+    <apply region="black-wr-breakable" block-place="only-purple" block-break="purple-wr-breakable-filter" message="You may not edit this part of the map."/>
+    <apply region="purple-wr-breakable" block-place="only-black" block-break="black-wr-breakable-filter" message="You may not edit this part of the map."/>
+    <apply region="black-wr" block-place="cause-world" block-break="purple-wr-filter" message="You may not edit this part of the map."/>
+    <apply region="purple-wr" block-place="cause-world" block-break="black-wr-filter" message="You may not edit this part of the map."/>
+    <apply region="black-wool-spawner-platform" kit="black-wr-animation-kit"/>
+    <apply region="purple-wool-spawner-platform" kit="purple-wr-animation-kit"/>
+    <apply region="gapple-spawner-region" block="never" message="You may not edit this part of the map."/>
+    <apply region="wool-spawners" block="cause-world" message="You may not edit this part of the map."/>
+    <apply region="portals" kit="portal-kit"/>
+    <apply region="portal-regions" block-place="never" block-break="end-portal-filter" message="You may not destroy or obstruct the portals."/>
+    <apply region="portal-vel-regions" velocity="0,1.4,0" filter="been-through-portal"/>
+</regions>
+<!-- PORTALS -->
+<portals>
+    <portal region="west-portal" destination="east-portal-destination"/>
+    <portal region="east-portal" destination="west-portal-destination"/>
+    <portal yaw="@45">
+        <region><cuboid min="-68,14,-109" max="-69,17,-110"/></region>
+        <destination><cuboid min="69,14,-109" max="70,14,-110"/></destination>
+    </portal>
+    <portal yaw="@-45">
+        <region><cuboid min="69,14,-109" max="70,17,-110"/></region>
+        <destination><cuboid min="-68,14,-109" max="-69,14,-110"/></destination>
+    </portal>
+    <portal yaw="@135">
+        <region><cuboid min="-68,14,110" max="-69,17,111"/></region>
+        <destination><cuboid min="69,14,110" max="70,14,111"/></destination>
+    </portal>
+    <portal yaw="@-135">
+        <region><cuboid min="69,14,110" max="70,17,111"/></region>
+        <destination><cuboid min="-68,14,110" max="-69,14,111"/></destination>
+    </portal>
+</portals>
+<!-- ITEM MODIFICATIONS -->
+<item-mods>
+    <rule>
+        <match>
+            <material>gold axe</material>
+            <material>gold spade</material>
+            <material>bow</material>
+        </match>
+        <modify unbreakable="true"/>
+    </rule>
+    <rule>
+        <match>
+            <material>iron chestplate</material>
+        </match>
+        <modify enchantment="protection fire:2"/>
+    </rule>
+    <rule>
+        <match>
+            <material>iron leggings</material>
+        </match>
+        <modify enchantment="protection projectile"/>
+    </rule>
+    <rule>
+        <match>
+            <material>iron boots</material>
+        </match>
+        <modify enchantment="protection fire:2;depth strider"/>
+    </rule>
+</item-mods>
+<!-- SHOP -->
+<shops>
+    <shop id="merchant" name="Item Shop">
+        <category id="blocks" name="`6`lBlocks" material="wood" damage="5">
+            <item material="wood" damage="1" amount="24" price="1" currency="emerald"/>
+            <item material="glass" amount="16" price="1" currency="emerald"/>
+            <item material="cobble wall" amount="32" price="3" currency="emerald"/>
+            <item material="redstone block" amount="16" price="3" currency="emerald"/>
+            <item material="piston sticky base" amount="16" price="3" currency="emerald"/>
+            <item material="web" amount="8" price="3" currency="emerald"/>
+            <item material="anvil" amount="8" price="3" currency="emerald"/>
+            <item material="sponge" amount="1" price="5" currency="emerald"/>
+        </category>
+        <category id="combat" name="`6`lCombat" material="iron sword">
+            <item material="gold sword" enchantment="sharpness:3" amount="1" price="15" currency="emerald" name="`6`lGolden Glory" lore="`7Sharpness III|`5`oPermanent upgrade" kit="golden-glory-kit" filter="sword-upgrade-0"/>
+            <item material="diamond sword" enchantment="sharpness:1;knockback:1" amount="1" price="20" currency="emerald" name="`b`lShardblade" lore="`7Sharpness I|`7Knockback I|Permanent upgrade" kit="shardblade-kit" filter="sword-upgrade-1"/>
+            <item material="bow" enchantment="arrow damage:1;arrow infinite" amount="1" price="8" currency="emerald" name="`2`lScorpion" lore="`7Power I|`7Infinity I|Permanent upgrade" kit="scorpion-kit" filter="bow-upgrade-0"/>
+            <item material="bow" enchantment="arrow damage:2;arrow fire:4;arrow infinite" amount="1" price="15" currency="emerald" name="`4`lDragon's Breath" lore="`7Power I|`7Flame IV|`7Infinity I|Permanent upgrade" kit="dragons-breath-kit" filter="bow-upgrade-1"/>
+            <item material="diamond helmet" enchantment="protection fire:2" amount="1" price="15" currency="emerald" name="`b`lCrystal Crown" lore="`7Fire Protection II|Permanent upgrade" kit="crystal-crown-kit" filter="helmet-upgrade-0"/>
+            <item material="gold chestplate" enchantment="protection environmental:3;thorns:1" amount="1" price="20" currency="emerald" name="`6`lPhoenix Plate" lore="`7Protection III|`7Thorns I|Permanent upgrade" kit="phoenix-plate-kit" filter="chestplate-upgrade-0"/>
+            <item material="diamond leggings" enchantment="protection fire:2" amount="1" price="15" currency="emerald" name="`b`lCrystal Crusaders" lore="`7Fire Protection II|Permanent upgrade" kit="crystal-crusaders-kit" filter="leggings-upgrade-0"/>
+            <item material="gold boots" enchantment="protection environmental:2;depth strider:2" amount="1" price="15" currency="emerald" name="`6`lKing's Kicks" lore="`7Protection II|`7Depth Strider II|Permanent upgrade" kit="kings-kicks-kit" filter="boots-upgrade-0"/>
+        </category>
+        <category id="tools" name="`6`lTools" material="iron pickaxe">
+            <item material="diamond pickaxe" enchantment="dig speed" amount="1" price="8" currency="emerald" name="`b`lExpert's Pickaxe" lore="`7Efficiency I|Permanent upgrade" kit="experts-pickaxe-kit" filter="pickaxe-upgrade-0"/>
+            <item material="diamond pickaxe" enchantment="dig speed:2" amount="1" price="15" currency="emerald" name="`9`lMaster's Pickaxe" lore="`7Efficiency II|Permanent upgrade" kit="masters-pickaxe-kit" filter="pickaxe-upgrade-1"/>
+            <item material="diamond axe" enchantment="dig speed" amount="1" price="15" currency="emerald" name="`b`lExpert's Axe" lore="`7Efficiency I|Permanent upgrade" kit="experts-axe-kit" filter="axe-upgrade-0"/>
+            <item material="diamond axe" enchantment="dig speed" amount="1" price="20" currency="emerald" name="`9`lMaster's Axe" lore="`7Efficiency II|Permanent upgrade" kit="masters-axe-kit" filter="axe-upgrade-1"/>
+            <item material="diamond spade" amount="1" price="8" currency="emerald" name="`b`lExpert's Spade" lore="Permanent upgrade" kit="experts-spade-kit" filter="spade-upgrade-0"/>
+            <item material="diamond spade" enchantment="dig speed" amount="1" price="15" currency="emerald" name="`9`lMaster's Spade" lore="`7Efficiency I|Permanent upgrade" kit="masters-spade-kit" filter="spade-upgrade-1"/>
+            <item material="fishing rod" amount="1" price="3" currency="emerald" name="`f`lFishing Rod"/>
+            <item material="shears" amount="1" price="1" currency="emerald" name="`f`lShears"/>
+        </category>
+        <category id="food" name="`6`lFood" material="cooked fish">
+            <item material="cooked fish" amount="16" price="1" currency="emerald" kit="cooked-fish-kit"/>
+            <item material="pumpkin pie" amount="16" price="3" currency="emerald"/>
+            <item material="cake" price="5" currency="emerald"/>
+        </category>
+    </shop>
+    <shop id="witch" name="Item Shop">
+        <category id="team-upgrades" name="`b`lTeam Upgrades" material="book and quill">
+            <item material="rotten flesh" amount="1" price="30" currency="emerald" name="`6`lHunger, Begone!" lore="Erases the need for food|for all players on your team." kit="team-hunger-kit" filter="team-hunger-upgrade-0"/>
+            <item material="apple" amount="1" price="30" currency="emerald" name="`c`lLifespan Extension" lore="Adds `b`otwo `5`oadditional hearts|to all players on your team." kit="team-health-kit-1" filter="team-health-upgrade-0"/>
+            <item material="golden apple" amount="1" price="45" currency="emerald" name="`e`lLifespan Extension+" lore="Adds `b`otwo `5`oadditional hearts|to all players on your team." kit="team-health-kit-2" filter="team-health-upgrade-1"/>
+            <item material="golden apple" damage="1" amount="1" price="60" currency="emerald" name="`6`lLifespan Extension++" lore="Adds `b`oone `5`oadditional heart|to all players on your team." kit="team-health-kit-3" filter="team-health-upgrade-2"/>
+            <item material="feather" amount="1" price="45" currency="emerald" name="`d`lRushing Rhapsody" lore="Increases the speed of all players|on your team." kit="team-speed-kit" filter="team-speed-upgrade-0"/>
+            <item material="gold pickaxe" amount="1" price="45" currency="emerald" name="`3`lDigging Swiftness" lore="Gives haste to all players on|your team." kit="team-haste-kit" filter="team-haste-upgrade-0"/>
+        </category>
+        <category id="potions" name="`b`lPotions" material="potion" damage="3">
+            <item material="potion" damage="5" amount="1" price="5" currency="emerald" name="`c`lMild Vitality Vial" lore="Instant health boost.|When life gets rough.">
+                <effect duration="0.12">instant_health</effect>
+            </item>
+            <item material="potion" damage="5" amount="1" price="8" currency="emerald" name="`c`lStrong Vitality Vial" lore="Instant health boost.|When life gets really rough.">
+                <effect duration="0.1" amplifier="2">instant_health</effect>
+            </item>
+            <item material="potion" damage="9" amount="1" price="8" currency="emerald" name="`4`lJuggernaut Juice" lore="To unleash your inner beast.">
+                <effect duration="90" amplifier="1">strength</effect>
+                <effect duration="90" amplifier="1">regeneration</effect>
+            </item>
+            <item material="potion" damage="11" amount="1" price="8" currency="emerald" name="`a`lLeap Tonic" lore="Take a swig and you'll be hopping|over your enemies!">
+                <effect duration="90" amplifier="2">jump_boost</effect>
+                <effect duration="90" amplifier="1">speed</effect>
+            </item>
+            <item material="potion" damage="16394" amount="1" price="3" currency="emerald" name="`0`lDark Cloud" lore="Creates a dense fog that briefly|blinds and confuses your enemies.">
+                <effect duration="4">blindness</effect>
+                <effect duration="7">confusion</effect>
+            </item>
+            <item material="potion" damage="16396" amount="1" price="5" currency="emerald" name="`4`lDeath Droplets" lore="Instantly harms your foes."/>
+        </category>
+        <category id="extras" name="`b`lExtras" material="monster egg" damage="50">
+            <item material="monster egg" damage="50" amount="1" price="5" currency="emerald" name="`a`lCreeper Egg" lore="Explosive surprise!" kit="creeper-egg-kit"/>
+            <item material="stick" enchantment="fire aspect:2" amount="1" price="15" currency="emerald" name="`6`lFlame Wand" lore="Scorch your enemies with this|blazing wand.|Permanent upgrade" kit="flame-wand-kit" filter="flame-wand-upgrade-0"/>
+        </category>
+    </shop>
+</shops>
+<shopkeepers>
+    <shopkeepers name="`6`lMerchant" shop="merchant">
+        <shopkeeper yaw="90">42.5,6,-68.5</shopkeeper>
+        <shopkeeper yaw="-90">-41.5,6,69.5</shopkeeper>
+    </shopkeepers>
+    <shopkeepers name="`b`lWitch" mob="Witch" shop="witch">
+        <shopkeeper yaw="-90">-41.5,6,-68.5</shopkeeper>
+        <shopkeeper yaw="90">42.5,6,69.5</shopkeeper>
+    </shopkeepers>
+</shopkeepers>
+<!-- SPAWNERS -->
+<spawners>
+    <spawner player-region="everywhere" spawn-region="gapple-spawner" max-entities="1" delay="12s">
+            <item amount="1" material="emerald"/>
+    </spawner>
+    <spawner player-region="everywhere" spawn-region="gapple-spawner" max-entities="1" delay="8s">
+        <item amount="1" material="golden apple"/>
+    </spawner>
+    <spawner player-region="black-wool-spawner-platform" spawn-region="black-wool-spawner" max-entities="16" delay="3s">
+        <item amount="4" material="wool" damage="7"/>
+    </spawner>
+    <spawner player-region="purple-wool-spawner-platform" spawn-region="purple-wool-spawner" max-entities="16" delay="3s">
+        <item amount="4" material="wool" damage="2"/>
+    </spawner>
+</spawners>
+<!-- BLOCK DROPS -->
+<block-drops>
+    <rule>
+        <filter>
+            <any>
+                <material>wood:0</material>
+                <material>wood stairs</material>
+                <material>acacia stairs</material>
+                <material>wood step:0</material>
+                <material>wood step:4</material>
+            </any>
+        </filter>
+        <drops>
+            <item material="boat"/>
+        </drops>
+    </rule>
+    <rule>
+        <filter>
+            <any>
+                <material>162:13</material>
+            </any>
+        </filter>
+        <drops>
+            <item material="log" damage="1"/>
+        </drops>
+    </rule>
+    <rule>
+        <filter>
+            <material>glowstone</material>
+        </filter>
+        <drops>
+            <item material="emerald"/>
+        </drops>
+    </rule>
+    <rule>
+        <filter>
+            <any>
+                <material>emerald ore</material>
+            </any>
+        </filter>
+        <drops>
+            <item material="emerald" amount="3"/>
+        </drops>
+    </rule>
+    <rule>
+        <filter>
+            <any>
+                <material>stained clay:12</material>
+                <material>wood:5</material>
+            </any>
+        </filter>
+        <drops>
+            <item chance="0.07" material="emerald"/>
+        </drops>
+    </rule>
+</block-drops>
+<!-- ENDER CHEST -->
+<enderchest>
+    <dropoff region="black-dropoff-west" filter="only-black"/>
+    <dropoff region="black-dropoff-east" filter="only-black"/>
+    <dropoff region="purple-dropoff-west" filter="only-purple"/>
+    <dropoff region="purple-dropoff-east" filter="only-purple"/>
+</enderchest>
+<!-- RENEWABLES -->
+<renewables>
+    <renewable region="spawns" renew-filter="only-iron"/>
+</renewables>
+<!-- ANIMATIONS -->
+<structures>
+    <!-- Black Fire Ring -->
+    <structure id="black-wr-ring-0" air="false" clear="true">
+        <region>
+            <cuboid min="-144,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-1" air="false" clear="true">
+        <region>
+            <cuboid min="-135,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-2" air="false" clear="true">
+        <region>
+            <cuboid min="-126,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-3" air="false" clear="true">
+        <region>
+            <cuboid min="-117,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-4" air="false" clear="true">
+        <region>
+            <cuboid min="-108,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-5" air="false" clear="true">
+        <region>
+            <cuboid min="-99,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-6" air="false" clear="true">
+        <region>
+            <cuboid min="-90,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-7" air="false" clear="true">
+        <region>
+            <cuboid min="-81,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-8" air="false" clear="true">
+        <region>
+            <cuboid min="-72,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-9" air="false" clear="true">
+        <region>
+            <cuboid min="-63,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-10" air="false" clear="true">
+        <region>
+            <cuboid min="-54,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-11" air="false" clear="true">
+        <region>
+            <cuboid min="-45,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-12" air="false" clear="true">
+        <region>
+            <cuboid min="-36,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-13" air="false" clear="true">
+        <region>
+            <cuboid min="-27,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-14" air="false" clear="true">
+        <region>
+            <cuboid min="-18,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-15" air="false" clear="true">
+        <region>
+            <cuboid min="-9,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-16" air="false" clear="true">
+        <region>
+            <cuboid min="0,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-17" air="false" clear="true">
+        <region>
+            <cuboid min="9,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-18" air="false" clear="true">
+        <region>
+            <cuboid min="18,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-19" air="false" clear="true">
+        <region>
+            <cuboid min="27,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-20" air="false" clear="true">
+        <region>
+            <cuboid min="36,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-21" air="false" clear="true">
+        <region>
+            <cuboid min="45,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-22" air="false" clear="true">
+        <region>
+            <cuboid min="54,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-23" air="false" clear="true">
+        <region>
+            <cuboid min="63,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="black-wr-ring-24" air="false" clear="true">
+        <region>
+            <cuboid min="72,0,137" size="-9,2,9"/>
+        </region>
+    </structure>
+    <!-- Purple Fire Ring -->
+    <structure id="purple-wr-ring-0" air="false" clear="true">
+        <region>
+            <cuboid min="72,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-1" air="false" clear="true">
+        <region>
+            <cuboid min="63,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-2" air="false" clear="true">
+        <region>
+            <cuboid min="54,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-3" air="false" clear="true">
+        <region>
+            <cuboid min="45,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-4" air="false" clear="true">
+        <region>
+            <cuboid min="36,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-5" air="false" clear="true">
+        <region>
+            <cuboid min="27,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-6" air="false" clear="true">
+        <region>
+            <cuboid min="18,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-7" air="false" clear="true">
+        <region>
+            <cuboid min="9,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-8" air="false" clear="true">
+        <region>
+            <cuboid min="0,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-9" air="false" clear="true">
+        <region>
+            <cuboid min="-9,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-10" air="false" clear="true">
+        <region>
+            <cuboid min="-18,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-11" air="false" clear="true">
+        <region>
+            <cuboid min="-27,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-12" air="false" clear="true">
+        <region>
+            <cuboid min="-36,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-13" air="false" clear="true">
+        <region>
+            <cuboid min="-45,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-14" air="false" clear="true">
+        <region>
+            <cuboid min="-54,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-15" air="false" clear="true">
+        <region>
+            <cuboid min="-63,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-16" air="false" clear="true">
+        <region>
+            <cuboid min="-72,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-17" air="false" clear="true">
+        <region>
+            <cuboid min="-81,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-18" air="false" clear="true">
+        <region>
+            <cuboid min="-90,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-19" air="false" clear="true">
+        <region>
+            <cuboid min="-99,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-20" air="false" clear="true">
+        <region>
+            <cuboid min="-108,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-21" air="false" clear="true">
+        <region>
+            <cuboid min="-117,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-22" air="false" clear="true">
+        <region>
+            <cuboid min="-126,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-23" air="false" clear="true">
+        <region>
+            <cuboid min="-135,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-ring-24" air="false" clear="true">
+        <region>
+            <cuboid min="-144,0,128" size="-9,2,9"/>
+        </region>
+    </structure>
+    <!-- Black Tree Eye -->
+    <structure id="black-wr-eye-0" air="false" clear="true">
+        <region>
+            <cuboid min="-16,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="black-wr-eye-1" air="false" clear="true">
+        <region>
+            <cuboid min="-27,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="black-wr-eye-2" air="false" clear="true">
+        <region>
+            <cuboid min="-38,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="black-wr-eye-3" air="false" clear="true">
+        <region>
+            <cuboid min="-49,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="black-wr-eye-4" air="false" clear="true">
+        <region>
+            <cuboid min="-60,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="black-wr-eye-5" air="false" clear="true">
+        <region>
+            <cuboid min="-71,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="black-wr-eye-6" air="false" clear="true">
+        <region>
+            <cuboid min="-82,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="black-wr-eye-7" air="false" clear="true">
+        <region>
+            <cuboid min="-93,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <!-- Purple Tree Eye -->
+    <structure id="purple-wr-eye-0" air="false" clear="true">
+        <region>
+            <cuboid min="72,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-eye-1" air="false" clear="true">
+        <region>
+            <cuboid min="61,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-eye-2" air="false" clear="true">
+        <region>
+            <cuboid min="50,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-eye-3" air="false" clear="true">
+        <region>
+            <cuboid min="39,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-eye-4" air="false" clear="true">
+        <region>
+            <cuboid min="28,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-eye-5" air="false" clear="true">
+        <region>
+            <cuboid min="17,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-eye-6" air="false" clear="true">
+        <region>
+            <cuboid min="6,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <structure id="purple-wr-eye-7" air="false" clear="true">
+        <region>
+            <cuboid min="-5,0,147" size="-11,7,1"/>
+        </region>
+    </structure>
+    <!-- Black Fire Ring Animation -->
+    <dynamic structure="black-wr-ring-0" location="-4,11,-112">
+        <trigger>
+            <after duration="0.1s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-1" location="-4,11,-112">
+        <trigger>
+            <after duration="0.2s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-2" location="-4,11,-112">
+        <trigger>
+            <after duration="0.3s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-3" location="-4,11,-112">
+        <trigger>
+            <after duration="0.4s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-4" location="-4,11,-112">
+        <trigger>
+            <after duration="0.5s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-5" location="-4,11,-112">
+        <trigger>
+            <after duration="0.6s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-6" location="-4,11,-112">
+        <trigger>
+            <after duration="0.7s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-7" location="-4,11,-112">
+        <trigger>
+            <after duration="0.8s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-8" location="-4,11,-112">
+        <trigger>
+            <after duration="0.9s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-9" location="-4,11,-112">
+        <trigger>
+            <after duration="1.0s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-10" location="-4,11,-112">
+        <trigger>
+            <after duration="1.1s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-11" location="-4,11,-112">
+        <trigger>
+            <after duration="1.2s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-12" location="-4,11,-112">
+        <trigger>
+            <after duration="1.3s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-13" location="-4,11,-112">
+        <trigger>
+            <after duration="1.4s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-14" location="-4,11,-112">
+        <trigger>
+            <after duration="1.5s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-15" location="-4,11,-112">
+        <trigger>
+            <after duration="1.6s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-16" location="-4,11,-112">
+        <trigger>
+            <after duration="1.7s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-17" location="-4,11,-112">
+        <trigger>
+            <after duration="1.8s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-18" location="-4,11,-112">
+        <trigger>
+            <after duration="1.9s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-19" location="-4,11,-112">
+        <trigger>
+            <after duration="2.0s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-20" location="-4,11,-112">
+        <trigger>
+            <after duration="2.1s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-21" location="-4,11,-112">
+        <trigger>
+            <after duration="2.2s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-22" location="-4,11,-112">
+        <trigger>
+            <after duration="2.3s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-23" location="-4,11,-112">
+        <trigger>
+            <after duration="2.4s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-ring-24" location="-4,11,-112">
+        <trigger>
+            <after duration="2.5s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <!-- Black Tree Eye Animation -->
+    <dynamic structure="black-wr-eye-0" location="-5,24,-123">
+        <trigger>
+            <after duration="2.6s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-eye-1" location="-5,24,-123">
+        <trigger>
+            <after duration="2.7s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-eye-2" location="-5,24,-123">
+        <trigger>
+            <after duration="2.8s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-eye-3" location="-5,24,-123">
+        <trigger>
+            <after duration="3.0s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-eye-4" location="-5,24,-123">
+        <trigger>
+            <after duration="3.2s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-eye-5" location="-5,24,-123">
+        <trigger>
+            <after duration="3.4s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-eye-6" location="-5,24,-123">
+        <trigger>
+            <after duration="3.8s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="black-wr-eye-7" location="-5,24,-123">
+        <trigger>
+            <after duration="4.4s">
+                <filter id="black-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <!-- Purple Fire Ring Animation -->
+    <dynamic structure="purple-wr-ring-0" location="-4,11,104">
+        <trigger>
+            <after duration="0.1s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-1" location="-4,11,104">
+        <trigger>
+            <after duration="0.2s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-2" location="-4,11,104">
+        <trigger>
+            <after duration="0.3s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-3" location="-4,11,104">
+        <trigger>
+            <after duration="0.4s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-4" location="-4,11,104">
+        <trigger>
+            <after duration="0.5s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-5" location="-4,11,104">
+        <trigger>
+            <after duration="0.6s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-6" location="-4,11,104">
+        <trigger>
+            <after duration="0.7s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-7" location="-4,11,104">
+        <trigger>
+            <after duration="0.8s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-8" location="-4,11,104">
+        <trigger>
+            <after duration="0.9s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-9" location="-4,11,104">
+        <trigger>
+            <after duration="1.0s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-10" location="-4,11,104">
+        <trigger>
+            <after duration="1.1s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-11" location="-4,11,104">
+        <trigger>
+            <after duration="1.2s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-12" location="-4,11,104">
+        <trigger>
+            <after duration="1.3s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-13" location="-4,11,104">
+        <trigger>
+            <after duration="1.4s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-14" location="-4,11,104">
+        <trigger>
+            <after duration="1.5s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-15" location="-4,11,104">
+        <trigger>
+            <after duration="1.6s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-16" location="-4,11,104">
+        <trigger>
+            <after duration="1.7s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-17" location="-4,11,104">
+        <trigger>
+            <after duration="1.8s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-18" location="-4,11,104">
+        <trigger>
+            <after duration="1.9s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-19" location="-4,11,104">
+        <trigger>
+            <after duration="2.0s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-20" location="-4,11,104">
+        <trigger>
+            <after duration="2.1s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-21" location="-4,11,104">
+        <trigger>
+            <after duration="2.2s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-22" location="-4,11,104">
+        <trigger>
+            <after duration="2.3s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-23" location="-4,11,104">
+        <trigger>
+            <after duration="2.4s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-ring-24" location="-4,11,104">
+        <trigger>
+            <after duration="2.5s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <!-- Purple Tree Eye Animation -->
+    <dynamic structure="purple-wr-eye-0" location="-5,24,123">
+        <trigger>
+            <after duration="2.6s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-eye-1" location="-5,24,123">
+        <trigger>
+            <after duration="2.7s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-eye-2" location="-5,24,123">
+        <trigger>
+            <after duration="2.8s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-eye-3" location="-5,24,123">
+        <trigger>
+            <after duration="3.0s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-eye-4" location="-5,24,123">
+        <trigger>
+            <after duration="3.2s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-eye-5" location="-5,24,123">
+        <trigger>
+            <after duration="3.4s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-eye-6" location="-5,24,123">
+        <trigger>
+            <after duration="3.8s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="purple-wr-eye-7" location="-5,24,123">
+        <trigger>
+            <after duration="4.4s">
+                <filter id="purple-wr-animation-1"/>
+            </after>
+        </trigger>
+    </dynamic>
+</structures>
+<toolrepair>
+    <tool>iron pickaxe</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>diamond axe</tool>
+    <tool>iron spade</tool>
+    <tool>diamond spade</tool>
+    <tool>gold sword</tool>
+    <tool>iron sword</tool>
+    <tool>diamond sword</tool>
+    <tool>shears</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>sapling</item>
+    <item>seeds</item>
+    <item>red mushroom</item>
+    <item>water lily</item>
+    <item>dirt</item>
+    <item>long grass</item>
+    <item>stained glass</item>
+    <item>stick</item>
+    <item>cooked fish</item>
+    <item>leather helmet</item>
+    <item>leather leggings</item>
+    <item>gold chestplate</item>
+    <item>gold boots</item>
+    <item>chainmail chestplate</item>
+    <item>chainmail boots</item>
+    <item>iron helmet</item>
+    <item>iron chestplate</item>
+    <item>iron leggings</item>
+    <item>iron boots</item>
+    <item>diamond helmet</item>
+    <item>diamond chestplate</item>
+    <item>diamond leggings</item>
+</itemremove>
+<itemkeep>
+    <item>golden apple</item>
+    <item>potion</item>
+    <item>monster egg:50</item>
+    <item>water bucket</item>
+    <item>emerald</item>
+    <item>torch</item>
+    <item>iron pickaxe</item>
+    <item>diamond pickaxe</item>
+    <item>iron axe</item>
+    <item>diamond axe</item>
+    <item>iron spade</item>
+    <item>diamond spade</item>
+    <item>gold sword</item>
+    <item>iron sword</item>
+    <item>diamond sword</item>
+    <item>shears</item>
+    <item>bow</item>
+</itemkeep>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item amount="16" material="wood" damage="2"/>
+        <item amount="1" material="emerald"/>
+    </kill-reward>
+</kill-rewards>
+<maxbuildheight>27</maxbuildheight>
+</map>
