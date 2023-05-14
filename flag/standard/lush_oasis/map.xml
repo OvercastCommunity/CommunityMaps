@@ -1,0 +1,150 @@
+<map proto="1.4.2">
+<name>Lush Oasis</name>
+<created>2023-05-10</created>
+<version>1.0.0</version>
+<objective>Capture the enemy's flag 3 times to win!</objective>
+<phase>development</phase>
+<gamemode>ctf</gamemode>
+<authors>
+    <author uuid="1fd982ab-8941-474b-b51e-6ce2346f4cd5"/> <!-- Zynnphony -->
+</authors>
+<contributors>
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML"/> <!-- zzuf -->
+</contributors>
+<rules>
+    <rule>Players may not take fall damage.</rule>
+    <rule>Players who carry a flag get everything but their golden apples removed.</rule>
+</rules>
+<teams>
+    <team id="red-team" color="dark red" max="8">Red</team>
+    <team id="blue-team" color="blue" max="8">Blue</team>
+</teams>
+<broadcasts>
+    <alert after="5s" every="5m">While you're carrying a flag, your weapons are `nremoved`r!</alert>
+</broadcasts>
+<spawns>
+    <spawn team="blue-team" kit="spawn-kit" yaw="90">
+        <region>
+            <point>29.5,62,-40.5</point>
+        </region>
+    </spawn>
+    <spawn team="red-team" kit="spawn-kit" yaw="90">
+        <region>
+            <point>29.5,62,41.5</point>
+        </region>
+    </spawn>
+    <default>
+        <region yaw="-90">
+            <cylinder base="-69.5,84,0.5" height="0" radius="1"/>
+        </region>
+    </default>
+</spawns>
+<kits>
+    <kit id="spawn-kit">
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true">
+            <enchantment>infinity</enchantment>
+            <enchantment>power</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <helmet team-color="true" unbreakable="true" material="leather helmet">
+            <enchantment level="1">protection projectile</enchantment>
+        </helmet>
+        <chestplate team-color="true" unbreakable="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="1">protection projectile</enchantment>
+        </leggings>
+        <boots team-color="true" unbreakable="true" material="leather boots"/>
+        <game-mode>adventure</game-mode>
+        <effect duration="1s" amplifier="255">resistance</effect>
+    </kit>
+    <kit id="drop-kit">
+        <action id="msg-weapons-back" scope="player"/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true">
+            <enchantment>infinity</enchantment>
+            <enchantment>power</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+    </kit>
+    <kit id="flag-kit">
+        <action id="take-items" scope="player"/>
+    </kit>
+</kits>
+<regions>
+    <cuboid id="red-net" min="0,63,72" size="3,3,3"/>
+    <cuboid id="blue-net" min="0,63,-74" size="3,3,3"/>
+    <apply block="deny-players" use="never"/>
+</regions>
+<filters>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+</filters>
+<flags>
+    <!-- Blue flag -->
+    <flag id="blue-flag" name="Blue Flag" color="blue" post="blue-flag-post" pickup-kit="flag-kit" drop-kit="drop-kit"/>
+    <post id="blue-flag-post" owner="blue-team" pickup-filter="only-red" respawn-time="0.1s" recover-time="0s">1.5,63,-72.5</post>
+    <net post="blue-flag-post" points="1" region="red-net" capture-filter="only-red" flag="blue-flag"/>
+    <!-- Red flag -->
+    <flag id="red-flag" name="Red Flag" color="red" post="red-flag-post" pickup-kit="flag-kit" drop-kit="drop-kit"/>
+    <post id="red-flag-post" owner="red-team" pickup-filter="only-blue" respawn-time="0.1s" recover-time="0s">1.5,63,73.5</post>
+    <net post="red-flag-post" points="1" region="blue-net" capture-filter="only-blue" flag="red-flag"/>
+</flags>
+<actions>
+    <action id="take-items" scope="player"> <!-- keeps gapples -->
+        <message text="`e⚠ `cYour weapons are removed while you're holding the flag! Use the map to your advantage."/>
+        <replace-item>
+            <find material="stone sword" unbreakable="true"/>
+            <replace material="air"/>
+        </replace-item>
+        <replace-item>
+            <find material="bow" unbreakable="true" enchantment="arrow damage:1;infinity"/>
+            <replace material="air"/>
+        </replace-item>
+        <replace-item>
+            <find material="arrow"/>
+            <replace material="air"/>
+        </replace-item>
+    </action>
+    <action id="msg-weapons-back" scope="player">
+        <message text="`e⚠ `aYour weapons are back!"/>
+    </action>
+</actions>
+<score>
+    <kills>0</kills>
+    <deaths>0</deaths>
+    <limit>3</limit>
+</score>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemkeep>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>arrow</item>
+    <item>golden apple</item>
+</itemkeep>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>425</item> <!-- banner item -->
+</itemremove>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+    </kill-reward>
+</kill-rewards>
+<disabledamage>
+    <damage>fall</damage>
+</disabledamage>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
