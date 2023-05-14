@@ -1,9 +1,16 @@
 <map proto="1.4.2">
 <name>Zipline</name>
-<version>1.1</version>
+<variant id="gunz">Moar Gunz Edition</variant>
+<version>1.1.1</version>
 <objective>Hold the flag for 200 seconds to win!</objective>
 <gamemode>kotf</gamemode>
-<created>2020-08-23</created>
+<unless variant="gunz">
+    <created>2020-08-23</created>
+</unless>
+<if variant="gunz">
+    <gamemode>arcade</gamemode>
+    <created>2021-03-18</created>
+</if>
 <authors>
     <author uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609"/> <!-- Technodono -->
 </authors>
@@ -27,9 +34,14 @@
     <kit id="spawn-kit" parents="default-kit">
         <clear/>
         <item slot="0" unbreakable="true" material="stone sword"/>
-        <item slot="1" unbreakable="true" material="bow"/>
-        <item slot="2" material="golden apple"/>
-        <item slot="8" amount="20" material="arrow"/>
+        <unless variant="gunz">
+            <item slot="1" unbreakable="true" material="bow"/>
+            <item slot="2" material="golden apple"/>
+            <item slot="8" amount="20" material="arrow"/>
+        </unless>
+        <if variant="gunz">
+            <item slot="3" material="golden apple"/>
+        </if>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
         <leggings unbreakable="true" material="chainmail leggings">
@@ -37,6 +49,10 @@
         </leggings>
         <boots unbreakable="true" material="iron boots"/>
         <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="guns">
+        <item slot="1" projectile="lazer" name="`6Lazer Blaster" material="gold barding"/>
+        <item slot="2" projectile="mob" name="`cTNT Cannon" material="iron barding"/>
     </kit>
     <kit id="flag-pickup" force="true">
         <effect>slowness</effect>
@@ -52,6 +68,24 @@
         <fly/>
     </kit>
 </kits>
+<projectiles>
+    <projectile
+        id="lazer"
+        name="lazer"
+        projectile="SmallFireball"
+        velocity="3.5"
+        damage="4"
+        throwable="false"
+        cooldown="0.15s"/>
+    <projectile
+        id="mob"
+        name="TNT"
+        projectile="TNTPrimed"
+        velocity="1"
+        damage="8"
+        throwable="false"
+        cooldown="4s"/>
+</projectiles>
 <spawns>
     <default kit="default-kit">
         <region yaw="-90">
@@ -124,6 +158,18 @@
         </region>
     </apply>
     <apply lend-kit="fly" region="ziplines"/>
+    <if variant="gunz">
+        <apply kit="guns">
+            <region>
+                <negative>
+                    <union>
+                        <cuboid min="-oo,16,-50" max="oo,oo,-oo"/>
+                        <cuboid min="oo,16,51" max="-oo,oo,oo"/>
+                    </union>
+                </negative>
+            </region>
+        </apply>
+    </if>
     <!--  Jumpads and Boost lanes  -->
     <!--  Blue's middle lane  -->
     <apply velocity="@0.0,0.5,-50.0" >
