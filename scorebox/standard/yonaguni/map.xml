@@ -1,9 +1,17 @@
 <map proto="1.4.2">
 <name>Yonaguni</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Jump into the enemy team's portal, located below their spawn point!</objective>
 <created>2023-03-20</created>
 <include id="bridge"/>
+<constants>
+    <constant id="map-origin">0.5,0,0.5</constant>
+    <!-- Teams -->
+    <constant id="team-one-spawn">-41.5,17,0.5</constant>
+    <constant id="team-one-yaw">-90</constant>
+    <constant id="team-two-spawn">42.5,17,0.5</constant>
+    <constant id="team-two-yaw">90</constant>
+</constants>
 <authors>
     <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
 </authors>
@@ -12,8 +20,6 @@
     <team id="team-two" color="dark purple" max="5">Purple</team>
 </teams>
 <spawns>
-    <spawn team="team-one" kit="spawn-kit" yaw="-90" region="team-one-spawn-point"/>
-    <spawn team="team-two" kit="spawn-kit" yaw="90" region="team-two-spawn-point"/>
     <default>
         <regions>
             <point yaw="0">0.5,27,-35.5</point>
@@ -30,14 +36,12 @@
     </kit>
 </kits>
 <filters>
-    <not id="other-blocks">
-        <any id="some-blocks">
-            <material>stained clay:10</material>
-            <material>stained clay:1</material>
-            <material>stained clay:0</material>
-            <material>long grass</material>
-        </any>
-    </not>
+    <any id="block-list">
+        <material>stained clay:10</material>
+        <material>stained clay:1</material>
+        <material>stained clay:0</material>
+        <material>long grass</material>
+    </any>
 </filters>
 <regions>
     <negative id="not-buildable">
@@ -47,39 +51,26 @@
                 <rectangle min="-25,-6" max="-48,7"/>
                 <rectangle min="-28,-8" max="-33,9"/>
             </union>
-            <mirror region="team-one-building" origin="0.5,0,0.5" normal="1,0,0"/>
+            <mirror region="team-one-building" origin="${map-origin}" normal="1,0,0"/>
         </complement>
     </negative>
-    <apply block="some-blocks"/>
-    <!-- Portals -->
     <cuboid id="team-one-portal" min="-43,2,-1" size="3,1,3"/>
-    <mirror id="team-two-portal" region="team-one-portal" origin="0.5,0,0.5" normal="1,0,0"/>
-    <!-- Spawn points -->
-    <point id="team-one-spawn-point">-41.5,17,0.5</point>
-    <point id="team-two-spawn-point">42.5,17,0.5</point>
-    <union id="cages"> <!-- Same base coordinates as spawn points -->
-        <cylinder id="team-one-spawn-cage" base="-41.5,17,0.5" height="3" radius="2"/>
-        <cylinder id="team-two-spawn-cage" base="42.5,17,0.5" height="3" radius="2"/>
+    <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
+    <union id="cages">
+        <cylinder id="team-one-spawn-cage" base="${team-one-spawn}" height="3" radius="2"/>
+        <cylinder id="team-two-spawn-cage" base="${team-two-spawn}" height="3" radius="2"/>
     </union>
     <!-- Yonaguni -->
     <negative id="survival-area">
         <union id="adventure-area">
             <above y="18"/>
             <below id="team-one-adventure-area" x="-40"/>
-            <mirror region="team-one-adventure-area" origin="0.5,0,0.5" normal="1,0,0"/>
+            <mirror region="team-one-adventure-area" origin="${map-origin}" normal="1,0,0"/>
         </union>
     </negative>
     <apply kit="survival-kit" region="survival-area"/>
     <apply kit="adventure-kit" region="adventure-area"/>
 </regions>
-<portals sound="true">
-    <!-- Falling on own team's portal -->
-    <portal destination="team-one-spawn-point" filter="only-team-one" region="team-one-portal" yaw="@-90" pitch="@0"/>
-    <portal destination="team-two-spawn-point" filter="only-team-two" region="team-two-portal" yaw="@90" pitch="@0"/>
-    <!-- Scoring -->
-    <portal destination="team-one-spawn-point" forward="should-teleport" filter="only-team-one" yaw="@-90" pitch="@0"/>
-    <portal destination="team-two-spawn-point" forward="should-teleport" filter="only-team-two" yaw="@90" pitch="@0"/>
-</portals>
 <itemremove>
     <item>seeds</item>
 </itemremove>

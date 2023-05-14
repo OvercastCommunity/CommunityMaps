@@ -1,9 +1,17 @@
 <map proto="1.4.2">
 <name>Avalon</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Jump into the enemy team's portal, located below their spawn point!</objective>
 <created>2023-03-15</created>
 <include id="bridge"/>
+<constants>
+    <constant id="map-origin">0.5,0,0.5</constant>
+    <!-- Teams -->
+    <constant id="team-one-spawn">-33.5,15,0.5</constant>
+    <constant id="team-one-yaw">-90</constant>
+    <constant id="team-two-spawn">34.5,15,0.5</constant>
+    <constant id="team-two-yaw">90</constant>
+</constants>
 <authors>
     <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
 </authors>
@@ -12,8 +20,6 @@
     <team id="team-two" color="yellow" max="5">Yellow</team>
 </teams>
 <spawns>
-    <spawn team="team-one" kit="spawn-kit" yaw="-90" region="team-one-spawn-point"/>
-    <spawn team="team-two" kit="spawn-kit" yaw="90" region="team-two-spawn-point"/>
     <default>
         <regions>
             <point yaw="0">0.5,27,-35.5</point>
@@ -22,46 +28,33 @@
     </default>
 </spawns>
 <filters>
-    <not id="other-blocks">
-        <any id="some-blocks">
-            <material>stained clay:14</material>
-            <material>stained clay:4</material>
-            <material>stained clay:0</material>
-            <material>long grass</material>
-            <material>yellow flower</material>
-            <material>red rose</material>
-            <material>vine</material>
-        </any>
-    </not>
+    <any id="block-list">
+        <material>stained clay:14</material>
+        <material>stained clay:4</material>
+        <material>stained clay:0</material>
+        <material>long grass</material>
+        <material>yellow flower</material>
+        <material>red rose</material>
+        <material>vine</material>
+    </any>
 </filters>
 <regions>
     <negative id="not-buildable">
         <complement>
             <cuboid min="-34,0,20" max="35,13,-19"/>
             <rectangle id="team-one-building" min="-22,-10" max="-42,11"/>
-            <mirror region="team-one-building" origin="0.5,0,0.5" normal="1,0,0"/>
+            <mirror region="team-one-building" origin="${map-origin}" normal="1,0,0"/>
         </complement>
     </negative>
-    <apply block="some-blocks"/>
     <!-- Portals -->
     <cuboid id="team-one-portal" min="-39,3,-1" size="3,1,3"/>
-    <mirror id="team-two-portal" region="team-one-portal" origin="0.5,0,0.5" normal="1,0,0"/>
-    <!-- Spawn points -->
-    <point id="team-one-spawn-point">-33.5,15,0.5</point>
-    <point id="team-two-spawn-point">34.5,15,0.5</point>
+    <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
+    <!-- Round cages  -->
     <union id="cages"> <!-- Same base coordinates as spawn points -->
-        <cylinder id="team-one-spawn-cage" base="-33.5,15,0.5" height="3" radius="2"/>
-        <cylinder id="team-two-spawn-cage" base="34.5,15,0.5" height="3" radius="2"/>
+        <cylinder id="team-one-spawn-cage" base="${team-one-spawn}" height="3" radius="2"/>
+        <cylinder id="team-two-spawn-cage" base="${team-two-spawn}" height="3" radius="2"/>
     </union>
 </regions>
-<portals sound="true">
-    <!-- Falling on own team's portal -->
-    <portal destination="team-one-spawn-point" filter="only-team-one" region="team-one-portal" yaw="@-90" pitch="@0"/>
-    <portal destination="team-two-spawn-point" filter="only-team-two" region="team-two-portal" yaw="@90" pitch="@0"/>
-    <!-- Scoring -->
-    <portal destination="team-one-spawn-point" forward="should-teleport" filter="only-team-one" yaw="@-90" pitch="@0"/>
-    <portal destination="team-two-spawn-point" forward="should-teleport" filter="only-team-two" yaw="@90" pitch="@0"/>
-</portals>
 <itemremove>
     <item>yellow flower</item>
     <item>red rose</item>

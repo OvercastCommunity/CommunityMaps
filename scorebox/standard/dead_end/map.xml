@@ -1,9 +1,17 @@
 <map proto="1.4.2">
 <name>Dead End</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Jump into the enemy team's portal, located below their spawn point!</objective>
 <created>2023-05-07</created>
 <include id="bridge"/>
+<constants>
+    <constant id="map-origin">0.5,0,0.5</constant>
+    <!-- Teams -->
+    <constant id="team-one-spawn">-39.5,14,0.5</constant>
+    <constant id="team-one-yaw">-90</constant>
+    <constant id="team-two-spawn">40.5,14,0.5</constant>
+    <constant id="team-two-yaw">90</constant>
+</constants>
 <authors>
     <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
 </authors>
@@ -16,45 +24,30 @@
     <team id="team-two" color="dark purple" max="5">Purple</team>
 </teams>
 <spawns>
-    <spawn team="team-one" kit="spawn-kit" yaw="-90" region="team-one-spawn-point"/>
-    <spawn team="team-two" kit="spawn-kit" yaw="90" region="team-two-spawn-point"/>
     <default>
         <region>
             <point yaw="0">0.5,23,-33.5</point>
         </region>
     </default>
 </spawns>
-<kits>
-    <kit id="adventure-kit">
-        <game-mode>adventure</game-mode>
-    </kit>
-    <kit id="survival-kit">
-        <game-mode>survival</game-mode>
-    </kit>
-</kits>
 <filters>
-    <not id="other-blocks">
-        <any id="some-blocks">
-            <material>stained clay:10</material>
-            <material>stained clay:4</material>
-            <material>stained clay:0</material>
-        </any>
-    </not>
+    <any id="block-list">
+        <material>stained clay:10</material>
+        <material>stained clay:4</material>
+        <material>stained clay:0</material>
+    </any>
 </filters>
 <regions>
     <negative id="not-buildable">
         <cuboid min="-27,1,15" max="28,14,-14"/>
     </negative>
-    <apply block="some-blocks"/>
     <!-- Portals -->
     <cuboid id="team-one-portal" min="-37,4,-1" size="3,1,3"/>
-    <mirror id="team-two-portal" region="team-one-portal" origin="0.5,0,0.5" normal="1,0,0"/>
-    <!-- Spawn points -->
-    <point id="team-one-spawn-point">-39.5,14,0.5</point>
-    <point id="team-two-spawn-point">40.5,14,0.5</point>
-    <union id="cages"> <!-- Same base coordinates as spawn points -->
-        <cylinder id="team-one-spawn-cage" base="-39.5,14,0.5" height="3" radius="2"/>
-        <cylinder id="team-two-spawn-cage" base="40.5,14,0.5" height="3" radius="2"/>
+    <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
+    <!-- Round cages -->
+    <union id="cages">
+        <cylinder id="team-one-spawn-cage" base="${team-one-spawn}" height="3" radius="2"/>
+        <cylinder id="team-two-spawn-cage" base="${team-two-spawn}" height="3" radius="2"/>
     </union>
     <!-- Dead End -->
     <apply velocity="1,1,0">
@@ -64,7 +57,7 @@
     </apply>
     <apply velocity="-1,1,0">
         <region>
-            <mirror region="team-one-jump-pad" origin="0.5,0,0.5" normal="1,0,0"/>
+            <mirror region="team-one-jump-pad" origin="${map-origin}" normal="1,0,0"/>
         </region>
     </apply>
     <apply use="never">
@@ -72,24 +65,5 @@
             <block>0,24,-37</block>
         </region>
     </apply>
-    <negative id="survival-area">
-        <union id="adventure-area">
-            <complement id="team-one-adventure-area">
-                <below x="-32"/>
-                <region id="team-one-spawn-cage"/>
-            </complement>
-            <mirror region="team-one-adventure-area" origin="0.5,0,0.5" normal="1,0,0"/>
-        </union>
-    </negative>
-    <apply kit="survival-kit" region="survival-area"/>
-    <apply kit="adventure-kit" region="adventure-area"/>
 </regions>
-<portals sound="true">
-    <!-- Falling on own team's portal -->
-    <portal destination="team-one-spawn-point" filter="only-team-one" region="team-one-portal" yaw="@-90" pitch="@0"/>
-    <portal destination="team-two-spawn-point" filter="only-team-two" region="team-two-portal" yaw="@90" pitch="@0"/>
-    <!-- Scoring -->
-    <portal destination="team-one-spawn-point" forward="should-teleport" filter="only-team-one" yaw="@-90" pitch="@0"/>
-    <portal destination="team-two-spawn-point" forward="should-teleport" filter="only-team-two" yaw="@90" pitch="@0"/>
-</portals>
 </map>

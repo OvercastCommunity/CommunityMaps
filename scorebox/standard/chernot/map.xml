@@ -1,13 +1,21 @@
 <map proto="1.4.2">
 <name>Chernot</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Jump into the enemy team's portal, located below their spawn point!</objective>
 <created>2023-03-21</created>
 <include id="bridge"/>
+<constants>
+    <constant id="map-origin">-0.5,0,0.5</constant>
+    <!-- Teams -->
+    <constant id="team-one-spawn">31.5,101,0.5</constant>
+    <constant id="team-one-yaw">90</constant>
+    <constant id="team-two-spawn">-32.5,101,0.5</constant>
+    <constant id="team-two-yaw">-90</constant>
+</constants>
 <authors>
     <author uuid="357ccee9-f178-496f-905f-26b6075a338e"/> <!-- Vand -->
 </authors>
-<contributors> 
+<contributors>
     <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML"/> <!-- zzuf -->
     <contributor uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
     <contributor uuid="924c4e61-57b6-4931-afdb-6525b2ed34c0"/> <!-- OAF6 -->
@@ -16,51 +24,39 @@
     <team id="team-one" color="dark red" max="5">Red</team>
     <team id="team-two" color="blue" max="5">Blue</team>
 </teams>
-<filters>
-    <not id="other-blocks">
-        <any id="only-clay">
-            <material>stained clay:11</material>
-            <material>stained clay:14</material>
-            <material>stained clay:0</material>
-        </any>
-    </not>
-</filters>
 <spawns>
-    <spawn team="team-one" kit="spawn-kit" yaw="90" region="team-one-spawn-point"/>
-    <spawn team="team-two" kit="spawn-kit" yaw="-90" region="team-two-spawn-point"/>
     <default>
         <regions>
             <point yaw="180">-0.5,114,30.5</point>
         </regions>
     </default>
 </spawns>
+<filters>
+    <any id="block-list">
+        <material>stained clay:11</material>
+        <material>stained clay:14</material>
+        <material>stained clay:0</material>
+    </any>
+</filters>
 <regions>
     <negative id="not-buildable">
         <cuboid min="26,84,21" max="-27,100,-20"/>
     </negative>
-    <apply block="only-clay"/>
+    <!-- Portals -->
     <cuboid id="team-one-portal" min="32,89,-1" size="3,1,3"/>
-    <mirror id="team-two-portal" region="team-one-portal" origin="-0.5,0,0.5" normal="1,0,0"/>
-    <point id="team-one-spawn-point">31.5,101,0.5</point>
-    <point id="team-two-spawn-point">-32.5,101,0.5</point>
+    <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
+    <!-- Round cages -->
     <union id="cages">
-        <cylinder id="team-one-spawn-cage" base="31.5,101,0.5" height="3" radius="2"/>
-        <cylinder id="team-two-spawn-cage" base="-32.5,101,0.5" height="3" radius="2"/>
+        <cylinder id="team-one-spawn-cage" base="${team-one-spawn}" height="3" radius="2"/>
+        <cylinder id="team-two-spawn-cage" base="${team-two-spawn}" height="3" radius="2"/>
     </union>
+    <!-- Chernot -->
     <complement id="death-plane">
         <below y="78"/>
         <below y="0"/>
     </complement>
     <apply kit="void-death" region="death-plane"/>
 </regions>
-<portals sound="true">
-    <!-- Falling on own team's portal -->
-    <portal destination="team-one-spawn-point" filter="only-team-one" region="team-one-portal" yaw="@90" pitch="@0"/>
-    <portal destination="team-two-spawn-point" filter="only-team-two" region="team-two-portal" yaw="@-90" pitch="@0"/>
-    <!-- Scoring -->
-    <portal destination="team-one-spawn-point" forward="should-teleport" filter="only-team-one" yaw="@90" pitch="@0"/>
-    <portal destination="team-two-spawn-point" forward="should-teleport" filter="only-team-two" yaw="@-90" pitch="@0"/>
-</portals>
 <portals sound="false">
     <!-- Chernot -->
     <portal y="@-110" region="death-plane"/>
