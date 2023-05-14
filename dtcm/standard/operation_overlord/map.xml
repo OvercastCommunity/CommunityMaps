@@ -1,0 +1,162 @@
+<map proto="1.4.2">
+<name>Operation Overlord</name>
+<version>1.0.0</version>
+<phase>development</phase>
+<objective>Break the Defenders' Core and Monument in 20 minutes, or prevent the Attackers from doing so!</objective>
+<created>2023-04-30</created>
+<gamemode>ad</gamemode>
+<authors>
+    <author uuid="20945afd-0a9b-4fe3-843e-5131eb036712"/> <!-- Sedum_Paul -->
+    <author uuid="63ddf58a-ba2c-4d39-8481-6358bb46c63a"/> <!-- samschaap -->
+</authors>
+<teams>
+    <team id="attackers" color="red" max="20" plural="true">Attackers</team>
+    <team id="defenders" color="blue" max="20" plural="true">Defenders</team>
+</teams>
+<time result="defenders">20m</time>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="28" material="arrow" amount="32"/>
+        <item slot="2" unbreakable="true" material="diamond pickaxe"/>
+        <item slot="3" unbreakable="true" material="iron axe"/>
+        <item slot="30" unbreakable="true" material="iron spade"/>
+        <item slot="4" amount="64" damage="1" material="wood"/>
+        <item slot="5" amount="64" damage="1" material="wood"/>
+        <item slot="6" amount="64" damage="2" material="stone"/>
+        <item slot="8" material="golden apple"/>
+        <helmet unbreakable="true" material="chainmail helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+        <boots unbreakable="true" team-color="true" material="leather boots"/>
+        <effect duration="3" amplifier="255">damage resistance</effect>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <regions yaw="-90">
+            <point>-27.5,56,5.5</point>
+        </regions>
+    </default>
+    <spawn team="attackers" kit="spawn-kit">
+        <regions yaw="-90">
+            <point>6.5,10.5,-35.5</point>
+            <point>-19.5,10.5,54.5</point>
+        </regions>
+    </spawn>
+    <spawn team="defenders" kit="spawn-kit">
+        <regions yaw="90">
+            <point>142.5,24,-9.5</point>
+        </regions>
+    </spawn>
+</spawns>
+<filters>
+    <team id="only-attackers">attackers</team>
+    <team id="only-defenders">defenders</team>
+    <all id="only-iron-renew">
+        <material id="only-iron">iron block</material>
+        <cause>world</cause>
+    </all>
+    <deny id="deny-void">
+        <void/>
+    </deny>
+</filters>
+<regions>
+    <union id="spawns">
+        <union id="attacker-spawn">
+            <cuboid min="22,8,-45" max="-21,24,-26"/> <!-- North ship -->
+            <cuboid min="-4,8,45" max="-47,24,64"/> <!-- South ship -->
+        </union>
+        <union id="defender-spawn">
+            <cuboid min="148,20,-28" max="129,50,9"/>
+            <cuboid min="131,20,9" max="148,50,19"/>
+        </union>
+    </union>
+    <above id="build-limit" y="40"/>
+    <apply block="never" region="build-limit">
+        <message>
+            {"translate":"match.maxBuildHeight"}
+        </message>
+    </apply>
+    <apply enter="only-attackers" region="attacker-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply enter="only-defenders" region="defender-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply block-break="only-iron" block-place="only-iron-renew" region="spawns" message="You may only break iron blocks in the spawns!"/>
+    <apply block="deny-void" message="You may not modify the void area!"/>
+</regions>
+<destroyables>
+    <destroyable name="Monument" material="emerald block" owner="defenders" show-progress="true" required="true">
+        <region>
+            <cuboid min="105,28,52" max="102,31,55"/>
+         </region>
+    </destroyable>
+</destroyables>
+<cores>
+    <core name="Core" material="obsidian" team="defenders" leak="2" required="true">
+        <region>
+            <cuboid min="130,29,-62" max="123,36,-55"/>
+         </region>
+    </core>
+</cores>
+<renewables>
+    <renewable region="spawns" renew-filter="only-iron" rate="0.7"/>
+</renewables>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+</toolrepair>
+<itemremove>
+    <item>chainmail helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>string</item>
+    <item>yellow flower</item>
+    <item>red rose</item>
+    <item>double plant</item>
+    <item>seeds</item>
+    <item>armor stand</item>
+    <item>sand</item>
+    <item>stained clay</item>
+    <item>dirt</item>
+    <item>cobblestone</item>
+    <item>mossy cobblestone</item>
+    <item>stone:5</item>
+    <item>obsidian</item>
+    <item>emerald block</item>
+</itemremove>
+<itemkeep>
+    <item>arrow</item>
+    <item>wood</item>
+    <item>stone:2</item>
+    <item>golden apple</item>
+</itemkeep>
+<block-drops>
+    <rule>
+        <filter>
+            <any>
+                <material>wood</material>
+                <material>stone:2</material>
+            </any>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+</block-drops>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item amount="16" material="arrow"/>
+        <item amount="32" damage="1" material="wood"/>
+        <item amount="16" damage="2" material="stone"/>
+    </kill-reward>
+</kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
