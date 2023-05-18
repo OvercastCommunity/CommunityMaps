@@ -1,0 +1,192 @@
+<map proto="1.4.2">
+<name>Mont Blanc</name>
+<version>1.0</version>
+<objective>Jump into the enemy team's portal, located behind their spawn point!</objective>
+<created>2023-05-17</created>
+<include id="bridge"/>
+<constants>
+    <constant id="score-limit">7</constant>
+    <constant id="mercy-limit">5</constant>
+    <constant id="map-origin">0.5,0,0.5</constant>
+    <!-- Teams -->
+    <constant id="team-one-spawn">-57.5,75,0.5</constant>
+    <constant id="team-one-yaw">-90</constant>
+    <constant id="team-two-spawn">58.5,75,0.5</constant>
+    <constant id="team-two-yaw">90</constant>
+</constants>
+<authors>
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
+</authors>
+<teams>
+    <team id="team-one" color="gold" max="22">Orange</team>
+    <team id="team-two" color="dark purple" max="22">Purple</team>
+</teams>
+<spawns>
+    <default>
+        <regions>
+            <point yaw="0">0.5,74,-53.5</point>
+            <point yaw="180">0.5,74,54.5</point>
+        </regions>
+    </default>
+</spawns>
+<world>
+    <randomtime/>
+</world>
+<gamerules>
+    <doDaylightCycle>true</doDaylightCycle>
+</gamerules>
+<kits>
+    <kit id="adventure-kit">
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="survival-kit">
+        <game-mode>survival</game-mode>
+    </kit>
+</kits>
+<filters>
+    <any id="block-list">
+        <material>stained clay:1</material>
+        <material>stained clay:10</material>
+        <material>stained clay:0</material>
+        <material>32</material>
+        <material>long grass</material>
+        <material>double plant:3</material>
+        <material>double plant:2</material>
+    </any>
+    <deny id="deny-physics">
+        <any>
+            <material>long grass</material>
+            <material>double plant</material>
+            <material>32</material>
+            <material>wall sign</material>
+            <material>redstone wire</material>
+        </any>
+    </deny>
+    <deny id="deny-portal-physics">
+        <material>portal</material>
+    </deny>
+    <players max="0" id="0-players">
+        <region id="outside"/>
+    </players>
+    <players min="1" max="1" id="1-player">
+        <region id="outside"/>
+    </players>
+    <players min="2" max="2" id="2-players">
+        <region id="outside"/>
+    </players>
+    <players min="3" max="3" id="3-players">
+        <region id="outside"/>
+    </players>
+    <players min="4" id="4-players">
+        <region id="outside"/>
+    </players>
+    <players min="4" id="4-players-no-msg">
+        <all>
+            <region id="outside"/>
+            <variable var="message">0</variable>
+        </all>
+    </players>
+</filters>
+<regions>
+    <negative id="not-buildable">
+        <complement id="buildable">
+            <cuboid min="-57,59,-36" max="58,75,37"/>
+            <rectangle id="orange-void" min="-57,-24" max="-44,25"/>
+            <mirror region="orange-void" origin="${map-origin}" normal="1,0,0"/>
+        </complement>
+    </negative>
+    <apply block-physics="deny-physics" region="buildable"/>
+    <apply block-physics="deny-portal-physics"/>
+    <!-- Portals -->
+    <cylinder id="team-one-portal" base="-77.5,61,0.5" height="1" radius="2.5"/>
+    <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
+    <union id="outside-portal">
+        <block id="team-one-outside-portal">-67,61,0</block>
+        <mirror region="team-one-outside-portal" origin="${map-origin}" normal="1,0,0"/>
+    </union>
+    <!-- Round cages -->
+    <union id="cages">
+        <cylinder id="team-one-spawn-cage" base="${team-one-spawn}" height="3" radius="2"/>
+        <cylinder id="team-two-spawn-cage" base="${team-two-spawn}" height="3" radius="2"/>
+    </union>
+    <!-- Mont Blanc  -->
+    <above y="87" id="ceiling"/>
+    <apply enter="never" region="ceiling" message="You may not climb higher!"/>
+    <negative id="survival-area">
+        <union id="adventure-area">
+            <above y="81"/>
+            <union id="purple-portal-area">
+                <rectangle min="63,42" max="92,-41"/>
+                <rectangle id="south-pillar" min="54,22" max="63,9"/>
+                <mirror region="south-pillar" origin="${map-origin}" normal="0,0,1"/>
+            </union>
+            <mirror region="purple-portal-area" origin="${map-origin}" normal="1,0,0"/>
+        </union>
+    </negative>
+    <apply kit="survival-kit" region="survival-area"/>
+    <apply kit="adventure-kit" region="adventure-area"/>
+    <complement id="death-plane">
+        <below y="54"/>
+        <below y="0"/>
+        <cuboid id="outside" min="8,12,-5" max="-5,6,6"/>
+    </complement>
+    <apply kit="void-death" region="death-plane"/>
+    <block id="lamp1">-7,9,2</block>
+    <block id="lamp2">-7,7,2</block>
+    <mirror id="lamp3" region="lamp1" origin="${map-origin}" normal="0,0,1"/>
+    <mirror id="lamp4" region="lamp2" origin="${map-origin}" normal="0,0,1"/>
+</regions>
+<variables>
+    <variable id="message" scope="match" default="0"/>
+</variables>
+<actions>
+    <action id="o0" scope="match">
+        <fill region="lamp1" material="bedrock"/>
+        <fill region="lamp2" material="bedrock"/>
+        <fill region="lamp3" material="bedrock"/>
+        <fill region="lamp4" material="bedrock"/>
+    </action>
+    <action id="o1" scope="match">
+        <fill region="lamp1" material="redstone block"/>
+        <fill region="lamp2" material="bedrock"/>
+        <fill region="lamp3" material="bedrock"/>
+        <fill region="lamp4" material="bedrock"/>
+    </action>
+    <action id="o2" scope="match">
+        <fill region="lamp1" material="redstone block"/>
+        <fill region="lamp2" material="redstone block"/>
+        <fill region="lamp3" material="bedrock"/>
+        <fill region="lamp4" material="bedrock"/>
+    </action>
+    <action id="o3" scope="match">
+        <fill region="lamp1" material="redstone block"/>
+        <fill region="lamp2" material="redstone block"/>
+        <fill region="lamp3" material="redstone block"/>
+        <fill region="lamp4" material="bedrock"/>
+    </action>
+    <action id="o4" scope="match">
+        <fill region="lamp1" material="redstone block"/>
+        <fill region="lamp2" material="redstone block"/>
+        <fill region="lamp3" material="redstone block"/>
+        <fill region="lamp4" material="redstone block"/>
+    </action>
+    <action id="show-message" scope="match">
+        <message text="`7The council's meeting has commenced."/>
+        <set var="message" value="1"/>
+    </action>
+    <trigger action="o0" filter="0-players" scope="match"/>
+    <trigger action="o1" filter="1-player" scope="match"/>
+    <trigger action="o2" filter="2-players" scope="match"/>
+    <trigger action="o3" filter="3-players" scope="match"/>
+    <trigger action="o4" filter="4-players" scope="match"/>
+    <trigger action="show-message" filter="4-players-no-msg" scope="match"/>
+</actions>
+<portals sound="false">
+    <!-- Mont Blanc -->
+    <portal y="@-110" region="death-plane"/>
+    <portal x="@7.5" y="@7" z="@0.5" yaw="@90" pitch="@0" region="outside-portal" sound="true" observers="never"/>
+</portals>
+<itemremove>
+    <item>seeds</item>
+</itemremove>
+</map>
