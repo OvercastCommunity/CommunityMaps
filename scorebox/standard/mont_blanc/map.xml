@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Mont Blanc</name>
-<version>1.0</version>
+<version>1.0.1</version>
 <objective>Jump into the enemy team's portal, located behind their spawn point!</objective>
 <created>2023-05-17</created>
 <include id="bridge"/>
@@ -8,6 +8,7 @@
     <constant id="score-limit">7</constant>
     <constant id="mercy-limit">5</constant>
     <constant id="map-origin">0.5,0,0.5</constant>
+    <constant id="void-plane">54</constant>
     <!-- Teams -->
     <constant id="team-one-spawn">-57.5,75,0.5</constant>
     <constant id="team-one-yaw">-90</constant>
@@ -24,8 +25,8 @@
 <spawns>
     <default>
         <regions>
-            <point yaw="0">0.5,74,-53.5</point>
-            <point yaw="180">0.5,74,54.5</point>
+            <point yaw="0">0.5,74,-65.5</point>
+            <point yaw="180">0.5,74,66.5</point>
         </regions>
     </default>
 </spawns>
@@ -42,6 +43,10 @@
     <kit id="survival-kit">
         <game-mode>survival</game-mode>
     </kit>
+    <kit id="full-health-kit" force="true">
+        <health>20</health>
+    </kit>
+    <give kit="full-health-kit" filter="after-out"/>
 </kits>
 <filters>
     <any id="block-list">
@@ -86,6 +91,7 @@
             <variable var="message">0</variable>
         </all>
     </players>
+    <after id="after-out" duration="0.1s" filter="outside"/>
 </filters>
 <regions>
     <negative id="not-buildable">
@@ -112,6 +118,13 @@
     <!-- Mont Blanc  -->
     <above y="87" id="ceiling"/>
     <apply enter="never" region="ceiling" message="You may not climb higher!"/>
+    <union id="blockglitch-areas">
+        <rectangle id="team-one-north-bg-area" min="-60,-38" max="-59,-oo"/>
+        <mirror id="team-one-south-bg-area" region="team-one-north-bg-area" origin="${map-origin}" normal="0,0,1"/>
+        <mirror region="team-one-north-bg-area" origin="${map-origin}" normal="1,0,0"/>
+        <mirror region="team-one-south-bg-area" origin="${map-origin}" normal="1,0,0"/>
+    </union>
+    <apply enter="never" region="blockglitch-areas" message="You may not go through here!"/>
     <negative id="survival-area">
         <union id="adventure-area">
             <above y="81"/>
@@ -125,12 +138,7 @@
     </negative>
     <apply kit="survival-kit" region="survival-area"/>
     <apply kit="adventure-kit" region="adventure-area"/>
-    <complement id="death-plane">
-        <below y="54"/>
-        <below y="0"/>
-        <cuboid id="outside" min="8,12,-5" max="-5,6,6"/>
-    </complement>
-    <apply kit="void-death" region="death-plane"/>
+    <cuboid id="outside" min="9,12,-5" max="-5,6,6"/>
     <block id="lamp1">-7,9,2</block>
     <block id="lamp2">-7,7,2</block>
     <mirror id="lamp3" region="lamp1" origin="${map-origin}" normal="0,0,1"/>
@@ -174,16 +182,19 @@
         <message text="`7The council's meeting has commenced."/>
         <set var="message" value="1"/>
     </action>
+    <action id="reset-message" scope="match">
+        <set var="message" value="0"/>
+    </action>
     <trigger action="o0" filter="0-players" scope="match"/>
     <trigger action="o1" filter="1-player" scope="match"/>
     <trigger action="o2" filter="2-players" scope="match"/>
     <trigger action="o3" filter="3-players" scope="match"/>
     <trigger action="o4" filter="4-players" scope="match"/>
     <trigger action="show-message" filter="4-players-no-msg" scope="match"/>
+    <trigger action="reset-message" filter="cage-time" scope="match"/>
 </actions>
-<portals sound="false">
+<portals>
     <!-- Mont Blanc -->
-    <portal y="@-110" region="death-plane"/>
     <portal x="@7.5" y="@7" z="@0.5" yaw="@90" pitch="@0" region="outside-portal" sound="true" observers="never"/>
 </portals>
 <itemremove>
