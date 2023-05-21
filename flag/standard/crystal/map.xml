@@ -1,0 +1,183 @@
+<map proto="1.4.2">
+<name>Crystal</name>
+<version>1.0.1</version>
+<phase>development</phase>
+<objective>Hold the flag for 200 seconds to win!</objective>
+<created>2023-05-03</created>
+<gamemode>kotf</gamemode>
+<authors>
+    <author uuid="4836c72e-1752-4716-a0fc-83baf403e0eb"/> <!-- Oprad -->
+</authors>
+<contributors>
+    <contributor uuid="654a9fe7-c75c-4b45-91df-8d48c4a5e072"/> <!-- Flamiix -->
+    <contributor uuid="63ddf58a-ba2c-4d39-8481-6358bb46c63a" contribution="xml"/> <!-- samschaap -->
+</contributors>
+<teams>
+    <team id="blue-team" color="blue" max="20">Blue</team>
+    <team id="pink-team" color="light purple" max="20">Pink</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow" enchantment="arrow infinite"/>
+        <item slot="2" material="golden apple"/>
+        <item slot="28" amount="1" material="arrow"/>
+        <helmet unbreakable="true" material="gold helmet" enchantment="protection projectile:2"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="iron leggings" enchantment="protection:2"/>
+        <boots unbreakable="true" team-color="true" material="leather boots"/>
+        <effect duration="6" amplifier="255">resistance</effect>
+        <double-jump recharge-time="8s"/>
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="flag-kit" parent="blue-flag-variable-kit,pink-flag-variable-kit" force="true">
+        <effect amplifier="-2">health boost</effect>
+        <effect duration="3" amplifier="2">absorption</effect>
+        <double-jump enabled="false"/>
+    </kit>
+    <kit id="reset-health" force="true">
+        <effect duration="0" amplifier="0">health boost</effect>
+        <effect duration="1" amplifier="10">regeneration</effect>
+        <double-jump recharge-time="8s"/>
+    </kit>
+    <kit id="blue-flag-variable-kit" filter="only-blue">
+        <action>
+            <switch-scope outer="player" inner="match">
+                <action id="set-next-post-pink" scope="match">
+                    <set var="next_post" value="2"/>
+                </action>
+            </switch-scope>
+        </action>
+    </kit>
+    <kit id="pink-flag-variable-kit" filter="only-pink">
+        <action>
+            <switch-scope outer="player" inner="match">
+                <action id="set-next-post-blue" scope="match">
+                    <set var="next_post" value="1"/>
+                </action>
+            </switch-scope>
+        </action>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <regions yaw="180">
+            <point>-8.5,159,-7.5</point>
+        </regions>
+    </default>
+    <spawn team="blue-team" kit="spawn-kit" filter="has-flag">
+        <regions>
+            <point yaw="-125">-74.5,107,-29.5</point>
+            <point yaw="-90">-82.5,109,-7.5</point>
+            <point yaw="-80">-74.5,108,14.5</point>
+        </regions>
+    </spawn>
+    <spawn team="pink-team" kit="spawn-kit" filter="has-flag">
+        <regions>
+            <point yaw="55">57.5,107,14.5</point>
+            <point yaw="90">65.5,109,-7.5</point>
+            <point yaw="100">57.5,108,-29.5</point>
+        </regions>
+    </spawn>
+</spawns>
+<filters>
+    <any id="has-flag">
+        <carrying-flag>flag</carrying-flag>
+        <not>
+            <same-team>
+                <carrying-flag>flag</carrying-flag>
+            </same-team>
+        </not>
+    </any>
+    <team id="only-blue">blue-team</team>
+    <team id="only-pink">pink-team</team>
+    <variable id="next-post-blue" var="next_post">1</variable>
+    <variable id="next-post-pink" var="next_post">2</variable>
+</filters>
+<variables>
+    <variable id="next_post" scope="match" default="0"/> <!-- 0 = Mid, 1 = Blue, 2 = Pink -->
+</variables>
+<regions>
+    <union id="jump-pads">
+        <union id="blue-from-spawn">
+            <cuboid min="-31,102,-35" max="-29,103,-36"/>
+            <cuboid min="-29,102,-36" max="-28,103,-37"/>
+            <cuboid min="-31,102,-37" max="-29,103,-38"/>
+        </union>
+        <union id="pink-from-spawn">
+            <cuboid min="14,102,20" max="12,103,21"/>
+            <cuboid min="13,102,21" max="11,103,22"/>
+            <cuboid min="13,102,22" max="12,103,23"/>
+        </union>
+        <cuboid id="mid-low-south" min="-5,82,7" max="-6,83,5"/>
+        <cuboid id="mid-low-north" min="-12,82,-22" max="-11,83,-20"/>
+        <complement id="mid-up-south">
+            <cuboid min="-1,125,42" max="-4,126,39"/>
+            <block>-4,125,41</block>
+            <block>-2,125,41</block>
+            <block>-2,125,39</block>
+        </complement>
+        <complement id="mid-up-north">
+            <cuboid min="-16,125,-57" max="-13,126,-54"/>
+            <block>-14,125,-57</block>
+            <block>-16,125,-57</block>
+            <block>-16,125,-55</block>
+        </complement>
+    </union>
+    <apply velocity="9,1,0" region="blue-from-spawn"/>
+    <apply velocity="-9,1,0" region="pink-from-spawn"/>
+    <apply velocity="-1,1,-20" region="mid-low-south"/>
+    <apply velocity="1,1,20" region="mid-low-north"/>
+    <apply velocity="-7,1,-7" region="mid-up-south"/>
+    <apply velocity="7,1,7" region="mid-up-north"/>
+    <apply block="never" use="never"/>
+</regions>
+<flags>
+    <flag id="flag" name="Flag" color="orange" shared="true" points-rate="1" pickup-kit="flag-kit" drop-kit="reset-health" flag-proximity-metric="none" show-respawn-on-pickup="true" sequential="false">
+        <post return-time="0s" respawn-time="15s">
+            <post id="mid-post" respawn-filter="never" name="Mid Post">-8.5,95,-7.5</post>
+            <post id="blue-post" respawn-filter="next-post-blue" name="§9Blue Post">-17.5,95,2.5</post>
+            <post id="pink-post" respawn-filter="next-post-pink" name="§dPink Post">0.5,95,-17.5</post>
+        </post>
+    </flag>
+</flags>
+<score>
+    <limit>200</limit>
+</score>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>gold helmet</item>
+    <item>leather chestplate</item>
+    <item>iron leggings</item>
+    <item>leather boots</item>
+    <item>banner</item>
+</itemremove>
+<itemkeep>
+    <item>golden apple</item>
+</itemkeep>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+    </kill-reward>
+</kill-rewards>
+<respawn delay="3s" auto="true" spectate="true">
+    <message>
+        {"translate":"death.respawn.confirmed.waiting.flagDropped"}
+    </message>
+</respawn>
+<broadcasts>
+    <tip after="5s" every="3m">There are several jump pads located around the map!</tip>
+    <tip after="35s" every="3m">You can double jump every 8 seconds, but you will lose this ability when you pick up the flag!</tip>
+</broadcasts>
+<disabledamage>
+    <damage>fall</damage>
+</disabledamage>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
