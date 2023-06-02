@@ -1,6 +1,6 @@
 <map proto="1.4.0">
 <name>Malupa</name>
-<version>1.2.1</version>
+<version>1.3</version>
 <objective>Capture the enemy team's two wools!</objective>
 <gamemode>ctw</gamemode>
 <created>2021-08-29</created>
@@ -12,8 +12,7 @@
     <contributor uuid="5c79d2c9-a4f0-4343-a84b-e1720f13009b" contribution="XML help"/> <!-- CoWinkKeyDinkInc -->
 </contributors>
 <broadcasts>
-    <tip after="1s" every="120s">Woolroom lanes will be bridgeable once the corresponding monuments are destroyed!</tip>
-    <tip after="1s" every="120s">The monuments are not required to win the game!</tip>
+    <tip after="1s" every="120s" filter="alert-filter">Destroying the enemy's monument will unlock additional building lanes to the wool, but destroying the monument is not required to win!</tip>
 </broadcasts>
 <teams>
     <team id="blue" color="blue" max="20">Blue</team>
@@ -30,12 +29,13 @@
             <enchantment>dig_speed</enchantment>
         </item>
         <item slot="28" material="arrow"/>
+        <item slot="29" unbreakable="true" material="iron spade"/>
+        <item slot="30" unbreakable="true" material="shears"/>
         <item slot="3" unbreakable="true" material="iron axe"/>
         <item slot="4" amount="64" material="wood"/>
         <item slot="31" amount="64" material="wood"/>
         <item slot="5" amount="64" material="glass"/>
         <item slot="7" material="golden apple"/>
-        <item slot="8" amount="64" material="cooked beef"/>
         <effect duration="4" amplifier="255">damage resistance</effect>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate">
@@ -56,7 +56,15 @@
     <deny id="deny-players">
           <participating/>
     </deny>
+    <deny id="redstone-physics">
+        <any>
+            <material>redstone wire</material>
+            <material>redstone torch on</material>
+            <material>redstone torch off</material>
+        </any>
+    </deny>
     <material id="only-iron">iron block</material>
+    <material id="only-air">air</material>
     <not id="blue-in-wr">
         <any>
             <team id="only-red">red</team>
@@ -71,33 +79,39 @@
             <material>beacon</material>
         </any>
     </not>
-<not id="only-blue-usage">
-    <any>
-        <filter id="only-red"/>
-        <material>beacon</material>
+    <any id="alert-filter">
+        <all>
+            <team>blue</team>
+            <not>
+                <completed>red-monument</completed>
+            </not>
+        </all>
+        <all>
+            <team>red</team>
+            <not>
+                <completed>blue-monument</completed>
+            </not>
+        </all>
     </any>
-</not>
-<not id="only-red-usage">
-    <any>
-        <filter id="only-blue"/>
-        <material>beacon</material>
-    </any>
-</not>
-    <all id="allow-yellow-lane-build">
-        <objective>blue-monument</objective>
-    </all>
-    <all id="allow-pink-lane-build">
-        <objective>blue-monument</objective>
-    </all>
-    <all id="allow-orange-lane-build">
-        <objective>red-monument</objective>
-    </all>
-    <all id="allow-lime-lane-build">
-        <objective>red-monument</objective>
-    </all>
+    <not id="only-blue-usage">
+        <any>
+            <filter id="only-red"/>
+            <material>beacon</material>
+        </any>
+    </not>
+    <not id="only-red-usage">
+        <any>
+            <filter id="only-blue"/>
+            <material>beacon</material>
+        </any>
+    </not>
+    <completed id="blue-mon-destroyed">blue-monument</completed>
+    <completed id="red-mon-destroyed">red-monument</completed>
     <not id="deny-void">
         <void/>
     </not>
+    <variable id="bluelanes-1" var="blue_lane_variable">1</variable>
+    <variable id="redlanes-1" var="red_lane_variable">1</variable>
 </filters>
 <regions>
     <point id="blue-spawn">-93.5,8,2.5</point>
@@ -125,16 +139,35 @@
             <rectangle min="86,-45.5" max="100,-61.5"/> <!-- Lime -->
         </union>
     </union>
-    <!-- Blue side-->
-    <rectangle id="yellow-lane" min="-40.5,-46.5" max="-60.5,-60.5"/>
-    <rectangle id="pink-lane" min="-40.5,65.5" max="-60.5,51.5"/>
-    <!--Red Side-->
-    <rectangle id="orange-lane" min="31.5,51.5" max="51.5,65.5"/>
-    <rectangle id="lime-lane" min="31.5,-60.5" max="51.5,-46.5"/>
-    <apply block="allow-yellow-lane-build" region="yellow-lane" message="You can't build here until the corresponding monument is destroyed!"/>
-    <apply block="allow-pink-lane-build" region="pink-lane" message="You can't build here until the corresponding monument is destroyed!"/>
-    <apply block="allow-orange-lane-build" region="orange-lane" message="You can't build here until the corresponding monument is destroyed!"/>
-    <apply block="allow-lime-lane-build" region="lime-lane" message="You can't build here until the corresponding monument is destroyed!"/>
+    <union id="waterlanes">
+        <union id="blue-lanes"> <!-- Blue defends -->
+            <rectangle id="yellow-lane-build" min="-40.5,-46.5" max="-60,-61"/>
+            <rectangle id="pink-lane-build" min="-40.5,66" max="-60,51.5"/>
+            <union id="blue-lanes-water">
+                <cuboid id="yellow-lane-water" min="-40.5,0,-46.5" max="-60,1,-61"/>
+                <cuboid id="pink-lane-water" min="-40.5,0,66" max="-60,1,51.5"/>
+            </union>
+            <union id="blue-lanes-redstone">
+                <cuboid id="yellow-lane-redstone" min="-40,10,-46" max="-41,11,-61"/>
+                <cuboid id="pink-lane-redstone" min="-40,10,66" max="-41,11,51"/>
+            </union>
+        </union>
+        <union id="red-lanes"> <!-- Red defends -->
+            <rectangle id="orange-lane-build" min="31.5,51" max="51,66"/>
+            <rectangle id="lime-lane-build" min="31.5,-61" max="51,-46.5"/>
+            <union id="red-lanes-water">
+                <cuboid id="orange-lane-water" min="31.5,0,51" max="51,1,66"/>
+                <cuboid id="lime-lane-water" min="31.5,0,-61" max="51,1,-46.5"/>
+            </union>
+            <union id="red-lanes-redstone">
+                <cuboid id="orange-lane-redstone" min="31,10,51" max="32,11,66"/>
+                <cuboid id="lime-lane-redstone" min="31,10,-61" max="32,11,-46"/>
+            </union>
+        </union>
+    </union>
+    <apply block-physics="redstone-physics"/>
+    <apply block="redlanes-1" region="blue-lanes" message="You can't build here until the enemy's monument is destroyed!"/>
+    <apply block="bluelanes-1" region="red-lanes" message="You can't build here until the enemy's monument is destroyed!"/>
     <apply enter="only-blue" region="blue-protection" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-red" region="red-protection" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool room!"/>
@@ -142,8 +175,36 @@
     <apply block="blue-in-wr" use="only-blue-usage" region="red-wool-rooms"/>
     <apply block="red-in-wr" use="only-red-usage" region="blue-wool-rooms"/>
     <apply block-break="only-iron" block-place="deny-players" region="spawn-protection" message="Only iron blocks may be broken in the spawns!"/>
-    <apply block="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
 </regions>
+<variables>
+    <variable id="red_lane_variable" scope="match"/>
+    <variable id="blue_lane_variable" scope="match"/>
+</variables>
+<actions>
+    <trigger id="red-lane-spawning" scope="match">
+        <filter>
+            <after message="`bWater Lanes towards `eYellow `rand `dPink `rWill Spawn In {0}" duration="5s" filter="blue-mon-destroyed"/>
+        </filter>
+        <action>
+            <message text="`4Red's `bwater lanes have been added!"/>
+            <set var="red_lane_variable" value="1"/>
+            <fill region="blue-lanes-water" material="water" filter="only-air"/>
+            <fill region="blue-lanes-redstone" material="air"/>
+        </action>
+    </trigger>
+    <trigger id="blue-lane-spawning" scope="match">
+        <filter>
+            <after message="`bWater Lanes towards `aLime `rand `6Orange `rWill Spawn In {0}" duration="5s" filter="red-mon-destroyed"/>
+        </filter>
+        <action>
+            <message text="`9Blue's `bwater lanes have been added!"/>
+            <set var="blue_lane_variable" value="1"/>
+            <fill region="red-lanes-water" material="water" filter="only-air"/>
+            <fill region="red-lanes-redstone" material="air"/>
+        </action>
+    </trigger>
+</actions>
 <wools team="red" craftable="false">
     <wool color="pink" location="-103,10,58">
         <monument>
@@ -168,12 +229,12 @@
         </monument>
     </wool>
 </wools>
-<destroyables materials="emerald block" completion="100%" required="false">
+<destroyables materials="emerald block" completion="100%" required="false" show-progress="true">
     <destroyable name="Blue Monument" owner="blue" id="blue-monument">
-        <region><cuboid min="-20,11,1" max="-23,15,4"/></region>
+        <region><cuboid min="-20,15,1" max="-23,18,4"/></region>
     </destroyable>
     <destroyable name="Red Monument" owner="red" id="red-monument">
-        <region><cuboid min="14,11,1" max="11,15,4"/></region>
+        <region><cuboid min="14,15,1" max="11,18,4"/></region>
     </destroyable>
 </destroyables>
 <renewables>
@@ -184,16 +245,14 @@
     <tool>bow</tool>
     <tool>diamond pickaxe</tool>
     <tool>iron axe</tool>
+    <tool>arrow</tool>
 </toolrepair>
 <itemremove>
-    <item>cooked beef</item>
     <item>leather helmet</item>
     <item>leather chestplate</item>
     <item>sapling</item>
-    <!-- long grass, all types -->
-    <item>31</item>
-    <!-- "red rose", all types -->
-    <item>38</item>
+    <item>long grass</item>
+    <item>red rose</item>
     <item>sugar cane</item>
     <item>emerald block</item>
     <item>yellow flower</item>
@@ -227,5 +286,8 @@
 <world>
     <timeset>6000</timeset>
 </world>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
 <maxbuildheight>35</maxbuildheight>
 </map>
