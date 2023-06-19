@@ -1,7 +1,7 @@
 <map proto="1.4.2">
 <name>Avant Garde</name>
 <phase>development</phase>
-<version>1.0.5</version>
+<version>1.0.6</version>
 <objective>Break the enemy's monument, then jump into the enemy team's portal located below their spawn point!</objective>
 <created>2023-06-04</created>
 <include id="bridge"/>
@@ -35,7 +35,8 @@
         <material>stained clay:2</material>
         <material>stained clay:11</material>
         <material>stained clay:0</material>
-        <material>iron block</material>
+        <material id="only-iron">iron block</material>
+        <material>packed ice</material>
         <material>long grass</material>
         <material>dead bush</material>
         <material>double plant</material>
@@ -46,8 +47,10 @@
         <material>water lily</material>
         <material>sugar cane block</material>
     </any>
-    <completed id="m-broken">magenta-monument</completed>
-    <completed id="b-broken">blue-monument</completed>
+    <any id="1-broken-mon">
+        <completed id="m-broken">magenta-monument</completed>
+        <completed id="b-broken">blue-monument</completed>
+    </any>
     <any id="only-stained-glass-and-obby">
         <material>stained glass:0</material>
         <material>obsidian</material>
@@ -101,6 +104,10 @@
     <block id="magenta-m-marker">39,95,14</block>
     <block id="blue-m-marker">-39,95,-14</block>
     <apply use="never" block-physics="deny-physics"/>
+    <union id="obs-monuments">
+        <cuboid min="-7,84,54" size="3,3,3"/> <!-- South -->
+        <cuboid min="5,84,-56" size="3,3,3"/> <!-- North -->
+    </union>
 </regions>
 <actions>
     <action id="magenta-doors" scope="match">
@@ -117,10 +124,14 @@
         </fill>
         <message text=" `e⚠ `9Blue`f's portal is now `aopen`f!"/>
     </action>
+    <action id="obs-mon-mode" scope="match">
+        <fill region="obs-monuments" material="packed ice" filter="only-iron"/>
+    </action>
     <trigger action="magenta-doors" filter="m-broken" scope="match"/>
     <trigger action="blue-doors" filter="b-broken" scope="match"/>
+    <trigger action="obs-mon-mode" filter="1-broken-mon" scope="match"/>
 </actions>
-<destroyables materials="iron block" completion="100%" required="false">
+<destroyables materials="iron block" completion="100%" required="false" mode-changes="true" show-progress="true">
     <destroyable id="magenta-monument" owner="team-one" name="Magenta Monument">
         <region><cuboid min="38,67,13" size="3,3,3"/></region>
     </destroyable>
@@ -128,6 +139,9 @@
         <region><cuboid min="-40,67,-15" size="3,3,3"/></region>
     </destroyable>
 </destroyables>
+<modes>
+    <mode after="1s" filter="1-broken-mon" material="packed ice" name="`fPACKED ICE MODE" show-before="0"/>
+</modes>
 <itemremove>
     <item>iron block</item>
     <item>seeds</item>
