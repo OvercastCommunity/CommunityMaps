@@ -1,9 +1,13 @@
 <map proto="1.4.2">
 <name>Xinx</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <objective>Capture the wool!</objective>
 <gamemode>ctw</gamemode>
 <created>2023-01-31</created>
+<constants>
+    <constant id="height-limit">33</constant>
+</constants>
+<maxbuildheight>${height-limit}</maxbuildheight>
 <authors>
     <author uuid="f6f5dce8-a158-461d-b26d-dc8acfaeedd7"/> <!-- Shuliett -->
     <author uuid="38ef938a-7020-4c04-9d12-4875ed0598ca"/> <!-- Kazoha -->
@@ -12,6 +16,11 @@
     <team id="blue-team" color="blue" max="20" max-overfill="30">Blue</team>
     <team id="red-team" color="red" max="20" max-overfill="30">Red</team>
 </teams>
+<spawns>
+    <spawn team="blue-team" kit="blue-kit" yaw="90" region="blue-spawn-point"/>
+    <spawn team="red-team" kit="red-kit" yaw="-90" region="red-spawn-point"/>
+    <default yaw="0" region="obs-spawn-point"/>
+</spawns>
 <kits>
     <kit id="spawn-kit">
         <clear/>
@@ -43,11 +52,6 @@
         <boots material="leather boots" color="FF0C0C" unbreakable="true"/>
     </kit>
 </kits>
-<spawns>
-    <spawn team="blue-team" kit="blue-kit" yaw="90" region="blue-spawn-point"/>
-    <spawn team="red-team" kit="red-kit" yaw="-90" region="red-spawn-point"/>
-    <default yaw="0" region="obs-spawn-point"/>
-</spawns>
 <wools craftable="false">
     <wool team="blue-team" color="light blue" monument="blue-team-light-blue-wool" location="-127.5,11.2,42.5"/>
     <wool team="blue-team" color="cyan" monument="blue-team-cyan-wool" location="-127.5,11.2,-41.5"/>
@@ -59,44 +63,35 @@
     <team id="only-red">red-team</team>
     <any id="block-break-void-filter">
         <all>
-            <any>
-                <material>leaves</material>
-                <material>log</material>
-                <material>wool</material>
-                <material>stained clay</material>
-                <material>melon block</material>
-                <material>huge mushroom 2</material>
-                <material>huge mushroom 1</material>
-                <material>wood step</material>
-                <material>wood double step</material>
-                <material>stained glass</material>
-                <material>spruce fence</material>
-                <material>stained clay</material>
-                <material>wood step</material>
-                <material>soul sand</material>
-                <material>wood</material>
-                <material>log 2</material>
-                <material>dirt</material>
-            </any>
+            <not>
+                <any>
+                    <material>77</material>
+                    <material>web</material>
+                </any>
+            </not>
             <void/>
         </all>
         <not id="block-place-void-filter">
             <void/>
         </not>
     </any>
-    <all id="reds-woolrooms-filter">
+    <all id="red-woolrooms-filter">
         <team>blue-team</team>
         <filter id="woolrooms-filter"/>
     </all>
-    <all id="blues-woolrooms-filter">
+    <all id="blue-woolrooms-filter">
         <team>red-team</team>
         <filter id="woolrooms-filter"/>
     </all>
-    <any id="woolrooms-filter">
-        <material>web</material>
-        <material>wood:0</material>
-        <material>glass</material>
-    </any>
+    <all id="woolrooms-filter">
+        <blocks region="woolroom-blocks">
+            <any>
+                <material>air</material>
+                <material>web</material>
+            </any>
+        </blocks>
+        <filter id="block-place-void-filter"/>
+    </all>
     <all id="only-iron-cause-world">
         <material id="only-iron">iron block</material>
         <cause>world</cause>
@@ -122,13 +117,28 @@
             <rectangle id="obs-spawn" min="-4,-4" max="5,5"/>
         </union>
     </negative>
-    <union id="blues-woolrooms"> <!-- blue defends / red attacks -->
-        <rectangle id="magenta-woolroom" min="109,-22" max="148,-61"/>
-        <rectangle id="pink-woolroom" min="109,23" max="148,62"/>
-    </union>
-    <union id="reds-woolrooms"> <!-- red defends / blue attacks -->
-        <rectangle id="cyan-woolroom" min="-108,-22" max="-147,-61"/>
-        <rectangle id="light-blue-woolroom" min="-108,23" max="-147,62"/>
+    <complement id="woolrooms">
+        <union>
+            <union id="blue-woolrooms"> <!-- blue defends / red attacks -->
+                <rectangle id="magenta-woolroom" min="109,-22" max="148,-61"/>
+                <rectangle id="pink-woolroom" min="109,23" max="148,62"/>
+            </union>
+            <union id="red-woolrooms"> <!-- red defends / blue attacks -->
+                <rectangle id="cyan-woolroom" min="-108,-22" max="-147,-61"/>
+                <rectangle id="light-blue-woolroom" min="-108,23" max="-147,62"/>
+            </union>
+        </union>
+        <region id="woolroom-blocks"/>
+    </complement>
+    <union id="woolroom-blocks">
+        <union id="blue-woolroom-blocks"> <!-- blue defends / red attacks -->
+            <cuboid id="magenta-woolroom-blocks" min="109,10,-22" max="148,${height-limit},-61"/>
+            <cuboid id="pink-woolroom-blocks" min="109,10,23" max="148,${height-limit},62"/>
+        </union>
+        <union id="red-woolroom-blocks"> <!-- red defends / blue attacks -->
+            <cuboid id="cyan-woolroom-blocks" min="-108,10,-22" max="-147,${height-limit},-61"/>
+            <cuboid id="light-blue-woolroom-blocks" min="-108,10,23" max="-147,${height-limit},62"/>
+        </union>
     </union>
     <negative id="not-build-area">
         <union id="build-area">
@@ -145,11 +155,12 @@
     <!-- applicators -->
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
-    <apply enter="only-red" region="blues-woolrooms" message="You may not enter your own wool room!"/>
-    <apply enter="only-blue" region="reds-woolrooms" message="You may not enter your own wool room!"/>
+    <apply enter="only-red" region="blue-woolrooms" message="You may not enter your own wool room!"/>
+    <apply enter="only-blue" region="red-woolrooms" message="You may not enter your own wool room!"/>
     <apply block-place="only-iron-cause-world" block-break="only-iron" region="spawns" message="You may not edit spawn!"/>
-    <apply block="blues-woolrooms-filter" region="blues-woolrooms" message="You may not edit the wool room!"/>
-    <apply block="reds-woolrooms-filter" region="reds-woolrooms" message="You may not edit the wool room!"/>
+    <apply block="blue-woolrooms-filter" region="blue-woolroom-blocks" message="You may not edit the wool room!"/>
+    <apply block="red-woolrooms-filter" region="red-woolroom-blocks" message="You may not edit the wool room!"/>
+    <apply block="never" region="woolrooms" message="You may not edit the wool room!"/>
     <apply block-place="block-place-void-filter" block-break="block-break-void-filter" region="not-build-area" message="You may not edit the void!"/>
     <apply kit="reset-resistance-kit" region="not-spawns"/>
 </regions>
@@ -267,14 +278,13 @@
 <renewables>
     <renewable rate="0.5" sound="false" region="iron-regen" renew-filter="only-iron" replace-filter="only-air" avoid-players="5"/>
 </renewables>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
-<maxbuildheight>33</maxbuildheight>
 <kill-rewards>
     <kill-reward>
         <item material="golden apple"/>
         <item material="wood" amount="16"/>
     </kill-reward>
 </kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
 </map>
