@@ -1,7 +1,6 @@
 <map proto="1.4.2">
 <name>Jupiter</name>
-<version>1.1.0</version>
-<phase>development</phase>
+<version>1.1.1</version>
 <objective>Capture the two wools of the enemy team!</objective>
 <created>2022-10-09</created>
 <authors>
@@ -10,6 +9,7 @@
 <contributors>
     <contributor uuid="63ddf58a-ba2c-4d39-8481-6358bb46c63a" contribution="xml"/> <!-- samschaap -->
     <contributor uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Feedback"/> <!-- Tundren -->
+    <contributor uuid="654a9fe7-c75c-4b45-91df-8d48c4a5e072" contribution="Feedback"/> <!-- Flamiix -->
 </contributors>
 <teams>
     <team id="red-team" color="dark red" max="12">Red</team>
@@ -21,30 +21,32 @@
         <item slot="0" unbreakable="true" material="stone sword"/>
         <item slot="1" unbreakable="true" material="bow"/>
         <item slot="2" unbreakable="true" material="iron pickaxe"/>
-        <item slot="3" unbreakable="true" material="iron spade"/>
+        <item slot="3" unbreakable="true" material="iron axe"/>
+        <item slot="30" unbreakable="true" material="iron spade"/>
         <item slot="4" amount="64" material="smooth brick"/>
-        <item slot="5" amount="32" material="glass"/>
+        <item slot="5" amount="32" material="wood" damage="5"/>
         <item slot="6" material="water bucket"/>
         <item slot="7" amount="24" material="arrow"/>
         <item slot="8" material="golden apple"/>
         <leggings unbreakable="true" material="chainmail leggings" enchantment="projectile_protection"/>
-        <boots unbreakable="true" material="iron boots"/>
         <effect duration="3" amplifier="255">damage resistance</effect>
     </kit>
     <kit id="red-kit" parents="spawn-kit">
         <helmet unbreakable="true" color="8b0000" material="leather helmet"/>
         <chestplate unbreakable="true" color="8b0000" material="leather chestplate"/>
+        <boots unbreakable="true" color="8b0000" material="leather boots"/>
     </kit>
     <kit id="blue-kit" parents="spawn-kit">
         <helmet unbreakable="true" color="00008b" material="leather helmet"/>
         <chestplate unbreakable="true" color="00008b" material="leather chestplate"/>
+        <boots unbreakable="true" color="00008b" material="leather boots"/>
     </kit>
     <kit id="default-kit">
         <head name="OafRlyWantedThis" uuid="a2de5dfc-9bae-40d1-97eb-175b22b077a4" slot="slot.armor.head" skin="ewogICJ0aW1lc3RhbXAiIDogMTY2NTMzNDA2MzQ3NSwKICAicHJvZmlsZUlkIiA6ICI2M2RkZjU4YWJhMmM0ZDM5ODQ4MTYzNThiYjQ2YzYzYSIsCiAgInByb2ZpbGVOYW1lIiA6ICJzYW1zY2hhYXAiLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDRiNTQ2ZGE4ZDA3NzJjZDU0YTg2Yjc5YmNiMDg2OTk1MDY1MTEzNTAwZmFhZjZjZGRlODRjYzMyNmJhMjA5YyIKICAgIH0sCiAgICAiQ0FQRSIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjBjYzA4ODQwNzAwNDQ3MzIyZDk1M2EwMmI5NjVmMWQ2NWExM2E2MDNiZjY0YjE3YzgwM2MyMTQ0NmZlMTYzNSIKICAgIH0KICB9Cn0="/>
     </kit>
 </kits>
 <spawns>
-    <default>
+    <default kit="default-kit">
         <region yaw="0">
             <point>-17.5,29,-55.5</point>
         </region>
@@ -72,6 +74,10 @@
         <team id="only-blue">blue-team</team>
         <filter id="wr-filter"/>
     </all>
+    <all id="only-gold-renew">
+        <material id="only-gold">gold block</material>
+        <cause>world</cause>
+    </all>
     <deny id="deny-void">
         <void/>
     </deny>
@@ -80,6 +86,10 @@
     <union id="spawns">
         <rectangle id="red-spawn" min="58,3" max="81,12"/>
         <rectangle id="blue-spawn" min="-117,3" max="-94,12"/>
+    </union>
+    <union id="gold">
+        <cuboid id="red-gold" min="68,0,12" max="59,15,19"/>
+        <cuboid id="blue-gold" min="-104,0,3" max="-95,15,-4"/>
     </union>
     <union id="wool-rooms">
         <union id="red-wool-rooms">  <!-- blue capture, red defend -->
@@ -107,6 +117,7 @@
     <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool rooms!"/>
     <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool rooms!"/>
     <apply block="never" region="spawns" message="You may not modify spawn!"/>
+    <apply block-break="only-gold" block-place="only-gold-renew" region="gold" message="You may only break gold blocks here!"/>
     <apply block="only-red-wr" use="only-red" region="blue-wool-rooms" message="You may not modify the wool rooms!"/>
     <apply block="only-blue-wr" use="only-blue" region="red-wool-rooms" message="You may not modify the wool rooms!"/>
     <apply block="deny-void" region="void-area" message="You may not modify the void area!"/>
@@ -147,25 +158,40 @@
         <item material="wool" amount="2" damage="5"/>
     </spawner>
 </spawners>
+<renewables>
+    <renewable region="gold" renew-filter="only-gold"/>
+</renewables>
 <toolrepair>
     <tool>stone sword</tool>
     <tool>bow</tool>
     <tool>iron pickaxe</tool>
     <tool>iron spade</tool>
+    <tool>iron axe</tool>
 </toolrepair>
 <itemremove>
     <item>leather helmet</item>
     <item>leather chestplate</item>
     <item>chainmail leggings</item>
-    <item>iron boots</item>
+    <item>leather boots</item>
     <item>string</item>
     <item>redstone</item>
+    <item>dirt</item>
+    <item>cobblestone</item>
+    <item>stained clay</item>
+    <item>nether brick</item>
+    <item>nether brick stairs</item>
+    <item>nether fence</item>
+    <item>smooth stairs</item>
+    <item>redstone lamp off</item>
+    <item>redstone block</item>
+    <item>step</item>
 </itemremove>
 <block-drops>
     <rule>
         <filter>
             <any>
                 <material>smooth brick</material>
+                <material>wood</material>
             </any>
         </filter>
         <drops>
@@ -175,11 +201,11 @@
 </block-drops>
 <itemkeep>
     <item>smooth brick</item>
-    <item>glass</item>
+    <item>wood</item>
     <item>arrow</item>
     <item>golden apple</item>
-    <tool>bucket</tool>
-    <tool>water bucket</tool>
+    <item>bucket</item>
+    <item>water bucket</item>
 </itemkeep>
 <kill-reward>
     <item material="golden apple"/>
