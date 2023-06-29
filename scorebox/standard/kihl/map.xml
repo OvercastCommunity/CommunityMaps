@@ -1,0 +1,76 @@
+<map proto="1.4.2">
+<name>Kihl</name>
+<version>1.0</version>
+<objective>Jump into the enemy team's portals, located to either side of their spawn point!</objective>
+<created>2023-03-31</created>
+<include id="bridge"/>
+<constants>
+    <constant id="score-limit">7</constant>
+    <constant id="mercy-limit">5</constant>
+    <!-- Teams -->
+    <constant id="team-one-spawn">-35.5,14,0.5</constant>
+    <constant id="team-one-yaw">-90</constant>
+    <constant id="team-two-spawn">36.5,14,0.5</constant>
+    <constant id="team-two-yaw">90</constant>
+</constants>
+<authors>
+    <author uuid="2d372806-0e62-4e44-87f7-2394540f5203"/> <!-- Tkes -->
+    <author uuid="01ade85f-b74a-4278-aed4-5590929f14de"/> <!-- Diegooh -->
+</authors>
+<contributors>
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML"/> <!-- zzuf -->
+</contributors>
+<teams>
+    <team id="team-one" color="dark red" max="20">Red</team>
+    <team id="team-two" color="blue" max="20">Blue</team>
+</teams>
+<spawns>
+    <default>
+        <regions>
+            <point yaw="180">0.5,44,0.5</point>
+        </regions>
+    </default>
+</spawns>
+<filters>
+    <any id="block-list">
+        <material>stained clay:14</material>
+        <material>stained clay:11</material>
+        <material>stained clay:0</material>
+    </any>
+</filters>
+<regions>
+    <negative id="not-buildable">
+        <complement>
+            <cuboid min="44,0,-34" max="-43,14,35"/>
+            <rectangle id="red-no-build-area" min="-29,-26" max="-43,27"/>
+            <mirror region="red-no-build-area" origin="${map-origin}" normal="1,0,0"/>
+        </complement>
+    </negative>
+    <!-- Portals -->
+    <union id="team-one-portal">
+        <cuboid id="team-one-south-portal" min="-37,1,11" size="3,1,3"/>
+        <mirror region="team-one-south-portal" origin="${map-origin}" normal="0,0,1"/>
+    </union>
+    <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
+    <!-- Round cages -->
+    <union id="cages">
+        <cylinder id="team-one-spawn-cage" base="${team-one-spawn}" height="3" radius="2"/>
+        <cylinder id="team-two-spawn-cage" base="${team-two-spawn}" height="3" radius="2"/>
+    </union>
+    <!-- Kihl -->
+    <union id="red-spawn-area">
+        <cuboid min="-29,13,-20" max="-49,16,21"/>
+        <cuboid min="-27,16,-28" max="-44,oo,29"/>
+    </union>
+    <mirror id="blue-spawn-area" region="red-spawn-area" origin="${map-origin}" normal="1,0,0"/>
+    <apply enter="only-team-one" region="red-spawn-area" message="You may not enter your enemy's spawn on this map!"/>
+    <apply enter="only-team-two" region="blue-spawn-area" message="You may not enter your enemy's spawn on this map!"/>
+    <union id="extra-walls">
+        <cuboid id="extra-wall-1" min="-44,0,27" max="-43,14,26"/>
+        <mirror id="extra-wall-2" region="extra-wall-1" origin="${map-origin}" normal="0,0,1"/>
+        <mirror region="extra-wall-1" origin="${map-origin}" normal="1,0,0"/>
+        <mirror region="extra-wall-2" origin="${map-origin}" normal="1,0,0"/>
+    </union>
+    <apply enter="never" region="extra-walls"/>
+</regions>
+</map>
