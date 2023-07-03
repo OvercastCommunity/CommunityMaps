@@ -1,0 +1,199 @@
+<map proto="1.4.2">
+<name>Autumn Solstice</name>
+<created>2023-06-04</created>
+<version>1.0.0</version>
+<phase>development</phase>
+<time>30m</time>
+<objective>Destroy the enemy's monuments and core with TNT!</objective>
+<authors>
+    <author uuid="f610e558-a3c8-44fb-8622-68cc49dbc18f"/> <!-- Dawthon -->
+    <author uuid="6ff4ade9-e968-4acd-80eb-1a6fa89629fb" contribution="XML"/> <!-- _Pear -->
+</authors>
+<!-- Teams and Kits -->
+<teams>
+    <team id="blue-team" color="blue" max="30">Blue</team>
+    <team id="red-team" color="red" max="30">Red</team>
+</teams>
+<kits>
+    <kit id="default">
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <item slot="2" unbreakable="true" material="diamond pickaxe"/>
+        <item slot="3" unbreakable="true" material="iron axe">
+            <enchantment level="2">efficiency</enchantment>
+        </item>
+        <item slot="30" unbreakable="true" material="shears">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item slot="4" unbreakable="true" material="iron spade"/>
+        <item slot="5" amount="64" material="wood"/>
+        <item slot="32" amount="64" material="wood"/>
+        <item slot="23" amount="16" material="stone button"/>
+        <item slot="14" amount="32" material="redstone"/>
+        <item slot="6" amount="64" material="glass"/>
+        <item slot="33" amount="16" material="ladder"/>
+        <item slot="24" amount="16" material="wood step"/>
+        <item slot="15" amount="16" material="nether fence"/>
+        <item slot="7" material="water bucket"/>
+        <item slot="34" material="water bucket"/>
+        <item slot="25" material="water bucket"/>
+        <item slot="16" material="water bucket"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="35" amount="16" material="tnt"/>
+        <item slot="26" amount="16" material="tnt"/>
+        <item slot="17" amount="16" material="tnt"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+        <boots unbreakable="true" material="iron boots">
+            <enchantment level="4">feather_falling</enchantment>
+            <enchantment>blast_protection</enchantment>
+        </boots>
+        <effect duration="5s" amplifier="255">damage_resistance</effect>
+    </kit>
+</kits>
+<spawns>
+    <default yaw="180">
+        <region>
+            <point>-48.5,59,-11.5</point>
+        </region>
+    </default>
+    <spawn team="blue-team" kit="default" region="blue-spawn" yaw="90"/>
+    <spawn team="red-team" kit="default" region="red-spawn" yaw="-90"/>
+</spawns>
+<!-- Filters and Regions -->
+<filters>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <all id="only-iron-renew">
+        <cause>world</cause>
+        <material id="only-iron">iron block</material>
+    </all>
+    <deny id="deny-beacon">
+        <material>beacon</material>
+    </deny>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+    <material id="only-leaves">leaves</material>
+</filters>
+<regions>
+    <!-- Definitions -->
+    <union id="spawns">
+        <point id="blue-spawn">85.5,60,-110.5</point>
+        <point id="red-spawn">-182.5,60,-110.5</point>
+        <union id="spawn-protections">
+            <rectangle id="blue-spawn-protection" min="62,-131" max="95,-91"/>
+            <rectangle id="red-spawn-protection" min="-159,-91" max="-193,-131"/>
+        </union>
+    </union>
+    <union id="team-renewables">
+        <cuboid id="blue-iron" min="78,58,-108" max="74,62,-114"/>
+        <cuboid id="red-iron" min="-176,58,-114" max="-172,62,-108"/>
+    </union>
+    <union id="monuments">
+        <cuboid id="north-blue-mon" min="1,18,-156" max="11,45,-166"/>
+        <cuboid id="south-blue-mon" min="11,18,-66" max="1,45,-56"/>
+        <cuboid id="north-red-mon" min="-109,18,-156" max="-99,45,-166"/>
+        <cuboid id="south-red-mon" min="-99,18,-66" max="-109,45,-56"/>
+    </union>
+    <union id="cores">
+        <cuboid id="blue-core" min="-6,34,-115" max="2,42,-107"/>
+        <cuboid id="red-core" min="-92,34,-107" max="-100,42,-115"/>
+    </union>
+    <negative id="not-map">
+        <rectangle id="map" min="-170,-37" max="73,-184"/>
+    </negative>
+    <!-- Applications -->
+    <apply region="team-renewables" block-break="only-iron" block-place="only-iron-renew" message="You can only break iron blocks!"/>
+    <apply region="spawn-protections" block="never" message="You are not allowed to modify terrain here."/>
+    <apply region="blue-spawn-protection" enter="only-blue" message="You may not enter the enemy spawn."/>
+    <apply region="red-spawn-protection" enter="only-red" message="You may not enter the enemy spawn."/>
+    <apply region="not-map" block-place="never" block-break="only-leaves" message="You are not allowed to modify terrain here."/>
+    <apply use="deny-beacon"/>
+</regions>
+<!-- Objectives and Modes -->
+<destroyables materials="ender stone" show-progress="true" completion="80%" repairable="false" required="true">
+    <destroyable name="North Column" owner="blue-team" region="north-blue-mon"/>
+    <destroyable name="South Column" owner="blue-team" region="south-blue-mon"/>
+    <destroyable name="North Column" owner="red-team" region="north-red-mon"/>
+    <destroyable name="South Column" owner="red-team" region="south-red-mon"/>
+</destroyables>
+<cores material="obsidian" show-progress="false" leak="7" required="true" mode-changes="true">
+    <core team="blue-team" region="blue-core"/>
+    <core team="red-team" region="red-core"/>
+</cores>
+<modes>
+    <mode id="gold-mode" after="15m" material="gold block" name="`6Golden Core"/>
+</modes>
+<!-- Misc -->
+<renewables>
+    <renewable region="team-renewables" renew-filter="only-iron" interval="15s" sound="false"/>
+</renewables>
+<block-drops>
+    <rule>
+        <filter>
+            <material>diamond block</material>
+        </filter>
+        <drops>
+            <item chance="1" enchantment="blast_protection" material="diamond chestplate"/>
+        </drops>
+    </rule>
+</block-drops>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>shears</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+    <item>tnt</item>
+    <item>wood</item>
+    <item>wood step</item>
+    <item>glass</item>
+    <item>redstone</item>
+    <item>ladder</item>
+    <item>stone button</item>
+    <item>nether fence</item>
+    <item>bucket</item>
+    <item>water bucket</item>
+    <item>arrow</item>
+    <item>obsidian</item>
+    <item>ender stone</item>
+    <item>item frame</item>
+    <item>red_rose</item>
+    <item>yellow_flower</item>
+    <item>flower_pot_item</item>
+    <item>seeds</item>
+    <item>sapling</item>
+    <item>apple</item>
+    <item>golden apple</item>
+    <item>double_plant</item>
+</itemremove>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item amount="32" material="wood"/>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak repeat="true" count="2"/>
+        </filter>
+        <item amount="16" material="tnt"/>
+        <item amount="16" material="redstone"/>
+    </kill-reward>
+</kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>64</maxbuildheight>
+</map>

@@ -1,0 +1,392 @@
+<map proto="1.4.2">
+<name>The Waiting Room</name>
+<version>1.1.0</version>
+<objective>Destroy the other team's side ladder monuments to win!</objective>
+<phase>development</phase>
+<time>30m</time>
+<authors>
+    <author uuid="2d1ed8d4-6346-4654-9cb7-19941c05820a"/> <!-- Lowie375 -->
+</authors>
+<contributors>
+    <contributor uuid="59655bfd-1fda-4e15-b6f7-eb6b6f84b406" contribution="Original in-game reference build + map support"/> <!-- Digitalight -->
+</contributors>
+<gamemode>dtm</gamemode>
+<created>2023-06-18</created>
+<maxbuildheight>48</maxbuildheight>
+<broadcasts>
+    <alert after="3s">Blocks can not be placed onto the deadly gray floor!</alert>
+    <alert after="5s">Some parts of this map, such as the gray walls and center tables, are indestructible!</alert>
+    <tip after="7s">Indestructible blocks will turn into bedrock or obsidian when punched.</tip>
+</broadcasts>
+<teams>
+    <team id="team-ladder" color="green" max="16">Lime</team>
+    <team id="team-sign" color="yellow" max="16">Yellow</team>
+</teams>
+<kits>
+    <kit id="night-vision">
+        <effect duration="oo" ambient="true">night vision</effect>
+    </kit>
+    <kit id="kit-base">
+        <clear effects="true"/>
+        <effect duration="oo" ambient="true">night vision</effect>
+        <effect duration="oo" ambient="true">saturation</effect>
+        <effect duration="3" amplifier="10" ambient="true">damage_resistance</effect>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" enchantment="arrow infinite" material="bow"/>
+        <item slot="2" unbreakable="true" material="diamond pickaxe"/>
+        <item slot="4" amount="64" material="redstone"/>
+        <item slot="5" amount="64" material="tnt"/>
+        <item slot="32" amount="64" material="tnt"/>
+        <item slot="23" amount="64" material="tnt"/>
+        <item slot="14" amount="64" material="tnt"/>
+        <item slot="6" material="water bucket"/>
+        <item slot="33" material="water bucket"/>
+        <item slot="24" material="water bucket"/>
+        <item slot="15" material="water bucket"/>
+        <item slot="7" amount="32" material="stone button"/>
+        <item slot="8" amount="32" material="ladder"/>
+        <item slot="16" amount="32" material="lever"/>
+        <item slot="17" amount="32" material="trap door"/>
+        <item slot="25" amount="16" material="diode"/>
+        <item slot="26" amount="32" material="stone plate"/>
+        <item slot="28" material="arrow"/>
+        <item slot="31" amount="64" material="redstone"/>
+        <item slot="34" amount="32" material="nether fence"/>
+        <item slot="35" amount="64" material="step"/>
+        <chestplate unbreakable="true" material="iron chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+    </kit>
+    <kit id="kit-ladder" parents="kit-base">
+        <item slot="3" amount="64" material="stained clay" damage="5"/>
+        <item slot="30" amount="64" material="stained clay" damage="5"/>
+        <item slot="21" amount="64" material="stained clay" damage="5"/>
+        <item slot="12" amount="64" material="stained clay" damage="5"/>
+        <helmet unbreakable="true" color="7FFF4C" material="leather helmet"/>
+        <boots unbreakable="true" color="7FFF4C" material="leather boots"/>
+    </kit>
+    <kit id="kit-sign" parents="kit-base">
+        <item slot="3" amount="64" material="stained clay" damage="4"/>
+        <item slot="30" amount="64" material="stained clay" damage="4"/>
+        <item slot="21" amount="64" material="stained clay" damage="4"/>
+        <item slot="12" amount="64" material="stained clay" damage="4"/>
+        <helmet unbreakable="true" color="FFE54C" material="leather helmet"/>
+        <boots unbreakable="true" color="FFE54C" material="leather boots"/>
+    </kit>
+    <kit id="death">
+        <clear effects="true" items="false" armor="false"/>
+        <effect amplifier="-37" duration="oo">health boost</effect>
+        <effect amplifier="37" duration="oo">wither</effect>
+    </kit>
+</kits>
+<tnt>
+    <dispenser-tnt-limit>0</dispenser-tnt-limit>
+    <yield>0</yield>
+</tnt>
+<disabledamage>
+    <damage ally="false" self="false" enemy="false" other="false">block explosion</damage>
+</disabledamage>
+<filters>
+    <team id="only-ladder">team-ladder</team>
+    <team id="only-sign">team-sign</team>
+    <not id="player-explosion">
+        <cause>explosion</cause>
+    </not>
+    <not id="not-obby-replace">
+        <any>
+            <any id="obby-replace">
+                <material>wood:1</material>
+                <material>wood:5</material>
+                <material>log:3</material>
+                <material>log:7</material>
+                <material>log:11</material>
+                <material>log:15</material>
+            </any>
+            <material id="obby">obsidian</material>
+            <material id="brock">bedrock</material>
+        </any>
+    </not>
+    <all id="mon-explosion">
+        <any>
+            <material>emerald block</material>
+            <material>gold block</material>
+            <material>iron block</material>
+            <material>ender stone</material>
+        </any>
+        <filter id="player-explosion"/>
+    </all>
+    <deny id="ladder-mon-explosion">
+        <all>
+            <filter id="mon-explosion"/>
+            <team>team-ladder</team>
+        </all>
+    </deny>
+    <deny id="sign-mon-explosion">
+        <all>
+            <filter id="mon-explosion"/>
+            <team>team-sign</team>
+        </all>
+    </deny>
+</filters>
+<regions>
+    <union id="spawns">
+        <cuboid id="spawn-ladder" min="-48,32,96" max="-32,48,112"/>
+        <cuboid id="spawn-sign" min="48,32,96" max="64,48,112"/>
+    </union>
+    <cuboid id="play-area" min="-32,16,64" max="48,64,144"/>
+    <cuboid id="floor" min="-32,15,64" max="48,16,176"/>
+    <cuboid id="death-area" min="-32,0,64" max="48,16.5,176"/>
+    <union id="main-area">
+        <region id="spawns"/>
+        <region id="play-area"/>
+    </union>
+    <negative id="not-main-area">
+        <region id="main-area"/>
+    </negative>
+    <union id="tables">
+        <cuboid id="table-fence-1" min="6,16,86" max="10,32,90"/>
+        <cuboid id="table-fence-2" min="6,16,102" max="10,32,106"/>
+        <cuboid id="table-fence-3" min="6,16,118" max="10,32,122"/>
+        <cuboid id="table-fence-beam-top" min="7,28,90" max="9,31,118"/>
+        <cuboid id="table-fence-beam-bot" min="7,22,90" max="9,25,118"/>
+        <cuboid id="table-top-1" min="1,32,81" max="15,33,95"/>
+        <cuboid id="table-top-2" min="1,32,97" max="15,33,111"/>
+        <cuboid id="table-top-3" min="1,32,113" max="15,33,127"/>
+    </union>
+    <union id="unbreakable-wood">
+        <region id="tables"/>
+        <!-- team-ladder couch -->
+        <cuboid min="-32,16,64" max="-16,24,72"/>
+        <cuboid min="-32,16,136" max="-16,24,144"/>
+        <cuboid min="-32,16,64" max="-24,24,144"/>
+        <cuboid min="-24,16,72" max="-16,20,136"/>
+        <!-- team-ladder spawn ramp -->
+        <cuboid min="-28,24,102" max="-32,32,106"/>
+        <cuboid min="-28,24,101" max="-32,31,107"/>
+        <cuboid min="-28,24,100" max="-32,30,108"/>
+        <cuboid min="-28,24,99" max="-32,29,109"/>
+        <cuboid min="-28,24,98" max="-32,28,110"/>
+        <cuboid min="-28,24,97" max="-32,27,111"/>
+        <cuboid min="-28,24,96" max="-32,26,112"/>
+        <cuboid min="-28,24,95" max="-32,25,113"/>
+        <!-- team-sign couch -->
+        <cuboid min="32,16,64" max="48,24,72"/>
+        <cuboid min="32,16,136" max="48,24,144"/>
+        <cuboid min="40,16,64" max="48,24,144"/>
+        <cuboid min="32,16,72" max="40,20,136"/>
+        <!-- team-sign spawn ramp -->
+        <cuboid min="44,24,102" max="48,32,106"/>
+        <cuboid min="44,24,101" max="48,31,107"/>
+        <cuboid min="44,24,100" max="48,30,108"/>
+        <cuboid min="44,24,99" max="48,29,109"/>
+        <cuboid min="44,24,98" max="48,28,110"/>
+        <cuboid min="44,24,97" max="48,27,111"/>
+        <cuboid min="44,24,96" max="48,26,112"/>
+        <cuboid min="44,24,95" max="48,25,113"/>
+    </union>
+    <union id="ladder-monuments">
+        <union id="mon-ladder-emerald">
+            <cuboid min="-32,32,82" max="-31,48,84"/>
+            <cuboid min="-32,32,92" max="-31,48,94"/>
+            <cuboid min="-32,45,81" max="-31,47,95"/>
+            <cuboid min="-32,41,81" max="-31,43,95"/>
+            <cuboid min="-32,37,81" max="-31,39,95"/>
+            <cuboid min="-32,33,81" max="-31,35,95"/>
+        </union>
+        <union id="mon-ladder-endstone">
+            <cuboid min="-32,32,114" max="-31,48,116"/>
+            <cuboid min="-32,32,124" max="-31,48,126"/>
+            <cuboid min="-32,45,113" max="-31,47,127"/>
+            <cuboid min="-32,41,113" max="-31,43,127"/>
+            <cuboid min="-32,37,113" max="-31,39,127"/>
+            <cuboid min="-32,33,113" max="-31,35,127"/>
+        </union>
+    </union>
+    <union id="sign-monuments">
+        <union id="mon-sign-gold">
+            <cuboid min="47,32,82" max="48,48,84"/>
+            <cuboid min="47,32,92" max="48,48,94"/>
+            <cuboid min="47,45,81" max="48,47,95"/>
+            <cuboid min="47,41,81" max="48,43,95"/>
+            <cuboid min="47,37,81" max="48,39,95"/>
+            <cuboid min="47,33,81" max="48,35,95"/>
+        </union>
+        <union id="mon-sign-endstone">
+            <cuboid min="47,32,114" max="48,48,116"/>
+            <cuboid min="47,32,124" max="48,48,126"/>
+            <cuboid min="47,45,113" max="48,47,127"/>
+            <cuboid min="47,41,113" max="48,43,127"/>
+            <cuboid min="47,37,113" max="48,39,127"/>
+            <cuboid min="47,33,113" max="48,35,127"/>
+        </union>
+    </union>
+    <apply region="spawn-ladder" enter="only-ladder" message="You may not enter the enemy spawn!"/>
+    <apply region="spawn-sign" enter="only-sign" message="You may not enter the enemy spawn!"/>
+    <apply region="spawns" block="never" message="You may not modify the spawn area!" early-warning="true"/>
+    <apply region="unbreakable-wood" block-break="player-explosion" message="You may not destroy the unbreakable wood blocks!"/>
+    <apply region="ladder-monuments" block-break="sign-mon-explosion" message="The monuments must be destroyed with TNT!" early-warning="true"/>
+    <apply region="sign-monuments" block-break="ladder-mon-explosion" message="The monuments must be destroyed with TNT!" early-warning="true"/>
+    <apply region="floor" block-place-against="never" message="You may not place blocks against the floor!"/>
+    <apply region="not-main-area" block="never" message="You may not modify the void area!" early-warning="true"/>
+    <apply region="death-area" kit="death">
+        <filter>
+            <participating/>
+        </filter>
+    </apply>
+    <apply region="everywhere" kit="night-vision">
+        <filter>
+            <observing/>
+        </filter>
+    </apply>
+</regions>
+<spawns>
+    <default kit="night-vision">
+        <region yaw="180">
+            <cuboid min="10.4,27.5,183.4" max="12.6,27.5,185.6"/>
+        </region>
+    </default>
+    <spawn team="team-ladder" kit="kit-ladder">
+        <regions yaw="-90">
+            <cuboid min="-46,33,98" max="-44,33,100"/>
+            <cuboid min="-46,33,108" max="-44,33,110"/>
+        </regions>
+    </spawn>
+    <spawn team="team-sign" kit="kit-sign">
+        <regions yaw="90">
+            <cuboid min="60,33,108" max="62,33,110"/>
+            <cuboid min="60,33,98" max="62,33,100"/>
+        </regions>
+    </spawn>
+</spawns>
+<destroyables completion="100%" required="true" show-progress="true" repairable="false">
+    <destroyable name="Emerald Ladder" region="mon-ladder-emerald" owner="team-ladder" materials="emerald block;iron block"/>
+    <destroyable name="Endstone Ladder" region="mon-ladder-endstone" owner="team-ladder" materials="ender stone;iron block"/>
+    <destroyable name="Golden Ladder" region="mon-sign-gold" owner="team-sign" materials="gold block;iron block"/>
+    <destroyable name="Endstone Ladder" region="mon-sign-endstone" owner="team-sign" materials="ender stone;iron block"/>
+</destroyables>
+<kill-rewards>
+    <kill-reward> <!-- general-->
+        <item amount="1" material="golden apple"/>
+        <item amount="32" material="tnt"/>
+        <item amount="16" material="ladder"/>
+    </kill-reward>
+    <kill-reward> <!-- team-ladder -->
+        <filter>
+            <team>team-ladder</team>
+        </filter>
+        <item amount="1" material="gold ingot"/>
+    </kill-reward>
+    <kill-reward> <!-- team-sign -->
+        <filter>
+            <team>team-sign</team>
+        </filter>
+        <item amount="1" material="emerald"/>
+    </kill-reward> 
+</kill-rewards>
+<block-drops>
+    <rule region="unbreakable-wood" filter="obby-replace">
+        <replacement>obsidian</replacement>
+        <punch>true</punch>
+    </rule>
+    <rule region="unbreakable-wood" filter="not-obby-replace">
+        <replacement>bedrock</replacement>
+        <punch>true</punch>
+    </rule>
+    <rule region="unbreakable-wood" filter="obby">
+        <replacement>obsidian</replacement>
+    </rule>
+    <rule region="unbreakable-wood" filter="brock">
+        <replacement>bedrock</replacement>
+    </rule>
+</block-drops>
+<itemremove>
+    <!-- map blocks -->
+    <item>log</item>
+    <item>log 2</item>
+    <item>wood</item>
+    <item>huge mushroom 1</item>
+    <item>wool</item>
+    <item>stained clay</item>
+    <item>hard clay</item>
+    <item>double step:8</item>
+    <item>double step:9</item>
+    <item>packed ice</item>
+    <item>nether brick</item>
+    <item>nether brick stairs</item>
+    <item>step:6</item>
+    <item>slime block</item>
+    <item>melon block</item>
+    <item>stone</item>
+    <item>cobblestone</item>
+    <item>mossy cobblestone</item>
+    <item>sponge</item>
+    <item>prismarine</item>
+    <item>hay block</item>
+    <item>iron block</item>
+    <item>emerald block</item>
+    <item>gold block</item>
+    <item>redstone block</item>
+    <item>quartz block</item>
+    <item>ender stone</item>
+    <item>snow block</item>
+    <item>brown mushroom</item>
+    <item>clay</item>
+    <item>clay ball</item>
+    <item>dirt</item>
+    <!-- kit -->
+    <item>iron sword</item>
+    <item>diamond pickaxe</item>
+    <item>bow</item>
+    <item>arrow</item>
+    <item>step</item>
+    <item>ladder</item>
+    <item>obsidian</item>
+    <item>stained clay</item>
+    <item>bucket</item>
+    <item>water bucket</item>
+    <item>stone plate</item>
+    <item>diode</item>
+    <item>lever</item>
+    <item>iron door</item>
+    <item>fence</item>
+    <item>wood</item>
+    <item>tnt</item>
+    <item>stone button</item>
+    <item>redstone</item>
+    <item>ladder</item>
+    <item>log</item>
+    <item>wood step</item>
+    <item>gravel</item>
+    <item>flint</item>
+    <item>trap door</item>
+    <item>fence gate</item>
+    <item>redstone block</item>
+    <item>nether fence</item>
+    <!-- unbreakables -->
+    <item>bedrock</item>
+    <item>obsidian</item>
+</itemremove>
+<armorkeep>
+    <item>leather helmet</item>
+    <item>iron chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+</armorkeep>
+<item-mods>
+    <rule>
+        <match>
+            <material>leather boots</material>
+        </match>
+        <modify>
+            <enchantment level="5">protection fall</enchantment>
+        </modify>
+    </rule>
+    <rule>
+        <match>
+            <material>iron chestplate</material>
+        </match>
+        <modify>
+            <enchantment level="5">protection explosions</enchantment>
+        </modify>
+    </rule>
+</item-mods>
+</map>
