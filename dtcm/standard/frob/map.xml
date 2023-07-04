@@ -1,0 +1,267 @@
+<!-- License: This map is available under CC-4.0-BY-SA -->
+<map proto="1.4.2">
+<name>Frob</name>
+<version>1.0.0</version>
+<phase>development</phase>
+<objective>Capture each hill in order!</objective>
+<created>2023-07-02</created>
+<authors>
+    <author uuid="33b99f02-2a1a-42db-9505-6161a3b2cb7e"/> <!-- halfmaster1 -->
+</authors>
+<teams>
+    <team id="blue-team" color="blue" max="12">Blue</team>
+    <team id="red-team" color="dark red" max="12">Red</team>
+</teams>
+<score>
+    <kills>0</kills>
+    <deaths>0</deaths>
+    <limit>750</limit>
+</score>
+<spawns>
+    <default kit="observer-kit">
+        <regions>
+            <region id="observer-spawn-1" yaw="90"/>
+            <region id="observer-spawn-2" yaw="-90"/>
+        </regions>
+    </default>
+    <spawn team="blue-team" kit="blue-kit" region="blue-spawn" yaw="45"/>
+    <spawn team="red-team" kit="red-kit" region="red-spawn" yaw="-135"/>
+</spawns>
+<kits>
+    <kit id="observer-kit">
+        <potion duration="oo">night vision</potion>
+    </kit>
+    <kit id="base-kit" parents="observer-kit">
+        <item slot="0" amount="1" unbreakable="true" attributes="generic.attackDamage:add:7">diamond pickaxe</item>
+        <item slot="1" amount="1" unbreakable="true" enchantment="arrow infinite:1">bow</item>
+        <item slot="28" amount="1">arrow</item>
+        <item slot="3" amount="32">nether fence</item>
+        <item slot="30" amount="32">step</item>
+        <item slot="21" amount="32">ladder</item>
+        <item slot="4" amount="16">stone button</item>
+        <item slot="31" amount="16">stone plate</item>
+        <item slot="22" amount="16">lever</item>
+        <item slot="5" amount="1">water bucket</item>
+        <item slot="32" amount="1">water bucket</item>
+        <item slot="23" amount="1">water bucket</item>
+        <item slot="14" amount="1">water bucket</item>
+        <item slot="6" amount="1">golden apple</item>
+        <item slot="7" amount="16">redstone block</item>
+        <item slot="34" amount="64">redstone</item>
+        <item slot="25" amount="16">redstone torch on</item>
+        <item slot="16" amount="16">diode</item>
+        <item slot="8" amount="64">tnt</item>
+        <item slot="35" amount="64">tnt</item>
+        <item slot="26" amount="64">tnt</item>
+        <item slot="17" amount="64">tnt</item>
+        <chestplate locked="true" unbreakable="true" team-color="true">leather chestplate</chestplate>
+        <leggings locked="true" unbreakable="true" team-color="true">leather leggings</leggings>
+        <boots locked="true" unbreakable="true" team-color="true" enchantment="protection explosions:3;protection fall:3">leather boots</boots>
+        <potion duration="6" amplifier="10">damage resistance</potion>
+    </kit>
+    <kit id="blue-kit" parents="base-kit">
+        <item slot="2" damage="11" amount="64">stained clay</item>
+        <item slot="29" damage="11" amount="64">stained clay</item>
+        <item slot="20" damage="11" amount="64">stained clay</item>
+        <item slot="11" damage="11" amount="64">stained clay</item>
+    </kit>
+    <kit id="red-kit" parents="base-kit">
+        <item slot="2" damage="14" amount="64">stained clay</item>
+        <item slot="29" damage="14" amount="64">stained clay</item>
+        <item slot="20" damage="14" amount="64">stained clay</item>
+        <item slot="11" damage="14" amount="64">stained clay</item>
+    </kit>
+</kits>
+<filters>
+    <!-- Capture rules for visual control points, which must be captured sequentially -->
+    <any id="filter-blue-last">
+        <team id="only-blue">blue-team</team>
+        <objective id="capped-blue-2nd">blue-2nd</objective>
+    </any>
+    <any id="filter-blue-2nd">
+        <objective id="capped-mid">mid</objective>
+        <objective id="capped-blue-last">blue-last</objective>
+    </any>
+    <any id="filter-red-2nd">
+        <filter id="capped-mid"/>
+        <objective id="capped-red-last">red-last</objective>
+    </any>
+    <any id="filter-red-last">
+        <team id="only-red">red-team</team>
+        <objective id="capped-red-2nd">red-2nd</objective>
+    </any>
+    <!-- To capture mid, a team must control their second point -->
+    <any id="filter-mid">
+        <filter id="capped-blue-2nd"/>
+        <filter id="capped-red-2nd"/>
+    </any>
+    <!-- Filters for the point-giving control points -->
+    <!--
+        A team can capture a point-giving control point when they capture the enemy's associated
+        visual point. However, if the enemy uncaptures the point, they will return the point-giving
+        point to a neutral state and points will no longer be scored from it by the team who lost
+        control.
+    -->
+    <any id="filter-last-point-blue">
+        <filter id="capped-red-last"/>
+        <all>
+            <filter id="only-red"/>
+            <not>
+                <any>
+                    <objective team="blue-team">red-last</objective>
+                    <objective team="red-team">red-last</objective>
+                </any>
+            </not>
+        </all>
+    </any>
+    <any id="filter-2nd-point-blue">
+        <filter id="capped-red-2nd"/>
+        <all>
+            <filter id="only-red"/>
+            <not>
+                <any>
+                    <objective team="blue-team">red-2nd</objective>
+                    <objective team="red-team">red-2nd</objective>
+                </any>
+            </not>
+        </all>
+    </any>
+    <any id="filter-2nd-point-red">
+        <filter id="capped-blue-2nd"/>
+        <all>
+            <filter id="only-blue"/>
+            <not>
+                <any>
+                    <objective team="blue-team">blue-2nd</objective>
+                    <objective team="red-team">blue-2nd</objective>
+                </any>
+            </not>
+        </all>
+    </any>
+    <any id="filter-last-point-red">
+        <filter id="capped-blue-last"/>
+        <all>
+            <filter id="only-blue"/>
+            <not>
+                <any>
+                    <objective team="blue-team">blue-last</objective>
+                    <objective team="red-team">blue-last</objective>
+                </any>
+            </not>
+        </all>
+    </any>
+    <!-- Filters unbreakable blocks -->
+    <not id="breakable">
+        <all>
+            <cause>explosion</cause>
+            <any id="unbreakable">
+                <material>quartz block</material>
+            </any>
+        </all>
+    </not>
+</filters>
+<regions>
+    <point id="observer-spawn-1">33,15,0.5</point>
+    <point id="observer-spawn-2">-32,15,0.5</point>
+    <point id="blue-spawn">54.5,14,-70.5</point>
+    <point id="red-spawn">-53.5,14,71.5</point>
+    <union id="hills">
+        <cuboid id="cp-blue-last" min="31,4,-39" max="40,8,-30"/>
+        <cuboid id="cp-blue-2nd" min="8,12,-35" max="17,16,-26"/>
+        <cuboid id="cp-mid" min="-4,6,-4" max="5,10,5"/>
+        <cuboid id="cp-red-2nd" min="-16,12,27" max="-7,16,36"/>
+        <cuboid id="cp-red-last" min="-39,4,31" max="-30,8,40"/>
+    </union>
+    <union id="spawns">
+        <rectangle min="-57,55" max="-50,75"/>
+        <rectangle min="-57,68" max="-37,75"/>
+        <rectangle min="51,-74" max="58,-54"/>
+        <rectangle min="38,-74" max="58,-67"/>
+    </union>
+    <apply region="hills" block="never" message="You can't edit the hill!"/>
+    <apply region="spawns" block="never" message="You can't edit the spawn!"/>
+    <apply region="everywhere" block-break="breakable" message="You can't blow up quartz!"/>
+</regions>
+<control-points neutral-state="true" show-progress="true">
+    <!-- Blue visual control points -->
+    <control-point initial-owner="blue-team" id="blue-last" required="false" name="Blue Last" capture-time="6s" time-multiplier="0.35" points="0" incremental="true" capture="cp-blue-last" progress="cp-blue-last" player-filter="filter-blue-last"/>
+    <control-point initial-owner="blue-team" id="blue-2nd" required="false" name="Blue 2nd" capture-time="6s" time-multiplier="0.35" points="0" incremental="true" capture="cp-blue-2nd" progress="cp-blue-2nd" player-filter="filter-blue-2nd"/>
+    <!-- Mid -->
+    <control-point id="mid" required="false" name="Mid" capture-time="6s" points="2" time-multiplier="0.35" incremental="true" capture="cp-mid" progress="cp-mid" player-filter="filter-mid"/>
+    <!-- Red visual control points -->
+    <control-point initial-owner="red-team" id="red-2nd" required="false" name="Red 2nd" capture-time="6s" points="0" time-multiplier="0.35" incremental="true" capture="cp-red-2nd" progress="cp-red-2nd" player-filter="filter-red-2nd"/>
+    <control-point initial-owner="red-team" id="red-last" required="false" name="Red Last" capture-time="6s" points="0" time-multiplier="0.35" incremental="true" capture="cp-red-last" progress="cp-red-last" player-filter="filter-red-last"/>
+    <!-- Point-giving control points -->
+    <control-point id="red-last-point" required="false" show="false" points="1" name="RL Point" capture-time="0s" capture="everywhere" player-filter="filter-last-point-blue" capture-filter="only-blue"/>
+    <control-point id="red-2nd-point" required="false" show="false" points="1" name="R2 Point" capture-time="0s" capture="everywhere" player-filter="filter-2nd-point-blue" capture-filter="only-blue"/>
+    <control-point id="blue-2nd-point" required="false" show="false" points="1" name="B2 Point" capture-time="0s" capture="everywhere" player-filter="filter-2nd-point-red" capture-filter="only-red"/>
+    <control-point id="blue-last-point" required="false" show="false" points="1" name="BL Point" capture-time="0s" capture="everywhere" player-filter="filter-last-point-red" capture-filter="only-red"/>
+</control-points>
+<block-drops>
+    <rule>
+        <filter>
+            <material>iron block</material>
+        </filter>
+        <drops>
+            <item material="iron helmet" enchantment="protection:3"/>
+        </drops>
+    </rule>
+</block-drops>
+<kill-rewards>
+    <kill-reward>
+        <item amount="1" material="golden apple"/>
+        <item amount="4" material="quartz"/>
+        <item amount="32" material="tnt"/>
+    </kill-reward>
+</kill-rewards>
+<itemremove>
+    <item>diamond pickaxe</item>
+    <item>bow</item>
+    <item>arrow</item>
+    <item>vine</item>
+    <item>stained clay</item>
+    <item>nether fence</item>
+    <item>step</item>
+    <item>ladder</item>
+    <item>stone plate</item>
+    <item>redstone block</item>
+    <item>redstone</item>
+    <item>stone button</item>
+    <item>lever</item>
+    <item>redstone torch on</item>
+    <item>diode</item>
+    <item>water bucket</item>
+    <item>bucket</item>
+    <item>tnt</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>bucket</item>
+    <item>diamond block</item>
+    <item>iron block</item>
+    <item>gold block</item>
+    <item>diamond block</item>
+    <item>dispenser</item>
+    <item>quartz block</item>
+    <item>ender stone</item>
+    <item>wood</item>
+    <item>wool</item>
+    <item>obsidian</item>
+    <item>fence</item>
+    <item>wood stairs</item>
+    <item>cobblestone stairs</item>
+    <item>smooth stairs</item>
+    <item>spruce wood stairs</item>
+    <item>dark oak stairs</item>
+    <item>cobblestone</item>
+    <item>golden apple</item>
+    <item>stone button</item>
+    <item>step</item>
+    <item>smooth brick</item>
+    <item>log</item>
+    <item>log 2</item>
+</itemremove>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
