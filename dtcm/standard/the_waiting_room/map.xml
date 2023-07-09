@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>The Waiting Room</name>
-<version>1.1.1</version>
+<version>1.2.1</version>
 <objective>Destroy the other team's side ladder monuments to win!</objective>
 <phase>development</phase>
 <time>30m</time>
@@ -12,11 +12,12 @@
 </contributors>
 <gamemode>dtm</gamemode>
 <created>2023-06-18</created>
-<maxbuildheight>48</maxbuildheight>
 <broadcasts>
     <alert after="3s">The floor is `c`ldeadly`r! Blocks can not be placed onto it.</alert>
-    <alert after="5s">Some parts of this map, such as the `7`lgray walls`r and `6`lcenter tables`r, are `e`lindestructible`r!</alert>
-    <tip after="7s">Indestructible blocks will turn into bedrock or obsidian when punched.</tip>
+    <!-- <alert after="5s" every="60s" count="2">The maximum build height is higher underneath the `f`liron bars`r!</alert> -->
+    <alert after="5s" every="55s" count="2">Some parts of this map, such as the `7`lgray walls`r and `6`lcenter tables`r, are `e`lindestructible`r!</alert>
+    <tip after="7s" every="55s" count="2">Indestructible blocks will turn into bedrock or obsidian when punched.</tip>
+    <tip after="9s" every="81s" count="2">Every `f`l2`r kills, you will get `f`l4 iron blocks`r, which can be used to `e`lrepair`r broken monuments!</tip>
 </broadcasts>
 <teams>
     <team id="team-ladder" color="green" max="16">Lime Ladder</team>
@@ -27,7 +28,7 @@
         <effect duration="oo" ambient="true">night vision</effect>
     </kit>
     <kit id="kit-base">
-        <clear effects="true"/>
+        <clear effects="true" items="false" armor="false"/>
         <effect duration="oo" ambient="true">night vision</effect>
         <effect duration="oo" ambient="true">saturation</effect>
         <effect duration="3" amplifier="10" ambient="true">damage_resistance</effect>
@@ -45,8 +46,10 @@
         <item slot="15" material="water bucket"/>
         <item slot="7" amount="32" material="stone button"/>
         <item slot="8" amount="32" material="ladder"/>
+        <item slot="11" material="shears"/>
         <item slot="16" amount="32" material="lever"/>
         <item slot="17" amount="32" material="trap door"/>
+        <item slot="20" material="iron spade" enchantment="efficiency:1"/>
         <item slot="25" amount="16" material="diode"/>
         <item slot="26" amount="32" material="stone plate"/>
         <item slot="28" material="arrow"/>
@@ -57,23 +60,23 @@
         <chestplate unbreakable="true" material="iron chestplate"/>
         <leggings unbreakable="true" material="chainmail leggings"/>
     </kit>
-    <kit id="kit-ladder" parents="kit-base">
+    <kit id="kit-ladder" parents="kit-base" drop-overflow="true">
         <item slot="3" amount="64" material="stained clay" damage="5"/>
         <item slot="30" amount="64" material="stained clay" damage="5"/>
         <item slot="21" amount="64" material="stained clay" damage="5"/>
         <item slot="12" amount="64" material="stained clay" damage="5"/>
-        <helmet unbreakable="true" color="7FFF4C" material="leather helmet"/>
-        <boots unbreakable="true" color="7FFF4C" material="leather boots"/>
+        <helmet unbreakable="true" color="0CF24C" material="leather helmet"/>
+        <boots unbreakable="true" color="0CF24C" material="leather boots"/>
     </kit>
-    <kit id="kit-sign" parents="kit-base">
+    <kit id="kit-sign" parents="kit-base" drop-overflow="true">
         <item slot="3" amount="64" material="stained clay" damage="4"/>
         <item slot="30" amount="64" material="stained clay" damage="4"/>
         <item slot="21" amount="64" material="stained clay" damage="4"/>
         <item slot="12" amount="64" material="stained clay" damage="4"/>
-        <helmet unbreakable="true" color="FFE54C" material="leather helmet"/>
-        <boots unbreakable="true" color="FFE54C" material="leather boots"/>
+        <helmet unbreakable="true" color="F2E53F" material="leather helmet"/>
+        <boots unbreakable="true" color="F2E53F" material="leather boots"/>
     </kit>
-    <kit id="death">
+    <kit id="death" force="true">
         <clear effects="true" items="false" armor="false"/>
         <effect amplifier="-37" duration="oo">health boost</effect>
         <effect amplifier="37" duration="oo">wither</effect>
@@ -127,21 +130,47 @@
             <team>team-sign</team>
         </all>
     </deny>
+    <not id="all-but-iron">
+        <material>iron block</material>
+    </not>
 </filters>
 <regions>
+    <!-- build height limits -->
+    <below id="lower-build-limit" y="17"/>
+    <above id="upper-build-limit" y="49"/>
+    <above id="upper-bar-build-limit" y="49"/> <!-- build limit under iron bars -->
+    <!-- general regions -->
     <union id="spawns">
         <cuboid id="spawn-ladder" min="-48,32,96" max="-32,48,112"/>
         <cuboid id="spawn-sign" min="48,32,96" max="64,48,112"/>
     </union>
-    <cuboid id="play-area" min="-32,17,64" max="48,64,144"/>
+    <union id="play-area">
+        <complement> <!-- main play area -->
+            <cuboid id="destroyable-area" min="-32,16,64" max="48,64,144"/>
+            <region id="upper-build-limit"/>
+            <region id="lower-build-limit"/>
+        </complement>
+        <complement> <!-- play area behind iron bars-->
+            <union>    
+                <cuboid min="-32,16,64" max="-23,64,137"/>
+                <cuboid min="-32,16,64" max="48,64,73"/>
+                <cuboid min="40,16,64" max="48,64,137"/>
+            </union>
+            <region id="upper-bar-build-limit"/>
+            <region id="lower-build-limit"/>
+        </complement>
+    </union>
     <cuboid id="floor" min="-32,15,64" max="48,16,176"/>
-    <cuboid id="death-area" min="-32,0,64" max="48,17.5,176"/>
+    <below id="death-area" y="17.5"/>
     <union id="main-area">
         <region id="spawns"/>
         <region id="play-area"/>
     </union>
     <negative id="not-main-area">
         <region id="main-area"/>
+    </negative>
+    <negative id="not-destroyable-area">
+        <region id="destroyable-area"/>
     </negative>
     <union id="tables">
         <cuboid id="table-fence-1" min="6,16,86" max="10,32,90"/>
@@ -220,22 +249,25 @@
             <cuboid min="47,33,113" max="48,35,127"/>
         </union>
     </union>
-    <apply region="spawn-ladder" enter="only-ladder" message="You may not enter the enemy spawn!"/>
-    <apply region="spawn-sign" enter="only-sign" message="You may not enter the enemy spawn!"/>
-    <apply region="spawns" block="never" message="You may not modify the spawn area!" early-warning="true"/>
-    <apply region="unbreakable-wood" block-break="player-explosion" message="You may not destroy the unbreakable wood blocks!"/>
-    <apply region="ladder-monuments" block-break="sign-mon-explosion" message="The monuments must be destroyed with TNT!" early-warning="true"/>
-    <apply region="sign-monuments" block-break="ladder-mon-explosion" message="The monuments must be destroyed with TNT!" early-warning="true"/>
-    <apply region="floor" block-place-against="never" message="You may not place blocks against the floor!"/>
-    <apply region="not-main-area" block="never" message="You may not modify the void area!" early-warning="true"/>
+    <negative id="not-monuments">
+        <union>
+            <region id="ladder-monuments"/>
+            <region id="sign-monuments"/>
+        </union>
+    </negative>
+    <apply region="spawn-ladder" enter="only-ladder" message="You may not enter the enemy spawn"/>
+    <apply region="spawn-sign" enter="only-sign" message="You may not enter the enemy spawn"/>
+    <apply region="spawns" block="never" message="You may not modify the spawn area" early-warning="true"/>
+    <apply region="unbreakable-wood" block-break="player-explosion" message="You may not destroy the unbreakable wood blocks"/>
+    <apply region="ladder-monuments" block-break="sign-mon-explosion" message="The monuments must be destroyed with TNT" early-warning="true"/>
+    <apply region="sign-monuments" block-break="ladder-mon-explosion" message="The monuments must be destroyed with TNT" early-warning="true"/>
+    <apply region="floor" block-place-against="never" message="You may not place blocks against the floor"/>
+    <apply region="not-destroyable-area" block="never" message="You may not modify the void area" early-warning="true"/>
+    <apply region="not-main-area" block-place="never" message="You have reached the maximum build height"/>
+    <apply region="not-monuments" block-place="all-but-iron" message="Iron blocks may only be used to repair monuments"/>
     <apply region="death-area" kit="death">
         <filter>
             <participating/>
-        </filter>
-    </apply>
-    <apply region="everywhere" kit="night-vision">
-        <filter>
-            <observing/>
         </filter>
     </apply>
 </regions>
@@ -258,7 +290,7 @@
         </regions>
     </spawn>
 </spawns>
-<destroyables completion="100%" required="true" show-progress="true" repairable="false">
+<destroyables completion="100%" required="true" show-progress="true" repairable="true">
     <destroyable name="Emerald Ladder" region="mon-ladder-emerald" owner="team-ladder" materials="emerald block;iron block"/>
     <destroyable name="Endstone Ladder" region="mon-ladder-endstone" owner="team-ladder" materials="ender stone;iron block"/>
     <destroyable name="Golden Ladder" region="mon-sign-gold" owner="team-sign" materials="gold block;iron block"/>
@@ -270,13 +302,21 @@
         <item amount="32" material="tnt"/>
         <item amount="16" material="ladder"/>
     </kill-reward>
-    <kill-reward> <!-- team-ladder -->
+    <kill-reward>
+        <filter>
+            <kill-streak count="2"/>
+        </filter>
+        <item amount="4" material="iron block"/>
+    </kill-reward>
+    <!-- team-ladder -->
+    <kill-reward> 
         <filter>
             <team>team-ladder</team>
         </filter>
         <item amount="1" material="gold ingot"/>
     </kill-reward>
-    <kill-reward> <!-- team-sign -->
+    <!-- team-sign -->
+    <kill-reward> 
         <filter>
             <team>team-sign</team>
         </filter>
@@ -333,40 +373,36 @@
     <item>clay</item>
     <item>clay ball</item>
     <item>dirt</item>
+    <item>tripwire hook</item>
+    <!-- unbreakables -->
+    <item>bedrock</item>
+    <item>obsidian</item>
+    <!-- kit (indirect) -->
+    <item>bucket</item>
+</itemremove>
+<itemkeep>
     <!-- kit -->
     <item>iron sword</item>
     <item>diamond pickaxe</item>
     <item>iron axe</item>
+    <item>iron spade</item>
+    <item>shears</item>
     <item>bow</item>
     <item>arrow</item>
     <item>step</item>
     <item>ladder</item>
-    <item>obsidian</item>
-    <item>stained clay</item>
-    <item>bucket</item>
     <item>water bucket</item>
     <item>stone plate</item>
     <item>diode</item>
     <item>lever</item>
-    <item>iron door</item>
-    <item>fence</item>
-    <item>wood</item>
     <item>tnt</item>
     <item>stone button</item>
     <item>redstone</item>
-    <item>ladder</item>
-    <item>log</item>
-    <item>wood step</item>
-    <item>gravel</item>
-    <item>flint</item>
     <item>trap door</item>
     <item>fence gate</item>
-    <item>redstone block</item>
     <item>nether fence</item>
-    <!-- unbreakables -->
-    <item>bedrock</item>
-    <item>obsidian</item>
-</itemremove>
+    <item>stained clay</item>
+</itemkeep>
 <armorkeep>
     <item>leather helmet</item>
     <item>iron chestplate</item>
