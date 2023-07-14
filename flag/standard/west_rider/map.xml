@@ -1,13 +1,21 @@
 <map proto="1.4.2">
 <name>West Rider</name>
-<version>1.1.7</version>
-<objective>Control the flag for 200 seconds to win!</objective>
+<version>1.1.8</version>
+<variant id="5v5">5v5</variant>
+<unless variant="5v5">
+    <include id="kotf"/>
+</unless>
+<if variant="5v5">
+    <include id="kotf-comp"/>
+    <constant id="respawn-timer">5s</constant>
+</if>
+<constant id="damage-resistance">6s</constant>
+<objective>Control the flag for ${score} seconds to win!</objective>
 <gamemode>kotf</gamemode>
-<edition>standard</edition>
 <authors>
     <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
     <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
-    <author uuid="38ef938a-7020-4c04-9d12-4875ed0598ca"/> <!-- Le0n4rdo fka Kazoha -->
+    <author uuid="38ef938a-7020-4c04-9d12-4875ed0598ca"/> <!-- Kazoha -->
     <author uuid="f6f5dce8-a158-461d-b26d-dc8acfaeedd7"/> <!-- Kallowy -->
 </authors>
 <contributors>
@@ -19,43 +27,33 @@
     <alert after="2s">If Blue holds the flag, it spawns at Red's flag post, and if Red holds the flag, it spawns at Blue's flag post.</alert>
 </broadcasts>
 <teams>
-    <team id="blue" color="blue" max="16">Blue</team>
-    <team id="red" color="dark red" max="16">Red</team>
+    <unless variant="5v5">
+        <team id="blue" color="blue" max="16">Blue</team>
+        <team id="red" color="dark red" max="16">Red</team>
+    </unless>
+    <if variant="5v5">
+        <team id="blue" color="blue" max="5" max-overfill="5">Blue</team>
+        <team id="red" color="dark red" max="5" max-overfill="5">Red</team>
+    </if>
 </teams>
 <kits>
-    <kit id="spawn-kit">
-        <clear/>
-        <item slot="0" unbreakable="true" material="stone sword"/>
-        <item slot="1" unbreakable="true" material="bow"/>
-        <item slot="2" material="golden apple"/>
-        <item slot="8" amount="16" material="arrow"/>
-        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
-        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
-        <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="2">projectile_protection</enchantment>
-        </leggings>
-        <boots unbreakable="true" material="iron boots">
-            <enchantment>feather_falling</enchantment>
-        </boots>
-        <effect duration="1s" amplifier="0">health boost</effect>
-        <effect duration="2s" amplifier="10">regeneration</effect>
-        <effect duration="6s" amplifier="255">resistance</effect>
-        <game-mode>adventure</game-mode>
+    <kit id="spawn-kit" parent="base-kit">
+        <if variant="default">
+            <action>
+                <replace-item>
+                    <find unbreakable="true" material="iron boots"/>
+                    <replace unbreakable="true" enchantment="feather_falling" material="iron boots"/>
+                </replace-item>
+            </action>
+        </if>
     </kit>
-    <kit id="flag-kit" force="true">
-        <effect>slowness</effect>
-        <effect amplifier="-3">health boost</effect>
-        <effect duration="3s" amplifier="2">absorption</effect>
+    <kit id="flag-kit-set-variables" parent="flag-kit">
         <action filter="blue-team">
             <set var="flag_held_by" value="1"/>
         </action>
         <action filter="red-team">
             <set var="flag_held_by" value="2"/>
         </action>
-    </kit>
-    <kit id="reset-health" force="true">
-        <effect duration="0s">slowness</effect>
-        <effect duration="0s">health boost</effect>
     </kit>
 </kits>
 <spawns>
@@ -81,17 +79,6 @@
 <filters>
     <team id="blue-team">blue</team>
     <team id="red-team">red</team>
-    <any id="has-flag">
-        <carrying-flag id="flag-carrier">flag</carrying-flag>
-        <not>
-            <same-team id="flag-control">
-                <carrying-flag>flag</carrying-flag>
-            </same-team>
-        </not>
-    </any>
-    <deny id="deny-flag-carrier">
-        <filter id="flag-carrier"/>
-    </deny>
     <variable id="held-by-blue" var="flag_held_by">1</variable>
     <variable id="held-by-red" var="flag_held_by">2</variable>
 </filters>
@@ -115,47 +102,15 @@
           color="orange"
           shared="true"
           points-rate="1"
-          pickup-kit="flag-kit"
+          pickup-kit="flag-kit-set-variables"
           drop-kit="reset-health"
           flag-proximity-metric="none"
-          show-respawn-on-pickup="true">
-        <post return-time="0s" respawn-time="20s">
+          show-respawn-on-pickup="${announce-post-pickup}">
+        <post return-time="0s" respawn-time="${flag-respawn-timer}">
             <post name="Mid Post" respawn-filter="never">4.5,17,1.5</post>
             <post name="Blue's Post" respawn-filter="held-by-red" yaw="180">-14.5,14,14.5</post>
             <post name="Red's Post" respawn-filter="held-by-blue" yaw="0">23.5,14,-11.5</post>
         </post>
     </flag>
 </flags>
-<score>
-    <limit>200</limit>
-</score>
-<toolrepair>
-    <tool>stone sword</tool>
-    <tool>bow</tool>
-</toolrepair>
-<itemremove>
-    <item>leather helmet</item>
-    <item>leather chestplate</item>
-    <item>chainmail leggings</item>
-    <item>iron boots</item>
-    <item>banner</item>
-</itemremove>
-<itemkeep>
-    <item>stone sword</item>
-    <item>bow</item>
-    <item>golden apple</item>
-    <item>arrow</item>
-</itemkeep>
-<kill-reward>
-    <item material="golden apple"/>
-    <item amount="8" material="arrow"/>
-</kill-reward>
-<respawn spectate="true" auto="true">
-    <message>
-        {"translate":"death.respawn.confirmed.waiting.flagDropped"}
-    </message>
-</respawn>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
 </map>
