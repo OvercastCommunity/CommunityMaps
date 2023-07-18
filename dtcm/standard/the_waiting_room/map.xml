@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>The Waiting Room</name>
-<version>1.2.1</version>
+<version>1.2.3</version>
 <objective>Destroy the other team's side ladder monuments to win!</objective>
 <phase>development</phase>
 <time>30m</time>
@@ -12,9 +12,12 @@
 </contributors>
 <gamemode>dtm</gamemode>
 <created>2023-06-18</created>
+<include id="void-death"/>
+<constants>
+    <constant id="void-plane">17.5</constant>
+</constants>
 <broadcasts>
     <alert after="3s">The floor is `c`ldeadly`r! Blocks can not be placed onto it.</alert>
-    <!-- <alert after="5s" every="60s" count="2">The maximum build height is higher underneath the `f`liron bars`r!</alert> -->
     <alert after="5s" every="55s" count="2">Some parts of this map, such as the `7`lgray walls`r and `6`lcenter tables`r, are `e`lindestructible`r!</alert>
     <tip after="7s" every="55s" count="2">Indestructible blocks will turn into bedrock or obsidian when punched.</tip>
     <tip after="9s" every="81s" count="2">Every `f`l2`r kills, you will get `f`l4 iron blocks`r, which can be used to `e`lrepair`r broken monuments!</tip>
@@ -46,14 +49,14 @@
         <item slot="15" material="water bucket"/>
         <item slot="7" amount="32" material="stone button"/>
         <item slot="8" amount="32" material="ladder"/>
-        <item slot="11" material="shears"/>
+        <item slot="11" unbreakable="true" material="shears"/>
         <item slot="16" amount="32" material="lever"/>
         <item slot="17" amount="32" material="trap door"/>
-        <item slot="20" material="iron spade" enchantment="efficiency:1"/>
+        <item slot="20" unbreakable="true" material="iron spade" enchantment="efficiency:1"/>
         <item slot="25" amount="16" material="diode"/>
         <item slot="26" amount="32" material="stone plate"/>
         <item slot="28" material="arrow"/>
-        <item slot="29" enchantment="efficiency:2" material="iron axe"/>
+        <item slot="29" unbreakable="true" enchantment="efficiency:2" material="iron axe"/>
         <item slot="31" amount="64" material="redstone"/>
         <item slot="34" amount="32" material="nether fence"/>
         <item slot="35" amount="64" material="step"/>
@@ -75,11 +78,6 @@
         <item slot="12" amount="64" material="stained clay" damage="4"/>
         <helmet unbreakable="true" color="F2E53F" material="leather helmet"/>
         <boots unbreakable="true" color="F2E53F" material="leather boots"/>
-    </kit>
-    <kit id="death" force="true">
-        <clear effects="true" items="false" armor="false"/>
-        <effect amplifier="-37" duration="oo">health boost</effect>
-        <effect amplifier="37" duration="oo">wither</effect>
     </kit>
 </kits>
 <tnt>
@@ -133,6 +131,12 @@
     <not id="all-but-iron">
         <material>iron block</material>
     </not>
+    <not id="all-but-water">
+        <any>
+            <material>water bucket</material>
+            <material>water</material>
+        </any>
+    </not>
 </filters>
 <regions>
     <!-- build height limits -->
@@ -146,9 +150,11 @@
     </union>
     <union id="play-area">
         <complement> <!-- main play area -->
-            <cuboid id="destroyable-area" min="-32,16,64" max="48,64,144"/>
+            <complement id="destroyable-area">
+                <cuboid  min="-32,16,64" max="48,64,144"/>
+                <region id="lower-build-limit"/>
+            </complement>
             <region id="upper-build-limit"/>
-            <region id="lower-build-limit"/>
         </complement>
         <complement> <!-- play area behind iron bars-->
             <union>    
@@ -161,7 +167,6 @@
         </complement>
     </union>
     <cuboid id="floor" min="-32,15,64" max="48,16,176"/>
-    <below id="death-area" y="17.5"/>
     <union id="main-area">
         <region id="spawns"/>
         <region id="play-area"/>
@@ -250,26 +255,22 @@
         </union>
     </union>
     <negative id="not-monuments">
-        <union>
+        <union id="monuments">
             <region id="ladder-monuments"/>
             <region id="sign-monuments"/>
         </union>
     </negative>
-    <apply region="spawn-ladder" enter="only-ladder" message="You may not enter the enemy spawn"/>
-    <apply region="spawn-sign" enter="only-sign" message="You may not enter the enemy spawn"/>
-    <apply region="spawns" block="never" message="You may not modify the spawn area" early-warning="true"/>
-    <apply region="unbreakable-wood" block-break="player-explosion" message="You may not destroy the unbreakable wood blocks"/>
-    <apply region="ladder-monuments" block-break="sign-mon-explosion" message="The monuments must be destroyed with TNT" early-warning="true"/>
-    <apply region="sign-monuments" block-break="ladder-mon-explosion" message="The monuments must be destroyed with TNT" early-warning="true"/>
-    <apply region="floor" block-place-against="never" message="You may not place blocks against the floor"/>
-    <apply region="not-destroyable-area" block="never" message="You may not modify the void area" early-warning="true"/>
-    <apply region="not-main-area" block-place="never" message="You have reached the maximum build height"/>
-    <apply region="not-monuments" block-place="all-but-iron" message="Iron blocks may only be used to repair monuments"/>
-    <apply region="death-area" kit="death">
-        <filter>
-            <participating/>
-        </filter>
-    </apply>
+    <apply region="spawn-ladder" enter="only-ladder" message="You may not enter the enemy spawn!"/>
+    <apply region="spawn-sign" enter="only-sign" message="You may not enter the enemy spawn!"/>
+    <apply region="spawns" block="never" message="You may not modify the spawn area!" early-warning="true"/>
+    <apply region="unbreakable-wood" block-break="player-explosion" message="You may not destroy the unbreakable wood blocks!"/>
+    <apply region="ladder-monuments" block-break="sign-mon-explosion" message="The monuments must be destroyed with TNT!" early-warning="true"/>
+    <apply region="sign-monuments" block-break="ladder-mon-explosion" message="The monuments must be destroyed with TNT!" early-warning="true"/>
+    <apply region="floor" block-place-against="never" message="You may not place blocks against the floor!"/>
+    <apply region="not-destroyable-area" block="never" message="You may not modify the void area!" early-warning="true"/>
+    <apply region="not-main-area" block-place="never" message="You have reached the maximum build height!"/>
+    <apply region="not-monuments" block-place="all-but-iron" message="Iron blocks may only be used to repair monuments!"/>
+    <apply region="monuments" block-place="all-but-water" message="You may not place water inside the monument area!"/>
 </regions>
 <spawns>
     <default kit="night-vision">
@@ -297,7 +298,8 @@
     <destroyable name="Endstone Ladder" region="mon-sign-endstone" owner="team-sign" materials="ender stone;iron block"/>
 </destroyables>
 <kill-rewards>
-    <kill-reward> <!-- general-->
+    <!-- general-->
+    <kill-reward>
         <item amount="1" material="golden apple"/>
         <item amount="32" material="tnt"/>
         <item amount="16" material="ladder"/>
@@ -337,6 +339,17 @@
     </rule>
     <rule region="unbreakable-wood" filter="brock">
         <replacement>bedrock</replacement>
+    </rule>
+    <rule region="destroyable-area">
+        <filter>
+            <any>
+                <material>double step:8</material>
+                <material>double step:9</material>
+            </any>
+        </filter>
+        <drops>
+            <item chance="0" material="step"/>
+        </drops>
     </rule>
 </block-drops>
 <itemremove>
