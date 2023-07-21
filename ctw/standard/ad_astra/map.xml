@@ -1,11 +1,10 @@
 <map proto="1.4.2">
 <name>Ad Astra</name>
-<version>1.0.14</version>
+<version>2.0</version>
 <objective>Take the enemy's wool located near their base and place it back at your spawn!</objective>
 <created>2023-02-11</created>
 <maxbuildheight>30</maxbuildheight>
 <gamemode>ctw</gamemode>
-<phase>development</phase>
 <authors>
     <author uuid="f610e558-a3c8-44fb-8622-68cc49dbc18f"/> <!-- Dawthon -->
 </authors>
@@ -24,17 +23,17 @@
 <spawns>
     <spawn team="red-team" kit="spawn-kit">
         <regions>
-            <point yaw="0">-113.5,20,-201.5</point>
+            <point yaw="0">-113.5,20,-189.5</point>
         </regions>
     </spawn>
     <spawn team="blue-team" kit="spawn-kit">
         <regions>
-            <point yaw="180">-113.5,20,78.5</point>
+            <point yaw="180">-113.5,20,90.5</point>
         </regions>
     </spawn>
     <default>
         <regions>
-            <point yaw="90">4.5,43,-61.5</point>
+            <point yaw="90">4.5,43,-49.5</point>
         </regions>
     </default>
 </spawns>
@@ -42,7 +41,7 @@
     <kit id="spawn-kit">
         <clear/>
         <item slot="0" material="iron sword" unbreakable="true"/>
-        <item slot="1" material="bow" enchantment="infinity" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true"/>
         <item slot="2" material="iron pickaxe" enchantment="dig speed" unbreakable="true"/>
         <item slot="3" material="iron axe" enchantment="dig speed" unbreakable="true"/>
         <item slot="4" material="iron spade" unbreakable="true"/>
@@ -50,7 +49,7 @@
         <item slot="6" material="glass" amount="32"/>
         <item slot="7" material="bucket"/>
         <item slot="8" material="golden apple"/>
-        <item slot="28" material="arrow"/>
+        <item slot="28" material="arrow" amount="64"/>
         <item slot="29" material="shears" unbreakable="true"/>
         <item slot="32" material="wood" amount="64"/>
         <helmet material="leather helmet" team-color="true" unbreakable="true"/>
@@ -104,81 +103,76 @@
     </all>
     <after id="water-lane-time" message="`9Water `9Lanes `fwill `fappear `fin {0}" duration="2m" filter="msg-waterlane"/>
     <variable id="no-water-lanes" var="water_lanes">0</variable>
+    <deny id="deny-beacon">
+        <material>beacon</material>
+    </deny>
 </filters>
 <regions>
     <!-- Void -->
     <union id="middle">
-        <complement id="red-mid">
-            <rectangle min="-43,-67" max="-184,-115"/>
-            <rectangle id="east-void" min="-55,-67" max="-94,-101"/>
-            <mirror region="east-void" origin="-113.5,0,-61.5" normal="1,0,0"/>
-        </complement>
-        <mirror region="red-mid" origin="-113.5,0,-61.5" normal="0,0,1"/>
-        <rectangle min="-60,-56" max="-167,-67"/>
+        <rectangle min="-129,-68" max="-98,-31"/>
+        <rectangle min="-69,-67" max="-38,-32"/>
+        <rectangle min="-189,-67" max="-158,-32"/>
     </union>
     <union id="water-lanes">
         <!-- water lanes -->
-        <rectangle id="orange-water-lane" min="-185,-134" max="-171,-193"/>
-        <mirror id="yellow-water-lane" region="orange-water-lane" origin="-113.5,0,-61.5" normal="1,0,0"/>
-        <mirror region="orange-water-lane" origin="-113.5,0,-61.5" normal="0,0,1"/>
-        <mirror region="yellow-water-lane" origin="-113.5,0,-61.5" normal="0,0,1"/>
+        <rectangle id="orange-water-lane" min="-185,-169" max="-171,-116"/>
+        <mirror id="yellow-water-lane" region="orange-water-lane" origin="-113.5,0,-49.5" normal="1,0,0"/>
+        <mirror region="orange-water-lane" origin="-113.5,0,-49.5" normal="0,0,1"/>
+        <mirror region="yellow-water-lane" origin="-113.5,0,-49.5" normal="0,0,1"/>
     </union>
     <union id="water-lanes-y0">
-        <cuboid id="orange-water-lane-y0" min="-185,0,-134" max="-171,1,-193"/>
-        <mirror id="yellow-water-lane-y0" region="orange-water-lane-y0" origin="-113.5,0,-61.5" normal="1,0,0"/>
-        <mirror region="orange-water-lane-y0" origin="-113.5,0,-61.5" normal="0,0,1"/>
-        <mirror region="yellow-water-lane-y0" origin="-113.5,0,-61.5" normal="0,0,1"/>
+        <cuboid id="orange-water-lane-y0" min="-185,0,-169" max="-171,1,-116"/>
+        <mirror id="yellow-water-lane-y0" region="orange-water-lane-y0" origin="-113.5,0,-49.5" normal="1,0,0"/>
+        <mirror region="orange-water-lane-y0" origin="-113.5,0,-49.5" normal="0,0,1"/>
+        <mirror region="yellow-water-lane-y0" origin="-113.5,0,-49.5" normal="0,0,1"/>
     </union>
-    <negative id="void-area">
+    <complement id="void-area">
+        <everywhere/>
         <region id="middle"/>
         <region id="wool-room-blocks"/>
         <region id="spawn-areas"/>
         <region id="water-lanes"/>
-    </negative>
+    </complement>
     <apply block-place="deny-void" block-break="deny-web" region="void-area" message="You may not edit the void!"/>
     <apply block="deny-void" region="water-lanes" message="You may not edit the void!" filter="no-water-lanes"/>
-    <cuboid id="obs-spawn" min="-3,26,-3" size="7,4,7"/>
     <apply block="never" region="obs-spawn" message="You may not modify the observer's spawn!"/>
     <!-- Spawns -->
     <union id="spawn-areas">
-        <complement id="red-spawn-area">
+        <complement>
             <union>
-                <rectangle min="-137,-226" max="-90,-189"/>
-                <rectangle min="-132,-189" max="-95,-162"/>
-                <rectangle min="-125,-162" max="-102,-161"/>
+                <union id="red-spawn-area">
+                    <rectangle min="-90,-212" max="-137,-167"/>
+                    <rectangle min="-123,-167" max="-104,-133"/>
+                </union>
+                <mirror id="blue-spawn-area" region="red-spawn-area" origin="-113.5,0,-49.5" normal="0,0,1"/>
             </union>
             <region id="victory-monuments"/>
         </complement>
-        <mirror id="blue-spawn-area" region="red-spawn-area" origin="-113.5,0,-61.5" normal="0,0,1"/>
-        <circle center="4.5,-61.5" radius="10.5"/>
+        <circle id="obs-spawn" center="4.5,-49.5" radius="10.5"/>
     </union>
     <apply block-place="deny-players" block-break="allowed-spawn" region="spawn-areas" message="You may not modify spawn areas!"/>
     <apply enter="deny-blue" region="red-spawn-area" message="You may not enter your enemies' spawn!"/>
     <apply enter="deny-red" region="blue-spawn-area" message="You may not enter your enemies' spawn!"/>
-    <!-- Water pools -->
-    <union id="water-pools">
-        <cuboid min="-116,19,43" max="-111,18,40"/>
-        <cuboid min="-111,19,-166" max="-116,18,-163"/>
-    </union>
     <!-- Wool rooms -->
     <union id="wool-rooms">
         <union id="red-wool-rooms">
-            <rectangle id="orange-wool-room" min="-195,-213" max="-220,-190"/>
-            <mirror id="yellow-wool-room" region="orange-wool-room" origin="-113.5,0,-61.5" normal="1,0,0"/>
+            <rectangle id="orange-wool-room" min="-195,-189" max="-220,-166"/>
+            <mirror id="yellow-wool-room" region="orange-wool-room" origin="-113.5,0,-49.5" normal="1,0,0"/>
         </union>
         <union id="blue-wool-rooms">
-            <mirror id="purple-wool-room" region="orange-wool-room" origin="-113.5,0,-61.5" normal="0,0,1"/>
-            <mirror id="pink-wool-room" region="yellow-wool-room" origin="-113.5,0,-61.5" normal="0,0,1"/>
+            <mirror id="purple-wool-room" region="orange-wool-room" origin="-113.5,0,-49.5" normal="0,0,1"/>
+            <mirror id="pink-wool-room" region="yellow-wool-room" origin="-113.5,0,-49.5" normal="0,0,1"/>
         </union>
     </union>
     <union id="wool-room-blocks">
         <union id="red-wool-room-blocks">
-            <cuboid id="orange-wool-room-blocks" min="-195,11,-213" max="-220,47,-190"/>
-            <mirror id="yellow-wool-room-blocks" region="orange-wool-room-blocks" origin="-113.5,0,-61.5" normal="1,0,0"/>
+            <cuboid id="orange-wool-room-blocks" min="-195,11,-189" max="-220,47,-166"/>
+            <mirror id="yellow-wool-room-blocks" region="orange-wool-room-blocks" origin="-113.5,0,-49.5" normal="1,0,0"/>
         </union>
         <union id="blue-wool-room-blocks">
-            <mirror id="purple-wool-room-blocks" region="orange-wool-room-blocks" origin="-113.5,0,-61.5" normal="0,0,1"/>
-            <mirror id="pink-wool-room-blocks" region="yellow-wool-room-blocks" origin="-113.5,0,-61.5" normal="0,0,1"/>
+            <mirror id="purple-wool-room-blocks" region="orange-wool-room-blocks" origin="-113.5,0,-49.5" normal="0,0,1"/>
+            <mirror id="pink-wool-room-blocks" region="yellow-wool-room-blocks" origin="-113.5,0,-49.5" normal="0,0,1"/>
         </union>
     </union>
     <apply block="deny-red" region="red-wool-rooms" message="You may not modify the wool room!"/>
@@ -188,32 +182,26 @@
     <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your team's wool room!"/>
     <point id="purple-wool-spawner">-210.5,21.2,78.5</point>
     <point id="pink-wool-spawner">-16.5,21.2,78.5</point>
-    <point id="orange-wool-spawner">-210.5,21.2,-201.5</point>
-    <point id="yellow-wool-spawner">-16.5,21.2,-201.5</point>
+    <point id="orange-wool-spawner">-210.5,21.2,-177.5</point>
+    <point id="yellow-wool-spawner">-16.5,21.2,-177.5</point>
     <!-- Victory monuments -->
     <union id="victory-monuments">
-        <block id="orange-victory-monument">-118,20,67</block>
-        <block id="yellow-victory-monument">-110,20,67</block>
-        <mirror id="purple-victory-monument" region="orange-victory-monument" origin="-113.5,0,-61.5" normal="0,0,1"/>
-        <mirror id="pink-victory-monument" region="yellow-victory-monument" origin="-113.5,0,-61.5" normal="0,0,1"/>
+        <block id="orange-victory-monument">-118,20,77</block>
+        <block id="yellow-victory-monument">-110,20,77</block>
+        <mirror id="purple-victory-monument" region="orange-victory-monument" origin="-113.5,0,-49.5" normal="0,0,1"/>
+        <mirror id="pink-victory-monument" region="yellow-victory-monument" origin="-113.5,0,-49.5" normal="0,0,1"/>
     </union>
-    <!-- gapples -->
-    <point id="gapple-point">-113.5,8.2,-61.5</point>
-    <cuboid id="gapple-spawner" min="-115,7,-63" size="3,4,3"/>
-    <apply block="never" region="gapple-spawner" message="You may not edit the golden apple spawner!"/>
+    <apply use="deny-beacon"/>
 </regions>
 <wools team="red-team" craftable="false">
     <wool color="purple" location="-210.5,21.5,78.5" monument="purple-victory-monument"/>
     <wool color="pink" location="-16.5,21.5,78.5" monument="pink-victory-monument"/>
 </wools>
 <wools team="blue-team" craftable="false">
-    <wool color="orange" location="-210.5,21.5,-201.5" monument="orange-victory-monument"/>
-    <wool color="yellow" location="16.5,21.2,-201.5" monument="yellow-victory-monument"/>
+    <wool color="orange" location="-210.5,21.5,-177.5" monument="orange-victory-monument"/>
+    <wool color="yellow" location="16.5,21.2,-177.5" monument="yellow-victory-monument"/>
 </wools>
 <spawners>
-    <spawner spawn-region="gapple-point" player-region="everywhere" max-entities="1" delay="8s">
-        <item amount="1" material="golden apple"/>
-    </spawner>
     <!-- Red side -->
     <spawner spawn-region="orange-wool-spawner" player-region="orange-wool-room" delay="4" max-entities="8">
         <item material="wool" amount="1" damage="1"/>
@@ -265,12 +253,10 @@
     <tool>iron pickaxe</tool>
     <tool>iron axe</tool>
     <tool>iron spade</tool>
-    <tool>arrow</tool>
     <tool>shears</tool>
 </toolrepair>
 <renewables>
     <renewable region="spawn-areas" renew-filter="only-iron"/>
-    <renewable region="water-pools" rate="0.5" sound="false" particles="false"/>
 </renewables>
 <block-drops>
     <rule>
@@ -288,6 +274,7 @@
         <item material="golden apple"/>
         <item material="wood" amount="16"/>
         <item material="glass" amount="8"/>
+        <item material="arrow" amount="16"/>
     </kill-reward>
 </kill-rewards>
 <hunger>
