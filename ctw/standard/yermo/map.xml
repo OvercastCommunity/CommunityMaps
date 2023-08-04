@@ -1,18 +1,17 @@
 <map proto="1.4.0">
 <name>Yermo</name>
-<version>1.0.7</version>
+<version>1.0.8</version>
 <objective>Capture the enemy team's wool</objective>
 <created>2023-01-14</created>
 <authors>
-    <author uuid="2d372806-0e62-4e44-87f7-2394540f5203"/> <!--tkes-->
-    <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!--lunacy-->
+    <author uuid="2d372806-0e62-4e44-87f7-2394540f5203"/> <!-- tkes -->
+    <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunacy -->
 </authors>
 <teams>
-    <team id="blue" color="blue" max="12">Blue</team>
-    <team id="red" color="dark red" max="12">Red</team>
+    <team id="blue-team" color="blue" max="12">Blue</team>
+    <team id="red-team" color="dark red" max="12">Red</team>
 </teams>
 <kits>
-    <!--PARENT SPAWN KIT-->
     <kit id="spawn-kit">
         <clear/>
         <item slot="0" unbreakable="true" material="iron sword"/>
@@ -31,25 +30,37 @@
         <effect duration="5" amplifier="10">damage resistance</effect>
     </kit>
 </kits>
-<!--SPAWNS-->
 <spawns>
     <default>
         <region yaw="-90">
             <cylinder base="20.5,58,-7.5" height="1" radius="0.3"/>
         </region>
     </default>
-    <spawn team="blue" kit="spawn-kit">
+    <spawn team="blue-team" kit="spawn-kit">
         <region yaw="-90">
             <cylinder base="-39,5,9.5" height="0" radius="0.2"/>
         </region>
     </spawn>
-    <spawn team="red" kit="spawn-kit">
+    <spawn team="red-team" kit="spawn-kit">
         <region yaw="90">
             <cylinder base="80,5,-24.5" height="0" radius="0.2"/>
         </region>
     </spawn>
 </spawns>
-<!--FILTERS-->
+<wools team="blue-team" craftable="false">
+    <wool color="lime" location="90.5,15,-25.5">
+        <monument>
+            <block>-42,7,9</block>
+        </monument>
+    </wool>
+</wools>
+<wools team="red-team" craftable="false">
+    <wool color="pink" location="-49.5,15,10.5">
+        <monument>
+            <block>82,7,-25</block>
+        </monument>
+   </wool>
+</wools>
 <filters>
     <deny id="deny-players">
         <participating/>
@@ -57,7 +68,7 @@
     <material id="only-iron">iron block</material>
     <not id="blue-in-wr">
         <any>
-            <team id="only-red">red</team>
+            <team id="only-red">red-team</team>
             <material>chest</material>
             <material>beacon</material>
             <material>iron block</material>
@@ -65,7 +76,7 @@
     </not>
     <not id="red-in-wr">
         <any>
-            <team id="only-blue">blue</team>
+            <team id="only-blue">blue-team</team>
             <material>chest</material>
             <material>beacon</material>
             <material>iron block</material>
@@ -83,41 +94,40 @@
             <material>beacon</material>
         </any>
     </not>
-    <not id="deny-void">
-        <void/>
-    </not>
+    <any id="block-break-void-filter">
+        <all>
+            <material>leaves</material>
+            <void/>
+        </all>
+        <not id="block-place-void-filter">
+            <void/>
+        </not>
+    </any>
 </filters>
-<!--REGIONS-->
 <regions>
-    <complement id="void-area">
-        <everywhere/>
-        <rectangle min="21,15" max="-6,-31"/> <!--mid-blue-->
-        <rectangle min="47,16" max="20,-30"/> <!--mid-red-->
-        <rectangle min="-13,-30" max="-38,-19"/> <!--blue-->
-        <rectangle min="-49,-16" max="-42,2"/> <!--blue-->
-
-        <rectangle min="55,15" max="79,4"/> <!--rede-->
-        <rectangle min="83,1" max="90,-17"/> <!--red-->
-    </complement>
+    <negative id="void-area">
+        <rectangle min="21,15" max="-6,-31"/> <!-- mid-blue -->
+        <rectangle min="47,16" max="20,-30"/> <!-- mid-red -->
+        <rectangle min="-13,-30" max="-38,-19"/> <!-- blue -->
+        <rectangle min="-49,-16" max="-42,2"/> <!-- blue -->
+        <rectangle min="55,15" max="79,4"/> <!-- red -->
+        <rectangle min="83,1" max="90,-17"/> <!-- red -->
+    </negative>
     <union id="spawns">
         <cuboid id="red-spawn" min="64.5,3,-19.5" max="84,11,-30"/>
         <cuboid id="blue-spawn" min="-23.5,3,4.5" max="-43,11,15"/>
     </union>
-    <union id="wool-rooms">
-        <union id="blue-wool-rooms"> <!-- blue defends -->
-            <rectangle min="-43.5,4.5" max="-54.5,22.5"/> <!-- Pink -->
-        </union>
-        <union id="red-wool-rooms"> <!-- red defends -->
-            <rectangle min="84.5,-19.5" max="95.5,-37.5"/> <!-- Lime -->
-        </union>
+    <union id="blue-wool-rooms"> <!-- blue defends -->
+        <rectangle min="-43.5,4.5" max="-54.5,22.5"/> <!-- Pink -->
     </union>
-
+    <union id="red-wool-rooms"> <!-- red defends -->
+        <rectangle min="84.5,-19.5" max="95.5,-37.5"/> <!-- Lime -->
+    </union>
     <union id="area-front-spawn">
-        <rectangle min="-22,4" max="-33,-3"/>  <!--blue-->
+        <rectangle min="-22,4" max="-33,-3"/> <!--blue-->
         <rectangle min="63,-12" max="74,-19"/> <!--red-->
     </union>
-
-
+    <!-- applicators -->
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool room!"/>
@@ -126,24 +136,8 @@
     <apply block="red-in-wr" use="only-red-usage" region="blue-wool-rooms"/>
     <apply block-break="only-iron" block-place="deny-players" region="spawns" message="You may not place or break anything in spawn!"/>
     <apply block="never" region="area-front-spawn" message="You may not place blocks here!"/>
-    <apply block="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block-place="block-place-void-filter" block-break="block-break-void-filter" region="void-area" message="You may not build in the void area!"/>
 </regions>
-<!--Wools-->
-<wools team="blue" craftable="false">
-    <wool color="lime" location="90.5,15,-25.5">
-        <monument>
-            <block>-42,7,9</block>
-        </monument>
-    </wool>
-</wools>
-<wools team="red" craftable="false">
-    <wool color="pink" location="-49.5,15,10.5">
-        <monument>
-            <block>82,7,-25</block>
-        </monument>
-   </wool>
-</wools>
-<!--misc-->
 <renewables>
     <renewable region="spawns" renew-filter="only-iron" rate="2" grow="false" particles="true" sound="true"/>
 </renewables>
