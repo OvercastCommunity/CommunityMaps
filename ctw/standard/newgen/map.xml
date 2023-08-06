@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>NewGen</name>
-<version>2.0.2</version>
+<version>2.0.3</version>
 <variant id="christmas" world="christmas" override="true">SnowGen</variant>
 <variant id="christmas_te" world="christmas" override="true">SnowGen: TE</variant>
 <objective>Capture the other team's wools.</objective>
@@ -182,21 +182,28 @@
         <rectangle min="137,-118" max="152,-136"/> <!-- green to mid -->
         <rectangle min="181,-118" max="200,-103"/> <!-- red to mid -->
         <rectangle min="119,-88" max="137,-73"/> <!-- yellow to mid -->
-        <rectangle min="182,-58" max="196,-42"/> <!-- in front of blue -->
-        <rectangle min="123,-149" max="137,-133"/> <!-- in front of green -->
-        <rectangle min="197,-132" max="213,-118"/> <!-- in front of red -->
-        <rectangle min="106,-73" max="122,-59"/> <!-- in front of yellow -->
+        <if variant="christmas_te">
+            <region id="spawn-window-exit"/>
+        </if>
     </complement>
+    <union id="spawn-window-exit">
+        <rectangle min="182,-58" max="196,-42"/> <!-- blue -->
+        <rectangle min="123,-149" max="137,-133"/> <!-- green -->
+        <rectangle min="197,-132" max="213,-118"/> <!-- red -->
+        <rectangle min="106,-73" max="122,-59"/> <!-- yellow -->
+    </union>
     <union id="floor">
         <cuboid min="137,0,-118" max="182,1,-73"/> <!-- mid islands -->
         <cuboid min="167,0,-74" max="182,1,-55"/> <!-- blue to mid -->
         <cuboid min="137,0,-118" max="152,1,-136"/> <!-- green to mid -->
         <cuboid min="181,0,-118" max="200,1,-103"/> <!-- red to mid -->
         <cuboid min="119,0,-88" max="137,1,-73"/> <!-- yellow to mid -->
-        <cuboid min="182,0,-58" max="196,1,-42"/> <!-- in front of blue -->
-        <cuboid min="123,0,-149" max="137,1,-133"/> <!-- in front of green -->
-        <cuboid min="197,0,-132" max="213,1,-118"/> <!-- in front of red -->
-        <cuboid min="106,0,-73" max="122,1,-59"/> <!-- in front of yellow -->
+        <union id="spawn-window-floor">
+            <cuboid min="182,0,-58" max="196,1,-42"/> <!-- blue -->
+            <cuboid min="123,0,-149" max="137,1,-133"/> <!-- green -->
+            <cuboid min="197,0,-132" max="213,1,-118"/> <!-- red -->
+            <cuboid min="106,0,-73" max="122,1,-59"/> <!-- yellow -->
+        </union>
     </union>
     <apply kit="wool-room-gear" region="wool-rooms"/>
     <apply kit="wool-room-kit" region="wool-rooms"/>
@@ -210,7 +217,13 @@
     <apply block="deny-yellow" region="yellow-wool" message="You may not interfere with your team's own wool room!"/>
     <apply block-place="no-safeties" message="You may not place safeties!"/>
     <apply block="wool-room-blocks" region="wool-rooms"/>
-    <apply block-place="never" block-break="only-glass-panes" region="spawns" message="You may not build in spawn!"/>
+    <if variant="christmas_te">
+        <apply block-place="never" block-break="only-glass-panes" region="spawns" message="You may not build in spawn!"/>
+    </if>
+    <unless variant="christmas_te">
+        <apply block="never" region="spawns" message="You may not build in spawn!"/>
+        <apply block-break="deny-void" region="spawn-window-exit" message="You may not build in the void!"/>
+    </unless>
     <apply block-place="deny-void" region="void-area" message="You may not build in the void!"/>
 </regions>
 <unless variant="christmas_te">
@@ -281,18 +294,21 @@
     </wool>
 </wools>
 <actions>
-    <if variant="christmas_te">
-        <trigger scope="match">
-            <filter>
-                <not>
-                    <match-running/>
-                </not>
-            </filter>
-            <action>
+    <trigger scope="match">
+        <filter>
+            <not>
+                <match-running/>
+            </not>
+        </filter>
+        <action>
+            <unless variant="christmas_te">
+                <fill material="air" region="spawn-window-floor" filter="only-stained-glass"/>
+            </unless>
+            <if variant="christmas_te">
                 <fill material="coal block" region="iron-regen" filter="only-iron"/>
-            </action>
-        </trigger>
-    </if>
+            </if>
+        </action>
+    </trigger>
     <trigger scope="match">
         <filter>
             <match-started/>
@@ -381,7 +397,7 @@
         </unless>
     </kill-reward>
 </kill-rewards>
-<respawn delay="4s"/>
+<respawn delay="4s" auto="true"/>
 <maxbuildheight>28</maxbuildheight>
 <item-mods>
     <rule>
