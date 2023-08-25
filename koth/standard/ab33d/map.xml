@@ -1,0 +1,156 @@
+<map proto="1.4.2">
+<name>Ab33d</name>
+<version>1.0</version>
+<objective>Be the first team to gain 450 points.</objective>
+<authors>
+    <author uuid="bd133f12-724a-4ca9-af7b-f808810aa835"/> <!-- ref -->
+    <author uuid="6c5d7783-27fd-4ac5-8a1d-ba35206edf53"/> <!-- _Nathy -->
+    <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
+</authors>
+<teams>
+    <team id="blue-team" color="blue" max="3" max-overfill="3">Blue</team>
+    <team id="red-team" color="dark red" max="3" max-overfill="3">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" material="golden apple"/>
+        <item slot="8" amount="4" material="arrow" locked="true" prevent-sharing="true"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="3">projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" material="iron boots">
+            <enchantment>feather_falling</enchantment>
+        </boots>
+        <effect duration="5s" amplifier="255">resistance</effect>
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="arrow-kit" deduct-items="false">
+        <item slot="8" material="arrow" locked="true" prevent-sharing="true"/>
+    </kit>
+    <kit id="max-arrow-kit">
+        <item slot="8" amount="4" material="arrow" locked="true" prevent-sharing="true"/>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <region yaw="-90">
+            <point>-36.5,20,0.5</point>
+        </region>
+    </default>
+    <spawn team="blue-team" kit="spawn-kit">
+        <region yaw="90">
+            <point>-9.5,17,-18.5</point>
+        </region>
+    </spawn>
+    <spawn team="red-team" kit="spawn-kit">
+        <region yaw="90">
+            <point>-9.5,17,19.5</point>
+        </region>
+    </spawn>
+</spawns>
+<regions>
+    <cuboid id="top" min="-33,19,4" max="-40,23,-3"/>
+    <cuboid id="cave" min="-31,7,4" max="-38,11,-3"/>
+    <apply block="never" use="never"/>
+</regions>
+<king>
+    <hills required="false" capture-time="5s" points="1" time-multiplier="0" show-progress="true" neutral-state="true" incremental="true" permanent="false">
+        <hill name="Top" capture="top" progress="top"/>
+        <hill name="Cave" capture="cave" progress="cave"/>
+    </hills>
+</king>
+<spawners>
+    <spawner delay="6s" max-entities="1">
+        <spawn-region>
+            <point>-12.5,10,0.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="-12.5,10,0.5" height="2" radius="1"/>
+        </player-region>
+        <item material="golden apple"/>
+    </spawner>
+</spawners>
+<score>
+    <limit>450</limit>
+</score>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+    <item>arrow</item>
+</itemremove>
+<itemkeep>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>golden apple</item>
+</itemkeep>
+<kill-reward>
+    <item material="golden apple"/>
+    <kit id="max-arrow-kit"/>
+</kill-reward>
+<respawn delay="5s" auto="true"/>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<modifybowprojectile pickup-filter="never"/>
+<variables>
+    <variable id="prevent_arrows" default="1" scope="player"/>
+</variables>
+<actions>
+    <trigger scope="player">
+        <filter>
+            <after id="requires-arrows" duration="4s">
+                <all>
+                    <any>
+                        <not>
+                            <carrying ignore-metadata="true">
+                                <item material="arrow"/>
+                            </carrying>
+                        </not>
+                        <carrying ignore-metadata="true" amount="[0,4)">
+                            <item material="arrow"/>
+                        </carrying>
+                    </any>
+                    <alive/>
+                    <variable var="prevent_arrows">1</variable>
+                </all>
+            </after>
+        </filter>
+        <action>
+            <set var="prevent_arrows" value="0"/>
+            <kit id="arrow-kit"/>
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <variable var="prevent_arrows">0</variable>
+        </filter>
+        <action>
+            <set var="prevent_arrows" value="1"/>
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <carrying>
+                <item material="arrow" />
+            </carrying>
+        </filter>
+        <action>
+            <replace-item>
+                <find material="arrow" />
+                <replace>air</replace>
+            </replace-item>
+        </action>
+    </trigger>
+</actions>
+</map>
