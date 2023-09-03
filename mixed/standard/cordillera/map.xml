@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Cordillera</name>
-<version>1.0</version>
+<version>1.0.1</version>
 <objective>Jump into the enemy team's portal, located below their spawn point!</objective>
 <created>2023-09-02</created>
 <include id="bridge"/>
@@ -78,6 +78,9 @@
             <material>dispenser</material>
         </any>
     </deny>
+    <after duration="0.05" id="is-alive">
+        <alive/>
+    </after>
 </filters>
 <regions>
     <negative id="not-buildable">
@@ -92,7 +95,7 @@
     <cylinder id="team-one-portal" base="-98.5,61,0.5" height="1" radius="3.5"/>
     <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
     <union id="outside-portal">
-        <block id="team-one-outside-portal">-62,53,0</block>
+        <block id="team-one-outside-portal">-62,54,0</block>
         <mirror region="team-one-outside-portal" origin="${map-origin}" normal="1,0,0"/>
     </union>
     <!-- Round cages -->
@@ -139,7 +142,7 @@
 <shops>
     <shop id="zzuf-shop" name="`f`lCdlla. Incognita Gift Shop">
         <category id="bridge" name="`eBridging Supplies" material="159">
-            <item name="`fMont Blanc Snowball" material="snow ball" amount="6" price="1" currency="emerald" prevent-sharing="true"/>
+            <item name="`bMont Blanc `fSnowball" material="snow ball" amount="6" price="1" currency="emerald" prevent-sharing="true"/>
             <item name="`fiCarus Blade" material="wood sword" damage="59" amount="1" price="2" currency="emerald" prevent-sharing="true">
                 <enchantment level="2">knockback</enchantment>
             </item>
@@ -148,6 +151,9 @@
             </item>
             <item name="`6The Cleaner `f(Haste II)" damage="3" material="potion" amount="1" price="5" currency="emerald" prevent-sharing="true">
                 <effect duration="15s" amplifier="2">haste</effect>
+            </item>
+            <item name="`aChartreuse `f(Strength I)" damage="11" material="potion" amount="1" price="8" currency="emerald" prevent-sharing="true">
+                <effect duration="15s">strength</effect>
             </item>
         </category>
     </shop>
@@ -170,7 +176,7 @@
     <shopkeeper name="Gift Shop Clerk" shop="zzuf-shop" mob="Blaze">
         <point yaw="180" pitch="0">75.5,75,40.5</point>
     </shopkeeper>
-    <shopkeeper name="Callaíta Gift Shop Clerk" shop="zzuf-shop" mob="Blaze">
+    <shopkeeper name="Gift Shop Clerk" shop="zzuf-shop" mob="Blaze">
         <point yaw="180" pitch="0">73.5,75,40.5</point>
     </shopkeeper>
     <shopkeeper name="Gift Shop Clerk" shop="zzuf-shop" mob="Blaze">
@@ -183,10 +189,10 @@
 <actions>
     <trigger filter="yellow-monument-broken" scope="match">
         <action scope="match">
-            <message text="`e⚠ `fAn extra bridge to `eYellow`f's portal has appeared!"/>
+            <message text=" `e⚠ `fAn extra bridge to `eYellow`f's portal has appeared!"/>
             <sound preset="alert"/>
             <fill material="air">
-                <union><block>-71,67,0</block><block>-86,67,0</block></union>
+                <union><block>71,67,0</block><block>86,67,0</block></union>
             </fill>
             <fill material="obsidian">
                 <block>42,95,0</block>
@@ -195,14 +201,42 @@
     </trigger>
     <trigger filter="green-monument-broken" scope="match">
         <action scope="match">
-            <message text="`e⚠ `fAn extra bridge to `2Green`f's portal has appeared!"/>
+            <message text=" `e⚠ `fAn extra bridge to `2Green`f's portal has appeared!"/>
             <sound preset="alert"/>
             <fill material="air">
-                <union><block>71,67,0</block><block>86,67,0</block></union>
+                <union><block>-71,67,0</block><block>-86,67,0</block></union>
             </fill>
             <fill material="obsidian">
                 <block>-42,95,0</block>
             </fill>
+        </action>
+    </trigger>
+    <trigger filter="outside-portal" scope="player">
+        <action scope="player">
+            <replace-item ignore-metadata="true">
+                <find material="iron sword"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="bow"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="diamond pickaxe"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="stained clay"/>
+                <replace material="air"/>
+            </replace-item>
+            <kit id="adventure-kit"/>
+            <message text=" `e⚠ `cYour weapons have been removed!"/>
+            <sound preset="death_other"/>
+        </action>
+    </trigger>
+    <trigger filter="is-alive" scope="player">
+        <action scope="player">
+            <kit id="adventure-kit"/>
         </action>
     </trigger>
 </actions>
