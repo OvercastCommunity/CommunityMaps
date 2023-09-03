@@ -1,0 +1,242 @@
+<map proto="1.4.2">
+<name>Cordillera</name>
+<version>1.0</version>
+<objective>Jump into the enemy team's portal, located below their spawn point!</objective>
+<created>2023-09-02</created>
+<include id="bridge"/>
+<gamemode>dtm</gamemode>
+<constants>
+    <constant id="score-limit">7</constant>
+    <constant id="mercy-limit">5</constant>
+    <constant id="pre-round-time">7</constant>
+    <constant id="void-plane">51</constant>
+    <!-- Teams -->
+    <constant id="team-one-spawn">-103.5,86,0.5</constant>
+    <constant id="team-one-yaw">-90</constant>
+    <constant id="team-two-spawn">104.5,86,0.5</constant>
+    <constant id="team-two-yaw">90</constant>
+    <!-- Cordillera -->
+    <constant id="green-north">-77.5,75,-33.5</constant>
+    <constant id="green-south">-77.5,75,34.5</constant>
+    <constant id="yellow-north">78.5,75,-33.5</constant>
+    <constant id="yellow-south">78.5,75,34.5</constant>
+</constants>
+<authors>
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
+</authors>
+<broadcasts>
+    <alert after="1s">If an enemy's monument is broken, an extra lane that goes directly to their portal will appear!</alert>
+    <tip after="3s">Get `aEmeralds`r from killing players to buy items at spawn!</tip>
+    <tip after="4s">Use `e`nEnder Chests`r around the map to keep items between lives/rounds</tip>
+</broadcasts>
+<teams>
+    <team id="team-one" color="dark green" max="32">Green</team>
+    <team id="team-two" color="yellow" max="32">Yellow</team>
+</teams>
+<spawns>
+    <default yaw="0">
+        <region>
+            <cylinder base="0.5,93,-77.5" radius="4" height="0"/>
+        </region>
+    </default>
+</spawns>
+<kits>
+    <kit id="adventure-kit">
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="survival-kit">
+        <game-mode>survival</game-mode>
+    </kit>
+</kits>
+<filters>
+    <any id="block-list">
+        <material>stained clay:13</material>
+        <material>stained clay:4</material>
+        <material>stained clay:0</material>
+        <material>glass</material>
+        <material>thin glass</material>
+        <material>snow</material>
+        <material>long grass</material>
+        <material>double plant:3</material>
+        <material>double plant:2</material>
+        <material>gold block</material>
+    </any>
+    <deny id="deny-physics">
+        <any>
+            <material>long grass</material>
+            <material>double plant</material>
+            <material>wall sign</material>
+            <material>redstone wire</material>
+            <material>snow</material>
+        </any>
+    </deny>
+    <completed id="yellow-monument-broken">yellow-monument</completed>
+    <completed id="green-monument-broken">green-monument</completed>
+    <deny id="deny-use">
+        <any>
+            <material>chest</material>
+            <material>dispenser</material>
+        </any>
+    </deny>
+</filters>
+<regions>
+    <negative id="not-buildable">
+        <union>
+            <cuboid min="69,56,-30" max="-68,75,31"/>
+            <cuboid id="green-mon-area" min="-36,75,6" max="-47,80,-5"/>
+            <mirror region="green-mon-area" origin="${map-origin}" normal="1,0,0"/>
+        </union>
+    </negative>
+    <apply block-physics="deny-physics"/>
+    <!-- Portals -->
+    <cylinder id="team-one-portal" base="-98.5,61,0.5" height="1" radius="3.5"/>
+    <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
+    <union id="outside-portal">
+        <block id="team-one-outside-portal">-62,53,0</block>
+        <mirror region="team-one-outside-portal" origin="${map-origin}" normal="1,0,0"/>
+    </union>
+    <!-- Round cages -->
+    <complement id="cages">
+        <union>
+            <cylinder id="green-north-o" base="${green-north}" height="4" radius="3"/>
+            <cylinder id="green-south-o" base="${green-south}" height="4" radius="3"/>
+            <mirror region="green-north-o" origin="${map-origin}" normal="1,0,0"/>
+            <mirror region="green-south-o" origin="${map-origin}" normal="1,0,0"/>
+        </union>
+        <union>
+            <cylinder id="green-north-i" base="${green-north}" height="3" radius="2"/>
+            <cylinder id="green-south-i" base="${green-south}" height="3" radius="2"/>
+            <mirror region="green-north-i" origin="${map-origin}" normal="1,0,0"/>
+            <mirror region="green-south-i" origin="${map-origin}" normal="1,0,0"/>
+        </union>
+    </complement>
+    <!-- Cordillera  -->
+    <apply use="deny-use" message="You may not interact with this block!"/>
+    <negative id="adventure-area">
+        <cuboid id="survival-area" min="69,56,-32" max="-68,84,33"/>
+    </negative>
+    <apply kit="survival-kit" region="survival-area"/>
+    <apply kit="adventure-kit" region="adventure-area"/>
+    <point id="green-sumo">-24.5,93,64.5</point>
+    <point id="yellow-sumo">23.5,93,64.5</point>
+    <cuboid id="green-spawn-north-portal" min="-99,86,-3" size="1,3,1"/>
+    <mirror id="green-spawn-south-portal" region="green-spawn-north-portal" origin="${map-origin}" normal="0,0,1"/>
+    <mirror id="yellow-spawn-north-portal" region="green-spawn-north-portal" origin="${map-origin}" normal="1,0,0"/>
+    <mirror id="yellow-spawn-south-portal" region="green-spawn-south-portal" origin="${map-origin}" normal="1,0,0"/>
+    <point id="green-north">${green-north}</point>
+    <point id="green-south">${green-south}</point>
+    <point id="yellow-north">${yellow-north}</point>
+    <point id="yellow-south">${yellow-south}</point>
+</regions>
+<destroyables materials="gold block" completion="100%" required="false" show-progress="true">
+    <destroyable id="green-monument" owner="team-one" name="Green Monument">
+        <region><cuboid min="-43,77,-1" size="3,3,3"/></region>
+    </destroyable>
+    <destroyable id="yellow-monument" owner="team-two" name="Yellow Monument">
+        <region><cuboid min="41,77,-1" size="3,3,3"/></region>
+    </destroyable>
+</destroyables>
+<shops>
+    <shop id="zzuf-shop" name="`f`lCdlla. Incognita Gift Shop">
+        <category id="bridge" name="`eBridging Supplies" material="159">
+            <item name="`fMont Blanc Snowball" material="snow ball" amount="6" price="1" currency="emerald" prevent-sharing="true"/>
+            <item name="`fiCarus Blade" material="wood sword" damage="59" amount="1" price="2" currency="emerald" prevent-sharing="true">
+                <enchantment level="2">knockback</enchantment>
+            </item>
+            <item name="`4The Motorhead `f(Speed II)" damage="2" material="potion" amount="1" price="5" currency="emerald" prevent-sharing="true">
+                <effect duration="15s" amplifier="2">speed</effect>
+            </item>
+            <item name="`6The Cleaner `f(Haste II)" damage="3" material="potion" amount="1" price="5" currency="emerald" prevent-sharing="true">
+                <effect duration="15s" amplifier="2">haste</effect>
+            </item>
+        </category>
+    </shop>
+</shops>
+<shopkeepers>
+    <!-- Green -->
+    <shopkeeper name="Gift Shop Clerk" shop="zzuf-shop" mob="Blaze">
+        <point yaw="180" pitch="0">-74.5,75,40.5</point>
+    </shopkeeper>
+    <shopkeeper name="Gift Shop Clerk" shop="zzuf-shop" mob="Blaze">
+        <point yaw="180" pitch="0">-72.5,75,40.5</point>
+    </shopkeeper>
+    <shopkeeper name="Gift Shop Clerk" shop="zzuf-shop" mob="Blaze">
+        <point yaw="0" pitch="0">-74.5,75,-39.5</point>
+    </shopkeeper>
+    <shopkeeper name="Gift Shop Clerk" shop="zzuf-shop" mob="Blaze">
+        <point yaw="0" pitch="0">-72.5,75,-39.5</point>
+    </shopkeeper>
+    <!-- Yellow -->
+    <shopkeeper name="Gift Shop Clerk" shop="zzuf-shop" mob="Blaze">
+        <point yaw="180" pitch="0">75.5,75,40.5</point>
+    </shopkeeper>
+    <shopkeeper name="Callaíta Gift Shop Clerk" shop="zzuf-shop" mob="Blaze">
+        <point yaw="180" pitch="0">73.5,75,40.5</point>
+    </shopkeeper>
+    <shopkeeper name="Gift Shop Clerk" shop="zzuf-shop" mob="Blaze">
+        <point yaw="0" pitch="0">73.5,75,-39.5</point>
+    </shopkeeper>
+    <shopkeeper name="Gift Shop Clerk" shop="zzuf-shop" mob="Blaze">
+        <point yaw="0" pitch="0">75.5,75,-39.5</point>
+    </shopkeeper>
+</shopkeepers>
+<actions>
+    <trigger filter="yellow-monument-broken" scope="match">
+        <action scope="match">
+            <message text="`e⚠ `fAn extra bridge to `eYellow`f's portal has appeared!"/>
+            <sound preset="alert"/>
+            <fill material="air">
+                <union><block>-71,67,0</block><block>-86,67,0</block></union>
+            </fill>
+            <fill material="obsidian">
+                <block>42,95,0</block>
+            </fill>
+        </action>
+    </trigger>
+    <trigger filter="green-monument-broken" scope="match">
+        <action scope="match">
+            <message text="`e⚠ `fAn extra bridge to `2Green`f's portal has appeared!"/>
+            <sound preset="alert"/>
+            <fill material="air">
+                <union><block>71,67,0</block><block>86,67,0</block></union>
+            </fill>
+            <fill material="obsidian">
+                <block>-42,95,0</block>
+            </fill>
+        </action>
+    </trigger>
+</actions>
+<structures>
+    <structure id="bonus-bridge" air="false">
+        <region>
+            <cuboid min="9,79,-301" max="-9,72,-290"/>
+        </region>
+    </structure>
+    <dynamic structure="bonus-bridge" location="70,61,-5" trigger="yellow-monument-broken"/>
+    <dynamic structure="bonus-bridge" location="-87,61,-5" trigger="green-monument-broken"/>
+</structures>
+<kill-rewards>
+    <kill-reward>
+        <item material="emerald" name="`f`lCordillera Emerald" lore="`9ⓘ `7Use this at the spawn shops, or save it in an ender chest!"/>
+    </kill-reward>
+</kill-rewards>
+<portals>
+    <!-- Spawns -->
+    <portal destination="green-north" region="green-spawn-north-portal" yaw="@-90" pitch="@0"/>
+    <portal destination="green-south" region="green-spawn-south-portal" yaw="@-90" pitch="@0"/>
+    <portal destination="yellow-north" region="yellow-spawn-north-portal" yaw="@90" pitch="@0"/>
+    <portal destination="yellow-south" region="yellow-spawn-south-portal" yaw="@90" pitch="@0"/>
+    <!-- Sumo -->
+    <portal destination="green-sumo" yaw="@-90" pitch="@0" region="outside-portal" filter="only-team-one" sound="true"/>
+    <portal destination="yellow-sumo" yaw="@90" pitch="@0" region="outside-portal" filter="only-team-two" sound="true"/>
+</portals>
+<itemremove>
+    <item>seeds</item>
+    <item>double plant</item>
+    <item>sand</item>
+    <item>147</item>
+    <item>wood sword</item>
+    <item>potion</item>
+    <item>gold block</item>
+</itemremove>
+</map>
