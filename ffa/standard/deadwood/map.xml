@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Deadwood</name>
-<version>1.0.6</version>
+<version>1.0.7</version>
 <objective>Be the player with the highest amount of kills after 3 minutes!</objective>
 <authors>
     <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="Map Builder, XML"/> <!-- zzuf -->
@@ -18,12 +18,13 @@
 <players max="10" max-overfill="12" colors="true" show-name-tags="false"/>
 <rage/>
 <time result="score">3m</time>
+<respawn auto="true"/>
 <score>
     <kills>1</kills>
 </score>
 <broadcasts>
-    <alert after="1s" every="50s">`7Swords `c`ldo not `7kill in one hit, but bow shots `a`ldo`7!`r</alert>
-    <tip after="2s" every="50s">`7You can tap your jump key twice for a small `fdouble jump`7!`r</tip>
+    <alert after="1s" every="1m">`7Swords `c`ldo not `7kill in one hit, but bow shots `a`ldo`7!`r</alert>
+    <tip after="2s" every="1m">`7You can tap your jump key twice for a small `fdouble jump`7!`r</tip>
 </broadcasts>
 <spawns>
     <spawn kit="players-kit" spread="true">
@@ -68,23 +69,23 @@
         <game-mode>adventure</game-mode>
     </kit>
 </kits>
-<classes family="oitq" sticky="true">
-    <class name="Archer" description="Stone sword! Quick double jumps!" longdescription="Stone sword, insta-kill bow and double jumps!" icon="stone sword" default="true">
+<classes family="oitq">
+    <class name="Archer" description="Stone sword! Quick double jumps!" longdescription="Stone sword, insta-kill bow and double jumps!" icon="bow" default="true">
         <kit parents="players-kit">
             <item slot="0" unbreakable="true" name="`7`lRegular `rBowie Knife" lore="`8Multiple Hit Kill" material="stone sword"/>
             <item slot="1" unbreakable="true" name="`c`lMo`6`ldd`e`led `rRepeater" lore="`8One Hit Kill" enchantment="power:10" show-enchantments="false" material="bow"/>
             <item slot="2">arrow</item>
         </kit>
     </class>
-    <class name="Brawler" description="Iron sword! Strength! No bow!" longdescription="Iron sword! Strength! No bow!" icon="potion:9">
+    <class name="Brawler" description="Iron sword! No bow!" longdescription="Iron sword! No bow!" icon="potion:9">
         <kit parents="players-kit">
             <item slot="0" unbreakable="true" name="`c`lSharpened `rBowie Knife" lore="`8Multiple Hit Kill" material="iron sword"/>
-            <effect duration="oo" ambient="true">strength</effect>
         </kit>
     </class>
-    <class name="Ninja" description="Gold sword! Invisibility after kills! No bow!" longdescription="Gold sword! Invisibility after kills! No bow!" icon="gold sword">
+    <class name="Speedster" description="Wooden sword! Speed! No bow!" longdescription="Wooden sword! Speed! No bow!" icon="potion:2">
         <kit parents="players-kit">
-            <item slot="0" unbreakable="true" name="`e`lButter `rBowie Knife" lore="`8Multiple Hit Kill" material="gold sword"/>
+            <item slot="0" unbreakable="true" name="`c`lSharpened `rStick" lore="`8Multiple Hit Kill" material="wood sword"/>
+            <effect duration="oo" ambient="true">speed</effect>
         </kit>
     </class>
 </classes>
@@ -105,12 +106,16 @@
     <cuboid id="sheriff-door" min="20.5,4,-20" max="21,6,-19"/>
     <cuboid id="grave" min="7,2,32" max="6,3,34"/>
     <above y="19" id="ceiling"/>
-    <apply block="never" region="gallows-lever"/>
-    <apply block="never" region="grave"/>
-    <apply block="never" use="never" region="deadwood"/>
+    <apply block="deny-players"/>
+    <apply use="never" region="deadwood"/>
     <apply enter="never" region="sheriff-door" message="`f&#60;`6❖`bDeadwood Sheriff`f&#62;: Where do you think you're going?"/>
     <apply enter="never" region="ceiling"/>
 </regions>
+<actions>
+    <action id="killstreak-sound" scope="player">
+        <sound key="mob.enderdragon.growl" volume="1" pitch="0.8"/>
+    </action>
+</actions>
 <portals>
     <portal x="@18.5" y="@4" z="@-25.5" yaw="@90">
         <region>
@@ -127,9 +132,80 @@
     </kill-reward>
     <kill-reward>
         <filter>
-            <class>Ninja</class>
+            <kill-streak count="3" repeat="false"/>
         </filter>
-        <effect duration="1.2s" ambient="false">invisibility</effect>
+        <kit>
+            <action>
+                <message text=" `b`lTriple kill! `f(3 kills)"/>
+                <action id="killstreak-sound"/>
+            </action>
+        </kit>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="5" repeat="false"/>
+        </filter>
+        <kit>
+            <action>
+                <message text=" `a`lKilling Spree! `f(5 kills)"/>
+                <action id="killstreak-sound"/>
+            </action>
+        </kit>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="10" repeat="false"/>
+        </filter>
+        <kit>
+            <action>
+                <message text=" `e`lRampage! `f(10 kills)"/>
+                <action id="killstreak-sound"/>
+            </action>
+        </kit>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="15" repeat="false"/>
+        </filter>
+        <kit>
+            <action>
+                <message text=" `6`lDominating! `f(15 kills)"/>
+                <action id="killstreak-sound"/>
+            </action>
+        </kit>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="20" repeat="false"/>
+        </filter>
+        <kit>
+            <action>
+                <message text=" `c`lUnstoppable! `f(20 kills)"/>
+                <action id="killstreak-sound"/>
+            </action>
+        </kit>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="30" repeat="false"/>
+        </filter>
+        <kit>
+            <action>
+                <message text=" `4`lGODLIKE! `f(30 kills)"/>
+                <action id="killstreak-sound"/>
+            </action>
+        </kit>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="50" repeat="false"/>
+        </filter>
+        <kit>
+            <action>
+                <message text=" `0`l`kzzuf`r `f(50 kills)"/>
+                <action id="killstreak-sound"/>
+            </action>
+        </kit>
     </kill-reward>
 </kill-rewards>
 <disabledamage>
@@ -141,8 +217,10 @@
 <itemremove>
     <item>stone sword</item>
     <item>iron sword</item>
-    <item>gold sword</item>
+    <item>wood sword</item>
     <item>bow</item>
     <item>arrow</item>
+    <item>bone</item>
+    <item>rotten flesh</item>
 </itemremove>
 </map>
