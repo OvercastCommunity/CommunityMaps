@@ -1,7 +1,6 @@
-<?xml version="1.0"?>
-<map proto="1.4.0">
+<map proto="1.4.2">
 <name>Outlyne</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <objective>Capture and place the wool at your monument</objective>
 <!-- Map authors & contributors. -->
 <authors>
@@ -35,11 +34,41 @@
         </regions>
     </spawn>
     <default>
-        <region id="spectator-spawn">
+        <region>
             <cuboid min="-7.5,30,-2.5" max="-4.5,30,-4.5"/>
         </region>
     </default>
 </spawns>
+<!-- Kits -->
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" unbreakable="true" material="iron pickaxe"/>
+        <item slot="3" unbreakable="true" material="stone axe"/>
+        <item slot="4" amount="16" material="stained clay" team-color="true"/>
+        <item slot="5" amount="24" damage="1" material="wood"/>
+        <item slot="6" material="golden apple" amount="1"/>
+        <item slot="8" material="arrow" amount="32"/>
+        <helmet team-color="true">leather helmet</helmet>
+        <chestplate team-color="true">leather chestplate</chestplate>
+        <leggings>chainmail leggings</leggings>
+        <boots team-color="true">leather boots</boots>
+    </kit>
+    <kit id="wool-gear" parent="wool-leggings">
+        <action>
+            <replace-item>
+                <find material="bow" unbreakable="true"/>
+                <replace material="bow" unbreakable="true" enchantment="power" name="`c`lPower Bow"/>
+            </replace-item>
+        </action>
+        <item material="golden apple" amount="16" />
+    </kit>
+    <kit id="wool-leggings" force="true">
+        <leggings unbreakable="true" material="diamond leggings"/>
+    </kit>
+</kits>
 <!-- Filters -->
 <filters>
     <!--No Void-->
@@ -48,9 +77,8 @@
     <team id="filter-red-team">red-team</team>
     <team id="filter-blue-team">blue-team</team>
     <!-- Block filters -->
-    <any id="web-filter">
-        <material>web</material>
-    </any>
+    <material id="web-filter">web</material>
+    <material id="stained-glass-filter">stained glass</material>
     <!-- Wool room filters -->
     <all id="red-wool-room-break">
         <filter id="filter-red-team"/>
@@ -68,9 +96,11 @@
 <!-- Regions -->
 <regions>
     <above id="build-limit" y="17"/>
-    <!-- Monument regions -->
-    <cuboid id="red-build-monu" min="24,1,25" max="-6,0,-28"/>
-    <cuboid id="blue-build-monu" min="-6,1,21" max="-36,0,-32"/>
+    <!-- Floor regions -->
+    <union id="floor">
+        <cuboid id="red-build-monu" min="24,1,25" max="-6,0,-28"/>
+        <cuboid id="blue-build-monu" min="-6,1,21" max="-36,0,-32"/>
+    </union>
     <!-- Build area -->
     <negative id="non-build-area">
         <union>
@@ -108,13 +138,16 @@
     <apply block-place="deny-players" block-break="only-iron" region="build-limit" message="You have reached max build height!"/>
 </regions>
 <!-- Show the build area and clear it on the game starting -->
-<destroyables materials="stained glass" completion="0%" required="false" show="false" mode-changes="true">
-    <destroyable owner="red-team" name="monu" region="red-build-monu"/>
-    <destroyable owner="blue-team" name="monu" region="blue-build-monu"/>
-</destroyables>
-<modes>
-    <mode after="0s" material="air" show-before="0"/>
-</modes>
+<actions>
+    <trigger scope="match">
+        <filter>
+            <match-started/>
+        </filter>
+        <action>
+            <fill material="air" region="floor" filter="stained-glass-filter"/>
+        </action>
+    </trigger>
+</actions>
 <!-- Spawners -->
 <spawners>
     <spawner spawn-region="pink-spawner" player-region="pink-wool-room" delay="10s">
@@ -124,36 +157,6 @@
         <item amount="2" material="wool" damage="3"/>
     </spawner>
 </spawners>
-<!-- Kits -->
-<kits>
-    <kit id="spawn-kit">
-        <clear/>
-        <item slot="0" unbreakable="true" material="iron sword"/>
-        <item slot="1" unbreakable="true" material="bow"/>
-        <item slot="2" unbreakable="true" material="iron pickaxe"/>
-        <item slot="3" unbreakable="true" material="stone axe"/>
-        <item slot="4" amount="16" material="stained clay" team-color="true"/>
-        <item slot="5" amount="24" damage="1" material="wood"/>
-        <item slot="6" material="golden apple" amount="1"/>
-        <item slot="8" material="arrow" amount="32"/>
-        <helmet team-color="true">leather helmet</helmet>
-        <chestplate team-color="true">leather chestplate</chestplate>
-        <leggings>chainmail leggings</leggings>
-        <boots team-color="true">leather boots</boots>
-    </kit>
-    <kit id="wool-gear" parent="wool-leggings">
-        <action>
-            <replace-item>
-                <find material="bow" unbreakable="true"/>
-                <replace material="bow" unbreakable="true" enchantment="power" name="`c`lPower Bow"/>
-            </replace-item>
-        </action>
-        <item material="golden apple" amount="16" />
-    </kit>
-    <kit id="wool-leggings" force="true">
-        <leggings unbreakable="true" material="diamond leggings"/>
-    </kit>
-</kits>
 <!-- Renewables -->
 <renewables>
     <renewable region="iron-area" renew-filter="only-iron" rate="1.5" particles="true" sound="true" avoid-players="2"/>
@@ -169,7 +172,13 @@
         </drops>
     </rule>
 </block-drops>
-<!-- Itemremove -->
+<!-- Items -->
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>stone axe</tool>
+</toolrepair>
 <itemremove>
     <item>iron sword</item>
     <item>bow</item>
@@ -187,12 +196,6 @@
     <item>wood</item>
     <item>golden apple</item>
 </itemkeep>
-<toolrepair>
-    <item>iron sword</item>
-    <item>bow</item>
-    <item>iron pickaxe</item>
-    <item>stone axe</item>
-</toolrepair>
 <!-- Kill reward -->
 <kill-rewards>
     <kill-reward>
