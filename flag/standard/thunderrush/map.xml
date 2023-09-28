@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Thunderrush</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Capture the most flags in 12m or gain a 3 point lead to win!</objective>
 <time result="score" overtime="1m" max-overtime="2m">12m</time>
 <gamemode>ctf</gamemode>
@@ -14,7 +14,7 @@
     <alert after="3s" every="4m" count="2">A team that gains a 3 capture lead will automatically win!</alert>
 </broadcasts>
 <teams>
-    <team id="green" color="green" max="6">Green</team>
+    <team id="green" color="green" dye-color="green" max="6">Green</team>
     <team id="yellow" color="yellow" max="6">Yellow</team>
     <team id="red" color="dark red" max="6">Red</team>
     <team id="blue" color="blue" max="6">Blue</team>
@@ -30,6 +30,8 @@
         <item slot="3" material="iron axe" unbreakable="true">
             <enchantment>dig_speed</enchantment>
         </item>
+        <item slot="4" material="stained clay" team-color="true" amount="24"/>
+        <item slot="5" material="stained glass" team-color="true" amount="8"/>
         <item slot="6" material="vine" amount="16"/>
         <item slot="8" material="golden apple"/>
         <item slot="28" material="arrow"/>
@@ -42,32 +44,24 @@
         <effect duration="2" amplifier="100">damage resistance</effect>
     </kit>
     <kit id="blue-kit" parent="spawn-kit">
-        <item slot="4" material="stained clay" damage="11" amount="24"/>
-        <item slot="5" material="stained glass" damage="11" amount="8"/>
         <leggings material="leather leggings" color="2092DC" unbreakable="true"/>
         <boots material="leather boots" color="2092DC" unbreakable="true"/>
     </kit>
     <kit id="red-kit" parent="spawn-kit">
-        <item slot="4" material="stained clay" damage="14" amount="24"/>
-        <item slot="5" material="stained glass" damage="14" amount="8"/>
         <leggings material="leather leggings" color="EB1515" unbreakable="true"/>
         <boots material="leather boots" color="EB1515" unbreakable="true"/>
     </kit>
     <kit id="green-kit" parent="spawn-kit">
-        <item slot="4" material="stained clay" damage="13" amount="24"/>
-        <item slot="5" material="stained glass" damage="13" amount="8"/>
         <leggings material="leather leggings" color="15EB60" unbreakable="true"/>
         <boots material="leather boots" color="15EB60" unbreakable="true"/>
     </kit>
     <kit id="yellow-kit" parent="spawn-kit">
-        <item slot="4" material="stained clay" damage="4" amount="24"/>
-        <item slot="5" material="stained glass" damage="4" amount="8"/>
         <leggings material="leather leggings" color="EBE815" unbreakable="true"/>
         <boots material="leather boots" color="EBE815" unbreakable="true"/>
     </kit>
 </kits>
 <spawns>
-    <spawn team="red" kit="red-kit" yaw="0">
+    <spawn team="red" kit="red-kit">
         <regions>
             <point>24.5,7,-48.5</point>
         </regions>
@@ -87,7 +81,7 @@
             <point>48.5,7,24.5</point>
         </regions>
     </spawn>
-    <default yaw="0">
+    <default>
         <regions>
             <point>0.5,7,0.5</point>
         </regions>
@@ -117,9 +111,9 @@
 <regions>
     <complement id="void-area">
         <everywhere/>
-        <!-- Middle Area-->
+        <!-- Middle Area -->
         <rectangle min="-30,30" max="30,-30"/>
-        <!--bridges-->
+        <!-- bridges -->
         <rectangle min="30,-24" max="38,-19"/> <!-- Red -->
         <rectangle min="-30, 24" max="-38,19"/> <!-- Blue -->
         <rectangle min="24,30" max="19,38"/> <!-- Yellow -->
@@ -139,7 +133,6 @@
     </union>
     <apply block="never" region="spawn-platforms" message="You may not break spawn!"/>
     <apply block="never" region="flag-platforms" message="You may not edit the flag platforms"/>
-    <everywhere/>
     <union id="nets">
         <cylinder id="red-net" radius="4" base="24.5,7,-48.5" height="10"/>
         <cylinder id="blue-net" radius="4" base="-24.5,7,48" height="10"/>
@@ -195,25 +188,13 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<kill-reward>
-    <kill-reward filter="only-blue-team">
-        <item amount="8" damage="11" material="stained clay"/>
-        <item amount="4" damage="11" material="stained glass"/>
+<kill-rewards>
+    <kill-reward>
+        <item amount="8" team-color="true" material="stained clay"/>
+        <item amount="4" team-color="true" material="stained glass"/>
+        <item material="golden apple"/>
     </kill-reward>
-    <kill-reward filter="only-red-team">
-        <item amount="8" damage="14" material="stained clay"/>
-        <item amount="4" damage="14" material="stained glass"/>
-    </kill-reward>
-    <kill-reward filter="only-green-team">
-        <item amount="8" damage="13" material="stained clay"/>
-        <item amount="4" damage="13" material="stained glass"/>
-    </kill-reward>
-    <kill-reward filter="only-yellow-team">
-        <item amount="8" damage="4" material="stained clay"/>
-        <item amount="4" damage="4" material="stained glass"/>
-    </kill-reward>
-    <item material="golden apple"/>
-</kill-reward>
+</kill-rewards>
 <world>
     <timeset>6000</timeset>
 </world>
@@ -222,22 +203,22 @@
     <mercy>3</mercy>
 </score>
 <flags flag-proximity-metric="none" net-proximity-metric="none">
-    <flag id="green-flag" name="Green Flag" carry-message="Capture the enemy flag at your spawn!" color="green" pickup-filter="not-green" post="green-post" shared="true">
+    <flag id="green-flag" name="Green Flag" carry-message="Take the `a`lenemy flag`r to your spawn!" color="green" pickup-filter="not-green" post="green-post" shared="true">
         <net points="1" owner="yellow" region="yellow-net" capture-filter="only-yellow-team"/>
         <net points="1" owner="blue" region="blue-net" capture-filter="only-blue-team"/>
         <net points="1" owner="red" region="red-net" capture-filter="only-red-team"/>
     </flag>
-    <flag id="yellow-flag" name="Yellow Flag" carry-message="Capture the enemy flag at your spawn!" color="yellow" pickup-filter="not-yellow" post="yellow-post" shared="true">
+    <flag id="yellow-flag" name="Yellow Flag" carry-message="Take the `e`lenemy flag`r to your spawn!" color="yellow" pickup-filter="not-yellow" post="yellow-post" shared="true">
         <net points="1" owner="blue" region="blue-net" capture-filter="only-blue-team"/>
         <net points="1" owner="red" region="red-net" capture-filter="only-red-team"/>
         <net points="1" owner="green" region="green-net" capture-filter="only-green-team"/>
     </flag>
-    <flag id="red-flag" name="Red Flag" carry-message="Capture the enemy flag at your spawn!" pickup-filter="not-red" color="red" post="red-post" shared="true">
+    <flag id="red-flag" name="Red Flag" carry-message="Take the `c`lenemy flag`r to your spawn!" pickup-filter="not-red" color="red" post="red-post" shared="true">
         <net points="1" owner="yellow" region="yellow-net" capture-filter="only-yellow-team"/>
         <net points="1" owner="blue" region="blue-net" capture-filter="only-blue-team"/>
         <net points="1" owner="green" region="green-net" capture-filter="only-green-team"/>
     </flag>
-    <flag id="blue-flag" name="Blue Flag" carry-message="Capture the enemy flag at your spawn!" color="blue" pickup-filter="not-blue" post="blue-post" shared="true">
+    <flag id="blue-flag" name="Blue Flag" carry-message="Take the `9`lenemy flag`r to your spawn!" color="blue" pickup-filter="not-blue" post="blue-post" shared="true">
         <net points="1" owner="yellow" region="yellow-net" capture-filter="only-yellow-team"/>
         <net points="1" owner="red" region="red-net" capture-filter="only-red-team"/>
         <net points="1" owner="green" region="green-net" capture-filter="only-green-team"/>
