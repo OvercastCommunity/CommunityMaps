@@ -1,8 +1,18 @@
 <map proto="1.4.2">
 <name>Rind Rushers</name>
-<version>1.0</version>
+<variant id="christmas" world="christmas" override="true">Rednose Rushers</variant>
+<version>1.1.0</version>
+<!-- Set variant below to current season (default/christmas) -->
+<unless variant="default">
+    <phase>development</phase>
+</unless>
 <objective>Destroy the enemy's monument!</objective>
-<created>2022-09-07</created>
+<if variant="default">
+    <created>2022-09-07</created>
+</if>
+<if variant="christmas">
+    <created>2022-11-24</created>
+</if>
 <gamemode>dtm</gamemode>
 <authors>
     <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4"/> <!-- Cazadorian -->
@@ -11,8 +21,14 @@
     <contributor uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Aesthetic contributions"/> <!-- Tundren --> 
 </contributors>
 <teams>
-    <team id="green" color="dark green" max="10">Green</team>
-    <team id="pink" color="light purple" max="10">Pink</team>
+    <unless variant="christmas">
+        <team id="green" color="dark green" max="10">Green</team>
+        <team id="pink" color="light purple" dye-color="pink" max="10">Pink</team>
+    </unless>
+    <if variant="christmas">
+        <team id="green" color="white" max="10">White</team>
+        <team id="pink" color="red" max="10">Red</team>
+    </if>
 </teams>
 <kits>
     <kit id="spawn-kit">
@@ -23,7 +39,13 @@
             <enchantment level="2">efficiency</enchantment>
         </item>
         <item slot="3" unbreakable="true" material="iron axe"/>
-        <item slot="5" amount="32" material="wood" damage="2"/>
+        <item slot="4" material="stained glass" team-color="true" amount="48"/>
+        <unless variant="christmas">
+            <item slot="5" amount="32" material="wood" damage="2"/>
+        </unless>
+        <if variant="christmas">
+            <item slot="5" amount="32" material="wood" damage="5"/>
+        </if>
         <item slot="7" material="golden apple"/>
         <item slot="8" material="water bucket"/>
         <item slot="28" material="arrow"/>
@@ -34,12 +56,6 @@
         <boots unbreakable="true" team-color="true" material="leather boots" />
         <effect duration="4" amplifier="255">damage resistance</effect>
     </kit>
-    <kit id="green-kit" parent="spawn-kit">
-        <item slot="4" material="stained glass" damage="13" amount="48"/>
-    </kit>
-    <kit id="pink-kit" parent="spawn-kit">
-        <item slot="4" material="stained glass" damage="6" amount="48"/>
-    </kit>
 </kits>
 <spawns>
     <default yaw="90">
@@ -47,28 +63,42 @@
             <point>6.5,54,21.5</point>
         </region>
     </default>
-    <spawn team="pink" kit="pink-kit" yaw="0">
+    <spawn team="pink" kit="spawn-kit">
         <regions>
             <point>-31.5,11,56.5</point>
         </regions>
     </spawn>
-    <spawn team="green" kit="green-kit" yaw="180">
+    <spawn team="green" kit="spawn-kit" yaw="180">
         <regions>
             <point>44.5,11,-13.5</point>
         </regions>
     </spawn>
 </spawns>
-<destroyables>
-    <destroyable name="Pink Monument" id="Pink-monument" show-progress="true" materials="emerald block;redstone block" completion="100%" required="true" owner="pink" modes="gold-mode clay-mode">
+<destroyables show-progress="true" materials="emerald block;redstone block">
+    <unless variant="christmas">
+        <destroyable name="Pink Monument" id="pink-monument" required="true" owner="pink" modes="gold-mode clay-mode">
+            <region>
+               <cuboid min="10,19,69" max="13,22,72"/>
+            </region>
+        </destroyable>
+        <destroyable name="Green Monument" id="green-monument" required="true" owner="green" modes="gold-mode clay-mode">
+            <region>
+               <cuboid min="0,19,-26" max="3,22,-29"/>
+            </region>
+        </destroyable>
+    </unless>
+    <if variant="christmas">
+        <destroyable name="Red Monument" id="pink-monument" required="true" owner="pink" modes="gold-mode clay-mode">
         <region>
            <cuboid min="10,19,69" max="13,22,72"/>
         </region>
     </destroyable>
-    <destroyable name="Green Monument" id="Green-monument" show-progress="true" materials="emerald block;redstone block" completion="100%" required="true" owner="green" modes="gold-mode clay-mode">
+    <destroyable name="White Monument" id="green-monument" required="true" owner="green" modes="gold-mode clay-mode">
         <region>
            <cuboid min="0,19,-26" max="3,22,-29"/>
         </region>
     </destroyable>
+    </if>
 </destroyables>
 <modes>
     <mode id="gold-mode" after="20m" name="`6GOLD MONUMENT MODE" material="gold block"/>
@@ -123,6 +153,9 @@
     <item>step:7</item>
     <item>quartz stairs</item>
     <item>wool</item>
+    <if variant="christmas">
+        <item>snow ball</item>
+    </if>
 </itemremove>
 <itemkeep>
     <item>wood</item>
@@ -148,15 +181,13 @@
 <kill-rewards>
     <kill-reward>
         <item material="golden apple"/>
-        <item amount="8" material="wood" damage="2"/>
-    </kill-reward>
-    <kill-reward>
-       <kill-reward filter="only-green">
-           <item amount="16" material="stained glass" damage="13" />
-       </kill-reward>
-       <kill-reward filter="only-pink">
-           <item amount="16" material="stained glass" damage="6" />
-       </kill-reward>
+        <item amount="16" material="stained glass" team-color="true"/>
+        <unless variant="christmas">
+            <item amount="8" material="wood" damage="2"/>
+        </unless>
+        <if variant="christmas">
+            <item amount="8" material="wood" damage="5"/>
+        </if>
     </kill-reward>
 </kill-rewards>
 </map>
