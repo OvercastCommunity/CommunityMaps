@@ -1,8 +1,23 @@
 <map proto="1.4.2">
 <name>Mame, I Shrunk the PvPers</name>
-<version>1.1.2</version>
+<variant id="halloween" world="halloween" override="true">Mame, I Shrunk the Goblins</variant>
+<if variant="default">
+    <version>1.2.0</version>
+</if>
+<if variant="halloween">
+    <version>1.0</version>
+</if>
 <objective>Capture both of the enemy's wools, and buy upgrades from the villagers to help you do so!</objective>
-<created>2023-02-01</created>
+<!-- Set variant below to current season (default/halloween) -->
+<unless variant="default">
+    <phase>development</phase>
+</unless>
+<if variant="default">
+    <created>2023-02-01</created>
+</if>
+<if variant="halloween">
+    <created>2023-09-13</created>
+</if>
 <gamemode>ctw</gamemode>
 <authors>
     <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Layout, theming, XML"/> <!-- Cazadorian -->
@@ -14,31 +29,59 @@
     <contributor uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609" contribution="Misc aesthetics"/> <!-- Technodono -->
 </contributors>
 <teams>
-    <team id="blue" color="blue" max="32">Blue</team>
-    <team id="red" color="red" max="32">Red</team>
+    <unless variant="halloween">
+        <team id="blue" color="blue" max="32">Blue</team>
+        <team id="red" color="red" max="32">Red</team>
+    </unless>
+    <if variant="halloween">
+        <team id="blue" color="dark purple" max="32">Purple</team>
+        <team id="red" color="gold" max="32">Orange</team>
+    </if>
 </teams>
 <broadcasts>
     <alert after="5s">Buy upgrades with Gold Nuggets, earned from kills, mining, and the middle spawners!</alert>
     <tip after="5m" every="5m">Buy upgrades with Gold Nuggets, earned from kills, mining, and the middle spawners!</tip>
 </broadcasts>
 <spawns>
-    <default yaw="0">
-        <regions>
-            <point>-5.5,33,222.5</point>
-        </regions>
-    </default>
+    <unless variant="halloween">
+        <default>
+            <regions>
+                <point>-5.5,33,222.5</point>
+            </regions>
+        </default>
+    </unless>
+    <if variant="halloween">
+        <default kit="default-kit">
+            <regions>
+                <point>-5.5,33,222.5</point>
+            </regions>
+        </default>
+    </if>
     <spawn team="blue" kit="spawn-kit" yaw="90">
         <regions>
-            <point>136.5,14,336.5</point>
+            <if variant="default">
+                <point>136.5,14,336.5</point>
+            </if>
+            <if variant="halloween">
+                <point>137.5,14,336.5</point>
+            </if>
         </regions>
     </spawn>
     <spawn team="red" kit="spawn-kit" yaw="-90">
         <regions>
-            <point>-147.5,14,336.5</point>
+            <if variant="default">
+                <point>-147.5,14,336.5</point>
+            </if>
+            <if variant="halloween">
+                <point>-148.5,14,336.5</point>
+            </if>
         </regions>
     </spawn>
 </spawns>
 <kits>
+    <kit id="default-kit">
+        <effect>night vision</effect>
+    </kit>
     <kit id="sword" filter="upgraded-sword">
         <item slot="0" material="stone sword" unbreakable="true"/>
     </kit>
@@ -57,11 +100,14 @@
         <leggings unbreakable="true" team-color="true" material="leather leggings" locked="true"/>
         <boots unbreakable="true" team-color="true" material="leather boots" locked="true"/>
         <effect duration="3" amplifier="255">damage resistance</effect>
+        <if variant="halloween">
+            <effect>night vision</effect>
+        </if>
     </kit>
     <!-- Upgrades -->
     <give filter="apply-haste-1">
         <kit>
-            <effect amplifier="1">fast digging</effect>
+            <effect>fast digging</effect>
         </kit>
     </give>
     <give filter="apply-haste-2">
@@ -71,12 +117,12 @@
     </give>
     <give filter="apply-speed">
         <kit>
-            <effect amplifier="1">speed</effect>
+            <effect>speed</effect>
         </kit>
     </give>
     <lend filter="apply-fatigue">
         <kit>
-            <effect amplifier="1">slow digging</effect>
+            <effect>slow digging</effect>
         </kit>
     </lend>
     <!-- Weapon Upgrades -->
@@ -178,6 +224,22 @@
             <set var="armour_variable" value="3" scope="player"/>
         </action>
     </kit>
+	<!-- Halloween Goodies-->
+	<if variant="halloween">
+        <kit id="festivefirework" deduct-items="false">
+		    <firework power="1">
+                <explosion type="creeper" flicker="true" trail="true">
+                    <color>ffa500</color>
+                    <color>aa00aa</color>
+                    <fade>000000</fade>
+                </explosion>
+            </firework>
+        </kit>
+        <kit id="horsemanhorse" deduct-items="false">
+		    <item material="saddle"/>
+			<item material="monster egg" damage="100"/>
+        </kit>
+	</if>
 </kits>
 <actions>
     <!-- Upgrade variables -->
@@ -1105,11 +1167,11 @@
         <point id="blue-dropoff">136.5,14,336.5</point>
     </union>
     <union id="wool-rooms">
-        <union id="blue-wool-rooms">  <!-- Blue defends -->
+        <union id="blue-wool-rooms"> <!-- Blue defends -->
             <cuboid id="pink-wool-room" min="147,0,370" max="166,46,385"/>
             <cuboid id="purple-wool-room" min="112,0,262" max="97,46,243"/>
         </union>
-        <union id="red-wool-rooms">  <!-- Red defends -->
+        <union id="red-wool-rooms"> <!-- Red defends -->
             <cuboid id="orange-wool-room" min="-108,0,411" max="-122,46,430"/>
             <cuboid id="yellow-wool-room" min="-158,0,288" max="-177,46,303"/>
         </union>
@@ -1164,13 +1226,25 @@
     </spawner>
 </spawners>
 <shopkeepers>
-    <shopkeepers name="`b`lItem Shop" shop="item-shop"> 
-        <shopkeeper yaw="-90">131.5,14,339.5</shopkeeper> <!-- Blue -->
-        <shopkeeper yaw="90">-142.5,14,333.5</shopkeeper> <!-- Red -->
+    <shopkeepers name="`b`lItem Shop" shop="item-shop">
+        <if variant="default">
+            <shopkeeper yaw="-90">131.5,14,339.5</shopkeeper> <!-- Blue -->
+            <shopkeeper yaw="90">-142.5,14,333.5</shopkeeper> <!-- Red -->
+        </if>
+        <if variant="halloween">
+            <shopkeeper yaw="-90">131.5,15,342.5</shopkeeper> <!-- Blue -->
+            <shopkeeper yaw="90">-142.5,15,330.5</shopkeeper> <!-- Red -->
+        </if>
     </shopkeepers>
     <shopkeepers name="`b`lUpgrade Shop" shop="upgrade-shop">
-        <shopkeeper yaw="-90">131.5,14,333.5</shopkeeper> <!-- Blue -->
-        <shopkeeper yaw="90">-142.5,14,339.5</shopkeeper> <!-- Red -->
+        <if variant="default">
+            <shopkeeper yaw="-90">131.5,14,333.5</shopkeeper> <!-- Blue -->
+            <shopkeeper yaw="90">-142.5,14,339.5</shopkeeper> <!-- Red -->
+        </if>
+        <if variant="halloween">
+            <shopkeeper yaw="-90">131.5,15,330.5</shopkeeper> <!-- Blue -->
+            <shopkeeper yaw="90">-142.5,15,342.5</shopkeeper> <!-- Red -->
+        </if>
     </shopkeepers>
 </shopkeepers>
 <shops>
@@ -1261,6 +1335,13 @@
             <item material="tnt" lore="`7Instantly ignites once placed." amount="1" price="8" currency="gold nugget"/>
             <item material="sponge" amount="1" price="1" currency="gold nugget"/>
         </category>
+		<if variant="halloween">
+            <category id="halloweengoodies" name="`aHalloween Goodies" material="jack o lantern">
+                <item material="firework" name="`6Festive Firework" price="1" currency="gold nugget" kit="festivefirework"/>
+				<item material="egg" name="`6Evil Egg" lore="`r`3Useful for egging houses" price="1" currency="gold nugget"/>
+				<item material="saddle" name="`6Horseman's Spare Horse" price="16" currency="gold nugget" kit="horsemanhorse"/>
+            </category>
+		</if>
     </shop>
     <shop id="upgrade-shop" name="Team Upgrades">
         <category id="upgrades" name="`aTeam Upgrades" material="beacon">
@@ -1280,26 +1361,56 @@
     </shop>
 </shops>
 <wools craftable="false">
+    <!-- Blue Team -->
     <wool team="blue" color="yellow" location="-168.5,18,295.5">
         <monument>
-            <block>147,19,334</block>
+            <if variant="default">
+                <block>147,19,334</block>
+            </if>
+            <if variant="halloween">
+                <block>145,17,335</block>
+            </if>
         </monument>
     </wool>
-    <wool team="blue" color="orange" location="-115.5,16,423.5">
-        <monument>
-            <block>147,19,338</block>
-        </monument>
-    </wool>
+    <if variant="default">
+        <wool team="blue" color="orange" location="-115.5,16,423.5">
+            <monument>
+                <block>147,19,338</block>
+            </monument>
+        </wool>
+    </if>
+    <if variant="halloween">
+        <wool team="blue" color="red" location="-115.5,16,423.5">
+            <monument>
+                <block>145,17,337</block>
+            </monument>
+        </wool>
+    </if>
+    <!-- Red Team -->
     <wool team="red" color="pink" location="157.5,18,377.5">
         <monument>
-            <block>-159,19,338</block>
+            <if variant="default">
+                <block>-159,19,338</block>
+            </if>
+            <if variant="halloween">
+                <block>-157,17,337</block>
+            </if>
         </monument>
     </wool>
-    <wool team="red" color="purple" location="104.5,16,249.5">
-        <monument>
-            <block>-159,19,334</block>
-        </monument>
-    </wool>
+    <if variant="default">
+        <wool team="red" color="purple" location="104.5,16,249.5">
+            <monument>
+                <block>-159,19,334</block>
+            </monument>
+        </wool>
+    </if>
+    <if variant="halloween">
+        <wool team="red" color="blue" location="104.5,16,249.5">
+            <monument>
+                <block>-157,17,335</block>
+            </monument>
+        </wool>
+    </if>
 </wools>
 <toolrepair>
     <tool>stone pickaxe</tool>
@@ -1359,6 +1470,43 @@
     <item>diamond chestplate</item>
     <item>diamond leggings</item>
     <item>diamond boots</item>
+    <item>stone pickaxe</item>
+    <item>gold pickaxe</item>
+    <item>iron pickaxe</item>
+    <item>diamond pickaxe</item>
+    <item>stone axe</item>
+    <item>gold axe</item>
+    <item>iron axe</item>
+    <item>diamond axe</item>
+    <item>stone spade</item>
+    <item>gold spade</item>
+    <item>iron spade</item>
+    <item>diamond spade</item>
+    <item>stone sword</item>
+    <item>iron sword</item>
+    <item>diamond sword</item>
+    <item>shears</item>
+    <item>bow</item>
+    <if variant="halloween">
+        <item>jack o lantern</item>
+        <item>brown mushroom</item>
+        <item>red mushroom</item>
+		<item>wool:13</item>
+		<item>quartz block</item>
+		<item>prismarine</item>
+		<item>step:7</item>
+		<item>wood step:4</item>
+		<item>wood step:5</item>
+		<item>coal block</item>
+		<item>log 2</item>
+		<item>nether brick stairs</item>
+		<item>hard clay</item>
+		<item>smooth brick</item>
+		<item>soul sand</item>
+		<item>flint</item>
+		<item>gravel</item>
+		<item>nether stalk</item>
+    </if>
 </itemremove>
 <itemkeep>
     <item>stone pickaxe</item>
@@ -1378,6 +1526,7 @@
     <item>diamond sword</item>
     <item>shears</item>
     <item>bow</item>
+    <item>stick</item>
 </itemkeep>
 <armorkeep>
     <item>leather helmet</item>
@@ -1408,6 +1557,12 @@
                 <material>sandstone</material>
                 <material>stained clay:9</material>
                 <material>clay</material>
+				<if variant="halloween">
+				    <material>hard clay</material>
+					<material>soul sand</material>
+					<material>gravel</material>
+                    <material>stained clay:8</material>
+				</if>
             </any>
         </filter>
         <drops>
