@@ -1,28 +1,53 @@
 <map proto="1.4.2">
 <name>Deciduous Nights</name>
-<version>1.1</version>
+<variant id="christmas" world="christmas" override="true">Silent Nights</variant>
+<variant id="halloween" world="halloween" override="true">Deciduous Frights</variant>
+<version>1.2.0</version>
 <objective>Capture the enemy team's wool!</objective>
-<created>2022-06-09</created>
+<if variant="default">
+    <created>2022-06-09</created>
+</if>
+<if variant="christmas">
+    <created>2022-11-23</created>
+</if>
+<if variant="halloween">
+    <created>2022-09-03</created>
+</if>
 <gamemode>ctw</gamemode>
 <authors>
     <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Map aesthetics, XML, Layout"/> <!-- Cazadorian -->
     <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Map aesthetics"/> <!--Tundren-->
 </authors>
 <teams>
-    <team id="blue" color="blue" max="8">Blue</team>
-    <team id="red" color="dark red" max="8">Red</team>
+    <unless variant="halloween">
+        <team id="blue" color="blue" max="8">Blue</team>
+        <team id="red" color="dark red" max="8">Red</team>
+    </unless>
+    <if variant="halloween">
+        <team id="blue" color="dark purple" max="8">Purple</team>
+        <team id="red" color="gold" max="8">Orange</team>
+    </if>
 </teams>
 <kits>
     <kit id="obs-kit">
         <effect>night vision</effect>
     </kit>
-    <kit id="spawn-kit">
+    <kit id="spawn-kit" parent="obs-kit">
         <clear/>
         <item slot="0" unbreakable="true" material="stone sword"/>
         <item slot="1" unbreakable="true" material="bow" />
         <item slot="2" unbreakable="true" material="iron pickaxe"/>
         <item slot="3" unbreakable="true" material="iron axe"/>
-        <item slot="6" material="bucket"/>
+        <unless variant="christmas">
+            <item slot="4" material="stained clay" team-color="true" amount="48"/>
+            <item slot="5" material="stained glass" team-color="true" amount="16"/>
+        </unless>
+        <if variant="christmas">
+            <item slot="4" unbreakable="true" material="iron spade"/>
+            <item slot="5" material="stained clay" team-color="true" amount="48"/>
+            <item slot="6" material="stained glass" team-color="true" amount="16"/>
+        </if>
+        <item slot="7" material="bucket"/>
         <item slot="8" material="golden apple"/>
         <item slot="28" material="arrow" amount="32"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
@@ -30,15 +55,6 @@
         <leggings material="leather leggings" team-color="true" unbreakable="true"/>
         <boots material="iron boots" unbreakable="true"/>
         <effect duration="4" amplifier="255">damage resistance</effect>
-        <effect>night vision</effect>
-    </kit>
-    <kit id="blue-kit" parent="spawn-kit">
-        <item slot="4" material="stained clay" damage="11" amount="48"/>
-        <item slot="5" material="stained glass" damage="11" amount="16"/>
-    </kit>
-    <kit id="red-kit" parent="spawn-kit">
-        <item slot="4" material="stained clay" damage="14" amount="48"/>
-        <item slot="5" material="stained glass" damage="14" amount="16"/>
     </kit>
     <kit id="wool-gear" parent="wool-helmet">
         <action>
@@ -54,17 +70,17 @@
     </kit>
 </kits>
 <spawns>
-    <default kit="obs-kit" yaw="0">
+    <default kit="obs-kit">
         <regions>
             <point>21.5,11,-53.5</point>
         </regions>
     </default>
-    <spawn team="red" kit="red-kit" yaw="90">
+    <spawn team="red" kit="spawn-kit" yaw="90">
         <regions>
             <point>51.5,7,3.5</point>
         </regions>
     </spawn>
-    <spawn team="blue" kit="blue-kit" yaw="-90">
+    <spawn team="blue" kit="spawn-kit" yaw="-90">
         <regions>
             <point>-8.5,7,3.5</point>
         </regions>
@@ -107,12 +123,24 @@
         <rectangle id="red-prot" min="43,-2" max="56,9"/>
     </union>
     <union id="wool-rooms">
-        <rectangle id="light-blue-wool-room" min="-43,-2" max="-53,9"/> <!-- blue defends -->
-        <rectangle id="pink-wool-room" min="86,-2" max="96,9"/> <!-- red defends -->
+        <unless variant="halloween">
+            <rectangle id="light-blue-wool-room" min="-43,-2" max="-53,9"/> <!-- blue defends -->
+            <rectangle id="pink-wool-room" min="86,-2" max="96,9"/> <!-- red defends -->
+        </unless>
+        <if variant="halloween">
+            <rectangle id="light-blue-wool-room" min="-36,-2" max="-46,9"/> <!-- purple defends -->
+            <rectangle id="pink-wool-room" min="79,-2" max="89,9"/> <!-- orange defends -->
+        </if>
     </union>
     <union id="spawners">
-        <point id="light-blue-point">-49.5,8.5,3.5</point>
-        <point id="pink-point">92.5,8.5,3.5</point>
+        <unless variant="halloween">
+            <point id="light-blue-point">-49.5,8.5,3.5</point>
+            <point id="pink-point">92.5,8.5,3.5</point>
+        </unless>
+        <if variant="halloween">
+            <point id="light-blue-point">-42.5,8,3.5</point>
+            <point id="pink-point">85.5,8,3.5</point>
+        </if>
     </union>
     <union id="lanes">
         <rectangle id="sw-lane" min="5,22" max="12,32"/>
@@ -162,6 +190,15 @@
     <item>string</item>
     <item>redstone</item>
     <item>redstone torch off</item>
+    <item>clay ball</item>
+    <if variant="christmas">
+        <item>snow ball</item>
+    </if>
+    <if variant="halloween">
+        <item>hard clay</item>
+        <item>brown mushroom</item>
+        <item>red mushroom</item>
+    </if>
 </itemremove>
 <itemkeep>
     <item>arrow</item>
@@ -188,14 +225,8 @@
 <kill-rewards>
     <kill-reward>
         <item material="golden apple" amount="1"/>
-    </kill-reward>
-    <kill-reward filter="only-red">
-        <item material="stained clay" damage="14" amount="16"/>
-        <item material="stained glass" damage="14" amount="8"/>
-    </kill-reward>
-    <kill-reward filter="only-blue">
-        <item material="stained clay" damage="11" amount="16"/>
-        <item material="stained glass" damage="11" amount="8"/>
+        <item material="stained clay" team-color="true" amount="16"/>
+        <item material="stained glass" team-color="true" amount="8"/>
     </kill-reward>
 </kill-rewards>
 </map>
