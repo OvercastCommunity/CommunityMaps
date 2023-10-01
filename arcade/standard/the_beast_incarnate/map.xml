@@ -1,0 +1,122 @@
+<map proto="1.4.2" game="Infection">
+<name>The Beast Incarnate</name>
+<version>1.2.4</version>
+<objective>Kill the beast to become the new BEAST.</objective>
+<gamemode>arcade</gamemode>
+<time result="beasts-team">5m</time>
+<authors>
+    <author uuid="38ef938a-7020-4c04-9d12-4875ed0598ca"/> <!-- Kazoha -->
+    <author uuid="f6f5dce8-a158-461d-b26d-dc8acfaeedd7"/> <!-- Shuliett -->
+</authors>
+<contributors>
+    <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="XML Fixes"/> <!-- Pablete1234 -->
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML Fixes"/> <!-- Zzuf -->
+</contributors>
+<rules>
+    <rule>Fall damage is off</rule>
+    <rule>Players name tags don't show</rule>
+</rules>
+<broadcasts>
+    <alert after="1s">The beasts will be released after 15 seconds!</alert>
+    <alert after="15s">The beasts have been released!</alert>
+    <tip after="3s" filter="only-humans">You must kill the beast to become the new beast!</tip>
+    <tip after="3s" filter="only-beasts">You must survive for as long as possible, good luck.</tip>
+</broadcasts>
+<teams>
+    <team id="humans-team" color="green" show-name-tags="false" max="55" plural="true">Humans</team>
+    <team id="beasts-team" color="Red" show-name-tags="false" max="3" max-overfill="3" plural="true">Beasts</team>
+</teams>
+<respawn delay="3s" auto="true"/>
+<kits>
+    <kit id="beasts-kit" parent="maybe-switch-to-human">
+        <helmet locked="true" unbreakable="true" team-color="true" material="diamond helmet" enchantment="PROTECTION_ENVIRONMENTAL"/>
+        <chestplate locked="true" unbreakable="true" team-color="true" material="diamond chestplate" enchantment="PROTECTION_ENVIRONMENTAL"/>
+        <leggings locked="true" unbreakable="true" team-color="true" material="diamond leggings" enchantment="PROTECTION_ENVIRONMENTAL"/>
+        <boots locked="true" unbreakable="true" team-color="true" material="diamond boots" enchantment="PROTECTION_ENVIRONMENTAL"/>
+        <item slot="0" unbreakable="true" material="diamond sword" name="`c`lBeast Sword"/>
+        <effect duration="10" amplifier="4">damage resistance</effect>
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="humans-kit">
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="chainmail chestplate"/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="maybe-switch-to-human" filter="needs_move=1..1">
+        <team-switch team="humans-team"/>
+        <action>
+            <set var="needs_move" value="0"/>
+        </action>
+    </kit>
+    <kit id="switch-to-beast">
+        <team-switch team="beasts-team"/>
+    </kit>
+</kits>
+<filters>
+    <team id="only-humans">humans-team</team>
+    <team id="only-beasts">beasts-team</team>
+</filters>
+<variables>
+    <variable id="needs_move" scope="player" default="0"/>
+</variables>
+<actions>
+    <trigger scope="match">
+        <filter>
+            <after duration="15s" message="Beasts are being released in {0}">
+                <match-running/>
+            </after>
+        </filter>
+        <action>
+            <fill region="beasts-spawn" material="air"/>
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <after duration="1s">
+                <all>
+                    <team>beasts-team</team>
+                    <dead/>
+                </all>
+            </after>
+        </filter>
+        <action>
+            <set var="needs_move" value="1"/>
+        </action>
+    </trigger>
+</actions>
+<spawns>
+    <spawn team="humans-team" kit="humans-kit" yaw="180" region="humans-spawn-point"/>
+    <spawn team="beasts-team" kit="beasts-kit" yaw="-90" region="beasts-spawn-point"/>
+    <default yaw="180" region="obs-spawn-point"/>
+</spawns>
+<regions>
+    <cylinder id="obs-spawn-point" base="-15.5,20.2,49.5" height="0" radius="2"/>
+    <cuboid id="beasts-spawn" min="-13,29,6" max="-18,22,11"/>
+    <cylinder id="beasts-spawn-point" base="-15.5,25.2,8.5" height="0" radius="1"/>
+    <cylinder id="humans-spawn-point" base="-15.5,17,8.5" height="0" radius="10"/>
+</regions>
+<control-points capture-time="10s" required="true" show="true" show-progress="false">
+    <control-point name="Beasts Win!" capture-filter="only-beasts" capture="everywhere"/>
+</control-points>
+<kill-rewards>
+    <kill-reward filter="only-humans" kit="switch-to-beast"/>
+</kill-rewards>
+<itemremove>
+    <item>leather helmet</item>
+    <item>chainmail chestplate</item>
+    <item>diamond helmet</item>
+    <item>diamond chestplate</item>
+    <item>diamond leggings</item>
+    <item>diamond boots</item>
+    <item>diamond sword</item>
+    <item>stone sword</item>
+</itemremove>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<disabledamage>
+    <damage>fall</damage>
+</disabledamage>
+<respawn auto="true"/>
+</map>
