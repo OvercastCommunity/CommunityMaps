@@ -1,11 +1,20 @@
 <map proto="1.4.2">
 <name>Wild Isle</name>
-<version>1.3.2</version>
+<variant id="halloween" world="halloween" override="true">Wild Vile</variant>
+<version>1.4.0</version>
 <objective>Destroy both enemy monuments!</objective>
-<created>2021-10-18</created>
+<if variant="default">
+    <created>2021-10-18</created>
+</if>
+<if variant="halloween">
+    <created>2022-09-10</created>
+</if>
 <authors>
     <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
     <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e"/> <!-- Mewzzy -->
+    <if variant="halloween">
+        <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Halloween edits"/> <!-- Cazadorian -->
+    </if>
 </authors>
 <contributors>
     <contributor uuid="621b2aa8-4e5f-4ed8-bd36-0ae2f8952a06" contribution="Gameplay advice, suggestions and feedback"/> <!-- Strangey -->
@@ -14,10 +23,19 @@
     <contributor uuid="1987fc00-a5b2-43b5-b94b-e3c0d25776e9" contribution="Feedback and suggestions"/> <!-- BrettOgden -->
 </contributors>
 <teams>
-    <team id="blue" color="blue" max="24">Blue</team>
-    <team id="red" color="dark red" max="24">Red</team>
+    <unless variant="halloween">
+        <team id="blue" color="blue" max="24">Blue</team>
+        <team id="red" color="dark red" max="24">Red</team>
+    </unless>
+    <if variant="halloween">
+        <team id="blue" color="gold" max="24">Orange</team>
+        <team id="red" color="dark purple" max="24">Purple</team>
+    </if>
 </teams>
 <kits>
+    <kit id="default-kit">
+        <effect>night vision</effect>
+    </kit>
     <kit id="spawn-kit">
         <clear/>
         <item slot="0" unbreakable="true" material="iron sword"/>
@@ -31,6 +49,7 @@
             <enchantment>efficiency</enchantment>
         </item>
         <item slot="4" unbreakable="true" material="iron spade"/>
+        <item slot="5" amount="64" team-color="true" material="stained clay"/>
         <item slot="6" amount="32" material="glass"/>
         <item slot="7" material="bucket"/>
         <item slot="8" material="golden apple"/>
@@ -39,26 +58,32 @@
         <boots unbreakable="true" team-color="true" material="leather boots">
             <enchantment>depth_strider</enchantment>
         </boots>
-    </kit>
-    <kit id="blue-kit" parents="spawn-kit">
-        <item slot="5" amount="64" damage="11" material="stained clay"/>
-    </kit>
-    <kit id="red-kit" parents="spawn-kit">
-        <item slot="5" amount="64" damage="14" material="stained clay"/>
+        <if variant="halloween">
+            <effect>night vision</effect>
+        </if>
     </kit>
 </kits>
 <spawns>
-    <default>
-        <region yaw="180">
-            <cylinder base="35.5,28,77.5" radius="0.5" height="0"/>
-        </region>
-    </default>
-    <spawn team="blue" kit="blue-kit">
+    <unless variant="halloween">
+        <default>
+            <region yaw="180">
+                <cylinder base="35.5,28,77.5" radius="0.5" height="0"/>
+            </region>
+        </default>
+    </unless>
+    <if variant="halloween">
+        <default kit="default-kit">
+            <region yaw="180">
+                <cylinder base="35.5,28,77.5" radius="0.5" height="0"/>
+            </region>
+        </default>
+    </if>
+    <spawn team="blue" kit="spawn-kit">
         <region yaw="90">
             <cylinder base="181.5,8,187.5" radius="0.5" height="0"/>
         </region>
     </spawn>
-    <spawn team="red" kit="red-kit">
+    <spawn team="red" kit="spawn-kit">
         <region yaw="-90">
             <cylinder base="-110.5,8,187.5" radius="0.5" height="0"/>
         </region>
@@ -130,7 +155,7 @@
     <mode id="gold-mode" after="15m" material="gold block" name="`6GOLD MONUMENT MODE"/>
     <mode id="coal-mode" after="30m" material="coal block" name="`8COAL MONUMENT MODE"/>
 </modes>
-<destroyables repairable="false" materials="emerald block" completion="100%" show-progress="true" modes="gold-mode coal-mode">
+<destroyables repairable="false" materials="emerald block" show-progress="true" modes="gold-mode coal-mode">
     <destroyables name="North Monument">
         <destroyable owner="blue" region="blue-north"/>
         <destroyable owner="red" region="red-north"/>
@@ -146,10 +171,20 @@
 <spawners>
     <spawner id="gapple-mid" delay="6s">
         <spawn-region>
-            <point>35.5,5.1,187.5</point>
+            <unless variant="halloween">
+                <point>35.5,5.1,187.5</point>
+            </unless>
+            <if variant="halloween">
+                <point>35.5,6.1,187.5</point>
+            </if>
         </spawn-region>
         <player-region>
-            <cylinder base="35.5,5,187.5" radius="5" height="6"/>
+            <unless variant="halloween">
+                <cylinder base="35.5,5,187.5" radius="5" height="6"/>
+            </unless>
+            <if variant="halloween">
+                <cylinder base="35.5,6,187.5" radius="5" height="6"/>
+            </if>
         </player-region>
         <item material="golden apple"/>
     </spawner>
@@ -191,6 +226,11 @@
     <item>leaves</item>
     <item>bucket</item>
     <item>water bucket</item>
+    <if variant="halloween">
+        <item>nether stalk</item>
+        <item>brown mushroom</item>
+        <item>double plant</item>
+    </if>
 </itemremove>
 <block-drops>
     <rule>
@@ -237,12 +277,7 @@
         <item material="golden apple"/>
         <item amount="8" material="glass"/>
         <item amount="8" damage="3" material="wood"/>
-    </kill-reward>
-    <kill-reward filter="only-blue">
-        <item amount="16" damage="11" material="stained clay"/>
-    </kill-reward>
-    <kill-reward filter="only-red">
-        <item amount="16" damage="14" material="stained clay"/>
+        <item amount="16" team-color="true" material="stained clay"/>
     </kill-reward>
 </kill-rewards>
 <maxbuildheight>28</maxbuildheight>
