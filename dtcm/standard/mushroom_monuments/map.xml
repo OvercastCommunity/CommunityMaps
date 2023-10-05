@@ -1,40 +1,78 @@
 <map proto="1.4.2">
 <name>Mushroom Monuments</name>
-<version>1.1.3</version>
+<variant id="christmas" world="christmas" override="true">Chillshroom Monuments</variant>
+<variant id="halloween" world="halloween" override="true">Booshroom Monuments</variant>
+<version>1.2.0</version>
 <objective>Destroy the enemy team's monument!</objective>
 <gamemode>dtm</gamemode>
-<created>2022-01-07</created>
+<if variant="default">
+    <created>2022-01-07</created>
+</if>
+<if variant="christmas">
+    <created>2022-11-24</created>
+</if>
+<if variant="halloween">
+    <created>2022-09-10</created>
+</if>
 <authors>
     <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4"/> <!-- Cazadorian -->
 </authors>
 <teams>
-    <team id="blue" color="blue" max="14">Blue</team>
-    <team id="red" color="dark red" max="14">Red</team>
+    <unless variant="halloween">
+        <team id="blue" color="blue" max="14">Blue</team>
+        <team id="red" color="dark red" max="14">Red</team>
+    </unless>
+    <if variant="halloween">
+        <team id="blue" color="dark purple" max="14">Purple</team>
+        <team id="red" color="gold" max="14">Orange</team>
+    </if>
 </teams>
 <kits>
+    <kit id="default-kit">
+        <effect>night vision</effect>
+    </kit>
     <kit id="spawn-kit">
         <clear/>
         <item slot="0" unbreakable="true" material="iron sword"/>
         <item slot="1" unbreakable="true" material="bow"/>
         <item slot="2" unbreakable="true" material="stone pickaxe"/>
         <item slot="3" unbreakable="true" material="iron axe" enchantment="dig speed:2"/>
-        <item slot="4" amount="48" material="wood"/>
-        <item slot="5" amount="16" material="glass"/>
+        <unless variant="christmas">
+            <item slot="4" amount="48" material="wood"/>
+            <item slot="5" amount="16" material="glass"/>
+        </unless>
+        <if variant="christmas">
+            <item slot="4" unbreakable="true" material="iron spade"/>
+            <item slot="5" amount="48" damage="5" material="wood"/>
+            <item slot="6" amount="16" material="glass"/>
+        </if>
         <item slot="7" amount="32" material="arrow"/>
         <item slot="8" material="golden apple"/>
         <effect duration="4" amplifier="255">damage resistance</effect>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
         <leggings unbreakable="true" material="chainmail leggings"/>
-        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <boots team-color="true" unbreakable="true" material="leather boots"/>
+        <if variant="halloween">
+            <effect>night vision</effect>
+        </if>
     </kit>
 </kits>
 <spawns>
-    <default yaw="0">
-        <regions>
-            <point>-11.5,45,0.5</point>
-        </regions>
-    </default>
+    <unless variant="halloween">
+        <default>
+            <regions>
+                <point>-11.5,45,0.5</point>
+            </regions>
+        </default>
+    </unless>
+    <if variant="halloween">
+        <default kit="default-kit">
+            <regions>
+                <point>-11.5,45,0.5</point>
+            </regions>
+        </default>
+    </if>
     <spawn team="red" kit="spawn-kit" yaw="-90">
         <regions>
             <point>-109.5,10,0.5</point>
@@ -63,12 +101,12 @@
       <point id="north-goldblock">-11.5,12,-41.5</point>
     </union>
     <union id="south-spawner">
-      <cuboid id="south-gapple" min="-7,11,37" max="-17,21,47"/>
-      <point id="south-goldblock">-11.5,12,42.5</point>
+        <cuboid id="south-gapple" min="-7,11,37" max="-17,21,47"/>
+        <point id="south-goldblock">-11.5,12,42.5</point>
     </union>
     <union id="spawner-prot">
-      <cuboid id="north-prot" min="-12,13,-42" max="-11,11,-41"/>
-      <cuboid id="south-prot" min="-12,13,42" max="-11,11,43"/>
+        <cuboid id="north-prot" min="-12,13,-42" max="-11,11,-41"/>
+        <cuboid id="south-prot" min="-12,13,42" max="-11,11,43"/>
     </union>
     <complement id="void-area">
         <everywhere/>
@@ -84,7 +122,7 @@
     <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
     <apply block="never" region="spawner-prot" message="You may not break the spawner!"/>
 </regions>
-<destroyables name="Monument" show-progress="true" materials="gold_block;coal_block" completion="100%" required="true">
+<destroyables name="Monument" show-progress="true" materials="gold_block;coal_block" required="true">
     <destroyable owner="blue">
         <region>
             <cuboid min="41,19,2" max="44,15,-1"/>
@@ -109,6 +147,9 @@
     <tool>bow</tool>
     <tool>stone pickaxe</tool>
     <tool>iron axe</tool>
+    <if variant="christmas">
+        <tool>iron spade</tool>
+    </if>
 </toolrepair>
 <itemremove>
     <item>leather helmet</item>
@@ -119,6 +160,10 @@
     <item>coal block</item>
     <item>sapling</item>
     <item>tnt</item>
+    <if variant="christmas">
+        <item>snow ball</item>
+        <item>clay ball</item>
+    </if>
 </itemremove>
 <block-drops>
     <rule>
@@ -136,12 +181,19 @@
     <item>golden apple</item>
     <item>arrow</item>
 </itemkeep>
-<kill-reward>
-    <item amount="16" material="wood"/>
-    <item amount="8" material="glass"/>
-    <item amount="16" material="arrow"/>
-    <item material="golden apple"/>
-</kill-reward>
+<kill-rewards>
+    <kill-reward>
+        <unless variant="christmas">
+            <item amount="16" material="wood"/>
+        </unless>
+        <if variant="christmas">
+            <item amount="16" material="wood" damage="5"/>
+        </if>
+        <item amount="8" material="glass"/>
+        <item amount="16" material="arrow"/>
+        <item material="golden apple"/>
+    </kill-reward>
+</kill-rewards>
 <hunger>
     <depletion>off</depletion>
 </hunger>
