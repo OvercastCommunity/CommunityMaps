@@ -1,8 +1,20 @@
 <map proto="1.4.2">
 <name>Happy Rainbow</name>
-<version>2.0.1</version>
-<objective>Capture the most flags in 8m or gain a 3 point lead to win!</objective>
-<time result="score" overtime="1m" max-overtime="2m">8m</time>
+<variant id="rage">Snowball RAGE</variant>
+<version>2.0.2</version>
+<include id="void-death"/>
+<constants>
+    <constant id="void-plane">-60</constant>
+</constants>
+<unless variant="rage">
+    <objective>Capture the most flags in 8m or gain a 3 point lead to win!</objective>
+    <time result="score" overtime="1m" max-overtime="2m">8m</time>
+</unless>
+<if variant="rage">
+    <objective>Capture the most flags in 5m or gain a 3 point lead to win!</objective>
+    <time result="score">5m</time>
+    <respawn delay="5s"/>
+</if>
 <created>2022-08-15</created>
 <gamemode>ctf</gamemode>
 <authors>
@@ -11,7 +23,14 @@
 <contributors>
     <contributor uuid="f2efb814-9e02-4d17-bdf5-8ed449f9df77" contribution="Testing"/> <!-- Alexander_ -->
     <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Feedback"/> <!-- Cazadorian -->
+    <if variant="rage">
+        <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Snowball RAGE variant"/> <!-- cs_ -->
+        <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Snowball RAGE variant"/> <!-- zzuf -->
+    </if>
 </contributors>
+<if variant="rage">
+    <phase>development</phase>
+</if>
 <broadcasts>
     <tip after="1s" every="1m">The floor is falling! Gotta keep running!</tip>
     <alert after="2s" every="3m">A mercy limit of 3 flag captures is active!</alert>
@@ -56,19 +75,32 @@
     </kit>
     <kit id="spawn-kit" parent="default">
         <clear/>
-        <item slot="0" unbreakable="true" material="stone sword"/>
-        <item slot="1" amount="8" material="snowball"/>
-        <item slot="2" material="golden apple"/>
+        <unless variant="rage">
+            <item slot="0" unbreakable="true" material="stone sword"/>
+            <item slot="1" amount="8" material="snowball"/>
+            <item slot="2" material="golden apple"/>
+        </unless>
+        <if variant="rage">
+            <item slot="0" unbreakable="true" material="diamond sword" enchantments="sharpness:10"/>
+            <item slot="1" amount="4" material="snowball" name="`fHeavy Snowball" projectile="heavySnowball" enchantments="sharpness:10"/>
+        </if>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
         <leggings unbreakable="true" team-color="true" material="leather leggings"/>
         <boots unbreakable="true" team-color="true" material="leather boots"/>
         <effect duration="3" amplifier="255">damage resistance</effect>
-    </kit>
-    <kit id="death-kit" force="true">
-        <health>1</health>
+        <game-mode>adventure</game-mode>
     </kit>
 </kits>
+<projectiles>
+    <projectile
+        id="heavySnowball"
+        name="Heavy Snowball"
+        projectile="Snowball"
+        damage="9999"
+        throwable="true"
+        click="right"/>
+</projectiles>
 <filters>
     <not id="not-red">
         <team id="only-red">red</team>
@@ -205,8 +237,6 @@
     <apply enter="only-yellow" region="yellow-protection" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-green" region="green-protection" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-blue" region="blue-protection" message="You may not enter the enemy's spawn!"/>
-    <cuboid id="death" min="-oo,-oo,-oo" max="oo,-60,oo"/>
-    <apply kit="death-kit" region="death"/>
 </regions>
 <kill-rewards>
     <kill-reward>
@@ -214,11 +244,13 @@
         <item>golden apple</item>
     </kill-reward>
 </kill-rewards>
-<spawners>
-    <spawner spawn-region="gapple-point" player-region="gapple" delay="3s">
-        <item amount="1" material="golden apple"/>
-    </spawner>
-</spawners>
+<unless variant="rage">
+    <spawners>
+        <spawner spawn-region="gapple-point" player-region="gapple" delay="3s">
+            <item amount="1" material="golden apple"/>
+        </spawner>
+    </spawners>
+</unless>
 <renewables>
     <renewable interval="7s" grow="true" particles="true" sound="false" region="everywhere">
         <renew-filter>
