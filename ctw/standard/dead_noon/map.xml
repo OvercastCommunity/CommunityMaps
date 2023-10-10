@@ -1,8 +1,14 @@
 <map proto="1.4.2">
 <name>Dead Noon</name>
-<version>1.1.2</version>
+<variant id="halloween" world="halloween" override="true">Undead Noon</variant>
+<version>1.2.0</version>
 <objective>Capture the wool!</objective>
-<created>2022-08-07</created>
+<if variant="default">
+    <created>2022-08-07</created>
+</if>
+<if variant="halloween">
+    <created>2022-09-16</created>
+</if>
 <authors>
     <author uuid="55cb168a-e28f-49e5-a853-8268093926c8"/> <!-- 0uzi -->
 </authors>
@@ -11,17 +17,23 @@
     <contributor uuid="5c79d2c9-a4f0-4343-a84b-e1720f13009b" contribution="XML Help"/> <!-- CoWinkKeyDinkInc, thanks! -->
 </contributors>
 <teams>
-    <team id="red-team" color="red" max="16">Red</team>
-    <team id="blue-team" color="blue" max="16">Blue</team>
+    <unless variant="halloween">
+        <team id="red-team" color="red" max="16">Red</team>
+        <team id="blue-team" color="blue" max="16">Blue</team>
+    </unless>
+    <if variant="halloween">
+        <team id="red-team" color="gold" max="16">Orange</team>
+        <team id="blue-team" color="dark purple" max="16">Purple</team>
+    </if>
 </teams>
 <kits>
     <kit id="spawn-kit">
         <clear/>
-        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
         <item slot="1" unbreakable="true" material="bow">
             <enchantment>infinity</enchantment>
         </item>
-        <item slot="2" material="iron pickaxe" unbreakable="true">
+        <item slot="2" unbreakable="true" material="iron pickaxe">
             <enchantment level="2">efficiency</enchantment>
         </item>
         <item slot="3" unbreakable="true" material="iron axe">
@@ -36,21 +48,28 @@
         <item slot="8" material="golden apple"/>
         <item slot="28" material="arrow"/>
         <item slot="31" material="workbench" amount="16" damage="2"/>
-        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
-        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
-        <leggings material="chainmail leggings" unbreakable="true"/>
-        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+        <boots unbreakable="true" team-color="true" material="leather boots"/>
         <potion duration="5s" amplifier="255">damage resistance</potion>
     </kit>
 </kits>
 <spawns>
     <spawn team="blue-team" kit="spawn-kit" yaw="180" region="blue-spawn-point"/>
-    <spawn team="red-team" kit="spawn-kit" yaw="0" region="red-spawn-point"/>
+    <spawn team="red-team" kit="spawn-kit" region="red-spawn-point"/>
     <default yaw="-90" region="obs-spawn-point"/>
 </spawns>
 <wools craftable="false">
-    <wool team="blue-team" color="blue" monument="blue-team-blue-wool" location="-6.5,16.2,96.5"/>
-    <wool team="red-team" color="red" monument="red-team-red-wool" location="6.5,16.2,-96.5"/>
+    <unless variant="halloween">
+        <wool team="blue-team" color="blue" monument="blue-team-blue-wool" location="-6.5,16.2,96.5"/>
+        <wool team="red-team" color="red" monument="red-team-red-wool" location="6.5,16.2,-96.5"/>
+    </unless>
+    <if variant="halloween">
+        <!-- Wool colors for each team intentionally opposite in Halloween variant -->
+        <wool team="blue-team" color="orange" monument="blue-team-blue-wool" location="6.5,16.2,-96.5"/>
+        <wool team="red-team" color="purple" monument="red-team-red-wool" location="-6.5,16.2,96.5"/>
+    </if>
 </wools>
 <filters>  
     <deny id="deny-blue">
@@ -89,7 +108,12 @@
     <union id="spawns">
         <union id="blue-spawn">
             <rectangle min="38,66" max="48,78"/>
-            <rectangle min="36,78" max="48,90"/>
+            <unless variant="halloween">
+                <rectangle min="36,78" max="48,90"/>
+            </unless>
+            <if variant="halloween">
+                <rectangle min="38,78" max="48,90"/>
+            </if>
         </union>
         <union id="red-spawn">
             <rectangle min="-38,-66" max="-48,-78"/>
@@ -98,9 +122,9 @@
     </union>
     <union id="woolrooms">
         <!-- blue defends / red attacks -->
-        <cuboid id="blue-woolroom" min="0,0,90" max="-12,oo,102"/>
+        <rectangle id="blue-woolroom" min="0,90" max="-12,102"/>
         <!-- red defends / blue attacks -->
-        <cuboid id="red-woolroom" min="0,0,-90" max="12,oo,-102"/>
+        <rectangle id="red-woolroom" min="0,-90" max="12,-102"/>
     </union>
     <complement id="void-area">
         <everywhere/>
@@ -127,10 +151,20 @@
 </regions>
 <spawners>
     <spawner spawn-region="blue-wool-spawn" player-region="red-woolroom" delay="2s">
-        <item material="wool" amount="1" damage="11"/>
+        <unless variant="halloween">
+            <item material="wool" amount="1" damage="11"/>
+        </unless>
+        <if variant="halloween">
+            <item material="wool" amount="1" damage="1"/>
+        </if>
     </spawner>
     <spawner spawn-region="red-wool-spawn" player-region="blue-woolroom" delay="2s">
-        <item material="wool" amount="1" damage="14"/>
+        <unless variant="halloween">
+            <item material="wool" amount="1" damage="14"/>
+        </unless>
+        <if variant="halloween">
+            <item material="wool" amount="1" damage="10"/>
+        </if>
     </spawner>
 </spawners>
 <renewables>
@@ -151,6 +185,10 @@
     <item>leather boots</item>
     <item>redstone</item>
     <item>redstone torch on</item>
+    <if variant="halloween">
+        <item>seeds</item>
+        <item>brown mushroom</item>
+    </if>
 </itemremove>
 <itemkeep>
     <item>iron sword</item>
