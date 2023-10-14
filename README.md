@@ -5,7 +5,7 @@ This repository contains maps created by community members of Overcast Community
 
 ## Submission
 
-If you are interested in submitting your map to be played on Overcast Community, please visit [Map Submissions](https://oc.tc/submissions/). The page will cover the process for submission, current map standards, and guidelines. We also recommend visiting the [`#mapmaking` channel in our Discord](https://oc.tc/discord) for assistance.
+If you are interested in submitting your map to be played on Overcast Community, please visit [Map Submissions](https://oc.tc/docs/submissions). The page will cover the process for submission, current map standards, and guidelines. We also recommend visiting the [`#mapmaking` channel in our Discord](https://oc.tc/discord) for assistance.
 
 If you would like to submit a map that was originally built for a different server/network, please visit [PublicMaps](https://github.com/OvercastCommunity/PublicMaps). 
 Additionally, if you would like to submit a map that is available under a different license (and thus, not public), please contact a Map Developer so we can arrange this for you.
