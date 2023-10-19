@@ -1,0 +1,152 @@
+<map proto="1.4.2">
+<name>Flags of Samarkand</name>
+<version>1.1.0</version>
+<objective>Capture the flag as many times as possible before time runs out!</objective>
+<created>2023-10-19</created>
+<gamemode>ctf</gamemode>
+<authors>
+    <author uuid="2ca8072f-74be-4798-85b8-bbce03aa91af"/> <!-- Tywnis -->
+</authors>
+<time result="score" overtime="30s" max-overtime="1m30s">9m</time>
+<teams>
+    <team id="yellow" color="yellow" max="12">Yellow</team>
+    <team id="red" color="dark red" max="12">Red</team>
+</teams>
+<spawns>
+    <default>
+        <region yaw="180">
+            <block>0.5,31,26.5</block>
+        </region>
+    </default>
+    <spawn team="yellow" kit="spawn-kit">
+        <region yaw="90">
+            <block>50.5,13,0.5</block>
+        </region>
+    </spawn>
+    <spawn team="red" kit="spawn-kit">
+        <region yaw="-90">
+            <block>-49.5,13,0.5</block>
+        </region>
+    </spawn>
+</spawns>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" unbreakable="true" enchantment="dig speed:1">iron pickaxe</item>
+        <item slot="3" amount="64" team-color="true" material="stained clay"/>
+        <item slot="4" material="golden apple"/>
+        <item slot="8" amount="12" material="arrow"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="3">projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" material="iron boots"/>
+        <effect duration="2s" amplifier="255">resistance</effect>
+    </kit>
+    <kit id="flag-pickup" force="true">
+        <effect>slowness</effect>
+    </kit>
+    <kit id="flag-reset" force="true">
+        <effect duration="0" amplifier="0">slowness</effect>
+    </kit>
+</kits>
+<filters>
+    <deny id="deny-void">
+        <void/>
+    </deny>
+    <team id="only-yellow">yellow</team>
+    <team id="only-red">red</team>
+    <time id="flag-respawns">0</time>
+    <any id="blocks">
+        <material>159</material>
+        <material>170</material>
+        <material>96</material>
+        <material>12</material>
+        <material>leaves</material>
+    </any>
+</filters>
+<regions>
+    <cylinder id="yellow-net" base="-45.5,5,0.5" radius="1.5" height="3"/>
+    <cylinder id="red-net" base="46.5,5,0.5" radius="1.5" height="3"/>
+    <union id="spawns">
+        <cylinder id="yellow-spawn-protection" base="-49.5,12,0.5" radius="3" height="3"/>
+        <cylinder id="red-spawn-protection" base="50.5,12,0.5" radius="3" height="3"/>
+        <cylinder id="yellow-cross" base="-45.5,5,0.5" radius="4" height="1"/>
+        <cylinder id="red-cross" base="46.5,5,0.5" radius="4" height="1"/>
+        <cuboid id="yellow-flag-height" min="-43,5,-2" max="-48,10,3"/>
+        <cuboid id="red-flag-height" min="44,5,-2" max="49,10,3"/>
+    </union>
+    <rectangle id="game-area" min="59,12" max="-58,-11"/>
+    <negative id="outside-game-area">
+        <region id="game-area"/>
+    </negative>
+    <apply block="deny-void" message="You may not build here.">
+        <region>
+            <negative>
+                <region id="game-area"/>
+            </negative>
+        </region>
+    </apply>
+    <apply block-break="never" block-place="never" message="You may not modify this area." region="spawns"/>
+    <apply block-place="blocks" block-break="blocks" region="game-area"/>
+</regions>
+<maxbuildheight>27</maxbuildheight>
+<flags flag-proximity-metric="none" net-proximity-metric="none" required="false">
+    <flag id="yellow-flag"
+          name="Yellow Sun"
+          owner="yellow"
+          color="yellow"
+          pickup-kit="flag-pickup"
+          drop-kit="flag-reset">
+        <post pickup-filter="only-yellow" recover-time="12s" respawn-time="10s">-45.5,6,0.5</post>
+    </flag>
+    <flag id="red-flag"
+          name="Red Sun"
+          owner="red"
+          color="red"
+          pickup-kit="flag-pickup"
+          drop-kit="flag-reset">
+        <post pickup-filter="only-red" recover-time="12s" respawn-time="10s">46.5,6,0.5</post>
+    </flag>
+    <flags points="1">
+        <net region="yellow-net" flag="red-flag" respawn-filter="flag-respawns"/>
+        <net region="red-net" flag="yellow-flag" respawn-filter="flag-respawns"/>
+    </flags>
+</flags>
+<score>
+    <kills>0</kills>
+    <deaths>0</deaths>
+    <limit>5</limit>
+    <mercy>3</mercy>
+</score>
+<score/>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+    <item>banner</item>
+    <item>stained_clay</item>
+</itemremove>
+<itemkeep>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>golden apple</item>
+    <item>arrow</item>
+</itemkeep>
+<kill-reward>
+    <item material="golden apple"/>
+    <item amount="5" material="arrow"/>
+</kill-reward>
+<respawn delay="3s" auto="true"/>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
