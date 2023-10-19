@@ -1,6 +1,7 @@
 <map proto="1.4.2">
 <name>Tsuchi</name>
-<version>1.1</version>
+<version>1.1.1</version>
+<created>2023-10-01</created>
 <objective>Push your team's cart to the end point before the enemy!</objective>
 <authors>
     <author uuid="b1521072-6993-4fe4-ae60-dbeeb7dc0cfa"/> <!-- Antnecb -->
@@ -10,38 +11,32 @@
     <team id="red" color="dark red" max="16">Red</team>
 </teams>
 <kits>
-    <kit id="spawn">
+    <kit id="spawn-kit">
         <game-mode>adventure</game-mode>
-        <item slot="0" unbreakable="true">stone sword</item>
-        <item slot="1" unbreakable="true">bow</item>
-        <item slot="2" amount="1">golden apple</item>
-        <item slot="8" amount="12">arrow</item>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" material="golden apple"/>
+        <item slot="8" amount="12" material="arrow"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" enchantment="protection projectile:3" material="leather chestplate"/>
         <leggings unbreakable="true" material="chainmail leggings"/>
         <boots unbreakable="true" material="iron boots"/>
     </kit>
-    <kit id="red-kit" parents="spawn">
-        <helmet color="cd0000" unbreakable="true">leather helmet</helmet>
-        <chestplate color="cd0000" enchantment="protection projectile:3" unbreakable="true">leather chestplate</chestplate>
-    </kit>
-    <kit id="blue-kit" parents="spawn">
-        <helmet color="0066cc" unbreakable="true">leather helmet</helmet>
-        <chestplate color="0066cc" enchantment="protection projectile:3" unbreakable="true">leather chestplate</chestplate>
-    </kit>
 </kits>
 <spawns>
-    <spawn team="red" kit="red-kit">
-        <regions yaw="0">
-            <block>-29.5,15.5,-60.5</block>
+    <spawn team="red" kit="spawn-kit">
+        <regions>
+            <point>-29.5,15,-60.5</point>
         </regions>
     </spawn>
-    <spawn team="blue" kit="blue-kit">
-        <regions yaw="0">
-            <block>32.5,15.5,-60.5</block>
+    <spawn team="blue" kit="spawn-kit">
+        <regions>
+            <point>32.5,15,-60.5</point>
         </regions>
     </spawn>
     <default>
         <region yaw="180">
-            <block>1.5,32.5,54.5</block>
+            <point>1.5,32,54.5</point>
         </region>
     </default>
 </spawns>
@@ -50,7 +45,7 @@
     <team id="only-red">red</team>
 </filters>
 <regions>
-<!--Spawns-->
+    <!-- Spawns -->
     <union id="red-spawn">
         <cuboid id="red-spawn-main" min="-26,15,-57" max="-18,18,-41"/>
         <cuboid id="red-spawn-mid" min="-81,21,6" max="-70,24,12"/>
@@ -59,7 +54,7 @@
         <cuboid id="blue-spawn-main" min="20,15,-57" max="28,18,-41"/>
         <cuboid id="blue-spawn-mid" min="72,21,6" max="83,24,12"/>
     </union>
-<!--Spawners-->
+    <!-- Spawners -->
     <point id="gap-spawn-start">1,16,10</point>
     <cuboid id="gap-player-start" min="0.5,15,9.5" max="2.5,17,11.5"/>
     <point id="gap-spawn-end">1,25,38</point>
@@ -68,14 +63,13 @@
     <cuboid id="arrow-player-red" min="-49.5,23,29.5" max="-47.5,26,31.5"/>
     <point id="arrow-spawn-blue">50,25,30</point>
     <cuboid id="arrow-player-blue" min="49.5,23,29.5" max="51.5,26,31.5"/>
-    <!--<rectangle id="everywhere" min="-oo,-oo" max="oo,oo"/>-->
-<!--Applies-->
+    <!-- Applies -->
     <apply enter="only-red" message="You may not enter the enemy's spawn." region="red-spawn"/>
     <apply enter="only-blue" message="You may not enter the enemy's spawn." region="blue-spawn"/>
-    <apply block="never" region="everywhere"/>
+    <apply block="never"/>
 </regions>
 <portals>
-    <!--Red side portals-->
+    <!-- Red side portals -->
     <portal id="red-spawn-portal" x="@-77.5" y="@21.5" z="@9.5" yaw="180">
         <region>
             <cuboid min="-39,15,-57" max="-37,19,-51"/>
@@ -86,7 +80,7 @@
             <cuboid min="-81,21,6" max="-79,25,12"/>
         </region>
     </portal>
-    <!--Blue side portals-->
+    <!-- Blue side portals -->
     <portal id="blue-spawn-portal" x="@80.5" y="@21.5" z="@9.5" yaw="@90">
         <region>
             <cuboid min="40,15,-57" max="41,19,-51"/>
@@ -98,9 +92,9 @@
         </region>
     </portal>
 </portals>
-<payloads>    
-    <payload location="-6.5,15,21.5" name="Red Payload" radius="4" capture-time="3m" decay-rate="0.25" capture-filter="only-red" score="1"/> <!--display-filter="filter"-->
-    <payload location="9.5,15,21.5" name="Blue Payload" radius="4" capture-time="3m" decay-rate="0.25" capture-filter="only-blue" score="1"/> <!--display-filter="filter"-->
+<payloads radius="4" capture-time="3m" decay-rate="0.25">
+    <payload location="-6.5,15,21.5" name="Red Payload" capture-filter="only-red"/> <!--display-filter="filter"-->
+    <payload location="9.5,15,21.5" name="Blue Payload" capture-filter="only-blue"/> <!--display-filter="filter"-->
 </payloads>
 <spawners>
     <spawner spawn-region="gap-spawn-start" player-region="gap-player-start" delay="6s">
@@ -127,8 +121,10 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<killreward>
-    <item>golden apple</item>
-    <item amount="4">arrow</item>
-</killreward>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item amount="4" material="arrow"/>
+    </kill-reward>
+</kill-rewards>
 </map>
