@@ -1,0 +1,348 @@
+<map proto="1.4.2">
+<name>Mo'ai</name>
+<variant id="halloween" world="halloween" override="true">Boo'ai</variant>
+<version>1.4.1</version>
+<objective>Destroy the enemy's monument, then capture their two wools!</objective>
+<if variant="default">
+    <created>2022-02-24</created>
+</if>
+<if variant="halloween">
+    <created>2022-09-03</created>
+</if>
+<gamemode>ctw</gamemode>
+<gamemode>dtm</gamemode>
+<authors>
+    <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Layout, theming, concept, xml"/> <!-- Cazadorian -->
+    <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e" contribution="Aesthetics"/> <!-- Mewzzy -->
+    <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Aesthetics, layout, theming"/> <!-- Tundren -->
+</authors>
+<contributors>
+    <contributor uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa" contribution="Layout help"/> <!-- Eliminate -->
+</contributors>
+<constants>
+    <constant id="observers-kit" delete="true"/>
+</constants>
+<if variant="halloween">
+    <constant id="observers-kit">default-kit</constant>
+</if>
+<broadcasts>
+    <alert after="1s" every="2m" filter="alert-filter">The lanes to the wool room will only spawn once you break the enemy's monument!</alert>
+</broadcasts>
+<teams>
+    <unless variant="halloween">
+        <team id="blue" color="blue" max="32">Blue</team>
+        <team id="red" color="dark red" max="32">Red</team>
+    </unless>
+    <if variant="halloween">
+        <team id="blue" color="gold" max="32">Orange</team>
+        <team id="red" color="dark purple" max="32">Purple</team>
+    </if>
+</teams>
+<kits>
+    <kit id="default-kit">
+        <effect>night vision</effect>
+    </kit>
+    <kit id="spawn-kit" parents="${observers-kit}">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow" enchantment="infinity"/>
+        <item slot="2" unbreakable="true" material="iron pickaxe"/>
+        <item slot="3" unbreakable="true" material="iron axe"/>
+        <item slot="4" amount="64" material="wood" damage="3"/>
+        <item slot="5" material="stained glass" team-color="true" amount="64"/>
+        <item slot="7" material="golden apple"/>
+        <item slot="8" material="bucket"/>
+        <item slot="28" material="arrow"/>
+        <item slot="29" unbreakable="true" material="shears"/>
+        <item slot="30" unbreakable="true" material="iron spade"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" team-color="true" material="leather leggings" />
+        <boots unbreakable="true" team-color="true" material="leather boots" />
+        <effect duration="4" amplifier="255">damage resistance</effect>
+    </kit>
+</kits>
+<spawns>
+    <default kit="${observers-kit}" yaw="90">
+        <region>
+            <point>-61.5,9,2.5</point>
+        </region>
+    </default>
+    <spawn team="red" kit="spawn-kit" yaw="90">
+        <regions>
+            <point>89.5,16,2.5</point>
+        </regions>
+    </spawn>
+    <spawn team="blue" kit="spawn-kit" yaw="-90">
+        <regions>
+            <point>-212.5,16,2.5</point>
+        </regions>
+    </spawn>
+</spawns>
+<wools craftable="false">
+    <wool team="blue" color="purple" location="89.5,12,-48.5">
+        <monument>
+            <block>-189,17,1</block>
+        </monument>
+    </wool>
+    <wool team="blue" color="orange" location="89.5,12,53.5">
+        <monument>
+            <block>-189,17,3</block>
+        </monument>
+    </wool>
+    <wool team="red" color="pink" location="-212.5,12,53.5">
+        <monument>
+            <block>65,17,3</block>
+        </monument>
+    </wool>
+    <wool team="red" color="yellow" location="-212.5,12,53.5">
+        <monument>
+            <block>65,17,1</block>
+        </monument>
+   </wool>
+</wools>
+<destroyables name="Monument" show-progress="true" materials="emerald block" modes="gold-mode" required="true">
+    <destroyable id="red-monument" owner="red">
+        <region>
+            <cuboid min="5,19,1" max="8,16,4"/>
+        </region>
+    </destroyable>
+    <destroyable id="blue-monument" owner="blue">
+        <region>
+            <cuboid min="-128,19,1" max="-131,16,4"/>
+        </region>
+    </destroyable>
+</destroyables>
+<modes>
+    <mode after="10m" show-before="10" id="gold-mode" material="gold block" name="Gold Monument Mode"/>
+</modes>
+<structures>
+    <structure id="red-wool-lanes-structure" region="red-wool-lanes"/>
+    <structure id="blue-wool-lanes-structure" region="blue-wool-lanes"/>
+    <dynamic structure="red-wool-lanes-structure">
+        <trigger>
+            <after duration="5" message="`5Purple`r and `6Orange`r Wool Lanes will appear in {0}">
+                <completed id="spawn-red-lanes">red-monument</completed>
+            </after>
+        </trigger>
+    </dynamic>
+    <dynamic structure="blue-wool-lanes-structure">
+        <trigger>
+            <after duration="5" message="`eYellow`r and `dPink`r Wool Lanes will appear in {0}">
+                <completed id="spawn-blue-lanes">blue-monument</completed>
+            </after>
+        </trigger>
+    </dynamic>
+</structures>
+<filters>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+    <material id="only-iron">iron block</material>
+    <not id="blue-in-wr">
+        <any>
+            <team id="only-red">red</team>
+            <filter id="wr-filter"/>
+        </any>
+    </not>
+    <not id="red-in-wr">
+        <any>
+            <team id="only-blue">blue</team>
+            <filter id="wr-filter"/>
+        </any>
+    </not>
+    <any id="alert-filter">
+        <all>
+            <team>blue</team>
+            <not>
+                <objective>red-monument</objective>
+            </not>
+        </all>
+        <all>
+            <team>red</team>
+            <not>
+                <objective>blue-monument</objective>
+            </not>
+        </all>
+    </any>
+    <any id="wr-filter">
+        <material>chest</material>
+        <material>smooth brick</material>
+        <material>cobblestone stairs</material>
+        <material>step</material>
+        <material>double step</material>
+        <material>wool</material>
+        <material>carpet</material>
+        <material>stained clay</material>
+        <material>redstone wire</material>
+        <material>torch</material>
+        <material>smooth stairs</material>
+        <material>stained glass pane</material>
+        <material>leaves</material>
+        <material>grass</material>
+        <material>long grass</material>
+        <material>stained glass:1</material>
+        <material>stained glass:10</material>
+        <material>stained glass:4</material>
+        <material>stained glass:6</material>
+        <material>beacon</material>
+        <material>dirt</material>
+        <material>dark oak stairs</material>
+        <material>wood:1</material>
+        <material>iron block</material>
+        <if variant="halloween">
+            <material>quartz block</material>
+            <material>nether brick</material>
+            <material>quartz stairs</material>
+            <material>coal block</material>
+        </if>
+    </any>
+    <not id="deny-void">
+       <void/>
+    </not>
+</filters>
+<regions>
+    <union id="spawn-protection">
+        <union id="red-spawn-protection">
+            <rectangle id="red-protection" min="74,-9" max="94,14"/>
+        </union>
+        <union id="blue-spawn-protection">
+            <rectangle id="blue-protection" min="-197,14" max="-217,-9"/>
+        </union>
+    </union>
+    <rectangle id="middle" min="-127,41" max="4,-36"/>
+    <union id="water-lanes">
+        <rectangle id="red-north-water" min="50,-24" max="57,-37"/>
+        <rectangle id="red-middle-water" min="45,-5" max="38,10"/>
+        <rectangle id="red-south-water" min="50,42" max="57,29"/>
+        <rectangle id="blue-north-water" min="-173,-24" max="-180,-37"/>
+        <rectangle id="blue-middle-water" min="-161,-5" max="-168,10"/>
+        <rectangle id="blue-south-water" min="-173,42" max="-180,29"/>
+    </union> <!-- Applying regions to allow building when water removed -->
+    <union id="wool-rooms">
+        <union id="blue-wool-rooms">
+            <rectangle id="pink-wool-room" min="-201,59" max="-219,48"/> <!-- blue defends -->
+            <rectangle id="yellow-wool-room" min="-201,-43" max="-219,-54"/> <!-- blue defends -->
+        </union>
+        <union id="red-wool-rooms">
+            <rectangle id="orange-wool-room" min="78,48" max="96,59"/> <!-- red defends -->
+            <rectangle id="purple-wool-room" min="78,-54" max="96,-43"/> <!-- red defends -->
+        </union>
+    </union>
+    <union id="wool-lanes">
+        <union id="red-wool-lanes"> <!-- red defends -->
+            <cuboid id="purple-lane" min="63,0,-43" max="78,13,-54"/>
+            <cuboid id="orange-lane" min="63,0,48" max="78,13,59"/>
+        </union>
+        <union id="blue-wool-lanes"> <!-- blue defends -->
+            <cuboid id="yellow-lane" min="-186,0,-43" max="-201,13,-54"/>
+            <cuboid id="pink-lane" min="-186,0,48" max="-201,13,59"/>
+        </union>
+    </union>
+    <union id="wool-lanes-bridging">
+        <union id="red-wool-lanes-bridging"> <!-- red defends -->
+            <rectangle id="purple-bridging-lane" min="63,-43" max="78,-54"/>
+            <rectangle id="orange-bridging-lane" min="63,48" max="78,59"/>
+        </union>
+        <union id="blue-wool-lanes-bridging"> <!-- blue defends -->
+            <rectangle id="yellow-bridging-lane" min="-186,-43" max="-201,-54"/>
+            <rectangle id="pink-bridging-lane" min="-186,48" max="-201,59"/>
+        </union>
+    </union>
+    <union id="wool-monuments">
+        <cuboid min="-190,16,-1" max="-187,20,6"/> <!-- blue side -->
+        <cuboid min="64,16,-1" max="67,20,6"/> <!-- red side -->
+    </union>
+    <negative id="void-area">
+        <region id="spawn-protection"/>
+        <region id="middle"/>
+        <region id="water-lanes"/>
+        <region id="wool-monuments"/>
+        <region id="wool-rooms"/>
+        <region id="wool-lanes"/>
+        <region id="wool-lanes-bridging"/>
+    </negative>
+    <union id="gap-spawner">
+        <cuboid id="spawner" min="-60,8,4" max="-63,10,1"/>
+        <cuboid id="spawner-prot" min="-61,8,3" max="-62,10,2"/>
+        <point id="spawner-point">-61.5,9,2.5</point>
+    </union>
+    <!-- filtering -->
+    <apply enter="only-blue" region="blue-spawn-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-red" region="red-spawn-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply block="never" region="wool-monuments" message="You may not block the wool monument!"/>
+    <apply block="never" region="spawner-prot" message="You may not break the spawner!"/>
+    <apply block="blue-in-wr" region="red-wool-rooms" message="You may not modify the wool rooms!"/>
+    <apply block="red-in-wr" region="blue-wool-rooms" message="You may not modify the wool rooms!"/>
+    <apply block="spawn-red-lanes" region="red-wool-lanes-bridging" message="You may not bridge here until the monument is broken!"/>
+    <apply block="spawn-blue-lanes" region="blue-wool-lanes-bridging" message="You may not bridge here until the monument is broken!"/>
+    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block-break="only-iron" block-place="deny-players" region="spawn-protection" message="You may not modify the spawns!"/>
+</regions>
+<spawners>
+    <spawner player-region="spawner" spawn-region="spawner-point" delay="6s">
+        <item material="golden apple"/>
+    </spawner>
+</spawners>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>shears</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>red rose</item>
+    <item>yellow flower</item>
+    <item>string</item>
+    <item>redstone</item>
+    <item>emerald block</item>
+    <item>gold block</item>
+    <if variant="halloween">
+        <item>dark oak stairs</item>
+        <item>nether stalk</item>
+        <item>sapling</item>
+        <item>brown mushroom</item>
+        <item>smooth brick</item>
+    </if>
+</itemremove>
+<itemkeep>
+    <item>wood</item>
+    <item>stained glass</item>
+    <item>golden apple</item>
+    <item>water bucket</item>
+    <item>bucket</item>
+</itemkeep>
+<renewables>
+    <renewable region="spawn-protection" renew-filter="only-iron" interval="3" grow="false" particles="true" sound="true"/>
+</renewables>
+<block-drops>
+    <rule>
+        <filter>
+            <material>wood</material>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+</block-drops>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>30</maxbuildheight>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item amount="16" material="wood" damage="3"/>
+        <item amount="16" material="stained glass" team-color="true"/>
+    </kill-reward>
+</kill-rewards>
+</map>

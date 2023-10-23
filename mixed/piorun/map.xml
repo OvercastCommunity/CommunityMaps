@@ -1,0 +1,263 @@
+<map proto="1.4.2">
+<name>Piorun</name>
+<version>1.0.2</version>
+<objective>Capture the enemy team's wool and destroy their monument!</objective>
+<gamemode>ctw</gamemode>
+<gamemode>dtm</gamemode>
+<created>2021-08-29</created>
+<authors>
+    <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
+    <author uuid="6c5d7783-27fd-4ac5-8a1d-ba35206edf53"/> <!-- _Nathy -->
+    <author uuid="c24e6f53-33a6-4003-98fd-f6c10f7f2bc8"/> <!-- Ludavigi -->
+    <author uuid="95763a18-eb88-44e7-8a10-780acffceae8"/> <!-- Creephunter -->
+</authors>
+<contributors>
+   <contributor uuid="430ec559-364a-4363-ac7a-2529050440ac" contribution="XML help"/> <!-- mameBT -->
+</contributors>
+<broadcasts>
+    <tip after="1s" every="1m" count="3">The middle lane will be bridgeable after 5 minutes!</tip>
+</broadcasts>
+<teams>
+    <team id="blue" color="blue" max="15">Blue</team>
+    <team id="red" color="dark red" max="15">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <item slot="2" unbreakable="true" material="diamond pickaxe"/>
+        <item slot="3" unbreakable="true" material="iron axe"/>
+        <item slot="30" unbreakable="true" material="iron spade"/>
+        <item slot="6" amount="32" material="wood"/>
+        <item slot="7" material="golden apple"/>
+        <item slot="8" amount="64" material="cooked beef"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate">
+            <enchantment>projectile_protection</enchantment>
+        </chestplate>
+        <effect duration="5" amplifier="5">damage resistance</effect>
+    </kit>
+    <kit id="blue-kit" parents="spawn-kit">
+        <item slot="5" damage="11" amount="64" material="stained clay"/>
+        <item slot="4" damage="11" amount="32" material="stained glass"/>
+    </kit>
+    <kit id="red-kit" parents="spawn-kit">
+        <item slot="5" damage="14" amount="64" material="stained clay"/>
+        <item slot="4" damage="14" amount="32" material="stained glass"/>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <region yaw="180">
+            <cylinder base="-1.5,41,62.5" height="1" radius="1"/>
+        </region>
+    </default>
+    <spawn team="blue" kit="blue-kit">
+        <region yaw="-90">
+            <cylinder base="-98.5,37,1.5" height="0" radius="0.5"/>
+        </region>
+    </spawn>
+    <spawn team="red" kit="red-kit">
+        <region yaw="90">
+            <cylinder base="99.5,37,1.5" height="0" radius="0.5"/>
+        </region>
+    </spawn>
+</spawns>
+<filters>
+  <not id="blue-in-wr">
+      <any>
+          <team id="only-red">red</team>
+          <material>chest</material>
+          <material>beacon</material>
+          <material>iron block</material>
+      </any>
+  </not>
+  <not id="red-in-wr">
+      <any>
+          <team id="only-blue">blue</team>
+          <material>chest</material>
+          <material>beacon</material>
+          <material>iron block</material>
+      </any>
+    </not>
+    <not id="only-blue-usage">
+        <any>
+            <filter id="only-red"/>
+            <material>beacon</material>
+        </any>
+    </not>
+    <not id="only-red-usage">
+        <any>
+            <filter id="only-blue"/>
+            <material>beacon</material>
+        </any>
+    </not>
+    <all id="only-iron-regen">
+        <cause>world</cause>
+        <material id="only-iron">iron block</material>
+    </all>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+    <not id="deny-void">
+        <void/>
+    </not>
+    <material id="only-diamond">diamond block</material>
+    <material id="only-coal">coal block</material>
+</filters>
+<regions>
+    <complement id="void-area">
+        <everywhere/>
+        <!-- Blue side -->
+        <rectangle min="-46.5,-37.5" max="-29.5,-23.5"/>
+        <!-- Red side -->
+        <rectangle min="31.5,26.5" max="46.5,40.5"/>
+        <!-- Middle -->
+        <rectangle min="17.5,40.5" max="-30.5,26.5"/>
+        <rectangle min="-17.5,-23.5" max="31.5,-37.5"/>
+    </complement>
+    <union id="spawns">
+        <rectangle id="red-spawn" min="72.5,-4.5" max="104.5,7.5"/>
+        <rectangle id="blue-spawn" min="-71.5,7.5" max="-103.5,-5.5"/>
+    </union>
+    <union id="wool-rooms">
+        <rectangle id="blue-wool-room" min="-70,-38" max="-83,-24"/> <!-- Purple; blue defends -->
+        <rectangle id="red-wool-room" min="70,40" max="83,26"/> <!-- Yellow; red defends -->
+    </union>
+    <union id="parkour">
+        <rectangle id="parkour-blue" min="-88,8" max="-73,74"/>
+        <rectangle id="parkour-red" min='88,-6' max="73,-31"/>
+    </union>
+    <union id="mid-lane">
+        <cuboid id="mid-blue" min="0.5,1,8.2" max="-19,0,-5.5"/>
+        <cuboid id="mid-red" min="0.5,1,8.2" max="19,0,-5.5"/>
+    </union>
+    <union id="spawner">
+        <cuboid id="gapple" min="-1.5,8,2.5" max="1.5,16,0.5"/>
+        <point id="goldblock">0,12.3,1</point>
+    </union>
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-blue" region="red-wool-room" message="You may not enter your own wool room!"/>
+    <apply enter="only-red" region="blue-wool-room" message="You may not enter your own wool room!"/>
+    <apply block-break="only-coal" block-place="deny-players" region="spawner" message="You may not break or place any blocks near the spawner!"/>
+    <apply block-break="only-iron" block-place="only-iron-regen" region="spawns" message="Only iron blocks may be broken in the spawn!"/>
+    <apply block-break="only-diamond" block-place="deny-players" region="parkour" message="You may not break or place any blocks here!"/>
+    <apply block="blue-in-wr" use="only-blue-usage" region="red-wool-room"/>
+    <apply block="red-in-wr" use="only-red-usage" region="blue-wool-room"/>
+    <apply block="deny-void" region="void-area" message="You may not build in the void area!"/>
+</regions>
+<wools craftable="false">
+    <wool team="blue" color="yellow" location="77,14,33">
+        <monument>
+            <block>-85,14,16</block>
+        </monument>
+    </wool>
+    <wool team="red" color="purple" location="-76,14,-30">
+        <monument>
+            <block>85,14,-14</block>
+        </monument>
+    </wool>
+</wools>
+<!-- middle lane is buildable at 5m -->
+<modes>
+    <mode id="lane-mid" after="5m" name="`eMiddle lane will become bridgeable" material="water" show-before="2m"/>
+</modes>
+<destroyables name="Mid" materials="air;water" completion="0%" required="false" show="false" modes="lane-mid">
+    <destroyable id="lanes=blue" owner="blue" region="mid-blue"/>
+    <destroyable id="lanes-red" owner="red" region="mid-red"/>
+</destroyables>
+<!-- actual monument -->
+<destroyables name="Monument" materials="emerald block" completion="100%" required="true" mode-changes="false">
+    <destroyable owner="blue">
+        <region>
+            <cuboid min="-56.5,11,36" max="-62.5,20,30"/>
+        </region>
+    </destroyable>
+    <destroyable owner="red">
+        <region>
+            <cuboid min="57,11,-33" max="64,20,-27"/>
+        </region>
+    </destroyable>
+</destroyables>
+<spawners>
+    <spawner player-region="spawner" spawn-region="goldblock" max-entities="50" min-delay="20s" max-delay="30s">
+        <item material="golden apple"/>
+    </spawner>
+</spawners>
+<renewables>
+    <renewable region="spawns" renew-filter="only-iron"/>
+</renewables>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+</toolrepair>
+<itemremove>
+    <item>cooked beef</item>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>sapling</item>
+    <item>31</item>
+    <item>37</item>
+    <item>38</item>
+    <item>338</item>
+    <item>yellow flower</item>
+    <item>string</item>
+    <item>redstone</item>
+    <item>redstone torch on</item>
+    <item>seeds</item>
+    <item>147</item>
+    <item>torch</item>
+    <item>emerald block</item>
+</itemremove>
+<block-drops>
+    <rule>
+        <filter>
+            <material>stained clay</material>
+        </filter>
+        <drops>
+            <item chance="0" material="stained clay"/>
+        </drops>
+    </rule>
+    <rule>
+        <filter>
+            <material>stained glass</material>
+        </filter>
+        <drops>
+            <item chance="0" material="stained glass"/>
+        </drops>
+    </rule>
+    <rule>
+        <filter>
+            <material>wood</material>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+</block-drops>
+<itemkeep>
+    <item>golden apple</item>
+    <item>stained clay</item>
+    <item>stained glass</item>
+    <item>wood</item>
+</itemkeep>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+    </kill-reward>
+    <kill-reward filter="only-blue">
+        <item amount="16" damage="11" material="stained clay"/>
+    </kill-reward>
+    <kill-reward filter="only-red">
+        <item amount="16" damage="14" material="stained clay"/>
+    </kill-reward>
+</kill-rewards>
+<maxbuildheight>21</maxbuildheight>
+</map>

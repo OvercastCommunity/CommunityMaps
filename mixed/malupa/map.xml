@@ -1,0 +1,295 @@
+<map proto="1.4.2">
+<name>Malupa</name>
+<version>1.3.2</version>
+<objective>Capture the enemy team's two wools!</objective>
+<gamemode>ctw</gamemode>
+<created>2021-08-29</created>
+<authors>
+    <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
+    <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4"/> <!-- Cazadorian -->
+</authors>
+<contributors>
+    <contributor uuid="5c79d2c9-a4f0-4343-a84b-e1720f13009b" contribution="XML help"/> <!-- CoWinkKeyDinkInc -->
+</contributors>
+<broadcasts>
+    <tip after="1s" every="120s" filter="alert-filter">Destroying the enemy's monument will unlock additional building lanes to the wool, but destroying the monument is not required to win!</tip>
+</broadcasts>
+<teams>
+    <team id="blue" color="blue" max="20">Blue</team>
+    <team id="red" color="dark red" max="20">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="2" unbreakable="true" material="diamond pickaxe">
+            <enchantment>dig_speed</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <item slot="29" unbreakable="true" material="iron spade"/>
+        <item slot="30" unbreakable="true" material="shears"/>
+        <item slot="3" unbreakable="true" material="iron axe"/>
+        <item slot="4" amount="64" material="wood"/>
+        <item slot="31" amount="64" material="wood"/>
+        <item slot="5" amount="64" material="glass"/>
+        <item slot="7" material="golden apple"/>
+        <effect duration="4" amplifier="255">damage resistance</effect>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate">
+            <enchantment>projectile_protection</enchantment>
+        </chestplate>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <region yaw="0">
+            <cylinder base="-4.5,52,-94.5" height="1" radius="1"/>
+        </region>
+    </default>
+    <spawn team="blue" kit="spawn-kit" yaw="-90" region="blue-spawn"/>
+    <spawn team="red" kit="spawn-kit" yaw="90" region="red-spawn"/>
+</spawns>
+<filters>
+    <deny id="deny-players">
+          <participating/>
+    </deny>
+    <deny id="redstone-physics">
+        <any>
+            <material>redstone wire</material>
+            <material>redstone torch on</material>
+            <material>redstone torch off</material>
+        </any>
+    </deny>
+    <material id="only-iron">iron block</material>
+    <material id="only-air">air</material>
+    <not id="blue-in-wr">
+        <any>
+            <team id="only-red">red</team>
+            <material>chest</material>
+            <material>beacon</material>
+        </any>
+    </not>
+    <not id="red-in-wr">
+        <any>
+            <team id="only-blue">blue</team>
+            <material>chest</material>
+            <material>beacon</material>
+        </any>
+    </not>
+    <any id="alert-filter">
+        <all>
+            <team>blue</team>
+            <not>
+                <completed>red-monument</completed>
+            </not>
+        </all>
+        <all>
+            <team>red</team>
+            <not>
+                <completed>blue-monument</completed>
+            </not>
+        </all>
+    </any>
+    <not id="only-blue-usage">
+        <any>
+            <filter id="only-red"/>
+            <material>beacon</material>
+        </any>
+    </not>
+    <not id="only-red-usage">
+        <any>
+            <filter id="only-blue"/>
+            <material>beacon</material>
+        </any>
+    </not>
+    <completed id="blue-mon-destroyed">blue-monument</completed>
+    <completed id="red-mon-destroyed">red-monument</completed>
+    <not id="deny-void">
+        <void/>
+    </not>
+    <variable id="bluelanes-1" var="blue_lane_variable">1</variable>
+    <variable id="redlanes-1" var="red_lane_variable">1</variable>
+</filters>
+<regions>
+    <point id="blue-spawn">-93.5,8,2.5</point>
+    <point id="red-spawn">84.5,8,2.5</point>
+    <union id="spawn-protection">
+        <rectangle id="red-protection" min="77,-7" max="104,12"/>
+        <rectangle id="blue-protection" min="-86,12" max="-113,-7"/>
+    </union>
+    <complement id="void-area">
+        <everywhere/>
+        <!-- Blue side-->
+        <rectangle min="-21,-44" max="-38,-30.5"/>
+        <rectangle min="-38,36" max="-21,49.5"/>
+        <!--Red Side-->
+        <rectangle min="29,50.5" max="12,36"/>
+        <rectangle min="29,-30.5" max="12,-44"/>
+    </complement>
+    <union id="wool-rooms">
+        <union id="blue-wool-rooms"> <!-- blue defends -->
+            <rectangle min="-109,-45.5" max="-95,-61.5"/> <!-- Yellow -->
+            <rectangle min="-109,66.5" max="-95,50.5"/> <!-- Pink -->
+        </union>
+        <union id="red-wool-rooms"> <!-- red defends -->
+            <rectangle min="86,66.5" max="100,50.5"/> <!-- Orange -->
+            <rectangle min="86,-45.5" max="100,-61.5"/> <!-- Lime -->
+        </union>
+    </union>
+    <union id="waterlanes">
+        <union id="blue-lanes"> <!-- Blue defends -->
+            <rectangle id="yellow-lane-build" min="-40.5,-46.5" max="-60,-61"/>
+            <rectangle id="pink-lane-build" min="-40.5,66" max="-60,51.5"/>
+            <union id="blue-lanes-water">
+                <cuboid id="yellow-lane-water" min="-40.5,0,-46.5" max="-60,1,-61"/>
+                <cuboid id="pink-lane-water" min="-40.5,0,66" max="-60,1,51.5"/>
+            </union>
+            <union id="blue-lanes-redstone">
+                <cuboid id="yellow-lane-redstone" min="-40,10,-46" max="-41,11,-61"/>
+                <cuboid id="pink-lane-redstone" min="-40,10,66" max="-41,11,51"/>
+            </union>
+        </union>
+        <union id="red-lanes"> <!-- Red defends -->
+            <rectangle id="orange-lane-build" min="31.5,51" max="51,66"/>
+            <rectangle id="lime-lane-build" min="31.5,-61" max="51,-46.5"/>
+            <union id="red-lanes-water">
+                <cuboid id="orange-lane-water" min="31.5,0,51" max="51,1,66"/>
+                <cuboid id="lime-lane-water" min="31.5,0,-61" max="51,1,-46.5"/>
+            </union>
+            <union id="red-lanes-redstone">
+                <cuboid id="orange-lane-redstone" min="31,10,51" max="32,11,66"/>
+                <cuboid id="lime-lane-redstone" min="31,10,-61" max="32,11,-46"/>
+            </union>
+        </union>
+    </union>
+    <apply block-physics="redstone-physics"/>
+    <apply block="redlanes-1" region="blue-lanes" message="You can't build here until the enemy's monument is destroyed!"/>
+    <apply block="bluelanes-1" region="red-lanes" message="You can't build here until the enemy's monument is destroyed!"/>
+    <apply enter="only-blue" region="blue-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-red" region="red-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply block="blue-in-wr" use="only-blue-usage" region="red-wool-rooms"/>
+    <apply block="red-in-wr" use="only-red-usage" region="blue-wool-rooms"/>
+    <apply block-break="only-iron" block-place="deny-players" region="spawn-protection" message="Only iron blocks may be broken in the spawns!"/>
+    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
+</regions>
+<variables>
+    <variable id="red_lane_variable" scope="match"/>
+    <variable id="blue_lane_variable" scope="match"/>
+</variables>
+<actions>
+    <trigger scope="match">
+        <filter>
+            <after message="`bWater Lanes towards `eYellow `rand `dPink `rWill Spawn In {0}" duration="5s" filter="blue-mon-destroyed"/>
+        </filter>
+        <action>
+            <message text="`4Red's `bwater lanes have been added!"/>
+            <set var="red_lane_variable" value="1"/>
+            <fill region="blue-lanes-water" material="water" filter="only-air"/>
+            <fill region="blue-lanes-redstone" material="air"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after message="`bWater Lanes towards `aLime `rand `6Orange `rWill Spawn In {0}" duration="5s" filter="red-mon-destroyed"/>
+        </filter>
+        <action>
+            <message text="`9Blue's `bwater lanes have been added!"/>
+            <set var="blue_lane_variable" value="1"/>
+            <fill region="red-lanes-water" material="water" filter="only-air"/>
+            <fill region="red-lanes-redstone" material="air"/>
+        </action>
+    </trigger>
+</actions>
+<wools team="red" craftable="false">
+    <wool color="pink" location="-103,10,58">
+        <monument>
+            <block>92,9,9</block>
+        </monument>
+    </wool>
+    <wool color="yellow" location="-103,10,-53">
+        <monument>
+            <block>92,9,-5</block>
+        </monument>
+    </wool>
+</wools>
+<wools team="blue" craftable="false">
+    <wool color="orange" location="94,10,58">
+        <monument>
+            <block>-102,9,9</block>
+        </monument>
+   </wool>
+    <wool color="lime" location="94,10,-53">
+        <monument>
+            <block>-102,9,-5</block>
+        </monument>
+    </wool>
+</wools>
+<destroyables materials="emerald block" completion="100%" required="false" show-progress="true">
+    <destroyable name="Blue Monument" owner="blue" id="blue-monument">
+        <region><cuboid min="-20,15,1" max="-23,18,4"/></region>
+    </destroyable>
+    <destroyable name="Red Monument" owner="red" id="red-monument">
+        <region><cuboid min="14,15,1" max="11,18,4"/></region>
+    </destroyable>
+</destroyables>
+<renewables>
+    <renewable region="spawn-protection" renew-filter="only-iron" interval="3" grow="false" particles="true" sound="true"/>
+</renewables>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>shears</tool>
+    <tool>iron spade</tool>
+    <tool>iron axe</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>sapling</item>
+    <item>long grass</item>
+    <item>red rose</item>
+    <item>sugar cane</item>
+    <item>emerald block</item>
+    <item>yellow flower</item>
+    <item>string</item>
+    <item>redstone</item>
+    <item>redstone torch on</item>
+    <item>seeds</item>
+    <item>gold plate</item>
+    <item>torch</item>
+</itemremove>
+<block-drops>
+    <rule>
+        <filter>
+            <material>wood</material>
+        </filter>
+        <drops>
+            <item chance="0" material="wood"/>
+        </drops>
+    </rule>
+</block-drops>
+<itemkeep>
+    <item>wood</item>
+    <item>glass</item>
+    <item>golden apple</item>
+</itemkeep>
+<kill-reward>
+    <item amount="32" material="wood"/>
+    <item amount="16" material="glass"/>
+    <item material="golden apple"/>
+</kill-reward>
+<world>
+    <timeset>6000</timeset>
+</world>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>35</maxbuildheight>
+</map>
