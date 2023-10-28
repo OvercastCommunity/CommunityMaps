@@ -1,6 +1,6 @@
 <map proto="1.4.2" game="Duel Wins">
 <name>The Grand Dueling Tournament II</name>
-<version>2.0.2</version>
+<version>2.0.3</version>
 <objective>Win the tournament.</objective>
 <phase>development</phase>
 <include id="countdown"/>
@@ -14,14 +14,14 @@
     <limit>3</limit>
 </score>
 <teams>
-    <team id="team-1" color="dark red"     max="2" min="1">Red</team>
-    <team id="team-2" color="blue"         max="2" min="1">Blue</team>
-    <team id="team-3" color="dark green"   max="2" min="1">Green</team>
-    <team id="team-4" color="dark purple"  max="2" min="1">Purple</team>
-    <team id="team-5" color="yellow"       max="2" min="1">Yellow</team>
-    <team id="team-6" color="white"        max="2" min="1">White</team>
-    <team id="team-7" color="light purple" max="2" min="1">Pink</team>
-    <team id="team-8" color="gray"         max="2" min="1">Gray</team>
+    <team id="team-1" color="dark red"     max="6" min="1">Red</team>
+    <team id="team-2" color="blue"         max="6" min="1">Blue</team>
+    <team id="team-3" color="dark green"   max="6" min="1">Green</team>
+    <team id="team-4" color="dark purple"  max="6" min="1">Purple</team>
+    <team id="team-5" color="yellow"       max="6" min="1">Yellow</team>
+    <team id="team-6" color="white"        max="6" min="1">White</team>
+    <team id="team-7" color="light purple" max="6" min="1">Pink</team>
+    <team id="team-8" color="gray"         max="6" min="1">Gray</team>
 </teams>
 <spawns spread="true">
     <spawn region="lobby-spawn" angle="193.5,6,31.5" kit="clear-kit" filter="current_round=0"/>
@@ -187,7 +187,7 @@
         <item slot="1" material="bow" unbreakable="true"/>
         <item slot="2" material="golden apple"/>
         <item slot="8" material="arrow" amount="12"/>
-        <helmet material="leather helmet" unbreakable="true"/>
+        <helmet material="leather helmet" unbreakable="true" team-color="true"/>
         <chestplate material="leather chestplate" unbreakable="true" team-color="true"/>
         <leggings material="leather leggings" unbreakable="true" team-color="true">
             <enchantment level="3">protection projectile</enchantment>
@@ -208,13 +208,44 @@
         <item slot="3" material="snow ball" amount="16" name="`rGrenade" grenade="true" grenade-power="1.2"/>
         <item slot="4" material="snow ball" amount="16" name="`rGrenade" grenade="true" grenade-power="1.2"/>
         <item slot="8" material="potion" damage="8229"/>
-        <helmet material="iron helmet" unbreakable="true" team-color="true"/>
+        <helmet material="iron helmet" unbreakable="true"/>
         <chestplate material="leather chestplate" unbreakable="true" team-color="true"/>
         <leggings material="chainmail leggings" unbreakable="true">
             <enchantment level="2">protection explosions</enchantment>
         </leggings>
         <boots material="iron boots" unbreakable="true"/>
         <double-jump/>
+    </kit>
+    <kit id="kit-12" parents="clear-kit" force="true"> <!-- uhc -->
+        <foodlevel>16</foodlevel>
+        <item slot="0" material="iron sword">
+            <enchantment level="2">damage all</enchantment>
+        </item>
+        <item slot="1" material="bow">
+            <enchantment>arrow damage</enchantment>
+        </item>
+        <helmet material="iron helmet">
+            <enchantment>protection environmental</enchantment>
+        </helmet>
+        <chestplate material="iron chestplate">
+            <enchantment>protection environmental</enchantment>
+        </chestplate>
+        <leggings material="iron leggings">
+            <enchantment>protection environmental</enchantment>
+        </leggings>
+        <boots material="iron boots">
+            <enchantment>protection environmental</enchantment>
+        </boots>
+        <item slot="28" material="arrow" amount="32"/>
+        <item slot="2" material="potion" damage="16421">
+            <potion amplifier="2">heal</potion>
+        </item>
+        <item slot="3" material="potion" damage="16421">
+            <potion amplifier="2">heal</potion>
+        </item>
+        <item slot="4" material="potion" damage="16421">
+            <potion amplifier="2">heal</potion>
+        </item>
     </kit>
 </kits>
 <projectiles>
@@ -321,15 +352,15 @@
     </any>
     <any id="countdown-start">
         <all>
-            <variable var="current_round">0</variable>
+            <variable var="current_round">1</variable>
             <after duration="7s" filter="round-1-starting"/>
         </all>
         <all>
-            <variable var="current_round">1</variable>
+            <variable var="current_round">2</variable>
             <after duration="7s" filter="round-2-starting"/>
         </all>
         <all>
-            <variable var="current_round">2</variable>
+            <variable var="current_round">3</variable>
             <after duration="7s" filter="round-3-starting"/>
         </all>
     </any>
@@ -451,44 +482,46 @@
     <completed id="round-3-arena-2-finished">round-3-arena-2-decider</completed>
     <completed id="round-3-arena-3-finished">round-3-arena-3-decider</completed>
     <completed id="round-3-arena-4-finished">round-3-arena-4-decider</completed>
-    <any id="award-points">
-        <all>
+    <after id="award-points" duration="2s">
+        <any>
             <all>
-                <filter id="round-1"/>
-                <filter id="round-1-finished"/>
+                <all>
+                    <filter id="round-1"/>
+                    <filter id="round-1-finished"/>
+                </all>
+                <any id="round-1-winner">
+                    <captured id="round-1-arena-1-winner">round-1-arena-1-decider</captured>
+                    <captured id="round-1-arena-2-winner">round-1-arena-2-decider</captured>
+                    <captured id="round-1-arena-3-winner">round-1-arena-3-decider</captured>
+                    <captured id="round-1-arena-4-winner">round-1-arena-4-decider</captured>
+                </any>
             </all>
-            <any id="round-1-winner">
-                <captured id="round-1-arena-1-winner">round-1-arena-1-decider</captured>
-                <captured id="round-1-arena-2-winner">round-1-arena-2-decider</captured>
-                <captured id="round-1-arena-3-winner">round-1-arena-3-decider</captured>
-                <captured id="round-1-arena-4-winner">round-1-arena-4-decider</captured>
-            </any>
-        </all>
-        <all>
             <all>
-                <filter id="round-2"/>
-                <filter id="round-2-finished"/>
+                <all>
+                    <filter id="round-2"/>
+                    <filter id="round-2-finished"/>
+                </all>
+                <any id="round-2-winner">
+                    <captured id="round-2-arena-1-winner">round-2-arena-1-decider</captured>
+                    <captured id="round-2-arena-2-winner">round-2-arena-2-decider</captured>
+                    <captured id="round-2-arena-3-winner">round-2-arena-3-decider</captured>
+                    <captured id="round-2-arena-4-winner">round-2-arena-4-decider</captured>
+                </any>
             </all>
-            <any id="round-2-winner">
-                <captured id="round-2-arena-1-winner">round-2-arena-1-decider</captured>
-                <captured id="round-2-arena-2-winner">round-2-arena-2-decider</captured>
-                <captured id="round-2-arena-3-winner">round-2-arena-3-decider</captured>
-                <captured id="round-2-arena-4-winner">round-2-arena-4-decider</captured>
-            </any>
-        </all>
-        <all>
             <all>
-                <filter id="round-3"/>
-                <filter id="round-3-finished"/>
+                <all>
+                    <filter id="round-3"/>
+                    <filter id="round-3-finished"/>
+                </all>
+                <any>
+                    <captured id="round-3-arena-1-winner">round-3-arena-1-decider</captured>
+                    <captured id="round-3-arena-2-winner">round-3-arena-2-decider</captured>
+                    <captured id="round-3-arena-3-winner">round-3-arena-3-decider</captured>
+                    <captured id="round-3-arena-4-winner">round-3-arena-4-decider</captured>
+                </any>
             </all>
-            <any>
-                <captured id="round-3-arena-1-winner">round-3-arena-1-decider</captured>
-                <captured id="round-3-arena-2-winner">round-3-arena-2-decider</captured>
-                <captured id="round-3-arena-3-winner">round-3-arena-3-decider</captured>
-                <captured id="round-3-arena-4-winner">round-3-arena-4-decider</captured>
-            </any>
-        </all>
-    </any>
+        </any>
+    </after>
     <captured id="round-1-arena-1-team-1" team="team-1">round-1-arena-1-decider</captured>
     <captured id="round-2-arena-1-team-1" team="team-1">round-2-arena-1-decider</captured>
     <captured id="round-2-arena-3-team-1" team="team-1">round-2-arena-3-decider</captured>
@@ -1146,14 +1179,12 @@
 </regions>
 <variables>
     <score id="score"/>
-    <variable id="kit_count" scope="match" default="12"/>
+    <variable id="kit_count" scope="match" default="13"/>
     <variable id="round_1_kit" scope="match" default="0"/>
     <variable id="round_2_kit" scope="match" default="0"/>
     <variable id="round_3_kit" scope="match" default="0"/>
     <variable id="kit_announcer" scope="match" default="0"/>
     <variable id="current_round" scope="match" default="0"/>
-
-
 </variables>
 <actions>
     <!--
@@ -1206,7 +1237,7 @@
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Your first kit will be..."/>
             <set var="kit_announcer" value="1"/>
-            <action id="kit-announcer"/>
+            <action id="kit-applicator"/>
             <sound key="mob.villager.haggle"/>
         </action>
     </trigger>
@@ -1217,7 +1248,7 @@
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: In round 2 your kit will be..."/>
             <set var="kit_announcer" value="2"/>
-            <action id="kit-announcer"/>
+            <action id="kit-applicator"/>
             <sound key="mob.villager.haggle"/>
         </action>
     </trigger>
@@ -1228,190 +1259,139 @@
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: And for the grand finale..."/>
             <set var="kit_announcer" value="3"/>
-            <action id="kit-announcer"/>
+            <action id="kit-applicator"/>
             <sound key="mob.villager.haggle"/>
+            <set var="kit_announcer" value="0"/>
         </action>
     </trigger>
-    <action id="kit-announcer" scope="match">
-        <action filter="any(all(kit_announcer=1, round_1_kit=0), all(kit_announcer=2, round_2_kit=0), all(kit_announcer=3, round_3_kit=0))">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: `bIron`r!"/>
-            <switch-scope inner="player">
-                <action filter="participating">
-                    <kit id="kit-0"/>
-                </action>
-            </switch-scope>
-        </action>
-        <action filter="any(all(kit_announcer=1, round_1_kit=1), all(kit_announcer=2, round_2_kit=1), all(kit_announcer=3, round_3_kit=1))">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: `6Gold`r!"/>
-            <switch-scope inner="player">
-                <action filter="participating">
-                    <kit id="kit-1"/>
-                </action>
-            </switch-scope>
-        </action>
-        <action filter="any(all(kit_announcer=1, round_1_kit=2), all(kit_announcer=2, round_2_kit=2), all(kit_announcer=3, round_3_kit=2))">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: `bSlappy Fish`r!"/>
-            <switch-scope inner="player">
-                <action filter="participating">
-                    <kit id="kit-2"/>
-                </action>
-            </switch-scope>
-        </action>
-        <action filter="any(all(kit_announcer=1, round_1_kit=3), all(kit_announcer=2, round_2_kit=3), all(kit_announcer=3, round_3_kit=3))">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: `cArcher`r!"/>
-            <switch-scope inner="player">
-                <action filter="participating">
-                    <kit id="kit-3"/>
-                </action>
-            </switch-scope>
-        </action>
-        <action filter="any(all(kit_announcer=1, round_1_kit=4), all(kit_announcer=2, round_2_kit=4), all(kit_announcer=3, round_3_kit=4))">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: `aLumberjack`r!"/>
-            <switch-scope inner="player">
-                <action filter="participating">
-                    <kit id="kit-4"/>
-                </action>
-            </switch-scope>
-        </action>
-        <action filter="any(all(kit_announcer=1, round_1_kit=5), all(kit_announcer=2, round_2_kit=5), all(kit_announcer=3, round_3_kit=5))">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: `cMCSG`r!"/>
-            <switch-scope inner="player">
-                <action filter="participating">
-                    <kit id="kit-5"/>
-                </action>
-            </switch-scope>
-        </action>
-        <action filter="any(all(kit_announcer=1, round_1_kit=6), all(kit_announcer=2, round_2_kit=6), all(kit_announcer=3, round_3_kit=6))">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: `3Diamond`b!"/>
-            <switch-scope inner="player">
-                <action filter="participating">
-                    <kit id="kit-6"/>
-                </action>
-            </switch-scope>
-        </action>
-        <action filter="any(all(kit_announcer=1, round_1_kit=7), all(kit_announcer=2, round_2_kit=7), all(kit_announcer=3, round_3_kit=7))">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: `5Potions`r!"/>
-            <switch-scope inner="player">
-                <action filter="participating">
-                    <kit id="kit-7"/>
-                </action>
-            </switch-scope>
-        </action>
-        <action filter="any(all(kit_announcer=1, round_1_kit=8), all(kit_announcer=2, round_2_kit=8), all(kit_announcer=3, round_3_kit=8))">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: `6Gapple`r!"/>
-            <switch-scope inner="player">
-                <action filter="participating">
-                    <kit id="kit-8"/>
-                </action>
-            </switch-scope>
-        </action>
-        <action filter="any(all(kit_announcer=1, round_1_kit=9), all(kit_announcer=2, round_2_kit=9), all(kit_announcer=3, round_3_kit=9))">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: `3Gunz`r!"/>
-            <switch-scope inner="player">
-                <action filter="participating">
-                    <kit id="kit-9"/>
-                </action>
-            </switch-scope>
-        </action>
-        <action filter="any(all(kit_announcer=1, round_1_kit=10), all(kit_announcer=2, round_2_kit=10), all(kit_announcer=3, round_3_kit=10))">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: `bConquest`r!"/>
-            <switch-scope inner="player">
-                <action filter="participating">
-                    <kit id="kit-10"/>
-                </action>
-            </switch-scope>
-        </action>
-        <action filter="any(all(kit_announcer=1, round_1_kit=11), all(kit_announcer=2, round_2_kit=11), all(kit_announcer=3, round_3_kit=11))">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: `eBlasternauts`r!"/>
-            <switch-scope inner="player">
-                <action filter="participating">
-                    <kit id="kit-11"/>
-                </action>
-            </switch-scope>
-        </action>
-    </action>
     <action id="kit-applicator" scope="match">
-        <action filter="any(all(current_round=1, round_1_kit=0), all(current_round=2, round_2_kit=0), all(current_round=3, round_3_kit=0))">
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=0), all(any(current_round=2, kit_announcer=2), round_2_kit=0), all(any(current_round=3, kit_announcer=3), round_3_kit=0))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `bIron`r!"/>
+            </action>
             <switch-scope inner="player">
                 <action filter="participating">
                     <kit id="kit-0"/>
                 </action>
             </switch-scope>
         </action>
-        <action filter="any(all(current_round=1, round_1_kit=1), all(current_round=2, round_2_kit=1), all(current_round=3, round_3_kit=1))">
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=1), all(any(current_round=2, kit_announcer=2), round_2_kit=1), all(any(current_round=3, kit_announcer=3), round_3_kit=1))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `6Gold`r!"/>
+            </action>
             <switch-scope inner="player">
                 <action filter="participating">
                     <kit id="kit-1"/>
                 </action>
             </switch-scope>
         </action>
-        <action filter="any(all(current_round=1, round_1_kit=2), all(current_round=2, round_2_kit=2), all(current_round=3, round_3_kit=2))">
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=2), all(any(current_round=2, kit_announcer=2), round_2_kit=2), all(any(current_round=3, kit_announcer=3), round_3_kit=2))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `bSlappy Fish`r!"/>
+            </action>
             <switch-scope inner="player">
                 <action filter="participating">
                     <kit id="kit-2"/>
                 </action>
             </switch-scope>
         </action>
-        <action filter="any(all(current_round=1, round_1_kit=3), all(current_round=2, round_2_kit=3), all(current_round=3, round_3_kit=3))">
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=3), all(any(current_round=2, kit_announcer=2), round_2_kit=3), all(any(current_round=3, kit_announcer=3), round_3_kit=3))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `cArcher`r!"/>
+            </action>
             <switch-scope inner="player">
                 <action filter="participating">
                     <kit id="kit-3"/>
                 </action>
             </switch-scope>
         </action>
-        <action filter="any(all(current_round=1, round_1_kit=4), all(current_round=2, round_2_kit=4), all(current_round=3, round_3_kit=4))">
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=4), all(any(current_round=2, kit_announcer=2), round_2_kit=4), all(any(current_round=3, kit_announcer=3), round_3_kit=4))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `aLumberjack`r!"/>
+            </action>
             <switch-scope inner="player">
                 <action filter="participating">
                     <kit id="kit-4"/>
                 </action>
             </switch-scope>
         </action>
-        <action filter="any(all(current_round=1, round_1_kit=5), all(current_round=2, round_2_kit=5), all(current_round=3, round_3_kit=5))">
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=5), all(any(current_round=2, kit_announcer=2), round_2_kit=5), all(any(current_round=3, kit_announcer=3), round_3_kit=5))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `cMCSG`r!"/>
+            </action>
             <switch-scope inner="player">
                 <action filter="participating">
                     <kit id="kit-5"/>
                 </action>
             </switch-scope>
         </action>
-        <action filter="any(all(current_round=1, round_1_kit=6), all(current_round=2, round_2_kit=6), all(current_round=3, round_3_kit=6))">
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=6), all(any(current_round=2, kit_announcer=2), round_2_kit=6), all(any(current_round=3, kit_announcer=3), round_3_kit=6))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `3Diamond`b!"/>
+            </action>
             <switch-scope inner="player">
                 <action filter="participating">
                     <kit id="kit-6"/>
                 </action>
             </switch-scope>
         </action>
-        <action filter="any(all(current_round=1, round_1_kit=7), all(current_round=2, round_2_kit=7), all(current_round=3, round_3_kit=7))">
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=7), all(any(current_round=2, kit_announcer=2), round_2_kit=7), all(any(current_round=3, kit_announcer=3), round_3_kit=7))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `5Potions`r!"/>
+            </action>
             <switch-scope inner="player">
                 <action filter="participating">
                     <kit id="kit-7"/>
                 </action>
             </switch-scope>
         </action>
-        <action filter="any(all(current_round=1, round_1_kit=8), all(current_round=2, round_2_kit=8), all(current_round=3, round_3_kit=8))">
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=8), all(any(current_round=2, kit_announcer=2), round_2_kit=8), all(any(current_round=3, kit_announcer=3), round_3_kit=8))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `6Gapple`r!"/>
+            </action>
             <switch-scope inner="player">
                 <action filter="participating">
                     <kit id="kit-8"/>
                 </action>
             </switch-scope>
         </action>
-        <action filter="any(all(current_round=1, round_1_kit=9), all(current_round=2, round_2_kit=9), all(current_round=3, round_3_kit=9))">
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=9), all(any(current_round=2, kit_announcer=2), round_2_kit=9), all(any(current_round=3, kit_announcer=3), round_3_kit=9))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `3Gunz`r!"/>
+            </action>
             <switch-scope inner="player">
                 <action filter="participating">
                     <kit id="kit-9"/>
                 </action>
             </switch-scope>
         </action>
-        <action filter="any(all(current_round=1, round_1_kit=10), all(current_round=2, round_2_kit=10), all(current_round=3, round_3_kit=10))">
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=10), all(any(current_round=2, kit_announcer=2), round_2_kit=10), all(any(current_round=3, kit_announcer=3), round_3_kit=10))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `bConquest`r!"/>
+            </action>
             <switch-scope inner="player">
                 <action filter="participating">
                     <kit id="kit-10"/>
                 </action>
             </switch-scope>
         </action>
-        <action filter="any(all(current_round=1, round_1_kit=11), all(current_round=2, round_2_kit=11), all(current_round=3, round_3_kit=11))">
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=11), all(any(current_round=2, kit_announcer=2), round_2_kit=11), all(any(current_round=3, kit_announcer=3), round_3_kit=11))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `eBlasternauts`r!"/>
+            </action>
             <switch-scope inner="player">
                 <action filter="participating">
                     <kit id="kit-11"/>
+                </action>
+            </switch-scope>
+        </action>
+        <action filter="any(all(any(current_round=1, kit_announcer=1), round_1_kit=12), all(any(current_round=2, kit_announcer=2), round_2_kit=12), all(any(current_round=3, kit_announcer=3), round_3_kit=12))">
+            <action filter="not(kit_announcer=0)">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `cUHC`r!"/>
+            </action>
+            <switch-scope inner="player">
+                <action filter="participating">
+                    <kit id="kit-12"/>
                 </action>
             </switch-scope>
         </action>
@@ -1431,13 +1411,13 @@
             <message text="`7[`6Arena Master`7] `6Tirion`r: Get ready, the first round is about to commence in 10 seconds!"/>
             <sound key="mob.villager.haggle"/>
             <action id="clear-kit-applicator"/>
+            <set var="current_round" value="1"/>
         </action>
     </trigger>
     <trigger scope="match" filter="round-1-begin">
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Let the Grand Dueling Tournament begin!"/>
             <sound key="mob.enderdragon.growl" volume="1.2" pitch="0.8"/>
-            <set var="current_round" value="1"/>
             <action id="kit-applicator"/>
         </action>
     </trigger>
@@ -1450,13 +1430,13 @@
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Brace yourselves, the second round starts in 10 seconds!"/>
             <sound key="mob.villager.haggle"/>
+            <set var="current_round" value="2"/>
         </action>
     </trigger>
     <trigger scope="match" filter="round-2-begin">
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Aaaaand fight!"/>
             <sound key="mob.enderdragon.growl" volume="1.2" pitch="0.8"/>
-            <set var="current_round" value="2"/>
             <action id="kit-applicator"/>
         </action>
     </trigger>
@@ -1469,18 +1449,24 @@
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Prepare for the `6final showdown`r, starting in 10 seconds!"/>
             <sound key="mob.villager.haggle"/>
+            <set var="current_round" value="3"/>
         </action>
     </trigger>
     <trigger scope="match" filter="round-3-begin">
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: May the best team win!"/>
             <sound key="mob.enderdragon.growl" volume="1.2" pitch="0.8"/>
-            <set var="current_round" value="3"/>
             <action id="kit-applicator"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="round-3-finished">
+        <action>
+            <action id="clear-kit-applicator"/>
         </action>
     </trigger>
     <trigger scope="match" filter="match-finished">
         <action>
+            <set var="current_round" value="0"/>
             <action filter="round-3-arena-1-team-1">
                 <message text="`7[`6Arena Master`7] `6Tirion`r: Congratulations `4Red `ron winning the Grand Dueling Tournament!"/>
             </action>
@@ -1579,54 +1565,54 @@
     <trigger scope="match" action="team-6-defeat-team-5-msg" filter="round-1-arena-3-team-6"/>
     <trigger scope="match" action="team-7-defeat-team-8-msg" filter="round-1-arena-4-team-7"/>
     <trigger scope="match" action="team-8-defeat-team-7-msg" filter="round-1-arena-4-team-8"/>
-    <trigger scope="match" action="team-1-defeat-team-3-msg" filter="all(team-1-vs-team-3, any(all(current_round=2, round-2-arena-1-team-1), all(current_round=2, round-2-arena-3-team-1)))"/>
-    <trigger scope="match" action="team-1-defeat-team-4-msg" filter="all(team-1-vs-team-4, any(all(current_round=2, round-2-arena-1-team-1), all(current_round=2, round-2-arena-3-team-1)))"/>
-    <trigger scope="match" action="team-1-defeat-team-5-msg" filter="all(team-1-vs-team-5, any(all(current_round=3, round-3-arena-1-team-1), all(current_round=3, round-3-arena-2-team-1), all(current_round=3, round-3-arena-3-team-1), all(current_round=3, round-3-arena-4-team-1)))"/>
-    <trigger scope="match" action="team-1-defeat-team-6-msg" filter="all(team-1-vs-team-6, any(all(current_round=3, round-3-arena-1-team-1), all(current_round=3, round-3-arena-2-team-1), all(current_round=3, round-3-arena-3-team-1), all(current_round=3, round-3-arena-4-team-1)))"/>
-    <trigger scope="match" action="team-1-defeat-team-7-msg" filter="all(team-1-vs-team-7, any(all(current_round=3, round-3-arena-1-team-1), all(current_round=3, round-3-arena-2-team-1), all(current_round=3, round-3-arena-3-team-1), all(current_round=3, round-3-arena-4-team-1)))"/>
-    <trigger scope="match" action="team-1-defeat-team-8-msg" filter="all(team-1-vs-team-8, any(all(current_round=3, round-3-arena-1-team-1), all(current_round=3, round-3-arena-2-team-1), all(current_round=3, round-3-arena-3-team-1), all(current_round=3, round-3-arena-4-team-1)))"/>
-    <trigger scope="match" action="team-2-defeat-team-3-msg" filter="all(team-2-vs-team-3, any(all(current_round=2, round-2-arena-1-team-2), all(current_round=2, round-2-arena-3-team-2)))"/>
-    <trigger scope="match" action="team-2-defeat-team-4-msg" filter="all(team-2-vs-team-4, any(all(current_round=2, round-2-arena-1-team-2), all(current_round=2, round-2-arena-3-team-2)))"/>
-    <trigger scope="match" action="team-2-defeat-team-5-msg" filter="all(team-2-vs-team-5, any(all(current_round=3, round-3-arena-1-team-2), all(current_round=3, round-3-arena-2-team-2), all(current_round=3, round-3-arena-3-team-2), all(current_round=3, round-3-arena-4-team-2)))"/>
-    <trigger scope="match" action="team-2-defeat-team-6-msg" filter="all(team-2-vs-team-6, any(all(current_round=3, round-3-arena-1-team-2), all(current_round=3, round-3-arena-2-team-2), all(current_round=3, round-3-arena-3-team-2), all(current_round=3, round-3-arena-4-team-2)))"/>
-    <trigger scope="match" action="team-2-defeat-team-7-msg" filter="all(team-2-vs-team-7, any(all(current_round=3, round-3-arena-1-team-2), all(current_round=3, round-3-arena-2-team-2), all(current_round=3, round-3-arena-3-team-2), all(current_round=3, round-3-arena-4-team-2)))"/>
-    <trigger scope="match" action="team-2-defeat-team-8-msg" filter="all(team-2-vs-team-8, any(all(current_round=3, round-3-arena-1-team-2), all(current_round=3, round-3-arena-2-team-2), all(current_round=3, round-3-arena-3-team-2), all(current_round=3, round-3-arena-4-team-2)))"/>
-    <trigger scope="match" action="team-3-defeat-team-1-msg" filter="all(team-1-vs-team-3, any(all(current_round=2, round-2-arena-1-team-3), all(current_round=2, round-2-arena-3-team-3)))"/>
-    <trigger scope="match" action="team-3-defeat-team-2-msg" filter="all(team-2-vs-team-3, any(all(current_round=2, round-2-arena-1-team-3), all(current_round=2, round-2-arena-3-team-3)))"/>
-    <trigger scope="match" action="team-3-defeat-team-5-msg" filter="all(team-3-vs-team-5, any(all(current_round=3, round-3-arena-1-team-3), all(current_round=3, round-3-arena-2-team-3), all(current_round=3, round-3-arena-3-team-3), all(current_round=3, round-3-arena-4-team-3)))"/>
-    <trigger scope="match" action="team-3-defeat-team-6-msg" filter="all(team-3-vs-team-6, any(all(current_round=3, round-3-arena-1-team-3), all(current_round=3, round-3-arena-2-team-3), all(current_round=3, round-3-arena-3-team-3), all(current_round=3, round-3-arena-4-team-3)))"/>
-    <trigger scope="match" action="team-3-defeat-team-7-msg" filter="all(team-3-vs-team-7, any(all(current_round=3, round-3-arena-1-team-3), all(current_round=3, round-3-arena-2-team-3), all(current_round=3, round-3-arena-3-team-3), all(current_round=3, round-3-arena-4-team-3)))"/>
-    <trigger scope="match" action="team-3-defeat-team-8-msg" filter="all(team-3-vs-team-8, any(all(current_round=3, round-3-arena-1-team-3), all(current_round=3, round-3-arena-2-team-3), all(current_round=3, round-3-arena-3-team-3), all(current_round=3, round-3-arena-4-team-3)))"/>
-    <trigger scope="match" action="team-4-defeat-team-1-msg" filter="all(team-1-vs-team-4, any(all(current_round=2, round-2-arena-1-team-4), all(current_round=2, round-2-arena-3-team-4)))"/>
-    <trigger scope="match" action="team-4-defeat-team-2-msg" filter="all(team-2-vs-team-4, any(all(current_round=2, round-2-arena-1-team-4), all(current_round=2, round-2-arena-3-team-4)))"/>
-    <trigger scope="match" action="team-4-defeat-team-5-msg" filter="all(team-4-vs-team-5, any(all(current_round=3, round-3-arena-1-team-4), all(current_round=3, round-3-arena-2-team-4), all(current_round=3, round-3-arena-3-team-4), all(current_round=3, round-3-arena-4-team-4)))"/>
-    <trigger scope="match" action="team-4-defeat-team-6-msg" filter="all(team-4-vs-team-6, any(all(current_round=3, round-3-arena-1-team-4), all(current_round=3, round-3-arena-2-team-4), all(current_round=3, round-3-arena-3-team-4), all(current_round=3, round-3-arena-4-team-4)))"/>
-    <trigger scope="match" action="team-4-defeat-team-7-msg" filter="all(team-4-vs-team-7, any(all(current_round=3, round-3-arena-1-team-4), all(current_round=3, round-3-arena-2-team-4), all(current_round=3, round-3-arena-3-team-4), all(current_round=3, round-3-arena-4-team-4)))"/>
-    <trigger scope="match" action="team-4-defeat-team-8-msg" filter="all(team-4-vs-team-8, any(all(current_round=3, round-3-arena-1-team-4), all(current_round=3, round-3-arena-2-team-4), all(current_round=3, round-3-arena-3-team-4), all(current_round=3, round-3-arena-4-team-4)))"/>
-    <trigger scope="match" action="team-5-defeat-team-7-msg" filter="all(team-5-vs-team-7, any(all(current_round=2, round-2-arena-2-team-5), all(current_round=2, round-2-arena-4-team-5)))"/>
-    <trigger scope="match" action="team-5-defeat-team-8-msg" filter="all(team-5-vs-team-8, any(all(current_round=2, round-2-arena-2-team-5), all(current_round=2, round-2-arena-4-team-5)))"/>
-    <trigger scope="match" action="team-5-defeat-team-1-msg" filter="all(team-1-vs-team-5, any(all(current_round=3, round-3-arena-1-team-5), all(current_round=3, round-3-arena-2-team-5), all(current_round=3, round-3-arena-3-team-5), all(current_round=3, round-3-arena-4-team-5)))"/>
-    <trigger scope="match" action="team-5-defeat-team-2-msg" filter="all(team-2-vs-team-5, any(all(current_round=3, round-3-arena-1-team-5), all(current_round=3, round-3-arena-2-team-5), all(current_round=3, round-3-arena-3-team-5), all(current_round=3, round-3-arena-4-team-5)))"/>
-    <trigger scope="match" action="team-5-defeat-team-3-msg" filter="all(team-3-vs-team-5, any(all(current_round=3, round-3-arena-1-team-5), all(current_round=3, round-3-arena-2-team-5), all(current_round=3, round-3-arena-3-team-5), all(current_round=3, round-3-arena-4-team-5)))"/>
-    <trigger scope="match" action="team-5-defeat-team-4-msg" filter="all(team-4-vs-team-5, any(all(current_round=3, round-3-arena-1-team-5), all(current_round=3, round-3-arena-2-team-5), all(current_round=3, round-3-arena-3-team-5), all(current_round=3, round-3-arena-4-team-5)))"/>
-    <trigger scope="match" action="team-6-defeat-team-7-msg" filter="all(team-6-vs-team-7, any(all(current_round=2, round-2-arena-2-team-6), all(current_round=2, round-2-arena-4-team-6)))"/>
-    <trigger scope="match" action="team-6-defeat-team-8-msg" filter="all(team-6-vs-team-8, any(all(current_round=2, round-2-arena-2-team-6), all(current_round=2, round-2-arena-4-team-6)))"/>
-    <trigger scope="match" action="team-6-defeat-team-1-msg" filter="all(team-1-vs-team-6, any(all(current_round=3, round-3-arena-1-team-6), all(current_round=3, round-3-arena-2-team-6), all(current_round=3, round-3-arena-3-team-6), all(current_round=3, round-3-arena-4-team-6)))"/>
-    <trigger scope="match" action="team-6-defeat-team-2-msg" filter="all(team-2-vs-team-6, any(all(current_round=3, round-3-arena-1-team-6), all(current_round=3, round-3-arena-2-team-6), all(current_round=3, round-3-arena-3-team-6), all(current_round=3, round-3-arena-4-team-6)))"/>
-    <trigger scope="match" action="team-6-defeat-team-3-msg" filter="all(team-3-vs-team-6, any(all(current_round=3, round-3-arena-1-team-6), all(current_round=3, round-3-arena-2-team-6), all(current_round=3, round-3-arena-3-team-6), all(current_round=3, round-3-arena-4-team-6)))"/>
-    <trigger scope="match" action="team-6-defeat-team-4-msg" filter="all(team-4-vs-team-6, any(all(current_round=3, round-3-arena-1-team-6), all(current_round=3, round-3-arena-2-team-6), all(current_round=3, round-3-arena-3-team-6), all(current_round=3, round-3-arena-4-team-6)))"/>
-    <trigger scope="match" action="team-7-defeat-team-5-msg" filter="all(team-5-vs-team-7, any(all(current_round=2, round-2-arena-2-team-7), all(current_round=2, round-2-arena-4-team-7)))"/>
-    <trigger scope="match" action="team-7-defeat-team-6-msg" filter="all(team-6-vs-team-7, any(all(current_round=2, round-2-arena-2-team-7), all(current_round=2, round-2-arena-4-team-7)))"/>
-    <trigger scope="match" action="team-7-defeat-team-1-msg" filter="all(team-1-vs-team-7, any(all(current_round=3, round-3-arena-1-team-7), all(current_round=3, round-3-arena-2-team-7), all(current_round=3, round-3-arena-3-team-7), all(current_round=3, round-3-arena-4-team-7)))"/>
-    <trigger scope="match" action="team-7-defeat-team-2-msg" filter="all(team-2-vs-team-7, any(all(current_round=3, round-3-arena-1-team-7), all(current_round=3, round-3-arena-2-team-7), all(current_round=3, round-3-arena-3-team-7), all(current_round=3, round-3-arena-4-team-7)))"/>
-    <trigger scope="match" action="team-7-defeat-team-3-msg" filter="all(team-3-vs-team-7, any(all(current_round=3, round-3-arena-1-team-7), all(current_round=3, round-3-arena-2-team-7), all(current_round=3, round-3-arena-3-team-7), all(current_round=3, round-3-arena-4-team-7)))"/>
-    <trigger scope="match" action="team-7-defeat-team-4-msg" filter="all(team-4-vs-team-7, any(all(current_round=3, round-3-arena-1-team-7), all(current_round=3, round-3-arena-2-team-7), all(current_round=3, round-3-arena-3-team-7), all(current_round=3, round-3-arena-4-team-7)))"/>
-    <trigger scope="match" action="team-8-defeat-team-5-msg" filter="all(team-5-vs-team-8, any(all(current_round=2, round-2-arena-2-team-8), all(current_round=2, round-2-arena-4-team-8)))"/>
-    <trigger scope="match" action="team-8-defeat-team-6-msg" filter="all(team-6-vs-team-8, any(all(current_round=2, round-2-arena-2-team-8), all(current_round=2, round-2-arena-4-team-8)))"/>
-    <trigger scope="match" action="team-8-defeat-team-1-msg" filter="all(team-1-vs-team-8, any(all(current_round=3, round-3-arena-1-team-8), all(current_round=3, round-3-arena-2-team-8), all(current_round=3, round-3-arena-3-team-8), all(current_round=3, round-3-arena-4-team-8)))"/>
-    <trigger scope="match" action="team-8-defeat-team-2-msg" filter="all(team-2-vs-team-8, any(all(current_round=3, round-3-arena-1-team-8), all(current_round=3, round-3-arena-2-team-8), all(current_round=3, round-3-arena-3-team-8), all(current_round=3, round-3-arena-4-team-8)))"/>
-    <trigger scope="match" action="team-8-defeat-team-3-msg" filter="all(team-3-vs-team-8, any(all(current_round=3, round-3-arena-1-team-8), all(current_round=3, round-3-arena-2-team-8), all(current_round=3, round-3-arena-3-team-8), all(current_round=3, round-3-arena-4-team-8)))"/>
-    <trigger scope="match" action="team-8-defeat-team-4-msg" filter="all(team-4-vs-team-8, any(all(current_round=3, round-3-arena-1-team-8), all(current_round=3, round-3-arena-2-team-8), all(current_round=3, round-3-arena-3-team-8), all(current_round=3, round-3-arena-4-team-8)))"/>
+    <trigger scope="match" action="team-1-defeat-team-3-msg" filter="all(team-1-vs-team-3, not(round-3-starting), not(round-3-starting), any(all(current_round=2, round-2-arena-1-team-1), all(current_round=2, round-2-arena-3-team-1)))"/>
+    <trigger scope="match" action="team-1-defeat-team-4-msg" filter="all(team-1-vs-team-4, not(round-3-starting), any(all(current_round=2, round-2-arena-1-team-1), all(current_round=2, round-2-arena-3-team-1)))"/>
+    <trigger scope="match" action="team-1-defeat-team-5-msg" filter="all(team-1-vs-team-5, not(match-finished), any(all(current_round=3, round-3-arena-1-team-1), all(current_round=3, round-3-arena-2-team-1), all(current_round=3, round-3-arena-3-team-1), all(current_round=3, round-3-arena-4-team-1)))"/>
+    <trigger scope="match" action="team-1-defeat-team-6-msg" filter="all(team-1-vs-team-6, not(match-finished), any(all(current_round=3, round-3-arena-1-team-1), all(current_round=3, round-3-arena-2-team-1), all(current_round=3, round-3-arena-3-team-1), all(current_round=3, round-3-arena-4-team-1)))"/>
+    <trigger scope="match" action="team-1-defeat-team-7-msg" filter="all(team-1-vs-team-7, not(match-finished), any(all(current_round=3, round-3-arena-1-team-1), all(current_round=3, round-3-arena-2-team-1), all(current_round=3, round-3-arena-3-team-1), all(current_round=3, round-3-arena-4-team-1)))"/>
+    <trigger scope="match" action="team-1-defeat-team-8-msg" filter="all(team-1-vs-team-8, not(match-finished), any(all(current_round=3, round-3-arena-1-team-1), all(current_round=3, round-3-arena-2-team-1), all(current_round=3, round-3-arena-3-team-1), all(current_round=3, round-3-arena-4-team-1)))"/>
+    <trigger scope="match" action="team-2-defeat-team-3-msg" filter="all(team-2-vs-team-3, not(round-3-starting), any(all(current_round=2, round-2-arena-1-team-2), all(current_round=2, round-2-arena-3-team-2)))"/>
+    <trigger scope="match" action="team-2-defeat-team-4-msg" filter="all(team-2-vs-team-4, not(round-3-starting), any(all(current_round=2, round-2-arena-1-team-2), all(current_round=2, round-2-arena-3-team-2)))"/>
+    <trigger scope="match" action="team-2-defeat-team-5-msg" filter="all(team-2-vs-team-5, not(match-finished), any(all(current_round=3, round-3-arena-1-team-2), all(current_round=3, round-3-arena-2-team-2), all(current_round=3, round-3-arena-3-team-2), all(current_round=3, round-3-arena-4-team-2)))"/>
+    <trigger scope="match" action="team-2-defeat-team-6-msg" filter="all(team-2-vs-team-6, not(match-finished), any(all(current_round=3, round-3-arena-1-team-2), all(current_round=3, round-3-arena-2-team-2), all(current_round=3, round-3-arena-3-team-2), all(current_round=3, round-3-arena-4-team-2)))"/>
+    <trigger scope="match" action="team-2-defeat-team-7-msg" filter="all(team-2-vs-team-7, not(match-finished), any(all(current_round=3, round-3-arena-1-team-2), all(current_round=3, round-3-arena-2-team-2), all(current_round=3, round-3-arena-3-team-2), all(current_round=3, round-3-arena-4-team-2)))"/>
+    <trigger scope="match" action="team-2-defeat-team-8-msg" filter="all(team-2-vs-team-8, not(match-finished), any(all(current_round=3, round-3-arena-1-team-2), all(current_round=3, round-3-arena-2-team-2), all(current_round=3, round-3-arena-3-team-2), all(current_round=3, round-3-arena-4-team-2)))"/>
+    <trigger scope="match" action="team-3-defeat-team-1-msg" filter="all(team-1-vs-team-3, not(round-3-starting), any(all(current_round=2, round-2-arena-1-team-3), all(current_round=2, round-2-arena-3-team-3)))"/>
+    <trigger scope="match" action="team-3-defeat-team-2-msg" filter="all(team-2-vs-team-3, not(round-3-starting), any(all(current_round=2, round-2-arena-1-team-3), all(current_round=2, round-2-arena-3-team-3)))"/>
+    <trigger scope="match" action="team-3-defeat-team-5-msg" filter="all(team-3-vs-team-5, not(match-finished), any(all(current_round=3, round-3-arena-1-team-3), all(current_round=3, round-3-arena-2-team-3), all(current_round=3, round-3-arena-3-team-3), all(current_round=3, round-3-arena-4-team-3)))"/>
+    <trigger scope="match" action="team-3-defeat-team-6-msg" filter="all(team-3-vs-team-6, not(match-finished), any(all(current_round=3, round-3-arena-1-team-3), all(current_round=3, round-3-arena-2-team-3), all(current_round=3, round-3-arena-3-team-3), all(current_round=3, round-3-arena-4-team-3)))"/>
+    <trigger scope="match" action="team-3-defeat-team-7-msg" filter="all(team-3-vs-team-7, not(match-finished), any(all(current_round=3, round-3-arena-1-team-3), all(current_round=3, round-3-arena-2-team-3), all(current_round=3, round-3-arena-3-team-3), all(current_round=3, round-3-arena-4-team-3)))"/>
+    <trigger scope="match" action="team-3-defeat-team-8-msg" filter="all(team-3-vs-team-8, not(match-finished), any(all(current_round=3, round-3-arena-1-team-3), all(current_round=3, round-3-arena-2-team-3), all(current_round=3, round-3-arena-3-team-3), all(current_round=3, round-3-arena-4-team-3)))"/>
+    <trigger scope="match" action="team-4-defeat-team-1-msg" filter="all(team-1-vs-team-4, not(round-3-starting), any(all(current_round=2, round-2-arena-1-team-4), all(current_round=2, round-2-arena-3-team-4)))"/>
+    <trigger scope="match" action="team-4-defeat-team-2-msg" filter="all(team-2-vs-team-4, not(round-3-starting), any(all(current_round=2, round-2-arena-1-team-4), all(current_round=2, round-2-arena-3-team-4)))"/>
+    <trigger scope="match" action="team-4-defeat-team-5-msg" filter="all(team-4-vs-team-5, not(match-finished), any(all(current_round=3, round-3-arena-1-team-4), all(current_round=3, round-3-arena-2-team-4), all(current_round=3, round-3-arena-3-team-4), all(current_round=3, round-3-arena-4-team-4)))"/>
+    <trigger scope="match" action="team-4-defeat-team-6-msg" filter="all(team-4-vs-team-6, not(match-finished), any(all(current_round=3, round-3-arena-1-team-4), all(current_round=3, round-3-arena-2-team-4), all(current_round=3, round-3-arena-3-team-4), all(current_round=3, round-3-arena-4-team-4)))"/>
+    <trigger scope="match" action="team-4-defeat-team-7-msg" filter="all(team-4-vs-team-7, not(match-finished), any(all(current_round=3, round-3-arena-1-team-4), all(current_round=3, round-3-arena-2-team-4), all(current_round=3, round-3-arena-3-team-4), all(current_round=3, round-3-arena-4-team-4)))"/>
+    <trigger scope="match" action="team-4-defeat-team-8-msg" filter="all(team-4-vs-team-8, not(match-finished), any(all(current_round=3, round-3-arena-1-team-4), all(current_round=3, round-3-arena-2-team-4), all(current_round=3, round-3-arena-3-team-4), all(current_round=3, round-3-arena-4-team-4)))"/>
+    <trigger scope="match" action="team-5-defeat-team-7-msg" filter="all(team-5-vs-team-7, not(round-3-starting), any(all(current_round=2, round-2-arena-2-team-5), all(current_round=2, round-2-arena-4-team-5)))"/>
+    <trigger scope="match" action="team-5-defeat-team-8-msg" filter="all(team-5-vs-team-8, not(round-3-starting), any(all(current_round=2, round-2-arena-2-team-5), all(current_round=2, round-2-arena-4-team-5)))"/>
+    <trigger scope="match" action="team-5-defeat-team-1-msg" filter="all(team-1-vs-team-5, not(match-finished), any(all(current_round=3, round-3-arena-1-team-5), all(current_round=3, round-3-arena-2-team-5), all(current_round=3, round-3-arena-3-team-5), all(current_round=3, round-3-arena-4-team-5)))"/>
+    <trigger scope="match" action="team-5-defeat-team-2-msg" filter="all(team-2-vs-team-5, not(match-finished), any(all(current_round=3, round-3-arena-1-team-5), all(current_round=3, round-3-arena-2-team-5), all(current_round=3, round-3-arena-3-team-5), all(current_round=3, round-3-arena-4-team-5)))"/>
+    <trigger scope="match" action="team-5-defeat-team-3-msg" filter="all(team-3-vs-team-5, not(match-finished), any(all(current_round=3, round-3-arena-1-team-5), all(current_round=3, round-3-arena-2-team-5), all(current_round=3, round-3-arena-3-team-5), all(current_round=3, round-3-arena-4-team-5)))"/>
+    <trigger scope="match" action="team-5-defeat-team-4-msg" filter="all(team-4-vs-team-5, not(match-finished), any(all(current_round=3, round-3-arena-1-team-5), all(current_round=3, round-3-arena-2-team-5), all(current_round=3, round-3-arena-3-team-5), all(current_round=3, round-3-arena-4-team-5)))"/>
+    <trigger scope="match" action="team-6-defeat-team-7-msg" filter="all(team-6-vs-team-7, not(round-3-starting), any(all(current_round=2, round-2-arena-2-team-6), all(current_round=2, round-2-arena-4-team-6)))"/>
+    <trigger scope="match" action="team-6-defeat-team-8-msg" filter="all(team-6-vs-team-8, not(round-3-starting), any(all(current_round=2, round-2-arena-2-team-6), all(current_round=2, round-2-arena-4-team-6)))"/>
+    <trigger scope="match" action="team-6-defeat-team-1-msg" filter="all(team-1-vs-team-6, not(match-finished), any(all(current_round=3, round-3-arena-1-team-6), all(current_round=3, round-3-arena-2-team-6), all(current_round=3, round-3-arena-3-team-6), all(current_round=3, round-3-arena-4-team-6)))"/>
+    <trigger scope="match" action="team-6-defeat-team-2-msg" filter="all(team-2-vs-team-6, not(match-finished), any(all(current_round=3, round-3-arena-1-team-6), all(current_round=3, round-3-arena-2-team-6), all(current_round=3, round-3-arena-3-team-6), all(current_round=3, round-3-arena-4-team-6)))"/>
+    <trigger scope="match" action="team-6-defeat-team-3-msg" filter="all(team-3-vs-team-6, not(match-finished), any(all(current_round=3, round-3-arena-1-team-6), all(current_round=3, round-3-arena-2-team-6), all(current_round=3, round-3-arena-3-team-6), all(current_round=3, round-3-arena-4-team-6)))"/>
+    <trigger scope="match" action="team-6-defeat-team-4-msg" filter="all(team-4-vs-team-6, not(match-finished), any(all(current_round=3, round-3-arena-1-team-6), all(current_round=3, round-3-arena-2-team-6), all(current_round=3, round-3-arena-3-team-6), all(current_round=3, round-3-arena-4-team-6)))"/>
+    <trigger scope="match" action="team-7-defeat-team-5-msg" filter="all(team-5-vs-team-7, not(round-3-starting), any(all(current_round=2, round-2-arena-2-team-7), all(current_round=2, round-2-arena-4-team-7)))"/>
+    <trigger scope="match" action="team-7-defeat-team-6-msg" filter="all(team-6-vs-team-7, not(round-3-starting), any(all(current_round=2, round-2-arena-2-team-7), all(current_round=2, round-2-arena-4-team-7)))"/>
+    <trigger scope="match" action="team-7-defeat-team-1-msg" filter="all(team-1-vs-team-7, not(match-finished), any(all(current_round=3, round-3-arena-1-team-7), all(current_round=3, round-3-arena-2-team-7), all(current_round=3, round-3-arena-3-team-7), all(current_round=3, round-3-arena-4-team-7)))"/>
+    <trigger scope="match" action="team-7-defeat-team-2-msg" filter="all(team-2-vs-team-7, not(match-finished), any(all(current_round=3, round-3-arena-1-team-7), all(current_round=3, round-3-arena-2-team-7), all(current_round=3, round-3-arena-3-team-7), all(current_round=3, round-3-arena-4-team-7)))"/>
+    <trigger scope="match" action="team-7-defeat-team-3-msg" filter="all(team-3-vs-team-7, not(match-finished), any(all(current_round=3, round-3-arena-1-team-7), all(current_round=3, round-3-arena-2-team-7), all(current_round=3, round-3-arena-3-team-7), all(current_round=3, round-3-arena-4-team-7)))"/>
+    <trigger scope="match" action="team-7-defeat-team-4-msg" filter="all(team-4-vs-team-7, not(match-finished), any(all(current_round=3, round-3-arena-1-team-7), all(current_round=3, round-3-arena-2-team-7), all(current_round=3, round-3-arena-3-team-7), all(current_round=3, round-3-arena-4-team-7)))"/>
+    <trigger scope="match" action="team-8-defeat-team-5-msg" filter="all(team-5-vs-team-8, not(round-3-starting), any(all(current_round=2, round-2-arena-2-team-8), all(current_round=2, round-2-arena-4-team-8)))"/>
+    <trigger scope="match" action="team-8-defeat-team-6-msg" filter="all(team-6-vs-team-8, not(round-3-starting), any(all(current_round=2, round-2-arena-2-team-8), all(current_round=2, round-2-arena-4-team-8)))"/>
+    <trigger scope="match" action="team-8-defeat-team-1-msg" filter="all(team-1-vs-team-8, not(match-finished), any(all(current_round=3, round-3-arena-1-team-8), all(current_round=3, round-3-arena-2-team-8), all(current_round=3, round-3-arena-3-team-8), all(current_round=3, round-3-arena-4-team-8)))"/>
+    <trigger scope="match" action="team-8-defeat-team-2-msg" filter="all(team-2-vs-team-8, not(match-finished), any(all(current_round=3, round-3-arena-1-team-8), all(current_round=3, round-3-arena-2-team-8), all(current_round=3, round-3-arena-3-team-8), all(current_round=3, round-3-arena-4-team-8)))"/>
+    <trigger scope="match" action="team-8-defeat-team-3-msg" filter="all(team-3-vs-team-8, not(match-finished), any(all(current_round=3, round-3-arena-1-team-8), all(current_round=3, round-3-arena-2-team-8), all(current_round=3, round-3-arena-3-team-8), all(current_round=3, round-3-arena-4-team-8)))"/>
+    <trigger scope="match" action="team-8-defeat-team-4-msg" filter="all(team-4-vs-team-8, not(match-finished), any(all(current_round=3, round-3-arena-1-team-8), all(current_round=3, round-3-arena-2-team-8), all(current_round=3, round-3-arena-3-team-8), all(current_round=3, round-3-arena-4-team-8)))"/>
     <trigger scope="team" filter="award-points">
         <action>
             <set var="score" value="score+1"/>
@@ -1665,8 +1651,9 @@
     <control-point id="round-3-arena-4-decider" name="round-3-arena-4-decider" capture="arena-4" player-filter="current_round=3"/>
 </control-points>
 <portals sound="false">
-    <portal destination="lobby-spawn" forward="round-1-finished"/>
-    <portal destination="lobby-spawn" forward="round-2-finished"/>
+    <portal destination="lobby-spawn" yaw="@90" forward="round-1-finished"/>
+    <portal destination="lobby-spawn" yaw="@90" forward="round-2-finished"/>
+    <portal destination="lobby-spawn" yaw="@90" forward="round-3-finished"/>
     <!--
     teleport players to respective arenas
     -->
@@ -1694,44 +1681,44 @@
     <portal destination="round-2-arena-4-spawn-1" yaw="@0"   forward="all(lobby, round-2-begin, not(round-2-finished), only-team-6, team-6-0-wins, round-2-arena-4-competitors)"/>
     <portal destination="round-2-arena-4-spawn-2" yaw="@180" forward="all(lobby, round-2-begin, not(round-2-finished), only-team-7, team-7-0-wins, round-2-arena-4-competitors)"/>
     <portal destination="round-2-arena-4-spawn-2" yaw="@180" forward="all(lobby, round-2-begin, not(round-2-finished), only-team-8, team-8-0-wins, round-2-arena-4-competitors)"/>
-    <portal destination="round-3-arena-1-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, only-team-1, team-1-2-wins, round-3-arena-1-competitors)"/>
-    <portal destination="round-3-arena-1-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, only-team-2, team-2-2-wins, round-3-arena-1-competitors)"/>
-    <portal destination="round-3-arena-1-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, only-team-3, team-3-2-wins, round-3-arena-1-competitors)"/>
-    <portal destination="round-3-arena-1-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, only-team-4, team-4-2-wins, round-3-arena-1-competitors)"/>
-    <portal destination="round-3-arena-1-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, only-team-5, team-5-2-wins, round-3-arena-1-competitors)"/>
-    <portal destination="round-3-arena-1-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, only-team-6, team-6-2-wins, round-3-arena-1-competitors)"/>
-    <portal destination="round-3-arena-1-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, only-team-7, team-7-2-wins, round-3-arena-1-competitors)"/>
-    <portal destination="round-3-arena-1-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, only-team-8, team-8-2-wins, round-3-arena-1-competitors)"/>
-    <portal destination="round-3-arena-2-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, round-3-arena-2-spawn-1-competitors, round-1-winner)"/>
-    <portal destination="round-3-arena-2-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, round-3-arena-2-spawn-2-competitors, round-1-winner)"/>
-    <portal destination="round-3-arena-3-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, round-3-arena-3-spawn-1-competitors, round-2-winner)"/>
-    <portal destination="round-3-arena-3-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, round-3-arena-3-spawn-2-competitors, round-2-winner)"/>
-    <portal destination="round-3-arena-4-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, only-team-1, team-1-0-wins, round-3-arena-4-competitors)"/>
-    <portal destination="round-3-arena-4-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, only-team-2, team-2-0-wins, round-3-arena-4-competitors)"/>
-    <portal destination="round-3-arena-4-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, only-team-3, team-3-0-wins, round-3-arena-4-competitors)"/>
-    <portal destination="round-3-arena-4-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, only-team-4, team-4-0-wins, round-3-arena-4-competitors)"/>
-    <portal destination="round-3-arena-4-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, only-team-5, team-5-0-wins, round-3-arena-4-competitors)"/>
-    <portal destination="round-3-arena-4-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, only-team-6, team-6-0-wins, round-3-arena-4-competitors)"/>
-    <portal destination="round-3-arena-4-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, only-team-7, team-7-0-wins, round-3-arena-4-competitors)"/>
-    <portal destination="round-3-arena-4-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, only-team-8, team-8-0-wins, round-3-arena-4-competitors)"/>
+    <portal destination="round-3-arena-1-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, not(round-3-finished), only-team-1, team-1-2-wins, round-3-arena-1-competitors)"/>
+    <portal destination="round-3-arena-1-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, not(round-3-finished), only-team-2, team-2-2-wins, round-3-arena-1-competitors)"/>
+    <portal destination="round-3-arena-1-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, not(round-3-finished), only-team-3, team-3-2-wins, round-3-arena-1-competitors)"/>
+    <portal destination="round-3-arena-1-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, not(round-3-finished), only-team-4, team-4-2-wins, round-3-arena-1-competitors)"/>
+    <portal destination="round-3-arena-1-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, not(round-3-finished), only-team-5, team-5-2-wins, round-3-arena-1-competitors)"/>
+    <portal destination="round-3-arena-1-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, not(round-3-finished), only-team-6, team-6-2-wins, round-3-arena-1-competitors)"/>
+    <portal destination="round-3-arena-1-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, not(round-3-finished), only-team-7, team-7-2-wins, round-3-arena-1-competitors)"/>
+    <portal destination="round-3-arena-1-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, not(round-3-finished), only-team-8, team-8-2-wins, round-3-arena-1-competitors)"/>
+    <portal destination="round-3-arena-2-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, not(round-3-finished), round-3-arena-2-spawn-1-competitors, round-1-winner)"/>
+    <portal destination="round-3-arena-2-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, not(round-3-finished), round-3-arena-2-spawn-2-competitors, round-1-winner)"/>
+    <portal destination="round-3-arena-3-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, not(round-3-finished), round-3-arena-3-spawn-1-competitors, round-2-winner)"/>
+    <portal destination="round-3-arena-3-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, not(round-3-finished), round-3-arena-3-spawn-2-competitors, round-2-winner)"/>
+    <portal destination="round-3-arena-4-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, not(round-3-finished), only-team-1, team-1-0-wins, round-3-arena-4-competitors)"/>
+    <portal destination="round-3-arena-4-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, not(round-3-finished), only-team-2, team-2-0-wins, round-3-arena-4-competitors)"/>
+    <portal destination="round-3-arena-4-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, not(round-3-finished), only-team-3, team-3-0-wins, round-3-arena-4-competitors)"/>
+    <portal destination="round-3-arena-4-spawn-1" yaw="@0"   forward="all(lobby, round-3-begin, not(round-3-finished), only-team-4, team-4-0-wins, round-3-arena-4-competitors)"/>
+    <portal destination="round-3-arena-4-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, not(round-3-finished), only-team-5, team-5-0-wins, round-3-arena-4-competitors)"/>
+    <portal destination="round-3-arena-4-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, not(round-3-finished), only-team-6, team-6-0-wins, round-3-arena-4-competitors)"/>
+    <portal destination="round-3-arena-4-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, not(round-3-finished), only-team-7, team-7-0-wins, round-3-arena-4-competitors)"/>
+    <portal destination="round-3-arena-4-spawn-2" yaw="@180" forward="all(lobby, round-3-begin, not(round-3-finished), only-team-8, team-8-0-wins, round-3-arena-4-competitors)"/>
     <!--
     rescue arena winners to spectator zone
     -->
-    <portal destination="round-1-arena-1-spectator" yaw="@90" forward="all(current_round=1, any(all(arena-1, round-1-arena-1-finished), all(arena-2, round-1-arena-2-finished), all(arena-3, round-1-arena-3-finished), all(arena-4, round-1-arena-4-finished)), not(round-1-arena-1-finished))"/>
-    <portal destination="round-1-arena-2-spectator" yaw="@90" forward="all(current_round=1, any(all(arena-1, round-1-arena-1-finished), all(arena-2, round-1-arena-2-finished), all(arena-3, round-1-arena-3-finished), all(arena-4, round-1-arena-4-finished)), not(round-1-arena-2-finished))"/>
-    <portal destination="round-1-arena-3-spectator" yaw="@90" forward="all(current_round=1, any(all(arena-1, round-1-arena-1-finished), all(arena-2, round-1-arena-2-finished), all(arena-3, round-1-arena-3-finished), all(arena-4, round-1-arena-4-finished)), not(round-1-arena-3-finished))"/>
-    <portal destination="round-1-arena-4-spectator" yaw="@90" forward="all(current_round=1, any(all(arena-1, round-1-arena-1-finished), all(arena-2, round-1-arena-2-finished), all(arena-3, round-1-arena-3-finished), all(arena-4, round-1-arena-4-finished)), not(round-1-arena-4-finished))"/>
-    <portal destination="lobby-spawn"                         forward="all(current_round=1, any(all(arena-1, round-1-arena-1-finished), all(arena-2, round-1-arena-2-finished), all(arena-3, round-1-arena-3-finished), all(arena-4, round-1-arena-4-finished)), round-1-finished)"/>
-    <portal destination="round-2-arena-1-spectator" yaw="@90" forward="all(current_round=2, any(all(arena-1, round-2-arena-1-finished), all(arena-2, round-2-arena-2-finished), all(arena-3, round-2-arena-3-finished), all(arena-4, round-2-arena-4-finished)), not(round-2-arena-1-finished))"/>
-    <portal destination="round-2-arena-2-spectator" yaw="@90" forward="all(current_round=2, any(all(arena-1, round-2-arena-1-finished), all(arena-2, round-2-arena-2-finished), all(arena-3, round-2-arena-3-finished), all(arena-4, round-2-arena-4-finished)), not(round-2-arena-2-finished))"/>
-    <portal destination="round-2-arena-3-spectator" yaw="@90" forward="all(current_round=2, any(all(arena-1, round-2-arena-1-finished), all(arena-2, round-2-arena-2-finished), all(arena-3, round-2-arena-3-finished), all(arena-4, round-2-arena-4-finished)), not(round-2-arena-3-finished))"/>
-    <portal destination="round-2-arena-4-spectator" yaw="@90" forward="all(current_round=2, any(all(arena-1, round-2-arena-1-finished), all(arena-2, round-2-arena-2-finished), all(arena-3, round-2-arena-3-finished), all(arena-4, round-2-arena-4-finished)), not(round-2-arena-4-finished))"/>
-    <portal destination="lobby-spawn"                         forward="all(current_round=2, any(all(arena-1, round-2-arena-1-finished), all(arena-2, round-2-arena-2-finished), all(arena-3, round-2-arena-3-finished), all(arena-4, round-2-arena-4-finished)), round-2-finished)"/>
-    <portal destination="round-3-arena-1-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-1, round-3-arena-1-finished), all(arena-2, round-3-arena-2-finished), all(arena-3, round-3-arena-3-finished), all(arena-4, round-3-arena-4-finished)), not(round-3-arena-1-finished))"/>
-    <portal destination="round-3-arena-2-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-1, round-3-arena-1-finished), all(arena-2, round-3-arena-2-finished), all(arena-3, round-3-arena-3-finished), all(arena-4, round-3-arena-4-finished)), not(round-3-arena-2-finished))"/>
-    <portal destination="round-3-arena-3-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-1, round-3-arena-1-finished), all(arena-2, round-3-arena-2-finished), all(arena-3, round-3-arena-3-finished), all(arena-4, round-3-arena-4-finished)), not(round-3-arena-3-finished))"/>
-    <portal destination="round-3-arena-4-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-1, round-3-arena-1-finished), all(arena-2, round-3-arena-2-finished), all(arena-3, round-3-arena-3-finished), all(arena-4, round-3-arena-4-finished)), not(round-3-arena-4-finished))"/>
-    <portal destination="lobby-spawn"                         forward="all(current_round=3, any(all(arena-1, round-3-arena-1-finished), all(arena-2, round-3-arena-2-finished), all(arena-3, round-3-arena-3-finished), all(arena-4, round-3-arena-4-finished)), round-3-finished)"/>
+    <portal destination="round-1-arena-1-spectator" yaw="@90" forward="all(participating, current_round=1, any(all(arena-1, round-1-arena-1-finished), all(arena-2, round-1-arena-2-finished), all(arena-3, round-1-arena-3-finished), all(arena-4, round-1-arena-4-finished)), not(round-1-arena-1-finished))"/>
+    <portal destination="round-1-arena-2-spectator" yaw="@90" forward="all(participating, current_round=1, any(all(arena-1, round-1-arena-1-finished), all(arena-2, round-1-arena-2-finished), all(arena-3, round-1-arena-3-finished), all(arena-4, round-1-arena-4-finished)), not(round-1-arena-2-finished))"/>
+    <portal destination="round-1-arena-3-spectator" yaw="@90" forward="all(participating, current_round=1, any(all(arena-1, round-1-arena-1-finished), all(arena-2, round-1-arena-2-finished), all(arena-3, round-1-arena-3-finished), all(arena-4, round-1-arena-4-finished)), not(round-1-arena-3-finished))"/>
+    <portal destination="round-1-arena-4-spectator" yaw="@90" forward="all(participating, current_round=1, any(all(arena-1, round-1-arena-1-finished), all(arena-2, round-1-arena-2-finished), all(arena-3, round-1-arena-3-finished), all(arena-4, round-1-arena-4-finished)), not(round-1-arena-4-finished))"/>
+    <portal destination="lobby-spawn"                         forward="all(participating, current_round=1, any(all(arena-1, round-1-arena-1-finished), all(arena-2, round-1-arena-2-finished), all(arena-3, round-1-arena-3-finished), all(arena-4, round-1-arena-4-finished)), round-1-finished)"/>
+    <portal destination="round-2-arena-1-spectator" yaw="@90" forward="all(participating, current_round=2, any(all(arena-1, round-2-arena-1-finished), all(arena-2, round-2-arena-2-finished), all(arena-3, round-2-arena-3-finished), all(arena-4, round-2-arena-4-finished)), not(round-2-arena-1-finished))"/>
+    <portal destination="round-2-arena-2-spectator" yaw="@90" forward="all(participating, current_round=2, any(all(arena-1, round-2-arena-1-finished), all(arena-2, round-2-arena-2-finished), all(arena-3, round-2-arena-3-finished), all(arena-4, round-2-arena-4-finished)), not(round-2-arena-2-finished))"/>
+    <portal destination="round-2-arena-3-spectator" yaw="@90" forward="all(participating, current_round=2, any(all(arena-1, round-2-arena-1-finished), all(arena-2, round-2-arena-2-finished), all(arena-3, round-2-arena-3-finished), all(arena-4, round-2-arena-4-finished)), not(round-2-arena-3-finished))"/>
+    <portal destination="round-2-arena-4-spectator" yaw="@90" forward="all(participating, current_round=2, any(all(arena-1, round-2-arena-1-finished), all(arena-2, round-2-arena-2-finished), all(arena-3, round-2-arena-3-finished), all(arena-4, round-2-arena-4-finished)), not(round-2-arena-4-finished))"/>
+    <portal destination="lobby-spawn"                         forward="all(participating, current_round=2, any(all(arena-1, round-2-arena-1-finished), all(arena-2, round-2-arena-2-finished), all(arena-3, round-2-arena-3-finished), all(arena-4, round-2-arena-4-finished)), round-2-finished)"/>
+    <portal destination="round-3-arena-1-spectator" yaw="@90" forward="all(participating, current_round=3, any(all(arena-1, round-3-arena-1-finished), all(arena-2, round-3-arena-2-finished), all(arena-3, round-3-arena-3-finished), all(arena-4, round-3-arena-4-finished)), not(round-3-arena-1-finished))"/>
+    <portal destination="round-3-arena-2-spectator" yaw="@90" forward="all(participating, current_round=3, any(all(arena-1, round-3-arena-1-finished), all(arena-2, round-3-arena-2-finished), all(arena-3, round-3-arena-3-finished), all(arena-4, round-3-arena-4-finished)), not(round-3-arena-2-finished))"/>
+    <portal destination="round-3-arena-3-spectator" yaw="@90" forward="all(participating, current_round=3, any(all(arena-1, round-3-arena-1-finished), all(arena-2, round-3-arena-2-finished), all(arena-3, round-3-arena-3-finished), all(arena-4, round-3-arena-4-finished)), not(round-3-arena-3-finished))"/>
+    <portal destination="round-3-arena-4-spectator" yaw="@90" forward="all(participating, current_round=3, any(all(arena-1, round-3-arena-1-finished), all(arena-2, round-3-arena-2-finished), all(arena-3, round-3-arena-3-finished), all(arena-4, round-3-arena-4-finished)), not(round-3-arena-4-finished))"/>
+    <portal destination="lobby-spawn"                         forward="all(participating, current_round=3, any(all(arena-1, round-3-arena-1-finished), all(arena-2, round-3-arena-2-finished), all(arena-3, round-3-arena-3-finished), all(arena-4, round-3-arena-4-finished)), round-3-finished)"/>
     <!--
     inter-arena portals
     -->
@@ -1763,14 +1750,14 @@
     <portal destination="round-3-arena-3-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-1-spectator, round-3-arena-1-finished, not(round-3-finished)), all(round-3-arena-1-spectator-portal, not(round-3-arena-3-finished), round-3-arena-2-finished)))"/>
     <portal destination="round-3-arena-4-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-1-spectator, round-3-arena-1-finished, not(round-3-finished)), all(round-3-arena-1-spectator-portal, not(round-3-arena-4-finished), round-3-arena-2-finished, round-3-arena-3-finished)))"/>
     <portal destination="round-3-arena-3-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-2-spectator, round-3-arena-2-finished, not(round-3-finished)), all(round-3-arena-2-spectator-portal, not(round-3-arena-3-finished))))"/>
-    <portal destination="round-3-arena-4-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-2-spectator, round-3-arena-2-finished, not(round-3-finished)), all(round-3-arena-2-spectator-portal, not(round-3-arena-4-finished), round-3-arena-2-finished)))"/>
-    <portal destination="round-3-arena-1-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-2-spectator, round-3-arena-2-finished, not(round-3-finished)), all(round-3-arena-2-spectator-portal, not(round-3-arena-1-finished), round-3-arena-2-finished, round-3-arena-4-finished)))"/>
+    <portal destination="round-3-arena-4-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-2-spectator, round-3-arena-2-finished, not(round-3-finished)), all(round-3-arena-2-spectator-portal, not(round-3-arena-4-finished), round-3-arena-3-finished)))"/>
+    <portal destination="round-3-arena-1-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-2-spectator, round-3-arena-2-finished, not(round-3-finished)), all(round-3-arena-2-spectator-portal, not(round-3-arena-1-finished), round-3-arena-3-finished, round-3-arena-4-finished)))"/>
     <portal destination="round-3-arena-4-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-3-spectator, round-3-arena-3-finished, not(round-3-finished)), all(round-3-arena-3-spectator-portal, not(round-3-arena-4-finished))))"/>
-    <portal destination="round-3-arena-1-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-3-spectator, round-3-arena-3-finished, not(round-3-finished)), all(round-3-arena-3-spectator-portal, not(round-3-arena-1-finished), round-3-arena-2-finished)))"/>
-    <portal destination="round-3-arena-2-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-3-spectator, round-3-arena-3-finished, not(round-3-finished)), all(round-3-arena-3-spectator-portal, not(round-3-arena-2-finished), round-3-arena-2-finished, round-3-arena-1-finished)))"/>
+    <portal destination="round-3-arena-1-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-3-spectator, round-3-arena-3-finished, not(round-3-finished)), all(round-3-arena-3-spectator-portal, not(round-3-arena-1-finished), round-3-arena-4-finished)))"/>
+    <portal destination="round-3-arena-2-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-3-spectator, round-3-arena-3-finished, not(round-3-finished)), all(round-3-arena-3-spectator-portal, not(round-3-arena-2-finished), round-3-arena-4-finished, round-3-arena-1-finished)))"/>
     <portal destination="round-3-arena-1-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-4-spectator, round-3-arena-4-finished, not(round-3-finished)), all(round-3-arena-4-spectator-portal, not(round-3-arena-1-finished))))"/>
-    <portal destination="round-3-arena-2-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-4-spectator, round-3-arena-4-finished, not(round-3-finished)), all(round-3-arena-4-spectator-portal, not(round-3-arena-2-finished), round-3-arena-2-finished)))"/>
-    <portal destination="round-3-arena-3-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-4-spectator, round-3-arena-4-finished, not(round-3-finished)), all(round-3-arena-4-spectator-portal, not(round-3-arena-3-finished), round-3-arena-2-finished, round-3-arena-2-finished)))"/>
+    <portal destination="round-3-arena-2-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-4-spectator, round-3-arena-4-finished, not(round-3-finished)), all(round-3-arena-4-spectator-portal, not(round-3-arena-2-finished), round-3-arena-1-finished)))"/>
+    <portal destination="round-3-arena-3-spectator" yaw="@90" forward="all(current_round=3, any(all(arena-4-spectator, round-3-arena-4-finished, not(round-3-finished)), all(round-3-arena-4-spectator-portal, not(round-3-arena-3-finished), round-3-arena-1-finished, round-3-arena-2-finished)))"/>
 </portals>
 <itemremove>
     <item>leather helmet</item>
