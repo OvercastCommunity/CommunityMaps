@@ -1,0 +1,3401 @@
+<map proto="1.4.2">
+<!--
+Apple Smash:
+- Japanese-themed DTM game with large Green and Red Apple monuments
+Features:
+- Permanent upgrade Stores utilizing monument blocks as currency
+- Each team has Player Upgrade store and Team Upgrade store (ala Bed Wars)
+- Player Upgrade store uses blocks taken from the enemy monument
+- Team Upgrade store uses blocks dropped from spawners in the home monuments, or collected from invaders
+- 4 Short melodies that highlight game events for players, teams and match
+- Custom logic to treat monument blocks with jingle on pick up, similar to with wool in CTW
+- Special Diamond Chestplate renewable drop that lasts for 4 player lives, obtained at map center
+- Permanent Vanity Diamond Hat for players that pickup a monument block while on enemy monument
+- Auto-ignite TNT available as kill reward or purchase in the Player store
+-->
+<name>Apple Smash</name>
+<version>1.0.0</version>
+<phase>development</phase>
+<objective>Destroy the enemy's Apples!</objective>
+<gamemode>dtm</gamemode>
+<created>2023-11-01</created>
+<authors>
+    <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb"/> <!-- arcadeboss -->
+</authors>
+<world>
+    <timeset>14000</timeset>
+    <timelock>on</timelock>
+</world>
+<teams>
+    <!-- Cyan instead of green to help R/G colorblind -->
+    <team id="green-team" color="dark_aqua" max="21" max-overfill="50">Mutsu</team> <!-- Green -->
+    <team id="red-team" color="red" max="21" max-overfill="50">Fuji</team> <!-- Red -->
+</teams>
+<kits>
+    <kit id="spawn-kit" force="true">
+        <clear/>
+        <effect duration="3s" amplifier="2">regeneration</effect>
+        <effect duration="3s" amplifier="255">damage resistance</effect>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true" name="Bow" enchantment="arrow infinite"/>
+        <!-- NOTE: only iron and diamond pickaxes will work uniformly with redstone/emerald blocks -->
+        <item slot="2" material="iron pickaxe" unbreakable="true"/>
+        <item slot="3" material="stone axe" unbreakable="true"/>
+        <item slot="4" material="stone spade"/>
+        <item slot="5" material="log" amount="16"/>
+        <item slot="6" material="smooth brick" amount="16"/>
+        <item slot="7" material="bucket"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="10" material="arrow" amount="1"/>
+        <item slot="33" material="wool" amount="16" team-color="true"/>
+        <helmet unbreakable="true" locked="true" material="leather helmet" team-color="true"/>
+        <chestplate unbreakable="true" locked="false" material="leather chestplate" team-color="true"/>
+        <leggings unbreakable="true" locked="true" material="leather leggings" team-color="true"/>
+        <boots unbreakable="true" locked="true" material="leather boots" team-color="true"/>
+    </kit>
+    <!-- Team Upgrades -->
+    <lend filter="apply-regen">
+        <kit>
+            <effect amplifier="1">regeneration</effect>
+        </kit>
+    </lend>
+    <give filter="apply-haste-1">
+        <kit>
+            <effect amplifier="1">fast digging</effect>
+        </kit>
+    </give>
+    <!-- Sword Upgrades -->
+    <kit id="iron-sword-sharp0" deduct-tools="false">
+        <action>
+            <sound key="random.anvil_use" volume=".3" pitch=".9"/>
+            <message text="`e`l▲ `6Sword upgraded to `e`lIron`r"/>
+            <set var="sword_variable" value="1"/>
+            <replace-item ignore-metadata="true">
+                <find material="stone sword"/>
+                <replace material="air"/>
+            </replace-item>
+        </action>
+        <item material="iron sword" unbreakable="true"/>
+    </kit>
+    <kit id="diamond-sword-sharp0" deduct-tools="false">
+        <action>
+            <sound key="random.anvil_use" volume=".3" pitch=".9"/>
+            <message text="`e`l▲ `6Sword upgraded to `e`lDiamond`r"/>
+            <set var="sword_variable" value="2"/>
+            <replace-item ignore-metadata="true">
+                <find material="iron sword"/>
+                <replace material="air"/>
+            </replace-item>
+        </action>
+        <item material="diamond sword" unbreakable="true"/>
+    </kit>
+    <kit id="iron-sword-sharp1" deduct-tools="false">
+        <action>
+            <sound key="random.anvil_use" volume=".3" pitch="1"/>
+            <message text="`e`l▲ `6Sword upgraded to `e`lIron (Sharp I)`r"/>
+            <set var="sword_variable" value="1"/>
+            <replace-item ignore-metadata="true">
+                <find material="stone sword"/>
+                <replace material="air"/>
+            </replace-item>
+        </action>
+        <item material="iron sword" unbreakable="true" enchantment="sharpness"/>
+    </kit>
+    <kit id="diamond-sword-sharp1" deduct-tools="false">
+        <action>
+            <sound key="random.anvil_use" volume=".3" pitch="1"/>
+            <message text="`e`l▲ `6Sword upgraded to `e`lDiamond (Sharp I)`r"/>
+            <set var="sword_variable" value="2"/>
+            <replace-item ignore-metadata="true">
+                <find material="iron sword"/>
+                <replace material="air"/>
+            </replace-item>
+        </action>
+        <item material="diamond sword" unbreakable="true" enchantment="sharpness"/>
+    </kit>
+    <kit id="iron-sword-sharp2" deduct-tools="false">
+    <action>
+        <sound key="random.anvil_use" volume=".3" pitch="1.1"/>
+        <message text="`e`l▲ `6Sword upgraded to `e`lIron (Sharp II)`r"/>
+        <set var="sword_variable" value="1"/>
+        <replace-item ignore-metadata="true">
+            <find material="stone sword"/>
+            <replace material="air"/>
+        </replace-item>
+    </action>
+    <item material="iron sword" unbreakable="true" enchantment="sharpness:2"/>
+</kit>
+<kit id="diamond-sword-sharp2" deduct-tools="false">
+    <action>
+        <sound key="random.anvil_use" volume=".3" pitch="1.1"/>
+        <message text="`e`l▲ `6Sword upgraded to `e`lDiamond (Sharp II)`r"/>
+        <set var="sword_variable" value="2"/>
+        <replace-item ignore-metadata="true">
+            <find material="iron sword"/>
+            <replace material="air"/>
+        </replace-item>
+    </action>
+    <item material="diamond sword" unbreakable="true" enchantment="sharpness:2"/>
+</kit>
+<!-- Armor Upgrades -->
+<kit id="leather-armor-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="leather leggings" team-color="true"/>
+    <boots unbreakable="true" locked="true" material="leather boots" team-color="true"/>
+</kit>
+<kit id="leather-prot1-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="leather leggings" enchantment="protection:1" team-color="true"/>
+    <boots unbreakable="true" locked="true" material="leather boots" enchantment="protection:1" team-color="true"/>
+</kit>
+<kit id="leather-prot2-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="leather leggings" enchantment="protection:2" team-color="true"/>
+    <boots unbreakable="true" locked="true" material="leather boots" enchantment="protection:2" team-color="true"/>
+</kit>
+<kit id="leather-prot3-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="leather leggings" enchantment="protection:3" team-color="true"/>
+    <boots unbreakable="true" locked="true" material="leather boots" enchantment="protection:3" team-color="true"/>
+</kit>
+<kit id="leather-prot4-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="leather leggings" enchantment="protection:4" team-color="true"/>
+    <boots unbreakable="true" locked="true" material="leather boots" enchantment="protection:4" team-color="true"/>
+</kit>
+<kit id="chainmail-armor-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="chainmail leggings"/>
+    <boots unbreakable="true" locked="true" material="chainmail boots"/>
+</kit>
+<kit id="chainmail-prot1-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="chainmail leggings" enchantment="protection:1"/>
+    <boots unbreakable="true" locked="true" material="chainmail boots" enchantment="protection:1"/>
+</kit>
+<kit id="chainmail-prot2-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="chainmail leggings" enchantment="protection:2"/>
+    <boots unbreakable="true" locked="true" material="chainmail boots" enchantment="protection:2"/>
+</kit>
+<kit id="chainmail-prot3-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="chainmail leggings" enchantment="protection:3"/>
+    <boots unbreakable="true" locked="true" material="chainmail boots" enchantment="protection:3"/>
+</kit>
+<kit id="chainmail-prot4-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="chainmail leggings" enchantment="protection:4"/>
+    <boots unbreakable="true" locked="true" material="chainmail boots" enchantment="protection:4"/>
+</kit>
+<kit id="iron-armor-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="iron leggings"/>
+    <boots unbreakable="true" locked="true" material="iron boots"/>
+</kit>
+<kit id="iron-prot1-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="iron leggings" enchantment="protection:1"/>
+    <boots unbreakable="true" locked="true" material="iron boots" enchantment="protection:1"/>
+</kit>
+<kit id="iron-prot2-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="iron leggings" enchantment="protection:2"/>
+    <boots unbreakable="true" locked="true" material="iron boots" enchantment="protection:2"/>
+</kit>
+<kit id="iron-prot3-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="iron leggings" enchantment="protection:3"/>
+    <boots unbreakable="true" locked="true" material="iron boots" enchantment="protection:3"/>
+</kit>
+<kit id="iron-prot4-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="iron leggings" enchantment="protection:4"/>
+    <boots unbreakable="true" locked="true" material="iron boots" enchantment="protection:4"/>
+</kit>
+<kit id="diamond-armor-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="diamond leggings"/>
+    <boots unbreakable="true" locked="true" material="diamond boots"/>
+</kit>
+<kit id="diamond-prot1-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="diamond leggings" enchantment="protection:1"/>
+    <boots unbreakable="true" locked="true" material="diamond boots" enchantment="protection:1"/>
+</kit>
+<kit id="diamond-prot2-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="diamond leggings" enchantment="protection:2"/>
+    <boots unbreakable="true" locked="true" material="diamond boots" enchantment="protection:2"/>
+</kit>
+<kit id="diamond-prot3-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="diamond leggings" enchantment="protection:3"/>
+    <boots unbreakable="true" locked="true" material="diamond boots" enchantment="protection:3"/>
+</kit>
+<kit id="diamond-prot4-kit" force="true">
+    <leggings unbreakable="true" locked="true" material="diamond leggings" enchantment="protection:4"/>
+    <boots unbreakable="true" locked="true" material="diamond boots" enchantment="protection:4"/>
+</kit>
+</kits>
+<spawns>
+<spawn team="green-team" kit="spawn-kit" yaw="90" region="green-spawn-point"/>
+<spawn team="red-team" kit="spawn-kit" yaw="-90" region="red-spawn-point"/>
+<default>
+    <regions>
+        <cuboid yaw="90" id="obs-spawn" min="135,66.1,-3" max="135,66.1,3"/>
+        <cuboid yaw="-90" id="obs-spawn-2" min="-134,66.1,-3" max="-134,66.1,3"/>
+    </regions>
+</default>
+</spawns>
+<broadcasts>
+<alert filter="only-green" after="2s">`r`7`lKon'nichiwa Samurai, defend the Green Apples and destroy the Red Apples.`r</alert>
+<alert filter="only-red" after="2s">`r`7`lKon'nichiwa Samurai, defend the Red Apples and destroy the Green Apples.`r</alert>
+<alert filter="only-green" after="20s">`r`7`lCollect Redstone and Emerald blocks for store upgrades.`r</alert>
+<alert filter="only-red" after="20s">`r`7`lCollect Emerald and Redstone blocks for store upgrades.`r</alert>
+<tip after="60s" every="3m">`r`7`lDiamond Chestplates from the center will last for your current life and 3 additional lives.`r</tip>
+<tip after="90s" every="3m" filter="only-green">`r`7`lPermanent diamond helmet awarded for collecting a monument block while on a Red Apple.`r</tip>
+<tip after="90s" every="3m" filter="only-red">`r`7`lPermanent diamond helmet awarded for collecting a monument block while on a Green Apple.`r</tip>
+<tip after="180s" every="3m">`r`7`lYour Apple cannot be repaired, but dropped blocks can buy upgrades in the store.`r</tip>
+<tip after="210s" every="3m">`r`7`lTNT awarded for every 4 kills, or buy TNT in the store.`r</tip>
+<tip after="720s">`r`7`lDid you know? "Ringo" is Japanese for Apple.`r</tip>
+<tip after="900s">`r`7`lDid you know? Fuji and Mutsu Apples are named after places in Japan.`r</tip>
+</broadcasts>
+<shopkeepers name="`2`lPlayer Upgrades" shop="red-player-shop"> <!-- On Left -->
+    <shopkeeper mob="Villager" yaw="90">-134.5,52,-7.5</shopkeeper> <!-- Red -->
+</shopkeepers>
+<shopkeepers name="`4`lTeam Upgrades" shop="red-team-shop"> <!-- On Right -->
+    <shopkeeper mob="Villager" yaw="90">-134.5,52,8.5</shopkeeper> <!-- Red -->
+</shopkeepers>
+<shopkeepers name="`4`lPlayer Upgrades" shop="green-player-shop"> <!-- On Left -->
+    <shopkeeper mob="Villager" yaw="270">135.5,52,8.5</shopkeeper> <!-- Green -->
+</shopkeepers>
+<shopkeepers name="`2`lTeam Upgrades" shop="green-team-shop"> <!-- On Right -->
+    <shopkeeper mob="Villager" yaw="270">135.5,52,-7.5</shopkeeper> <!-- Green -->
+</shopkeepers>
+<actions>
+    <action id="song" scope="match" expose="true"> <!-- for command line exposure only -->
+        <set var="intro_variable" value="17"/> <!-- restarts the intro melody -->
+    </action>
+    <trigger filter="leather-prot-0" trigger="leather-armor-kit" scope="player"/>
+    <trigger filter="leather-prot-1" trigger="leather-prot1-kit" scope="player"/>
+    <trigger filter="leather-prot-2" trigger="leather-prot2-kit" scope="player"/>
+    <trigger filter="leather-prot-3" trigger="leather-prot3-kit" scope="player"/>
+    <trigger filter="leather-prot-4" trigger="leather-prot4-kit" scope="player"/>
+    <trigger filter="chainmail-prot-0" trigger="chainmail-armor-kit" scope="player"/>
+    <trigger filter="iron-prot-0" trigger="iron-armor-kit" scope="player"/>
+    <trigger filter="diamond-prot-0" trigger="diamond-armor-kit" scope="player"/>
+    <trigger filter="chainmail-prot-1" trigger="chainmail-prot1-kit" scope="player"/>
+    <trigger filter="iron-prot-1" trigger="iron-prot1-kit" scope="player"/>
+    <trigger filter="diamond-prot-1" trigger="diamond-prot1-kit" scope="player"/>
+    <trigger filter="chainmail-prot-2" trigger="chainmail-prot2-kit" scope="player"/>
+    <trigger filter="iron-prot-2" trigger="iron-prot2-kit" scope="player"/>
+    <trigger filter="diamond-prot-2" trigger="diamond-prot2-kit" scope="player"/>
+    <trigger filter="chainmail-prot-3" trigger="chainmail-prot3-kit" scope="player"/>
+    <trigger filter="iron-prot-3" trigger="iron-prot3-kit" scope="player"/>
+    <trigger filter="diamond-prot-3" trigger="diamond-prot3-kit" scope="player"/>
+    <trigger filter="chainmail-prot-4" trigger="chainmail-prot4-kit" scope="player"/>
+    <trigger filter="iron-prot-4" trigger="iron-prot4-kit" scope="player"/>
+    <trigger filter="diamond-prot-4" trigger="diamond-prot4-kit" scope="player"/>
+    <!-- Player Vanity Hat -->
+    <action id="vanity-hat-action" scope="player">
+        <kit force="true" filter="always">
+            <helmet material="diamond helmet" unbreakable="true" name="Diamond Apple Smasher" lore="Permanent vanity cap, no cap.||`6`oApple Smashers Only"/>
+        </kit>
+        <sound key="random.levelup" volume="1" pitch="1"/>
+        <sound key="item.armor.equip_diamond" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_diamond" pitch=".9" volume="1"/>
+        <sound key="item.armor.equip_diamond" pitch=".95" volume="1"/>
+        <message text="`e`l▲ `bYou got a permanent `lDiamond Helmet`r`b upgrade!`r"/>
+        <set var="vanity_hat_variable" value="1"/>
+    </action>
+    <action id="helmet-replacement" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="leather helmet"/>
+            <replace material="diamond helmet" unbreakable="true" name="Diamond Apple Smasher" lore="Permanent vanity cap, no cap.||`6`oApple Smashers Only"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron helmet"/>
+            <replace material="diamond helmet" unbreakable="true" name="Diamond Apple Smasher" lore="Permanent vanity cap, no cap.||`6`oApple Smashers Only"/>
+        </replace-item>
+    </action>
+    <trigger filter="helmet-replacement-filter" trigger="helmet-replacement" scope="player"/>
+    <!-- Player Diamond Chestplate -->
+    <action id="chestplate-holding-action" scope="player">
+        <sound key="item.armor.equip_diamond" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_diamond" pitch=".9" volume="1"/>
+        <sound key="item.armor.equip_diamond" pitch=".8" volume="1"/>
+        <message text="`e`l▲ `6Your diamond chestplate will last 4 lives!`r"/>
+        <set var="vanity_chestplate_variable" value="1"/>
+        <set var="vanity_chestplate_life_variable" value="4"/>
+        <replace-item ignore-metadata="true">
+            <find material="diamond chestplate"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <chestplate material="diamond chestplate" lore="`7Curse of Binding" enchantment="blast_protection" unbreakable="true" locked="true"/>
+        </kit>
+    </action>
+    <trigger filter="chestplate-holding" trigger="chestplate-holding-action" scope="player"/>
+    <action id="chestplate-hoarding-action" scope="player">
+        <sound key="note.pling" pitch=".891" volume="1"/>
+        <message text="`e`l▲ `6One diamond chestplate per player, extra item removed!`r"/>
+        <replace-item ignore-metadata="true">
+            <find material="diamond chestplate"/>
+            <replace material="air"/>
+        </replace-item>
+        <!-- replace chestplate, since we just deleted everything -->
+        <kit force="true" filter="always">
+            <chestplate material="diamond chestplate" lore="`7Curse of Binding" enchantment="blast_protection" unbreakable="true" locked="true"/>
+        </kit>
+        <set var="chestplate_check_variable" value="1"/>
+    </action>
+    <action id="chestplate-check-reset-action" scope="player">
+        <set var="chestplate_check_variable" value="0"/> <!-- jiggle the filter so it will fire again, if needed -->
+    </action>
+    <trigger filter="chestplate-hoarding" trigger="chestplate-hoarding-action" scope="player"/>
+    <trigger filter="chestplate-check-reset" trigger="chestplate-check-reset-action" scope="player"/>
+    <!-- Diamond Chestplate runs out of lives -->
+    <action id="vanity-chestplate-done-action" scope="player">
+        <sound key="random.break" pitch="1" volume="1"/>
+        <sound key="random.break" pitch=".9" volume=".5"/>
+        <message text="`e`l▼ `6Your diamond chestplate has expired!`r"/>
+        <set var="vanity_chestplate_variable" value="0"/>
+        <set var="vanity_chestplate_life_variable" value="0"/>
+    </action>
+    <trigger filter="vanity-chestplate-done" trigger="vanity-chestplate-done-action" scope="player"/>
+    <!-- Copious code related to handling event of picking up self/enemy monument blocks (sounds, etc) -->
+    <!-- Since objects can only be filtered as "X or more items", we must process from largest to smallest bucket size
+           There are 4 buckets: 1, 2, 3 and 4+. Smaller buckets support stacking/inventory management, 4+ for everything else
+           The purpose of the state machines are to provide a fixed order for processing buckets: 4+, 3, 2, 1
+           There is 1 state machine for each of the 4 types of block conversions needed, since independent processing is required:
+               Pickup vanilla My Monument Block      -> My Recovered block
+               Pickup Stolen My Monument Block       -> My Recovered block
+               Pickup vanilla Their Monument Block   -> Their Stolen block
+               Pickup Recovered Their Monument Block -> Their Stolen block 
+           When 1+ blocks picked-up, the state machine fires.  At each step, another filter decides if bucket processing needed.
+    -->
+    <!-- State Machine 1 Red -->
+    <action id="pickup-red-action-by-red-state-0" scope="player">
+        <set var="pickup_state1" value="1"/>
+    </action>
+    <trigger filter="pickup-red-filter-by-red-state-0" action="pickup-red-action-by-red-state-0" scope="player"/>
+    <action id="pickup-red-action-by-red-state-1" scope="player">
+        <set var="pickup_state1" value="2"/>
+    </action>
+    <trigger filter="pickup-red-filter-by-red-state-1" action="pickup-red-action-by-red-state-1" scope="player"/>
+    <action id="pickup-red-action-by-red-state-2" scope="player">
+        <set var="pickup_state1" value="3"/>
+    </action>
+    <trigger filter="pickup-red-filter-by-red-state-2" action="pickup-red-action-by-red-state-2" scope="player"/>
+    <action id="pickup-red-action-by-red-state-3" scope="player">
+        <set var="pickup_state1" value="0"/>
+    </action>
+    <trigger filter="pickup-red-filter-by-red-state-3" action="pickup-red-action-by-red-state-3" scope="player"/>
+    <!-- State Machine 2 Red -->
+    <action id="pickup-red2-action-by-red-state-0" scope="player">
+        <set var="pickup_state2" value="1"/>
+    </action>
+    <trigger filter="pickup-red2-filter-by-red-state-0" action="pickup-red2-action-by-red-state-0" scope="player"/>
+    <action id="pickup-red2-action-by-red-state-1" scope="player">
+        <set var="pickup_state2" value="2"/>
+    </action>
+    <trigger filter="pickup-red2-filter-by-red-state-1" action="pickup-red2-action-by-red-state-1" scope="player"/>
+    <action id="pickup-red2-action-by-red-state-2" scope="player">
+        <set var="pickup_state2" value="3"/>
+    </action>
+    <trigger filter="pickup-red2-filter-by-red-state-2" action="pickup-red2-action-by-red-state-2" scope="player"/>
+    <action id="pickup-red2-action-by-red-state-3" scope="player">
+        <set var="pickup_state2" value="0"/>
+    </action>
+    <trigger filter="pickup-red2-filter-by-red-state-3" action="pickup-red2-action-by-red-state-3" scope="player"/>
+    <!-- State Machine 3 Red -->
+    <action id="pickup-green-action-by-red-state-0" scope="player">
+        <set var="pickup_state3" value="1"/>
+    </action>
+    <trigger filter="pickup-green-filter-by-red-state-0" action="pickup-green-action-by-red-state-0" scope="player"/>
+    <action id="pickup-green-action-by-red-state-1" scope="player">
+        <set var="pickup_state3" value="2"/>
+    </action>
+    <trigger filter="pickup-green-filter-by-red-state-1" action="pickup-green-action-by-red-state-1" scope="player"/>
+    <action id="pickup-green-action-by-red-state-2" scope="player">
+        <set var="pickup_state3" value="3"/>
+    </action>
+    <trigger filter="pickup-green-filter-by-red-state-2" action="pickup-green-action-by-red-state-2" scope="player"/>
+    <action id="pickup-green-action-by-red-state-3" scope="player">
+        <set var="pickup_state3" value="0"/>
+    </action>
+    <trigger filter="pickup-green-filter-by-red-state-3" action="pickup-green-action-by-red-state-3" scope="player"/>
+    <!-- State Machine 4 Red -->
+    <action id="pickup-green2-action-by-red-state-0" scope="player">
+        <set var="pickup_state4" value="1"/>
+    </action>
+    <trigger filter="pickup-green2-filter-by-red-state-0" action="pickup-green2-action-by-red-state-0" scope="player"/>
+    <action id="pickup-green2-action-by-red-state-1" scope="player">
+        <set var="pickup_state4" value="2"/>
+    </action>
+    <trigger filter="pickup-green2-filter-by-red-state-1" action="pickup-green2-action-by-red-state-1" scope="player"/>
+    <action id="pickup-green2-action-by-red-state-2" scope="player">
+        <set var="pickup_state4" value="3"/>
+    </action>
+    <trigger filter="pickup-green2-filter-by-red-state-2" action="pickup-green2-action-by-red-state-2" scope="player"/>
+    <action id="pickup-green2-action-by-red-state-3" scope="player">
+        <set var="pickup_state4" value="0"/>
+    </action>
+    <trigger filter="pickup-green2-filter-by-red-state-3" action="pickup-green2-action-by-red-state-3" scope="player"/>
+    <!-- State Machine 1 Green -->
+    <action id="pickup-red-action-by-green-state-0" scope="player">
+        <set var="pickup_state3" value="1"/>
+    </action>
+    <trigger filter="pickup-red-filter-by-green-state-0" action="pickup-red-action-by-green-state-0" scope="player"/>
+    <action id="pickup-red-action-by-green-state-1" scope="player">
+        <set var="pickup_state3" value="2"/>
+    </action>
+    <trigger filter="pickup-red-filter-by-green-state-1" action="pickup-red-action-by-green-state-1" scope="player"/>
+    <action id="pickup-red-action-by-green-state-2" scope="player">
+        <set var="pickup_state3" value="3"/>
+    </action>
+    <trigger filter="pickup-red-filter-by-green-state-2" action="pickup-red-action-by-green-state-2" scope="player"/>
+    <action id="pickup-red-action-by-green-state-3" scope="player">
+        <set var="pickup_state3" value="0"/>
+    </action>
+    <trigger filter="pickup-red-filter-by-green-state-3" action="pickup-red-action-by-green-state-3" scope="player"/>
+    <!-- State Machine 2 Green -->
+    <action id="pickup-red2-action-by-green-state-0" scope="player">
+        <set var="pickup_state4" value="1"/>
+    </action>
+    <trigger filter="pickup-red2-filter-by-green-state-0" action="pickup-red2-action-by-green-state-0" scope="player"/>
+    <action id="pickup-red2-action-by-green-state-1" scope="player">
+        <set var="pickup_state4" value="2"/>
+    </action>
+    <trigger filter="pickup-red2-filter-by-green-state-1" action="pickup-red2-action-by-green-state-1" scope="player"/>
+    <action id="pickup-red2-action-by-green-state-2" scope="player">
+        <set var="pickup_state4" value="3"/>
+    </action>
+    <trigger filter="pickup-red2-filter-by-green-state-2" action="pickup-red2-action-by-green-state-2" scope="player"/>
+    <action id="pickup-red2-action-by-green-state-3" scope="player">
+        <set var="pickup_state4" value="0"/>
+    </action>
+    <trigger filter="pickup-red2-filter-by-green-state-3" action="pickup-red2-action-by-green-state-3" scope="player"/>
+    <!-- State Machine 3 Green -->
+    <action id="pickup-green-action-by-green-state-0" scope="player">
+        <set var="pickup_state1" value="1"/>
+    </action>
+    <trigger filter="pickup-green-filter-by-green-state-0" action="pickup-green-action-by-green-state-0" scope="player"/>
+    <action id="pickup-green-action-by-green-state-1" scope="player">
+        <set var="pickup_state1" value="2"/>
+    </action>
+    <trigger filter="pickup-green-filter-by-green-state-1" action="pickup-green-action-by-green-state-1" scope="player"/>
+    <action id="pickup-green-action-by-green-state-2" scope="player">
+        <set var="pickup_state1" value="3"/>
+    </action>
+    <trigger filter="pickup-green-filter-by-green-state-2" action="pickup-green-action-by-green-state-2" scope="player"/>
+    <action id="pickup-green-action-by-green-state-3" scope="player">
+        <set var="pickup_state1" value="0"/>
+    </action>
+    <trigger filter="pickup-green-filter-by-green-state-3" action="pickup-green-action-by-green-state-3" scope="player"/>
+    <!-- State Machine 4 Green -->
+    <action id="pickup-green2-action-by-green-state-0" scope="player">
+        <set var="pickup_state2" value="1"/>
+    </action>
+    <trigger filter="pickup-green2-filter-by-green-state-0" action="pickup-green2-action-by-green-state-0" scope="player"/>
+    <action id="pickup-green2-action-by-green-state-1" scope="player">
+        <set var="pickup_state2" value="2"/>
+    </action>
+    <trigger filter="pickup-green2-filter-by-green-state-1" action="pickup-green2-action-by-green-state-1" scope="player"/>
+    <action id="pickup-green2-action-by-green-state-2" scope="player">
+        <set var="pickup_state2" value="3"/>
+    </action>
+    <trigger filter="pickup-green2-filter-by-green-state-2" action="pickup-green2-action-by-green-state-2" scope="player"/>
+    <action id="pickup-green2-action-by-green-state-3" scope="player">
+        <set var="pickup_state2" value="0"/>
+    </action>
+    <trigger filter="pickup-green2-filter-by-green-state-3" action="pickup-green2-action-by-green-state-3" scope="player"/>
+    <!-- BY RED -->
+    <!-- Red picks up plain redstone -->
+    <action id="pickup-red-action-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
+        <replace-item ignore-metadata="false" keep-amount="true">
+            <find material="redstone block"/>
+            <replace material="redstone block" name="Red Recovered block"/>
+        </replace-item>
+    </action>
+    <trigger filter="pickup-red-filter-by-red" action="pickup-red-action-by-red" scope="player"/>
+    <action id="pickup-red-action-1-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="3">
+            <find material="redstone block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="redstone block" name="Red Recovered block" amount="3"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-red-filter-1-by-red" action="pickup-red-action-1-by-red" scope="player"/>
+    <action id="pickup-red-action-2-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="2">
+            <find material="redstone block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="redstone block" name="Red Recovered block" amount="2"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-red-filter-2-by-red" action="pickup-red-action-2-by-red" scope="player"/>
+    <action id="pickup-red-action-3-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="1">
+            <find material="redstone block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="redstone block" name="Red Recovered block" amount="1"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-red-filter-3-by-red" action="pickup-red-action-3-by-red" scope="player"/>
+    <!-- Red picks up stolen redstone -->
+    <action id="pickup-red2-action-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
+        <replace-item ignore-metadata="false" keep-amount="true">
+            <find material="redstone block" name="Red Stolen block"/>
+            <replace material="redstone block" name="Red Recovered block"/>
+        </replace-item>
+    </action>
+    <trigger filter="pickup-red2-filter-by-red" action="pickup-red2-action-by-red" scope="player"/>
+    <action id="pickup-red2-action-1-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="3">
+            <find material="redstone block" name="Red Stolen block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="redstone block" name="Red Recovered block" amount="3"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-red2-filter-1-by-red" action="pickup-red2-action-1-by-red" scope="player"/>
+    <action id="pickup-red2-action-2-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="2">
+            <find material="redstone block" name="Red Stolen block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="redstone block" name="Red Recovered block" amount="2"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-red2-filter-2-by-red" action="pickup-red2-action-2-by-red" scope="player"/>
+    <action id="pickup-red2-action-3-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="1">
+            <find material="redstone block" name="Red Stolen block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="redstone block" name="Red Recovered block" amount="1"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-red2-filter-3-by-red" action="pickup-red2-action-3-by-red" scope="player"/>
+    <!-- Red picks up vanilla emerald -->
+    <action id="pickup-green-action-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
+        <replace-item ignore-metadata="false" keep-amount="true">
+            <find material="emerald block"/>
+            <replace material="emerald block" name="Green Stolen block"/>
+        </replace-item>
+    </action>
+    <trigger filter="pickup-green-filter-by-red" action="pickup-green-action-by-red" scope="player"/>
+    <action id="pickup-green-action-1-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="3">
+            <find material="emerald block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="emerald block" name="Green Stolen block" amount="3"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-green-filter-1-by-red" action="pickup-green-action-1-by-red" scope="player"/>
+    <action id="pickup-green-action-2-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="2">
+            <find material="emerald block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="emerald block" name="Green Stolen block" amount="2"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-green-filter-2-by-red" action="pickup-green-action-2-by-red" scope="player"/>
+    <action id="pickup-green-action-3-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="1">
+            <find material="emerald block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="emerald block" name="Green Stolen block" amount="1"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-green-filter-3-by-red" action="pickup-green-action-3-by-red" scope="player"/>
+    <!-- Red picks up recovered emerald -->
+    <action id="pickup-green2-action-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
+        <replace-item ignore-metadata="false" keep-amount="true">
+            <find material="emerald block" name="Green Recovered block"/>
+            <replace material="emerald block" name="Green Stolen block"/>
+        </replace-item>
+    </action>
+    <trigger filter="pickup-green2-filter-by-red" action="pickup-green2-action-by-red" scope="player"/>
+    <action id="pickup-green2-action-1-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="3">
+            <find material="emerald block" name="Green Recovered block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="emerald block" name="Green Stolen block" amount="3"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-green2-filter-1-by-red" action="pickup-green2-action-1-by-red" scope="player"/>
+    <action id="pickup-green2-action-2-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="2">
+            <find material="emerald block" name="Green Recovered block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="emerald block" name="Green Stolen block" amount="2"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-green2-filter-2-by-red" action="pickup-green2-action-2-by-red" scope="player"/>
+    <action id="pickup-green2-action-3-by-red" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="1">
+            <find material="emerald block" name="Green Recovered block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="emerald block" name="Green Stolen block" amount="1"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-green2-filter-3-by-red" action="pickup-green2-action-3-by-red" scope="player"/>
+    <!-- By GREEN -->
+    <!-- Green picks up plain emerald -->
+    <action id="pickup-green-action-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
+        <replace-item ignore-metadata="false" keep-amount="true">
+            <find material="emerald block"/>
+            <replace material="emerald block" name="Green Recovered block"/>
+        </replace-item>
+    </action>
+    <trigger filter="pickup-green-filter-by-green" action="pickup-green-action-by-green" scope="player"/>
+    <action id="pickup-green-action-1-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="3">
+            <find material="emerald block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="emerald block" name="Green Recovered block" amount="3"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-green-filter-1-by-green" action="pickup-green-action-1-by-green" scope="player"/>
+    <action id="pickup-green-action-2-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="2">
+            <find material="emerald block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="emerald block" name="Green Recovered block" amount="2"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-green-filter-2-by-green" action="pickup-green-action-2-by-green" scope="player"/>
+    <action id="pickup-green-action-3-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="1">
+            <find material="emerald block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="emerald block" name="Green Recovered block" amount="1"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-green-filter-3-by-green" action="pickup-green-action-3-by-green" scope="player"/>
+    <!-- Green picks up stolen emerald -->
+    <action id="pickup-green2-action-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
+        <replace-item ignore-metadata="false" keep-amount="true">
+            <find material="emerald block" name="Green Stolen block"/>
+            <replace material="emerald block" name="Green Recovered block"/>
+        </replace-item>
+    </action>
+    <trigger filter="pickup-green2-filter-by-green" action="pickup-green2-action-by-green" scope="player"/>
+    <action id="pickup-green2-action-1-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="3">
+            <find material="emerald block" name="Green Stolen block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="emerald block" name="Green Recovered block" amount="3"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-green2-filter-1-by-green" action="pickup-green2-action-1-by-green" scope="player"/>
+    <action id="pickup-green2-action-2-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="2">
+            <find material="emerald block" name="Green Stolen block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="emerald block" name="Green Recovered block" amount="2"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-green2-filter-2-by-green" action="pickup-green2-action-2-by-green" scope="player"/>
+    <action id="pickup-green2-action-3-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_green_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="1">
+            <find material="emerald block" name="Green Stolen block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="emerald block" name="Green Recovered block" amount="1"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-green2-filter-3-by-green" action="pickup-green2-action-3-by-green" scope="player"/>
+    <!-- Green picks up vanilla redstone -->
+    <action id="pickup-red-action-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
+        <replace-item ignore-metadata="false" keep-amount="true">
+            <find material="redstone block"/>
+            <replace material="redstone block" name="Red Stolen block"/>
+        </replace-item>
+    </action>
+    <trigger filter="pickup-red-filter-by-green" action="pickup-red-action-by-green" scope="player"/>
+    <action id="pickup-red-action-1-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="3">
+            <find material="redstone block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="redstone block" name="Red Stolen block" amount="3"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-red-filter-1-by-green" action="pickup-red-action-1-by-green" scope="player"/>
+    <action id="pickup-red-action-2-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="2">
+            <find material="redstone block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="redstone block" name="Red Stolen block" amount="2"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-red-filter-2-by-green" action="pickup-red-action-2-by-green" scope="player"/>
+    <action id="pickup-red-action-3-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="1">
+            <find material="redstone block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="redstone block" name="Red Stolen block" amount="1"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-red-filter-3-by-green" action="pickup-red-action-3-by-green" scope="player"/>
+    <!-- Green picks up recovered redstone -->
+    <action id="pickup-red2-action-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
+        <replace-item ignore-metadata="false" keep-amount="true">
+            <find material="redstone block" name="Red Recovered block"/>
+            <replace material="redstone block" name="Red Stolen block"/>
+        </replace-item>
+    </action>
+    <trigger filter="pickup-red2-filter-by-green" action="pickup-red2-action-by-green" scope="player"/>
+    <action id="pickup-red2-action-1-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="3">
+            <find material="redstone block" name="Red Recovered block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="redstone block" name="Red Stolen block" amount="3"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-red2-filter-1-by-green" action="pickup-red2-action-1-by-green" scope="player"/>
+    <action id="pickup-red2-action-2-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="2">
+            <find material="redstone block" name="Red Recovered block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="redstone block" name="Red Stolen block" amount="2"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-red2-filter-2-by-green" action="pickup-red2-action-2-by-green" scope="player"/>
+    <action id="pickup-red2-action-3-by-green" scope="player">
+        <sound key="random.levelup" volume=".9" pitch="1.2"/>
+        <set var="pickup_red_momentary_variable" value="1"/>
+        <replace-item ignore-metadata="false" amount="1">
+            <find material="redstone block" name="Red Recovered block"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="redstone block" name="Red Stolen block" amount="1"/>
+        </kit>
+    </action>
+    <trigger filter="pickup-red2-filter-3-by-green" action="pickup-red2-action-3-by-green" scope="player"/>
+    <!--
+         Pitch Guide:
+         0.5    F#      1      F#
+         0.53   G       1.059  G
+         0.561  G#      1.122  G#
+         0.595  A       1.189  A
+         0.63   A#      1.26   A#
+         0.667  B       1.335  B
+         0.707  C       1.414  C
+         0.749  C#      1.498  C#
+         0.794  D       1.587  D
+         0.841  D#      1.682  D#
+         0.891  E       1.782  E
+         0.944  F       1.888  F
+    -->
+    <!-- Four melodic sequences augment the game, using Hungarian/Japanese/Major style scales
+         - Game Intro - Theme-setting pentatonic with 4th harmonies for match
+         - Team Upgrade - Ascending rhythmic fanfare for team
+         - Picked up Their Monument Block - Ascending hungarian-minor fanfare for player
+         - Picked up My Monument Block - Descending hungarian-minor fanfare for player -->
+    <action id="red-pickup-red-action" scope="player">
+        <sound key="entity.firework.twinkle" volume="1" pitch="1.22"/>
+        <set var="pickup_me_variable" value="6"/>
+        <sound key="note.harp" volume=".5" pitch="1.122"/> <!-- g# (first note) -->
+        <message text="`e`l▲ `6Purchase `lteam upgrades`r`6 with Red blocks in the store!`r"/>
+    </action>
+    <trigger filter="red-pickup-red-filter" action="red-pickup-red-action" scope="player"/>
+    <action id="green-pickup-green-action" scope="player">
+        <sound key="entity.firework.twinkle" volume="1" pitch="1.22"/>
+        <sound key="note.harp" volume=".5" pitch="1.122"/> <!-- g# (first note) -->
+        <set var="pickup_me_variable" value="6"/>
+        <message text="`e`l▲ `6Purchase `lteam upgrades`r`6 with Green blocks in the store!`r"/>
+    </action>
+    <trigger filter="green-pickup-green-filter" action="green-pickup-green-action" scope="player"/>
+    <action id="red-pickup-green-action" scope="player">
+        <sound key="entity.firework.twinkle" volume="1" pitch="1.22"/>
+        <sound key="note.harp" volume=".5" pitch=".561"/> <!-- g# (first note) -->
+        <set var="pickup_them_variable" value="6"/>
+        <message text="`e`l▲ `6Take the Green block to store for `lplayer upgrades`r`6!`r"/>
+    </action>
+    <trigger filter="red-pickup-green-filter" action="red-pickup-green-action" scope="player"/>
+    <action id="green-pickup-red-action" scope="player">
+        <sound key="entity.firework.twinkle" volume="1" pitch="1.22"/>
+        <sound key="note.harp" volume=".5" pitch=".561"/> <!-- g# (first note) -->
+        <set var="pickup_them_variable" value="6"/>
+        <message text="`e`l▲ `6Take the Red block to store for `lplayer upgrades`r`6!`r"/>
+    </action>
+    <trigger filter="green-pickup-red-filter" action="green-pickup-red-action" scope="player"/>
+    <action id="pickup-red-momentary-action" scope="player">
+        <set var="pickup_red_momentary_variable" value="0"/>
+    </action>
+    <action id="pickup-green-momentary-action" scope="player">
+        <set var="pickup_green_momentary_variable" value="0"/>
+    </action>
+    <!-- ascending melody when picking up opposing team's monument block for first time -->
+    <!-- a c# d e f g# a -->
+    <action id="pickup-them-action-6" scope="player">
+        <sound key="note.harp" volume=".6" pitch=".595"/> <!-- a -->
+        <set var="pickup_them_variable" value="5"/>
+    </action>
+    <action id="pickup-them-action-5" scope="player">
+        <sound key="note.harp" volume=".6" pitch=".749"/> <!-- c# -->
+        <set var="pickup_them_variable" value="4"/>
+    </action>
+    <action id="pickup-them-action-4" scope="player">
+        <sound key="note.harp" volume=".7" pitch=".891"/> <!-- e -->
+        <set var="pickup_them_variable" value="3"/>
+    </action>
+    <action id="pickup-them-action-3" scope="player">
+        <sound key="note.harp" volume=".8" pitch=".944"/> <!-- f -->
+        <set var="pickup_them_variable" value="2"/>
+    </action>
+    <action id="pickup-them-action-2" scope="player">
+        <sound key="note.harp" volume=".9" pitch="1.122"/> <!-- g# -->
+        <sound key="note.bass" volume=".1" pitch=".4455"/>
+        <set var="pickup_them_variable" value="1"/>
+    </action>
+    <action id="pickup-them-action-1" scope="player">
+        <sound key="note.harp" volume="1" pitch="2.378"/>
+        <sound key="note.harp" volume="1" pitch="1.189"/> <!-- a (finish) -->
+        <sound key="note.bass" volume=".1" pitch=".595"/>
+        <set var="pickup_them_variable" value="99"/>
+    </action>
+    <!-- descending melody when picking up own team's monument block for first time -->
+    <!-- g# a e f d c# a -->
+    <action id="pickup-me-action-6" scope="player">
+        <sound key="note.harp" volume=".6" pitch="1.189"/> <!-- a -->
+        <set var="pickup_me_variable" value="5"/>
+    </action>
+    <action id="pickup-me-action-5" scope="player">
+        <sound key="note.harp" volume=".6" pitch=".891"/> <!-- e -->
+        <set var="pickup_me_variable" value="4"/>
+    </action>
+    <action id="pickup-me-action-4" scope="player">
+        <sound key="note.harp" volume=".7" pitch=".944"/> <!-- f -->
+        <set var="pickup_me_variable" value="3"/>
+    </action>
+    <action id="pickup-me-action-3" scope="player">
+        <sound key="note.harp" volume=".8" pitch=".794"/> <!-- d -->
+        <set var="pickup_me_variable" value="2"/>
+    </action>
+    <action id="pickup-me-action-2" scope="player">
+        <sound key="note.harp" volume=".9" pitch=".749"/> <!-- c# -->
+        <sound key="note.bass" volume=".1" pitch=".4455"/> <!-- e -->
+        <set var="pickup_me_variable" value="1"/>
+    </action>
+    <action id="pickup-me-action-1" scope="player">
+        <sound key="note.harp" volume="1" pitch="1.189"/> <!-- a (finish) -->
+        <sound key="note.bass" volume=".1" pitch=".595"/> <!-- a -->
+    </action>
+    <!-- short embellished melody when receiving team upgrade -->
+    <action id="upgrade-me-action-8" scope="player">
+        <sound key="note.harp" volume=".6" pitch="0.891"/> <!-- e -->
+        <sound key="note.bass" volume=".2" pitch=".891"/> <!-- e -->
+        <set var="upgrade_me_variable" value="7"/>
+    </action>
+    <action id="upgrade-me-action-7" scope="player">
+        <sound key="note.harp" volume=".6" pitch="1.782"/> <!-- e2 -->
+        <sound key="note.bass" volume=".2" pitch=".667"/> <!-- b -->
+        <set var="upgrade_me_variable" value="6"/>
+    </action>
+    <action id="upgrade-me-action-6" scope="player">
+        <sound key="note.harp" volume=".6" pitch="0.944"/> <!-- f -->
+        <sound key="note.bass" volume=".2" pitch="0.707"/> <!-- c -->
+        <set var="upgrade_me_variable" value="5"/>
+    </action>
+    <action id="upgrade-me-action-5" scope="player">
+        <sound key="note.harp" volume=".6" pitch="1.888"/> <!-- f2 -->
+        <sound key="note.bass" volume=".2" pitch="0.944"/> <!-- f -->
+        <set var="upgrade_me_variable" value="4"/>
+    </action>
+    <action id="upgrade-me-action-4" scope="player">
+        <sound key="note.harp" volume=".7" pitch="1.122"/> <!-- g# -->
+        <sound key="note.bass" volume=".2" pitch="0.561"/> <!-- g# -->
+        <set var="upgrade_me_variable" value="3"/>
+    </action>
+    <action id="upgrade-me-action-3" scope="player">
+        <sound key="note.harp" volume=".8" pitch="2.244"/> <!-- g#2 -->
+        <sound key="note.bass" volume=".2" pitch="0.891"/> <!-- g# -->
+        <set var="upgrade_me_variable" value="2"/>
+    </action>
+    <action id="upgrade-me-action-2" scope="player">
+        <sound key="note.harp" volume="1" pitch="2.378"/> <!-- a -->
+        <sound key="note.harp" volume="1" pitch="1.782"/> <!-- e -->
+        <sound key="note.harp" volume="1" pitch="1.189"/> <!-- a -->
+        <sound key="note.harp" volume=".9" pitch=".749"/> <!-- c# -->
+        <sound key="note.bass" volume=".2" pitch="0.749"/> <!-- c# -->
+        <sound key="note.harp" volume=".9" pitch=".595"/> <!-- a -->
+        <set var="upgrade_me_variable" value="1"/>
+    </action>
+    <action id="upgrade-me-action-1" scope="player">
+        <sound key="note.harp" volume=".9" pitch=".891"/> <!-- e -->
+        <sound key="note.harp" volume="1" pitch="1.189"/> <!-- a (finish) -->
+        <sound key="note.bass" volume=".2" pitch=".595"/> <!-- a -->
+        <set var="upgrade_me_variable" value="0"/>
+    </action>
+    <!-- Game Intro: a a# b c c# e f# e c# b a   b c# e c# g#2 a2 -->
+    <action id="intro-action-17" scope="match">
+        <sound key="note.pling" volume=".3" pitch="1.000"/> <!-- f# -->
+        <sound key="note.harp" volume="1" pitch="1.000"/> <!-- f# -->
+        <sound key="note.bass" volume=".2" pitch="1.000"/> <!-- f# -->
+        <sound key="note.harp" volume=".6" pitch="1.335"/> <!-- b -->
+        <sound key="random.orb" volume=".1" pitch="2"/>
+        <set var="intro_variable" value="16"/>
+    </action>
+    <action id="intro-action-16" scope="match">
+        <sound key="note.pling" volume=".2" pitch="1.782"/> <!-- e -->
+        <sound key="note.harp" volume="1" pitch="0.891"/> <!-- e -->
+        <sound key="note.bass" volume=".1" pitch="0.891"/> <!-- e -->
+        <sound key="note.harp" volume=".6" pitch="1.189"/> <!-- a -->
+        <sound key="random.orb" volume=".1" pitch="2"/>
+        <set var="intro_variable" value="15"/>
+    </action>
+    <action id="intro-action-15" scope="match">
+        <sound key="note.pling" volume=".2" pitch="1.498"/> <!-- c# -->
+        <sound key="note.harp" volume="1" pitch="0.749"/> <!-- c# -->
+        <sound key="note.bass" volume=".2" pitch="0.749"/> <!-- c# -->
+        <sound key="note.harp" volume=".6" pitch="1"/> <!-- f# -->
+        <sound key="random.orb" volume=".1" pitch="2"/>
+        <set var="intro_variable" value="14"/>
+    </action>
+    <action id="intro-action-14" scope="match">
+        <sound key="note.pling" volume=".2" pitch="1.414"/> <!-- c -->
+        <sound key="note.harp" volume=".9" pitch="0.707"/> <!-- c -->
+        <sound key="note.bass" volume=".1" pitch="0.707"/> <!-- c -->
+        <sound key="note.harp" volume=".4" pitch="1.414"/> <!-- c -->
+        <set var="intro_variable" value="13"/>
+    </action>
+    <action id="intro-action-13" scope="match">
+        <sound key="note.pling" volume=".3" pitch="1.498"/> <!-- c# -->
+        <sound key="note.harp" volume="1" pitch="0.749"/> <!-- c# -->
+        <sound key="note.bass" volume=".2" pitch="0.749"/> <!-- c# -->
+        <sound key="note.harp" volume=".5" pitch="1"/> <!-- f# -->
+        <set var="intro_variable" value="12"/>
+    </action>
+    <action id="intro-action-12" scope="match">
+        <sound key="note.pling" volume=".3" pitch="1.782"/> <!-- e -->
+        <sound key="note.harp" volume=".9" pitch="0.891"/> <!-- e -->
+        <sound key="note.bass" volume=".1" pitch="0.891"/> <!-- e -->
+        <sound key="note.harp" volume=".5" pitch="1.189"/> <!-- a -->
+        <sound key="random.orb" volume=".1" pitch="3"/>
+        <set var="intro_variable" value="11"/>
+    </action>
+    <action id="intro-action-11" scope="match">
+        <sound key="note.pling" volume=".3" pitch="1.000"/> <!-- f# -->
+        <sound key="note.harp" volume="1" pitch="1.000"/> <!-- f# -->
+        <sound key="note.bass" volume=".2" pitch="1.000"/> <!-- f# -->
+        <sound key="note.harp" volume=".6" pitch="1.335"/> <!-- b -->
+        <set var="intro_variable" value="10"/>
+    </action>
+    <action id="intro-action-10" scope="match">
+        <sound key="note.pling" volume=".2" pitch="1.782"/> <!-- e -->
+        <sound key="note.harp" volume="1" pitch="0.891"/> <!-- e -->
+        <sound key="note.bass" volume=".1" pitch="0.891"/> <!-- e -->
+        <sound key="note.harp" volume=".6" pitch="1.189"/> <!-- a -->
+        <set var="intro_variable" value="9"/>
+    </action>
+    <action id="intro-action-9" scope="match">
+        <sound key="note.pling" volume=".2" pitch="1.498"/> <!-- c# -->
+        <sound key="note.harp" volume="1" pitch="0.749"/> <!-- c# -->
+        <sound key="note.bass" volume=".2" pitch="0.749"/> <!-- c# -->
+        <sound key="note.harp" volume=".6" pitch="1"/> <!-- f# -->
+        <sound key="random.orb" volume=".1" pitch="2"/>
+        <set var="intro_variable" value="8"/>
+    </action>
+    <action id="intro-action-8" scope="match">
+        <sound key="note.pling" volume=".2" pitch="1.335"/> <!-- b -->
+        <sound key="note.harp" volume=".9" pitch="0.667"/> <!-- b -->
+        <sound key="note.bass" volume=".3" pitch="0.667"/> <!-- b -->
+        <sound key="note.harp" volume=".6" pitch="0.891"/> <!-- e -->
+        <sound key="random.orb" volume=".1" pitch="2"/>
+        <set var="intro_variable" value="7"/>
+    </action>
+    <action id="intro-action-7" scope="match">
+        <sound key="note.pling" volume=".3" pitch="1.189"/> <!-- a -->
+        <sound key="note.harp" volume="1" pitch="0.595"/> <!-- a -->
+        <sound key="note.bass" volume=".3" pitch="0.595"/> <!-- a -->
+        <sound key="note.harp" volume=".6" pitch="0.749"/> <!-- c# -->
+        <sound key="block.note.hat" volume=".5" pitch="3"/>
+        <sound key="random.orb" volume=".1" pitch="2"/>
+        <set var="intro_variable" value="6"/>
+    </action>
+    <action id="intro-action-6" scope="match">
+        <sound key="note.harp" volume=".9" pitch="0.667"/> <!-- b -->
+        <sound key="note.bass" volume=".2" pitch="0.667"/> <!-- b -->
+        <sound key="note.harp" volume=".6" pitch="0.891"/> <!-- e -->
+        <sound key="random.orb" volume=".1" pitch="2"/>
+        <set var="intro_variable" value="5"/>
+    </action>
+    <action id="intro-action-5" scope="match">
+        <sound key="note.harp" volume="1" pitch="0.749"/> <!-- c# -->
+        <sound key="note.bass" volume=".3" pitch="0.749"/> <!-- c# -->
+        <sound key="note.harp" volume=".6" pitch="1"/> <!-- f# -->
+        <sound key="random.orb" volume=".1" pitch="2"/>
+        <set var="intro_variable" value="4"/>
+    </action>
+    <action id="intro-action-4" scope="match">
+        <sound key="note.harp" volume=".9" pitch="0.891"/> <!-- e -->
+        <sound key="note.bass" volume=".3" pitch="0.891"/> <!-- e -->
+        <sound key="note.harp" volume=".6" pitch="1.189"/> <!-- a -->
+        <sound key="block.note.hat" volume=".2" pitch="4"/>
+        <sound key="random.orb" volume=".2" pitch="2"/>
+        <set var="intro_variable" value="3"/>
+    </action>
+    <action id="intro-action-3" scope="match">
+        <sound key="note.harp" volume="1" pitch="0.749"/> <!-- c# -->
+        <sound key="note.bass" volume=".3" pitch="0.595"/> <!-- a -->
+        <sound key="note.harp" volume=".6" pitch="1"/> <!-- f# -->
+        <sound key="block.note.hat" volume=".5" pitch="3"/>
+        <sound key="random.orb" volume=".2" pitch="2"/>
+        <set var="intro_variable" value="2"/>
+    </action>
+    <action id="intro-action-2" scope="match">
+        <sound key="note.harp" volume=".9" pitch="1.122"/> <!-- g# -->
+        <sound key="note.bass" volume=".3" pitch="0.891"/> <!-- e -->
+        <sound key="note.harp" volume=".6" pitch="0.891"/> <!-- e -->
+        <sound key="block.note.hat" volume=".2" pitch="1"/>
+        <sound key="block.note.hat" volume=".1" pitch="2"/>
+        <sound key="random.orb" volume=".1" pitch="2"/>
+        <set var="intro_variable" value="1"/>
+    </action>
+    <action id="intro-action-1" scope="match">
+        <sound key="note.harp" volume="1" pitch="1.189"/> <!-- a -->
+        <sound key="note.bass" volume=".4" pitch="0.595"/> <!-- a -->
+        <sound key="note.harp" volume=".6" pitch="0.891"/> <!-- e -->
+        <sound key="block.note.hat" volume=".5" pitch="3"/>
+        <sound key="block.note.snare" volume=".5" pitch="1"/>
+        <sound key="random.explode" volume=".1" pitch=".5"/>
+        <sound key="block.enchantment_table.use" volume=".6" pitch=".5"/>
+        <sound key="random.orb" volume=".2" pitch="2"/>
+        <sound key="entity.lightning.thunder" volume=".1" pitch="1"/>
+        <set var="intro_variable" value="0"/>
+    </action>
+    <trigger filter="intro-17" action="intro-action-17" scope="match"/>
+    <trigger filter="intro-16" action="intro-action-16" scope="match"/>
+    <trigger filter="intro-15" action="intro-action-15" scope="match"/>
+    <trigger filter="intro-14" action="intro-action-14" scope="match"/>
+    <trigger filter="intro-13" action="intro-action-13" scope="match"/>
+    <trigger filter="intro-12" action="intro-action-12" scope="match"/>
+    <trigger filter="intro-11" action="intro-action-11" scope="match"/>
+    <trigger filter="intro-10" action="intro-action-10" scope="match"/>
+    <trigger filter="intro-9" action="intro-action-9" scope="match"/>
+    <trigger filter="intro-8" action="intro-action-8" scope="match"/>
+    <trigger filter="intro-7" action="intro-action-7" scope="match"/>
+    <trigger filter="intro-6" action="intro-action-6" scope="match"/>
+    <trigger filter="intro-5" action="intro-action-5" scope="match"/>
+    <trigger filter="intro-4" action="intro-action-4" scope="match"/>
+    <trigger filter="intro-3" action="intro-action-3" scope="match"/>
+    <trigger filter="intro-2" action="intro-action-2" scope="match"/>
+    <trigger filter="intro-1" action="intro-action-1" scope="match"/>
+    <trigger filter="pickup-green-momentary" action="pickup-green-momentary-action" scope="player"/>
+    <trigger filter="pickup-red-momentary" action="pickup-red-momentary-action" scope="player"/>
+    <trigger filter="pickup-them-6" action="pickup-them-action-6" scope="player"/>
+    <trigger filter="pickup-them-5" action="pickup-them-action-5" scope="player"/>
+    <trigger filter="pickup-them-4" action="pickup-them-action-4" scope="player"/>
+    <trigger filter="pickup-them-3" action="pickup-them-action-3" scope="player"/>
+    <trigger filter="pickup-them-2" action="pickup-them-action-2" scope="player"/>
+    <trigger filter="pickup-them-1" action="pickup-them-action-1" scope="player"/>
+    <trigger filter="pickup-me-6" action="pickup-me-action-6" scope="player"/>
+    <trigger filter="pickup-me-5" action="pickup-me-action-5" scope="player"/>
+    <trigger filter="pickup-me-4" action="pickup-me-action-4" scope="player"/>
+    <trigger filter="pickup-me-3" action="pickup-me-action-3" scope="player"/>
+    <trigger filter="pickup-me-2" action="pickup-me-action-2" scope="player"/>
+    <trigger filter="pickup-me-1" action="pickup-me-action-1" scope="player"/>
+    <trigger filter="upgrade-me-8" action="upgrade-me-action-8" scope="player"/>
+    <trigger filter="upgrade-me-7" action="upgrade-me-action-7" scope="player"/>
+    <trigger filter="upgrade-me-6" action="upgrade-me-action-6" scope="player"/>
+    <trigger filter="upgrade-me-5" action="upgrade-me-action-5" scope="player"/>
+    <trigger filter="upgrade-me-4" action="upgrade-me-action-4" scope="player"/>
+    <trigger filter="upgrade-me-3" action="upgrade-me-action-3" scope="player"/>
+    <trigger filter="upgrade-me-2" action="upgrade-me-action-2" scope="player"/>
+    <trigger filter="upgrade-me-1" action="upgrade-me-action-1" scope="player"/>
+    <trigger filter="vanity-hat-filter" action="vanity-hat-action" scope="player"/>
+    <!-- Upgrade variables -->
+    <set id="haste-set-1" var="haste_variable" value="1" scope="player"/>
+    <set id="haste-set-2" var="haste_variable" value="2" scope="player"/>
+    <set id="sharpness-set-1" var="sharpness_variable" value="1" scope="player"/>
+    <set id="sharpness-set-2" var="sharpness_variable" value="2" scope="player"/>
+    <set id="protection-set-1" var="protection_variable" value="1" scope="player"/>
+    <set id="protection-set-2" var="protection_variable" value="2" scope="player"/>
+    <set id="protection-set-3" var="protection_variable" value="3" scope="player"/>
+    <set id="protection-set-4" var="protection_variable" value="4" scope="player"/>
+    <set id="axe-shovel-set-0" var="axe_shovel_variable" value="0" scope="player"/>
+    <set id="axe-shovel-set-1" var="axe_shovel_variable" value="1" scope="player"/>
+    <set id="axe-shovel-set-2" var="axe_shovel_variable" value="2" scope="player"/>
+    <set id="axe-shovel-set-3" var="axe_shovel_variable" value="3" scope="player"/>
+    <!-- Team upgrade: Shears -->
+    <action id="regen-set" scope="player">
+        <message text="`e`l▲ `6Your team now has `e`lRegeneration`6 around your monuments`r"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <set var="regen_variable" value="1"/>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+    <action id="shears-action" scope="player">
+        <message text="`e`l▲ `6Your team now has permanent `e`lShears`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="entity.sheep.shear" volume="1" pitch="1"/>
+        <set var="shears_variable" value="1"/>
+        <kit force="true" filter="always">
+            <item material="shears" unbreakable="true"/>
+        </kit>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+        <!-- Team upgrade: Iron Hat -->
+    <action id="iron-hat-action" scope="player">
+        <message text="`e`l▲ `6Your team now has permanent `e`lIron Helmet`r"/>
+        <sound key="item.armor.equip_iron" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_iron" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <set var="iron_hat_variable" value="1"/>
+        <replace-item ignore-metadata="true">
+            <find material="leather helmet"/>
+            <replace material="iron helmet" unbreakable="true"/>
+        </replace-item>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+    <!-- Team upgrade: Sharpness replacements -->
+    <action id="sharpness-replacements-1" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="stone sword"/>
+            <replace material="stone sword" unbreakable="true" enchantment="sharpness"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron sword"/>
+            <replace material="iron sword" unbreakable="true" enchantment="sharpness"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="diamond sword"/>
+            <replace material="diamond sword" unbreakable="true" enchantment="sharpness"/>
+        </replace-item>
+    </action>
+    <!-- Team upgrade: Sharpness 2 replacements -->
+    <action id="sharpness-replacements-2" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="stone sword"/>
+            <replace material="stone sword" unbreakable="true" enchantment="sharpness:2"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron sword"/>
+            <replace material="iron sword" unbreakable="true" enchantment="sharpness:2"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="diamond sword"/>
+            <replace material="diamond sword" unbreakable="true" enchantment="sharpness:2"/>
+        </replace-item>
+    </action>
+    <!-- Team upgrade: Protection replacements -->
+    <action id="protection-replacement-1" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="leather boots"/>
+            <replace material="leather boots" team-color="true" unbreakable="true" enchantment="protection:1"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="leather leggings"/>
+            <replace material="leather leggings" team-color="true" unbreakable="true" enchantment="protection:1"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="chainmail boots"/>
+            <replace material="chainmail boots" unbreakable="true" enchantment="protection:1"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="chainmail leggings"/>
+            <replace material="chainmail leggings" unbreakable="true" enchantment="protection:1"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron boots"/>
+            <replace material="iron boots" unbreakable="true" enchantment="protection:1"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron leggings"/>
+            <replace material="iron leggings" unbreakable="true" enchantment="protection:1"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="diamond boots"/>
+            <replace material="diamond boots" unbreakable="true" enchantment="protection:1"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="diamond leggings"/>
+            <replace material="diamond leggings" unbreakable="true" enchantment="protection:1"/>
+        </replace-item>
+    </action>
+    <action id="protection-replacement-2" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="leather boots"/>
+            <replace material="leather boots" unbreakable="true" team-color="true" enchantment="protection:2"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="leather leggings"/>
+            <replace material="leather leggings" unbreakable="true" team-color="true" enchantment="protection:2"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="chainmail boots"/>
+            <replace material="chainmail boots" unbreakable="true" enchantment="protection:2"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="chainmail leggings"/>
+            <replace material="chainmail leggings" unbreakable="true" enchantment="protection:2"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron boots"/>
+            <replace material="iron boots" unbreakable="true" enchantment="protection:2"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron leggings"/>
+            <replace material="iron leggings" unbreakable="true" enchantment="protection:2"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="diamond boots"/>
+            <replace material="diamond boots" unbreakable="true" enchantment="protection:2"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="diamond leggings"/>
+            <replace material="diamond leggings" unbreakable="true" enchantment="protection:2"/>
+        </replace-item>
+    </action>
+    <action id="protection-replacement-3" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="leather boots"/>
+            <replace material="leather boots" unbreakable="true" team-color="true" enchantment="protection:3"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="leather leggings"/>
+            <replace material="leather leggings" unbreakable="true" team-color="true" enchantment="protection:3"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="chainmail boots"/>
+            <replace material="chainmail boots" unbreakable="true" enchantment="protection:3"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="chainmail leggings"/>
+            <replace material="chainmail leggings" unbreakable="true" enchantment="protection:3"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron boots"/>
+            <replace material="iron boots" unbreakable="true" enchantment="protection:3"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron leggings"/>
+            <replace material="iron leggings" unbreakable="true" enchantment="protection:3"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="diamond boots"/>
+            <replace material="diamond boots" unbreakable="true" enchantment="protection:3"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="diamond leggings"/>
+            <replace material="diamond leggings" unbreakable="true" enchantment="protection:3"/>
+        </replace-item>
+    </action>
+    <action id="protection-replacement-4" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="leather boots"/>
+            <replace material="leather boots" unbreakable="true" team-color="true" enchantment="protection:4"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="leather leggings"/>
+            <replace material="leather leggings" unbreakable="true" team-color="true" enchantment="protection:4"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="chainmail boots"/>
+            <replace material="chainmail boots" unbreakable="true" enchantment="protection:4"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="chainmail leggings"/>
+            <replace material="chainmail leggings" unbreakable="true" enchantment="protection:4"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron boots"/>
+            <replace material="iron boots" unbreakable="true" enchantment="protection:4"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron leggings"/>
+            <replace material="iron leggings" unbreakable="true" enchantment="protection:4"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="diamond boots"/>
+            <replace material="diamond boots" unbreakable="true" enchantment="protection:4"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="diamond leggings"/>
+            <replace material="diamond leggings" unbreakable="true" enchantment="protection:4"/>
+        </replace-item>
+    </action>
+    <!-- Upgrade alerts -->
+    <action id="sharpness-alert-1" scope="player">
+        <message text="`e`l▲ `r`6Sword upgraded to `e`lSharpness I`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+    <trigger filter="sharpness-1" trigger="sharpness-alert-1" scope="player"/>
+    <action id="sharpness-alert-2" scope="player">
+        <message text="`e`l▲ `r`6Sword upgraded to `e`lSharpness II`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+    <trigger filter="sharpness-2" trigger="sharpness-alert-2" scope="player"/>
+    <action id="protection-alert-1" scope="player">
+        <message text="`e`l▲ `6Team armor upgraded to `e`lProtection I`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+    <trigger filter="protection-1" trigger="protection-alert-1" scope="player"/>
+    <action id="protection-alert-2" scope="player">
+        <message text="`e`l▲ `6Team armor upgraded to `e`lProtection II`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+    <trigger filter="protection-2" trigger="protection-alert-2" scope="player"/>
+    <action id="protection-alert-3" scope="player">
+        <message text="`e`l▲ `6Team armor upgraded to `e`lProtection III`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+    <trigger filter="protection-3" trigger="protection-alert-3" scope="player"/>
+    <action id="protection-alert-4" scope="player">
+        <message text="`e`l▲ `6Team armor upgraded to `e`lProtection IV`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+    <trigger filter="protection-4" trigger="protection-alert-4" scope="player"/>
+    <action id="haste-alert-1" scope="player">
+        <message text="`e`l▲ `6Your team now has `e`lHaste I`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+    <trigger filter="haste-1" trigger="haste-alert-1" scope="player"/>
+    <action id="haste-alert-2" scope="player">
+        <message text="`e`l▲ `6Your team now has `e`lHaste II`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+    <!-- Team upgrades: Blocks -->
+    <action id="block-boost-action-1" scope="player">
+        <set var="block_boost_variable" value="1"/>
+        <message text="`e`l▲ `6Team kit upgraded to `e`lBlock Boost I`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.stone.place" volume="1" pitch="1"/>
+        <kit force="true" filter="always" deduct-items="true">
+            <item material="log" amount="32"/>
+            <item material="smooth brick" amount="32"/>
+            <item material="wool" amount="32" team-color="true"/>
+        </kit>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+    <action id="block-boost-action-2" scope="player">
+        <set var="block_boost_variable" value="2"/>
+        <message text="`e`l▲ `6Team kit upgraded to `e`lBlock Boost II`r"/>
+        <sound key="random.orb" volume="1" pitch="1.1"/>
+        <sound key="block.stone.place" volume="1" pitch="1"/>
+        <kit force="true" filter="always" deduct-items="true">
+            <item material="log" amount="64"/>
+            <item material="smooth brick" amount="64"/>
+            <item material="wool" amount="64" team-color="true"/>
+        </kit>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+    </action>
+    <!-- Team upgrades: Enchantment triggers -->
+    <trigger filter="apply-sharpness-1" trigger="sharpness-replacements-1" scope="player"/>
+    <trigger filter="apply-sharpness-2" trigger="sharpness-replacements-2" scope="player"/>
+    <trigger filter="apply-protection-1" trigger="protection-replacement-1" scope="player"/>
+    <trigger filter="apply-protection-2" trigger="protection-replacement-2" scope="player"/>
+    <trigger filter="apply-protection-3" trigger="protection-replacement-3" scope="player"/>
+    <trigger filter="apply-protection-4" trigger="protection-replacement-4" scope="player"/>
+    <!-- Team upgrades: Axe/Shovel -->
+    <action id="axe-shovel-action-1" scope="player">
+        <set var="axe_shovel_variable" value="1"/>
+        <message text="`e`l▲ `6Axe and Shovel upgraded to `e`lIron`r"/>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <sound key="random.anvil_use" volume=".3" pitch="0.9"/>
+        <replace-item ignore-metadata="true">
+            <find material="stone axe"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="iron axe" unbreakable="true"/>
+        </kit>
+        <replace-item ignore-metadata="true">
+            <find material="stone spade"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="iron spade" unbreakable="true"/>
+        </kit>
+    </action>
+    <action id="axe-shovel-action-2" scope="player">
+        <set var="axe_shovel_variable" value="2"/>
+        <message text="`e`l▲ `6Axe and Shovel upgraded to `e`lDiamond`r"/>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <sound key="random.anvil_use" volume=".3" pitch="1.1"/>
+        <replace-item ignore-metadata="true">
+            <find material="iron axe"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="diamond axe" unbreakable="true"/>
+        </kit>
+        <replace-item ignore-metadata="true">
+            <find material="stone spade"/>
+            <replace material="air"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron spade"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="diamond spade" unbreakable="true"/>
+        </kit>
+    </action>
+    <action id="axe-shovel-action-3" scope="player">
+        <set var="axe_shovel_variable" value="3"/>
+        <message text="`e`l▲ `6Axe and Shovel upgraded to `e`lDiamond Efficiency I`r"/>
+        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <replace-item ignore-metadata="true">
+            <find material="diamond axe"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="diamond axe" enchantment="efficiency:1" unbreakable="true"/>
+        </kit>
+        <replace-item ignore-metadata="true">
+            <find material="diamond spade"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="diamond spade" enchantment="efficiency:1" unbreakable="true"/>
+        </kit>
+    </action>
+    <!-- Armor upgrades -->
+    <action id="chainmail-armor-0-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lChainmail`r"/>
+        <set var="armor_material_variable" value="2"/>
+        <sound key="item.armor.equip_chain" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_chain" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="chainmail leggings"/>
+            <boots unbreakable="true" locked="false" material="chainmail boots"/>
+        </kit>
+    </action>
+    <action id="iron-armor-0-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lIron`r"/>
+        <set var="armor_material_variable" value="3"/>
+        <sound key="item.armor.equip_iron" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_iron" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="iron leggings"/>
+            <boots unbreakable="true" locked="false" material="iron boots"/>
+        </kit>
+    </action>
+    <action id="diamond-armor-0-action" scope="player">
+        <set var="armor_material_variable" value="4"/>
+        <message text="`e`l▲ `6Armor upgraded to `e`lDiamond`r"/>
+        <sound key="item.armor.equip_diamond" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_diamond" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="diamond leggings"/>
+            <boots unbreakable="true" locked="false" material="diamond boots"/>
+        </kit>
+    </action>
+    <action id="leather-armor-1-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lLeather (Protection I)`r"/>
+        <set var="armor_material_variable" value="1"/>
+        <sound key="item.armor.equip_leather" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_leather" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="leather leggings" enchantment="protection:1"/>
+            <boots unbreakable="true" locked="false" material="leather boots" enchantment="protection:1"/>
+        </kit>
+    </action>
+    <action id="chainmail-armor-1-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lChainmail (Protection I)`r"/>
+        <set var="armor_material_variable" value="2"/>
+        <sound key="item.armor.equip_chain" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_chain" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="chainmail leggings" enchantment="protection:1"/>
+            <boots unbreakable="true" locked="false" material="chainmail boots" enchantment="protection:1"/>
+        </kit>
+    </action>
+    <action id="iron-armor-1-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lIron (Protection I)`r"/>
+        <set var="armor_material_variable" value="3"/>
+        <sound key="item.armor.equip_iron" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_iron" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="iron leggings" enchantment="protection:1"/>
+            <boots unbreakable="true" locked="false" material="iron boots" enchantment="protection:1"/>
+        </kit>
+    </action>
+    <action id="diamond-armor-1-action" scope="player">
+        <set var="armor_material_variable" value="4"/>
+        <message text="`e`l▲ `6Armor upgraded to `e`lDiamond (Protection I)`r"/>
+        <sound key="item.armor.equip_diamond" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_diamond" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="diamond leggings" enchantment="protection:1"/>
+            <boots unbreakable="true" locked="false" material="diamond boots" enchantment="protection:1"/>
+        </kit>
+    </action>
+    <action id="leather-armor-2-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lLeather (Protection II)`r"/>
+        <set var="armor_material_variable" value="1"/>
+        <sound key="item.armor.equip_leather" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_leather" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="leather leggings" enchantment="protection:2"/>
+            <boots unbreakable="true" locked="false" material="leather boots" enchantment="protection:2"/>
+        </kit>
+    </action>
+    <action id="chainmail-armor-2-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lChainmail (Protection II)`r"/>
+        <set var="armor_material_variable" value="2"/>
+        <sound key="item.armor.equip_chain" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_chain" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="chainmail leggings" enchantment="protection:2"/>
+            <boots unbreakable="true" locked="false" material="chainmail boots" enchantment="protection:2"/>
+        </kit>
+    </action>
+    <action id="iron-armor-2-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lIron (Protection II)`r"/>
+        <set var="armor_material_variable" value="3"/>
+        <sound key="item.armor.equip_iron" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_iron" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="iron leggings" enchantment="protection:2"/>
+            <boots unbreakable="true" locked="false" material="iron boots" enchantment="protection:2"/>
+        </kit>
+    </action>
+    <action id="diamond-armor-2-action" scope="player">
+        <set var="armor_material_variable" value="4"/>
+        <message text="`e`l▲ `6Armor upgraded to `e`lDiamond (Protection II)`r"/>
+        <sound key="item.armor.equip_diamond" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_diamond" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="diamond leggings" enchantment="protection:2"/>
+            <boots unbreakable="true" locked="false" material="diamond boots" enchantment="protection:2"/>
+        </kit>
+    </action>
+    <action id="leather-armor-3-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lLeather (Protection III)`r"/>
+        <set var="armor_material_variable" value="1"/>
+        <sound key="item.armor.equip_leather" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_leather" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="leather leggings" enchantment="protection:3"/>
+            <boots unbreakable="true" locked="false" material="leather boots" enchantment="protection:3"/>
+        </kit>
+    </action>
+    <action id="chainmail-armor-3-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lChainmail (Protection III)`r"/>
+        <set var="armor_material_variable" value="2"/>
+        <sound key="item.armor.equip_chain" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_chain" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="chainmail leggings" enchantment="protection:3"/>
+            <boots unbreakable="true" locked="false" material="chainmail boots" enchantment="protection:3"/>
+        </kit>
+    </action>
+    <action id="iron-armor-3-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lIron (Protection III)`r"/>
+        <set var="armor_material_variable" value="3"/>
+        <sound key="item.armor.equip_iron" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_iron" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="iron leggings" enchantment="protection:3"/>
+            <boots unbreakable="true" locked="false" material="iron boots" enchantment="protection:3"/>
+        </kit>
+    </action>
+    <action id="diamond-armor-3-action" scope="player">
+        <set var="armor_material_variable" value="4"/>
+        <message text="`e`l▲ `6Armor upgraded to `e`lDiamond (Protection III)`r"/>
+        <sound key="item.armor.equip_diamond" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_diamond" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="diamond leggings" enchantment="protection:3"/>
+            <boots unbreakable="true" locked="false" material="diamond boots" enchantment="protection:3"/>
+        </kit>
+    </action>
+    <action id="leather-armor-4-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lLeather (Protection IV)`r"/>
+        <set var="armor_material_variable" value="1"/>
+        <sound key="item.armor.equip_leather" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_leather" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="leather leggings" enchantment="protection:4"/>
+            <boots unbreakable="true" locked="false" material="leather boots" enchantment="protection:4"/>
+        </kit>
+    </action>
+    <action id="chainmail-armor-4-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lChainmail (Protection IV)`r"/>
+        <set var="armor_material_variable" value="2"/>
+        <sound key="item.armor.equip_chain" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_chain" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="chainmail leggings" enchantment="protection:4"/>
+            <boots unbreakable="true" locked="false" material="chainmail boots" enchantment="protection:4"/>
+        </kit>
+    </action>
+    <action id="iron-armor-4-action" scope="player">
+        <message text="`e`l▲ `6Armor upgraded to `e`lIron (Protection IV)`r"/>
+        <set var="armor_material_variable" value="3"/>
+        <sound key="item.armor.equip_iron" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_iron" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="iron leggings" enchantment="protection:4"/>
+            <boots unbreakable="true" locked="false" material="iron boots" enchantment="protection:4"/>
+        </kit>
+    </action>
+    <action id="diamond-armor-4-action" scope="player">
+        <set var="armor_material_variable" value="4"/>
+        <message text="`e`l▲ `6Armor upgraded to `e`lDiamond (Protection IV)`r"/>
+        <sound key="item.armor.equip_diamond" pitch="1" volume="1"/>
+        <sound key="item.armor.equip_diamond" pitch=".9" volume="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <kit force="true" filter="always">
+            <leggings unbreakable="true" locked="false" material="diamond leggings" enchantment="protection:4"/>
+            <boots unbreakable="true" locked="false" material="diamond boots" enchantment="protection:4"/>
+        </kit>
+    </action>
+    <!-- Pickaxe upgrades -->
+    <action id="pickaxe-1-action" scope="player">
+        <set var="pickaxe_variable" value="1"/>
+        <message text="`e`l▲ `6Pickaxe upgraded to `e`lDiamond`r"/>
+        <sound key="random.anvil_use" volume=".3" pitch="1.1"/>
+        <replace-item ignore-metadata="true">
+            <find material="iron pickaxe"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="diamond pickaxe" unbreakable="true"/>
+        </kit>
+    </action>
+    <action id="pickaxe-2-action" scope="player">
+        <set var="pickaxe_variable" value="2"/>
+        <message text="`e`l▲ `6Pickaxe upgraded to `e`lDiamond Efficiency I`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <replace-item ignore-metadata="true">
+            <find material="diamond pickaxe"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="diamond pickaxe" enchantment="efficiency:1" unbreakable="true"/>
+        </kit>
+    </action>
+    <action id="pickaxe-3-action" scope="player">
+        <set var="pickaxe_variable" value="3"/>
+        <message text="`e`l▲ `6Pickaxe upgraded to `e`lDiamond Efficiency III`r"/>
+                <sound key="random.anvil_use" volume=".3" pitch="1.1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <replace-item ignore-metadata="true">
+            <find material="diamond pickaxe" enchantment="efficiency:1"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="diamond pickaxe" enchantment="efficiency:3" unbreakable="true"/>
+        </kit>
+    </action>
+    <action id="pickaxe-4-action" scope="player">
+        <set var="pickaxe_variable" value="4"/>
+        <message text="`e`l▲ `6Pickaxe upgraded to `e`lDiamond Efficiency V`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <replace-item ignore-metadata="true">
+            <find material="diamond pickaxe" enchantment="efficiency:3"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="diamond pickaxe" enchantment="efficiency:5" unbreakable="true"/>
+        </kit>
+    </action>
+    <!-- Gapple upgrade -->
+    <action id="gapple-king-action" scope="player">
+        <set var="gapple_king_variable" value="1"/>
+        <message text="`e`l▲ `6Kit upgraded to `e`lGapple King`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="golden apple" amount="7"/>
+        </kit>
+    </action>
+    <!-- Bow upgrade -->
+    <action id="bow-action" scope="player">
+        <set var="bow_variable" value="1"/>
+        <message text="`e`l▲ `6Bow upgraded to `e`lPower I`r"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <replace-item ignore-metadata="true">
+            <find material="bow"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="bow" enchantment="power:1;infinity" unbreakable="true"/>
+        </kit>
+    </action>
+    <!-- Reset after Respawn: Part 2 (half a second after Part 1) -->
+    <action id="reset-stuff-part-2" scope="player">
+        <!-- Reset: Team Iron Helmet Upgrades -->
+        <kit force="true" filter="iron-hat-1">
+            <helmet material="iron helmet" enchantment="blast_protection" unbreakable="true"/>
+        </kit>
+        <!-- Reset: Player Diamond Helmet Upgrade -->
+        <kit force="true" filter="vanity-hat-1">
+            <helmet material="diamond helmet" unbreakable="true" name="Diamond Apple Smasher" lore="Permanent vanity cap, no cap.||`6`oApple Smashers Only"/>
+        </kit>
+        <!-- Reset: Player Diamond Chestplate (Limited Life) Upgrade -->
+        <kit force="true" filter="vanity-chestplate-1">
+            <chestplate material="diamond chestplate" lore="`7Curse of Binding" enchantment="blast_protection" unbreakable="true" locked="true"/>
+        </kit>
+        <set var="reset_phase_variable" value="2"/>
+    </action>
+    <trigger filter="respawn-reset-phase-1-done" trigger="reset-stuff-part-2" scope="player"/>
+    <action id="tnt-action" scope="player">
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="tnt" amount="1"/>
+        </kit>
+    </action>
+    <action id="god-apple-action" scope="player">
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="golden_apple" damage="1" amount="3"/> <!-- yes, that one -->
+        </kit>
+    </action>
+    <action id="knockback-apple-action" scope="player">
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="apple" name="Knockbapple II" enchantment="knockback:2" amount="1"/>
+        </kit>
+    </action>
+    <!-- Reset after Respawn: Part 1 -->
+    <action id="reset-stuff-part-1" scope="player">
+        <set var="vanity_chestplate_life_variable" value="vanity_chestplate_life_variable-1"/>
+        <!-- Reset: Shears Upgrades -->
+        <kit force="true" filter="shears-1">
+            <item material="shears" unbreakable="true"/>
+        </kit>
+        <!-- Reset: Axe/Shovel Upgrades -->
+        <kit force="true" filter="axe-shovel-1">
+            <item material="iron axe" unbreakable="true"/>
+            <item material="iron spade" unbreakable="true"/>
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="stone axe"/>
+                    <replace material="air"/>
+                </replace-item>
+                <replace-item ignore-metadata="true">
+                    <find material="stone spade"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+        </kit>
+        <kit force="true" filter="axe-shovel-2">
+            <item material="diamond axe" unbreakable="true"/>
+            <item material="diamond spade" unbreakable="true"/>
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="stone axe"/>
+                    <replace material="air"/>
+                </replace-item>
+                <replace-item ignore-metadata="true">
+                    <find material="stone spade"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+        </kit>
+        <kit force="true" filter="axe-shovel-3">
+            <item material="diamond axe" enchantment="efficiency:1" unbreakable="true"/>
+            <item material="diamond spade" enchantment="efficiency:1" unbreakable="true"/>
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="stone axe"/>
+                    <replace material="air"/>
+                </replace-item>
+                <replace-item ignore-metadata="true">
+                    <find material="stone spade"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+        </kit>
+        <!-- Reset: Hat Upgrades -->
+        <kit force="true" filter="iron-hat-1">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="leather helmet"/>
+                    <replace material="iron helmet" enchantment="blast_protection" unbreakable="true"/>
+                </replace-item>
+            </action>
+        </kit>
+        <!-- Reset: Sword Upgrades -->
+        <kit force="true" filter="iron-sword-0-sharp">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="stone sword"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+            <item material="iron sword" unbreakable="true"/>
+        </kit>
+        <kit force="true" filter="diamond-sword-0-sharp">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="stone sword"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+            <item material="diamond sword" unbreakable="true"/>
+        </kit>
+        <kit force="true" filter="iron-sword-1-sharp">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="stone sword"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+            <item material="iron sword" unbreakable="true" enchantment="sharpness"/>
+        </kit>
+        <kit force="true" filter="diamond-sword-1-sharp">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="stone sword"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+            <item material="diamond sword" unbreakable="true" enchantment="sharpness"/>
+        </kit>
+        <kit force="true" filter="iron-sword-2-sharp">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="stone sword"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+            <item material="iron sword" unbreakable="true" enchantment="sharpness:2"/>
+        </kit>
+        <kit force="true" filter="diamond-sword-2-sharp">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="stone sword"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+            <item material="diamond sword" unbreakable="true" enchantment="sharpness:2"/>
+        </kit>
+        <!-- Reset: Block Boost 1 Upgrade -->
+        <kit force="true" filter="block-boost-1">
+            <item material="log" amount="16"/>
+            <item material="smooth brick" amount="16"/>
+            <item material="wool" amount="16" team-color="true"/>
+        </kit>
+        <!-- Reset: Block Boost 2 Upgrade -->
+        <kit force="true" filter="block-boost-2">
+            <item material="log" amount="48"/>
+            <item material="smooth brick" amount="48"/>
+            <item material="wool" amount="48" team-color="true"/>
+        </kit>
+        <!-- Reset: Gapple Upgrade -->
+        <kit force="true" filter="gapple-king-1">
+            <item material="golden apple" amount="7"/> <!-- +1 already in inventory -->
+        </kit>
+        <!-- Reset: Bow Upgrades -->
+        <kit force="true" filter="bow-1">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="bow"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+            <item material="bow" enchantment="power:1;infinity" unbreakable="true"/>
+        </kit>
+        <!-- Reset: Pickaxe Upgrades -->
+        <kit force="true" filter="diamond-pickaxe-1">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="iron pickaxe"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+            <item material="diamond pickaxe" unbreakable="true"/>
+        </kit>
+        <kit force="true" filter="diamond-pickaxe-2">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="iron pickaxe"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+            <item material="diamond pickaxe" unbreakable="true" enchantment="efficiency:1"/>
+        </kit>
+        <kit force="true" filter="diamond-pickaxe-3">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="iron pickaxe"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+            <item material="diamond pickaxe" unbreakable="true" enchantment="efficiency:3"/>
+        </kit>
+        <kit force="true" filter="diamond-pickaxe-4">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find material="iron pickaxe"/>
+                    <replace material="air"/>
+                </replace-item>
+            </action>
+            <item material="diamond pickaxe" unbreakable="true" enchantment="efficiency:5"/>
+        </kit>
+        <set var="reset_phase_variable" value="1"/> <!-- triggers part 2 -->
+    </action>
+    <trigger filter="respawned" trigger="reset-stuff-part-1" scope="player"/>
+    <action id="dead-action" scope="player">
+        <set var="reset_phase_variable" value="0"/>
+    </action>
+    <trigger filter="dead" trigger="dead-action" scope="player"/>
+</actions>
+<variables>
+    <variable id="intro_variable" default="17" scope="match"/>
+    <variable id="reset_phase_variable" default="0" scope="player"/> <!-- 0=dead 1=phase1Done 2=phase2Done -->
+    <!-- pickup state: 0 -> 3 -> 2 -> 1 -> 0 -->
+    <variable id="pickup_state1" default="0" scope="player"/> <!-- red: vanilla to recovered -->
+    <variable id="pickup_state2" default="0" scope="player"/> <!-- red: stolen to recovered -->
+    <variable id="pickup_state3" default="0" scope="player"/> <!-- green: vanilla to stolen -->
+    <variable id="pickup_state4" default="0" scope="player"/> <!-- green: recovered to stolen -->
+    <!-- pickup redstone and emerald block variables for sounds and helmet upgrade -->
+    <variable id="pickup_green_momentary_variable" default="0" scope="player"/>
+    <variable id="pickup_red_momentary_variable" default="0" scope="player"/>
+    <variable id="pickup_them_variable" default="0" scope="player"/>
+    <variable id="pickup_me_variable" default="0" scope="player"/>
+    <variable id="pickup_theirs_variable" default="0" scope="player"/>
+    <variable id="upgrade_me_variable" default="0" scope="player"/>
+    <!-- player vanity upgrade -->
+    <variable id="vanity_hat_variable" default="0" scope="player"/>
+    <variable id="vanity_chestplate_variable" default="0" scope="player"/>
+    <variable id="vanity_chestplate_life_variable" default="0" scope="player"/>
+    <variable id="chestplate_check_variable" default="0" scope="player"/>
+    <!-- player store upgrade variables -->
+    <variable id="sword_variable" default="0" scope="player"/>
+    <variable id="armor_material_variable" default="1" scope="player"/> <!-- 1=leather 2=chain 3=iron 4=dia -->
+    <variable id="pickaxe_variable" default="0" scope="player"/>
+    <variable id="bow_variable" default="0" scope="player"/>
+    <variable id="gapple_king_variable" default="0" scope="player"/>
+    <!-- team store upgrade variables -->
+    <variable id="iron_hat_variable" default="0" scope="team"/>
+    <variable id="haste_variable" default="0" scope="team"/>
+    <variable id="regen_variable" default="0" scope="team"/>
+    <variable id="shears_variable" default="0" scope="team"/>
+    <variable id="axe_shovel_variable" default="0" scope="team"/>
+    <variable id="protection_variable" default="0" scope="team"/>
+    <variable id="sharpness_variable" default="0" scope="team"/>
+    <variable id="block_boost_variable" default="0" scope="team"/>
+</variables>
+<filters>
+    <team id="only-green">green-team</team>
+    <team id="only-red">red-team</team>
+    <alive id="respawned"/>
+    <dead id="dead"/>
+    <any id="block-break-void-filter">
+        <all>
+            <void/>
+        </all>
+        <not id="block-place-filter-void">
+            <void />
+        </not>
+    </any>
+    <after id="respawn-reset-phase-1-done" duration="0.1s">
+        <variable var="reset_phase_variable">1</variable>
+    </after>
+    <after id="pickup-green-momentary" duration="0.2s">
+        <variable var="pickup_green_momentary_variable">1</variable>
+    </after>
+    <after id="pickup-red-momentary" duration="0.2s">
+        <variable var="pickup_red_momentary_variable">1</variable>
+    </after>
+    <!-- Auto equip the diamond chestplate -->
+    <all id="chestplate-holding">
+        <not>
+            <wearing ignore-metadata="true">
+                <item material="diamond chestplate"/>
+            </wearing>
+        </not>
+        <carrying ignore-metadata="true">
+            <item material="diamond chestplate" amount="1"/> <!-- one or more -->
+        </carrying>
+    </all>
+    <!-- Auto remove extra chestplates from inventory -->
+    <all id="chestplate-hoarding"> 
+        <wearing ignore-metadata="true">
+            <item material="diamond chestplate"/>
+        </wearing>
+        <carrying ignore-metadata="true">
+            <item material="diamond chestplate" amount="1"/> <!-- one or more -->
+        </carrying>
+        <variable var="chestplate_check_variable">0</variable>
+    </all>
+    <after id="chestplate-check-reset" duration="2s">
+        <variable var="chestplate_check_variable">1</variable>
+    </after>
+    <!-- Chestplate life is depleted -->
+    <all id="vanity-chestplate-done">
+        <variable var="vanity_chestplate_variable">1</variable>
+        <variable var="vanity_chestplate_life_variable">0</variable>
+    </all>
+    <after id="intro-17" duration="4.0s">
+        <all>
+            <match-started/>
+            <variable var="intro_variable">17</variable>
+        </all>
+    </after>
+    <after id="intro-16" duration="0.6s">
+        <variable var="intro_variable">16</variable>
+    </after>
+    <after id="intro-15" duration="0.6">
+        <variable var="intro_variable">15</variable>
+    </after>
+    <after id="intro-14" duration="0.3s">
+        <variable var="intro_variable">14</variable>
+    </after>
+    <after id="intro-13" duration="0.15s">
+        <variable var="intro_variable">13</variable>
+    </after>
+    <after id="intro-12" duration="0.15s">
+        <variable var="intro_variable">12</variable>
+    </after>
+    <after id="intro-11" duration="0.15s">
+        <variable var="intro_variable">11</variable>
+    </after>
+    <after id="intro-10" duration="0.15s">
+        <variable var="intro_variable">10</variable>
+    </after>
+    <after id="intro-9" duration="0.1s">
+        <variable var="intro_variable">9</variable>
+    </after>
+    <after id="intro-8" duration="0.1s">
+        <variable var="intro_variable">8</variable>
+    </after>
+    <after id="intro-7" duration="0.1s">
+        <variable var="intro_variable">7</variable>
+    </after>
+    <after id="intro-6" duration="0.4s">
+        <variable var="intro_variable">6</variable>
+    </after>
+    <after id="intro-5" duration="0.15s">
+        <variable var="intro_variable">5</variable>
+    </after>
+    <after id="intro-4" duration="0.1s">
+        <variable var="intro_variable">4</variable>
+    </after>
+    <after id="intro-3" duration="0.15s">
+        <variable var="intro_variable">3</variable>
+    </after>
+    <after id="intro-2" duration="0.1s">
+        <variable var="intro_variable">2</variable>
+    </after>
+    <after id="intro-1" duration="0.1s">
+        <variable var="intro_variable">1</variable>
+    </after>
+    <!-- Filters that set the pace of the two "pickup" melodies -->
+    <after id="pickup-them-6" duration="0.3s">
+        <variable var="pickup_them_variable">6</variable>
+    </after>
+    <after id="pickup-them-5" duration="0.25s">
+        <variable var="pickup_them_variable">5</variable>
+    </after>
+    <after id="pickup-them-4" duration="0.22s">
+        <variable var="pickup_them_variable">4</variable>
+    </after>
+    <after id="pickup-them-3" duration="0.21s">
+        <variable var="pickup_them_variable">3</variable>
+    </after>
+    <after id="pickup-them-2" duration="0.2s">
+        <variable var="pickup_them_variable">2</variable>
+    </after>
+    <after id="pickup-them-1" duration="0.2s">
+        <variable var="pickup_them_variable">1</variable>
+    </after>
+    <after id="pickup-me-6" duration="0.3s">
+        <variable var="pickup_me_variable">6</variable>
+    </after>
+    <after id="pickup-me-5" duration="0.25s">
+        <variable var="pickup_me_variable">5</variable>
+    </after>
+    <after id="pickup-me-4" duration="0.22s">
+        <variable var="pickup_me_variable">4</variable>
+    </after>
+    <after id="pickup-me-3" duration="0.21s">
+        <variable var="pickup_me_variable">3</variable>
+    </after>
+    <after id="pickup-me-2" duration="0.2s">
+        <variable var="pickup_me_variable">2</variable>
+    </after>
+    <after id="pickup-me-1" duration="0.2s">
+        <variable var="pickup_me_variable">1</variable>
+    </after>
+    <after id="upgrade-me-8" duration="0.8s">
+        <variable var="upgrade_me_variable">8</variable>
+    </after>
+    <after id="upgrade-me-7" duration="0.21s">
+        <variable var="upgrade_me_variable">7</variable>
+    </after>
+    <after id="upgrade-me-6" duration="0.7s">
+        <variable var="upgrade_me_variable">6</variable>
+    </after>
+    <after id="upgrade-me-5" duration="0.2">
+        <variable var="upgrade_me_variable">5</variable>
+    </after>
+    <after id="upgrade-me-4" duration="0.6s">
+        <variable var="upgrade_me_variable">4</variable>
+    </after>
+    <after id="upgrade-me-3" duration="0.2">
+        <variable var="upgrade_me_variable">3</variable>
+    </after>
+    <after id="upgrade-me-2" duration="0.4s">
+        <variable var="upgrade_me_variable">2</variable>
+    </after>
+    <after id="upgrade-me-1" duration="0.1">
+        <variable var="upgrade_me_variable">1</variable>
+    </after>
+    <!-- Respawn Reset filters -->
+    <all id="stone-sword-0-sharp">
+        <variable var="sword_variable">0</variable>
+        <variable var="sharpness_variable">0</variable>
+    </all>
+    <all id="stone-sword-1-sharp">
+        <variable var="sword_variable">0</variable>
+        <variable var="sharpness_variable">1</variable>
+    </all>
+    <all id="stone-sword-2-sharp">
+        <variable var="sword_variable">0</variable>
+        <variable var="sharpness_variable">2</variable>
+    </all>
+    <all id="iron-sword-0-sharp">
+        <variable var="sword_variable">1</variable>
+        <variable var="sharpness_variable">0</variable>
+    </all>
+    <all id="iron-sword-1-sharp">
+        <variable var="sword_variable">1</variable>
+        <variable var="sharpness_variable">1</variable>
+    </all>
+    <all id="iron-sword-2-sharp">
+        <variable var="sword_variable">1</variable>
+        <variable var="sharpness_variable">2</variable>
+    </all>
+    <all id="diamond-sword-0-sharp">
+        <variable var="sword_variable">2</variable>
+        <variable var="sharpness_variable">0</variable>
+    </all>
+    <all id="diamond-sword-1-sharp">
+        <variable var="sword_variable">2</variable>
+        <variable var="sharpness_variable">1</variable>
+    </all>
+    <all id="diamond-sword-2-sharp">
+        <variable var="sword_variable">2</variable>
+        <variable var="sharpness_variable">2</variable>
+    </all>
+    <!-- Red State Machine filters -->
+    <all id="pickup-red-filter-by-red-state-0"> <!-- Red picks up plain redstone -->
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" amount="1"/> <!-- matches 1 or more -->
+        </carrying>
+        <variable var="pickup_state1">0</variable>
+    </all>
+    <after id="pickup-red-filter-by-red-state-1" duration="0.2">
+        <all>
+            <variable var="pickup_state1">1</variable>
+        </all>
+    </after>
+    <after id="pickup-red-filter-by-red-state-2" duration="0.2">
+        <all>
+            <variable var="pickup_state1">2</variable>
+        </all>
+    </after>
+    <after id="pickup-red-filter-by-red-state-3" duration="0.2">
+        <all>
+            <variable var="pickup_state1">3</variable>
+        </all>
+    </after>
+    <all id="pickup-red2-filter-by-red-state-0"> <!-- Red picks up stolen redstone -->
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" name="Red Stolen block" amount="1"/> <!-- matches 1 or more -->
+        </carrying>
+        <variable var="pickup_state2">0</variable>
+    </all>
+    <after id="pickup-red2-filter-by-red-state-1" duration="0.2">
+        <all>
+            <variable var="pickup_state2">1</variable>
+        </all>
+    </after>
+    <after id="pickup-red2-filter-by-red-state-2" duration="0.2">
+        <all>
+            <variable var="pickup_state2">2</variable>
+        </all>
+    </after>
+    <after id="pickup-red2-filter-by-red-state-3" duration="0.2">
+        <all>
+            <variable var="pickup_state2">3</variable>
+        </all>
+    </after>
+    <all id="pickup-green-filter-by-red-state-0"> <!-- Red picks up plain emerald -->
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" amount="1"/> <!-- matches 1 or more -->
+        </carrying>
+        <variable var="pickup_state3">0</variable>
+    </all>
+    <after id="pickup-green-filter-by-red-state-1" duration="0.2">
+        <all>
+            <variable var="pickup_state3">1</variable>
+        </all>
+    </after>
+    <after id="pickup-green-filter-by-red-state-2" duration="0.2">
+        <all>
+            <variable var="pickup_state3">2</variable>
+        </all>
+    </after>
+    <after id="pickup-green-filter-by-red-state-3" duration="0.2">
+        <all>
+            <variable var="pickup_state3">3</variable>
+        </all>
+    </after>
+    <all id="pickup-green2-filter-by-red-state-0"> <!-- Red picks up recovered emerald -->
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" name="Green Recovered block" amount="1"/> <!-- matches 1 or more -->
+        </carrying>
+        <variable var="pickup_state4">0</variable>
+    </all>
+    <after id="pickup-green2-filter-by-red-state-1" duration="0.2">
+        <all>
+            <variable var="pickup_state4">1</variable>
+        </all>
+    </after>
+    <after id="pickup-green2-filter-by-red-state-2" duration="0.2">
+        <all>
+            <variable var="pickup_state4">2</variable>
+        </all>
+    </after>
+    <after id="pickup-green2-filter-by-red-state-3" duration="0.2">
+        <all>
+            <variable var="pickup_state4">3</variable>
+        </all>
+    </after>
+    <!-- Green State Machine filters -->
+    <all id="pickup-red-filter-by-green-state-0"> <!-- Green picks up plain redstone -->
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" amount="1"/> <!-- matches 1 or more -->
+        </carrying>
+        <variable var="pickup_state3">0</variable>
+    </all>
+    <after id="pickup-red-filter-by-green-state-1" duration="0.2">
+        <all>
+            <variable var="pickup_state3">1</variable>
+        </all>
+    </after>
+    <after id="pickup-red-filter-by-green-state-2" duration="0.2">
+        <all>
+            <variable var="pickup_state3">2</variable>
+        </all>
+    </after>
+    <after id="pickup-red-filter-by-green-state-3" duration="0.2">
+        <all>
+            <variable var="pickup_state3">3</variable>
+        </all>
+    </after>
+    <all id="pickup-red2-filter-by-green-state-0"> <!-- Green picks up recovered redstone -->
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" name="Red Recovered block" amount="1"/> <!-- matches 1 or more -->
+        </carrying>
+        <variable var="pickup_state4">0</variable>
+    </all>
+    <after id="pickup-red2-filter-by-green-state-1" duration="0.2">
+        <all>
+            <variable var="pickup_state4">1</variable>
+        </all>
+    </after>
+    <after id="pickup-red2-filter-by-green-state-2" duration="0.2">
+        <all>
+            <variable var="pickup_state4">2</variable>
+        </all>
+    </after>
+    <after id="pickup-red2-filter-by-green-state-3" duration="0.2">
+        <all>
+            <variable var="pickup_state4">3</variable>
+        </all>
+    </after>
+    <all id="pickup-green-filter-by-green-state-0"> <!-- Green picks up plain emerald -->
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" amount="1"/> <!-- matches 1 or more -->
+        </carrying>
+        <variable var="pickup_state1">0</variable>
+    </all>
+    <after id="pickup-green-filter-by-green-state-1" duration="0.2">
+        <all>
+            <variable var="pickup_state1">1</variable>
+        </all>
+    </after>
+    <after id="pickup-green-filter-by-green-state-2" duration="0.2">
+        <all>
+            <variable var="pickup_state1">2</variable>
+        </all>
+    </after>
+    <after id="pickup-green-filter-by-green-state-3" duration="0.2">
+        <all>
+            <variable var="pickup_state1">3</variable>
+        </all>
+    </after>
+    <all id="pickup-green2-filter-by-green-state-0"> <!-- Green picks up stolen emerald -->
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" name="Green Stolen block" amount="1"/> <!-- matches 1 or more -->
+        </carrying>
+        <variable var="pickup_state2">0</variable>
+    </all>
+    <after id="pickup-green2-filter-by-green-state-1" duration="0.2">
+        <all>
+            <variable var="pickup_state2">1</variable>
+        </all>
+    </after>
+    <after id="pickup-green2-filter-by-green-state-2" duration="0.2">
+        <all>
+            <variable var="pickup_state2">2</variable>
+        </all>
+    </after>
+    <after id="pickup-green2-filter-by-green-state-3" duration="0.2">
+        <all>
+            <variable var="pickup_state2">3</variable>
+        </all>
+    </after>
+    <!-- Each type of pickup has 4 filters which use 2 different strategies -->
+    <!-- Red Pick-up Filters -->
+    <all id="pickup-red-filter-by-red"> <!-- Red picks up plain redstone -->
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" amount="4"/> <!-- matches 4 or more -->
+        </carrying>
+        <variable var="pickup_state1">0</variable>
+    </all>
+    <after id="pickup-red-filter-1-by-red" duration="0.1">
+    <all>
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" amount="3"/> <!-- matches 3 or more -->
+        </carrying>
+        <variable var="pickup_state1">1</variable>
+    </all>
+    </after>
+    <after id="pickup-red-filter-2-by-red" duration="0.1">
+    <all>
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" amount="2"/> <!-- matches 2 or more -->
+        </carrying>
+        <variable var="pickup_state1">2</variable>
+    </all>
+    </after>
+    <after id="pickup-red-filter-3-by-red" duration="0.1">
+    <all>
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" amount="1"/> <!-- matches 1 or more -->
+        </carrying>
+        <variable var="pickup_state1">3</variable>
+     </all>
+    </after>
+    <all id="pickup-red2-filter-by-red"> <!-- Red picks up stolen redstone -->
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+           <item material="redstone block" name="Red Stolen block" amount="4"/>
+        </carrying>
+        <variable var="pickup_state2">0</variable>
+    </all>
+    <after id="pickup-red2-filter-1-by-red" duration="0.1">
+        <all>
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" name="Red Stolen block" amount="3"/>
+        </carrying>
+        <variable var="pickup_state2">1</variable>
+    </all>
+    </after>
+    <after id="pickup-red2-filter-2-by-red" duration="0.1">
+        <all>
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" name="Red Stolen block" amount="2"/>
+        </carrying>
+        <variable var="pickup_state2">2</variable>
+    </all>
+    </after>
+    <after id="pickup-red2-filter-3-by-red" duration="0.1">
+        <all>
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" name="Red Stolen block" amount="1"/>
+        </carrying>
+        <variable var="pickup_state2">3</variable>
+    </all>
+    </after>
+    <all id="pickup-green-filter-by-red"> <!-- Red picks up vanilla emerald -->
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" amount="4"/>
+        </carrying>
+        <variable var="pickup_state3">0</variable>
+    </all>
+    <after id="pickup-green-filter-1-by-red" duration="0.1">
+        <all>
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" amount="3"/>
+        </carrying>
+        <variable var="pickup_state3">1</variable>
+    </all>
+    </after>
+    <after id="pickup-green-filter-2-by-red" duration="0.1">
+        <all>
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" amount="2"/>
+        </carrying>
+        <variable var="pickup_state3">2</variable>
+    </all>
+    </after>
+    <after id="pickup-green-filter-3-by-red" duration="0.1">
+        <all>
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" amount="1"/>
+        </carrying>
+        <variable var="pickup_state3">3</variable>
+    </all>
+    </after>
+    <all id="pickup-green2-filter-by-red"> <!-- Red picks up recovered emerald -->
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" name="Green Recovered block" amount="4"/>
+        </carrying>
+        <variable var="pickup_state4">0</variable>
+    </all>
+    <after id="pickup-green2-filter-1-by-red" duration="0.1">
+        <all>
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" name="Green Recovered block" amount="3"/>
+        </carrying>
+        <variable var="pickup_state4">1</variable>
+    </all>
+    </after>
+    <after id="pickup-green2-filter-2-by-red" duration="0.1">
+        <all>
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" name="Green Recovered block" amount="2"/>
+        </carrying>
+        <variable var="pickup_state4">2</variable>
+    </all>
+    </after>
+    <after id="pickup-green2-filter-3-by-red" duration="0.1">
+    <all>
+        <team>red-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" name="Green Recovered block" amount="1"/>
+        </carrying>
+        <variable var="pickup_state4">3</variable>
+    </all>
+    </after>
+    <!-- Green Pick-up Filters -->
+    <all id="pickup-green-filter-by-green"> <!-- Green picks up plain emerald -->
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" amount="4"/> <!-- matches 4 or more -->
+        </carrying>
+        <variable var="pickup_state1">0</variable>
+    </all>
+    <after id="pickup-green-filter-1-by-green" duration="0.1">
+        <all>
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" amount="3"/>
+        </carrying>
+        <variable var="pickup_state1">1</variable>
+    </all>
+    </after>
+    <after id="pickup-green-filter-2-by-green" duration="0.1">
+        <all>
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" amount="2"/>
+        </carrying>
+        <variable var="pickup_state1">2</variable>
+    </all>
+    </after>
+    <after id="pickup-green-filter-3-by-green" duration="0.1">
+    <all>
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" amount="1"/>
+        </carrying>
+        <variable var="pickup_state1">3</variable>
+    </all>
+    </after>
+    <all id="pickup-green2-filter-by-green"> <!-- Green picks up stolen emerald -->
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" name="Green Stolen block" amount="4"/>
+        </carrying>
+        <variable var="pickup_state2">0</variable>
+    </all>
+    <after id="pickup-green2-filter-1-by-green" duration="0.1">
+        <all>
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" name="Green Stolen block" amount="3"/>
+        </carrying>
+        <variable var="pickup_state2">1</variable>
+    </all>
+    </after>
+    <after id="pickup-green2-filter-2-by-green" duration="0.1">
+        <all>
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" name="Green Stolen block" amount="2"/>
+        </carrying>
+        <variable var="pickup_state2">2</variable>
+    </all>
+    </after>
+    <after id="pickup-green2-filter-3-by-green" duration="0.1">
+    <all>
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="emerald block" name="Green Stolen block" amount="1"/>
+        </carrying>
+        <variable var="pickup_state2">3</variable>
+    </all>
+    </after>
+    <all id="pickup-red-filter-by-green"> <!-- Green picks up vanilla redstone -->
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" amount="4"/>
+        </carrying>
+        <variable var="pickup_state3">0</variable>
+    </all>
+    <after id="pickup-red-filter-1-by-green" duration="0.1">
+        <all>
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" amount="3"/>
+        </carrying>
+        <variable var="pickup_state3">1</variable>
+    </all>
+    </after>
+    <after id="pickup-red-filter-2-by-green" duration="0.1">
+        <all>
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" amount="2"/>
+        </carrying>
+        <variable var="pickup_state3">2</variable>
+    </all>
+    </after>
+    <after id="pickup-red-filter-3-by-green" duration="0.1">
+    <all>
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" amount="1"/>
+        </carrying>
+        <variable var="pickup_state3">3</variable>
+    </all>
+    </after>
+    <all id="pickup-red2-filter-by-green"> <!-- Green picks up recovered redstone -->
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" name="Red Recovered block" amount="4"/>
+        </carrying>
+        <variable var="pickup_state4">0</variable>
+    </all>
+    <after id="pickup-red2-filter-1-by-green" duration="0.1">
+        <all>
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" name="Red Recovered block" amount="3"/>
+        </carrying>
+        <variable var="pickup_state4">1</variable>
+    </all>
+    </after>
+    <after id="pickup-red2-filter-2-by-green" duration="0.1">
+        <all>
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" name="Red Recovered block" amount="2"/>
+        </carrying>
+        <variable var="pickup_state4">2</variable>
+    </all>
+    </after>
+    <after id="pickup-red2-filter-3-by-green"  duration="0.1">
+    <all>
+        <team>green-team</team>
+        <carrying ignore-metadata="false">
+            <item material="redstone block" name="Red Recovered block" amount="1"/>
+        </carrying>
+        <variable var="pickup_state4">3</variable>
+    </all>
+    </after>
+    <!-- More pickup related filters -->
+    <all id="red-pickup-red-filter">
+        <alive/>
+        <team>red-team</team>
+        <carrying>
+            <item material="redstone block"/>
+        </carrying>
+        <variable var="pickup_me_variable">0</variable>
+    </all>
+    <all id="red-pickup-green-filter">
+        <alive/>
+        <team>red-team</team>
+        <carrying>
+            <item material="emerald block"/>
+        </carrying>
+        <variable var="pickup_them_variable">0</variable>
+    </all>
+    <all id="green-pickup-red-filter">
+        <alive/>
+        <team>green-team</team>
+        <carrying>
+            <item material="redstone block"/>
+        </carrying>
+        <variable var="pickup_them_variable">0</variable>
+    </all>
+    <all id="green-pickup-green-filter">
+        <alive/>
+        <team>green-team</team>
+        <carrying>
+            <item material="emerald block"/>
+        </carrying>
+        <variable var="pickup_me_variable">0</variable>
+    </all>
+    <!-- Vanity Diamond Helmet -->
+    <any id="vanity-hat-filter">
+        <all>
+            <team>red-team</team>
+            <variable var="vanity_hat_variable">0</variable>
+            <variable var="pickup_them_variable">99</variable> <!-- pickup fanfare done -->
+            <variable var="pickup_green_momentary_variable">1</variable>
+            <any>
+                <region id="green-monument-1"/>
+                <region id="green-monument-2"/>
+            </any>
+        </all>
+        <all>
+            <team>green-team</team>
+            <variable var="vanity_hat_variable">0</variable>
+            <variable var="pickup_them_variable">99</variable> <!-- pickup fanfare done -->
+            <variable var="pickup_red_momentary_variable">1</variable>
+            <any>
+                <region id="red-monument-1"/>
+                <region id="red-monument-2"/>
+            </any>
+        </all>
+    </any>
+    <all id="helmet-replacement-filter">
+        <alive/>
+        <variable var="vanity_hat_variable">1</variable>
+    </all>
+    <!-- Team Upgrade Systems -->
+    <all id="apply-sharpness-1">
+        <variable var="sharpness_variable">1</variable>
+        <alive/>
+    </all>
+    <all id="apply-sharpness-2">
+        <variable var="sharpness_variable">2</variable>
+        <alive/>
+    </all>
+    <all id="apply-protection-1">
+        <variable var="protection_variable">1</variable>
+        <alive/>
+    </all>
+    <all id="apply-protection-2">
+        <variable var="protection_variable">2</variable>
+        <alive/>
+    </all>
+    <all id="apply-protection-3">
+        <variable var="protection_variable">3</variable>
+        <alive/>
+    </all>
+    <all id="apply-protection-4">
+        <variable var="protection_variable">4</variable>
+        <alive/>
+    </all>
+    <all id="apply-haste-1">
+        <variable var="haste_variable">1</variable>
+        <alive/>
+    </all>
+    <all id="apply-regen">
+        <alive/>
+        <variable var="regen_variable">1</variable>
+        <any>
+            <all>
+                <team>green-team</team>
+                <any>
+                    <region id="regen-green-left"/>
+                    <region id="regen-green-right"/>
+                </any>
+            </all>
+            <all>
+                <team>red-team</team>
+                <any>
+                    <region id="regen-red-left"/>
+                    <region id="regen-red-right"/>
+                </any>
+            </all>
+        </any>
+    </all>
+    <!-- Upgrade visibility filters -->
+    <variable id="axe-shovel-0" var="axe_shovel_variable">0</variable>
+    <variable id="axe-shovel-1" var="axe_shovel_variable">1</variable>
+    <variable id="axe-shovel-2" var="axe_shovel_variable">2</variable>
+    <variable id="axe-shovel-3" var="axe_shovel_variable">3</variable>
+    <variable id="sword-0" var="sword_variable">0</variable>
+    <variable id="sword-1" var="sword_variable">1</variable>
+    <variable id="sword-2" var="sword_variable">2</variable>
+    <variable id="bow-0" var="bow_variable">0</variable>
+    <variable id="bow-1" var="bow_variable">1</variable>
+    <variable id="diamond-pickaxe-0" var="pickaxe_variable">0</variable> <!-- iron -->
+    <variable id="diamond-pickaxe-1" var="pickaxe_variable">1</variable> <!-- diamond -->
+    <variable id="diamond-pickaxe-2" var="pickaxe_variable">2</variable> <!-- diamond eff 1 -->
+    <variable id="diamond-pickaxe-3" var="pickaxe_variable">3</variable> <!-- diamond eff 3 -->
+    <variable id="diamond-pickaxe-4" var="pickaxe_variable">4</variable> <!-- diamond eff 5 -->
+    <variable id="haste-0" var="haste_variable">0</variable>
+    <variable id="haste-1" var="haste_variable">1</variable>
+    <variable id="protection-0" var="protection_variable">0</variable>
+    <variable id="protection-1" var="protection_variable">1</variable>
+    <variable id="protection-2" var="protection_variable">2</variable>
+    <variable id="protection-3" var="protection_variable">3</variable>
+    <variable id="protection-4" var="protection_variable">4</variable>
+    <variable id="sharpness-0" var="sharpness_variable">0</variable>
+    <variable id="sharpness-1" var="sharpness_variable">1</variable>
+    <variable id="sharpness-2" var="sharpness_variable">2</variable>
+    <variable id="regen-0" var="regen_variable">0</variable>
+    <variable id="regen-1" var="regen_variable">1</variable>
+    <variable id="shears-0" var="shears_variable">0</variable>
+    <variable id="iron-hat-0" var="iron_hat_variable">0</variable>
+    <variable id="vanity-hat-1" var="vanity_hat_variable">1</variable>
+    <variable id="gapple-king-0" var="gapple_king_variable">0</variable>
+    <variable id="gapple-king-1" var="gapple_king_variable">1</variable>
+    <variable id="block-boost-0" var="block_boost_variable">0</variable>
+    <all id="block-boost-1">
+        <alive/>
+        <variable var="block_boost_variable">1</variable>
+    </all>
+    <all id="block-boost-2">
+        <alive/>
+        <variable var="block_boost_variable">2</variable>
+    </all>
+    <all id="vanity-chestplate-1">
+        <alive/>
+        <variable var="vanity_chestplate_variable">1</variable>
+    </all>
+    <all id="shears-1">
+        <alive/>
+        <variable var="shears_variable">1</variable>
+    </all>
+    <all id="iron-hat-1">
+        <alive/>
+        <variable var="iron_hat_variable">1</variable>
+    </all>
+    <all id="leather-prot-0">
+        <alive/>
+        <variable var="armor_material_variable">1</variable>
+        <variable var="protection_variable">0</variable>
+    </all>
+    <all id="chainmail-prot-0">
+        <alive/>
+        <variable var="armor_material_variable">2</variable>
+        <variable var="protection_variable">0</variable>
+    </all>
+    <all id="iron-prot-0">
+        <alive/>
+        <variable var="armor_material_variable">3</variable>
+        <variable var="protection_variable">0</variable>
+    </all>
+    <all id="diamond-prot-0">
+        <alive/>
+        <variable var="armor_material_variable">4</variable>
+        <variable var="protection_variable">0</variable>
+    </all>
+    <all id="leather-prot-1">
+        <alive/>
+        <variable var="armor_material_variable">1</variable>
+        <variable var="protection_variable">1</variable>
+    </all>
+    <all id="chainmail-prot-1">
+        <alive/>
+        <variable var="armor_material_variable">2</variable>
+        <variable var="protection_variable">1</variable>
+    </all>
+    <all id="iron-prot-1">
+        <alive/>
+        <variable var="armor_material_variable">3</variable>
+        <variable var="protection_variable">1</variable>
+    </all>
+    <all id="diamond-prot-1">
+        <alive/>
+        <variable var="armor_material_variable">4</variable>
+        <variable var="protection_variable">1</variable>
+    </all>
+    <all id="leather-prot-2">
+        <alive/>
+        <variable var="armor_material_variable">1</variable>
+        <variable var="protection_variable">2</variable>
+    </all>
+    <all id="chainmail-prot-2">
+        <alive/>
+        <variable var="armor_material_variable">2</variable>
+        <variable var="protection_variable">2</variable>
+    </all>
+    <all id="iron-prot-2">
+        <alive/>
+        <variable var="armor_material_variable">3</variable>
+        <variable var="protection_variable">2</variable>
+    </all>
+    <all id="diamond-prot-2">
+        <alive/>
+        <variable var="armor_material_variable">4</variable>
+        <variable var="protection_variable">2</variable>
+    </all>
+    <all id="leather-prot-3">
+        <alive/>
+        <variable var="armor_material_variable">1</variable>
+        <variable var="protection_variable">3</variable>
+    </all>
+    <all id="chainmail-prot-3">
+        <alive/>
+        <variable var="armor_material_variable">2</variable>
+        <variable var="protection_variable">3</variable>
+    </all>
+    <all id="iron-prot-3">
+        <alive/>
+        <variable var="armor_material_variable">3</variable>
+        <variable var="protection_variable">3</variable>
+    </all>
+    <all id="diamond-prot-3">
+        <alive/>
+        <variable var="armor_material_variable">4</variable>
+        <variable var="protection_variable">3</variable>
+    </all>
+    <all id="leather-prot-4">
+        <alive/>
+        <variable var="armor_material_variable">1</variable>
+        <variable var="protection_variable">4</variable>
+    </all>
+    <all id="chainmail-prot-4">
+        <alive/>
+        <variable var="armor_material_variable">2</variable>
+        <variable var="protection_variable">4</variable>
+    </all>
+    <all id="iron-prot-4">
+        <alive/>
+        <variable var="armor_material_variable">3</variable>
+        <variable var="protection_variable">4</variable>
+    </all>
+    <all id="diamond-prot-4">
+        <alive/>
+        <variable var="armor_material_variable">4</variable>
+        <variable var="protection_variable">4</variable>
+    </all>
+    <!-- Armor visibility filters -->
+    <all id="chainmail-set-0">
+        <variable var="armor_material_variable">1</variable>
+        <filter id="protection-0"/>
+    </all>
+    <all id="iron-set-0">
+        <variable var="armor_material_variable">2</variable>
+        <filter id="protection-0"/>
+    </all>
+    <all id="diamond-set-0">
+        <variable var="armor_material_variable">3</variable>
+        <filter id="protection-0"/>
+    </all>
+    <all id="chainmail-set-1">
+        <variable var="armor_material_variable">1</variable>
+        <filter id="protection-1"/>
+    </all>
+    <all id="iron-set-1">
+        <variable var="armor_material_variable">2</variable>
+        <filter id="protection-1"/>
+    </all>
+    <all id="diamond-set-1">
+        <variable var="armor_material_variable">3</variable>
+        <filter id="protection-1"/>
+    </all>
+    <all id="chainmail-set-2">
+        <variable var="armor_material_variable">1</variable>
+        <filter id="protection-2"/>
+    </all>
+    <all id="iron-set-2">
+        <variable var="armor_material_variable">2</variable>
+        <filter id="protection-2"/>
+    </all>
+    <all id="diamond-set-2">
+        <variable var="armor_material_variable">3</variable>
+        <filter id="protection-2"/>
+    </all>
+    <all id="chainmail-set-3">
+        <variable var="armor_material_variable">1</variable>
+        <filter id="protection-3"/>
+    </all>
+    <all id="iron-set-3">
+        <variable var="armor_material_variable">2</variable>
+        <filter id="protection-3"/>
+    </all>
+    <all id="diamond-set-3">
+        <variable var="armor_material_variable">3</variable>
+        <filter id="protection-3"/>
+    </all>
+    <all id="chainmail-set-4">
+        <variable var="armor_material_variable">1</variable>
+        <filter id="protection-4"/>
+    </all>
+    <all id="iron-set-4">
+        <variable var="armor_material_variable">2</variable>
+        <filter id="protection-4"/>
+    </all>
+    <all id="diamond-set-4">
+        <variable var="armor_material_variable">3</variable>
+        <filter id="protection-4"/>
+    </all>
+    <all id="only-diamond-renew">
+        <cause>world</cause>
+        <material id="only-diamond">diamond block</material>
+    </all>
+</filters>
+<shops>
+    <!-- SHOP 1 - Red / Fuji    -->
+    <shop id="red-player-shop" name="Player Upgrades">
+        <category id="player" name="`aUpgrades" material="diamond sword">
+            <item material="chainmail boots" name="`2Permanent Chainmail Armor" price="1" currency="emerald block" filter="chainmail-set-0" action="chainmail-armor-0-action" color="dark green" lore="`7You permanently gain|`7Chainmail leggings/boots.||`2Tier 1: Chainmail Armor`7, `b1 Blocks|`7Tier 2: Iron Armor, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="iron boots" name="`2Permanent Iron Armor" price="5" currency="emerald block" filter="iron-set-0" action="iron-armor-0-action" color="dark green" lore="`7You permanently gain|`7Iron leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`2Tier 2: Iron Armor`7, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="diamond boots" name="`2Permanent Diamond Armor" price="30" currency="emerald block" filter="diamond-set-0" action="diamond-armor-0-action" color="dark green" lore="`7You permanently gain|`7Diamond leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`8Tier 2: Iron Armor, `b5 Blocks|`2Tier 3: Diamond Armor`7, `b30 Blocks|"/>
+            <item material="chainmail boots" enchantment="protection" name="`2Permanent Chainmail Armor" price="1" currency="emerald block" filter="chainmail-set-1" action="chainmail-armor-1-action" color="dark green" lore="`7You permanently gain|`7Chainmail leggings/boots.||`2Tier 1: Chainmail Armor`7, `b1 Blocks|`7Tier 2: Iron Armor, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="iron boots" enchantment="protection" name="`2Permanent Iron Armor" price="5" currency="emerald block" filter="iron-set-1" action="iron-armor-1-action" color="dark green" lore="`7You permanently gain|`7Iron leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`2Tier 2: Iron Armor`7, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="diamond boots" enchantment="protection" name="`2Permanent Diamond Armor" price="30" currency="emerald block" filter="diamond-set-1" action="diamond-armor-1-action" color="dark green" lore="`7You permanently gain|`7Diamond leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`8Tier 2: Iron Armor, `b5 Blocks|`2Tier 3: Diamond Armor`7, `b30 Blocks|"/>
+            <item material="chainmail boots" enchantment="protection:2" name="`2Permanent Chainmail Armor" price="1" currency="emerald block" filter="chainmail-set-2" action="chainmail-armor-2-action" color="dark green" lore="`7You permanently gain|`7Chainmail leggings/boots.||`2Tier 1: Chainmail Armor`7, `b1 Blocks|`7Tier 2: Iron Armor, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="iron boots" enchantment="protection:2" name="`2Permanent Iron Armor" price="5" currency="emerald block" filter="iron-set-2" action="iron-armor-2-action" color="dark green" lore="`7You permanently gain|`7Iron leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`2Tier 2: Iron Armor`7, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="diamond boots" enchantment="protection:2" name="`2Permanent Diamond Armor" price="30" currency="emerald block" filter="diamond-set-2" action="diamond-armor-2-action" color="dark green" lore="`7You permanently gain|`7Diamond leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`8Tier 2: Iron Armor, `b5 Blocks|`2Tier 3: Diamond Armor`7, `b30 Blocks|"/>
+            <item material="chainmail boots" enchantment="protection:3" name="`2Permanent Chainmail Armor" price="1" currency="emerald block" filter="chainmail-set-3" action="chainmail-armor-3-action" color="dark green" lore="`7You permanently gain|`7Chainmail leggings/boots.||`2Tier 1: Chainmail Armor`7, `b1 Blocks|`7Tier 2: Iron Armor, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="iron boots" enchantment="protection:3" name="`2Permanent Iron Armor" price="5" currency="emerald block" filter="iron-set-3" action="iron-armor-3-action" color="dark green" lore="`7You permanently gain|`7Iron leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`2Tier 2: Iron Armor`7, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="diamond boots" enchantment="protection:3" name="`2Permanent Diamond Armor" price="30" currency="emerald block" filter="diamond-set-3" action="diamond-armor-3-action" color="dark green" lore="`7You permanently gain|`7Diamond leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`8Tier 2: Iron Armor, `b5 Blocks|`2Tier 3: Diamond Armor`7, `b30 Blocks|"/>
+            <item material="chainmail boots" enchantment="protection:4" name="`2Permanent Chainmail Armor" price="1" currency="emerald block" filter="chainmail-set-4" action="chainmail-armor-4-action" color="dark green" lore="`7You permanently gain|`7Chainmail leggings/boots.||`2Tier 1: Chainmail Armor`7, `b1 Blocks|`7Tier 2: Iron Armor, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="iron boots" enchantment="protection:4" name="`2Permanent Iron Armor" price="5" currency="emerald block" filter="iron-set-4" action="iron-armor-4-action" color="dark green" lore="`7You permanently gain|`7Iron leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`2Tier 2: Iron Armor`7, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="diamond boots" enchantment="protection:4" name="`2Permanent Diamond Armor" price="30" currency="emerald block" filter="diamond-set-4" action="diamond-armor-4-action" color="dark green" lore="`7You permanently gain|`7Diamond leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`8Tier 2: Iron Armor, `b5 Blocks|`2Tier 3: Diamond Armor`7, `b30 Blocks|"/>
+            <item material="golden apple" name="`2Gapple King" amount="8" price="2" currency="emerald block" color="dark green" filter="gapple-king-0" action="gapple-king-action" lore="`7You permanently gain|`78 Gapples`7 in kit.|"/>
+            <item material="iron sword" name="`2Iron Sword" unbreakable="true" amount="1" price="3" currency="emerald block" kit="iron-sword-sharp0" filter="stone-sword-0-sharp" color="dark green" lore="`7You permanently gain an|`7Iron sword.||`2Tier 1: Iron Sword`7, `b3 Blocks|`7Tier 2: Diamond Sword, `b17 Blocks|"/>
+            <item material="diamond sword" name="`2Diamond Sword" unbreakable="true" amount="1" price="17" currency="emerald block" kit="diamond-sword-sharp0" filter="iron-sword-0-sharp" color="dark green" lore="`7You permanently gain a|`7Diamond sword.||`8Tier 1: Iron Sword, `b3 Blocks|`2Tier 2: Diamond Sword`7, `b17 Blocks|"/>
+            <item material="iron sword" name="`2Iron Sword" unbreakable="true" enchantment="sharpness" amount="1" price="3" kit="iron-sword-sharp1" currency="emerald block" filter="stone-sword-1-sharp" color="dark green" lore="`7You permanently gain an|`7Iron sword.||`2Tier 1: Iron Sword`7, `b3 Blocks|`7Tier 2: Diamond Sword, `b17 Blocks|"/>
+            <item material="diamond sword" name="`2Diamond Sword" unbreakable="true" enchantment="sharpness" amount="1" price="17" kit="diamond-sword-sharp1" currency="emerald block" filter="iron-sword-1-sharp" color="dark green" lore="`7You permanently gain a|`7Diamond sword.||`8Tier 1: Iron Sword, `b3 Blocks|`2Tier 2: Diamond Sword`7, `b17 Blocks|"/>
+            <item material="iron sword" name="`2Iron Sword" unbreakable="true" enchantment="sharpness:2" amount="1" price="3" kit="iron-sword-sharp2" currency="emerald block" filter="stone-sword-2-sharp" color="dark green" lore="`7You permanently gain an|`7Iron sword.||`2Tier 1: Iron Sword`7, `b3 Blocks|`7Tier 2: Diamond Sword, `b17 Blocks|"/>
+            <item material="diamond sword" name="`2Diamond Sword" unbreakable="true" enchantment="sharpness:2" amount="1" price="17" kit="diamond-sword-sharp2" currency="emerald block" filter="iron-sword-2-sharp" color="dark green" lore="`7You permanently gain a|`7Diamond sword.||`8Tier 1: Iron Sword, `b3 Blocks|`2Tier 2: Diamond Sword`7, `b17 Blocks|"/>
+            <item material="diamond pickaxe" name="`2Diamond Pickaxe" unbreakable="true" filter="diamond-pickaxe-0" action="pickaxe-1-action" lore="`7You permanently gain a|`7Diamond Pickaxe.||`2Tier 1: Diamond Pickaxe`7, `b3 Blocks|`7Tier 2: Diamond Pickaxe Efficiency I, `b12 Blocks|`7Tier 3: Diamond Pickaxe Efficiency III, `b25 Blocks|`7Tier 4: Diamond Pickaxe Efficiency V, `b40 Blocks|">
+                <payment price="3" currency="emerald block" color="dark green"/>
+            </item>
+            <item material="diamond pickaxe" name="`2Diamond Pickaxe Efficiency I" unbreakable="true" enchantment="efficiency:1" filter="diamond-pickaxe-1" action="pickaxe-2-action" lore="`7You permanently gain a|`7Diamond Pickaxe Efficiency 3.||`8Tier 1: Diamond Pickaxe`7, `b3 Blocks|`2Tier 2: Diamond Pickaxe Efficiency I, `b12 Blocks|`7Tier 3: Diamond Pickaxe Efficiency III, `b25 Blocks|`7Tier 4: Diamond Pickaxe Efficiency V, `b40 Blocks|">
+                <payment price="12" currency="emerald block" color="dark green"/>
+            </item>
+            <item material="diamond pickaxe" name="`2Diamond Pickaxe Efficiency III" unbreakable="true" enchantment="efficiency:3" filter="diamond-pickaxe-2" action="pickaxe-3-action" lore="`7You permanently gain a|`7Diamond Pickaxe Efficiency 3.||`8Tier 1: Diamond Pickaxe`7, `b3 Blocks|`8Tier 2: Diamond Pickaxe Efficiency I`7, `b12 Blocks|`2Tier 3: Diamond Pickaxe Efficiency III`7, `b25 Blocks|`7Tier 4: Diamond Pickaxe Efficiency V, `b40 Blocks|">
+                <payment price="25" currency="emerald block" color="dark green"/>
+            </item>
+            <item material="diamond pickaxe" name="`2Diamond Pickaxe Efficiency V" unbreakable="true" enchantment="efficiency:5" filter="diamond-pickaxe-3" action="pickaxe-4-action" lore="`7You permanently gain a|`7Diamond Pickaxe Efficiency 5.||`8Tier 1: Diamond Pickaxe, `b3 Blocks|`8Tier 2: Diamond Pickaxe Efficiency I`7, `b12 Blocks|`8Tier 3: Diamond Pickaxe Efficiency III`7, `b25 Blocks|`2Tier 4: Diamond Pickaxe Efficiency V`7, `b40 Blocks|">
+                <payment price="40" currency="emerald block" color="dark green"/>
+            </item>
+            <item material="bow" unbreakable="true" enchantment="power:1;infinity" name="`2Power Bow" amount="1" price="30" currency="emerald block" color="dark green" filter="bow-0" action="bow-action" lore="`7You permanently gain a|`7Power I, Infinity bow.|"/>
+        </category>
+        <!-- One-time Items -->
+        <category id="player" name="`aItem Store" material="tnt">
+            <item material="apple" name="`2Knockbapple II" enchantment="knockback:2" amount="1" price="5" currency="emerald block" color="dark green" action="knockback-apple-action" lore="`7One-time purchase:|`71 Knockbapple with Knockback II.|"/>
+            <item material="tnt" damage="1" name="`2TNT" amount="1" price="7" currency="emerald block" color="dark green" action="tnt-action" lore="`7One-time purchase:|`71 Auto TNT.|"/>
+            <item material="golden_apple" name="`2God Apples" damage="1" amount="3" price="24" currency="emerald block" color="dark green" action="god-apple-action" lore="`7One-time purchase:|`73 Enchanted Golden Apples.|"/>
+        </category>
+    </shop>
+    <!-- Shop - Team Upgrades -->
+    <shop id="red-team-shop" name="Team Upgrades">
+        <category id="team" name="`4Team Upgrades" material="beacon">
+            <item material="shears" name="`4Permanent Shears" lore="`7Your team permanently gains|`7Shears for defense.|" unbreakable="true" price="1" currency="redstone block" filter="shears-0" action="shears-action" color="red"/>
+            <item material="smooth brick" name="`4Block Boost I" amount="32" price="2" currency="redstone block" color="red" filter="block-boost-0" action="block-boost-action-1" lore="`7Your team permanently gains|`7Double number of blocks in kit.||`4Tier 1: Stack Size 32`7, `b2 Blocks|`7Tier 2: Stack Size 64, `b5 Blocks|"/>
+            <item material="smooth brick" name="`4Block Boost II" amount="64" price="5" currency="redstone block" color="red" filter="block-boost-1" action="block-boost-action-2" lore="`7Your team permanently gains|`7Double number of blocks in kit, again.||`8Tier 1: Stack Size 32`7, `b2 Blocks|`4Tier 2: Stack Size 64`7, `b5 Blocks|"/>
+            <item material="iron axe" name="`4Iron Axe and Shovel" filter="axe-shovel-0" action="axe-shovel-action-1" lore="`7Your team permanently gains|`7Iron Axe &#38; Shovel.||`4Tier 1: Iron Axe &#38; Shovel, `b3 Blocks|`7Tier 2: Diamond Axe &#38; Shovel, `b7 Blocks|`7Tier 3: Diamond Axe &#38; Shovel Efficiency I, `b30 Blocks|">
+                <payment price="3" currency="redstone block" color="red"/>
+            </item>
+            <item material="diamond axe" name="`4Diamond Axe and Shovel" filter="axe-shovel-1" action="axe-shovel-action-2" lore="`7Your team permanently gains|`7Diamond Axe &#38; Shovel.||`8Tier 1: Iron Axe &#38; Shovel, `b3 Blocks|`4Tier 2: Diamond Axe &#38; Shovel, `b7 Blocks|`7Tier 3: Diamond Axe &#38; Shovel Efficiency I, `b30 Blocks|">
+                <payment price="7" currency="redstone block" color="red"/>
+            </item>
+            <item material="diamond axe" enchantment="efficiency:1" name="`4Diamond Axe and Shovel - Efficiency I" filter="axe-shovel-2" action="axe-shovel-action-3" lore="`7Your team permanently gains|`7Diamond Axe &#38; Shovel Efficiency I.||`8Tier 1: Iron Axe &#38; Shovel, `b3 Blocks|`8Tier 2: Diamond Axe &#38; Shovel, `b7 Blocks|`4Tier 3: Diamond Axe &#38; Shovel Efficiency I, `b30 Blocks|">
+                <payment price="30" currency="redstone block" color="red"/>
+            </item>
+            <item material="leather chestplate" name="`4Reinforced Armor I" lore="`7Your team permanently gains|`7Protection I on leggings/boots.||`4Tier 1: Protection I`7, `b12 Blocks|`7Tier 2: Protection II`7, `b25 Blocks|`7Tier 3: Protection III`7, `b30 Blocks|`7Tier 4: Protection IV`7, `b45 Blocks|" action="protection-set-1" filter="protection-0">
+                <payment price="12" currency="redstone block" color="red"/>
+            </item>
+            <item material="chainmail chestplate" amount="2" name="`4Reinforced Armor II" lore="`7Your team permanently gains|`7Protection II on leggings/boots.||`8Tier 1: Protection I`7, `b12 Blocks|`4Tier 2: Protection II`7, `b25 Blocks|`7Tier 3: Protection III`7, `b30 Blocks|`7Tier 4: Protection IV`7, `b45 Blocks|" price="25" currency="redstone block" action="protection-set-2" filter="protection-1" color="red"/>
+            <item material="gold chestplate" amount="3" name="`4Reinforced Armor III" lore="`7Your team permanently gains|`7Protection III on leggings/boots.||`8Tier 1: Protection I`7, `b12 Blocks|`8Tier 2: Protection II`7, `b25 Blocks|`4Tier 3: Protection III`7, `b30 Blocks|`7Tier 4: Protection IV`7, `b45 Blocks|" price="30" currency="redstone block" action="protection-set-3" filter="protection-2" color="red"/>
+            <item material="diamond chestplate" amount="4" name="`4Reinforced Armor IV" lore="`7Your team permanently gains|`7Protection IV on leggings/boots.||`8Tier 1: Protection I`7, `b12 Blocks|`8Tier 2: Protection II`7, `b25 Blocks|`8Tier 3: Protection III`7, `b30 Blocks|`4Tier 4: Protection IV`7, `b45 Blocks|" price="45" currency="redstone block" action="protection-set-4" filter="protection-3" color="red"/>
+            <item material="iron helmet" name="`4Permanent Iron Helmet" lore="`7Your team permanently gains|`7Iron Helmet for kit.|" price="16" currency="redstone block" filter="iron-hat-0" action="iron-hat-action" color="red"/>
+            <item material="iron sword" name="`4Sharpened Swords" lore="`7Your team permanently gains|`7Sharpness I on all swords.||`4Tier 1: Sharpness I`7, `b20 Blocks|`7Tier 2: Sharpness II, `b50 Blocks|" price="20" currency="redstone block" action="sharpness-set-1" filter="sharpness-0" color="red"/>
+            <item material="diamond sword" name="`4Sharpened Swords 2" lore="`7Your team permanently gains|`7Sharpness II on all swords.||`8Tier 1: Sharpness I`7, `b20 Blocks|`4Tier 2: Sharpness II, `b50 Blocks|" price="50" currency="redstone block" action="sharpness-set-2" filter="sharpness-1" color="red"/>
+            <item material="beacon" name="`4Regen" lore="`7Creates a Regeneration field|`7around your monuments.|" price="30" currency="redstone block" action="regen-set" filter="regen-0" color="red"/>
+            <item material="gold pickaxe" name="`4Haste I" lore="`7All players on your team|`7permanently gain Haste I.|" price="75" currency="redstone block" action="haste-set-1" filter="haste-0" color="red"/>
+        </category>
+    </shop>
+    <!-- SHOP 2 - Green / Mutsu -->
+    <shop id="green-player-shop" name="Player Upgrades">
+        <category id="player" name="`aUpgrades" material="diamond sword">
+            <item material="chainmail boots" name="`4Permanent Chainmail Armor" price="1" currency="redstone block" filter="chainmail-set-0" action="chainmail-armor-0-action" color="red" lore="`7You permanently gain|`7Chainmail leggings/boots.||`4Tier 1: Chainmail Armor`7, `b1 Blocks|`7Tier 2: Iron Armor, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="iron boots" name="`4Permanent Iron Armor" price="5" currency="redstone block" filter="iron-set-0" action="iron-armor-0-action" color="red" lore="`7You permanently gain|`7Iron leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`4Tier 2: Iron Armor`7, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="diamond boots" name="`4Permanent Diamond Armor" price="30" currency="redstone block" filter="diamond-set-0" action="diamond-armor-0-action" color="red" lore="`7You permanently gain|`7Diamond leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`8Tier 2: Iron Armor, `b5 Blocks|`4Tier 3: Diamond Armor`7, `b30 Blocks|"/>
+            <item material="chainmail boots" enchantment="protection" name="`4Permanent Chainmail Armor" price="1" currency="redstone block" filter="chainmail-set-1" action="chainmail-armor-1-action" color="red" lore="`7You permanently gain|`7Chainmail leggings/boots.||`4Tier 1: Chainmail Armor`7, `b1 Blocks|`7Tier 2: Iron Armor, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="iron boots" enchantment="protection" name="`4Permanent Iron Armor" price="5" currency="redstone block" filter="iron-set-1" action="iron-armor-1-action" color="red" lore="`7You permanently gain|`7Iron leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`4Tier 2: Iron Armor`7, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="diamond boots" enchantment="protection" name="`4Permanent Diamond Armor" price="30" currency="redstone block" filter="diamond-set-1" action="diamond-armor-1-action" color="red" lore="`7You permanently gain|`7Diamond leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`8Tier 2: Iron Armor, `b5 Blocks|`4Tier 3: Diamond Armor`7, `b30 Blocks|"/>
+            <item material="chainmail boots" enchantment="protection:2" name="`4Permanent Chainmail Armor" price="1" currency="redstone block" filter="chainmail-set-2" action="chainmail-armor-2-action" color="red" lore="`7You permanently gain|`7Chainmail leggings/boots.||`4Tier 1: Chainmail Armor`7, `b1 Blocks|`7Tier 2: Iron Armor, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="iron boots" enchantment="protection:2" name="`4Permanent Iron Armor" price="5" currency="redstone block" filter="iron-set-2" action="iron-armor-2-action" color="red" lore="`7You permanently gain|`7Iron leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`4Tier 2: Iron Armor`7, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="diamond boots" enchantment="protection:2" name="`4Permanent Diamond Armor" price="30" currency="redstone block" filter="diamond-set-2" action="diamond-armor-2-action" color="red" lore="`7You permanently gain|`7Diamond leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`8Tier 2: Iron Armor, `b5 Blocks|`4Tier 3: Diamond Armor`7, `b30 Blocks|"/>
+            <item material="chainmail boots" enchantment="protection:3" name="`4Permanent Chainmail Armor" price="1" currency="redstone block" filter="chainmail-set-3" action="chainmail-armor-3-action" color="red" lore="`7You permanently gain|`7Chainmail leggings/boots.||`4Tier 1: Chainmail Armor`7, `b1 Blocks|`7Tier 2: Iron Armor, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="iron boots" enchantment="protection:3" name="`4Permanent Iron Armor" price="5" currency="redstone block" filter="iron-set-3" action="iron-armor-3-action" color="red" lore="`7You permanently gain|`7Iron leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`4Tier 2: Iron Armor`7, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="diamond boots" enchantment="protection:3" name="`4Permanent Diamond Armor" price="30" currency="redstone block" filter="diamond-set-3" action="diamond-armor-3-action" color="red" lore="`7You permanently gain|`7Diamond leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`8Tier 2: Iron Armor, `b5 Blocks|`4Tier 3: Diamond Armor`7, `b30 Blocks|"/>
+            <item material="chainmail boots" enchantment="protection:4" name="`4Permanent Chainmail Armor" price="1" currency="redstone block" filter="chainmail-set-4" action="chainmail-armor-4-action" color="red" lore="`7You permanently gain|`7Chainmail leggings/boots.||`4Tier 1: Chainmail Armor`7, `b1 Blocks|`7Tier 2: Iron Armor, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="iron boots" enchantment="protection:4" name="`4Permanent Iron Armor" price="5" currency="redstone block" filter="iron-set-4" action="iron-armor-4-action" color="red" lore="`7You permanently gain|`7Iron leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`4Tier 2: Iron Armor`7, `b5 Blocks|`7Tier 3: Diamond Armor, `b30 Blocks|"/>
+            <item material="diamond boots" enchantment="protection:4" name="`4Permanent Diamond Armor" price="30" currency="redstone block" filter="diamond-set-4" action="diamond-armor-4-action" color="red" lore="`7You permanently gain|`7Diamond leggings/boots.||`8Tier 1: Chainmail Armor, `b1 Blocks|`8Tier 2: Iron Armor, `b5 Blocks|`4Tier 3: Diamond Armor`7, `b30 Blocks|"/>
+            <item material="golden apple" name="`4Gapple King" amount="8" price="2" currency="redstone block" color="red" filter="gapple-king-0" action="gapple-king-action" lore="`7You permanently gain|`78 Gapples`7 in kit.|"/>
+            <item material="iron sword" name="`4Iron Sword" unbreakable="true" amount="1" price="3" currency="redstone block" kit="iron-sword-sharp0" filter="stone-sword-0-sharp" color="red" lore="`7You permanently gain an|`7Iron sword.||`4Tier 1: Iron Sword`7, `b3 Blocks|`7Tier 2: Diamond Sword, `b17 Blocks|"/>
+            <item material="diamond sword" name="`4Diamond Sword" unbreakable="true" amount="1" price="17" currency="redstone block" kit="diamond-sword-sharp0" filter="iron-sword-0-sharp" color="red" lore="`7You permanently gain a|`7Diamond sword.||`8Tier 1: Iron Sword, `b3 Blocks|`4Tier 2: Diamond Sword`7, `b17 Blocks|"/>
+            <item material="iron sword" name="`4Iron Sword" unbreakable="true" enchantment="sharpness" amount="1" price="3" kit="iron-sword-sharp1" currency="redstone block" filter="stone-sword-1-sharp" color="red" lore="`7You permanently gain an|`7Iron sword.||`4Tier 1: Iron Sword`7, `b3 Blocks|`7Tier 2: Diamond Sword, `b17 Blocks|"/>
+            <item material="diamond sword" name="`4Diamond Sword" unbreakable="true" enchantment="sharpness" amount="1" price="17" kit="diamond-sword-sharp1" currency="redstone block" filter="iron-sword-1-sharp" color="red" lore="`7You permanently gain a|`7Diamond sword.||`8Tier 1: Iron Sword, `b3 Blocks|`4Tier 2: Diamond Sword`7, `b17 Blocks|"/>
+            <item material="iron sword" name="`4Iron Sword" unbreakable="true" enchantment="sharpness:2" amount="1" price="3" kit="iron-sword-sharp2" currency="redstone block" filter="stone-sword-2-sharp" color="red" lore="`7You permanently gain an|`7Iron sword.||`4Tier 1: Iron Sword`7, `b3 Blocks|`7Tier 2: Diamond Sword, `b17 Blocks|"/>
+            <item material="diamond sword" name="`4Diamond Sword" unbreakable="true" enchantment="sharpness:2" amount="1" price="17" kit="diamond-sword-sharp2" currency="redstone block" filter="iron-sword-2-sharp" color="red" lore="`7You permanently gain a|`7Diamond sword.||`8Tier 1: Iron Sword, `b3 Blocks|`4Tier 2: Diamond Sword`7, `b17 Blocks|"/>
+            <item material="diamond pickaxe" name="`4Diamond Pickaxe" unbreakable="true" filter="diamond-pickaxe-0" action="pickaxe-1-action" lore="`7You permanently gain a|`7Diamond Pickaxe.||`4Tier 1: Diamond Pickaxe`7, `b3 Blocks|`7Tier 2: Diamond Pickaxe Efficiency I, `b12 Blocks|`7Tier 3: Diamond Pickaxe Efficiency III, `b25 Blocks|`7Tier 4: Diamond Pickaxe Efficiency V, `b40 Blocks|">
+                <payment price="3" currency="redstone block" color="red"/>
+            </item>
+            <item material="diamond pickaxe" name="`4Diamond Pickaxe Efficiency I" unbreakable="true" enchantment="efficiency:1" filter="diamond-pickaxe-1" action="pickaxe-2-action" lore="`7You permanently gain a|`7Diamond Pickaxe Efficiency 3.||`8Tier 1: Diamond Pickaxe`7, `b3 Blocks|`4Tier 2: Diamond Pickaxe Efficiency I, `b12 Blocks|`7Tier 3: Diamond Pickaxe Efficiency III, `b25 Blocks|`7Tier 4: Diamond Pickaxe Efficiency V, `b40 Blocks|">
+                <payment price="12" currency="redstone block" color="red"/>
+            </item>
+            <item material="diamond pickaxe" name="`4Diamond Pickaxe Efficiency III" unbreakable="true" enchantment="efficiency:3" filter="diamond-pickaxe-2" action="pickaxe-3-action" lore="`7You permanently gain a|`7Diamond Pickaxe Efficiency 3.||`8Tier 1: Diamond Pickaxe`7, `b3 Blocks|`8Tier 2: Diamond Pickaxe Efficiency I`7, `b12 Blocks|`4Tier 3: Diamond Pickaxe Efficiency III`7, `b25 Blocks|`7Tier 4: Diamond Pickaxe Efficiency V, `b40 Blocks|">
+                <payment price="25" currency="redstone block" color="red"/>
+            </item>
+            <item material="diamond pickaxe" name="`4Diamond Pickaxe Efficiency V" unbreakable="true" enchantment="efficiency:5" filter="diamond-pickaxe-3" action="pickaxe-4-action" lore="`7You permanently gain a|`7Diamond Pickaxe Efficiency 5.||`8Tier 1: Diamond Pickaxe, `b3 Blocks|`8Tier 2: Diamond Pickaxe Efficiency I`7, `b12 Blocks|`8Tier 3: Diamond Pickaxe Efficiency III`7, `b25 Blocks|`4Tier 4: Diamond Pickaxe Efficiency V`7, `b40 Blocks|">
+                <payment price="40" currency="redstone block" color="red"/>
+            </item>
+            <item material="bow" unbreakable="true" enchantment="power:1;infinity" name="`4Power Bow" amount="1" price="30" currency="redstone block" color="red" filter="bow-0" action="bow-action" lore="`7You permanently gain a|`7Power I, Infinity bow.|"/>
+        </category>
+        <!-- One-time Items -->
+        <category id="player" name="`aItem Store" material="tnt">
+            <item material="apple" name="`2Knockbapple II" enchantment="knockback:2" amount="1" price="5" currency="redstone block" color="red" action="knockback-apple-action" lore="`7One-time purchase:|`71 Knockbapple with Knockback II.|"/>
+            <item material="tnt" damage="1" name="`2TNT" amount="1" price="7" currency="redstone block" color="red" action="tnt-action" lore="`7One-time purchase:|`71 Auto TNT.|"/>
+            <item material="golden_apple" name="`2God Apples" damage="1" amount="3" price="24" currency="redstone block" color="red" action="god-apple-action" lore="`7One-time purchase:|`73 Enchanted Golden Apples.|"/>
+        </category>
+    </shop>
+    <!-- Shop - Team Upgrades -->
+    <shop id="green-team-shop" name="Team Upgrades">
+        <category id="team" name="`2Team Upgrades" material="beacon">
+            <item material="shears" name="`2Permanent Shears" lore="`7Your team permanently gains|`7Shears for defense.|" unbreakable="true" price="1" currency="emerald block" filter="shears-0" action="shears-action" color="dark green"/>
+            <item material="smooth brick" name="`2Block Boost I" amount="32" price="2" currency="emerald block" color="dark green" filter="block-boost-0" action="block-boost-action-1" lore="`7Your team permanently gains|`7Double number of blocks in kit.||`2Tier 1: Stack Size 32`7, `b2 Blocks|`7Tier 2: Stack Size 64, `b5 Blocks|"/>
+            <item material="smooth brick" name="`2Block Boost II" amount="64" price="5" currency="emerald block" color="dark green" filter="block-boost-1" action="block-boost-action-2" lore="`7Your team permanently gains|`7Double number of blocks in kit, again.||`8Tier 1: Stack Size 32`7, `b2 Blocks|`2Tier 2: Stack Size 64`7, `b5 Blocks|"/>
+            <item material="iron axe" name="`2Iron Axe and Shovel" filter="axe-shovel-0" action="axe-shovel-action-1" lore="`7Your team permanently gains|`7Iron Axe &#38; Shovel.||`2Tier 1: Iron Axe &#38; Shovel, `b3 Blocks|`7Tier 2: Diamond Axe &#38; Shovel, `b7 Blocks|`7Tier 3: Diamond Axe &#38; Shovel Efficiency I, `b30 Blocks|">
+                <payment price="3" currency="emerald block" color="dark green"/>
+            </item>
+            <item material="diamond axe" name="`2Diamond Axe and Shovel" filter="axe-shovel-1" action="axe-shovel-action-2" lore="`7Your team permanently gains|`7Diamond Axe &#38; Shovel.||`8Tier 1: Iron Axe &#38; Shovel, `b3 Blocks|`2Tier 2: Diamond Axe &#38; Shovel, `b7 Blocks|`7Tier 3: Diamond Axe &#38; Shovel Efficiency I, `b30 Blocks|">
+                <payment price="7" currency="emerald block" color="dark green"/>
+            </item>
+            <item material="diamond axe" enchantment="efficiency:1" name="`2Diamond Axe and Shovel - Efficiency I" filter="axe-shovel-2" action="axe-shovel-action-3" lore="`7Your team permanently gains|`7Diamond Axe &#38; Shovel Efficiency I.||`8Tier 1: Iron Axe &#38; Shovel, `b3 Blocks|`8Tier 2: Diamond Axe &#38; Shovel, `b7 Blocks|`2Tier 3: Diamond Axe &#38; Shovel Efficiency I, `b30 Blocks|">
+                <payment price="30" currency="emerald block" color="dark green"/>
+            </item>
+            <item material="leather chestplate" name="`2Reinforced Armor I" lore="`7Your team permanently gains|`7Protection I on leggings/boots.||`2Tier 1: Protection I`7, `b12 Blocks|`7Tier 2: Protection II`7, `b25 Blocks|`7Tier 3: Protection III`7, `b30 Blocks|`7Tier 4: Protection IV`7, `b45 Blocks|" action="protection-set-1" filter="protection-0">
+                <payment price="12" currency="emerald block" color="dark green"/>
+            </item>
+            <item material="chainmail chestplate" amount="2" name="`2Reinforced Armor II" lore="`7Your team permanently gains|`7Protection II on leggings/boots.||`8Tier 1: Protection I`7, `b12 Blocks|`2Tier 2: Protection II`7, `b25 Blocks|`7Tier 3: Protection III`7, `b30 Blocks|`7Tier 4: Protection IV`7, `b45 Blocks|" price="25" currency="emerald block" action="protection-set-2" filter="protection-1" color="dark green"/>
+            <item material="gold chestplate" amount="3" name="`2Reinforced Armor III" lore="`7Your team permanently gains|`7Protection III on leggings/boots.||`8Tier 1: Protection I`7, `b12 Blocks|`8Tier 2: Protection II`7, `b25 Blocks|`2Tier 3: Protection III`7, `b30 Blocks|`7Tier 4: Protection IV`7, `b45 Blocks|" price="30" currency="emerald block" action="protection-set-3" filter="protection-2" color="dark green"/>
+            <item material="diamond chestplate" amount="4" name="`2Reinforced Armor IV" lore="`7Your team permanently gains|`7Protection IV on leggings/boots.||`8Tier 1: Protection I`7, `b12 Blocks|`8Tier 2: Protection II`7, `b25 Blocks|`8Tier 3: Protection III`7, `b30 Blocks|`2Tier 4: Protection IV`7, `b45 Blocks|" price="45" currency="emerald block" action="protection-set-4" filter="protection-3" color="dark green"/>
+            <item material="iron helmet" name="`2Permanent Iron Helmet" lore="`7Your team permanently gains|`7Iron Helmet for kit.|" price="16" currency="emerald block" filter="iron-hat-0" action="iron-hat-action" color="dark green"/>
+            <item material="iron sword" name="`2Sharpened Swords" lore="`7Your team permanently gains|`7Sharpness I on all swords.||`2Tier 1: Sharpness I`7, `b20 Blocks|`7Tier 2: Sharpness II, `b50 Blocks|" price="20" currency="emerald block" action="sharpness-set-1" filter="sharpness-0" color="dark green"/>
+            <item material="diamond sword" name="`2Sharpened Swords 2" lore="`7Your team permanently gains|`7Sharpness II on all swords.||`8Tier 1: Sharpness I`7, `b20 Blocks|`2Tier 2: Sharpness II, `b50 Blocks|" price="50" currency="emerald block" action="sharpness-set-2" filter="sharpness-1" color="dark green"/>
+            <item material="beacon" name="`2Regen" lore="`7Creates a Regeneration field|`7around your monuments.|" price="30" currency="emerald block" action="regen-set" filter="regen-0" color="dark green"/>
+            <item material="gold pickaxe" name="`2Haste I" lore="`7All players on your team|`7permanently gain Haste I.|" price="75" currency="emerald block" action="haste-set-1" filter="haste-0" color="dark green"/>
+        </category>
+    </shop>
+</shops>
+<destroyables materials="emerald block;redstone block" mode-changes="false" sparks="true" repairable="false" show-progress="true" required="true" completion="94%">
+    <destroyable id="red-apple-1" name="Red Apple L" owner="red-team">
+        <region><cuboid id="red-monument-1" min="-62,49,-29" max="-69,58,-22"/></region>
+    </destroyable>
+    <destroyable id="red-apple-2" name="Red Apple R" owner="red-team">
+        <region><cuboid id="red-monument-2" min="-62,49,30" max="-69,58,23"/></region>
+    </destroyable>
+    <destroyable id="green-apple-1" name="Green Apple L" owner="green-team">
+        <region><cuboid id="green-monument-1" min="63,49,30" max="70,58,23"/></region>
+    </destroyable>
+    <destroyable id="green-apple-2" name="Green Apple R" owner="green-team">
+        <region><cuboid id="green-monument-2" min="63,49,-29" max="70,58,-22"/></region>
+    </destroyable>
+</destroyables>
+<renewables>
+    <renewable region="everywhere" renew-filter="only-diamond" interval="35s" sound="false"/>
+</renewables>
+<block-drops>
+    <rule>
+        <filter>
+            <material>diamond block</material>
+        </filter>
+        <drops>
+            <item chance="1" enchantment="blast_protection" material="diamond chestplate"/>
+        </drops>
+    </rule>
+</block-drops>
+<spawners player-region="everywhere">
+    <spawner spawn-region="green-monument-1" max-entities="2" delay="30s">
+        <item amount="1" material="emerald block"/>
+    </spawner>
+    <spawner spawn-region="green-monument-2" max-entities="2" delay="30s">
+        <item amount="1" material="emerald block"/>
+    </spawner>
+    <spawner spawn-region="red-monument-1" max-entities="2" delay="30s">
+        <item amount="1" material="redstone block"/>
+    </spawner>
+    <spawner spawn-region="red-monument-2" max-entities="2" delay="30s">
+        <item amount="1" material="redstone block"/>
+    </spawner>
+</spawners>
+<regions>
+    <cylinder id="regen-red-left" base="-65,45,-25" radius="9" height="14"/>
+    <cylinder id="regen-red-right" base="-65,45,26" radius="9" height="14"/>
+    <cylinder id="regen-green-left" base="66,45,-25" radius="9" height="14"/>
+    <cylinder id="regen-green-right" base="66,45,26" radius="9" height="14"/>
+    <cylinder id="center-diamonds" base="0.5,15,0.5" radius="3" height="3"/>
+    <cuboid id="green-spawn-protect" min="-151,0,-13" max="-133,150,13"/>
+    <cuboid id="red-spawn-protect" min="134,0,-13" max="152,150,13"/>
+    <cylinder id="green-spawn-point" base="149.5,53.2,0.5" radius=".2" height="0"/>
+    <cylinder id="red-spawn-point" base="-148.5,53.2,0.5" radius=".2" height="0"/>
+    <union id="obs-spawn-point">
+        <cylinder base="135.5,66.1,0.5" radius="2" height="0"/>
+        <cylinder base="-134.5,66.1,0.5" radius="2" height="0"/>
+    </union>
+    <negative id="not-build-area">
+        <union id="build-area">
+            <cuboid min="-99,13,-63" max="100,65,64"/>
+        </union>
+    </negative>
+    <cuboid id="red-monument-region" min="125,90,-22" max="130,116,20"/>
+    <cuboid id="green-monument-region" min="-129,90,-22" max="-124,116,20"/>
+    <!-- applicators -->
+    <apply region="center-diamonds" block-place="only-diamond-renew" message="You may not cover the diamonds!"/>
+    <apply block-break="never" block-place="block-place-filter-void" region="not-build-area" message="You may not edit this area!"/>
+    <apply enter="only-green" region="red-spawn-protect" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-red" region="green-spawn-protect" message="You may not enter the enemy's spawn!"/>
+</regions>
+<armorkeep>
+    <item>diamond chestplate</item> <!-- needs to be able to drop -->
+</armorkeep>
+<itemkeep>
+    <item>smooth brick</item>
+    <item>wool</item>
+    <item>log</item>
+    <item>golden apple</item>
+</itemkeep>
+<itemremove>
+    <item>prismarine_crystals</item>
+    <item>prismarine_shard</item>
+    <item>glowstone_dust</item>
+    <item>wool</item>
+    <item>torch</item>
+    <item>item_frame</item>
+    <!-- Weapons -->
+    <item>stone sword</item>
+    <item>iron sword</item>
+    <item>diamond sword</item>
+    <item>bow</item>
+    <item>arrow</item>
+    <!-- Tools -->
+    <item>iron pickaxe</item>
+    <item>diamond pickaxe</item>
+    <item>iron axe</item>
+    <item>diamond axe</item>
+    <item>stone axe</item>
+    <item>iron spade</item>
+    <item>stone spade</item>
+    <item>shears</item>
+    <item>bucket</item>
+    <!-- Armor -->
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>chainmail leggings</item>
+    <item>chainmail boots</item>
+    <item>iron helmet</item>
+    <item>iron leggings</item>
+    <item>iron boots</item>
+    <item>diamond leggings</item>
+    <item>diamond boots</item>
+    <item>diamond helmet</item>
+</itemremove>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>65</maxbuildheight>
+<tnt>
+    <instantignite>true</instantignite>
+    <blockdamage>true</blockdamage>
+    <friendly-defuse>off</friendly-defuse>
+    <fuse>3s</fuse>
+    <yield>1</yield>
+    <power>2.3</power>
+</tnt>
+<disabledamage>
+    <damage ally="true" self="false" enemy="false" other="false">block explosion</damage>
+</disabledamage>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple" amount="1"/>
+        <item material="smooth brick" amount="8"/>
+    </kill-reward>
+    <kill-reward>
+        <item material="tnt" amount="1"/>
+        <filter>
+            <kill-streak count="4" repeat="true"/>
+        </filter>
+    </kill-reward>
+</kill-rewards>
+</map>
