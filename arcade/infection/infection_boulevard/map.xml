@@ -1,8 +1,11 @@
-<map proto="1.4.2" game="Infection">
+<map proto="1.4.2">
 <name>Infection: Boulevard</name>
-<version>1.0.2</version>
-<objective>Survive against the Zombies for 8 minutes!</objective>
-<time result="human-team">8m</time>
+<version>1.0.3</version>
+<include id="infection"/>
+<constants>
+    <constant id="map-zombie-kit">zombie-kit</constant>
+    <constant id="map-human-kit">default-human-kit</constant>
+</constants>
 <authors>
     <author uuid="74948888-fdb8-4446-9340-f7688c2435cc"/> <!-- Zero_Frosty -->
     <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
@@ -15,21 +18,15 @@
 <broadcasts>
     <alert after="2s">The Zombies are released in 8 seconds!</alert>
     <alert after="10s">The Zombies are released!</alert>
-    <tip after="4s" filter="only-humans">You are a Human, You must survive for as long as possible against the waves of Zombies. If you die, you become a Zombie!</tip>
-    <tip after="4s" filter="only-zombies">You are a Zombie, You must kill all of the Humans to win!</tip>
     <tip after="20s" every="2m">Zombies are able to double-jump every 7 seconds.</tip>
 </broadcasts>
-<teams>
-    <team id="human-team" color="gold" plural="true" min="1" max="60" max-overfill="60">Humans</team>
-    <team id="zombie-team" color="dark green" show-name-tags="false" plural="true" min="1" max="8" max-overfill="8">Zombies</team>
-</teams>
 <spawns>
     <default>
         <region yaw="-90">
             <point>2,70,1</point>
         </region>
     </default>
-    <spawn filter="before-10s" team="human-team" kit="human-kit">
+    <spawn filter="before-10s" team="human-team" kit="${map-human-kit}">
         <region yaw="0">
             <point>0.5,10,0.5</point>
         </region>
@@ -51,16 +48,6 @@
     </spawn>
 </spawns>
 <kits>
-    <kit id="human-kit">
-        <item slot="0" unbreakable="true" material="iron sword"/>
-        <item slot="1" unbreakable="true" material="bow"/>
-        <item slot="2" material="arrow" amount="64"/>
-        <helmet locked="true" unbreakable="true" material="chainmail helmet"/>
-        <chestplate locked="true" unbreakable="true" material="chainmail chestplate"/>
-        <leggings locked="true" unbreakable="true" material="chainmail leggings"/>
-        <boots locked="true" unbreakable="true" material="iron boots"/>
-        <game-mode>adventure</game-mode>
-    </kit>
     <kit id="zombie-kit">
         <item slot="0" unbreakable="true" material="stone sword" name="`2`lInfection Sword"/>
         <helmet locked="true" material="skull item" damage="2"/>
@@ -71,34 +58,24 @@
         <double-jump recharge-time="7s"/>
         <game-mode>adventure</game-mode>
     </kit>
-    <kit id="zombie-switch-kit" force="true">
-        <team-switch team="zombie-team"/>
-    </kit>
-    <kit id="attacker-kill-reward">
-        <effect duration="5s" amplifier="2">regeneration</effect>
-    </kit>
 </kits>
 <filters>
-    <team id="only-humans">human-team</team>
-    <team id="only-zombies">zombie-team</team>
     <not id="after-10s">
         <countdown id="before-10s" duration="10s" message="Zombies will be released in {0}">
             <match-running/>
         </countdown>
     </not>
-    <deny id="deny-participating">
-        <participating/>
-    </deny>
 </filters>
-<regions>
-    <apply block="deny-participating"/>
-</regions>
 <portals observers="never">
     <portal forward="after-10s" filter="only-zombies" x="@-15.5" y="@65" z="@1"/>
 </portals>
-<control-points>
-    <control-point id="win-point" name="Zombies Win!" required="true" capture-time="0s" show-progress="true" capture="everywhere"/>
-</control-points>
+<kill-rewards>
+    <kill-reward filter="only-humans"/>
+        <kit id="human-kill-reward">
+            <effect duration="5s" amplifier="2">regeneration</effect>
+        </kit>
+    </kill-reward>
+</kill-rewards>
 <itemremove>
     <item>arrow</item>
     <item>leather helmet</item>
@@ -116,19 +93,4 @@
     <item>bow</item>
     <item>iron boots</item>
 </itemremove>
-<kill-rewards>
-    <kill-reward filter="only-humans" kit="attacker-kill-reward"/>
-</kill-rewards>
-<respawn auto="true"/>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
-<damage>
-    <deny>
-        <all>
-            <cause>fall</cause>
-            <team>zombie-team</team>
-        </all>
-    </deny>
-</damage>
 </map>

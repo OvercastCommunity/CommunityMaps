@@ -1,15 +1,19 @@
-<map proto="1.4.2" game="Infection">
+<map proto="1.4.2">
 <name>Infection: Kraken</name>
-<version>1.1</version>
-<phase>development</phase>
-<objective>Try not to get killed by the infected. Humans win by default after the timer ends.</objective>
-<gamemode>arcade</gamemode>
+<version>1.1.2</version>
 <created>2022-01-30</created>
+<phase>development</phase>
+<include id="infection"/>
+<constants>
+    <constant id="map-zombie-kit">infected-kit</constant>
+    <constant id="map-human-kit">human-kit</constant>
+    <constant id="zombie-team-name">Infected</constant>
+    <constant id="zombie-team-color">green</constant>
+    <constant id="human-team-color">blue</constant>
+</constants>
 <broadcasts>
     <alert after="1s">The infected will be released after 30 seconds!</alert>
     <alert after="30s">The infected have been released!</alert>
-    <tip after="3s" filter="only-humans">You are a Human, You must survive for as long as possible against the infected. If you die, you will become part of the Infected!</tip>
-    <tip after="3s" filter="only-infected">You are Infected, You must kill all of the Humans to win!</tip>
 </broadcasts>
 <authors>
     <author uuid="74948888-fdb8-4446-9340-f7688c2435cc"/> <!-- Zero_Frosty -->
@@ -20,18 +24,9 @@
     <contributor uuid="0a359aef-794b-4d88-97ca-5672d9421532"/> <!-- xTrina -->
     <contributor uuid="f876b863-1ccd-4ae2-acad-8a09e2209e81" contribution="Conversion to Infection"/> <!-- _DISTRACTION_ -->
 </contributors>
-<teams>
-    <team id="human-team" color="blue" show-name-tags="false" plural="true" max="50">Humans</team>
-    <team id="infected-team" color="green" show-name-tags="true" plural="true" max="3" max-overfill="3">Infected</team>
-</teams>
-<time result="human-team">8m</time>
-<respawn auto="true"/>
-<blitz filter="never" join-filter="always">
-    <broadcastLives>false</broadcastLives>
-</blitz>
 <kits>
     <kit id="infected-switch-kit" force="true">
-        <team-switch team="infected-team"/>
+        <team-switch team="zombie-team"/>
     </kit>
     <kit id="infected-kit">
         <helmet locked="true" unbreakable="true" color="00FF00" material="leather helmet"/>
@@ -69,17 +64,17 @@
     </kit>
 </kits>
 <spawns>
-    <spawn filter="before-30s" team="infected-team" kit="infected-kit-start">
+    <spawn filter="before-30s" team="zombie-team" kit="${map-zombie-kit}-start">
         <regions yaw="78">
             <point>13.5,15,198.5</point>
         </regions>
     </spawn>
-    <spawn filter="before-30s" team="human-team" kit="human-kit">
+    <spawn filter="before-30s" team="human-team" kit="${map-human-kit}">
         <regions yaw="0">
             <point>-11.5,13,194</point>
         </regions>
     </spawn>
-    <spawn filter="after-30s" team="infected-team" kit="infected-kit">
+    <spawn filter="after-30s" team="zombie-team" kit="${map-zombie-kit}">
         <regions yaw="78">
             <point>16,12,196</point>
         </regions>
@@ -96,13 +91,8 @@
     </default>
 </spawns>
 <filters>
-    <team id="only-humans">human-team</team>
-    <team id="only-infected">infected-team</team>
     <not id="before-30s">
         <time id="after-30s">31s</time>
-    </not>
-    <not id="deny-void">
-        <void/>
     </not>
     <not id="deny-ender-chest">
         <material>ender chest</material>
@@ -119,6 +109,7 @@
     </all>
 </filters>
 <regions>
+    <apply use="deny-ender-chest"/>
     <complement id="cage">
         <cylinder base="13.5,14,198.5" height="5" radius="3"/>
         <cylinder base="13.5,15,198.5" height="3" radius="2"/>
@@ -158,7 +149,7 @@
     <deny>
         <all>
             <cause>fall</cause>
-            <team>infected-team</team>
+            <team>zombie-team</team>
         </all>
     </deny>
 </damage>
@@ -171,7 +162,4 @@
     <item>bow</item>
     <item>arrow</item>
 </itemremove>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
 </map>

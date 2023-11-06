@@ -1,9 +1,16 @@
-<map proto="1.4.2" game="Infection">
+<map proto="1.4.2">
 <name>Infection: Riot in Prison</name>
-<version>1.0.9</version>
-<objective>The prisoners must resist for 8 minutes against the prison police.</objective>
-<gamemode>arcade</gamemode>
+<version>1.0.10</version>
 <created>2022-03-11</created>
+<include id="infection"/>
+<constants>
+    <constant id="map-zombie-kit">prison-police-kit</constant>
+    <constant id="map-human-kit">prisoners-kit</constant>
+    <constant id="zombie-team-name">Prison Police</constant>
+    <constant id="human-team-name">Prisoners</constant>
+    <constant id="zombie-team-color">dark aqua</constant>
+    <constant id="human-team-color">green</constant>
+</constants>
 <authors>
     <author uuid="065c76d6-32b8-4b3a-8270-db350f876844"/> <!-- Put0veda -->
 </authors>
@@ -19,16 +26,12 @@
     <tip after="0s">Prison Police have Speed I</tip>
     <alert after="0s">Prison Police will be released from the main entrance after 30s!</alert>
 </broadcasts>
-<teams>
-    <team id="Prisoners" color="green" max="60" show-name-tags="false" plural="true">Prisoners</team>
-    <team id="Prison Police" color="dark aqua" max="6" max-overfill="8" show-name-tags="false" plural="true">Prison Police</team>
-</teams>
 <!-- Kits -->
 <kits>
-    <kit id="prison police-switch-kit" force="true">
-        <team-switch team="Prison Police"/>
+    <kit id="prison-police-switch-kit" force="true">
+        <team-switch team="zombie-team"/>
     </kit>
-    <kit id="prison police-kit">
+    <kit id="prison-police-kit">
         <helmet unbreakable="true" material="gold helmet"/>
         <chestplate unbreakable="true" material="gold chestplate"/>
         <leggings unbreakable="true" material="gold leggings"/>
@@ -41,7 +44,7 @@
         <effect duration="30" amplifier="2">jump</effect>
         <game-mode>adventure</game-mode>
     </kit>
-    <kit id="prison police-kit-start">
+    <kit id="prison-police-kit-start">
         <helmet unbreakable="true" material="gold helmet"/>
         <chestplate  unbreakable="true" material="gold chestplate"/>
         <leggings  unbreakable="true" material="gold leggings"/>
@@ -69,27 +72,21 @@
 </kits>
 <!-- Spawns -->
 <spawns>
-    <spawn team="Prisoners" kit="prisoners-kit" yaw="180" safe="true" filter="before-30s" region="Prisoners-spawn-point"/>
-    <spawn team="Prison Police" kit="prison police-kit-start" yaw="-90" filter="before-30s" region="Prison Police-spawn-point"/>
-    <spawn team="Prisoners" kit="prison police-switch-kit" yaw="180" safe="true" filter="after-30s" region="Prisoners-spawn-point"/>
-    <spawn team="Prison Police" kit="prison police-kit" yaw="-90" filter="after-30s" region="Prison Police-spawn-point"/>
+    <spawn team="human-team" kit="${map-human-kit}" yaw="180" safe="true" filter="before-30s" region="Prisoners-spawn-point"/>
+    <spawn team="zombie-team" kit="prison-police-kit-start" yaw="-90" filter="before-30s" region="Prison Police-spawn-point"/>
+    <spawn team="human-team" kit="zombie-switch-kit" yaw="180" safe="true" filter="after-30s" region="Prisoners-spawn-point"/>
+    <spawn team="zombie-team" kit="${map-zombie-kit}" yaw="-90" filter="after-30s" region="Prison Police-spawn-point"/>
     <default yaw="0" region="obs-spawn-point"/>
 </spawns>
-<time result="Prisoners">8m</time>
-<destroyables name="cage" required="false" show="false" owner="Prisoners">
+<destroyables name="cage" required="false" show="false" owner="human-team">
     <destroyable materials="stained glass" region="prison-police-cage" modes="start-game"/>
 </destroyables>
 <!-- Police Release -->
 <modes show-before="30s">
-    <mode id="start-game" after="30s" material="air" name="The prison police are coming"/>
+    <mode id="start-game" after="30s" material="air" name="The prison-police will be released in"/>
 </modes>
 <!-- Filters -->
 <filters>
-    <deny id="deny-players">
-        <participating/>
-    </deny>
-    <team id="only-prisoners">Prisoners</team>
-    <team id="only-prison police">Prison Police</team>
     <not id="before-10s">
         <time id="after-10s">11s</time>
     </not>
@@ -102,9 +99,7 @@
     <cylinder id="Prisoners-spawn-point" base="-111.000,57.00,58.177" height="0" radius="2"/>
     <cuboid id="Prison Police-spawn-point" min="-171,44,68" max="-183,45,78"/>
     <cuboid id="prison-police-cage" min="-171,44,68" max="-169,47,78"/>
-    <apply block="deny-players"/>
 </regions>
-<!-- Kill Rewards -->
 <kill-rewards>
     <kill-reward>
         <kit>
@@ -113,7 +108,7 @@
         </kit>
         <filter>
             <all>
-                <team>Prisoners</team>
+                <team>human-team</team>
                 <kill-streak count="5" repeat="true"/>
             </all>
         </filter>
@@ -123,17 +118,10 @@
             <effect duration="5" amplifier="3">regeneration</effect>
         </kit>
         <filter>
-            <team>Prison Police</team>
+            <team>zombie-team</team>
         </filter>
     </kill-reward>
 </kill-rewards>
-<control-points capture-time="0s" required="true" show="true" show-progress="false">
-    <control-point name="Police Win!" capture-filter="only-prison police">
-        <capture>
-            <everywhere/>
-        </capture>
-    </control-point>
-</control-points>
 <itemremove>
         <item>arrow</item>
         <item>leather helmet</item>
@@ -155,9 +143,6 @@
         <item>gold helmet</item>
         <item>gold leggings</item>
 </itemremove>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
 <damage>
     <deny>
         <attacker>
@@ -165,9 +150,6 @@
         </attacker>
     </deny>
 </damage>
-<disabledamage>
-    <damage>fall</damage>
-</disabledamage>
 <world>
     <timeset>13000</timeset>
 </world>
