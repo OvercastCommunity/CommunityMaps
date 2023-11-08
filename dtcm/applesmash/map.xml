@@ -14,7 +14,7 @@ Features:
 - Auto-ignite TNT available as kill reward or purchase in the Player store
 -->
 <name>Apple Smash</name>
-<version>1.0.0</version>
+<version>1.1.0</version>
 <phase>development</phase>
 <objective>Destroy the enemy's Apples!</objective>
 <gamemode>dtm</gamemode>
@@ -37,7 +37,7 @@ Features:
         <effect duration="3s" amplifier="2">regeneration</effect>
         <effect duration="3s" amplifier="255">damage resistance</effect>
         <item slot="0" material="stone sword" unbreakable="true"/>
-        <item slot="1" material="bow" unbreakable="true" name="Bow" enchantment="arrow infinite"/>
+        <item slot="1" material="bow" unbreakable="true" enchantment="arrow infinite"/>
         <!-- NOTE: only iron and diamond pickaxes will work uniformly with redstone/emerald blocks -->
         <item slot="2" material="iron pickaxe" unbreakable="true"/>
         <item slot="3" material="stone axe" unbreakable="true"/>
@@ -46,7 +46,7 @@ Features:
         <item slot="6" material="smooth brick" amount="16"/>
         <item slot="7" material="bucket"/>
         <item slot="8" material="golden apple"/>
-        <item slot="10" material="arrow" amount="1"/>
+        <item slot="28" material="arrow" amount="1"/>
         <item slot="33" material="wool" amount="16" team-color="true"/>
         <helmet unbreakable="true" locked="true" material="leather helmet" team-color="true"/>
         <chestplate unbreakable="true" locked="false" material="leather chestplate" team-color="true"/>
@@ -287,7 +287,7 @@ Features:
         <sound key="item.armor.equip_diamond" pitch="1" volume="1"/>
         <sound key="item.armor.equip_diamond" pitch=".9" volume="1"/>
         <sound key="item.armor.equip_diamond" pitch=".95" volume="1"/>
-        <message text="`e`l▲ `bYou got a permanent `lDiamond Helmet`r`b upgrade!`r"/>
+        <message text="`2`l▲ `bYou got a permanent `lDiamond Helmet`r`b upgrade!`r"/>
         <set var="vanity_hat_variable" value="1"/>
     </action>
     <action id="helmet-replacement" scope="player">
@@ -345,531 +345,107 @@ Features:
         <set var="vanity_chestplate_life_variable" value="0"/>
     </action>
     <trigger filter="vanity-chestplate-done" trigger="vanity-chestplate-done-action" scope="player"/>
-    <!-- Copious code related to handling event of picking up self/enemy monument blocks (sounds, etc) -->
-    <!-- Since objects can only be filtered as "X or more items", we must process from largest to smallest bucket size
-           There are 4 buckets: 1, 2, 3 and 4+. Smaller buckets support stacking/inventory management, 4+ for everything else
-           The purpose of the state machines are to provide a fixed order for processing buckets: 4+, 3, 2, 1
-           There is 1 state machine for each of the 4 types of block conversions needed, since independent processing is required:
-               Pickup vanilla My Monument Block      -> My Recovered block
-               Pickup Stolen My Monument Block       -> My Recovered block
-               Pickup vanilla Their Monument Block   -> Their Stolen block
-               Pickup Recovered Their Monument Block -> Their Stolen block 
-           When 1+ blocks picked-up, the state machine fires.  At each step, another filter decides if bucket processing needed.
-    -->
-    <!-- State Machine 1 Red -->
-    <action id="pickup-red-action-by-red-state-0" scope="player">
-        <set var="pickup_state1" value="1"/>
+    <!-- Since blocks don't stack well, at least warn the player to manually stack -->
+    <action id="redstone-pickup-warning-action" scope="player">
+        <message text="`4`l▲ `cRestack Red blocks to prevent 'full' inventory!`r"/>
+        <sound key="note.bass" pitch=".891" volume=".1"/>
+        <sound key="note.pling" pitch=".891" volume="1"/>
+        <sound key="note.pling" pitch="1.335" volume="1"/>
     </action>
-    <trigger filter="pickup-red-filter-by-red-state-0" action="pickup-red-action-by-red-state-0" scope="player"/>
-    <action id="pickup-red-action-by-red-state-1" scope="player">
-        <set var="pickup_state1" value="2"/>
+    <trigger filter="redstone-pickup-warning" action="redstone-pickup-warning-action" scope="player"/>
+    <action id="emerald-pickup-warning-action" scope="player">
+        <message text="`4`l▲ `cRestack Green blocks to prevent 'full' inventory!`r"/>
+        <sound key="note.bass" pitch=".891" volume=".1"/>
+        <sound key="note.pling" pitch=".891" volume="1"/>
+        <sound key="note.pling" pitch="1.335" volume="1"/>
     </action>
-    <trigger filter="pickup-red-filter-by-red-state-1" action="pickup-red-action-by-red-state-1" scope="player"/>
-    <action id="pickup-red-action-by-red-state-2" scope="player">
-        <set var="pickup_state1" value="3"/>
-    </action>
-    <trigger filter="pickup-red-filter-by-red-state-2" action="pickup-red-action-by-red-state-2" scope="player"/>
-    <action id="pickup-red-action-by-red-state-3" scope="player">
-        <set var="pickup_state1" value="0"/>
-    </action>
-    <trigger filter="pickup-red-filter-by-red-state-3" action="pickup-red-action-by-red-state-3" scope="player"/>
-    <!-- State Machine 2 Red -->
-    <action id="pickup-red2-action-by-red-state-0" scope="player">
-        <set var="pickup_state2" value="1"/>
-    </action>
-    <trigger filter="pickup-red2-filter-by-red-state-0" action="pickup-red2-action-by-red-state-0" scope="player"/>
-    <action id="pickup-red2-action-by-red-state-1" scope="player">
-        <set var="pickup_state2" value="2"/>
-    </action>
-    <trigger filter="pickup-red2-filter-by-red-state-1" action="pickup-red2-action-by-red-state-1" scope="player"/>
-    <action id="pickup-red2-action-by-red-state-2" scope="player">
-        <set var="pickup_state2" value="3"/>
-    </action>
-    <trigger filter="pickup-red2-filter-by-red-state-2" action="pickup-red2-action-by-red-state-2" scope="player"/>
-    <action id="pickup-red2-action-by-red-state-3" scope="player">
-        <set var="pickup_state2" value="0"/>
-    </action>
-    <trigger filter="pickup-red2-filter-by-red-state-3" action="pickup-red2-action-by-red-state-3" scope="player"/>
-    <!-- State Machine 3 Red -->
-    <action id="pickup-green-action-by-red-state-0" scope="player">
-        <set var="pickup_state3" value="1"/>
-    </action>
-    <trigger filter="pickup-green-filter-by-red-state-0" action="pickup-green-action-by-red-state-0" scope="player"/>
-    <action id="pickup-green-action-by-red-state-1" scope="player">
-        <set var="pickup_state3" value="2"/>
-    </action>
-    <trigger filter="pickup-green-filter-by-red-state-1" action="pickup-green-action-by-red-state-1" scope="player"/>
-    <action id="pickup-green-action-by-red-state-2" scope="player">
-        <set var="pickup_state3" value="3"/>
-    </action>
-    <trigger filter="pickup-green-filter-by-red-state-2" action="pickup-green-action-by-red-state-2" scope="player"/>
-    <action id="pickup-green-action-by-red-state-3" scope="player">
-        <set var="pickup_state3" value="0"/>
-    </action>
-    <trigger filter="pickup-green-filter-by-red-state-3" action="pickup-green-action-by-red-state-3" scope="player"/>
-    <!-- State Machine 4 Red -->
-    <action id="pickup-green2-action-by-red-state-0" scope="player">
-        <set var="pickup_state4" value="1"/>
-    </action>
-    <trigger filter="pickup-green2-filter-by-red-state-0" action="pickup-green2-action-by-red-state-0" scope="player"/>
-    <action id="pickup-green2-action-by-red-state-1" scope="player">
-        <set var="pickup_state4" value="2"/>
-    </action>
-    <trigger filter="pickup-green2-filter-by-red-state-1" action="pickup-green2-action-by-red-state-1" scope="player"/>
-    <action id="pickup-green2-action-by-red-state-2" scope="player">
-        <set var="pickup_state4" value="3"/>
-    </action>
-    <trigger filter="pickup-green2-filter-by-red-state-2" action="pickup-green2-action-by-red-state-2" scope="player"/>
-    <action id="pickup-green2-action-by-red-state-3" scope="player">
-        <set var="pickup_state4" value="0"/>
-    </action>
-    <trigger filter="pickup-green2-filter-by-red-state-3" action="pickup-green2-action-by-red-state-3" scope="player"/>
-    <!-- State Machine 1 Green -->
-    <action id="pickup-red-action-by-green-state-0" scope="player">
-        <set var="pickup_state3" value="1"/>
-    </action>
-    <trigger filter="pickup-red-filter-by-green-state-0" action="pickup-red-action-by-green-state-0" scope="player"/>
-    <action id="pickup-red-action-by-green-state-1" scope="player">
-        <set var="pickup_state3" value="2"/>
-    </action>
-    <trigger filter="pickup-red-filter-by-green-state-1" action="pickup-red-action-by-green-state-1" scope="player"/>
-    <action id="pickup-red-action-by-green-state-2" scope="player">
-        <set var="pickup_state3" value="3"/>
-    </action>
-    <trigger filter="pickup-red-filter-by-green-state-2" action="pickup-red-action-by-green-state-2" scope="player"/>
-    <action id="pickup-red-action-by-green-state-3" scope="player">
-        <set var="pickup_state3" value="0"/>
-    </action>
-    <trigger filter="pickup-red-filter-by-green-state-3" action="pickup-red-action-by-green-state-3" scope="player"/>
-    <!-- State Machine 2 Green -->
-    <action id="pickup-red2-action-by-green-state-0" scope="player">
-        <set var="pickup_state4" value="1"/>
-    </action>
-    <trigger filter="pickup-red2-filter-by-green-state-0" action="pickup-red2-action-by-green-state-0" scope="player"/>
-    <action id="pickup-red2-action-by-green-state-1" scope="player">
-        <set var="pickup_state4" value="2"/>
-    </action>
-    <trigger filter="pickup-red2-filter-by-green-state-1" action="pickup-red2-action-by-green-state-1" scope="player"/>
-    <action id="pickup-red2-action-by-green-state-2" scope="player">
-        <set var="pickup_state4" value="3"/>
-    </action>
-    <trigger filter="pickup-red2-filter-by-green-state-2" action="pickup-red2-action-by-green-state-2" scope="player"/>
-    <action id="pickup-red2-action-by-green-state-3" scope="player">
-        <set var="pickup_state4" value="0"/>
-    </action>
-    <trigger filter="pickup-red2-filter-by-green-state-3" action="pickup-red2-action-by-green-state-3" scope="player"/>
-    <!-- State Machine 3 Green -->
-    <action id="pickup-green-action-by-green-state-0" scope="player">
-        <set var="pickup_state1" value="1"/>
-    </action>
-    <trigger filter="pickup-green-filter-by-green-state-0" action="pickup-green-action-by-green-state-0" scope="player"/>
-    <action id="pickup-green-action-by-green-state-1" scope="player">
-        <set var="pickup_state1" value="2"/>
-    </action>
-    <trigger filter="pickup-green-filter-by-green-state-1" action="pickup-green-action-by-green-state-1" scope="player"/>
-    <action id="pickup-green-action-by-green-state-2" scope="player">
-        <set var="pickup_state1" value="3"/>
-    </action>
-    <trigger filter="pickup-green-filter-by-green-state-2" action="pickup-green-action-by-green-state-2" scope="player"/>
-    <action id="pickup-green-action-by-green-state-3" scope="player">
-        <set var="pickup_state1" value="0"/>
-    </action>
-    <trigger filter="pickup-green-filter-by-green-state-3" action="pickup-green-action-by-green-state-3" scope="player"/>
-    <!-- State Machine 4 Green -->
-    <action id="pickup-green2-action-by-green-state-0" scope="player">
-        <set var="pickup_state2" value="1"/>
-    </action>
-    <trigger filter="pickup-green2-filter-by-green-state-0" action="pickup-green2-action-by-green-state-0" scope="player"/>
-    <action id="pickup-green2-action-by-green-state-1" scope="player">
-        <set var="pickup_state2" value="2"/>
-    </action>
-    <trigger filter="pickup-green2-filter-by-green-state-1" action="pickup-green2-action-by-green-state-1" scope="player"/>
-    <action id="pickup-green2-action-by-green-state-2" scope="player">
-        <set var="pickup_state2" value="3"/>
-    </action>
-    <trigger filter="pickup-green2-filter-by-green-state-2" action="pickup-green2-action-by-green-state-2" scope="player"/>
-    <action id="pickup-green2-action-by-green-state-3" scope="player">
-        <set var="pickup_state2" value="0"/>
-    </action>
-    <trigger filter="pickup-green2-filter-by-green-state-3" action="pickup-green2-action-by-green-state-3" scope="player"/>
+    <trigger filter="emerald-pickup-warning" action="emerald-pickup-warning-action" scope="player"/>
     <!-- BY RED -->
     <!-- Red picks up plain redstone -->
     <action id="pickup-red-action-by-red" scope="player">
         <sound key="random.levelup" volume=".9" pitch="1.2"/>
         <set var="pickup_red_momentary_variable" value="1"/>
-        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
         <replace-item ignore-metadata="false" keep-amount="true">
             <find material="redstone block"/>
             <replace material="redstone block" name="Red Recovered block"/>
         </replace-item>
     </action>
     <trigger filter="pickup-red-filter-by-red" action="pickup-red-action-by-red" scope="player"/>
-    <action id="pickup-red-action-1-by-red" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_red_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="3">
-            <find material="redstone block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="redstone block" name="Red Recovered block" amount="3"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-red-filter-1-by-red" action="pickup-red-action-1-by-red" scope="player"/>
-    <action id="pickup-red-action-2-by-red" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_red_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="2">
-            <find material="redstone block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="redstone block" name="Red Recovered block" amount="2"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-red-filter-2-by-red" action="pickup-red-action-2-by-red" scope="player"/>
-    <action id="pickup-red-action-3-by-red" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_red_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="1">
-            <find material="redstone block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="redstone block" name="Red Recovered block" amount="1"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-red-filter-3-by-red" action="pickup-red-action-3-by-red" scope="player"/>
     <!-- Red picks up stolen redstone -->
     <action id="pickup-red2-action-by-red" scope="player">
         <sound key="random.levelup" volume=".9" pitch="1.2"/>
         <set var="pickup_red_momentary_variable" value="1"/>
-        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
         <replace-item ignore-metadata="false" keep-amount="true">
             <find material="redstone block" name="Red Stolen block"/>
             <replace material="redstone block" name="Red Recovered block"/>
         </replace-item>
     </action>
     <trigger filter="pickup-red2-filter-by-red" action="pickup-red2-action-by-red" scope="player"/>
-    <action id="pickup-red2-action-1-by-red" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_red_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="3">
-            <find material="redstone block" name="Red Stolen block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="redstone block" name="Red Recovered block" amount="3"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-red2-filter-1-by-red" action="pickup-red2-action-1-by-red" scope="player"/>
-    <action id="pickup-red2-action-2-by-red" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_red_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="2">
-            <find material="redstone block" name="Red Stolen block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="redstone block" name="Red Recovered block" amount="2"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-red2-filter-2-by-red" action="pickup-red2-action-2-by-red" scope="player"/>
-    <action id="pickup-red2-action-3-by-red" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_red_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="1">
-            <find material="redstone block" name="Red Stolen block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="redstone block" name="Red Recovered block" amount="1"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-red2-filter-3-by-red" action="pickup-red2-action-3-by-red" scope="player"/>
     <!-- Red picks up vanilla emerald -->
     <action id="pickup-green-action-by-red" scope="player">
         <sound key="random.levelup" volume=".9" pitch="1.2"/>
         <set var="pickup_green_momentary_variable" value="1"/>
-        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
+        <set var="pickup_enemy_count" value="pickup_enemy_count+1"/>
         <replace-item ignore-metadata="false" keep-amount="true">
             <find material="emerald block"/>
             <replace material="emerald block" name="Green Stolen block"/>
         </replace-item>
     </action>
     <trigger filter="pickup-green-filter-by-red" action="pickup-green-action-by-red" scope="player"/>
-    <action id="pickup-green-action-1-by-red" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_green_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="3">
-            <find material="emerald block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="emerald block" name="Green Stolen block" amount="3"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-green-filter-1-by-red" action="pickup-green-action-1-by-red" scope="player"/>
-    <action id="pickup-green-action-2-by-red" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_green_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="2">
-            <find material="emerald block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="emerald block" name="Green Stolen block" amount="2"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-green-filter-2-by-red" action="pickup-green-action-2-by-red" scope="player"/>
-    <action id="pickup-green-action-3-by-red" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_green_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="1">
-            <find material="emerald block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="emerald block" name="Green Stolen block" amount="1"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-green-filter-3-by-red" action="pickup-green-action-3-by-red" scope="player"/>
     <!-- Red picks up recovered emerald -->
     <action id="pickup-green2-action-by-red" scope="player">
         <sound key="random.levelup" volume=".9" pitch="1.2"/>
         <set var="pickup_green_momentary_variable" value="1"/>
-        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
+        <set var="pickup_enemy_count" value="pickup_enemy_count+1"/>
         <replace-item ignore-metadata="false" keep-amount="true">
             <find material="emerald block" name="Green Recovered block"/>
             <replace material="emerald block" name="Green Stolen block"/>
         </replace-item>
     </action>
     <trigger filter="pickup-green2-filter-by-red" action="pickup-green2-action-by-red" scope="player"/>
-    <action id="pickup-green2-action-1-by-red" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_green_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="3">
-            <find material="emerald block" name="Green Recovered block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="emerald block" name="Green Stolen block" amount="3"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-green2-filter-1-by-red" action="pickup-green2-action-1-by-red" scope="player"/>
-    <action id="pickup-green2-action-2-by-red" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_green_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="2">
-            <find material="emerald block" name="Green Recovered block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="emerald block" name="Green Stolen block" amount="2"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-green2-filter-2-by-red" action="pickup-green2-action-2-by-red" scope="player"/>
-    <action id="pickup-green2-action-3-by-red" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_green_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="1">
-            <find material="emerald block" name="Green Recovered block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="emerald block" name="Green Stolen block" amount="1"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-green2-filter-3-by-red" action="pickup-green2-action-3-by-red" scope="player"/>
     <!-- By GREEN -->
     <!-- Green picks up plain emerald -->
     <action id="pickup-green-action-by-green" scope="player">
         <sound key="random.levelup" volume=".9" pitch="1.2"/>
         <set var="pickup_green_momentary_variable" value="1"/>
-        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
         <replace-item ignore-metadata="false" keep-amount="true">
             <find material="emerald block"/>
             <replace material="emerald block" name="Green Recovered block"/>
         </replace-item>
     </action>
     <trigger filter="pickup-green-filter-by-green" action="pickup-green-action-by-green" scope="player"/>
-    <action id="pickup-green-action-1-by-green" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_green_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="3">
-            <find material="emerald block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="emerald block" name="Green Recovered block" amount="3"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-green-filter-1-by-green" action="pickup-green-action-1-by-green" scope="player"/>
-    <action id="pickup-green-action-2-by-green" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_green_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="2">
-            <find material="emerald block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="emerald block" name="Green Recovered block" amount="2"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-green-filter-2-by-green" action="pickup-green-action-2-by-green" scope="player"/>
-    <action id="pickup-green-action-3-by-green" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_green_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="1">
-            <find material="emerald block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="emerald block" name="Green Recovered block" amount="1"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-green-filter-3-by-green" action="pickup-green-action-3-by-green" scope="player"/>
     <!-- Green picks up stolen emerald -->
     <action id="pickup-green2-action-by-green" scope="player">
         <sound key="random.levelup" volume=".9" pitch="1.2"/>
         <set var="pickup_green_momentary_variable" value="1"/>
-        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
         <replace-item ignore-metadata="false" keep-amount="true">
             <find material="emerald block" name="Green Stolen block"/>
             <replace material="emerald block" name="Green Recovered block"/>
         </replace-item>
     </action>
     <trigger filter="pickup-green2-filter-by-green" action="pickup-green2-action-by-green" scope="player"/>
-    <action id="pickup-green2-action-1-by-green" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_green_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="3">
-            <find material="emerald block" name="Green Stolen block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="emerald block" name="Green Recovered block" amount="3"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-green2-filter-1-by-green" action="pickup-green2-action-1-by-green" scope="player"/>
-    <action id="pickup-green2-action-2-by-green" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_green_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="2">
-            <find material="emerald block" name="Green Stolen block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="emerald block" name="Green Recovered block" amount="2"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-green2-filter-2-by-green" action="pickup-green2-action-2-by-green" scope="player"/>
-    <action id="pickup-green2-action-3-by-green" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_green_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="1">
-            <find material="emerald block" name="Green Stolen block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="emerald block" name="Green Recovered block" amount="1"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-green2-filter-3-by-green" action="pickup-green2-action-3-by-green" scope="player"/>
     <!-- Green picks up vanilla redstone -->
     <action id="pickup-red-action-by-green" scope="player">
         <sound key="random.levelup" volume=".9" pitch="1.2"/>
         <set var="pickup_red_momentary_variable" value="1"/>
-        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
+        <set var="pickup_enemy_count" value="pickup_enemy_count+1"/>
         <replace-item ignore-metadata="false" keep-amount="true">
             <find material="redstone block"/>
             <replace material="redstone block" name="Red Stolen block"/>
         </replace-item>
     </action>
     <trigger filter="pickup-red-filter-by-green" action="pickup-red-action-by-green" scope="player"/>
-    <action id="pickup-red-action-1-by-green" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_red_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="3">
-            <find material="redstone block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="redstone block" name="Red Stolen block" amount="3"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-red-filter-1-by-green" action="pickup-red-action-1-by-green" scope="player"/>
-    <action id="pickup-red-action-2-by-green" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_red_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="2">
-            <find material="redstone block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="redstone block" name="Red Stolen block" amount="2"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-red-filter-2-by-green" action="pickup-red-action-2-by-green" scope="player"/>
-    <action id="pickup-red-action-3-by-green" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_red_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="1">
-            <find material="redstone block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="redstone block" name="Red Stolen block" amount="1"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-red-filter-3-by-green" action="pickup-red-action-3-by-green" scope="player"/>
     <!-- Green picks up recovered redstone -->
     <action id="pickup-red2-action-by-green" scope="player">
         <sound key="random.levelup" volume=".9" pitch="1.2"/>
         <set var="pickup_red_momentary_variable" value="1"/>
-        <!-- This method doesn't stack with existing blocks, but fallback for handling 4 and larger sized stacks -->
+        <set var="pickup_enemy_count" value="pickup_enemy_count+1"/>
         <replace-item ignore-metadata="false" keep-amount="true">
             <find material="redstone block" name="Red Recovered block"/>
             <replace material="redstone block" name="Red Stolen block"/>
         </replace-item>
     </action>
     <trigger filter="pickup-red2-filter-by-green" action="pickup-red2-action-by-green" scope="player"/>
-    <action id="pickup-red2-action-1-by-green" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_red_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="3">
-            <find material="redstone block" name="Red Recovered block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="redstone block" name="Red Stolen block" amount="3"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-red2-filter-1-by-green" action="pickup-red2-action-1-by-green" scope="player"/>
-    <action id="pickup-red2-action-2-by-green" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_red_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="2">
-            <find material="redstone block" name="Red Recovered block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="redstone block" name="Red Stolen block" amount="2"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-red2-filter-2-by-green" action="pickup-red2-action-2-by-green" scope="player"/>
-    <action id="pickup-red2-action-3-by-green" scope="player">
-        <sound key="random.levelup" volume=".9" pitch="1.2"/>
-        <set var="pickup_red_momentary_variable" value="1"/>
-        <replace-item ignore-metadata="false" amount="1">
-            <find material="redstone block" name="Red Recovered block"/>
-            <replace material="air"/>
-        </replace-item>
-        <kit force="true" filter="always" deduct-items="false">
-            <item material="redstone block" name="Red Stolen block" amount="1"/>
-        </kit>
-    </action>
-    <trigger filter="pickup-red2-filter-3-by-green" action="pickup-red2-action-3-by-green" scope="player"/>
     <!--
          Pitch Guide:
          0.5    F#      1      F#
@@ -2090,11 +1666,6 @@ Features:
 <variables>
     <variable id="intro_variable" default="17" scope="match"/>
     <variable id="reset_phase_variable" default="0" scope="player"/> <!-- 0=dead 1=phase1Done 2=phase2Done -->
-    <!-- pickup state: 0 -> 3 -> 2 -> 1 -> 0 -->
-    <variable id="pickup_state1" default="0" scope="player"/> <!-- red: vanilla to recovered -->
-    <variable id="pickup_state2" default="0" scope="player"/> <!-- red: stolen to recovered -->
-    <variable id="pickup_state3" default="0" scope="player"/> <!-- green: vanilla to stolen -->
-    <variable id="pickup_state4" default="0" scope="player"/> <!-- green: recovered to stolen -->
     <!-- pickup redstone and emerald block variables for sounds and helmet upgrade -->
     <variable id="pickup_green_momentary_variable" default="0" scope="player"/>
     <variable id="pickup_red_momentary_variable" default="0" scope="player"/>
@@ -2102,6 +1673,7 @@ Features:
     <variable id="pickup_me_variable" default="0" scope="player"/>
     <variable id="pickup_theirs_variable" default="0" scope="player"/>
     <variable id="upgrade_me_variable" default="0" scope="player"/>
+    <variable id="pickup_enemy_count" default="0" scope="player"/>
     <!-- player vanity upgrade -->
     <variable id="vanity_hat_variable" default="0" scope="player"/>
     <variable id="vanity_chestplate_variable" default="0" scope="player"/>
@@ -2145,6 +1717,18 @@ Features:
     <after id="pickup-red-momentary" duration="0.2s">
         <variable var="pickup_red_momentary_variable">1</variable>
     </after>
+    <after id="redstone-pickup-warning" duration="5s">
+        <all>
+            <team>green-team</team>
+            <variable var="pickup_enemy_count">[14,oo)</variable>
+        </all>
+    </after>
+    <after id="emerald-pickup-warning" duration="5s">
+        <all>
+            <team>red-team</team>
+            <variable var="pickup_enemy_count">[14,oo)</variable>
+        </all>
+    </after>
     <!-- Auto equip the diamond chestplate -->
     <all id="chestplate-holding">
         <not>
@@ -2157,7 +1741,7 @@ Features:
         </carrying>
     </all>
     <!-- Auto remove extra chestplates from inventory -->
-    <all id="chestplate-hoarding"> 
+    <all id="chestplate-hoarding">
         <wearing ignore-metadata="true">
             <item material="diamond chestplate"/>
         </wearing>
@@ -2326,459 +1910,56 @@ Features:
         <variable var="sword_variable">2</variable>
         <variable var="sharpness_variable">2</variable>
     </all>
-    <!-- Red State Machine filters -->
-    <all id="pickup-red-filter-by-red-state-0"> <!-- Red picks up plain redstone -->
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" amount="1"/> <!-- matches 1 or more -->
-        </carrying>
-        <variable var="pickup_state1">0</variable>
-    </all>
-    <after id="pickup-red-filter-by-red-state-1" duration="0.2">
-        <all>
-            <variable var="pickup_state1">1</variable>
-        </all>
-    </after>
-    <after id="pickup-red-filter-by-red-state-2" duration="0.2">
-        <all>
-            <variable var="pickup_state1">2</variable>
-        </all>
-    </after>
-    <after id="pickup-red-filter-by-red-state-3" duration="0.2">
-        <all>
-            <variable var="pickup_state1">3</variable>
-        </all>
-    </after>
-    <all id="pickup-red2-filter-by-red-state-0"> <!-- Red picks up stolen redstone -->
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" name="Red Stolen block" amount="1"/> <!-- matches 1 or more -->
-        </carrying>
-        <variable var="pickup_state2">0</variable>
-    </all>
-    <after id="pickup-red2-filter-by-red-state-1" duration="0.2">
-        <all>
-            <variable var="pickup_state2">1</variable>
-        </all>
-    </after>
-    <after id="pickup-red2-filter-by-red-state-2" duration="0.2">
-        <all>
-            <variable var="pickup_state2">2</variable>
-        </all>
-    </after>
-    <after id="pickup-red2-filter-by-red-state-3" duration="0.2">
-        <all>
-            <variable var="pickup_state2">3</variable>
-        </all>
-    </after>
-    <all id="pickup-green-filter-by-red-state-0"> <!-- Red picks up plain emerald -->
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" amount="1"/> <!-- matches 1 or more -->
-        </carrying>
-        <variable var="pickup_state3">0</variable>
-    </all>
-    <after id="pickup-green-filter-by-red-state-1" duration="0.2">
-        <all>
-            <variable var="pickup_state3">1</variable>
-        </all>
-    </after>
-    <after id="pickup-green-filter-by-red-state-2" duration="0.2">
-        <all>
-            <variable var="pickup_state3">2</variable>
-        </all>
-    </after>
-    <after id="pickup-green-filter-by-red-state-3" duration="0.2">
-        <all>
-            <variable var="pickup_state3">3</variable>
-        </all>
-    </after>
-    <all id="pickup-green2-filter-by-red-state-0"> <!-- Red picks up recovered emerald -->
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" name="Green Recovered block" amount="1"/> <!-- matches 1 or more -->
-        </carrying>
-        <variable var="pickup_state4">0</variable>
-    </all>
-    <after id="pickup-green2-filter-by-red-state-1" duration="0.2">
-        <all>
-            <variable var="pickup_state4">1</variable>
-        </all>
-    </after>
-    <after id="pickup-green2-filter-by-red-state-2" duration="0.2">
-        <all>
-            <variable var="pickup_state4">2</variable>
-        </all>
-    </after>
-    <after id="pickup-green2-filter-by-red-state-3" duration="0.2">
-        <all>
-            <variable var="pickup_state4">3</variable>
-        </all>
-    </after>
-    <!-- Green State Machine filters -->
-    <all id="pickup-red-filter-by-green-state-0"> <!-- Green picks up plain redstone -->
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" amount="1"/> <!-- matches 1 or more -->
-        </carrying>
-        <variable var="pickup_state3">0</variable>
-    </all>
-    <after id="pickup-red-filter-by-green-state-1" duration="0.2">
-        <all>
-            <variable var="pickup_state3">1</variable>
-        </all>
-    </after>
-    <after id="pickup-red-filter-by-green-state-2" duration="0.2">
-        <all>
-            <variable var="pickup_state3">2</variable>
-        </all>
-    </after>
-    <after id="pickup-red-filter-by-green-state-3" duration="0.2">
-        <all>
-            <variable var="pickup_state3">3</variable>
-        </all>
-    </after>
-    <all id="pickup-red2-filter-by-green-state-0"> <!-- Green picks up recovered redstone -->
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" name="Red Recovered block" amount="1"/> <!-- matches 1 or more -->
-        </carrying>
-        <variable var="pickup_state4">0</variable>
-    </all>
-    <after id="pickup-red2-filter-by-green-state-1" duration="0.2">
-        <all>
-            <variable var="pickup_state4">1</variable>
-        </all>
-    </after>
-    <after id="pickup-red2-filter-by-green-state-2" duration="0.2">
-        <all>
-            <variable var="pickup_state4">2</variable>
-        </all>
-    </after>
-    <after id="pickup-red2-filter-by-green-state-3" duration="0.2">
-        <all>
-            <variable var="pickup_state4">3</variable>
-        </all>
-    </after>
-    <all id="pickup-green-filter-by-green-state-0"> <!-- Green picks up plain emerald -->
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" amount="1"/> <!-- matches 1 or more -->
-        </carrying>
-        <variable var="pickup_state1">0</variable>
-    </all>
-    <after id="pickup-green-filter-by-green-state-1" duration="0.2">
-        <all>
-            <variable var="pickup_state1">1</variable>
-        </all>
-    </after>
-    <after id="pickup-green-filter-by-green-state-2" duration="0.2">
-        <all>
-            <variable var="pickup_state1">2</variable>
-        </all>
-    </after>
-    <after id="pickup-green-filter-by-green-state-3" duration="0.2">
-        <all>
-            <variable var="pickup_state1">3</variable>
-        </all>
-    </after>
-    <all id="pickup-green2-filter-by-green-state-0"> <!-- Green picks up stolen emerald -->
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" name="Green Stolen block" amount="1"/> <!-- matches 1 or more -->
-        </carrying>
-        <variable var="pickup_state2">0</variable>
-    </all>
-    <after id="pickup-green2-filter-by-green-state-1" duration="0.2">
-        <all>
-            <variable var="pickup_state2">1</variable>
-        </all>
-    </after>
-    <after id="pickup-green2-filter-by-green-state-2" duration="0.2">
-        <all>
-            <variable var="pickup_state2">2</variable>
-        </all>
-    </after>
-    <after id="pickup-green2-filter-by-green-state-3" duration="0.2">
-        <all>
-            <variable var="pickup_state2">3</variable>
-        </all>
-    </after>
-    <!-- Each type of pickup has 4 filters which use 2 different strategies -->
     <!-- Red Pick-up Filters -->
     <all id="pickup-red-filter-by-red"> <!-- Red picks up plain redstone -->
         <team>red-team</team>
         <carrying ignore-metadata="false">
-            <item material="redstone block" amount="4"/> <!-- matches 4 or more -->
+            <item material="redstone block"/>
         </carrying>
-        <variable var="pickup_state1">0</variable>
     </all>
-    <after id="pickup-red-filter-1-by-red" duration="0.1">
-    <all>
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" amount="3"/> <!-- matches 3 or more -->
-        </carrying>
-        <variable var="pickup_state1">1</variable>
-    </all>
-    </after>
-    <after id="pickup-red-filter-2-by-red" duration="0.1">
-    <all>
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" amount="2"/> <!-- matches 2 or more -->
-        </carrying>
-        <variable var="pickup_state1">2</variable>
-    </all>
-    </after>
-    <after id="pickup-red-filter-3-by-red" duration="0.1">
-    <all>
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" amount="1"/> <!-- matches 1 or more -->
-        </carrying>
-        <variable var="pickup_state1">3</variable>
-     </all>
-    </after>
     <all id="pickup-red2-filter-by-red"> <!-- Red picks up stolen redstone -->
         <team>red-team</team>
         <carrying ignore-metadata="false">
-           <item material="redstone block" name="Red Stolen block" amount="4"/>
+            <item material="redstone block" name="Red Stolen block"/>
         </carrying>
-        <variable var="pickup_state2">0</variable>
     </all>
-    <after id="pickup-red2-filter-1-by-red" duration="0.1">
-        <all>
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" name="Red Stolen block" amount="3"/>
-        </carrying>
-        <variable var="pickup_state2">1</variable>
-    </all>
-    </after>
-    <after id="pickup-red2-filter-2-by-red" duration="0.1">
-        <all>
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" name="Red Stolen block" amount="2"/>
-        </carrying>
-        <variable var="pickup_state2">2</variable>
-    </all>
-    </after>
-    <after id="pickup-red2-filter-3-by-red" duration="0.1">
-        <all>
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" name="Red Stolen block" amount="1"/>
-        </carrying>
-        <variable var="pickup_state2">3</variable>
-    </all>
-    </after>
     <all id="pickup-green-filter-by-red"> <!-- Red picks up vanilla emerald -->
         <team>red-team</team>
         <carrying ignore-metadata="false">
-            <item material="emerald block" amount="4"/>
+            <item material="emerald block"/>
         </carrying>
-        <variable var="pickup_state3">0</variable>
     </all>
-    <after id="pickup-green-filter-1-by-red" duration="0.1">
-        <all>
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" amount="3"/>
-        </carrying>
-        <variable var="pickup_state3">1</variable>
-    </all>
-    </after>
-    <after id="pickup-green-filter-2-by-red" duration="0.1">
-        <all>
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" amount="2"/>
-        </carrying>
-        <variable var="pickup_state3">2</variable>
-    </all>
-    </after>
-    <after id="pickup-green-filter-3-by-red" duration="0.1">
-        <all>
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" amount="1"/>
-        </carrying>
-        <variable var="pickup_state3">3</variable>
-    </all>
-    </after>
     <all id="pickup-green2-filter-by-red"> <!-- Red picks up recovered emerald -->
         <team>red-team</team>
         <carrying ignore-metadata="false">
-            <item material="emerald block" name="Green Recovered block" amount="4"/>
+            <item material="emerald block" name="Green Recovered block"/>
         </carrying>
-        <variable var="pickup_state4">0</variable>
     </all>
-    <after id="pickup-green2-filter-1-by-red" duration="0.1">
-        <all>
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" name="Green Recovered block" amount="3"/>
-        </carrying>
-        <variable var="pickup_state4">1</variable>
-    </all>
-    </after>
-    <after id="pickup-green2-filter-2-by-red" duration="0.1">
-        <all>
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" name="Green Recovered block" amount="2"/>
-        </carrying>
-        <variable var="pickup_state4">2</variable>
-    </all>
-    </after>
-    <after id="pickup-green2-filter-3-by-red" duration="0.1">
-    <all>
-        <team>red-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" name="Green Recovered block" amount="1"/>
-        </carrying>
-        <variable var="pickup_state4">3</variable>
-    </all>
-    </after>
     <!-- Green Pick-up Filters -->
     <all id="pickup-green-filter-by-green"> <!-- Green picks up plain emerald -->
         <team>green-team</team>
         <carrying ignore-metadata="false">
-            <item material="emerald block" amount="4"/> <!-- matches 4 or more -->
+            <item material="emerald block"/>
         </carrying>
-        <variable var="pickup_state1">0</variable>
     </all>
-    <after id="pickup-green-filter-1-by-green" duration="0.1">
-        <all>
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" amount="3"/>
-        </carrying>
-        <variable var="pickup_state1">1</variable>
-    </all>
-    </after>
-    <after id="pickup-green-filter-2-by-green" duration="0.1">
-        <all>
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" amount="2"/>
-        </carrying>
-        <variable var="pickup_state1">2</variable>
-    </all>
-    </after>
-    <after id="pickup-green-filter-3-by-green" duration="0.1">
-    <all>
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" amount="1"/>
-        </carrying>
-        <variable var="pickup_state1">3</variable>
-    </all>
-    </after>
     <all id="pickup-green2-filter-by-green"> <!-- Green picks up stolen emerald -->
         <team>green-team</team>
         <carrying ignore-metadata="false">
-            <item material="emerald block" name="Green Stolen block" amount="4"/>
+            <item material="emerald block" name="Green Stolen block"/>
         </carrying>
-        <variable var="pickup_state2">0</variable>
     </all>
-    <after id="pickup-green2-filter-1-by-green" duration="0.1">
-        <all>
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" name="Green Stolen block" amount="3"/>
-        </carrying>
-        <variable var="pickup_state2">1</variable>
-    </all>
-    </after>
-    <after id="pickup-green2-filter-2-by-green" duration="0.1">
-        <all>
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" name="Green Stolen block" amount="2"/>
-        </carrying>
-        <variable var="pickup_state2">2</variable>
-    </all>
-    </after>
-    <after id="pickup-green2-filter-3-by-green" duration="0.1">
-    <all>
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="emerald block" name="Green Stolen block" amount="1"/>
-        </carrying>
-        <variable var="pickup_state2">3</variable>
-    </all>
-    </after>
     <all id="pickup-red-filter-by-green"> <!-- Green picks up vanilla redstone -->
         <team>green-team</team>
         <carrying ignore-metadata="false">
-            <item material="redstone block" amount="4"/>
+            <item material="redstone block"/>
         </carrying>
-        <variable var="pickup_state3">0</variable>
     </all>
-    <after id="pickup-red-filter-1-by-green" duration="0.1">
-        <all>
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" amount="3"/>
-        </carrying>
-        <variable var="pickup_state3">1</variable>
-    </all>
-    </after>
-    <after id="pickup-red-filter-2-by-green" duration="0.1">
-        <all>
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" amount="2"/>
-        </carrying>
-        <variable var="pickup_state3">2</variable>
-    </all>
-    </after>
-    <after id="pickup-red-filter-3-by-green" duration="0.1">
-    <all>
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" amount="1"/>
-        </carrying>
-        <variable var="pickup_state3">3</variable>
-    </all>
-    </after>
     <all id="pickup-red2-filter-by-green"> <!-- Green picks up recovered redstone -->
         <team>green-team</team>
         <carrying ignore-metadata="false">
-            <item material="redstone block" name="Red Recovered block" amount="4"/>
+            <item material="redstone block" name="Red Recovered block"/>
         </carrying>
-        <variable var="pickup_state4">0</variable>
     </all>
-    <after id="pickup-red2-filter-1-by-green" duration="0.1">
-        <all>
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" name="Red Recovered block" amount="3"/>
-        </carrying>
-        <variable var="pickup_state4">1</variable>
-    </all>
-    </after>
-    <after id="pickup-red2-filter-2-by-green" duration="0.1">
-        <all>
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" name="Red Recovered block" amount="2"/>
-        </carrying>
-        <variable var="pickup_state4">2</variable>
-    </all>
-    </after>
-    <after id="pickup-red2-filter-3-by-green"  duration="0.1">
-    <all>
-        <team>green-team</team>
-        <carrying ignore-metadata="false">
-            <item material="redstone block" name="Red Recovered block" amount="1"/>
-        </carrying>
-        <variable var="pickup_state4">3</variable>
-    </all>
-    </after>
     <!-- More pickup related filters -->
     <all id="red-pickup-red-filter">
         <alive/>
@@ -3314,7 +2495,7 @@ Features:
     </union>
     <negative id="not-build-area">
         <union id="build-area">
-            <cuboid min="-99,13,-63" max="100,65,64"/>
+            <cuboid min="-103,13,-63" max="104,65,64"/>
         </union>
     </negative>
     <cuboid id="red-monument-region" min="125,90,-22" max="130,116,20"/>
@@ -3332,6 +2513,7 @@ Features:
     <item>smooth brick</item>
     <item>wool</item>
     <item>log</item>
+    <item>wood</item>
     <item>golden apple</item>
 </itemkeep>
 <itemremove>
@@ -3350,11 +2532,12 @@ Features:
     <!-- Tools -->
     <item>iron pickaxe</item>
     <item>diamond pickaxe</item>
+    <item>stone axe</item>
     <item>iron axe</item>
     <item>diamond axe</item>
-    <item>stone axe</item>
     <item>iron spade</item>
     <item>stone spade</item>
+    <item>diamond spade</item>
     <item>shears</item>
     <item>bucket</item>
     <!-- Armor -->
@@ -3381,7 +2564,7 @@ Features:
     <friendly-defuse>off</friendly-defuse>
     <fuse>3s</fuse>
     <yield>1</yield>
-    <power>2.3</power>
+    <power>2.4</power>
 </tnt>
 <disabledamage>
     <damage ally="true" self="false" enemy="false" other="false">block explosion</damage>
