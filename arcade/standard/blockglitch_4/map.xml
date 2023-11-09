@@ -2,7 +2,7 @@
 <!-- #region meta -->
 <name>BlockGlitch 4</name>
 <slug>blockglitch_4_hell_edition</slug>
-<version>1.1.0</version>
+<version>1.1.1</version>
 <created>2023-10-22</created>
 <objective>Be the first one to finish the parkour!</objective>
 <phase>development</phase>
@@ -15,9 +15,6 @@
 <rules>
     <rule>Blockglitching is allowed.</rule>
 </rules>
-<broadcasts>
-    <tip after="10s">Every minute you'll be able to skip a level whenever you fail!</tip>
-</broadcasts>
 <players max="666" colors="true" />
 <time>12m</time>
 <respawn delay="0s" auto="true" blackout="false" />
@@ -48,7 +45,7 @@
     <constant id="LEVELLED_ITEM_9">red sandstone</constant>
     <!-- #endregion levelled-items -->
     <!-- #region portal-tp-constants -->
-    <constant id="TP_COUNTDOWN">1m</constant>
+    <constant id="TP_COUNTDOWN">30s</constant>
     <!-- #endregion portal-tp-constants -->
 </constants>
 <variables>
@@ -495,6 +492,16 @@
     <after duration="${TP_COUNTDOWN}" id="on-tp-lvl-7" filter="all(running, tp_checkpoint=6)" />
     <after duration="${TP_COUNTDOWN}" id="on-tp-lvl-8" filter="all(running, tp_checkpoint=7)" />
     <!-- #endregion tp-countdowns -->
+    <any id="tp-eligible">
+        <filter id="all(do_tp=0, lvl-1, tp_checkpoint=1..)" />
+        <filter id="all(do_tp=0, lvl-2, tp_checkpoint=2..)" />
+        <filter id="all(do_tp=0, lvl-3, tp_checkpoint=3..)" />
+        <filter id="all(do_tp=0, lvl-4, tp_checkpoint=4..)" />
+        <filter id="all(do_tp=0, lvl-5, tp_checkpoint=5..)" />
+        <filter id="all(do_tp=0, lvl-6, tp_checkpoint=6..)" />
+        <filter id="all(do_tp=0, lvl-7, tp_checkpoint=7..)" />
+        <filter id="all(do_tp=0, lvl-8, tp_checkpoint=8..)" />
+    </any>
     <all id="allow-using-boats">
         <holding>
             <item material="boat" />
@@ -534,6 +541,11 @@
     </action>
     <action id="decrease-tp" scope="player">
         <set var="do_tp" value="do_tp - 1" />
+    </action>
+    <action id="announce-tp-eligibility" scope="player">
+        <sound preset="ALERT" />
+        <message text="`e⚠ `6`lIt looks like you're struggling to complete the map." />
+        <message text="You'll be teleported to the next level when you fail to get a chance to catch up to others and complete the map!" />
     </action>
     <!--
         Removes respawn potions at respawn points - in very rare occassions,
@@ -582,6 +594,7 @@
     <trigger filter="on-tp-lvl-6" scope="match" action="increase-tp-checkpoint" />
     <trigger filter="on-tp-lvl-7" scope="match" action="increase-tp-checkpoint" />
     <trigger filter="on-tp-lvl-8" scope="match" action="increase-tp-checkpoint" />
+    <trigger filter="tp-eligible" scope="player" action="announce-tp-eligibility" />
     <!-- #endregion triggers-auto-tp -->
     <!-- #endregion triggers -->
 </actions>
