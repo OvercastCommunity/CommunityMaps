@@ -1,0 +1,607 @@
+<map proto="1.4.2" game="Progress">
+<!-- #region meta -->
+<name>BlockGlitch 4</name>
+<version>1.1.0</version>
+<created>2023-10-22</created>
+<objective>Be the first one to finish the parkour!</objective>
+<phase>development</phase>
+<authors>
+    <author uuid="654a9fe7-c75c-4b45-91df-8d48c4a5e072" /> <!-- Flamiix -->
+</authors>
+<contributors>
+    <contributor uuid="4efaccb9-7535-4638-8907-47b47cf1af37" contribution="XML" /> <!-- TTtie -->
+</contributors>
+<rules>
+    <rule>Blockglitching is allowed.</rule>
+</rules>
+<broadcasts>
+    <tip after="10s">Every minute you'll be able to skip a level whenever you fail!</tip>
+</broadcasts>
+<players max="666" colors="true" />
+<time>12m</time>
+<respawn delay="0s" auto="true" blackout="false" />
+<!-- #endregion meta -->
+<constants>
+    <constant id="SPAWN_LOCATION">216.0,112.0,-14.0</constant>
+    <!-- #region checkpoint-constants -->
+    <constant id="CHECKPOINT_1">-20.5,64.0,32.5</constant>
+    <constant id="CHECKPOINT_2">-21.5,79.0,68.5</constant>
+    <constant id="CHECKPOINT_3">-20.5,89.0,95.5</constant>
+    <constant id="CHECKPOINT_4">-14.5,100.0,134.5</constant>
+    <constant id="CHECKPOINT_5">-14.5,102.0,154.5</constant>
+    <constant id="CHECKPOINT_6">-15.5,113.0,182.5</constant>
+    <constant id="CHECKPOINT_7">-15.5,123.0,210.5</constant>
+    <constant id="CHECKPOINT_8">-15.5,125.0,231.5</constant>
+    <constant id="CHECKPOINT_9">-18.5,126.0,271.5</constant>
+    <constant id="CHECKPOINT_10">-20.5,127.0,302.5</constant>
+    <!-- #endregion checkpoint-constants -->
+    <!-- #region levelled-items -->
+    <constant id="LEVELLED_ITEM_1">wool</constant>
+    <constant id="LEVELLED_ITEM_2">quartz block</constant>
+    <constant id="LEVELLED_ITEM_3">huge mushroom 2</constant>
+    <constant id="LEVELLED_ITEM_4">ender stone</constant>
+    <constant id="LEVELLED_ITEM_5">iron block</constant>
+    <constant id="LEVELLED_ITEM_6">stained clay</constant>
+    <constant id="LEVELLED_ITEM_7">obsidian</constant>
+    <constant id="LEVELLED_ITEM_8">birch fence</constant> <!-- a fence, or any 1.5 block high block --> 
+    <constant id="LEVELLED_ITEM_9">red sandstone</constant>
+    <!-- #endregion levelled-items -->
+    <!-- #region portal-tp-constants -->
+    <constant id="TP_COUNTDOWN">1m</constant>
+    <!-- #endregion portal-tp-constants -->
+</constants>
+<variables>
+    <variable scope="match" id="tp_checkpoint" default="0" />
+    <variable scope="player" id="tp_lane" default="0" />
+    <variable scope="player" id="do_tp" default="0" />
+</variables>
+<score>
+    <limit>9</limit>
+    <box points="1" region="cp-2-boxes" filter="lvl-1" silent="true" />
+    <box points="1" region="cp-3-boxes" filter="lvl-2" silent="true" />
+    <box points="1" region="cp-4-boxes" filter="lvl-3" silent="true" />
+    <box points="1" region="cp-5-boxes" filter="lvl-4" silent="true" />
+    <box points="1" region="cp-6-boxes" filter="lvl-5" silent="true" />
+    <box points="1" region="cp-7-boxes" filter="lvl-6" silent="true" />
+    <box points="1" region="cp-8-boxes" filter="lvl-7" silent="true" />
+    <box points="1" region="cp-9-boxes" filter="lvl-8" silent="true" />
+    <box points="10" region="cp-10-boxes" filter="lvl-9" silent="true" />
+</score>
+<regions>
+    <below y="60" id="void" />
+    <!-- #region checkpoint-points -->
+    <point id="spawn">${SPAWN_LOCATION}</point>
+    <union id="cp-10-union">
+        <point id="cp-10">${CHECKPOINT_10}</point>
+        <translate offset="58,0,0" region="cp-10" id="cp-10-2" />
+        <translate offset="116,0,0" region="cp-10" id="cp-10-3" />
+        <translate offset="174,0,0" region="cp-10" id="cp-10-4" />
+        <translate offset="232,0,0" region="cp-10" id="cp-10-5" />
+        <translate offset="290,0,0" region="cp-10" id="cp-10-6" />
+        <translate offset="348,0,0" region="cp-10" id="cp-10-7" />
+        <translate offset="406,0,0" region="cp-10" id="cp-10-8" />
+        <translate offset="464,0,0" region="cp-10" id="cp-10-9" />
+        <translate offset="522,0,0" region="cp-10" id="cp-10-10" />
+    </union>
+    <!-- #endregion checkpoint-points -->
+    <!-- #region checkpoint-score-boxes -->
+    <union id="cp-1-boxes">
+        <cylinder id="cp-1-box" base="${CHECKPOINT_1}" radius="2" height="4" />
+        <translate offset="58,0,0" region="cp-1-box" />
+        <translate offset="116,0,0" region="cp-1-box" />
+        <translate offset="174,0,0" region="cp-1-box" />
+        <translate offset="232,0,0" region="cp-1-box" />
+        <translate offset="290,0,0" region="cp-1-box" />
+        <translate offset="348,0,0" region="cp-1-box" />
+        <translate offset="406,0,0" region="cp-1-box" />
+        <translate offset="464,0,0" region="cp-1-box" />
+        <translate offset="522,0,0" region="cp-1-box" />
+    </union>
+    <union id="cp-2-boxes">
+        <cylinder id="cp-2-box" base="${CHECKPOINT_2}" radius="2" height="4" />
+        <translate offset="58,0,0" region="cp-2-box" />
+        <translate offset="116,0,0" region="cp-2-box" />
+        <translate offset="174,0,0" region="cp-2-box" />
+        <translate offset="232,0,0" region="cp-2-box" />
+        <translate offset="290,0,0" region="cp-2-box" />
+        <translate offset="348,0,0" region="cp-2-box" />
+        <translate offset="406,0,0" region="cp-2-box" />
+        <translate offset="464,0,0" region="cp-2-box" />
+        <translate offset="522,0,0" region="cp-2-box" />
+    </union>
+    <union id="cp-3-boxes">
+        <cylinder id="cp-3-box" base="${CHECKPOINT_3}" radius="2" height="4" />
+        <translate offset="58,0,0" region="cp-3-box" />
+        <translate offset="116,0,0" region="cp-3-box" />
+        <translate offset="174,0,0" region="cp-3-box" />
+        <translate offset="232,0,0" region="cp-3-box" />
+        <translate offset="290,0,0" region="cp-3-box" />
+        <translate offset="348,0,0" region="cp-3-box" />
+        <translate offset="406,0,0" region="cp-3-box" />
+        <translate offset="464,0,0" region="cp-3-box" />
+        <translate offset="522,0,0" region="cp-3-box" />
+    </union>
+    <union id="cp-4-boxes">
+        <cylinder id="cp-4-box" base="${CHECKPOINT_4}" radius="2" height="4" />
+        <translate offset="58,0,0" region="cp-4-box" />
+        <translate offset="116,0,0" region="cp-4-box" />
+        <translate offset="174,0,0" region="cp-4-box" />
+        <translate offset="232,0,0" region="cp-4-box" />
+        <translate offset="290,0,0" region="cp-4-box" />
+        <translate offset="348,0,0" region="cp-4-box" />
+        <translate offset="406,0,0" region="cp-4-box" />
+        <translate offset="464,0,0" region="cp-4-box" />
+        <translate offset="522,0,0" region="cp-4-box" />
+    </union>
+    <union id="cp-5-boxes">
+        <cylinder id="cp-5-box" base="${CHECKPOINT_5}" radius="2" height="4" />
+        <translate offset="58,0,0" region="cp-5-box" />
+        <translate offset="116,0,0" region="cp-5-box" />
+        <translate offset="174,0,0" region="cp-5-box" />
+        <translate offset="232,0,0" region="cp-5-box" />
+        <translate offset="290,0,0" region="cp-5-box" />
+        <translate offset="348,0,0" region="cp-5-box" />
+        <translate offset="406,0,0" region="cp-5-box" />
+        <translate offset="464,0,0" region="cp-5-box" />
+        <translate offset="522,0,0" region="cp-5-box" />
+    </union>
+    <union id="cp-6-boxes">
+        <cylinder id="cp-6-box" base="${CHECKPOINT_6}" radius="2" height="4" />
+        <translate offset="58,0,0" region="cp-6-box" />
+        <translate offset="116,0,0" region="cp-6-box" />
+        <translate offset="174,0,0" region="cp-6-box" />
+        <translate offset="232,0,0" region="cp-6-box" />
+        <translate offset="290,0,0" region="cp-6-box" />
+        <translate offset="348,0,0" region="cp-6-box" />
+        <translate offset="406,0,0" region="cp-6-box" />
+        <translate offset="464,0,0" region="cp-6-box" />
+        <translate offset="522,0,0" region="cp-6-box" />
+    </union>
+    <union id="cp-7-boxes">
+        <cylinder id="cp-7-box" base="${CHECKPOINT_7}" radius="2" height="4" />
+        <translate offset="58,0,0" region="cp-7-box" />
+        <translate offset="116,0,0" region="cp-7-box" />
+        <translate offset="174,0,0" region="cp-7-box" />
+        <translate offset="232,0,0" region="cp-7-box" />
+        <translate offset="290,0,0" region="cp-7-box" />
+        <translate offset="348,0,0" region="cp-7-box" />
+        <translate offset="406,0,0" region="cp-7-box" />
+        <translate offset="464,0,0" region="cp-7-box" />
+        <translate offset="522,0,0" region="cp-7-box" />
+    </union>
+    <union id="cp-8-boxes">
+        <cylinder id="cp-8-box" base="${CHECKPOINT_8}" radius="2" height="4" />
+        <translate offset="58,0,0" region="cp-8-box" />
+        <translate offset="116,0,0" region="cp-8-box" />
+        <translate offset="174,0,0" region="cp-8-box" />
+        <translate offset="232,0,0" region="cp-8-box" />
+        <translate offset="290,0,0" region="cp-8-box" />
+        <translate offset="348,0,0" region="cp-8-box" />
+        <translate offset="406,0,0" region="cp-8-box" />
+        <translate offset="464,0,0" region="cp-8-box" />
+        <translate offset="522,0,0" region="cp-8-box" />
+    </union>
+    <union id="cp-9-boxes">
+        <cylinder id="cp-9-box" base="${CHECKPOINT_9}" radius="2" height="4" />
+        <translate offset="58,0,0" region="cp-9-box" />
+        <translate offset="116,0,0" region="cp-9-box" />
+        <translate offset="174,0,0" region="cp-9-box" />
+        <translate offset="232,0,0" region="cp-9-box" />
+        <translate offset="290,0,0" region="cp-9-box" />
+        <translate offset="348,0,0" region="cp-9-box" />
+        <translate offset="406,0,0" region="cp-9-box" />
+        <translate offset="464,0,0" region="cp-9-box" />
+        <translate offset="522,0,0" region="cp-9-box" />
+    </union>
+    <union id="cp-10-boxes">
+        <cylinder id="cp-10-box" base="${CHECKPOINT_10}" radius="2" height="4" />
+        <translate offset="58,0,0" region="cp-10-box" />
+        <translate offset="116,0,0" region="cp-10-box" />
+        <translate offset="174,0,0" region="cp-10-box" />
+        <translate offset="232,0,0" region="cp-10-box" />
+        <translate offset="290,0,0" region="cp-10-box" />
+        <translate offset="348,0,0" region="cp-10-box" />
+        <translate offset="406,0,0" region="cp-10-box" />
+        <translate offset="464,0,0" region="cp-10-box" />
+        <translate offset="522,0,0" region="cp-10-box" />
+    </union>
+    <negative id="not-cp-boxes">
+        <union id="cp-boxes">
+            <region id="cp-1-boxes" />
+            <region id="cp-2-boxes" />
+            <region id="cp-3-boxes" />
+            <region id="cp-4-boxes" />
+            <region id="cp-5-boxes" />
+            <region id="cp-6-boxes" />
+            <region id="cp-7-boxes" />
+            <region id="cp-8-boxes" />
+            <region id="cp-9-boxes" />
+            <region id="cp-10-boxes" />
+        </union>
+    </negative>
+    <!-- #endregion checkpoint-score-boxes -->
+    <negative id="not-the-neo-before-the-end">
+        <union id="the-neo-before-the-end">
+            <rectangle min="-24,290" max="-16,300" id="neo-box" />
+            <translate offset="58,0,0" region="neo-box" />
+            <translate offset="116,0,0" region="neo-box" />
+            <translate offset="174,0,0" region="neo-box" />
+            <translate offset="232,0,0" region="neo-box" />
+            <translate offset="290,0,0" region="neo-box" />
+            <translate offset="348,0,0" region="neo-box" />
+            <translate offset="406,0,0" region="neo-box" />
+            <translate offset="464,0,0" region="neo-box" />
+            <translate offset="522,0,0" region="neo-box" />
+        </union>
+    </negative>
+    <!-- #region region-application -->
+    <apply region="not-cp-boxes" kit="give-respawn-potion" />
+    <apply region="the-neo-before-the-end" kit="gm-a" />
+    <apply region="not-the-neo-before-the-end" kit="gm-s" />
+    <apply block="never" block-physics="never" use="allow-using-boats" />
+    <!-- #endregion region-application-->
+</regions>
+<spawns>
+    <spawn kit="lvl-1-kit" filter="lvl-1">
+        <regions yaw="0" pitch="0">
+            <union id="cp-1-union">
+                <point id="cp-1">${CHECKPOINT_1}</point>
+                <translate offset="58,0,0" region="cp-1" id="cp-1-2" />
+                <translate offset="116,0,0" region="cp-1" id="cp-1-3" />
+                <translate offset="174,0,0" region="cp-1" id="cp-1-4" />
+                <translate offset="232,0,0" region="cp-1" id="cp-1-5" />
+                <translate offset="290,0,0" region="cp-1" id="cp-1-6" />
+                <translate offset="348,0,0" region="cp-1" id="cp-1-7" />
+                <translate offset="406,0,0" region="cp-1" id="cp-1-8" />
+                <translate offset="464,0,0" region="cp-1" id="cp-1-9" />
+                <translate offset="522,0,0" region="cp-1" id="cp-1-10" />
+            </union>
+        </regions>
+    </spawn>
+    <spawn kit="lvl-2-kit" filter="lvl-2">
+        <regions yaw="0" pitch="0">
+            <union id="cp-2-union">
+                <point id="cp-2">${CHECKPOINT_2}</point>
+                <translate offset="58,0,0" region="cp-2" id="cp-2-2" />
+                <translate offset="116,0,0" region="cp-2" id="cp-2-3" />
+                <translate offset="174,0,0" region="cp-2" id="cp-2-4" />
+                <translate offset="232,0,0" region="cp-2" id="cp-2-5" />
+                <translate offset="290,0,0" region="cp-2" id="cp-2-6" />
+                <translate offset="348,0,0" region="cp-2" id="cp-2-7" />
+                <translate offset="406,0,0" region="cp-2" id="cp-2-8" />
+                <translate offset="464,0,0" region="cp-2" id="cp-2-9" />
+                <translate offset="522,0,0" region="cp-2" id="cp-2-10" />
+            </union>
+        </regions>
+    </spawn>
+    <spawn kit="lvl-3-kit" filter="lvl-3">
+        <regions yaw="0" pitch="0">
+            <union id="cp-3-union">
+                <point id="cp-3">${CHECKPOINT_3}</point>
+                <translate offset="58,0,0" region="cp-3" id="cp-3-2" />
+                <translate offset="116,0,0" region="cp-3" id="cp-3-3" />
+                <translate offset="174,0,0" region="cp-3" id="cp-3-4" />
+                <translate offset="232,0,0" region="cp-3" id="cp-3-5" />
+                <translate offset="290,0,0" region="cp-3" id="cp-3-6" />
+                <translate offset="348,0,0" region="cp-3" id="cp-3-7" />
+                <translate offset="406,0,0" region="cp-3" id="cp-3-8" />
+                <translate offset="464,0,0" region="cp-3" id="cp-3-9" />
+                <translate offset="522,0,0" region="cp-3" id="cp-3-10" />
+            </union>
+        </regions>
+    </spawn>
+    <spawn kit="lvl-4-kit" filter="lvl-4">
+        <regions yaw="0" pitch="0">
+            <union id="cp-4-union">
+                <point id="cp-4">${CHECKPOINT_4}</point>
+                <translate offset="58,0,0" region="cp-4" id="cp-4-2" />
+                <translate offset="116,0,0" region="cp-4" id="cp-4-3" />
+                <translate offset="174,0,0" region="cp-4" id="cp-4-4" />
+                <translate offset="232,0,0" region="cp-4" id="cp-4-5" />
+                <translate offset="290,0,0" region="cp-4" id="cp-4-6" />
+                <translate offset="348,0,0" region="cp-4" id="cp-4-7" />
+                <translate offset="406,0,0" region="cp-4" id="cp-4-8" />
+                <translate offset="464,0,0" region="cp-4" id="cp-4-9" />
+                <translate offset="522,0,0" region="cp-4" id="cp-4-10" />
+            </union>
+        </regions>
+    </spawn>
+    <spawn kit="lvl-5-kit" filter="lvl-5">
+        <regions yaw="0" pitch="0">
+            <union id="cp-5-union">
+                <point id="cp-5">${CHECKPOINT_5}</point>
+                <translate offset="58,0,0" region="cp-5" id="cp-5-2" />
+                <translate offset="116,0,0" region="cp-5" id="cp-5-3" />
+                <translate offset="174,0,0" region="cp-5" id="cp-5-4" />
+                <translate offset="232,0,0" region="cp-5" id="cp-5-5" />
+                <translate offset="290,0,0" region="cp-5" id="cp-5-6" />
+                <translate offset="348,0,0" region="cp-5" id="cp-5-7" />
+                <translate offset="406,0,0" region="cp-5" id="cp-5-8" />
+                <translate offset="464,0,0" region="cp-5" id="cp-5-9" />
+                <translate offset="522,0,0" region="cp-5" id="cp-5-10" />
+            </union>
+        </regions>
+    </spawn>
+    <spawn kit="lvl-6-kit" filter="lvl-6">
+        <regions yaw="0" pitch="0">
+            <union id="cp-6-union">
+                <point id="cp-6">${CHECKPOINT_6}</point>
+                <translate offset="58,0,0" region="cp-6" id="cp-6-2" />
+                <translate offset="116,0,0" region="cp-6" id="cp-6-3" />
+                <translate offset="174,0,0" region="cp-6" id="cp-6-4" />
+                <translate offset="232,0,0" region="cp-6" id="cp-6-5" />
+                <translate offset="290,0,0" region="cp-6" id="cp-6-6" />
+                <translate offset="348,0,0" region="cp-6" id="cp-6-7" />
+                <translate offset="406,0,0" region="cp-6" id="cp-6-8" />
+                <translate offset="464,0,0" region="cp-6" id="cp-6-9" />
+                <translate offset="522,0,0" region="cp-6" id="cp-6-10" />
+            </union>
+        </regions>
+    </spawn>
+    <spawn kit="lvl-7-kit" filter="lvl-7">
+        <regions yaw="0" pitch="0">
+            <union id="cp-7-union">
+                <point id="cp-7">${CHECKPOINT_7}</point>
+                <translate offset="58,0,0" region="cp-7" id="cp-7-2" />
+                <translate offset="116,0,0" region="cp-7" id="cp-7-3" />
+                <translate offset="174,0,0" region="cp-7" id="cp-7-4" />
+                <translate offset="232,0,0" region="cp-7" id="cp-7-5" />
+                <translate offset="290,0,0" region="cp-7" id="cp-7-6" />
+                <translate offset="348,0,0" region="cp-7" id="cp-7-7" />
+                <translate offset="406,0,0" region="cp-7" id="cp-7-8" />
+                <translate offset="464,0,0" region="cp-7" id="cp-7-9" />
+                <translate offset="522,0,0" region="cp-7" id="cp-7-10" />
+            </union>
+        </regions>
+    </spawn>
+    <spawn kit="lvl-8-kit" filter="lvl-8">
+        <regions yaw="0" pitch="0">
+            <union id="cp-8-union">
+                <point id="cp-8">${CHECKPOINT_8}</point>
+                <translate offset="58,0,0" region="cp-8" id="cp-8-2" />
+                <translate offset="116,0,0" region="cp-8" id="cp-8-3" />
+                <translate offset="174,0,0" region="cp-8" id="cp-8-4" />
+                <translate offset="232,0,0" region="cp-8" id="cp-8-5" />
+                <translate offset="290,0,0" region="cp-8" id="cp-8-6" />
+                <translate offset="348,0,0" region="cp-8" id="cp-8-7" />
+                <translate offset="406,0,0" region="cp-8" id="cp-8-8" />
+                <translate offset="464,0,0" region="cp-8" id="cp-8-9" />
+                <translate offset="522,0,0" region="cp-8" id="cp-8-10" />
+            </union>
+        </regions>
+    </spawn>
+    <spawn kit="lvl-9-kit" filter="lvl-9">
+        <regions yaw="0" pitch="0">
+            <union id="cp-9-union">
+                <point id="cp-9">${CHECKPOINT_9}</point>
+                <translate offset="58,0,0" region="cp-9" id="cp-9-2" />
+                <translate offset="116,0,0" region="cp-9" id="cp-9-3" />
+                <translate offset="174,0,0" region="cp-9" id="cp-9-4" />
+                <translate offset="232,0,0" region="cp-9" id="cp-9-5" />
+                <translate offset="290,0,0" region="cp-9" id="cp-9-6" />
+                <translate offset="348,0,0" region="cp-9" id="cp-9-7" />
+                <translate offset="406,0,0" region="cp-9" id="cp-9-8" />
+                <translate offset="464,0,0" region="cp-9" id="cp-9-9" />
+                <translate offset="522,0,0" region="cp-9" id="cp-9-10" />
+            </union>
+        </regions>
+    </spawn>
+    <default>
+        <regions>
+            <region id="spawn" />
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="gm-a">
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="gm-s">
+        <game-mode>survival</game-mode>
+    </kit>
+    <kit id="give-respawn-potion">
+        <item slot="8" material="potion" damage="0" name="`c`lRespawn" lore="`7Drink to respawn" show-other="false" prevent-sharing="true" consumable="on-potion-drink" />
+    </kit>
+    <kit id="base-kit">
+        <clear />
+        <boots material="leather boots" team-color="true" locked="true" unbreakable="true" />
+        <effect>invisibility</effect>
+    </kit>
+    <kit id="lvl-1-kit" parent="base-kit" filter="lvl-1">
+        <item slot="0" material="${LEVELLED_ITEM_1}" amount="64" prevent-sharing="true" />
+    </kit>
+    <kit id="lvl-2-kit" parent="base-kit" filter="lvl-2">
+        <item slot="1" material="${LEVELLED_ITEM_2}" amount="64" prevent-sharing="true" />
+    </kit>
+    <kit id="lvl-3-kit" parent="base-kit" filter="lvl-3">
+        <item slot="2" material="${LEVELLED_ITEM_3}" amount="64" prevent-sharing="true" />
+        <item slot="3" material="boat" amount="5" />
+    </kit>
+    <kit id="lvl-4-kit" parent="base-kit" filter="lvl-4">
+        <item slot="3" material="${LEVELLED_ITEM_4}" amount="64" prevent-sharing="true" />
+    </kit>
+    <kit id="lvl-5-kit" parent="base-kit" filter="lvl-5">
+        <item slot="4" material="${LEVELLED_ITEM_5}" amount="64" prevent-sharing="true" />
+    </kit>
+    <kit id="lvl-6-kit" parent="base-kit" filter="lvl-6">
+        <item slot="5" material="${LEVELLED_ITEM_6}" amount="64" prevent-sharing="true" />
+    </kit>
+    <kit id="lvl-7-kit" parent="base-kit" filter="lvl-7">
+        <item slot="6" material="${LEVELLED_ITEM_7}" amount="64" prevent-sharing="true" />
+    </kit>
+    <kit id="lvl-8-kit" parent="base-kit" filter="lvl-8">
+        <item slot="7" material="${LEVELLED_ITEM_8}" amount="64" prevent-sharing="true" />
+    </kit>
+    <kit id="lvl-9-kit" parent="base-kit" filter="lvl-9">
+        <item slot="0" material="${LEVELLED_ITEM_9}" amount="64" prevent-sharing="true" />
+    </kit>
+</kits>
+<portals>
+    <!--
+        The portal system doesn't support teleporting to a set of points as it is
+        coerced to an union, which is not randomize-able. Therefore, we're teleporting
+        to a single point determined by a randomized variable, and then we move them
+        by a predetermined offset up to the desired destination.
+    -->
+    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=1)" x="58" observers="never" />
+    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=2)" x="116" observers="never" />
+    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=3)" x="174" observers="never" />
+    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=4)" x="232" observers="never" />
+    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=5)" x="290" observers="never" />
+    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=6)" x="348" observers="never" />
+    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=7)" x="406" observers="never" />
+    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=8)" x="464" observers="never" />
+    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=9)" x="522" observers="never" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-9, tp_checkpoint=..8)" yaw="@0" pitch="@0" observers="never" destination="cp-9" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-8, tp_checkpoint=8..)" yaw="@0" pitch="@0" observers="never" destination="cp-9" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-8, tp_checkpoint=..7)" yaw="@0" pitch="@0" observers="never" destination="cp-8" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-7, tp_checkpoint=7..)" yaw="@0" pitch="@0" observers="never" destination="cp-8" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-7, tp_checkpoint=..6)" yaw="@0" pitch="@0" observers="never" destination="cp-7" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-6, tp_checkpoint=6..)" yaw="@0" pitch="@0" observers="never" destination="cp-7" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-6, tp_checkpoint=..5)" yaw="@0" pitch="@0" observers="never" destination="cp-6" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-5, tp_checkpoint=5..)" yaw="@0" pitch="@0" observers="never" destination="cp-6" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-5, tp_checkpoint=..4)" yaw="@0" pitch="@0" observers="never" destination="cp-5" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-4, tp_checkpoint=4..)" yaw="@0" pitch="@0" observers="never" destination="cp-5" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-4, tp_checkpoint=..3)" yaw="@0" pitch="@0" observers="never" destination="cp-4" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-3, tp_checkpoint=3..)" yaw="@0" pitch="@0" observers="never" destination="cp-4" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-3, tp_checkpoint=..2)" yaw="@0" pitch="@0" observers="never" destination="cp-3" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-2, tp_checkpoint=2..)" yaw="@0" pitch="@0" observers="never" destination="cp-3" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-2, tp_checkpoint=..1)" yaw="@0" pitch="@0" observers="never" destination="cp-2" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-1, tp_checkpoint=1..)" yaw="@0" pitch="@0" observers="never" destination="cp-2" />
+    <portal forward="all(portal-debounce, do_tp=2, lvl-1, tp_checkpoint=0)" yaw="@0" pitch="@0" observers="never" destination="cp-1" />
+    <portal filter="not(participating)" yaw="@0" pitch="@0" region="void" destination="spawn" />
+</portals>
+<filters>
+    <!-- #region scores -->
+    <score id="lvl-1">0</score>
+    <score id="lvl-2">1</score>
+    <score id="lvl-3">2</score>
+    <score id="lvl-4">3</score>
+    <score id="lvl-5">4</score>
+    <score id="lvl-6">5</score>
+    <score id="lvl-7">6</score>
+    <score id="lvl-8">7</score>
+    <score id="lvl-9">8</score>
+    <score id="lvl-10">9</score>
+    <!-- #endregion scores -->
+    <!-- #region tp-countdowns -->
+    <after duration="${TP_COUNTDOWN}" id="on-tp-lvl-1" filter="all(running, tp_checkpoint=0)" />
+    <after duration="${TP_COUNTDOWN}" id="on-tp-lvl-2" filter="all(running, tp_checkpoint=1)" />
+    <after duration="${TP_COUNTDOWN}" id="on-tp-lvl-3" filter="all(running, tp_checkpoint=2)" />
+    <after duration="${TP_COUNTDOWN}" id="on-tp-lvl-4" filter="all(running, tp_checkpoint=3)" />
+    <after duration="${TP_COUNTDOWN}" id="on-tp-lvl-5" filter="all(running, tp_checkpoint=4)" />
+    <after duration="${TP_COUNTDOWN}" id="on-tp-lvl-6" filter="all(running, tp_checkpoint=5)" />
+    <after duration="${TP_COUNTDOWN}" id="on-tp-lvl-7" filter="all(running, tp_checkpoint=6)" />
+    <after duration="${TP_COUNTDOWN}" id="on-tp-lvl-8" filter="all(running, tp_checkpoint=7)" />
+    <!-- #endregion tp-countdowns -->
+    <all id="allow-using-boats">
+        <holding>
+            <item material="boat" />
+        </holding>
+        <filter id="lvl-3" />
+        <!-- Disallow opening trapdoors -->
+        <not>
+            <any>
+                <material>wood button</material>
+                <material>trap door</material>
+            </any>
+        </not>
+    </all>
+    <match-running id="running" />
+    <alive id="alive" />
+    <participating id="participating" />
+    <!--
+        HACK: This clock allows PGM to breathe a bit and teleport you to a
+        random lane properly
+    -->
+    <pulse id="portal-debounce" period="0.1s" duration="0.05s" filter="running" />
+</filters>
+<consumables>
+    <consumable id="on-potion-drink" on="eat" action="set-tp" />
+</consumables>
+<actions>
+    <!-- #region actions -->
+    <action id="increase-tp-checkpoint" scope="match">
+        <set var="tp_checkpoint" value="tp_checkpoint + 1" />
+    </action>
+    <action id="randomize-tp-lane" scope="player">
+        <set var="tp_lane" value="floor(random() * 9)" />
+    </action>
+    <action id="set-tp" scope="player">
+        <set var="tp_lane" value="floor(random() * 9)" />
+        <set var="do_tp" value="2" />
+    </action>
+    <action id="decrease-tp" scope="player">
+        <set var="do_tp" value="do_tp - 1" />
+    </action>
+    <!--
+        Removes respawn potions at respawn points - in very rare occassions,
+        players drinking the respawn potion at spawn points aren't moved around.
+        Mitigating by removal because why would you want to respawn when you're at a
+        checkpoint anyway?
+    -->
+    <action id="remove-respawn-potion" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="potion" damage="0" />
+            <replace material="air" />
+        </replace-item>
+    </action>
+    <!-- #endregion actions -->
+    <!-- #region triggers -->
+    <!-- #region triggers-kits -->
+    <trigger filter="all(lvl-1, do_tp=1)" scope="player" action="lvl-1-kit" />
+    <trigger filter="lvl-2" scope="player" action="lvl-2-kit" />
+    <trigger filter="all(lvl-2, do_tp=1)" scope="player" action="lvl-2-kit" />
+    <trigger filter="lvl-3" scope="player" action="lvl-3-kit" />
+    <trigger filter="all(lvl-3, do_tp=1)" scope="player" action="lvl-3-kit" />
+    <trigger filter="lvl-4" scope="player" action="lvl-4-kit" />
+    <trigger filter="all(lvl-4, do_tp=1)" scope="player" action="lvl-4-kit" />
+    <trigger filter="lvl-5" scope="player" action="lvl-5-kit" />
+    <trigger filter="all(lvl-5, do_tp=1)" scope="player" action="lvl-5-kit" />
+    <trigger filter="lvl-6" scope="player" action="lvl-6-kit" />
+    <trigger filter="all(lvl-6, do_tp=1)" scope="player" action="lvl-6-kit" />
+    <trigger filter="lvl-7" scope="player" action="lvl-7-kit" />
+    <trigger filter="all(lvl-7, do_tp=1)" scope="player" action="lvl-7-kit" />
+    <trigger filter="lvl-8" scope="player" action="lvl-8-kit" />
+    <trigger filter="all(lvl-8, do_tp=1)" scope="player" action="lvl-8-kit" />
+    <trigger filter="lvl-9" scope="player" action="lvl-9-kit" />
+    <trigger filter="all(lvl-9, do_tp=1)" scope="player" action="lvl-9-kit" />
+    <!-- #endregion triggers-kits -->
+    <!-- #region triggers-auto-tp -->
+    <trigger filter="running" scope="player" action="randomize-tp-lane" />
+    <trigger filter="void" scope="player" action="set-tp" />
+    <trigger filter="all(portal-debounce, do_tp=1, cp-boxes)" scope="player" action="decrease-tp" />
+    <trigger filter="all(not(portal-debounce), do_tp=2, cp-boxes)" scope="player" action="decrease-tp" />
+    <trigger filter="all(cp-boxes, participating)" scope="player" action="remove-respawn-potion" />
+    <trigger filter="on-tp-lvl-1" scope="match" action="increase-tp-checkpoint" />
+    <trigger filter="on-tp-lvl-2" scope="match" action="increase-tp-checkpoint" />
+    <trigger filter="on-tp-lvl-3" scope="match" action="increase-tp-checkpoint" />
+    <trigger filter="on-tp-lvl-4" scope="match" action="increase-tp-checkpoint" />
+    <trigger filter="on-tp-lvl-5" scope="match" action="increase-tp-checkpoint" />
+    <trigger filter="on-tp-lvl-6" scope="match" action="increase-tp-checkpoint" />
+    <trigger filter="on-tp-lvl-7" scope="match" action="increase-tp-checkpoint" />
+    <trigger filter="on-tp-lvl-8" scope="match" action="increase-tp-checkpoint" />
+    <!-- #endregion triggers-auto-tp -->
+    <!-- #endregion triggers -->
+</actions>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<disabledamage>
+    <damage>entity attack</damage>
+    <damage>fall</damage>
+    <damage>lava</damage>
+</disabledamage>
+<itemremove>
+    <item>${LEVELLED_ITEM_1}</item>
+    <item>${LEVELLED_ITEM_2}</item>
+    <item>${LEVELLED_ITEM_3}</item>
+    <item>${LEVELLED_ITEM_4}</item>
+    <item>${LEVELLED_ITEM_5}</item>
+    <item>${LEVELLED_ITEM_6}</item>
+    <item>${LEVELLED_ITEM_7}</item>
+    <item>${LEVELLED_ITEM_8}</item>
+    <item>${LEVELLED_ITEM_9}</item>
+    <item>boat</item>
+</itemremove>
+</map>
