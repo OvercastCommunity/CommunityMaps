@@ -7,14 +7,13 @@ Features:
 - Each team has Player Upgrade store and Team Upgrade store (ala Bed Wars)
 - Player Upgrade store uses blocks taken from the enemy monument
 - Team Upgrade store uses blocks dropped from spawners in the home monuments, or collected from invaders
-- 4 Short melodies that highlight game events for players, teams and match
 - Custom logic to treat monument blocks with jingle on pick up, similar to with wool in CTW
 - Special Diamond Chestplate renewable drop that lasts for 4 player lives, obtained at map center
 - Permanent Vanity Diamond Hat for players that pickup a monument block while on enemy monument
 - Auto-ignite TNT available as kill reward or purchase in the Player store
 -->
 <name>Apple Smash</name>
-<version>1.1.0</version>
+<version>1.2.0</version>
 <phase>development</phase>
 <objective>Destroy the enemy's Apples!</objective>
 <gamemode>dtm</gamemode>
@@ -28,8 +27,8 @@ Features:
 </world>
 <teams>
     <!-- Cyan instead of green to help R/G colorblind -->
-    <team id="green-team" color="dark_aqua" max="21" max-overfill="50">Mutsu</team> <!-- Green -->
-    <team id="red-team" color="red" max="21" max-overfill="50">Fuji</team> <!-- Red -->
+    <team id="green-team" color="dark_aqua" max="22" max-overfill="50">Mutsu</team> <!-- Green -->
+    <team id="red-team" color="red" max="22" max-overfill="50">Fuji</team> <!-- Red -->
 </teams>
 <kits>
     <kit id="spawn-kit" force="true">
@@ -255,9 +254,6 @@ Features:
     <shopkeeper mob="Villager" yaw="270">135.5,52,-7.5</shopkeeper> <!-- Green -->
 </shopkeepers>
 <actions>
-    <action id="song" scope="match" expose="true"> <!-- for command line exposure only -->
-        <set var="intro_variable" value="17"/> <!-- restarts the intro melody -->
-    </action>
     <trigger filter="leather-prot-0" trigger="leather-armor-kit" scope="player"/>
     <trigger filter="leather-prot-1" trigger="leather-prot1-kit" scope="player"/>
     <trigger filter="leather-prot-2" trigger="leather-prot2-kit" scope="player"/>
@@ -283,7 +279,8 @@ Features:
         <kit force="true" filter="always">
             <helmet material="diamond helmet" unbreakable="true" name="Diamond Apple Smasher" lore="Permanent vanity cap, no cap.||`6`oApple Smashers Only"/>
         </kit>
-        <sound key="random.levelup" volume="1" pitch="1"/>
+        <sound key="block.beacon.activate" volume="1" pitch="1"/>
+        <sound key="block.beacon.activate" volume="1" pitch="1.2"/>
         <sound key="item.armor.equip_diamond" pitch="1" volume="1"/>
         <sound key="item.armor.equip_diamond" pitch=".9" volume="1"/>
         <sound key="item.armor.equip_diamond" pitch=".95" volume="1"/>
@@ -446,51 +443,27 @@ Features:
         </replace-item>
     </action>
     <trigger filter="pickup-red2-filter-by-green" action="pickup-red2-action-by-green" scope="player"/>
-    <!--
-         Pitch Guide:
-         0.5    F#      1      F#
-         0.53   G       1.059  G
-         0.561  G#      1.122  G#
-         0.595  A       1.189  A
-         0.63   A#      1.26   A#
-         0.667  B       1.335  B
-         0.707  C       1.414  C
-         0.749  C#      1.498  C#
-         0.794  D       1.587  D
-         0.841  D#      1.682  D#
-         0.891  E       1.782  E
-         0.944  F       1.888  F
-    -->
-    <!-- Four melodic sequences augment the game, using Hungarian/Japanese/Major style scales
-         - Game Intro - Theme-setting pentatonic with 4th harmonies for match
-         - Team Upgrade - Ascending rhythmic fanfare for team
-         - Picked up Their Monument Block - Ascending hungarian-minor fanfare for player
-         - Picked up My Monument Block - Descending hungarian-minor fanfare for player -->
     <action id="red-pickup-red-action" scope="player">
         <sound key="entity.firework.twinkle" volume="1" pitch="1.22"/>
-        <set var="pickup_me_variable" value="6"/>
-        <sound key="note.harp" volume=".5" pitch="1.122"/> <!-- g# (first note) -->
+        <set var="pickup_me_variable" value="1"/>
         <message text="`e`l▲ `6Purchase `lteam upgrades`r`6 with Red blocks in the store!`r"/>
     </action>
     <trigger filter="red-pickup-red-filter" action="red-pickup-red-action" scope="player"/>
     <action id="green-pickup-green-action" scope="player">
         <sound key="entity.firework.twinkle" volume="1" pitch="1.22"/>
-        <sound key="note.harp" volume=".5" pitch="1.122"/> <!-- g# (first note) -->
-        <set var="pickup_me_variable" value="6"/>
+        <set var="pickup_me_variable" value="1"/>
         <message text="`e`l▲ `6Purchase `lteam upgrades`r`6 with Green blocks in the store!`r"/>
     </action>
     <trigger filter="green-pickup-green-filter" action="green-pickup-green-action" scope="player"/>
     <action id="red-pickup-green-action" scope="player">
         <sound key="entity.firework.twinkle" volume="1" pitch="1.22"/>
-        <sound key="note.harp" volume=".5" pitch=".561"/> <!-- g# (first note) -->
-        <set var="pickup_them_variable" value="6"/>
+        <set var="pickup_them_variable" value="1"/>
         <message text="`e`l▲ `6Take the Green block to store for `lplayer upgrades`r`6!`r"/>
     </action>
     <trigger filter="red-pickup-green-filter" action="red-pickup-green-action" scope="player"/>
     <action id="green-pickup-red-action" scope="player">
         <sound key="entity.firework.twinkle" volume="1" pitch="1.22"/>
-        <sound key="note.harp" volume=".5" pitch=".561"/> <!-- g# (first note) -->
-        <set var="pickup_them_variable" value="6"/>
+        <set var="pickup_them_variable" value="1"/>
         <message text="`e`l▲ `6Take the Red block to store for `lplayer upgrades`r`6!`r"/>
     </action>
     <trigger filter="green-pickup-red-filter" action="green-pickup-red-action" scope="player"/>
@@ -500,282 +473,16 @@ Features:
     <action id="pickup-green-momentary-action" scope="player">
         <set var="pickup_green_momentary_variable" value="0"/>
     </action>
-    <!-- ascending melody when picking up opposing team's monument block for first time -->
-    <!-- a c# d e f g# a -->
-    <action id="pickup-them-action-6" scope="player">
-        <sound key="note.harp" volume=".6" pitch=".595"/> <!-- a -->
-        <set var="pickup_them_variable" value="5"/>
-    </action>
-    <action id="pickup-them-action-5" scope="player">
-        <sound key="note.harp" volume=".6" pitch=".749"/> <!-- c# -->
-        <set var="pickup_them_variable" value="4"/>
-    </action>
-    <action id="pickup-them-action-4" scope="player">
-        <sound key="note.harp" volume=".7" pitch=".891"/> <!-- e -->
-        <set var="pickup_them_variable" value="3"/>
-    </action>
-    <action id="pickup-them-action-3" scope="player">
-        <sound key="note.harp" volume=".8" pitch=".944"/> <!-- f -->
-        <set var="pickup_them_variable" value="2"/>
-    </action>
-    <action id="pickup-them-action-2" scope="player">
-        <sound key="note.harp" volume=".9" pitch="1.122"/> <!-- g# -->
-        <sound key="note.bass" volume=".1" pitch=".4455"/>
-        <set var="pickup_them_variable" value="1"/>
-    </action>
-    <action id="pickup-them-action-1" scope="player">
-        <sound key="note.harp" volume="1" pitch="2.378"/>
-        <sound key="note.harp" volume="1" pitch="1.189"/> <!-- a (finish) -->
-        <sound key="note.bass" volume=".1" pitch=".595"/>
-        <set var="pickup_them_variable" value="99"/>
-    </action>
-    <!-- descending melody when picking up own team's monument block for first time -->
-    <!-- g# a e f d c# a -->
-    <action id="pickup-me-action-6" scope="player">
-        <sound key="note.harp" volume=".6" pitch="1.189"/> <!-- a -->
-        <set var="pickup_me_variable" value="5"/>
-    </action>
-    <action id="pickup-me-action-5" scope="player">
-        <sound key="note.harp" volume=".6" pitch=".891"/> <!-- e -->
-        <set var="pickup_me_variable" value="4"/>
-    </action>
-    <action id="pickup-me-action-4" scope="player">
-        <sound key="note.harp" volume=".7" pitch=".944"/> <!-- f -->
-        <set var="pickup_me_variable" value="3"/>
-    </action>
-    <action id="pickup-me-action-3" scope="player">
-        <sound key="note.harp" volume=".8" pitch=".794"/> <!-- d -->
-        <set var="pickup_me_variable" value="2"/>
-    </action>
-    <action id="pickup-me-action-2" scope="player">
-        <sound key="note.harp" volume=".9" pitch=".749"/> <!-- c# -->
-        <sound key="note.bass" volume=".1" pitch=".4455"/> <!-- e -->
-        <set var="pickup_me_variable" value="1"/>
-    </action>
-    <action id="pickup-me-action-1" scope="player">
-        <sound key="note.harp" volume="1" pitch="1.189"/> <!-- a (finish) -->
-        <sound key="note.bass" volume=".1" pitch=".595"/> <!-- a -->
-    </action>
-    <!-- short embellished melody when receiving team upgrade -->
-    <action id="upgrade-me-action-8" scope="player">
-        <sound key="note.harp" volume=".6" pitch="0.891"/> <!-- e -->
-        <sound key="note.bass" volume=".2" pitch=".891"/> <!-- e -->
-        <set var="upgrade_me_variable" value="7"/>
-    </action>
-    <action id="upgrade-me-action-7" scope="player">
-        <sound key="note.harp" volume=".6" pitch="1.782"/> <!-- e2 -->
-        <sound key="note.bass" volume=".2" pitch=".667"/> <!-- b -->
-        <set var="upgrade_me_variable" value="6"/>
-    </action>
-    <action id="upgrade-me-action-6" scope="player">
-        <sound key="note.harp" volume=".6" pitch="0.944"/> <!-- f -->
-        <sound key="note.bass" volume=".2" pitch="0.707"/> <!-- c -->
-        <set var="upgrade_me_variable" value="5"/>
-    </action>
-    <action id="upgrade-me-action-5" scope="player">
-        <sound key="note.harp" volume=".6" pitch="1.888"/> <!-- f2 -->
-        <sound key="note.bass" volume=".2" pitch="0.944"/> <!-- f -->
-        <set var="upgrade_me_variable" value="4"/>
-    </action>
-    <action id="upgrade-me-action-4" scope="player">
-        <sound key="note.harp" volume=".7" pitch="1.122"/> <!-- g# -->
-        <sound key="note.bass" volume=".2" pitch="0.561"/> <!-- g# -->
-        <set var="upgrade_me_variable" value="3"/>
-    </action>
-    <action id="upgrade-me-action-3" scope="player">
-        <sound key="note.harp" volume=".8" pitch="2.244"/> <!-- g#2 -->
-        <sound key="note.bass" volume=".2" pitch="0.891"/> <!-- g# -->
-        <set var="upgrade_me_variable" value="2"/>
-    </action>
     <action id="upgrade-me-action-2" scope="player">
-        <sound key="note.harp" volume="1" pitch="2.378"/> <!-- a -->
-        <sound key="note.harp" volume="1" pitch="1.782"/> <!-- e -->
-        <sound key="note.harp" volume="1" pitch="1.189"/> <!-- a -->
-        <sound key="note.harp" volume=".9" pitch=".749"/> <!-- c# -->
-        <sound key="note.bass" volume=".2" pitch="0.749"/> <!-- c# -->
-        <sound key="note.harp" volume=".9" pitch=".595"/> <!-- a -->
-        <set var="upgrade_me_variable" value="1"/>
+        <sound key="random.orb" volume="1" pitch="1"/>
     </action>
     <action id="upgrade-me-action-1" scope="player">
-        <sound key="note.harp" volume=".9" pitch=".891"/> <!-- e -->
-        <sound key="note.harp" volume="1" pitch="1.189"/> <!-- a (finish) -->
-        <sound key="note.bass" volume=".2" pitch=".595"/> <!-- a -->
+        <sound key="random.levelup" volume="1" pitch=".8"/>
+        <sound key="random.anvil_use" volume=".2" pitch="1.2"/>
         <set var="upgrade_me_variable" value="0"/>
     </action>
-    <!-- Game Intro: a a# b c c# e f# e c# b a   b c# e c# g#2 a2 -->
-    <action id="intro-action-17" scope="match">
-        <sound key="note.pling" volume=".3" pitch="1.000"/> <!-- f# -->
-        <sound key="note.harp" volume="1" pitch="1.000"/> <!-- f# -->
-        <sound key="note.bass" volume=".2" pitch="1.000"/> <!-- f# -->
-        <sound key="note.harp" volume=".6" pitch="1.335"/> <!-- b -->
-        <sound key="random.orb" volume=".1" pitch="2"/>
-        <set var="intro_variable" value="16"/>
-    </action>
-    <action id="intro-action-16" scope="match">
-        <sound key="note.pling" volume=".2" pitch="1.782"/> <!-- e -->
-        <sound key="note.harp" volume="1" pitch="0.891"/> <!-- e -->
-        <sound key="note.bass" volume=".1" pitch="0.891"/> <!-- e -->
-        <sound key="note.harp" volume=".6" pitch="1.189"/> <!-- a -->
-        <sound key="random.orb" volume=".1" pitch="2"/>
-        <set var="intro_variable" value="15"/>
-    </action>
-    <action id="intro-action-15" scope="match">
-        <sound key="note.pling" volume=".2" pitch="1.498"/> <!-- c# -->
-        <sound key="note.harp" volume="1" pitch="0.749"/> <!-- c# -->
-        <sound key="note.bass" volume=".2" pitch="0.749"/> <!-- c# -->
-        <sound key="note.harp" volume=".6" pitch="1"/> <!-- f# -->
-        <sound key="random.orb" volume=".1" pitch="2"/>
-        <set var="intro_variable" value="14"/>
-    </action>
-    <action id="intro-action-14" scope="match">
-        <sound key="note.pling" volume=".2" pitch="1.414"/> <!-- c -->
-        <sound key="note.harp" volume=".9" pitch="0.707"/> <!-- c -->
-        <sound key="note.bass" volume=".1" pitch="0.707"/> <!-- c -->
-        <sound key="note.harp" volume=".4" pitch="1.414"/> <!-- c -->
-        <set var="intro_variable" value="13"/>
-    </action>
-    <action id="intro-action-13" scope="match">
-        <sound key="note.pling" volume=".3" pitch="1.498"/> <!-- c# -->
-        <sound key="note.harp" volume="1" pitch="0.749"/> <!-- c# -->
-        <sound key="note.bass" volume=".2" pitch="0.749"/> <!-- c# -->
-        <sound key="note.harp" volume=".5" pitch="1"/> <!-- f# -->
-        <set var="intro_variable" value="12"/>
-    </action>
-    <action id="intro-action-12" scope="match">
-        <sound key="note.pling" volume=".3" pitch="1.782"/> <!-- e -->
-        <sound key="note.harp" volume=".9" pitch="0.891"/> <!-- e -->
-        <sound key="note.bass" volume=".1" pitch="0.891"/> <!-- e -->
-        <sound key="note.harp" volume=".5" pitch="1.189"/> <!-- a -->
-        <sound key="random.orb" volume=".1" pitch="3"/>
-        <set var="intro_variable" value="11"/>
-    </action>
-    <action id="intro-action-11" scope="match">
-        <sound key="note.pling" volume=".3" pitch="1.000"/> <!-- f# -->
-        <sound key="note.harp" volume="1" pitch="1.000"/> <!-- f# -->
-        <sound key="note.bass" volume=".2" pitch="1.000"/> <!-- f# -->
-        <sound key="note.harp" volume=".6" pitch="1.335"/> <!-- b -->
-        <set var="intro_variable" value="10"/>
-    </action>
-    <action id="intro-action-10" scope="match">
-        <sound key="note.pling" volume=".2" pitch="1.782"/> <!-- e -->
-        <sound key="note.harp" volume="1" pitch="0.891"/> <!-- e -->
-        <sound key="note.bass" volume=".1" pitch="0.891"/> <!-- e -->
-        <sound key="note.harp" volume=".6" pitch="1.189"/> <!-- a -->
-        <set var="intro_variable" value="9"/>
-    </action>
-    <action id="intro-action-9" scope="match">
-        <sound key="note.pling" volume=".2" pitch="1.498"/> <!-- c# -->
-        <sound key="note.harp" volume="1" pitch="0.749"/> <!-- c# -->
-        <sound key="note.bass" volume=".2" pitch="0.749"/> <!-- c# -->
-        <sound key="note.harp" volume=".6" pitch="1"/> <!-- f# -->
-        <sound key="random.orb" volume=".1" pitch="2"/>
-        <set var="intro_variable" value="8"/>
-    </action>
-    <action id="intro-action-8" scope="match">
-        <sound key="note.pling" volume=".2" pitch="1.335"/> <!-- b -->
-        <sound key="note.harp" volume=".9" pitch="0.667"/> <!-- b -->
-        <sound key="note.bass" volume=".3" pitch="0.667"/> <!-- b -->
-        <sound key="note.harp" volume=".6" pitch="0.891"/> <!-- e -->
-        <sound key="random.orb" volume=".1" pitch="2"/>
-        <set var="intro_variable" value="7"/>
-    </action>
-    <action id="intro-action-7" scope="match">
-        <sound key="note.pling" volume=".3" pitch="1.189"/> <!-- a -->
-        <sound key="note.harp" volume="1" pitch="0.595"/> <!-- a -->
-        <sound key="note.bass" volume=".3" pitch="0.595"/> <!-- a -->
-        <sound key="note.harp" volume=".6" pitch="0.749"/> <!-- c# -->
-        <sound key="block.note.hat" volume=".5" pitch="3"/>
-        <sound key="random.orb" volume=".1" pitch="2"/>
-        <set var="intro_variable" value="6"/>
-    </action>
-    <action id="intro-action-6" scope="match">
-        <sound key="note.harp" volume=".9" pitch="0.667"/> <!-- b -->
-        <sound key="note.bass" volume=".2" pitch="0.667"/> <!-- b -->
-        <sound key="note.harp" volume=".6" pitch="0.891"/> <!-- e -->
-        <sound key="random.orb" volume=".1" pitch="2"/>
-        <set var="intro_variable" value="5"/>
-    </action>
-    <action id="intro-action-5" scope="match">
-        <sound key="note.harp" volume="1" pitch="0.749"/> <!-- c# -->
-        <sound key="note.bass" volume=".3" pitch="0.749"/> <!-- c# -->
-        <sound key="note.harp" volume=".6" pitch="1"/> <!-- f# -->
-        <sound key="random.orb" volume=".1" pitch="2"/>
-        <set var="intro_variable" value="4"/>
-    </action>
-    <action id="intro-action-4" scope="match">
-        <sound key="note.harp" volume=".9" pitch="0.891"/> <!-- e -->
-        <sound key="note.bass" volume=".3" pitch="0.891"/> <!-- e -->
-        <sound key="note.harp" volume=".6" pitch="1.189"/> <!-- a -->
-        <sound key="block.note.hat" volume=".2" pitch="4"/>
-        <sound key="random.orb" volume=".2" pitch="2"/>
-        <set var="intro_variable" value="3"/>
-    </action>
-    <action id="intro-action-3" scope="match">
-        <sound key="note.harp" volume="1" pitch="0.749"/> <!-- c# -->
-        <sound key="note.bass" volume=".3" pitch="0.595"/> <!-- a -->
-        <sound key="note.harp" volume=".6" pitch="1"/> <!-- f# -->
-        <sound key="block.note.hat" volume=".5" pitch="3"/>
-        <sound key="random.orb" volume=".2" pitch="2"/>
-        <set var="intro_variable" value="2"/>
-    </action>
-    <action id="intro-action-2" scope="match">
-        <sound key="note.harp" volume=".9" pitch="1.122"/> <!-- g# -->
-        <sound key="note.bass" volume=".3" pitch="0.891"/> <!-- e -->
-        <sound key="note.harp" volume=".6" pitch="0.891"/> <!-- e -->
-        <sound key="block.note.hat" volume=".2" pitch="1"/>
-        <sound key="block.note.hat" volume=".1" pitch="2"/>
-        <sound key="random.orb" volume=".1" pitch="2"/>
-        <set var="intro_variable" value="1"/>
-    </action>
-    <action id="intro-action-1" scope="match">
-        <sound key="note.harp" volume="1" pitch="1.189"/> <!-- a -->
-        <sound key="note.bass" volume=".4" pitch="0.595"/> <!-- a -->
-        <sound key="note.harp" volume=".6" pitch="0.891"/> <!-- e -->
-        <sound key="block.note.hat" volume=".5" pitch="3"/>
-        <sound key="block.note.snare" volume=".5" pitch="1"/>
-        <sound key="random.explode" volume=".1" pitch=".5"/>
-        <sound key="block.enchantment_table.use" volume=".6" pitch=".5"/>
-        <sound key="random.orb" volume=".2" pitch="2"/>
-        <sound key="entity.lightning.thunder" volume=".1" pitch="1"/>
-        <set var="intro_variable" value="0"/>
-    </action>
-    <trigger filter="intro-17" action="intro-action-17" scope="match"/>
-    <trigger filter="intro-16" action="intro-action-16" scope="match"/>
-    <trigger filter="intro-15" action="intro-action-15" scope="match"/>
-    <trigger filter="intro-14" action="intro-action-14" scope="match"/>
-    <trigger filter="intro-13" action="intro-action-13" scope="match"/>
-    <trigger filter="intro-12" action="intro-action-12" scope="match"/>
-    <trigger filter="intro-11" action="intro-action-11" scope="match"/>
-    <trigger filter="intro-10" action="intro-action-10" scope="match"/>
-    <trigger filter="intro-9" action="intro-action-9" scope="match"/>
-    <trigger filter="intro-8" action="intro-action-8" scope="match"/>
-    <trigger filter="intro-7" action="intro-action-7" scope="match"/>
-    <trigger filter="intro-6" action="intro-action-6" scope="match"/>
-    <trigger filter="intro-5" action="intro-action-5" scope="match"/>
-    <trigger filter="intro-4" action="intro-action-4" scope="match"/>
-    <trigger filter="intro-3" action="intro-action-3" scope="match"/>
-    <trigger filter="intro-2" action="intro-action-2" scope="match"/>
-    <trigger filter="intro-1" action="intro-action-1" scope="match"/>
     <trigger filter="pickup-green-momentary" action="pickup-green-momentary-action" scope="player"/>
     <trigger filter="pickup-red-momentary" action="pickup-red-momentary-action" scope="player"/>
-    <trigger filter="pickup-them-6" action="pickup-them-action-6" scope="player"/>
-    <trigger filter="pickup-them-5" action="pickup-them-action-5" scope="player"/>
-    <trigger filter="pickup-them-4" action="pickup-them-action-4" scope="player"/>
-    <trigger filter="pickup-them-3" action="pickup-them-action-3" scope="player"/>
-    <trigger filter="pickup-them-2" action="pickup-them-action-2" scope="player"/>
-    <trigger filter="pickup-them-1" action="pickup-them-action-1" scope="player"/>
-    <trigger filter="pickup-me-6" action="pickup-me-action-6" scope="player"/>
-    <trigger filter="pickup-me-5" action="pickup-me-action-5" scope="player"/>
-    <trigger filter="pickup-me-4" action="pickup-me-action-4" scope="player"/>
-    <trigger filter="pickup-me-3" action="pickup-me-action-3" scope="player"/>
-    <trigger filter="pickup-me-2" action="pickup-me-action-2" scope="player"/>
-    <trigger filter="pickup-me-1" action="pickup-me-action-1" scope="player"/>
-    <trigger filter="upgrade-me-8" action="upgrade-me-action-8" scope="player"/>
-    <trigger filter="upgrade-me-7" action="upgrade-me-action-7" scope="player"/>
-    <trigger filter="upgrade-me-6" action="upgrade-me-action-6" scope="player"/>
-    <trigger filter="upgrade-me-5" action="upgrade-me-action-5" scope="player"/>
-    <trigger filter="upgrade-me-4" action="upgrade-me-action-4" scope="player"/>
-    <trigger filter="upgrade-me-3" action="upgrade-me-action-3" scope="player"/>
     <trigger filter="upgrade-me-2" action="upgrade-me-action-2" scope="player"/>
     <trigger filter="upgrade-me-1" action="upgrade-me-action-1" scope="player"/>
     <trigger filter="vanity-hat-filter" action="vanity-hat-action" scope="player"/>
@@ -795,34 +502,26 @@ Features:
     <!-- Team upgrade: Shears -->
     <action id="regen-set" scope="player">
         <message text="`e`l▲ `6Your team now has `e`lRegeneration`6 around your monuments`r"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
-        <sound key="random.orb" volume="1" pitch="1"/>
         <set var="regen_variable" value="1"/>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
     <action id="shears-action" scope="player">
         <message text="`e`l▲ `6Your team now has permanent `e`lShears`r"/>
-        <sound key="random.orb" volume="1" pitch="1"/>
-        <sound key="entity.sheep.shear" volume="1" pitch="1"/>
         <set var="shears_variable" value="1"/>
         <kit force="true" filter="always">
             <item material="shears" unbreakable="true"/>
         </kit>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
         <!-- Team upgrade: Iron Hat -->
     <action id="iron-hat-action" scope="player">
         <message text="`e`l▲ `6Your team now has permanent `e`lIron Helmet`r"/>
-        <sound key="item.armor.equip_iron" pitch="1" volume="1"/>
-        <sound key="item.armor.equip_iron" pitch=".9" volume="1"/>
-        <sound key="random.orb" volume="1" pitch="1"/>
         <set var="iron_hat_variable" value="1"/>
         <replace-item ignore-metadata="true">
             <find material="leather helmet"/>
             <replace material="iron helmet" unbreakable="true"/>
         </replace-item>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
     <!-- Team upgrade: Sharpness replacements -->
     <action id="sharpness-replacements-1" scope="player">
@@ -994,91 +693,63 @@ Features:
     <!-- Upgrade alerts -->
     <action id="sharpness-alert-1" scope="player">
         <message text="`e`l▲ `r`6Sword upgraded to `e`lSharpness I`r"/>
-        <sound key="random.orb" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
     <trigger filter="sharpness-1" trigger="sharpness-alert-1" scope="player"/>
     <action id="sharpness-alert-2" scope="player">
         <message text="`e`l▲ `r`6Sword upgraded to `e`lSharpness II`r"/>
-        <sound key="random.orb" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
     <trigger filter="sharpness-2" trigger="sharpness-alert-2" scope="player"/>
     <action id="protection-alert-1" scope="player">
         <message text="`e`l▲ `6Team armor upgraded to `e`lProtection I`r"/>
-        <sound key="random.orb" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
     <trigger filter="protection-1" trigger="protection-alert-1" scope="player"/>
     <action id="protection-alert-2" scope="player">
         <message text="`e`l▲ `6Team armor upgraded to `e`lProtection II`r"/>
-        <sound key="random.orb" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
     <trigger filter="protection-2" trigger="protection-alert-2" scope="player"/>
     <action id="protection-alert-3" scope="player">
         <message text="`e`l▲ `6Team armor upgraded to `e`lProtection III`r"/>
-        <sound key="random.orb" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
     <trigger filter="protection-3" trigger="protection-alert-3" scope="player"/>
     <action id="protection-alert-4" scope="player">
         <message text="`e`l▲ `6Team armor upgraded to `e`lProtection IV`r"/>
-        <sound key="random.orb" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
     <trigger filter="protection-4" trigger="protection-alert-4" scope="player"/>
     <action id="haste-alert-1" scope="player">
         <message text="`e`l▲ `6Your team now has `e`lHaste I`r"/>
-        <sound key="random.orb" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
     <trigger filter="haste-1" trigger="haste-alert-1" scope="player"/>
     <action id="haste-alert-2" scope="player">
         <message text="`e`l▲ `6Your team now has `e`lHaste II`r"/>
-        <sound key="random.orb" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
     <!-- Team upgrades: Blocks -->
     <action id="block-boost-action-1" scope="player">
         <set var="block_boost_variable" value="1"/>
         <message text="`e`l▲ `6Team kit upgraded to `e`lBlock Boost I`r"/>
-        <sound key="random.orb" volume="1" pitch="1"/>
-        <sound key="block.stone.place" volume="1" pitch="1"/>
         <kit force="true" filter="always" deduct-items="true">
             <item material="log" amount="32"/>
             <item material="smooth brick" amount="32"/>
             <item material="wool" amount="32" team-color="true"/>
         </kit>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
     <action id="block-boost-action-2" scope="player">
         <set var="block_boost_variable" value="2"/>
         <message text="`e`l▲ `6Team kit upgraded to `e`lBlock Boost II`r"/>
-        <sound key="random.orb" volume="1" pitch="1.1"/>
-        <sound key="block.stone.place" volume="1" pitch="1"/>
         <kit force="true" filter="always" deduct-items="true">
             <item material="log" amount="64"/>
             <item material="smooth brick" amount="64"/>
             <item material="wool" amount="64" team-color="true"/>
         </kit>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
+        <set var="upgrade_me_variable" value="1"/>
     </action>
     <!-- Team upgrades: Enchantment triggers -->
     <trigger filter="apply-sharpness-1" trigger="sharpness-replacements-1" scope="player"/>
@@ -1091,8 +762,7 @@ Features:
     <action id="axe-shovel-action-1" scope="player">
         <set var="axe_shovel_variable" value="1"/>
         <message text="`e`l▲ `6Axe and Shovel upgraded to `e`lIron`r"/>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
-        <sound key="random.anvil_use" volume=".3" pitch="0.9"/>
+        <set var="upgrade_me_variable" value="1"/>
         <replace-item ignore-metadata="true">
             <find material="stone axe"/>
             <replace material="air"/>
@@ -1111,8 +781,7 @@ Features:
     <action id="axe-shovel-action-2" scope="player">
         <set var="axe_shovel_variable" value="2"/>
         <message text="`e`l▲ `6Axe and Shovel upgraded to `e`lDiamond`r"/>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
-        <sound key="random.anvil_use" volume=".3" pitch="1.1"/>
+        <set var="upgrade_me_variable" value="1"/>
         <replace-item ignore-metadata="true">
             <find material="iron axe"/>
             <replace material="air"/>
@@ -1135,10 +804,7 @@ Features:
     <action id="axe-shovel-action-3" scope="player">
         <set var="axe_shovel_variable" value="3"/>
         <message text="`e`l▲ `6Axe and Shovel upgraded to `e`lDiamond Efficiency I`r"/>
-        <set var="upgrade_me_variable" value="8"/> <!-- starts upgrade melody -->
-        <sound key="random.orb" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
-        <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
+        <set var="upgrade_me_variable" value="1"/>
         <replace-item ignore-metadata="true">
             <find material="diamond axe"/>
             <replace material="air"/>
@@ -1394,7 +1060,6 @@ Features:
     <action id="pickaxe-3-action" scope="player">
         <set var="pickaxe_variable" value="3"/>
         <message text="`e`l▲ `6Pickaxe upgraded to `e`lDiamond Efficiency III`r"/>
-                <sound key="random.anvil_use" volume=".3" pitch="1.1"/>
         <sound key="random.orb" volume="1" pitch="1"/>
         <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
         <sound key="block.enchantment_table.use" volume="1" pitch=".9"/>
@@ -1664,7 +1329,6 @@ Features:
     <trigger filter="dead" trigger="dead-action" scope="player"/>
 </actions>
 <variables>
-    <variable id="intro_variable" default="17" scope="match"/>
     <variable id="reset_phase_variable" default="0" scope="player"/> <!-- 0=dead 1=phase1Done 2=phase2Done -->
     <!-- pickup redstone and emerald block variables for sounds and helmet upgrade -->
     <variable id="pickup_green_momentary_variable" default="0" scope="player"/>
@@ -1758,119 +1422,10 @@ Features:
         <variable var="vanity_chestplate_variable">1</variable>
         <variable var="vanity_chestplate_life_variable">0</variable>
     </all>
-    <after id="intro-17" duration="4.0s">
-        <all>
-            <match-started/>
-            <variable var="intro_variable">17</variable>
-        </all>
-    </after>
-    <after id="intro-16" duration="0.6s">
-        <variable var="intro_variable">16</variable>
-    </after>
-    <after id="intro-15" duration="0.6">
-        <variable var="intro_variable">15</variable>
-    </after>
-    <after id="intro-14" duration="0.3s">
-        <variable var="intro_variable">14</variable>
-    </after>
-    <after id="intro-13" duration="0.15s">
-        <variable var="intro_variable">13</variable>
-    </after>
-    <after id="intro-12" duration="0.15s">
-        <variable var="intro_variable">12</variable>
-    </after>
-    <after id="intro-11" duration="0.15s">
-        <variable var="intro_variable">11</variable>
-    </after>
-    <after id="intro-10" duration="0.15s">
-        <variable var="intro_variable">10</variable>
-    </after>
-    <after id="intro-9" duration="0.1s">
-        <variable var="intro_variable">9</variable>
-    </after>
-    <after id="intro-8" duration="0.1s">
-        <variable var="intro_variable">8</variable>
-    </after>
-    <after id="intro-7" duration="0.1s">
-        <variable var="intro_variable">7</variable>
-    </after>
-    <after id="intro-6" duration="0.4s">
-        <variable var="intro_variable">6</variable>
-    </after>
-    <after id="intro-5" duration="0.15s">
-        <variable var="intro_variable">5</variable>
-    </after>
-    <after id="intro-4" duration="0.1s">
-        <variable var="intro_variable">4</variable>
-    </after>
-    <after id="intro-3" duration="0.15s">
-        <variable var="intro_variable">3</variable>
-    </after>
-    <after id="intro-2" duration="0.1s">
-        <variable var="intro_variable">2</variable>
-    </after>
-    <after id="intro-1" duration="0.1s">
-        <variable var="intro_variable">1</variable>
-    </after>
-    <!-- Filters that set the pace of the two "pickup" melodies -->
-    <after id="pickup-them-6" duration="0.3s">
-        <variable var="pickup_them_variable">6</variable>
-    </after>
-    <after id="pickup-them-5" duration="0.25s">
-        <variable var="pickup_them_variable">5</variable>
-    </after>
-    <after id="pickup-them-4" duration="0.22s">
-        <variable var="pickup_them_variable">4</variable>
-    </after>
-    <after id="pickup-them-3" duration="0.21s">
-        <variable var="pickup_them_variable">3</variable>
-    </after>
-    <after id="pickup-them-2" duration="0.2s">
-        <variable var="pickup_them_variable">2</variable>
-    </after>
-    <after id="pickup-them-1" duration="0.2s">
-        <variable var="pickup_them_variable">1</variable>
-    </after>
-    <after id="pickup-me-6" duration="0.3s">
-        <variable var="pickup_me_variable">6</variable>
-    </after>
-    <after id="pickup-me-5" duration="0.25s">
-        <variable var="pickup_me_variable">5</variable>
-    </after>
-    <after id="pickup-me-4" duration="0.22s">
-        <variable var="pickup_me_variable">4</variable>
-    </after>
-    <after id="pickup-me-3" duration="0.21s">
-        <variable var="pickup_me_variable">3</variable>
-    </after>
-    <after id="pickup-me-2" duration="0.2s">
-        <variable var="pickup_me_variable">2</variable>
-    </after>
-    <after id="pickup-me-1" duration="0.2s">
-        <variable var="pickup_me_variable">1</variable>
-    </after>
-    <after id="upgrade-me-8" duration="0.8s">
-        <variable var="upgrade_me_variable">8</variable>
-    </after>
-    <after id="upgrade-me-7" duration="0.21s">
-        <variable var="upgrade_me_variable">7</variable>
-    </after>
-    <after id="upgrade-me-6" duration="0.7s">
-        <variable var="upgrade_me_variable">6</variable>
-    </after>
-    <after id="upgrade-me-5" duration="0.2">
-        <variable var="upgrade_me_variable">5</variable>
-    </after>
-    <after id="upgrade-me-4" duration="0.6s">
-        <variable var="upgrade_me_variable">4</variable>
-    </after>
-    <after id="upgrade-me-3" duration="0.2">
-        <variable var="upgrade_me_variable">3</variable>
-    </after>
-    <after id="upgrade-me-2" duration="0.4s">
-        <variable var="upgrade_me_variable">2</variable>
-    </after>
-    <after id="upgrade-me-1" duration="0.1">
+    <all id="upgrade-me-2">
+        <variable var="upgrade_me_variable">1</variable>
+    </all>
+    <after id="upgrade-me-1" duration="0.2">
         <variable var="upgrade_me_variable">1</variable>
     </after>
     <!-- Respawn Reset filters -->
@@ -1998,7 +1553,6 @@ Features:
         <all>
             <team>red-team</team>
             <variable var="vanity_hat_variable">0</variable>
-            <variable var="pickup_them_variable">99</variable> <!-- pickup fanfare done -->
             <variable var="pickup_green_momentary_variable">1</variable>
             <any>
                 <region id="green-monument-1"/>
@@ -2008,7 +1562,6 @@ Features:
         <all>
             <team>green-team</team>
             <variable var="vanity_hat_variable">0</variable>
-            <variable var="pickup_them_variable">99</variable> <!-- pickup fanfare done -->
             <variable var="pickup_red_momentary_variable">1</variable>
             <any>
                 <region id="red-monument-1"/>
@@ -2453,7 +2006,7 @@ Features:
     </destroyable>
 </destroyables>
 <renewables>
-    <renewable region="everywhere" renew-filter="only-diamond" interval="35s" sound="false"/>
+    <renewable region="everywhere" renew-filter="only-diamond" interval="35s" sound="true"/>
 </renewables>
 <block-drops>
     <rule>
