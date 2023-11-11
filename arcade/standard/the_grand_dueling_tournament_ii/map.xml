@@ -1,6 +1,6 @@
 <map proto="1.4.2" game="Duel Wins">
 <name>The Grand Dueling Tournament II</name>
-<version>2.1.1</version>
+<version>2.1.2</version>
 <objective>Win the tournament.</objective>
 <phase>development</phase>
 <variant id="spleef" world="spleef" override="true">The Grand Spleefing Tournament II</variant>
@@ -496,7 +496,9 @@
     <if variant="spleef">
         <material id="breakable-blocks">snow block</material>
     </if>
+    <match-started id="match-started"/>
     <match-finished id="match-finished"/>
+    <participating id="participating"/>
     <variable id="round-1" var="current_round">1</variable>
     <variable id="round-2" var="current_round">2</variable>
     <variable id="round-3" var="current_round">3</variable>
@@ -545,30 +547,26 @@
     </any>
     <any id="countdown-start">
         <all>
-            <variable var="current_round">1</variable>
             <after duration="7s" filter="round-1-starting"/>
+            <not>
+                <filter id="round-1-finished"/>
+            </not>
         </all>
         <all>
-            <variable var="current_round">2</variable>
             <after duration="7s" filter="round-2-starting"/>
+            <not>
+                <filter id="round-2-finished"/>
+            </not>
         </all>
         <all>
-            <variable var="current_round">3</variable>
             <after duration="7s" filter="round-3-starting"/>
+            <not>
+                <filter id="round-3-finished"/>
+            </not>
         </all>
-    </any>
-    <any id="participating">
-        <team id="only-team-1">team-1</team>
-        <team id="only-team-2">team-2</team>
-        <team id="only-team-3">team-3</team>
-        <team id="only-team-4">team-4</team>
-        <team id="only-team-5">team-5</team>
-        <team id="only-team-6">team-6</team>
-        <team id="only-team-7">team-7</team>
-        <team id="only-team-8">team-8</team>
     </any>
     <all id="only-team-1-0-wins">
-        <filter id="only-team-1"/>
+        <team id="only-team-1">team-1</team>
         <score id="team-1-0-wins" team="team-1">0</score>
     </all>
     <all id="only-team-1-1-wins">
@@ -580,7 +578,7 @@
         <score id="team-1-2-wins" team="team-1">2</score>
     </all>
     <all id="only-team-2-0-wins">
-        <filter id="only-team-2"/>
+        <team id="only-team-2">team-2</team>
         <score id="team-2-0-wins" team="team-2">0</score>
     </all>
     <all id="only-team-2-1-wins">
@@ -592,7 +590,7 @@
         <score id="team-2-2-wins" team="team-2">2</score>
     </all>
     <all id="only-team-3-0-wins">
-        <filter id="only-team-3"/>
+        <team id="only-team-3">team-3</team>
         <score id="team-3-0-wins" team="team-3">0</score>
     </all>
     <all id="only-team-3-1-wins">
@@ -604,7 +602,7 @@
         <score id="team-3-2-wins" team="team-3">2</score>
     </all>
     <all id="only-team-4-0-wins">
-        <filter id="only-team-4"/>
+        <team id="only-team-4">team-4</team>
         <score id="team-4-0-wins" team="team-4">0</score>
     </all>
     <all id="only-team-4-1-wins">
@@ -616,7 +614,7 @@
         <score id="team-4-2-wins" team="team-4">2</score>
     </all>
     <all id="only-team-5-0-wins">
-        <filter id="only-team-5"/>
+        <team id="only-team-5">team-5</team>
         <score id="team-5-0-wins" team="team-5">0</score>
     </all>
     <all id="only-team-5-1-wins">
@@ -628,7 +626,7 @@
         <score id="team-5-2-wins" team="team-5">2</score>
     </all>
     <all id="only-team-6-0-wins">
-        <filter id="only-team-6"/>
+        <team id="only-team-6">team-6</team>
         <score id="team-6-0-wins" team="team-6">0</score>
     </all>
     <all id="only-team-6-1-wins">
@@ -640,7 +638,7 @@
         <score id="team-6-2-wins" team="team-6">2</score>
     </all>
     <all id="only-team-7-0-wins">
-        <filter id="only-team-7"/>
+        <team id="only-team-7">team-7</team>
         <score id="team-7-0-wins" team="team-7">0</score>
     </all>
     <all id="only-team-7-1-wins">
@@ -652,7 +650,7 @@
         <score id="team-7-2-wins" team="team-7">2</score>
     </all>
     <all id="only-team-8-0-wins">
-        <filter id="only-team-8"/>
+        <team id="only-team-8">team-8</team>
         <score id="team-8-0-wins" team="team-8">0</score>
     </all>
     <all id="only-team-8-1-wins">
@@ -1404,10 +1402,10 @@
     </trigger>
     <action id="pick-unique-kit" scope="match">
         <unless variant="spleef">
-            <set var="t" value="min(min(min(min(k0, k1),min(k2, k3)),min(min(k4, k5),min(k6, k7))),min(min(min(k8, k9),min(k10, k11)),k12))"/>
+            <set var="t" value="min(k0, k1, k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12)"/>
         </unless>
         <if variant="spleef">
-            <set var="t" value="min(min(min(k0, k1),min(k2, k3)),k4)"/>
+            <set var="t" value="min(k0, k1, k2, k3, k4)"/>
         </if>
         <set var="k0" value="k0 - t"/>
         <set var="k1" value="k1 - t"/>
@@ -1439,10 +1437,7 @@
     <!--
     pre-match introduction announcements
     -->
-    <trigger scope="match">
-        <filter>
-            <time>0s</time>
-        </filter>
+    <trigger scope="match" filter="match-started">
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Welcome to The Grand ${tournament-type} Tournament!"/>
             <sound key="mob.villager.haggle"/>
@@ -1626,7 +1621,6 @@
             <message text="`7[`6Arena Master`7] `6Tirion`r: Get ready, the first round is about to commence in 10 seconds!"/>
             <sound key="mob.villager.haggle"/>
             <action id="clear-kit-applicator"/>
-            <set var="current_round" value="1"/>
             <set var="current_kit" value="round_1_kit"/>
         </action>
     </trigger>
@@ -1634,19 +1628,15 @@
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Let The Grand ${tournament-type} Tournament begin!"/>
             <sound key="mob.enderdragon.growl" volume="1.2" pitch="0.8"/>
+            <set var="current_round" value="1"/>
             <action id="kit-applicator"/>
         </action>
     </trigger>
-    <trigger scope="match" filter="round-1-finished">
-        <action>
-            <action id="clear-kit-applicator"/>
-        </action>
-    </trigger>
+    <trigger scope="match" filter="round-1-finished" action="clear-kit-applicator"/>
     <trigger scope="match" filter="round-2-starting">
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Brace yourselves, the second round starts in 10 seconds!"/>
             <sound key="mob.villager.haggle"/>
-            <set var="current_round" value="2"/>
             <set var="current_kit" value="round_2_kit"/>
         </action>
     </trigger>
@@ -1654,19 +1644,15 @@
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Aaaaand fight!"/>
             <sound key="mob.enderdragon.growl" volume="1.2" pitch="0.8"/>
+            <set var="current_round" value="2"/>
             <action id="kit-applicator"/>
         </action>
     </trigger>
-    <trigger scope="match" filter="round-2-finished">
-        <action>
-            <action id="clear-kit-applicator"/>
-        </action>
-    </trigger>
+    <trigger scope="match" filter="round-2-finished" action="clear-kit-applicator"/>
     <trigger scope="match" filter="round-3-starting">
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Prepare for the `6final showdown`r, starting in 10 seconds!"/>
             <sound key="mob.villager.haggle"/>
-            <set var="current_round" value="3"/>
             <set var="current_kit" value="round_3_kit"/>
         </action>
     </trigger>
@@ -1674,14 +1660,11 @@
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: May the best team win!"/>
             <sound key="mob.enderdragon.growl" volume="1.2" pitch="0.8"/>
+            <set var="current_round" value="3"/>
             <action id="kit-applicator"/>
         </action>
     </trigger>
-    <trigger scope="match" filter="round-3-finished">
-        <action>
-            <action id="clear-kit-applicator"/>
-        </action>
-    </trigger>
+    <trigger scope="match" filter="round-3-finished" action="clear-kit-applicator"/>
     <trigger scope="match" filter="match-finished">
         <action>
             <set var="current_round" value="0"/>
@@ -1711,26 +1694,25 @@
             </action>
         </action>
     </trigger>
-    <trigger scope="player" filter="all-arena-spectator">
-        <action filter="participating">
-            <kit id="spectating-kit"/>
-        </action>
-    </trigger>
+    <trigger scope="player" filter="all(all-arena-spectator, participating)" action="spectating-kit"/>
     <if variant="spleef">
-        <trigger scope="player">
+        <trigger scope="match">
             <filter>
                 <after duration="10s" message="Sudden death in {0}">
                     <after duration="2m20s">
-                        <region id="all-arenas"/>
+                        <filter id="all(any(all(current_round=1, round-1-starting), all(current_round=2, round-2-starting), all(current_round=3, round-3-starting)), not(between-rounds))"/>
                     </after>
                 </after>
             </filter>
             <action>
-                <kit>
-                    <item material="egg" amount="128" name="`rMega Grenade" grenade="true" grenade-power="6">
-                        <enchantment>knockback</enchantment>
-                    </item>
-                </kit>
+                <message text="`7[`6Arena Master`7] `6Tirion`r: Let's make this sudden death a little... `cexplosive`r!"/>
+                <switch-scope inner="player" filter="all(all-arenas, participating)">
+                    <kit>
+                        <item material="egg" amount="128" name="`rMega Grenade" grenade="true" grenade-power="4">
+                            <enchantment>knockback</enchantment>
+                        </item>
+                    </kit>
+                </switch-scope>
             </action>
         </trigger>
     </if>
@@ -1997,7 +1979,7 @@
 </portals>
 <if variant="spleef">
     <renewables>
-        <renewable region="all-arenas" interval="60" grow="false" particles="true">
+        <renewable region="all-arenas" interval="80" grow="false" particles="true">
             <renew-filter>
                 <material>snow block</material>
             </renew-filter>
