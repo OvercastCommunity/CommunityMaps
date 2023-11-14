@@ -1,39 +1,16 @@
 <map proto="1.4.2">
 <name>Boar Beach</name>
-<version>1.3.2</version>
-<objective>Get the most points in 7 minutes!</objective>
+<version>1.4</version>
+<objective>Have the most flags captured in your base after 7 minutes!</objective>
 <created>2023-01-26</created>
+<include id="void-death"/>
 <authors>
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
 </authors>
 <teams>
-    <team id="blue-team" color="blue"     max="12">Blue</team>
-    <team id="red-team"  color="dark red" max="12">Red</team>
+    <team id="blue-team" color="blue" max="12">Blue</team>
+    <team id="red-team" color="dark red" max="12">Red</team>
 </teams>
-<kits>
-    <kit id="main-kit">
-        <clear/>
-        <item slot="0" unbreakable="true" material="stone sword"/>
-        <item slot="1" unbreakable="true" material="bow"/>
-        <item slot="8" amount="36"        material="arrow"/>
-        <chestplate    unbreakable="true" material="chainmail chestplate"/>
-        <boots         unbreakable="true" material="iron boots"/>
-        <effect duration="3" amplifier="10">resistance</effect>
-        <effect duration="3" amplifier="10">strength</effect>
-        <effect duration="4" amplifier="01">speed</effect>
-    </kit>
-    <kit id="blue-kit" parents="main-kit">
-        <helmet   unbreakable="true" color="0066cc" material="leather helmet"/>
-        <leggings unbreakable="true" color="0066cc" material="leather leggings"/>
-    </kit>
-    <kit id="red-kit" parents="main-kit">
-        <helmet   unbreakable="true" color="cd0000" material="leather helmet"/>
-        <leggings unbreakable="true" color="cd0000" material="leather leggings"/>
-    </kit>
-    <kit id="void-kit" force="true">
-        <max-health>1</max-health>
-    </kit>
-</kits>
 <spawns>
     <default>
         <regions angle="0,25,0">
@@ -41,23 +18,56 @@
             <point>0.5,24,-20.5</point>
         </regions>
     </default>
-    <spawn team="blue-team" kit="blue-kit">
+    <spawn team="blue-team" kit="main-kit">
         <regions>
-            <point yaw="90">0.5,9,-32.5</point>
-            <point yaw="-90">0.5,9,-32.5</point>
+            <point yaw="90">0.5,7,-32.5</point>
+            <point yaw="-90">0.5,7,-32.5</point>
         </regions>
     </spawn>
-    <spawn team="red-team" kit="red-kit">
+    <spawn team="red-team" kit="main-kit">
         <regions>
-            <point yaw="90">0.5,9,33.5</point>
-            <point yaw="-90">0.5,9,33.5</point>
+            <point yaw="90">0.5,7,33.5</point>
+            <point yaw="-90">0.5,7,33.5</point>
         </regions>
     </spawn>
 </spawns>
-<variables>
-    <variable id="release_order" default="0" scope="match"/>
-</variables>
+<kits>
+    <kit id="main-kit">
+        <clear/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true"/>
+        <helmet material="leather helmet" unbreakable="true" team-color="true"/>
+        <chestplate material="chainmail chestplate" unbreakable="true"/>
+        <leggings material="leather leggings" unbreakable="true" team-color="true"/>
+        <boots material="iron boots" unbreakable="true"/>
+        <effect amplifier="10">resistance</effect>
+        <effect amplifier="10">strength</effect>
+        <effect>speed</effect>
+        <knockback-reduction>1</knockback-reduction>
+    </kit>
+    <kit id="clear-spawn-effects" force="true">
+        <item material="arrow" amount="36"/>
+        <effect duration="2s" amplifier="10">resistance</effect>
+        <effect duration="2s" amplifier="10">strength</effect>
+        <effect duration="2s">speed</effect>
+        <knockback-reduction>0</knockback-reduction>
+    </kit>
+</kits>
+<kill-rewards>
+    <kill-reward>
+        <item amount="12" material="arrow"/>
+        <item material="golden apple"/>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="2" repeat="true"/>
+        </filter>
+        <item amount="2" material="tnt"/>
+    </kill-reward>
+</kill-rewards>
 <filters>
+    <participating id="participating"/>
+    <match-started id="match-started"/>
     <team id="only-blue">blue-team</team>
     <team id="only-red">red-team</team>
     <!--
@@ -77,124 +87,26 @@
             <flag-returned post="red-post-red-flag">red-flag</flag-returned>
         </all>
     </not>
-    <time id="begin-release-0">0m10s</time>
-    <time id="begin-release-1">1m40s</time>
-    <time id="begin-release-2">3m10s</time>
-    <variable id="release-order-0" var="release_order">0</variable>
-    <variable id="release-order-1" var="release_order">1</variable>
-    <variable id="release-order-2" var="release_order">2</variable>
-    <variable id="release-order-3" var="release_order">3</variable>
-    <variable id="release-order-4" var="release_order">4</variable>
-    <variable id="release-order-5" var="release_order">5</variable>
-    <any id="begin-diamond-release">
-        <all>
-            <any>
-                <filter id="release-order-0"/>
-                <filter id="release-order-3"/>
-            </any>
-            <filter id="begin-release-0"/>
-        </all>
-        <all>
-            <any>
-                <filter id="release-order-1"/>
-                <filter id="release-order-4"/>
-            </any>
-            <filter id="begin-release-1"/>
-        </all>
-        <all>
-            <any>
-                <filter id="release-order-2"/>
-                <filter id="release-order-5"/>
-            </any>
-            <filter id="begin-release-2"/>
-        </all>
+    <time id="begin-release-1">0m10s</time>
+    <time id="begin-release-2">1m40s</time>
+    <time id="begin-release-3">3m10s</time>
+    <any id="diamond-flag-at-team-post">
+        <flag-returned id="blue-owns-diamond-flag" post="blue-post-diamond-flag">diamond-flag</flag-returned>
+        <flag-returned id="red-owns-diamond-flag" post="red-post-diamond-flag">diamond-flag</flag-returned>
     </any>
-    <any id="begin-gold-release">
-        <all>
-            <any>
-                <filter id="release-order-2"/>
-                <filter id="release-order-4"/>
-            </any>
-            <filter id="begin-release-0"/>
-        </all>
-        <all>
-            <any>
-                <filter id="release-order-0"/>
-                <filter id="release-order-5"/>
-            </any>
-            <filter id="begin-release-1"/>
-        </all>
-        <all>
-            <any>
-                <filter id="release-order-1"/>
-                <filter id="release-order-3"/>
-            </any>
-            <filter id="begin-release-2"/>
-        </all>
+    <any id="emerald-flag-at-team-post">
+        <flag-returned id="blue-owns-emerald-flag" post="blue-post-emerald-flag">emerald-flag</flag-returned>
+        <flag-returned id="red-owns-emerald-flag" post="red-post-emerald-flag">emerald-flag</flag-returned>
     </any>
-    <any id="begin-emerald-release">
-        <all>
-            <any>
-                <filter id="release-order-1"/>
-                <filter id="release-order-5"/>
-            </any>
-            <filter id="begin-release-0"/>
-        </all>
-        <all>
-            <any>
-                <filter id="release-order-2"/>
-                <filter id="release-order-3"/>
-            </any>
-            <filter id="begin-release-1"/>
-        </all>
-        <all>
-            <any>
-                <filter id="release-order-0"/>
-                <filter id="release-order-4"/>
-            </any>
-            <filter id="begin-release-2"/>
-        </all>
+    <any id="gold-flag-at-team-post">
+        <flag-returned id="blue-owns-gold-flag" post="blue-post-gold-flag">gold-flag</flag-returned>
+        <flag-returned id="red-owns-gold-flag" post="red-post-gold-flag">gold-flag</flag-returned>
     </any>
-    <after id="trigger-diamond-release" message="Diamond Flag will be released in {0}" duration="45s" filter="begin-diamond-release"/>
-    <after id="trigger-gold-release"    message="Gold Flag will be released in {0}"    duration="45s" filter="begin-gold-release"/>
-    <after id="trigger-emerald-release" message="Emerald Flag will be released in {0}" duration="45s" filter="begin-emerald-release"/>
-    <any id="enable-diamond-post-spawner">
-        <flag-returned post="blue-post-diamond-flag">diamond-flag</flag-returned>
-        <flag-returned post="red-post-diamond-flag">diamond-flag</flag-returned>
-    </any>
-    <any id="enable-gold-post-spawner">
-        <flag-returned post="blue-post-gold-flag">gold-flag</flag-returned>
-        <flag-returned post="red-post-gold-flag">gold-flag</flag-returned>
-    </any>
-    <any id="enable-emerald-post-spawner">
-        <flag-returned post="blue-post-emerald-flag">emerald-flag</flag-returned>
-        <flag-returned post="red-post-emerald-flag">emerald-flag</flag-returned>
-    </any>
-    <pulse id="send-flag-unreleased-alert" period="1s" duration="0.5">
-        <all>
-            <participating/>
-            <any>
-                <all>
-                    <region id="diamond-flag-alert"/>
-                    <not>
-                        <filter id="trigger-diamond-release"/>
-                    </not>
-                </all>
-                <all>
-                    <region id="gold-flag-alert"/>
-                    <not>
-                        <filter id="trigger-gold-release"/>
-                    </not>
-                </all>
-                <all>
-                    <region id="emerald-flag-alert"/>
-                    <not>
-                        <filter id="trigger-emerald-release"/>
-                    </not>
-                </all>
-            </any>
-        </all>
-    </pulse>
+    <flag-returned id="blue-owns-blue-flag" post="blue-post-blue-flag">blue-flag</flag-returned>
+    <flag-returned id="red-owns-blue-flag" post="red-post-blue-flag">blue-flag</flag-returned>
+    <flag-returned id="blue-owns-red-flag" post="blue-post-red-flag">red-flag</flag-returned>
+    <flag-returned id="red-owns-red-flag" post="red-post-red-flag">red-flag</flag-returned>
+    <pulse id="flag-not-released" period="1s" duration="0.5" filter="all(participating, any(all(diamond-flag-alert, not(diamond_flag_release=9)), all(emerald-flag-alert, not(emerald_flag_release=9)), all(gold-flag-alert, not(gold_flag_release=9))))"/>
     <any id="block-whitelist">
         <material>tnt</material>
         <material>long grass</material>
@@ -202,186 +114,222 @@
         <material>web</material>
         <material>red mushroom</material>
         <material>brown mushroom</material>
+        <material>tripwire</material>
     </any>
     <material id="only-stained-clay">stained clay</material>
     <material id="only-stained-glass">stained glass</material>
+    <effect id="leaving-spawn" min-duration="oo">resistance</effect>
 </filters>
 <regions>
-    <cuboid id="blue-spawn-safety" min="17,7.75,-38" max="-17,8.5,-27"/>
-    <cuboid id="red-spawn-safety" min="-17,7.75,39" max="18,8.5,28"/>
     <union id="spawn-exits">
         <union id="blue-spawn-exits">
             <!-- defined from blue west exit points -->
             <union id="blue-west-exits">
-                <cuboid min="-11,12,-30" max="-14,15,-26"/> <!-- lower -->
-                <cuboid min="-16,21,-31" max="-20,24,-36"/> <!-- upper -->
+                <cuboid min="-14,9,-28" max="-11,12,-29"/> <!-- lower -->
+                <cuboid min="-16,18,-31" max="-15,21,-35"/> <!-- upper -->
             </union>
             <mirror normal="1,0,0" origin="0.5,0,0.5" region="blue-west-exits"/>
         </union>
         <mirror id="red-spawn-exits" normal="0,0,1" origin="0.5,0,0.5" region="blue-spawn-exits"/>
     </union>
-    <cuboid id="blue-net" min="5,14,-19" max="-4,20,-37"/>
-    <cuboid id="red-net" min="5,14,20" max="-4,20,38"/>
+    <cylinder id="blue-net" base="0.5,14,-26.5" radius="4" height="5"/>
+    <cylinder id="red-net" base="0.5,14,27.5" radius="4" height="5"/>
     <point id="diamond-point">13.5,9,0.5</point>
-    <cuboid id="diamond-flag-indicator" min="13,14,0" max="14,18,1"/>
-    <cuboid id="diamond-flag-box" min="12,9,-1" max="15,12,2"/>
-    <sphere id="diamond-flag-alert" origin="13.5,9,0.5" radius="4.5"/>
-    <point id="gold-point">0.5,7,0.5</point>
-    <cuboid id="gold-flag-indicator" min="0,12,0" max="1,16,1"/>
-    <cuboid id="gold-flag-box" min="-1,7,-1" max="2,10,2"/>
-    <sphere id="gold-flag-alert" origin="0.5,7,0.5" radius="4.5"/>
     <point id="emerald-point">-12.5,9,0.5</point>
-    <cuboid id="emerald-flag-indicator" min="-13,14,0" max="-12,18,1"/>
+    <point id="gold-point">0.5,7,0.5</point>
+    <cuboid id="diamond-flag-box" min="12,9,-1" max="15,12,2"/>
     <cuboid id="emerald-flag-box" min="-14,9,-1" max="-11,12,2"/>
+    <cuboid id="gold-flag-box" min="-1,6,-1" max="2,9,2"/>
+    <complement id="diamond-flag-indicator">
+        <cuboid min="13,14,0" max="14,18,1"/>
+        <block>13,15,0</block>
+    </complement>
+    <translate id="emerald-flag-indicator" region="gold-flag-indicator" offset="-13,0,0"/>
+    <translate id="gold-flag-indicator" region="diamond-flag-indicator" offset="-13,0,0"/>
+    <sphere id="diamond-flag-alert" origin="13.5,9,0.5" radius="4.5"/>
     <sphere id="emerald-flag-alert" origin="-13.5,9,0.5" radius="4.5"/>
-    <below id="yeet-into-the-void" y="-10"/>
-
+    <sphere id="gold-flag-alert" origin="0.5,6,0.5" radius="4.5"/>
     <apply block="block-whitelist" message="You may not interact with that material here"/>
-    <apply enter="only-blue" region="blue-spawn-exits"/>
-    <apply enter="only-red" region="red-spawn-exits"/>
-    <apply kit="void-kit" region="yeet-into-the-void"/>
+    <apply region="spawn-exits" kit="clear-spawn-effects" filter="leaving-spawn"/>
+    <apply region="blue-spawn-exits" enter="only-blue"/>
+    <apply region="red-spawn-exits" enter="only-red" />
 </regions>
-<portals sound="false">
-    <portal region="blue-spawn-safety" x="@0.5" y="@9" z="@-32.5" filter="only-blue"/>
-    <portal region="red-spawn-safety" x="@0.5" y="@9" z="@33.5" filter="only-red"/>
-    <portal region="yeet-into-the-void" y="-100"/>
-</portals>
 <score/>
 <time result="score">7m</time>
 <flags shared="true" carry-message="Return the flag to your team's skull!" deny-message="Return the flag to your team's skull!">
-    <flag id="blue-flag"    name="Blue Flag"    color="blue"   post="blue-post-blue-flag"/>
-    <flag id="red-flag"     name="Red Flag"     color="red"    post="red-post-red-flag"/>
-    <flag id="diamond-flag" name="Diamond Flag" color="cyan"   post="diamond-init-post" scoreboard-filter="trigger-diamond-release"/>
-    <flag id="gold-flag"    name="Gold Flag"    color="yellow" post="gold-init-post"    scoreboard-filter="trigger-gold-release"/>
-    <flag id="emerald-flag" name="Emerald Flag" color="lime"   post="emerald-init-post" scoreboard-filter="trigger-emerald-release"/>
+    <flag id="blue-flag" name="Lapis Flag" color="blue" post="blue-post-blue-flag"/>
+    <flag id="red-flag" name="Redstone Flag" color="red" post="red-post-red-flag"/>
+    <flag id="diamond-flag" name="Diamond Flag" color="cyan" post="diamond-init-post" scoreboard-filter="diamond_flag_release=9"/>
+    <flag id="emerald-flag" name="Emerald Flag" color="lime" post="emerald-init-post" scoreboard-filter="emerald_flag_release=9"/>
+    <flag id="gold-flag" name="Gold Flag" color="yellow" post="gold-init-post" scoreboard-filter="gold_flag_release=9"/>
     <post id="diamond-init-post" recover-time="3s" yaw="90">13,9,0</post>
-    <post id="gold-init-post"    recover-time="3s" yaw="90">0,7,0</post>
     <post id="emerald-init-post" recover-time="3s" yaw="-90">-13,9,0</post>
+    <post id="gold-init-post" recover-time="3s" yaw="90">0,6,0</post>
     <!-- blue specific posts and nets -->
-    <post id="blue-post-blue-flag"    owner="blue-team"  points-rate="1.0" recover-time="oo" respawn-time="1s" pickup-filter="deny-blue-own-pickup" yaw="0">0,18,-23</post>
-    <post id="blue-post-red-flag"     owner="blue-team"  points-rate="1.0" recover-time="oo" respawn-time="1s" pickup-filter="only-red" yaw="0">-1,18,-23</post>
-    <post id="blue-post-diamond-flag" owner="blue-team"  points-rate="1.0" recover-time="oo" respawn-time="1s" pickup-filter="only-red" yaw="0">1,18,-24</post>
-    <post id="blue-post-gold-flag"    owner="blue-team"  points-rate="1.0" recover-time="oo" respawn-time="1s" pickup-filter="only-red" yaw="0">0,18,-24</post>
-    <post id="blue-post-emerald-flag" owner="blue-team"  points-rate="1.0" recover-time="oo" respawn-time="1s" pickup-filter="only-red" yaw="0">-1,18,-24</post>
-    <net id="blue-net-blue-flag"    region="blue-net" post="blue-post-blue-flag"    flag="blue-flag"    capture-filter="only-blue" respawn-filter="always" location="0.5,18,-23"/>
-    <net id="blue-net-red-flag"     region="blue-net" post="blue-post-red-flag"     flag="red-flag"     capture-filter="only-blue" respawn-filter="always" location="0.5,18,-23"/>
-    <net id="blue-net-diamond-flag" region="blue-net" post="blue-post-diamond-flag" flag="diamond-flag" capture-filter="only-blue" respawn-filter="always" location="0.5,18,-23"/>
-    <net id="blue-net-gold-flag"    region="blue-net" post="blue-post-gold-flag"    flag="gold-flag"    capture-filter="only-blue" respawn-filter="always" location="0.5,18,-23"/>
-    <net id="blue-net-emerald-flag" region="blue-net" post="blue-post-emerald-flag" flag="emerald-flag" capture-filter="only-blue" respawn-filter="always" location="0.5,18,-23"/>
+    <post id="blue-post-blue-flag" owner="blue-team" recover-time="8s" respawn-time="1s" pickup-filter="deny-blue-own-pickup" yaw="0">0,14,-26</post>
+    <post id="blue-post-red-flag" owner="blue-team" recover-time="8s" respawn-time="1s" pickup-filter="only-red" yaw="0">0,14,-28</post>
+    <post id="blue-post-diamond-flag" owner="blue-team" recover-time="8s" respawn-time="1s" pickup-filter="only-red" yaw="-45">1,14,-27</post>
+    <post id="blue-post-emerald-flag" owner="blue-team" recover-time="8s" respawn-time="1s" pickup-filter="only-red" yaw="45">-1,14,-27</post>
+    <post id="blue-post-gold-flag" owner="blue-team" recover-time="8s" respawn-time="1s" pickup-filter="only-red" yaw="0">0,14,-27</post>
+    <net id="blue-net-blue-flag" region="blue-net" post="blue-post-blue-flag" flag="blue-flag" capture-filter="only-blue" respawn-filter="always" location="0.5,14,-27"/>
+    <net id="blue-net-red-flag" region="blue-net" post="blue-post-red-flag" flag="red-flag" capture-filter="only-blue" respawn-filter="always" location="0.5,14,-27"/>
+    <net id="blue-net-diamond-flag" region="blue-net" post="blue-post-diamond-flag" flag="diamond-flag" capture-filter="only-blue" respawn-filter="always" location="0.5,14,-27"/>
+    <net id="blue-net-emerald-flag" region="blue-net" post="blue-post-emerald-flag" flag="emerald-flag" capture-filter="only-blue" respawn-filter="always" location="0.5,14,-27"/>
+    <net id="blue-net-gold-flag" region="blue-net" post="blue-post-gold-flag" flag="gold-flag" capture-filter="only-blue" respawn-filter="always" location="0.5,14,-27"/>
     <!-- red specific posts and nets -->
-    <post id="red-post-blue-flag"    owner="red-team" points-rate="1.0" recover-time="oo" respawn-time="1s" pickup-filter="only-blue" yaw="180">1,18,23</post>
-    <post id="red-post-red-flag"     owner="red-team" points-rate="1.0" recover-time="oo" respawn-time="1s" pickup-filter="deny-red-own-pickup" yaw="180">0,18,23</post>
-    <post id="red-post-diamond-flag" owner="red-team" points-rate="1.0" recover-time="oo" respawn-time="1s" pickup-filter="only-blue" yaw="180">1,18,24</post>
-    <post id="red-post-gold-flag"    owner="red-team" points-rate="1.0" recover-time="oo" respawn-time="1s" pickup-filter="only-blue" yaw="180">0,18,24</post>
-    <post id="red-post-emerald-flag" owner="red-team" points-rate="1.0" recover-time="oo" respawn-time="1s" pickup-filter="only-blue" yaw="180">-1,18,24</post>
-    <net id="red-net-blue-flag"    region="red-net" post="red-post-blue-flag"    flag="blue-flag"    capture-filter="only-red" respawn-filter="always" location="0.5,18,23"/>
-    <net id="red-net-red-flag"     region="red-net" post="red-post-red-flag"     flag="red-flag"     capture-filter="only-red" respawn-filter="always" location="0.5,18,23"/>
-    <net id="red-net-diamond-flag" region="red-net" post="red-post-diamond-flag" flag="diamond-flag" capture-filter="only-red" respawn-filter="always" location="0.5,18,23"/>
-    <net id="red-net-gold-flag"    region="red-net" post="red-post-gold-flag"    flag="gold-flag"    capture-filter="only-red" respawn-filter="always" location="0.5,18,23"/>
-    <net id="red-net-emerald-flag" region="red-net" post="red-post-emerald-flag" flag="emerald-flag" capture-filter="only-red" respawn-filter="always" location="0.5,18,23"/>
+    <post id="red-post-blue-flag" owner="red-team" recover-time="8s" respawn-time="1s" pickup-filter="only-blue" yaw="180">0,14,28</post>
+    <post id="red-post-red-flag" owner="red-team" recover-time="8s" respawn-time="1s" pickup-filter="deny-red-own-pickup" yaw="180">0,14,26</post>
+    <post id="red-post-diamond-flag" owner="red-team" recover-time="8s" respawn-time="1s" pickup-filter="only-blue" yaw="225">1,14,27</post>
+    <post id="red-post-emerald-flag" owner="red-team" recover-time="8s" respawn-time="1s" pickup-filter="only-blue" yaw="135">-1,14,27</post>
+    <post id="red-post-gold-flag" owner="red-team" recover-time="8s" respawn-time="1s" pickup-filter="only-blue" yaw="180">0,14,27</post>
+    <net id="red-net-blue-flag" region="red-net" post="red-post-blue-flag" flag="blue-flag" capture-filter="only-red" respawn-filter="always" location="0.5,14,27"/>
+    <net id="red-net-red-flag" region="red-net" post="red-post-red-flag" flag="red-flag" capture-filter="only-red" respawn-filter="always" location="0.5,14,27"/>
+    <net id="red-net-diamond-flag" region="red-net" post="red-post-diamond-flag" flag="diamond-flag" capture-filter="only-red" respawn-filter="always" location="0.5,14,27"/>
+    <net id="red-net-emerald-flag" region="red-net" post="red-post-emerald-flag" flag="emerald-flag" capture-filter="only-red" respawn-filter="always" location="0.5,14,27"/>
+    <net id="red-net-gold-flag" region="red-net" post="red-post-gold-flag" flag="gold-flag" capture-filter="only-red" respawn-filter="always" location="0.5,14,27"/>
 </flags>
-<structures>
-    <!-- exclamation point indicator above the flag when release countdown has begun -->
-    <structure id="diamond-flag-indicator-struc" region="diamond-flag-indicator"/>
-    <dynamic structure="diamond-flag-indicator-struc">
-        <trigger>
-            <all>
-                <time>0s</time>
-                <filter id="begin-diamond-release"/>
-                <not>
-                    <filter id="trigger-diamond-release"/>
-                </not>
-            </all>
-        </trigger>
-    </dynamic>
-    <structure id="gold-flag-indicator-struc" region="gold-flag-indicator"/>
-    <dynamic structure="gold-flag-indicator-struc">
-        <trigger>
-            <all>
-                <time>0s</time>
-                <filter id="begin-gold-release"/>
-                <not>
-                    <filter id="trigger-gold-release"/>
-                </not>
-            </all>
-        </trigger>
-    </dynamic>
-    <structure id="emerald-flag-indicator-struc" region="emerald-flag-indicator"/>
-    <dynamic structure="emerald-flag-indicator-struc">
-        <trigger>
-            <all>
-                <time>0s</time>
-                <filter id="begin-emerald-release"/>
-                <not>
-                    <filter id="trigger-emerald-release"/>
-                </not>
-            </all>
-        </trigger>
-    </dynamic>
-</structures>
+<variables>
+    <score id="score"/>
+    <with-team id="blue_score" var="score" team="blue-team"/>
+    <with-team id="red_score" var="score" team="red-team"/>
+    <variable id="diamond_flag_release" default="0" scope="match"/>
+    <variable id="gold_flag_release" default="0" scope="match"/>
+    <variable id="emerald_flag_release" default="0" scope="match"/>
+    <variable id="t" default="0" scope="match"/>
+</variables>
 <actions>
-    <!-- randomly pick which order to release flags -->
-    <set id="set-release-order" var="release_order" value="floor(random() * 6)" scope="match"/>
-    <trigger filter="always" action="set-release-order" scope="match"/>
-    <!-- replace boxes with glass -->
-    <fill id="replace-diamond-box-glass" region="diamond-flag-box" material="stained glass:3" filter="only-stained-clay"/>
-    <fill id="replace-gold-box-glass"    region="gold-flag-box"    material="stained glass:4" filter="only-stained-clay"/>
-    <fill id="replace-emerald-box-glass" region="emerald-flag-box" material="stained glass:5" filter="only-stained-clay"/>
-    <trigger filter="begin-diamond-release" action="replace-diamond-box-glass" scope="match"/>
-    <trigger filter="begin-gold-release"    action="replace-gold-box-glass"    scope="match"/>
-    <trigger filter="begin-emerald-release" action="replace-emerald-box-glass" scope="match"/>
-    <!-- replace boxes with air -->
-    <fill id="replace-diamond-box-air" region="diamond-flag-box" material="air" filter="only-stained-glass"/>
-    <fill id="replace-gold-box-air"    region="gold-flag-box"    material="air" filter="only-stained-glass"/>
-    <fill id="replace-emerald-box-air" region="emerald-flag-box" material="air" filter="only-stained-glass"/>
-    <trigger filter="trigger-diamond-release" action="replace-diamond-box-air" scope="match"/>
-    <trigger filter="trigger-gold-release"    action="replace-gold-box-air"    scope="match"/>
-    <trigger filter="trigger-emerald-release" action="replace-emerald-box-air" scope="match"/>
-    <!-- countdown alert msg -->
-    <message id="msg-diamond-flag-countdown" text="`3Diamond Flag `rwill be released in `b45 seconds"/>
-    <message id="msg-gold-flag-countdown"    text="`eGold Flag `rwill be released in `b45 seconds"/>
-    <message id="msg-emerald-flag-countdown" text="`aEmerald Flag `rwill be released in `b45 seconds"/>
-    <trigger filter="begin-diamond-release"  action="msg-diamond-flag-countdown" scope="match"/>
-    <trigger filter="begin-gold-release"     action="msg-gold-flag-countdown"    scope="match"/>
-    <trigger filter="begin-emerald-release"  action="msg-emerald-flag-countdown" scope="match"/>
-    <!-- released alert msg -->
-    <message id="msg-diamond-flag-released"   text="`3Diamond Flag `rhas been released"/>
-    <message id="msg-gold-flag-released"      text="`eGold Flag `rhas been released"/>
-    <message id="msg-emerald-flag-released"   text="`aEmerald Flag `rhas been released"/>
-    <trigger filter="trigger-diamond-release" action="msg-diamond-flag-released"  scope="match"/>
-    <trigger filter="trigger-gold-release"    action="msg-gold-flag-released"     scope="match"/>
-    <trigger filter="trigger-emerald-release" action="msg-emerald-flag-released"  scope="match"/>
-    <!-- not yet released alert tip -->
-    <message id="msg-flag-not-released" actionbar="`c`lThis flag has not been released yet"/>
-    <trigger filter="send-flag-unreleased-alert" action="msg-flag-not-released" scope="player"/>
+    <trigger scope="match" filter="always">
+        <action>
+            <set var="diamond_flag_release" value="random()"/>
+            <set var="gold_flag_release" value="random()"/>
+            <set var="emerald_flag_release" value="random()"/>
+        </action>
+    </trigger>
+    <action id="pick-next-flag" scope="match">
+        <set var="t" value="min(diamond_flag_release, gold_flag_release, emerald_flag_release)"/>
+        <!-- value 9 indicates that a flag has been enabled for release -->
+        <!-- we don't want to subtract from the var once it has been released otherwise it messes with the scoreboard filtering -->
+        <action filter="not(diamond_flag_release=9)">
+            <set var="diamond_flag_release" value="diamond_flag_release - t"/>
+        </action>
+        <action filter="not(emerald_flag_release=9)">
+            <set var="emerald_flag_release" value="emerald_flag_release - t"/>
+        </action>
+        <action filter="not(gold_flag_release=9)">
+            <set var="gold_flag_release" value="gold_flag_release - t"/>
+        </action>
+        <action filter="diamond_flag_release=0">
+            <set var="diamond_flag_release" value="9"/>
+        </action>
+        <action filter="emerald_flag_release=0">
+            <set var="emerald_flag_release" value="9"/>
+        </action>
+        <action filter="gold_flag_release=0">
+            <set var="gold_flag_release" value="9"/>
+        </action>
+    </action>
+    <trigger scope="match" filter="begin-release-1" action="pick-next-flag"/>
+    <trigger scope="match" filter="begin-release-2" action="pick-next-flag"/>
+    <trigger scope="match" filter="begin-release-3" action="pick-next-flag"/>
+    <trigger scope="match" filter="diamond_flag_release=9">
+        <action>
+            <message text="`3Diamond Flag `rwill be released in `b45 seconds"/>
+            <fill region="diamond-flag-box" material="stained glass:3" filter="only-stained-clay"/>
+            <fill region="diamond-flag-indicator" material="diamond block"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="emerald_flag_release=9">
+        <action>
+            <message text="`aEmerald Flag `rwill be released in `b45 seconds"/>
+            <fill region="emerald-flag-box" material="stained glass:5" filter="only-stained-clay"/>
+            <fill region="emerald-flag-indicator" material="emerald block"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="gold_flag_release=9">
+        <action>
+            <message text="`eGold Flag `rwill be released in `b45 seconds"/>
+            <fill region="gold-flag-box" material="stained glass:4" filter="only-stained-clay"/>
+            <fill region="gold-flag-indicator" material="gold block"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after message="Diamond Flag will be released in {0}" duration="45s" filter="diamond_flag_release=9"/>
+        </filter>
+        <action>
+            <message text="`3Diamond Flag `rhas been released"/>
+            <fill region="diamond-flag-box" material="air" filter="only-stained-glass"/>
+            <fill region="diamond-flag-indicator" material="air"/>
+            <sound preset="OBJECTIVE_MODE"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after  message="Emerald Flag will be released in {0}" duration="45s" filter="emerald_flag_release=9"/>
+        </filter>
+        <action>
+            <message text="`aEmerald Flag `rhas been released"/>
+            <fill region="emerald-flag-box" material="air" filter="only-stained-glass"/>
+            <fill region="emerald-flag-indicator" material="air"/>
+            <sound preset="OBJECTIVE_MODE"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after message="Gold Flag will be released in {0}" duration="45s" filter="gold_flag_release=9"/>
+        </filter>
+        <action>
+            <message text="`eGold Flag `rhas been released"/>
+            <fill region="gold-flag-box" material="air" filter="only-stained-glass"/>
+            <fill region="gold-flag-indicator" material="air"/>
+            <sound preset="OBJECTIVE_MODE"/>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="flag-not-released">
+        <action>
+            <message actionbar="`c`lThis flag has not been released yet"/>
+        </action>
+    </trigger>
+    <set id="decrease-blue-score" scope="match" var="blue_score" value="max(blue_score-1, 0)"/>
+    <set id="increase-blue-score" scope="match" var="blue_score" value="min(blue_score+1, 5)"/>
+    <set id="decrease-red-score" scope="match" var="red_score" value="max(red_score-1, 0)"/>
+    <set id="increase-red-score" scope="match" var="red_score" value="min(red_score+1, 5)"/>
+    <trigger filter="not(blue-owns-blue-flag)" scope="match" action="decrease-blue-score"/>
+    <trigger filter="not(blue-owns-red-flag)" scope="match" action="decrease-blue-score"/>
+    <trigger filter="not(blue-owns-diamond-flag)" scope="match" action="decrease-blue-score"/>
+    <trigger filter="not(blue-owns-emerald-flag)" scope="match" action="decrease-blue-score"/>
+    <trigger filter="not(blue-owns-gold-flag)" scope="match" action="decrease-blue-score"/>
+    <trigger filter="not(red-owns-blue-flag)" scope="match" action="decrease-red-score"/>
+    <trigger filter="not(red-owns-red-flag)" scope="match" action="decrease-red-score"/>
+    <trigger filter="not(red-owns-diamond-flag)" scope="match" action="decrease-red-score"/>
+    <trigger filter="not(red-owns-emerald-flag)" scope="match" action="decrease-red-score"/>
+    <trigger filter="not(red-owns-gold-flag)" scope="match" action="decrease-red-score"/>
+    <trigger filter="all(match-started, blue-owns-blue-flag)" scope="match" action="increase-blue-score"/>
+    <trigger filter="all(match-started, blue-owns-red-flag)" scope="match" action="increase-blue-score"/>
+    <trigger filter="all(match-started, blue-owns-diamond-flag)" scope="match" action="increase-blue-score"/>
+    <trigger filter="all(match-started, blue-owns-emerald-flag)" scope="match" action="increase-blue-score"/>
+    <trigger filter="all(match-started, blue-owns-gold-flag)" scope="match" action="increase-blue-score"/>
+    <trigger filter="all(match-started, red-owns-blue-flag)" scope="match" action="increase-red-score"/>
+    <trigger filter="all(match-started, red-owns-red-flag)" scope="match" action="increase-red-score"/>
+    <trigger filter="all(match-started, red-owns-diamond-flag)" scope="match" action="increase-red-score"/>
+    <trigger filter="all(match-started, red-owns-emerald-flag)" scope="match" action="increase-red-score"/>
+    <trigger filter="all(match-started, red-owns-gold-flag)" scope="match" action="increase-red-score"/>
 </actions>
 <broadcasts>
     <tip after="0m05s" every="1m" count="3">Your team gains points for every flag you have captured at your skull flag post!</tip>
     <tip after="4m05s" every="1m" count="3">Steal flags from the enemy team's skull flag post to earn more points for your team!</tip>
 </broadcasts>
 <spawners>
-    <spawner spawn-region="diamond-point" player-region="everywhere" max-entities="1" delay="8s" filter="enable-diamond-post-spawner">
+    <spawner spawn-region="diamond-point" player-region="everywhere" max-entities="1" delay="8s" filter="diamond-flag-at-team-post">
         <item amount="6" material="arrow"/>
     </spawner>
-    <spawner spawn-region="gold-point" player-region="everywhere" max-entities="1" delay="15s" filter="enable-gold-post-spawner">
+    <spawner spawn-region="gold-point" player-region="everywhere" max-entities="1" delay="15s" filter="gold-flag-at-team-post">
         <item amount="1" material="golden apple"/>
     </spawner>
-    <spawner spawn-region="emerald-point" player-region="everywhere" max-entities="1" delay="25s" filter="enable-emerald-post-spawner">
+    <spawner spawn-region="emerald-point" player-region="everywhere" max-entities="1" delay="25s" filter="emerald-flag-at-team-post">
         <item amount="1" material="tnt"/>
     </spawner>
 </spawners>
-<kill-rewards>
-    <kill-reward>
-        <item amount="12" material="arrow"/>
-        <item material="golden apple"/>
-    </kill-reward>
-    <kill-reward>
-        <filter>
-            <kill-streak count="2" repeat="true"/>
-        </filter>
-        <item amount="2" material="tnt"/>
-    </kill-reward>
-</kill-rewards>
 <itemremove>
     <item>golden carrot</item>
     <item>leather helmet</item>
@@ -397,6 +345,7 @@
     <item>brown mushroom</item>
     <item>pork</item>
     <item>saddle</item>
+    <item>string</item>
 </itemremove>
 <toolrepair>
     <tool>stone sword</tool>
@@ -408,24 +357,6 @@
     <item>bow</item>
     <item>arrow</item>
 </itemkeep>
-<damage>
-    <!-- deny fall damage outside spawns -->
-    <deny>
-        <all>
-            <cause>gravity</cause>
-            <any>
-                <union id="blue-fall">
-                    <union id="blue-west-fall">
-                        <cylinder base="-15.5,18,-30.5" radius="8" height="1"/> <!-- blue west upper -->
-                        <cylinder base="-12.5,9,-22.5" radius="4.5" height="1"/> <!-- blue west lower -->
-                    </union>
-                    <mirror normal="1,0,0" origin="0.5,0,0.5" region="blue-west-fall"/>
-                </union>
-                <mirror id="red-fall" normal="0,0,1" origin="0.5,0,0.5" region="blue-fall"/>
-            </any>
-        </all>
-    </deny>
-</damage>
 <tnt>
     <instantignite>on</instantignite>
     <fuse>2s</fuse>
