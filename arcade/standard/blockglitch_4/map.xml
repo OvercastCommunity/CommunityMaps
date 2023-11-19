@@ -2,8 +2,8 @@
 <!-- #region meta -->
 <name>BlockGlitch 4</name>
 <slug>blockglitch_4_hell_edition</slug>
-<!-- Commit ID: 5de932274acb2c665923736bc5bb47ee72d2675b -->
-<version>1.1.2</version>
+<!-- Commit ID: 13c11dc4cae380c69499e1f62951c34210501d64 -->
+<version>1.1.3</version>
 <created>2023-10-22</created>
 <objective>Be the first one to finish the parkour!</objective>
 <phase>development</phase>
@@ -51,8 +51,9 @@
 </constants>
 <variables>
     <variable scope="match" id="tp_checkpoint" default="0" />
+    <variable scope="player" id="do_tp_checkpoint" default="0" />
     <variable scope="player" id="tp_lane" default="0" />
-    <variable scope="player" id="do_tp" default="0" />
+    <variable scope="player" id="do_tp_lane" default="0" />
 </variables>
 <score>
     <limit>9</limit>
@@ -205,20 +206,6 @@
         <translate offset="464,0,0" region="cp-10-box" />
         <translate offset="522,0,0" region="cp-10-box" />
     </union>
-    <negative id="not-cp-boxes">
-        <union id="cp-boxes">
-            <region id="cp-1-boxes" />
-            <region id="cp-2-boxes" />
-            <region id="cp-3-boxes" />
-            <region id="cp-4-boxes" />
-            <region id="cp-5-boxes" />
-            <region id="cp-6-boxes" />
-            <region id="cp-7-boxes" />
-            <region id="cp-8-boxes" />
-            <region id="cp-9-boxes" />
-            <region id="cp-10-boxes" />
-        </union>
-    </negative>
     <!-- #endregion checkpoint-score-boxes -->
     <negative id="not-the-neo-before-the-end">
         <union id="the-neo-before-the-end">
@@ -235,7 +222,6 @@
         </union>
     </negative>
     <!-- #region region-application -->
-    <apply region="not-cp-boxes" kit="give-respawn-potion" />
     <apply region="the-neo-before-the-end" kit="gm-a" />
     <apply region="not-the-neo-before-the-end" kit="gm-s" />
     <apply block="never" block-physics="never" use="allow-using-boats" />
@@ -399,13 +385,11 @@
     <kit id="gm-s">
         <game-mode>survival</game-mode>
     </kit>
-    <kit id="give-respawn-potion">
-        <item slot="8" material="potion" damage="0" name="`c`lRespawn" lore="`7Drink to respawn" show-other="false" prevent-sharing="true" consumable="on-potion-drink" />
-    </kit>
     <kit id="base-kit">
         <clear />
         <boots material="leather boots" team-color="true" locked="true" unbreakable="true" />
         <effect>invisibility</effect>
+        <item slot="8" material="potion" damage="0" name="`c`lRespawn" lore="`7Drink to respawn" show-other="false" prevent-sharing="true" consumable="on-potion-drink" />
     </kit>
     <kit id="lvl-1-kit" parent="base-kit" filter="lvl-1">
         <item slot="0" material="${LEVELLED_ITEM_1}" amount="64" prevent-sharing="true" />
@@ -443,32 +427,32 @@
         to a single point determined by a randomized variable, and then we move them
         by a predetermined offset up to the desired destination.
     -->
-    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=1)" x="58" />
-    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=2)" x="116" />
-    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=3)" x="174" />
-    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=4)" x="232" />
-    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=5)" x="290" />
-    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=6)" x="348" />
-    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=7)" x="406" />
-    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=8)" x="464" />
-    <portal forward="all(not(portal-debounce), do_tp=1, tp_lane=9)" x="522" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-9, tp_checkpoint=..8)" destination="cp-9" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-8, tp_checkpoint=8..)" destination="cp-9" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-8, tp_checkpoint=..7)" destination="cp-8" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-7, tp_checkpoint=7..)" destination="cp-8" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-7, tp_checkpoint=..6)" destination="cp-7" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-6, tp_checkpoint=6..)" destination="cp-7" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-6, tp_checkpoint=..5)" destination="cp-6" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-5, tp_checkpoint=5..)" destination="cp-6" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-5, tp_checkpoint=..4)" destination="cp-5" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-4, tp_checkpoint=4..)" destination="cp-5" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-4, tp_checkpoint=..3)" destination="cp-4" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-3, tp_checkpoint=3..)" destination="cp-4" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-3, tp_checkpoint=..2)" destination="cp-3" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-2, tp_checkpoint=2..)" destination="cp-3" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-2, tp_checkpoint=..1)" destination="cp-2" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-1, tp_checkpoint=1..)" destination="cp-2" />
-    <portal forward="all(portal-debounce, do_tp=2, lvl-1, tp_checkpoint=0)" destination="cp-1" />
+    <portal forward="all(lane-debounce, tp_lane=1)" x="58" />
+    <portal forward="all(lane-debounce, tp_lane=2)" x="116" />
+    <portal forward="all(lane-debounce, tp_lane=3)" x="174" />
+    <portal forward="all(lane-debounce, tp_lane=4)" x="232" />
+    <portal forward="all(lane-debounce, tp_lane=5)" x="290" />
+    <portal forward="all(lane-debounce, tp_lane=6)" x="348" />
+    <portal forward="all(lane-debounce, tp_lane=7)" x="406" />
+    <portal forward="all(lane-debounce, tp_lane=8)" x="464" />
+    <portal forward="all(lane-debounce, tp_lane=9)" x="522" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-9, tp_checkpoint=..8)" destination="cp-9" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-8, tp_checkpoint=8..)" destination="cp-9" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-8, tp_checkpoint=..7)" destination="cp-8" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-7, tp_checkpoint=7..)" destination="cp-8" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-7, tp_checkpoint=..6)" destination="cp-7" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-6, tp_checkpoint=6..)" destination="cp-7" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-6, tp_checkpoint=..5)" destination="cp-6" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-5, tp_checkpoint=5..)" destination="cp-6" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-5, tp_checkpoint=..4)" destination="cp-5" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-4, tp_checkpoint=4..)" destination="cp-5" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-4, tp_checkpoint=..3)" destination="cp-4" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-3, tp_checkpoint=3..)" destination="cp-4" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-3, tp_checkpoint=..2)" destination="cp-3" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-2, tp_checkpoint=2..)" destination="cp-3" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-2, tp_checkpoint=..1)" destination="cp-2" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-1, tp_checkpoint=1..)" destination="cp-2" />
+    <portal forward="all(do_tp_checkpoint=1, lvl-1, tp_checkpoint=0)" destination="cp-1" />
     <portal filter="not(participating)" region="void" destination="spawn-point" observers="always" />
 </portals>
 <filters>
@@ -495,14 +479,14 @@
     <after duration="${TP_COUNTDOWN}" id="on-tp-lvl-8" filter="all(running, tp_checkpoint=7)" />
     <!-- #endregion tp-countdowns -->
     <any id="tp-eligible">
-        <filter id="all(do_tp=0, lvl-1, tp_checkpoint=1..)" />
-        <filter id="all(do_tp=0, lvl-2, tp_checkpoint=2..)" />
-        <filter id="all(do_tp=0, lvl-3, tp_checkpoint=3..)" />
-        <filter id="all(do_tp=0, lvl-4, tp_checkpoint=4..)" />
-        <filter id="all(do_tp=0, lvl-5, tp_checkpoint=5..)" />
-        <filter id="all(do_tp=0, lvl-6, tp_checkpoint=6..)" />
-        <filter id="all(do_tp=0, lvl-7, tp_checkpoint=7..)" />
-        <filter id="all(do_tp=0, lvl-8, tp_checkpoint=8..)" />
+        <filter id="all(do_tp_checkpoint=0, lvl-1, tp_checkpoint=1..)" />
+        <filter id="all(do_tp_checkpoint=0, lvl-2, tp_checkpoint=2..)" />
+        <filter id="all(do_tp_checkpoint=0, lvl-3, tp_checkpoint=3..)" />
+        <filter id="all(do_tp_checkpoint=0, lvl-4, tp_checkpoint=4..)" />
+        <filter id="all(do_tp_checkpoint=0, lvl-5, tp_checkpoint=5..)" />
+        <filter id="all(do_tp_checkpoint=0, lvl-6, tp_checkpoint=6..)" />
+        <filter id="all(do_tp_checkpoint=0, lvl-7, tp_checkpoint=7..)" />
+        <filter id="all(do_tp_checkpoint=0, lvl-8, tp_checkpoint=8..)" />
     </any>
     <all id="allow-using-boats">
         <holding>
@@ -521,15 +505,14 @@
     <alive id="alive" />
     <participating id="participating" />
     <!--
-        HACK: This clock allows PGM to breathe a bit and teleport you to a
-        random lane properly.
+        HACK: Waits for a bit to mitigate client-side chunk rendering issues
+        after double teleports.
 
-        This debouncing clock also tries its best to mitigate client-side
-        chunk rendering issues after being teleported twice. It is a last 
-        resort before causing nerve loss, and resorting to implementing the
-        teleports via criminally infamous 340 portal nodes.
+        In an ideal world, we'd just be teleported only once, but doing it
+        improves maintainability. (the current way PGM stands, we'd be at a
+        whopping 340 portal nodes!)
     -->
-    <pulse id="portal-debounce" period="0.4s" duration="0.2s" filter="running" />
+    <after id="lane-debounce" duration="0.2s" filter="do_tp_lane=1" />
 </filters>
 <consumables>
     <consumable id="on-potion-drink" on="eat" action="set-tp" />
@@ -539,60 +522,51 @@
     <action id="increase-tp-checkpoint" scope="match">
         <set var="tp_checkpoint" value="tp_checkpoint + 1" />
     </action>
-    <action id="randomize-tp-lane" scope="player">
-        <set var="tp_lane" value="floor(random() * 10)" />
-    </action>
     <action id="set-tp" scope="player">
         <set var="tp_lane" value="floor(random() * 10)" />
-        <set var="do_tp" value="2" />
+        <set var="do_tp_checkpoint" value="1" />
+        <set var="do_tp_lane" value="1" />
     </action>
-    <action id="decrease-tp" scope="player">
-        <set var="do_tp" value="do_tp - 1" />
+    <action id="reset-tp-checkpoint" scope="player">
+        <set var="do_tp_checkpoint" value="0" />
+    </action>
+    <action id="reset-tp-lane" scope="player">
+        <set var="do_tp_lane" value="0" />
     </action>
     <action id="announce-tp-eligibility" scope="player">
         <sound preset="ALERT" />
         <message text="`e⚠ `6`lIt looks like you're struggling to complete the map." />
         <message text="You'll be teleported to the next level when you fail to get a chance to catch up to others and complete the map!" />
     </action>
-    <!--
-        Removes respawn potions at respawn points - in very rare occassions,
-        players drinking the respawn potion at spawn points aren't moved around.
-        Mitigating by removal because why would you want to respawn when you're at a
-        checkpoint anyway?
-    -->
-    <action id="remove-respawn-potion" scope="player">
-        <replace-item ignore-metadata="true">
-            <find material="potion" damage="0" />
-            <replace material="air" />
-        </replace-item>
-    </action>
     <!-- #endregion actions -->
     <!-- #region triggers -->
     <!-- #region triggers-kits -->
-    <trigger filter="all(lvl-1, do_tp=1)" scope="player" action="lvl-1-kit" />
+    <trigger filter="all(lvl-1, do_tp_checkpoint=1)" scope="player" action="lvl-1-kit" />
     <trigger filter="lvl-2" scope="player" action="lvl-2-kit" />
-    <trigger filter="all(lvl-2, do_tp=1)" scope="player" action="lvl-2-kit" />
+    <trigger filter="all(lvl-2, do_tp_checkpoint=1)" scope="player" action="lvl-2-kit" />
     <trigger filter="lvl-3" scope="player" action="lvl-3-kit" />
-    <trigger filter="all(lvl-3, do_tp=1)" scope="player" action="lvl-3-kit" />
+    <trigger filter="all(lvl-3, do_tp_checkpoint=1)" scope="player" action="lvl-3-kit" />
     <trigger filter="lvl-4" scope="player" action="lvl-4-kit" />
-    <trigger filter="all(lvl-4, do_tp=1)" scope="player" action="lvl-4-kit" />
+    <trigger filter="all(lvl-4, do_tp_checkpoint=1)" scope="player" action="lvl-4-kit" />
     <trigger filter="lvl-5" scope="player" action="lvl-5-kit" />
-    <trigger filter="all(lvl-5, do_tp=1)" scope="player" action="lvl-5-kit" />
+    <trigger filter="all(lvl-5, do_tp_checkpoint=1)" scope="player" action="lvl-5-kit" />
     <trigger filter="lvl-6" scope="player" action="lvl-6-kit" />
-    <trigger filter="all(lvl-6, do_tp=1)" scope="player" action="lvl-6-kit" />
+    <trigger filter="all(lvl-6, do_tp_checkpoint=1)" scope="player" action="lvl-6-kit" />
     <trigger filter="lvl-7" scope="player" action="lvl-7-kit" />
-    <trigger filter="all(lvl-7, do_tp=1)" scope="player" action="lvl-7-kit" />
+    <trigger filter="all(lvl-7, do_tp_checkpoint=1)" scope="player" action="lvl-7-kit" />
     <trigger filter="lvl-8" scope="player" action="lvl-8-kit" />
-    <trigger filter="all(lvl-8, do_tp=1)" scope="player" action="lvl-8-kit" />
+    <trigger filter="all(lvl-8, do_tp_checkpoint=1)" scope="player" action="lvl-8-kit" />
     <trigger filter="lvl-9" scope="player" action="lvl-9-kit" />
-    <trigger filter="all(lvl-9, do_tp=1)" scope="player" action="lvl-9-kit" />
+    <trigger filter="all(lvl-9, do_tp_checkpoint=1)" scope="player" action="lvl-9-kit" />
     <!-- #endregion triggers-kits -->
     <!-- #region triggers-auto-tp -->
-    <trigger filter="running" scope="player" action="randomize-tp-lane" />
     <trigger filter="all(void, participating)" scope="player" action="set-tp" />
-    <trigger filter="all(portal-debounce, do_tp=1, cp-boxes)" scope="player" action="decrease-tp" />
-    <trigger filter="all(not(portal-debounce), do_tp=2, cp-boxes)" scope="player" action="decrease-tp" />
-    <trigger filter="all(cp-boxes, participating)" scope="player" action="remove-respawn-potion" />
+    <!--
+        HACK: Reset do_tp_checkpoint immediately to avoid skipping
+        two levels at a time.
+    -->
+    <trigger filter="do_tp_checkpoint=1" scope="player" action="reset-tp-checkpoint" />
+    <trigger filter="lane-debounce" scope="player" action="reset-tp-lane" />
     <trigger filter="on-tp-lvl-1" scope="match" action="increase-tp-checkpoint" />
     <trigger filter="on-tp-lvl-2" scope="match" action="increase-tp-checkpoint" />
     <trigger filter="on-tp-lvl-3" scope="match" action="increase-tp-checkpoint" />
