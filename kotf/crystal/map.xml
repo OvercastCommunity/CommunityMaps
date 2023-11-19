@@ -1,10 +1,31 @@
 <map proto="1.4.2">
 <name>Crystal</name>
-<version>1.0.3</version>
+<variant id="oitq">OITQ</variant>
+<version>1.0.4</version>
 <phase>development</phase>
-<objective>Hold the flag for 200 seconds to win!</objective>
 <created>2023-05-03</created>
-<gamemode>kotf</gamemode>
+<constants>
+    <unless variant="oitq">
+        <constant id="spawn-module-kit">spawn-kit</constant>
+        <constant id="spawn-filter">has-flag</constant>
+    </unless>
+    <if variant="oitq">
+        <constant id="spawn-module-kit" delete="true"/>
+        <constant id="spawn-filter" delete="true"/>
+    </if>
+</constants>
+<unless variant="oitq">
+    <objective>Hold the flag for 200 seconds to win!</objective>
+    <gamemode>kotf</gamemode>
+    <broadcasts>
+        <tip after="5s" every="3m">There are several jump pads located around the map!</tip>
+        <tip after="35s" every="3m">You can double jump every 8 seconds, but you will lose this ability when you pick up the flag!</tip>
+    </broadcasts>
+</unless>
+<if variant="oitq">
+    <include id="oitq"/>
+    <objective>Be on the team with the highest amount of kills after ${time-limit} minutes!</objective>
+</if>
 <authors>
     <author uuid="4836c72e-1752-4716-a0fc-83baf403e0eb"/> <!-- Oprad -->
 </authors>
@@ -31,34 +52,36 @@
         <double-jump recharge-time="8s"/>
         <game-mode>adventure</game-mode>
     </kit>
-    <kit id="flag-kit" parent="blue-flag-variable-kit,pink-flag-variable-kit" force="true">
-        <effect amplifier="-2">health boost</effect>
-        <effect duration="3" amplifier="2">absorption</effect>
-        <double-jump enabled="false"/>
-    </kit>
-    <kit id="reset-health" force="true">
-        <effect duration="0" amplifier="0">health boost</effect>
-        <effect duration="1" amplifier="10">regeneration</effect>
-        <double-jump recharge-time="8s"/>
-    </kit>
-    <kit id="blue-flag-variable-kit" filter="only-blue">
-        <action>
-            <switch-scope outer="player" inner="match">
-                <action id="set-next-post-pink" scope="match">
-                    <set var="next_post" value="2"/>
-                </action>
-            </switch-scope>
-        </action>
-    </kit>
-    <kit id="pink-flag-variable-kit" filter="only-pink">
-        <action>
-            <switch-scope outer="player" inner="match">
-                <action id="set-next-post-blue" scope="match">
-                    <set var="next_post" value="1"/>
-                </action>
-            </switch-scope>
-        </action>
-    </kit>
+    <unless variant="oitq">
+        <kit id="flag-kit" parent="blue-flag-variable-kit,pink-flag-variable-kit" force="true">
+            <effect amplifier="-2">health boost</effect>
+            <effect duration="3" amplifier="2">absorption</effect>
+            <double-jump enabled="false"/>
+        </kit>
+        <kit id="reset-health" force="true">
+            <effect duration="0" amplifier="0">health boost</effect>
+            <effect duration="1" amplifier="10">regeneration</effect>
+            <double-jump recharge-time="8s"/>
+        </kit>
+        <kit id="blue-flag-variable-kit" filter="only-blue">
+            <action>
+                <switch-scope outer="player" inner="match">
+                    <action id="set-next-post-pink" scope="match">
+                        <set var="next_post" value="2"/>
+                    </action>
+                </switch-scope>
+            </action>
+        </kit>
+        <kit id="pink-flag-variable-kit" filter="only-pink">
+            <action>
+                <switch-scope outer="player" inner="match">
+                    <action id="set-next-post-blue" scope="match">
+                        <set var="next_post" value="1"/>
+                    </action>
+                </switch-scope>
+            </action>
+        </kit>
+    </unless>
 </kits>
 <spawns>
     <default>
@@ -66,30 +89,53 @@
             <point>-8.5,159,-7.5</point>
         </regions>
     </default>
-    <spawn team="blue-team" kit="spawn-kit" filter="has-flag">
-        <regions>
-            <point yaw="-125">-74.5,107,-29.5</point>
-            <point yaw="-90">-82.5,109,-7.5</point>
-            <point yaw="-80">-74.5,108,14.5</point>
-        </regions>
-    </spawn>
-    <spawn team="pink-team" kit="spawn-kit" filter="has-flag">
-        <regions>
-            <point yaw="55">57.5,107,14.5</point>
-            <point yaw="90">65.5,109,-7.5</point>
-            <point yaw="100">57.5,108,-29.5</point>
-        </regions>
-    </spawn>
+    <!--
+        Spawn module was acting weird with constants that had delete="true", so each variant has their own for the time being
+    -->
+    <unless variant="oitq">
+        <spawn team="blue-team" kit="spawn-kit" filter="has-flag">
+            <regions>
+                <point yaw="-125">-74.5,107,-29.5</point>
+                <point yaw="-90">-82.5,109,-7.5</point>
+                <point yaw="-80">-74.5,108,14.5</point>
+            </regions>
+        </spawn>
+        <spawn team="pink-team" kit="spawn-kit" filter="has-flag">
+            <regions>
+                <point yaw="55">57.5,107,14.5</point>
+                <point yaw="90">65.5,109,-7.5</point>
+                <point yaw="100">57.5,108,-29.5</point>
+            </regions>
+        </spawn>
+    </unless>
+    <if variant="oitq">
+        <spawn team="blue-team">
+            <regions>
+                <point yaw="-125">-74.5,107,-29.5</point>
+                <point yaw="-90">-82.5,109,-7.5</point>
+                <point yaw="-80">-74.5,108,14.5</point>
+            </regions>
+        </spawn>
+        <spawn team="pink-team">
+            <regions>
+                <point yaw="55">57.5,107,14.5</point>
+                <point yaw="90">65.5,109,-7.5</point>
+                <point yaw="100">57.5,108,-29.5</point>
+            </regions>
+        </spawn>
+    </if>
 </spawns>
 <filters>
-    <any id="has-flag">
-        <carrying-flag>flag</carrying-flag>
-        <not>
-            <same-team>
-                <carrying-flag>flag</carrying-flag>
-            </same-team>
-        </not>
-    </any>
+    <unless variant="oitq">
+        <any id="has-flag">
+            <carrying-flag>flag</carrying-flag>
+            <not>
+                <same-team>
+                    <carrying-flag>flag</carrying-flag>
+                </same-team>
+            </not>
+        </any>
+    </unless>
     <material id="only-chest">chest</material>
     <team id="only-blue">blue-team</team>
     <team id="only-pink">pink-team</team>
@@ -134,18 +180,36 @@
     <apply velocity="7,1,7" region="mid-up-north"/>
     <apply block="never" use="only-chest"/>
 </regions>
-<flags>
-    <flag id="flag" name="Flag" color="orange" shared="true" points-rate="1" pickup-kit="flag-kit" drop-kit="reset-health" flag-proximity-metric="none" show-respawn-on-pickup="true">
-        <post return-time="0s" respawn-time="15s">
-            <post id="mid-post" respawn-filter="never" name="Mid Post">-8.5,95,-7.5</post>
-            <post id="blue-post" respawn-filter="next-post-blue" name="§9Blue Post">-17.5,95,2.5</post>
-            <post id="pink-post" respawn-filter="next-post-pink" name="§dPink Post">0.5,95,-17.5</post>
-        </post>
-    </flag>
-</flags>
-<score>
-    <limit>200</limit>
-</score>
+<unless variant="oitq">
+    <flags>
+        <flag id="flag" name="Flag" color="orange" shared="true" points-rate="1" pickup-kit="flag-kit" drop-kit="reset-health" flag-proximity-metric="none" show-respawn-on-pickup="true">
+            <post return-time="0s" respawn-time="15s">
+                <post id="mid-post" respawn-filter="never" name="Mid Post">-8.5,95,-7.5</post>
+                <post id="blue-post" respawn-filter="next-post-blue" name="§9Blue Post">-17.5,95,2.5</post>
+                <post id="pink-post" respawn-filter="next-post-pink" name="§dPink Post">0.5,95,-17.5</post>
+            </post>
+        </flag>
+    </flags>
+    <score>
+        <limit>200</limit>
+    </score>
+    <kill-rewards>
+        <kill-reward>
+            <item material="golden apple"/>
+        </kill-reward>
+    </kill-rewards>
+    <respawn delay="3s" auto="true" spectate="true">
+        <message>
+            {"translate":"death.respawn.confirmed.waiting.flagDropped"}
+        </message>
+    </respawn>
+    <disabledamage>
+        <damage>fall</damage>
+    </disabledamage>
+    <hunger>
+        <depletion>off</depletion>
+    </hunger>
+</unless>
 <toolrepair>
     <tool>stone sword</tool>
     <tool>bow</tool>
@@ -161,24 +225,4 @@
 <itemkeep>
     <item>golden apple</item>
 </itemkeep>
-<kill-rewards>
-    <kill-reward>
-        <item material="golden apple"/>
-    </kill-reward>
-</kill-rewards>
-<respawn delay="3s" auto="true" spectate="true">
-    <message>
-        {"translate":"death.respawn.confirmed.waiting.flagDropped"}
-    </message>
-</respawn>
-<broadcasts>
-    <tip after="5s" every="3m">There are several jump pads located around the map!</tip>
-    <tip after="35s" every="3m">You can double jump every 8 seconds, but you will lose this ability when you pick up the flag!</tip>
-</broadcasts>
-<disabledamage>
-    <damage>fall</damage>
-</disabledamage>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
 </map>
