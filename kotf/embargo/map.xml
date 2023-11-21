@@ -1,8 +1,9 @@
-<map proto="1.4.0">
+<map proto="1.4.2">
 <name>Embargo</name>
-<version>1.1.0</version>
-<objective>Capture and hold the flag for 200 seconds to win</objective>
-<gamemode>kotf</gamemode>
+<version>1.1.1</version>
+<include id="kotf"/>
+<constant id="damage-resistance">4s</constant>
+<objective>Capture and hold the flag for ${score} seconds to win</objective>
 <!-- Map authors & contributors. -->
 <authors>
     <author uuid="b03360db-b8cd-49de-8ba1-b7920c2238a9" contribution="Map author"/> <!-- Obelistics -->
@@ -17,31 +18,13 @@
     <team id="blue-team" color="blue" max="12">Blue</team>
 </teams>
 <kits>
-    <kit id="spawn-kit">
-        <clear/>
-        <item slot="0" unbreakable="true" material="stone sword"/>
-        <item slot="1" unbreakable="true" material="bow"/>
-        <item slot="2" material="golden apple"/>
-        <item slot="8" amount="20" material="arrow"/>
-        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
-        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
-        <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="2">projectile_protection</enchantment>
-        </leggings>
-        <boots unbreakable="true" material="iron boots">
-            <enchantment level="2">feather_falling</enchantment>
-        </boots>
-        <effect duration="4s" amplifier="255">damage resistance</effect>
-        <game-mode>adventure</game-mode>
-    </kit>
-    <kit id="flag-kit" force="true">
-        <effect>slowness</effect>
-        <effect amplifier="-3">health boost</effect>
-        <effect duration="3s" amplifier="2">absorption</effect>
-    </kit>
-    <kit id="reset-health" force="true">
-        <effect duration="0s" amplifier="0">slowness</effect>
-        <effect duration="0s" amplifier="0">health boost</effect>
+    <kit id="spawn-kit" parent="base-kit">
+        <action>
+            <replace-item>
+                <find unbreakable="true" material="iron boots"/>
+                <replace unbreakable="true" enchantment="feather_falling:2" material="iron boots"/>
+            </replace-item>
+        </action>
     </kit>
 </kits>
 <spawns>
@@ -62,14 +45,6 @@
     </spawn>
 </spawns>
 <filters>
-    <any id="has-flag">
-        <carrying-flag>flag</carrying-flag>
-        <not>
-            <same-team>
-                <carrying-flag>flag</carrying-flag>
-            </same-team>
-        </not>
-    </any>
     <any id="above-or-below-canyon">
         <not>
             <cuboid min="24,10,-1" max="29,13,4"/>
@@ -100,43 +75,11 @@
           pickup-kit="flag-kit"
           drop-kit="reset-health"
           flag-proximity-metric="none"
-          show-respawn-on-pickup="true">
-        <post return-time="0s" respawn-time="20s">
+          show-respawn-on-pickup="${announce-post-pickup}">
+        <post return-time="0s" respawn-time="${flag-respawn-timer}">
             <post name="Canyon Post" yaw="90" pickup-filter="above-or-below-canyon">26.5,13,1.5</post>
             <post name="Lava Post" yaw="-90" pickup-filter="above-or-below-lava">0.5,12,1.5</post>
         </post>
     </flag>
 </flags>
-<score>
-    <limit>200</limit>
-</score>
-<toolrepair>
-    <tool>stone sword</tool>
-    <tool>bow</tool>
-</toolrepair>
-<itemremove>
-    <item>leather helmet</item>
-    <item>leather chestplate</item>
-    <item>chainmail leggings</item>
-    <item>iron boots</item>
-    <item>banner</item>
-</itemremove>
-<itemkeep>
-    <item>stone sword</item>
-    <item>bow</item>
-    <item>golden apple</item>
-    <item>arrow</item>
-</itemkeep>
-<kill-reward>
-    <item material="golden apple"/>
-    <item amount="10" material="arrow"/>
-</kill-reward>
-<respawn spectate="true" auto="true">
-    <message>
-        {"translate":"death.respawn.confirmed.waiting.flagDropped"}
-    </message>
-</respawn>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
 </map>

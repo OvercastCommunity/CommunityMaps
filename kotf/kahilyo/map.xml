@@ -1,8 +1,9 @@
 <map proto="1.4.2">
 <name>Kahilyo</name>
-<version>1.0.3</version>
-<objective>Control the flag for 200 seconds to win!</objective>
-<gamemode>kotf</gamemode>
+<version>1.0.4</version>
+<include id="kotf"/>
+<constant id="damage-resistance">6s</constant>
+<objective>Control the flag for ${score} seconds to win!</objective>
 <created>2022-01-06</created>
 <authors>
     <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
@@ -17,33 +18,13 @@
     <team id="red" color="dark red" max="16">Red</team>
 </teams>
 <kits>
-    <kit id="spawn-kit">
-        <clear/>
-        <item slot="0" unbreakable="true" material="stone sword"/>
-        <item slot="1" unbreakable="true" material="bow"/>
-        <item slot="2" material="golden apple"/>
-        <item slot="8" amount="20" material="arrow"/>
-        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
-        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
-        <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="2">projectile_protection</enchantment>
-        </leggings>
-        <boots unbreakable="true" material="iron boots">
-            <enchantment level="2">feather_falling</enchantment>
-        </boots>
-        <effect duration="1" amplifier="0">health boost</effect>
-        <effect duration="2" amplifier="10">regeneration</effect>
-        <effect duration="6" amplifier="255">damage resistance</effect>
-        <game-mode>adventure</game-mode>
-    </kit>
-    <kit id="flag-kit" force="true">
-        <effect>slowness</effect>
-        <effect amplifier="-3">health boost</effect>
-        <effect duration="3" amplifier="2">absorption</effect>
-    </kit>
-    <kit id="reset-health" force="true">
-        <effect duration="0" amplifier="0">slowness</effect>
-        <effect duration="0" amplifier="0">health boost</effect>
+    <kit id="spawn-kit" parent="base-kit">
+        <action>
+            <replace-item>
+                <find unbreakable="true" material="iron boots"/>
+                <replace unbreakable="true" enchantment="feather_falling:2" material="iron boots"/>
+            </replace-item>
+        </action>
     </kit>
 </kits>
 <spawns>
@@ -63,16 +44,6 @@
         </region>
     </spawn>
 </spawns>
-<filters>
-    <any id="has-flag">
-        <carrying-flag>flag</carrying-flag>
-        <not>
-            <same-team>
-                <carrying-flag>flag</carrying-flag>
-            </same-team>
-        </not>
-    </any>
-</filters>
 <regions>
     <apply block="never" use="never"/>
 </regions>
@@ -85,42 +56,12 @@
           pickup-kit="flag-kit"
           drop-kit="reset-health"
           flag-proximity-metric="none"
-          show-respawn-on-pickup="true">
-        <post return-time="0s" respawn-time="20s">
+          show-respawn-on-pickup="${announce-post-pickup}">
+        <post return-time="0s" respawn-time="${flag-respawn-timer}">
             <post name="Mid Post">0,19,1</post>
             <post name="East Post">40,19,1</post>
             <post name="West Post">-40,19,1</post>
         </post>
     </flag>
 </flags>
-<score>
-    <limit>200</limit>
-</score>
-<toolrepair>
-    <tool>stone sword</tool>
-    <tool>bow</tool>
-</toolrepair>
-<itemremove>
-    <item>leather helmet</item>
-    <item>leather chestplate</item>
-    <item>chainmail leggings</item>
-    <item>iron boots</item>
-    <item>banner</item>
-</itemremove>
-<itemkeep>
-    <item>golden apple</item>
-    <item>arrow</item>
-</itemkeep>
-<kill-reward>
-    <item material="golden apple"/>
-    <item amount="10" material="arrow"/>
-</kill-reward>
-<respawn spectate="true" auto="true">
-    <message>
-        {"translate":"death.respawn.confirmed.waiting.flagDropped"}
-    </message>
-</respawn>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
 </map>

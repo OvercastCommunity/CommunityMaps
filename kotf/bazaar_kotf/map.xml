@@ -1,8 +1,11 @@
 <map proto="1.4.2">
 <name>Bazaar KotF</name>
-<version>1.0.3</version>
-<objective>Control the flag for 150 seconds to win!</objective>
-<gamemode>kotf</gamemode>
+<version>1.0.4</version>
+<include id="kotf"/>
+<constant id="score">150</constant>
+<constant id="damage-resistance">0s</constant>
+<constant id="flag-respawn-timer">12s</constant>
+<objective>Control the flag for ${score} seconds to win!</objective>
 <authors>
     <author uuid="1fd982ab-8941-474b-b51e-6ce2346f4cd5"/> <!-- Zynnphony -->
 </authors>
@@ -13,62 +16,23 @@
     <team id="blue" color="blue" max="8">Blue</team>
     <team id="red" color="dark red" max="8">Red</team>
 </teams>
-<kits>
-    <kit id="spawn-kit">
-        <clear/>
-        <item slot="0" unbreakable="true" material="stone sword"/>
-        <item slot="1" unbreakable="true" material="bow"/>
-        <item slot="2" material="golden apple"/>
-        <item slot="8" amount="16" material="arrow"/>
-        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
-        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
-        <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="2">projectile_protection</enchantment>
-        </leggings>
-        <boots unbreakable="true" material="iron boots"/>
-        <game-mode>adventure</game-mode>
-    </kit>
-    <kit id="flag-kit" force="true">
-        <effect>slow</effect>
-        <effect amplifier="-2">health boost</effect>
-        <effect duration="3" amplifier="2">absorption</effect>
-    </kit>
-    <kit id="reset-health" force="true">
-        <effect duration="0" amplifier="0">slow</effect>
-        <effect duration="0" amplifier="0">health boost</effect>
-        <effect duration="2" amplifier="10">regeneration</effect>
-    </kit>
-</kits>
 <spawns>
     <default>
         <region yaw="-90">
             <point>-32.5,25,0.5</point>
         </region>
     </default>
-    <spawn team="blue" kit="spawn-kit" filter="has-flag">
+    <spawn team="blue" kit="base-kit" filter="has-flag">
         <region yaw="0">
             <point>0.5,2,-43.5</point>
         </region>
     </spawn>
-    <spawn team="red" kit="spawn-kit" filter="has-flag">
+    <spawn team="red" kit="base-kit" filter="has-flag">
         <region yaw="180">
             <point>0.5,2,44.5</point>
         </region>
     </spawn>
 </spawns>
-<filters>
-    <not id="not-carrier">
-        <carrying-flag>flag</carrying-flag>
-    </not>
-    <any id="has-flag">
-        <carrying-flag>flag</carrying-flag>
-        <not>
-            <same-team>
-                <carrying-flag>flag</carrying-flag>
-            </same-team>
-        </not>
-    </any>
-</filters>
 <regions>
     <apply block="never"/>
 </regions>
@@ -80,43 +44,15 @@
           points-rate="1"
           pickup-kit="flag-kit"
           drop-kit="reset-health"
-          flag-proximity-metric="none">
-        <post return-time="0s" respawn-time="12s">
+          flag-proximity-metric="none"
+          show-respawn-on-pickup="${announce-post-pickup}">
+        <post return-time="0s" respawn-time="${flag-respawn-timer}">
             <post name="Mid Post" yaw="180">0.5,5,0.5</post>
             <post name="East Post" yaw="90">24.5,7,0.5</post>
             <post name="West Post" yaw="-90">-23.5,7,0.5</post>
         </post>
     </flag>
 </flags>
-<score>
-    <limit>150</limit>
-</score>
-<toolrepair>
-    <tool>stone sword</tool>
-    <tool>bow</tool>
-</toolrepair>
-<itemremove>
-    <item>leather helmet</item>
-    <item>leather chestplate</item>
-    <item>chainmail leggings</item>
-    <item>iron boots</item>
-</itemremove>
-<itemkeep>
-    <item>golden apple</item>
-    <item>arrow</item>
-</itemkeep>
-<kill-reward>
-    <item material="golden apple"/>
-    <item amount="8" material="arrow"/>
-</kill-reward>
-<respawn spectate="true">
-    <message>
-        {"translate":"death.respawn.confirmed.waiting.flagDropped"}
-    </message>
-</respawn>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
 <world>
     <timeset>12750</timeset>
 </world>
