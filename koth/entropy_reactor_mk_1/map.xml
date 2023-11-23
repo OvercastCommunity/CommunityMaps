@@ -1,0 +1,255 @@
+<map proto="1.4.2" internal="true">
+<name>Entropy Reactor Mk. 1</name>
+<version>1.0.0</version>
+<objective>Get the most points in 7 minutes!</objective>
+<gamemode>koth</gamemode>
+<created>2023-11-22</created>
+<include id="conquest"/>
+<include id="void-death"/>
+<constants>
+    <constant id="respawn-timer">3s</constant>
+    <constant id="damage-resistance">3s</constant>
+    <constant id="void-plane">46</constant>
+    <constant id="affect-obs">never</constant>
+</constants>
+<authors>
+    <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
+</authors>
+<teams>
+    <team id="blue-team" color="blue" min="1" max="16">Blue</team>
+    <team id="red-team" color="dark red" min="1" max="16">Red</team>
+</teams>
+<spawns>
+    <default kit="obs" angle="0.5,72,0.5" safe="true">
+        <region>
+            <cylinder base="0.5,78,0.5" radius="23" height="1"/>
+        </region>
+    </default>
+    <spawn team="blue-team" region="blue-spawn" yaw="-45" kit="spawn-kit"/>
+    <spawn team="red-team" region="red-spawn" yaw="135" kit="spawn-kit"/>
+</spawns>
+<kits>
+    <kit id="obs">
+        <effect>night vision</effect>
+    </kit>
+    <kit id="spawn-kit" parents="base-kit">
+        <effect>night vision</effect>
+    </kit>
+</kits>
+<regions>
+    <block id="blue-spawn">23,58,24</block>
+    <block id="red-spawn">-22,58,-21</block>
+    <union id="hill-regions">
+        <cylinder id="region-au" base="22.5,63,23.5" radius="5" height="6"/>
+        <cylinder id="region-al" base="13.5,50,14.5" radius="5" height="6"/>
+        <cylinder id="region-bu" base="14.5,60,-12.5" radius="5" height="6"/>
+        <cylinder id="region-cu" base="-21.5,63,-20.5" radius="5" height="6"/>
+        <cylinder id="region-cl" base="-12.5,50,-11.5" radius="5" height="6"/>
+        <cylinder id="region-du" base="-13.5,60,15.5" radius="5" height="6"/>
+    </union>
+    <apply use="never"/>
+</regions>
+<score/>
+<time>7m</time>
+<control-points capture-time="4s" neutral-state="true" capture-rule="majority">
+    <control-point id="hill-au" name="A Upper" capture="everywhere" progress="region-au" player-filter="any(all(au=9, region-au), all(not(au=9), not(captured-au)))" capture-filter="all(au=9, region-au)" scoreboard-filter="au=9"/>
+    <control-point id="hill-al" name="A Lower" capture="everywhere" progress="region-al" player-filter="any(all(al=9, region-al), all(not(al=9), not(captured-al)))" capture-filter="all(al=9, region-al)" scoreboard-filter="al=9"/>
+    <control-point id="hill-bu" name="B Upper" capture="everywhere" progress="region-bu" player-filter="any(all(bu=9, region-bu), all(not(bu=9), not(captured-bu)))" capture-filter="all(bu=9, region-bu)" scoreboard-filter="bu=9"/>
+    <control-point id="hill-cu" name="C Upper" capture="everywhere" progress="region-cu" player-filter="any(all(cu=9, region-cu), all(not(cu=9), not(captured-cu)))" capture-filter="all(cu=9, region-cu)" scoreboard-filter="cu=9"/>
+    <control-point id="hill-cl" name="C Lower" capture="everywhere" progress="region-cl" player-filter="any(all(cl=9, region-cl), all(not(cl=9), not(captured-cl)))" capture-filter="all(cl=9, region-cl)" scoreboard-filter="cl=9"/>
+    <control-point id="hill-du" name="D Upper" capture="everywhere" progress="region-du" player-filter="any(all(du=9, region-du), all(not(du=9), not(captured-du)))" capture-filter="all(du=9, region-du)" scoreboard-filter="du=9"/>
+</control-points>
+<filters>
+    <material id="hill-active-material">stained clay</material>
+    <material id="beacon-active-material">stained glass</material>
+    <material id="hill-inactive-material">coal block</material>
+    <material id="beacon-inactive-material">nether brick</material>
+    <any id="active-hills">
+        <all>
+            <variable var="au">9</variable>
+            <region id="region-au"/>
+        </all>
+        <all>
+            <variable var="al">9</variable>
+            <region id="region-al"/>
+        </all>
+        <all>
+            <variable var="bu">9</variable>
+            <region id="region-bu"/>
+        </all>
+        <all>
+            <variable var="cu">9</variable>
+            <region id="region-cu"/>
+        </all>
+        <all>
+            <variable var="cl">9</variable>
+            <region id="region-cl"/>
+        </all>
+        <all>
+            <variable var="du">9</variable>
+            <region id="region-du"/>
+        </all>
+    </any>
+    <captured id="captured-au">hill-au</captured>
+    <captured id="captured-al">hill-al</captured>
+    <captured id="captured-bu">hill-bu</captured>
+    <captured id="captured-cu">hill-cu</captured>
+    <captured id="captured-cl">hill-cl</captured>
+    <captured id="captured-du">hill-du</captured>
+</filters>
+<variables>
+    <variable id="au" default="0" scope="match"/>
+    <variable id="al" default="0" scope="match"/>
+    <variable id="bu" default="0" scope="match"/>
+    <variable id="cu" default="0" scope="match"/>
+    <variable id="cl" default="0" scope="match"/>
+    <variable id="du" default="0" scope="match"/>
+    <variable id="t" default="0" scope="match"/>
+</variables>
+<actions>
+    <action id="reset-hill-states" scope="match">
+        <set var="au" value="random()"/>
+        <set var="al" value="random()"/>
+        <set var="bu" value="random()"/>
+        <set var="cu" value="random()"/>
+        <set var="cl" value="random()"/>
+        <set var="du" value="random()"/>
+    </action>
+    <action id="activate-random-hill" scope="match">
+        <set var="t" value="min(au, al, bu, cu, cl, du)"/>
+        <action filter="not(au=1..)"><set var="au" value="au - t"/></action>
+        <action filter="not(al=1..)"><set var="al" value="al - t"/></action>
+        <action filter="not(bu=1..)"><set var="bu" value="bu - t"/></action>
+        <action filter="not(cu=1..)"><set var="cu" value="cu - t"/></action>
+        <action filter="not(cl=1..)"><set var="cl" value="cl - t"/></action>
+        <action filter="not(du=1..)"><set var="du" value="du - t"/></action>
+        <action filter="au=0"><set var="au" value="9"/></action>
+        <action filter="al=0"><set var="al" value="9"/></action>
+        <action filter="bu=0"><set var="bu" value="9"/></action>
+        <action filter="cu=0"><set var="cu" value="9"/></action>
+        <action filter="cl=0"><set var="cl" value="9"/></action>
+        <action filter="du=0"><set var="du" value="9"/></action>
+    </action>
+    <action id="remove-active-hills-from-pool" scope="match">
+        <action filter="au=9"><set var="au" value="8"/></action>
+        <action filter="al=9"><set var="al" value="8"/></action>
+        <action filter="bu=9"><set var="bu" value="8"/></action>
+        <action filter="cu=9"><set var="cu" value="8"/></action>
+        <action filter="cl=9"><set var="cl" value="8"/></action>
+        <action filter="du=9"><set var="du" value="8"/></action>
+    </action>
+    <action id="update-hill-blocks" scope="match">
+        <fill region="hill-regions" material="stained clay" filter="all(hill-inactive-material, active-hills)"/>
+        <fill region="hill-regions" material="stained glass" filter="all(beacon-inactive-material, active-hills)"/>
+        <fill region="hill-regions" material="coal block" filter="all(hill-active-material, not(active-hills))"/>
+        <fill region="hill-regions" material="nether brick" filter="all(beacon-active-material, not(active-hills))"/>
+    </action>
+    <action id="send-message" scope="match">
+        <message text="`7[`6Control Unit`7]: `r`bSystem unstable, redistributing power to:"/>
+        <action filter="au=9">
+            <message text="`7[`6Control Unit`7]: `r`bSector A Upper"/>
+        </action>
+        <action filter="al=9">
+            <message text="`7[`6Control Unit`7]: `r`bSector A Lower"/>
+        </action>
+        <action filter="bu=9">
+            <message text="`7[`6Control Unit`7]: `r`bSector B Upper"/>
+        </action>
+        <action filter="cu=9">
+            <message text="`7[`6Control Unit`7]: `r`bSector C Upper"/>
+        </action>
+        <action filter="cl=9">
+            <message text="`7[`6Control Unit`7]: `r`bSector C Lower"/>
+        </action>
+        <action filter="du=9">
+            <message text="`7[`6Control Unit`7]: `r`bSector D Upper"/>
+        </action>
+        <sound preset="OBJECTIVE_MODE"/>
+    </action>
+    <trigger scope="match">
+        <filter>
+            <match-phase>idle</match-phase>
+        </filter>
+        <action>
+            <set var="bu" value="9"/>
+            <set var="du" value="9"/>
+            <action id="update-hill-blocks"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <match-started/>
+        </filter>
+        <action>
+            <message text="`7[`6Control Unit`7]: `r`bInitializing system..."/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <time>1m30s</time>
+        </filter>
+        <action>
+            <set var="bu" value="8"/>
+            <set var="du" value="8"/>
+            <set var="t" value="floor(random() * 2)"/>
+            <action filter="t=0">
+                <set var="au" value="9"/>
+            </action>
+            <action filter="t=1">
+                <set var="al" value="9"/>
+            </action>
+            <set var="t" value="floor(random() * 2)"/>
+            <action filter="t=0">
+                <set var="cu" value="9"/>
+            </action>
+            <action filter="t=1">
+                <set var="cl" value="9"/>
+            </action>
+            <action id="update-hill-blocks"/>
+            <action id="send-message"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <time>3m</time>
+        </filter>
+        <action>
+            <action id="reset-hill-states"/>
+            <action id="activate-random-hill"/>
+            <action id="activate-random-hill"/>
+            <action id="activate-random-hill"/>
+            <action id="update-hill-blocks"/>
+            <action id="send-message"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <time>5m</time>
+        </filter>
+        <action>
+            <action id="remove-active-hills-from-pool"/>
+            <action id="activate-random-hill"/>
+            <action id="activate-random-hill"/>
+            <action id="activate-random-hill"/>
+            <action id="update-hill-blocks"/>
+            <action id="send-message"/>
+        </action>
+    </trigger>
+    <!-- <trigger scope="match">
+        <filter>
+            <time>6m30s</time>
+        </filter>
+        <action>
+            <set var="au" value="9"/>
+            <set var="al" value="9"/>
+            <set var="bu" value="9"/>
+            <set var="cu" value="9"/>
+            <set var="cl" value="9"/>
+            <set var="du" value="9"/>
+            <action id="update-hill-blocks"/>
+            <message text="`7[`6Control Unit`7]: `r`c⚠ System overloading ⚠"/>
+            <message text="`7[`6Control Unit`7]: `r`bRedirecting power to all sectors"/>
+        </action>
+    </trigger> -->
+</actions>
+</map>
