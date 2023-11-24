@@ -1,6 +1,6 @@
 <map proto="1.4.2" internal="true">
 <name>Entropy Reactor Mk. 1</name>
-<version>1.0.0</version>
+<version>1.1.0</version>
 <objective>Get the most points in 7 minutes!</objective>
 <gamemode>koth</gamemode>
 <created>2023-11-22</created>
@@ -15,6 +15,9 @@
 <authors>
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
 </authors>
+<contributors>
+    <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="XML advice"/> <!-- Pablete1234 -->
+</contributors>
 <teams>
     <team id="blue-team" color="blue" min="1" max="16">Blue</team>
     <team id="red-team" color="dark red" min="1" max="16">Red</team>
@@ -51,7 +54,7 @@
 </regions>
 <score/>
 <time>7m</time>
-<control-points capture-time="4s" neutral-state="true" capture-rule="majority">
+<control-points capture-time="4s" neutral-state="true" capture-rule="majority" decay="1">
     <control-point id="hill-au" name="A Upper" capture="everywhere" progress="region-au" player-filter="any(all(au=9, region-au), all(not(au=9), not(captured-au)))" capture-filter="all(au=9, region-au)" scoreboard-filter="au=9"/>
     <control-point id="hill-al" name="A Lower" capture="everywhere" progress="region-al" player-filter="any(all(al=9, region-al), all(not(al=9), not(captured-al)))" capture-filter="all(al=9, region-al)" scoreboard-filter="al=9"/>
     <control-point id="hill-bu" name="B Upper" capture="everywhere" progress="region-bu" player-filter="any(all(bu=9, region-bu), all(not(bu=9), not(captured-bu)))" capture-filter="all(bu=9, region-bu)" scoreboard-filter="bu=9"/>
@@ -96,6 +99,9 @@
     <captured id="captured-cu">hill-cu</captured>
     <captured id="captured-cl">hill-cl</captured>
     <captured id="captured-du">hill-du</captured>
+    <time id="switch-hills-1">1m20s</time>
+    <time id="switch-hills-2">2m50s</time>
+    <time id="switch-hills-3">4m50s</time>
 </filters>
 <variables>
     <variable id="au" default="0" scope="match"/>
@@ -144,25 +150,29 @@
         <fill region="hill-regions" material="coal block" filter="all(hill-active-material, not(active-hills))"/>
         <fill region="hill-regions" material="nether brick" filter="all(beacon-active-material, not(active-hills))"/>
     </action>
-    <action id="send-message" scope="match">
-        <message text="`7[`6Control Unit`7]: `r`bSystem unstable, redistributing power to:"/>
+    <action id="send-warning-message" scope="match">
+        <message text="`7[`6Control Unit`7]: `6⚠ `cSystem unstable `6⚠"/>
+        <message text="`7[`6Control Unit`7]: `bPreparing to redistribute power across control points..."/>
+    </action>
+    <action id="send-change-message" scope="match">
+        <message text="`7[`6Control Unit`7]: `bPower successfully redistributed to the following control points:"/>
         <action filter="au=9">
-            <message text="`7[`6Control Unit`7]: `r`bSector A Upper"/>
+            <message text="`7[`6Control Unit`7]: `bQuadrant A Upper Level"/>
         </action>
         <action filter="al=9">
-            <message text="`7[`6Control Unit`7]: `r`bSector A Lower"/>
+            <message text="`7[`6Control Unit`7]: `bQuadrant A Lower Level"/>
         </action>
         <action filter="bu=9">
-            <message text="`7[`6Control Unit`7]: `r`bSector B Upper"/>
+            <message text="`7[`6Control Unit`7]: `bQuadrant B Upper Level"/>
         </action>
         <action filter="cu=9">
-            <message text="`7[`6Control Unit`7]: `r`bSector C Upper"/>
+            <message text="`7[`6Control Unit`7]: `bQuadrant C Upper Level"/>
         </action>
         <action filter="cl=9">
-            <message text="`7[`6Control Unit`7]: `r`bSector C Lower"/>
+            <message text="`7[`6Control Unit`7]: `bQuadrant C Lower Level"/>
         </action>
         <action filter="du=9">
-            <message text="`7[`6Control Unit`7]: `r`bSector D Upper"/>
+            <message text="`7[`6Control Unit`7]: `bQuadrant D Upper Level"/>
         </action>
         <sound preset="OBJECTIVE_MODE"/>
     </action>
@@ -181,12 +191,13 @@
             <match-started/>
         </filter>
         <action>
-            <message text="`7[`6Control Unit`7]: `r`bInitializing system..."/>
+            <message text="`7[`6Control Unit`7]: `bInitializing system..."/>
         </action>
     </trigger>
+    <trigger scope="match" filter="switch-hills-1" action="send-warning-message"/>
     <trigger scope="match">
         <filter>
-            <time>1m30s</time>
+            <after filter="switch-hills-1" duration="10s" message="Redistributing control points in {0}"/>
         </filter>
         <action>
             <set var="bu" value="8"/>
@@ -206,12 +217,13 @@
                 <set var="cl" value="9"/>
             </action>
             <action id="update-hill-blocks"/>
-            <action id="send-message"/>
+            <action id="send-change-message"/>
         </action>
     </trigger>
+    <trigger scope="match" filter="switch-hills-2" action="send-warning-message"/>
     <trigger scope="match">
         <filter>
-            <time>3m</time>
+            <after filter="switch-hills-2" duration="10s" message="Redistributing control points in {0}"/>
         </filter>
         <action>
             <action id="reset-hill-states"/>
@@ -219,12 +231,13 @@
             <action id="activate-random-hill"/>
             <action id="activate-random-hill"/>
             <action id="update-hill-blocks"/>
-            <action id="send-message"/>
+            <action id="send-change-message"/>
         </action>
     </trigger>
+    <trigger scope="match" filter="switch-hills-3" action="send-warning-message"/>
     <trigger scope="match">
         <filter>
-            <time>5m</time>
+            <after filter="switch-hills-3" duration="10s" message="Redistributing control points in {0}"/>
         </filter>
         <action>
             <action id="remove-active-hills-from-pool"/>
@@ -232,7 +245,7 @@
             <action id="activate-random-hill"/>
             <action id="activate-random-hill"/>
             <action id="update-hill-blocks"/>
-            <action id="send-message"/>
+            <action id="send-change-message"/>
         </action>
     </trigger>
     <!-- <trigger scope="match">
