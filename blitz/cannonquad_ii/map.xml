@@ -1,7 +1,7 @@
 <map proto="1.4.2">
 <name>CannonQuad II</name>
 <variant id="blitz-only" world="blitz">Blitz</variant>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Destroy your opponents within 20 minutes.</objective>
 <created>2023-11-19</created>
 <phase>development</phase>
@@ -14,6 +14,14 @@
 </contributors>
 <include id="void-death"/>
 <respawn auto="true"/>
+<unless variant="blitz-only">
+    <constant id="sudden-death-countdown">14m</constant>
+    <constant id="sudden-death-broadcast">10m</constant>
+</unless>
+<if variant="blitz-only">
+    <constant id="sudden-death-countdown">9m</constant>
+    <constant id="sudden-death-broadcast">5m</constant>
+</if>
 <broadcasts>
         <alert after="1s">`7You have 20 seconds to prepare.</alert>
         <tip after="10s">`7You may not build in the center until 5 minutes have passed.</tip>
@@ -25,10 +33,10 @@
         <alert after="5m">`7You may now build in the center.</alert>
         <unless variant="blitz-only">
             <tip after="5s">`7If your team's Monument is destroyed, you will be eliminated on death.</tip>
-            <alert after="10m">`4Sudden Death`7 begins in 5 minutes. Any remaining Monuments will be disabled!</alert>
+            <alert after="${sudden-death-broadcast}">`4Sudden Death`7 begins in 5 minutes. Any remaining Monuments will be disabled!</alert>
         </unless>
         <if variant="blitz-only">
-            <alert after="10m">`4Sudden Death`7 begins in 5 minutes.</alert>
+            <alert after="${sudden-death-broadcast}">`4Sudden Death`7 begins in 5 minutes.</alert>
         </if>
         <alert after="15m5s">`4Sudden Death`7 has begun. Watch out, the border is shrinking!</alert>
 </broadcasts>
@@ -181,7 +189,7 @@
         <time>4m</time>
     </after>
     <after id="sudden-death" duration="60s" message="`4Sudden Death`7 begins in {0}">
-        <time>14m</time>
+        <time>${sudden-death-countdown}</time>
     </after>
     <not id="initial-spawn">
         <time>20s</time>
@@ -276,16 +284,18 @@
             <subtitle>`fYou `fcan `fno `flonger `frespawn.</subtitle>
         </message>
         <trigger filter="show-destroyed-message" trigger="monument-destroyed-message" scope="player"/>
-        <trigger filter="sudden-death" scope="match">
-            <action>
-                <fill region="monuments" material="air" filter="only-end-stone"/>
-                    <message id="sudden-death-message" fade-in="0.5s" stay="2s" fade-out="0.5s">
-                        <title>`4SUDDEN `4DEATH!</title>
-                        <subtitle>`fYou `fcan `fno `flonger `frespawn.</subtitle>
-                    </message>
-            </action>
-        </trigger>
     </unless>
+    <trigger filter="sudden-death" scope="match">
+        <action>
+            <fill region="monuments" material="air" filter="only-end-stone"/>
+                <message id="sudden-death-message" fade-in="0.5s" stay="2s" fade-out="0.5s">
+                    <title>`4SUDDEN `4DEATH!</title>
+                    <unless variant="blitz-only">
+                        <subtitle>`fYou `fcan `fno `flonger `frespawn.</subtitle>
+                    </unless>
+                </message>
+        </action>
+    </trigger>
 </actions>
 <unless variant="blitz-only">
     <destroyables>
