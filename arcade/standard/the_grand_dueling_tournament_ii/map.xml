@@ -1,6 +1,6 @@
 <map proto="1.4.2" game="Wins">
 <name>The Grand Dueling Tournament II</name>
-<version>2.2.3</version>
+<version>2.3.0</version>
 <objective>Win the tournament.</objective>
 <phase>development</phase>
 <variant id="spleef" world="spleef" override="true">The Grand Spleefing Tournament II</variant>
@@ -20,6 +20,8 @@
 <constant id="kit-10-name">`bConquest</constant>
 <constant id="kit-11-name">`eBlasternauts</constant>
 <constant id="kit-12-name">`cUHC</constant>
+<constant id="round-begin-after-seconds">10</constant>
+<constant id="round-begin-countdown-after-seconds">7</constant> <!-- 3 less than round-begin-after-seconds for countdown include -->
 <if variant="spleef">
     <constant id="tournament-type">Spleefing</constant>
     <constant id="tournament-action">spleef</constant>
@@ -33,6 +35,8 @@
     <constant id="tournament-type">Cannoning</constant>
     <constant id="tournament-action">cannon</constant>
     <constant id="kit-0-name">`bClassic</constant>
+    <constant id="round-begin-after-seconds">35</constant>
+    <constant id="round-begin-countdown-after-seconds">32</constant>
 </if>
 <include id="countdown"/>
 <include id="void-death"/>
@@ -93,6 +97,7 @@
         <double-jump enabled="false"/>
         <action>
             <set var="current_kill_reward" value="0"/>
+            <set var="current_kit_requires_survival" value="0"/>
         </action>
         <if variant="cannon">
             <effect>night vision</effect>
@@ -100,6 +105,9 @@
     </kit>
     <kit id="spectating-kit" parents="clear-kit" force="true">
         <effect>invisibility</effect>
+    </kit>
+    <kit id="survival-kit" force="true">
+        <game-mode>survival</game-mode>
     </kit>
     <unless variant="spleef, cannon">
         <kit id="kit-0" parents="clear-kit"> <!-- iron -->
@@ -409,7 +417,6 @@
     </if>
     <if variant="cannon">
         <kit id="kit-0" parents="clear-kit"> <!-- classic -->
-            <game-mode>survival</game-mode>
             <item slot="9" material="tnt" amount="64"/>
             <item slot="18" material="tnt" amount="64"/>
             <item slot="27" material="tnt" amount="64"/>
@@ -450,6 +457,9 @@
             <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
             <leggings material="leather leggings" team-color="true" unbreakable="true"/>
             <boots material="leather boots" team-color="true" unbreakable="true"/>
+            <action>
+                <set var="current_kit_requires_survival" value="1"/>
+            </action>
         </kit>
     </if>
 </kits>
@@ -566,12 +576,12 @@
     <match-finished id="match-finished"/>
     <participating id="participating"/>
     <after id="allow-round-1-completion" duration="1s">
-        <after id="round-1-begin" duration="10s" message="Round 1 begins in {0}">
+        <after id="round-1-begin" duration="${round-begin-after-seconds}s" message="Round 1 begins in {0}">
             <time id="round-1-starting">18s</time>
         </after>
     </after>
     <after id="allow-round-2-completion" duration="1s">
-        <after id="round-2-begin" duration="10s" message="Round 2 begins in {0}">
+        <after id="round-2-begin" duration="${round-begin-after-seconds}s" message="Round 2 begins in {0}">
             <after id="round-2-starting" duration="2s">
                 <all id="round-1-finished">
                     <filter id="round-1-arena-1-finished"/>
@@ -583,7 +593,7 @@
         </after>
     </after>
     <after id="allow-round-3-completion" duration="1s">
-        <after id="round-3-begin" duration="10s" message="Round 3 begins in {0}">
+        <after id="round-3-begin" duration="${round-begin-after-seconds}s" message="Round 3 begins in {0}">
             <after id="round-3-starting" duration="2s">
                 <all id="round-2-finished">
                     <filter id="round-2-arena-1-finished"/>
@@ -600,6 +610,11 @@
         <filter id="round-3-arena-3-finished"/>
         <filter id="round-3-arena-4-finished"/>
     </all>
+    <if variant="cannon">
+        <after id="round-1-kit-rearranging-period" duration="5s" filter="round-1-starting"/>
+        <after id="round-2-kit-rearranging-period" duration="5s" filter="round-2-starting"/>
+        <after id="round-3-kit-rearranging-period" duration="5s" filter="round-3-starting"/>
+    </if>
     <any id="between-rounds">
         <all>
             <variable id="round-1" var="current_round">1</variable>
@@ -616,19 +631,19 @@
     </any>
     <any id="countdown-start">
         <all>
-            <after duration="7s" filter="round-1-starting"/>
+            <after duration="${round-begin-countdown-after-seconds}s" filter="round-1-starting"/>
             <not>
                 <filter id="round-1-finished"/>
             </not>
         </all>
         <all>
-            <after duration="7s" filter="round-2-starting"/>
+            <after duration="${round-begin-countdown-after-seconds}s" filter="round-2-starting"/>
             <not>
                 <filter id="round-2-finished"/>
             </not>
         </all>
         <all>
-            <after duration="7s" filter="round-3-starting"/>
+            <after duration="${round-begin-countdown-after-seconds}s" filter="round-3-starting"/>
             <not>
                 <filter id="round-3-finished"/>
             </not>
@@ -1459,6 +1474,7 @@
     <variable id="announce_kit" scope="match" default="1"/>
     <variable id="current_round" scope="match" default="0"/>
     <variable id="current_kit" scope="match" default="0"/>
+    <variable id="current_kit_requires_survival" scope="player" default="0"/>
     <variable id="current_kill_reward" scope="player" default="0"/>
     <variable id="t" scope="match"/>
     <variable id="k0" scope="match"/>
@@ -1622,6 +1638,7 @@
                 <set var="current_kit" value="round_1_kit"/>
                 <action id="kit-applicator"/>
                 <sound key="mob.villager.haggle"/>
+                <set var="announce_kit" value="0"/>
             </action>
         </trigger>
     </if>
@@ -1745,12 +1762,13 @@
             <foodlevel>16</foodlevel>
         </kit>
     </action>
+    <trigger scope="player" filter="all(current_kit_requires_survival=1, all-arenas)" action="survival-kit"/>
     <!--
     round starting
     -->
     <trigger scope="match" filter="round-1-starting">
         <action>
-            <message text="`7[`6Arena Master`7] `6Tirion`r: Get ready, the first round is about to commence in 10 seconds!"/>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: Get ready, the first round is about to commence in ${round-begin-after-seconds} seconds!"/>
             <sound key="mob.villager.haggle"/>
             <action id="clear-kit-applicator"/>
             <set var="current_kit" value="round_1_kit"/>
@@ -1761,13 +1779,15 @@
             <message text="`7[`6Arena Master`7] `6Tirion`r: Let The Grand ${tournament-type} Tournament begin!"/>
             <sound key="mob.enderdragon.growl" volume="1.2" pitch="0.8"/>
             <set var="current_round" value="1"/>
-            <action id="kit-applicator"/>
+            <unless variant="cannon">
+                <action id="kit-applicator"/>
+            </unless>
         </action>
     </trigger>
     <trigger scope="match" filter="round-1-finished" action="clear-kit-applicator"/>
     <trigger scope="match" filter="round-2-starting">
         <action>
-            <message text="`7[`6Arena Master`7] `6Tirion`r: Brace yourselves, the second round starts in 10 seconds!"/>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: Brace yourselves, the second round starts in ${round-begin-after-seconds} seconds!"/>
             <sound key="mob.villager.haggle"/>
             <set var="current_kit" value="round_2_kit"/>
         </action>
@@ -1777,13 +1797,15 @@
             <message text="`7[`6Arena Master`7] `6Tirion`r: Aaaaand fight!"/>
             <sound key="mob.enderdragon.growl" volume="1.2" pitch="0.8"/>
             <set var="current_round" value="2"/>
-            <action id="kit-applicator"/>
+            <unless variant="cannon">
+                <action id="kit-applicator"/>
+            </unless>
         </action>
     </trigger>
     <trigger scope="match" filter="round-2-finished" action="clear-kit-applicator"/>
     <trigger scope="match" filter="round-3-starting">
         <action>
-            <message text="`7[`6Arena Master`7] `6Tirion`r: Prepare for the `6final showdown`r, starting in 10 seconds!"/>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: Prepare for the `6final showdown`r, starting in ${round-begin-after-seconds} seconds!"/>
             <sound key="mob.villager.haggle"/>
             <set var="current_kit" value="round_3_kit"/>
         </action>
@@ -1793,10 +1815,21 @@
             <message text="`7[`6Arena Master`7] `6Tirion`r: May the best team win!"/>
             <sound key="mob.enderdragon.growl" volume="1.2" pitch="0.8"/>
             <set var="current_round" value="3"/>
-            <action id="kit-applicator"/>
+            <unless variant="cannon">
+                <action id="kit-applicator"/>
+            </unless>
         </action>
     </trigger>
     <trigger scope="match" filter="round-3-finished" action="clear-kit-applicator"/>
+    <if variant="cannon">
+        <trigger scope="match" filter="any(all(round-1-kit-rearranging-period, not(round-1-begin)), all(round-2-kit-rearranging-period, not(round-2-begin)), all(round-3-kit-rearranging-period, not(round-3-begin)))">
+            <action>
+                <message text="`7[`6Arena Master`7] `6Tirion`r: Use this time to rearrange your inventory to your liking!"/>
+                <sound key="mob.villager.haggle"/>
+                <action id="kit-applicator"/>
+            </action>
+        </trigger>
+    </if>
     <trigger scope="match" filter="match-finished">
         <action>
             <set var="current_round" value="0"/>
