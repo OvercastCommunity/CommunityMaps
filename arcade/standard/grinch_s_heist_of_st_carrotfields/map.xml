@@ -1,0 +1,269 @@
+<map proto="1.4.2" game="Score">
+<name>Grinch's Heist of St. Carrotfields</name>
+<version>1.0</version>
+<objective>Stop the Grinch from stealing the presents!</objective>
+<gamemode>arcade</gamemode>
+<gamemode>scorebox</gamemode>
+<authors>
+    <author uuid="ba4a93aa-4935-4a71-bab2-a58f9a124e7b"/> <!-- ItsMiiOlly -->
+    <author uuid="75fd93dd-8e48-4698-81a2-97dae2ec5b5f"/> <!-- Pugzy -->
+    <author uuid="af9c1942-af66-42d1-89f9-9b677c281e03"/> <!-- _IQ -->
+    <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
+</authors>
+<teams>
+    <team id="cops-team" color="dark red" min="1" max="6" show-name-tags="allies">Elves</team>
+    <team id="robbers-team" color="green" min="1" max="16" show-name-tags="allies">Grinch</team>
+</teams>
+<spawns safe="true">
+    <spawn team="cops-team" kit="cops-kit" angle="0.5,12,0.5">
+        <regions>
+            <cylinder base="0.5,11,0.5" radius="40" height="4"/>
+        </regions>
+    </spawn>
+    <spawn team="robbers-team" kit="robbers-kit" angle="0.5,12,0.5">
+        <regions>
+            <block>0,18,-48</block>
+            <block>34,22,-34</block>
+            <block>48,23,0</block>
+            <block>36,23,32</block>
+            <block>0,18,48</block>
+            <block>-34,22,34</block>
+            <block>-48,23,0</block>
+            <block>-36,23,-32</block>
+        </regions>
+    </spawn>
+    <default yaw="-90">
+        <regions>
+            <block>2,46,0</block>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="cops-kit">
+        <item material="iron sword" unbreakable="true" locked="true"/>
+        <item material="bow" unbreakable="true" locked="true">
+            <enchantment level="2">power</enchantment>
+        </item>
+        <item material="arrow"/>
+        <chestplate material="leather chestplate" unbreakable="true" locked="true" color="993333"/>
+        <leggings material="leather leggings" unbreakable="true" locked="true" color="FFFFFF"/>
+        <boots material="leather boots" unbreakable="true" locked="true" color="993333"/>
+    </kit>
+    <kit id="robbers-kit">
+        <item material="stick">
+            <enchantment>knockback</enchantment>
+        </item>
+        <item material="snow ball" amount="16" projectile="robber-blindness-proj"/>
+        <head name="Grinch" slot="slot.armor.head" locked="true" uuid="f650913b-2698-49c8-990d-e6972dffb566">
+            <skin>eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGRiNWY3ZWNjNDA1NzYzOTcxNzVkYTA3YjJkYzAzYTY5N2I2MDIzMzZmNDJiMGFmZWQ5MTkzYjliYzYzNjdlNSJ9fX0=</skin>
+        </head>
+        <chestplate material="leather chestplate" unbreakable="true" locked="true" color="E66565"/>
+        <leggings material="leather leggings" unbreakable="true" locked="true" color="94C58C"/>
+        <boots material="leather boots" unbreakable="true" locked="true" color="94C58C"/>
+    </kit>
+    <kit id="point-kit" deduct-items="false">
+        <head slot="8" name="Presents" locked="true" uuid="67d4ea6e-dc52-4a14-a238-167bc1266574">
+            <skin>eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDUzNjhmNTYzNWZmNmMzNDA3ZjBmMzU2YzViNmUwOTQ3YmNkNWUzODQ5MGM5YWE4YjhiNTgyYTRmMjFhZTNjYiJ9fX0=</skin>
+        </head>
+        <action>
+            <set var="cops_score" value="max(cops_score - 1, 0)"/>
+            <set var="robbers_score" value="min(robbers_score + 1, (robber_count * robber_avg_score))"/>
+            <set var="personal_score" value="min(personal_score + 1, (robber_count * robber_avg_score))"/>
+            <action id="robber-stress"/>
+            <sound preset="SCORE"/>
+        </action>
+    </kit>
+</kits>
+<projectiles>
+    <projectile id="robber-blindness-proj" name="snow ball" projectile="Snowball">
+        <effect duration="1.5s">blindness</effect>
+    </projectile>
+</projectiles>
+<modifybowprojectile pickup-filter="never"/>
+<kill-rewards>
+    <kill-reward victim-action="robber-death"/>
+</kill-rewards>
+<block-drops>
+    <rule wrong-tool="true" filter="point-blocks" kit="point-kit"/>
+</block-drops>
+<renewables>
+    <renewable region="everywhere" renew-filter="point-blocks" interval="8s"/>
+</renewables>
+<regions>
+    <circle id="main-arena" center="0.5,0.5" radius="45"/>
+    <apply block-break="breakable-blocks" block-place="only-world"/>
+</regions>
+<filters>
+    <team id="only-cops">cops-team</team>
+    <team id="only-robbers">robbers-team</team>
+    <cause id="only-world">world</cause>
+    <any id="breakable-blocks">
+        <material>long grass</material>
+        <material>yellow flower</material>
+        <material>red rose</material>
+        <material>carrot</material>
+        <all>
+            <filter id="only-robbers"/>
+            <any id="point-blocks">
+                <material>skull</material>
+            </any>
+        </all>
+    </any>
+    <all id="no-arrows">
+        <filter id="only-cops"/>
+        <not>
+            <carrying ignore-metadata="true">
+                <item material="arrow"/>
+            </carrying>
+        </not>
+        <participating/>
+        <alive/>
+    </all>
+</filters>
+<score/>
+<time>5m</time>
+<variables>
+    <score id="team_score"/>
+    <with-team id="cops_score" var="team_score" team="cops-team"/>
+    <with-team id="robbers_score" var="team_score" team="robbers-team"/>
+    <variable id="personal_score" scope="player" default="0"/>
+    <variable id="robber_count" scope="match" default="0"/>
+    <variable id="robber_avg_score" scope="match" default="25"/>
+</variables>
+<actions>
+    <trigger scope="player">
+        <filter>
+            <all>
+                <filter id="only-robbers"/>
+                <match-started/>
+            </all>
+        </filter>
+        <action>
+            <switch-scope inner="match">
+                <set var="robber_count" value="robber_count + 1"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <match-started/>
+        </filter>
+        <action>
+            <set var="cops_score" value="(robber_count * robber_avg_score)"/>
+        </action>
+    </trigger>
+    <!-- arrow stuff based on bridge.xml include -->
+    <trigger scope="player">
+        <filter>
+            <after duration="3.5s" filter="no-arrows"/>
+        </filter>
+        <action>
+            <kit>
+                <item material="arrow"/>
+            </kit>
+            <message text=" `e⚠ `aYou got an arrow!"/>
+            <sound key="random.pop" pitch="0.8"/>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="no-arrows">
+        <action>
+            <message text=" `e⚠ `cYou will receive an arrow in `e3.5`c seconds!" actionbar="`c`lNO ARROWS!"/>
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <all>
+                <filter id="only-cops"/>
+                <carrying ignore-metadata="true" amount="(1,oo)">
+                    <item material="arrow"/>
+                </carrying>
+                <participating/>
+            </all>
+        </filter>
+        <action>
+            <message actionbar="`a`lARROW READY!"/>
+        </action>
+    </trigger>
+    <action id="robber-death" scope="player">
+        <set var="cops_score" value="min(cops_score + ceil(personal_score * 0.75), (robber_count * robber_avg_score))"/>
+        <set var="robbers_score" value="max(robbers_score - ceil(personal_score * 0.75), 0)"/>
+        <set var="personal_score" value="0"/>
+    </action>
+    <action id="robber-stress" scope="player">
+        <action filter="personal_score=0..3">
+            <kit force="true">
+                <chestplate material="leather chestplate" unbreakable="true" locked="true" color="E66565"/>
+                <leggings material="leather leggings" unbreakable="true" locked="true" color="94C58C"/>
+                <boots material="leather boots" unbreakable="true" locked="true" color="94C58C"/>
+                <walk-speed>0.9</walk-speed>
+            </kit>
+        </action>
+        <action filter="personal_score=4..9">
+            <kit force="true">
+                <chestplate material="leather chestplate" unbreakable="true" locked="true" color="EB3131"/>
+                <leggings material="leather leggings" unbreakable="true" locked="true" color="64AD62"/>
+                <boots material="leather boots" unbreakable="true" locked="true" color="64AD62"/>
+                <walk-speed>0.8</walk-speed>
+            </kit>
+        </action>
+        <action filter="personal_score=10..14">
+            <kit force="true">
+                <chestplate material="leather chestplate" unbreakable="true" locked="true" color="D92800"/>
+                <leggings material="leather leggings" unbreakable="true" locked="true" color="429B46"/>
+                <boots material="leather boots" unbreakable="true" locked="true" color="429B46"/>
+                <walk-speed>0.7</walk-speed>
+                <effect amplifier="0">slowness</effect>
+                <effect amplifier="0">jump</effect>
+            </kit>
+        </action>
+        <action filter="personal_score=15..19">
+            <kit force="true">
+                <chestplate material="leather chestplate" unbreakable="true" locked="true" color="AE1E00"/>
+                <leggings material="leather leggings" unbreakable="true" locked="true" color="1A8828"/>
+                <boots material="leather boots" unbreakable="true" locked="true" color="1A8828"/>
+                <walk-speed>0.6</walk-speed>
+                <effect amplifier="1">slowness</effect>
+                <effect amplifier="-1">jump</effect>
+            </kit>
+        </action>
+        <action filter="personal_score=20..24">
+            <kit force="true">
+                <chestplate material="leather chestplate" unbreakable="true" locked="true" color="991C06"/>
+                <leggings material="leather leggings" unbreakable="true" locked="true" color="0A6921"/>
+                <boots material="leather boots" unbreakable="true" locked="true" color="0A6921"/>
+                <walk-speed>0.5</walk-speed>
+                <effect amplifier="2">slowness</effect>
+                <effect amplifier="-1">jump</effect>
+            </kit>
+        </action>
+        <action filter="personal_score=25..">
+            <kit force="true">
+                <chestplate material="leather chestplate" unbreakable="true" locked="true" color="801300"/>
+                <leggings material="leather leggings" unbreakable="true" locked="true" color="094F29"/>
+                <boots material="leather boots" unbreakable="true" locked="true" color="094F29"/>
+                <walk-speed>0.4</walk-speed>
+                <effect amplifier="3">slowness</effect>
+                <effect amplifier="-1">jump</effect>
+            </kit>
+        </action>
+    </action>
+</actions>
+<itemremove>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>iron sword</item>
+    <item>bow</item>
+    <item>arrow</item>
+    <item>stick</item>
+    <item>snow ball</item>
+    <item>skull item</item>
+    <item>seeds</item>
+    <item>yellow flower</item>
+    <item>red rose</item>
+    <item>carrot item</item>
+</itemremove>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
