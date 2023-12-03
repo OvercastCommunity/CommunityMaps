@@ -1,6 +1,7 @@
 <map proto="1.4.2" game="Score">
-<name>Grinch's Heist of St. Carrotfields</name>
-<version>1.0</version>
+<name>The Grinch's Heist of St. Carrotfields</name>
+<slug>grinch_s_heist_of_st_carrotfields</slug>
+<version>1.0.1</version>
 <objective>Stop the Grinch from stealing the presents!</objective>
 <gamemode>arcade</gamemode>
 <gamemode>scorebox</gamemode>
@@ -11,8 +12,8 @@
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
 </authors>
 <teams>
-    <team id="cops-team" color="dark red" min="1" max="6" show-name-tags="allies">Elves</team>
-    <team id="robbers-team" color="green" min="1" max="16" show-name-tags="allies">Grinch</team>
+    <team id="cops-team" color="dark red" min="1" max="6">Elves</team>
+    <team id="robbers-team" color="green" min="1" max="16">Grinch</team>
 </teams>
 <spawns safe="true">
     <spawn team="cops-team" kit="cops-kit" angle="0.5,12,0.5">
@@ -52,6 +53,7 @@
     <kit id="robbers-kit">
         <item material="stick">
             <enchantment>knockback</enchantment>
+            <enchantment>sharpness</enchantment>
         </item>
         <item material="snow ball" amount="16" projectile="robber-blindness-proj"/>
         <head name="Grinch" slot="slot.armor.head" locked="true" uuid="f650913b-2698-49c8-990d-e6972dffb566">
@@ -87,8 +89,14 @@
     <rule wrong-tool="true" filter="point-blocks" kit="point-kit"/>
 </block-drops>
 <renewables>
-    <renewable region="everywhere" renew-filter="point-blocks" interval="8s"/>
+    <renewable region="everywhere" renew-filter="point-blocks" interval="8s" avoid-players="4"/>
 </renewables>
+<broadcasts>
+    <tip filter="only-robbers" after="3s" every="1m">`rBreak and hold as many presents as you can!</tip>
+    <tip filter="only-robbers" after="9s" every="1m">`rThe more presents you hold the more points you steal from the `4Elves`r!</tip>
+    <tip filter="only-cops" after="3s" every="1m">`rStop the `aGrinch `rfrom stealing the presents!</tip>
+    <tip filter="only-cops" after="9s" every="1m">`rYou get points back for killing a `aGrinch `rthat has stolen presents!</tip>
+</broadcasts>
 <regions>
     <circle id="main-arena" center="0.5,0.5" radius="45"/>
     <apply block-break="breakable-blocks" block-place="only-world"/>
@@ -129,6 +137,7 @@
     <variable id="personal_score" scope="player" default="0"/>
     <variable id="robber_count" scope="match" default="0"/>
     <variable id="robber_avg_score" scope="match" default="25"/>
+    <variable id="robber_score_loss_percent" scope="match" default="0.85"/>
 </variables>
 <actions>
     <trigger scope="player">
@@ -146,7 +155,9 @@
     </trigger>
     <trigger scope="match">
         <filter>
-            <match-started/>
+            <after duration="0.1">
+                <match-started/>
+            </after>
         </filter>
         <action>
             <set var="cops_score" value="(robber_count * robber_avg_score)"/>
@@ -185,8 +196,8 @@
         </action>
     </trigger>
     <action id="robber-death" scope="player">
-        <set var="cops_score" value="min(cops_score + ceil(personal_score * 0.75), (robber_count * robber_avg_score))"/>
-        <set var="robbers_score" value="max(robbers_score - ceil(personal_score * 0.75), 0)"/>
+        <set var="cops_score" value="min(cops_score + ceil(personal_score * robber_score_loss_percent), (robber_count * robber_avg_score))"/>
+        <set var="robbers_score" value="max(robbers_score - ceil(personal_score * robber_score_loss_percent), 0)"/>
         <set var="personal_score" value="0"/>
     </action>
     <action id="robber-stress" scope="player">
