@@ -1,8 +1,8 @@
 <map proto="1.4.2">
 <!-- #region meta -->
 <name>Watch Your Head</name>
-<!-- Commit ID: 7309dfbb4c7715e36b9c4cf0be9d1c562ebcbdba -->
-<version>1.0.1</version>
+<!-- Commit ID: 18d531164c9954d418cf178060733020ce6ad903 -->
+<version>1.1.0</version>
 <created>2023-11-11</created>
 <objective>Be the first team to reach ${MAX_POINT_AMOUNT} points!</objective>
 <phase>development</phase>
@@ -61,32 +61,7 @@
     <point id="offender-spawn">14.5,42.0,18.5</point>
     <cuboid id="the-anthill" min="-2,41,2" max="31,45,35" />
     <cuboid id="defenders-area" min="-9,71,-5" max="38,82,42" />
-    <complement id="tnt-moderator-water">
-        <cuboid id="tnt-moderator-area" min="-6,53,-3" max="33,54,39" />
-        <union id="tnt-moderator-webs">
-            <union id="web-grid-base">
-                <cuboid min="-3,53,36" max="0,54,39" id="web-grid-even-origin" />
-                <translate offset="-3,0,-3" region="web-grid-even-origin" id="web-grid-odd-origin" />
-                <translate offset="6,0,0" region="web-grid-even-origin" />
-                <translate offset="12,0,0" region="web-grid-even-origin" />
-                <translate offset="18,0,0" region="web-grid-even-origin" />
-                <translate offset="24,0,0" region="web-grid-even-origin" />
-                <translate offset="30,0,0" region="web-grid-even-origin" />
-                <translate offset="6,0,0" region="web-grid-odd-origin" />
-                <translate offset="12,0,0" region="web-grid-odd-origin" />
-                <translate offset="18,0,0" region="web-grid-odd-origin" />
-                <translate offset="24,0,0" region="web-grid-odd-origin" />
-                <translate offset="30,0,0" region="web-grid-odd-origin" />
-                <translate offset="36,0,0" region="web-grid-odd-origin" />
-            </union>
-            <translate offset="0,0,-6" region="web-grid-base" />
-            <translate offset="0,0,-12" region="web-grid-base" />
-            <translate offset="0,0,-18" region="web-grid-base" />
-            <translate offset="0,0,-24" region="web-grid-base" />
-            <translate offset="0,0,-30" region="web-grid-base" />
-            <translate offset="0,0,-36" region="web-grid-base" />
-        </union>
-    </complement>
+    <cuboid id="tnt-moderator-area" min="-6,53,-3" max="33,54,39" />
     <!-- #endregion region-definitions -->
     <apply block-physics="never" region="tnt-moderator-area" />
     <apply leave="is_defending=1" message="You may not leave the anthill!" region="the-anthill" />
@@ -98,7 +73,7 @@
         </regions>
     </spawn>
     <spawn filter="all(game_stage=0, only-red, not(match-started-debounce))" kit="stage-0-kit">
-        <regions yaw="45" pitch="0">
+        <regions yaw="135" pitch="0">
             <point>28.5,42.0,32.5</point>
         </regions>
     </spawn>
@@ -201,7 +176,7 @@
         <game-mode>adventure</game-mode>
     </kit>
 </kits>
-<portals observers="never">
+<portals observers="never" yaw="@0" pitch="@0">
     <portal forward="all(game_stage=1, is_defending=0)" destination="offender-spawn" />
     <portal forward="all(game_stage=1, is_defending=1, not(defenders-area))" destination="defender-spawn" />
 </portals>
@@ -228,7 +203,7 @@
               starts.
     -->
     <after id="match-started-debounce" duration="0.5s">
-        <match-running />
+        <match-running id="match-running"/>
     </after>
     <participating id="participating" />
 </filters>
@@ -236,10 +211,14 @@
     <action id="advance-game-stage" scope="match">
         <set var="game_stage" value="1" />
     </action>
+    <action id="sumo-time" scope="team">
+        <message text="It's time to `e`lfist fight`r!" title="Time to `e`lfist fight`r!" subtitle="Kill the enemies!" />
+        <message text="Kill the players on the enemy team to control the point first!" />
+    </action>
     <action id="set-defending" scope="team">
         <set var="is_defending" value="1" />
         <set var="switched" value="1" />
-        <message text="You're an `b`lanteater`r!" title="You're `b`lanteater`r!" subtitle="Blow up players under you!" />
+        <message text="You're an `b`lanteater`r!" title="You're an `b`lanteater`r!" subtitle="Blow up players under you!" />
         <message text="Blow up players under you to get a chance at holding the point!" />
         <switch-scope inner="player">
             <kit id="defender-kit" />
@@ -264,12 +243,8 @@
     <action id="set-dead" scope="player">
         <set var="dead" value="1" />
     </action>
-    <action id="hide-tnt-moderator" scope="match">
-        <fill region="tnt-moderator-area" material="air" />
-    </action>
     <action id="place-tnt-moderator" scope="match">
-        <fill region="tnt-moderator-webs" material="web" />
-        <fill region="tnt-moderator-water" material="stationary water" />
+        <fill region="tnt-moderator-area" material="stationary water" />
     </action>
     <trigger filter="all(game_stage=0, any(is-dead-blue, is-dead-red))" scope="match" action="advance-game-stage" />
     <trigger filter="all(participating, game_stage=0, is-dead-blue, only-blue, switched=0)" scope="team" action="set-defending"/>
@@ -281,8 +256,7 @@
     <trigger filter="all(participating, game_stage=1, is-dead-offender, is_defending=0, switched=0)" scope="team" action="set-defending" />
     <trigger filter="all(switched=1, not(is-dead-offender))" scope="match" action="reset-switch" />
     <trigger filter="all(participating, not(alive))" scope="player" action="set-dead" />
-    <!-- Hide the TNT minecart moderation layer for aesthetical purposes -->
-    <trigger filter="always" scope="match" action="hide-tnt-moderator" />
+    <trigger filter="all(participating, match-running)" scope="team" action="sumo-time" />
     <trigger filter="game_stage=1" scope="match" action="place-tnt-moderator" />
 </actions>
 <hunger>
