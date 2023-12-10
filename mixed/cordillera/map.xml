@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Cordillera</name>
-<version>1.0.6</version>
+<version>1.1</version>
 <objective>Jump into the enemy team's portal, located below their spawn point!</objective>
 <created>2023-09-02</created>
 <include id="bridge"/>
@@ -26,7 +26,8 @@
 </authors>
 <broadcasts>
     <alert after="1s" every="5m" filter="broadcast-filter">`3If an enemy's `fmonument`3 is broken, an `nextra lane`3 that goes directly to their portal will appear!</alert>
-    <tip after="2s" every="5m">`3Get `a1 Emerald`3 every `c2 kills`3 to buy items at spawn!</tip>
+    <tip after="2s" every="5m">`3Get `a1 emerald`3 every `c2 kills`3 to buy items at spawn, like `cgrenades`3 and `cpotions`3!</tip>
+    <tip after="10s" every="5m">`3Find the `6Sumo Arena`3 and compete against other players for `aemeralds`3!</tip>
 </broadcasts>
 <teams>
     <team id="team-one" color="dark green" max="32">Green</team>
@@ -49,16 +50,21 @@
 </kits>
 <filters>
     <any id="block-list">
-        <material>stained clay:13</material>
-        <material>stained clay:4</material>
+        <material id="green-clay">stained clay:13</material>
+        <material id="yellow-clay">stained clay:4</material>
         <material>stained clay:0</material>
-        <material>glass</material>
-        <material>thin glass</material>
-        <material>snow</material>
-        <material>long grass</material>
-        <material>double plant:3</material>
-        <material>double plant:2</material>
-        <material>gold block</material>
+        <all>
+            <any>
+                <material>snow</material>
+                <material>long grass</material>
+                <material>double plant:3</material>
+                <material>double plant:2</material>
+                <material>gold block</material>
+            </any>
+            <not>
+                <cause>explosion</cause>
+            </not>
+        </all>
     </any>
     <deny id="deny-physics">
         <any>
@@ -117,7 +123,7 @@
     <cylinder id="team-one-portal" base="-98.5,61,0.5" height="1" radius="3.5"/>
     <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
     <union id="outside-portal">
-        <block id="team-one-outside-portal">-62,54,0</block>
+        <block id="team-one-outside-portal">-62,55,0</block>
         <mirror region="team-one-outside-portal" origin="${map-origin}" normal="1,0,0"/>
     </union>
     <!-- Round cages -->
@@ -152,6 +158,12 @@
     <point id="green-south">${green-south}</point>
     <point id="yellow-north">${yellow-north}</point>
     <point id="yellow-south">${yellow-south}</point>
+    <union id="sumo-spawn-areas">
+        <cylinder id="green-sumo-area" base="-24.5,93,64.5" height="oo" radius="8"/>
+        <cylinder id="yellow-sumo-area" base="23.5,93,64.5" height="oo" radius="8"/>
+    </union>
+    <apply enter="only-team-one" region="green-sumo-area" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-team-two" region="yellow-sumo-area" message="You may not enter the enemy's spawn!"/>
 </regions>
 <destroyables materials="gold block" completion="100%" required="false" show-progress="true">
     <destroyable id="green-monument" owner="team-one" name="Green Monument">
@@ -161,26 +173,49 @@
         <region><cuboid min="41,77,-1" size="3,3,3"/></region>
     </destroyable>
 </destroyables>
+<projectiles>
+    <projectile
+        id="vitGrenade"
+        name="Vitamin Industries Grenade"
+        projectile="LargeFireball"
+        velocity="1.5"
+        click="right"
+        power="4"
+        damage="8"
+        throwable="true"
+        cooldown="4s"/>
+</projectiles>
 <shops>
     <shop id="zzuf-shop" name="`f`lCdlla. Incognita Gift Shop">
         <category id="bridge" name="`eBridging Supplies" material="159">
             <item name="`9Mont Blanc `fSnowball" material="snow ball" lore="`8Collected from the Mont Blanc Grand Prix race track." amount="6" price="1" currency="emerald" prevent-sharing="true"/>
-            <item name="`fiCarus Blade" damage="59" material="wood sword" lore="`9ⓘ `7Enchanted with Knockback II." amount="1" price="2" currency="emerald" prevent-sharing="true">
+            <item filter="only-team-one" name="`2Sharpshooter" material="monster egg" damage="51" lore="`9ⓘ `7Spawns a `fSkeleton`7!" amount="2" price="4" currency="emerald" prevent-sharing="true" show-can-place-on="false">
+                <can-place-on>
+                    <all-blocks/>
+                </can-place-on>
+            </item>
+            <item filter="only-team-two" name="`eSharpshooter" material="monster egg" damage="51" lore="`9ⓘ `7Spawns a `fSkeleton`7!" amount="2" price="4" currency="emerald" prevent-sharing="true" show-can-place-on="false">
+                <can-place-on>
+                    <all-blocks/>
+                </can-place-on>
+            </item>
+            <item name="`aVitamin Industries Grenade" material="fireball" lore="`9ⓘ `7Destroys `fStained Clay`7/`fTerracotta`7 and damages players." amount="1" price="3" currency="emerald" prevent-sharing="true" projectile="vitGrenade"/>
+            <item name="`fiCarus Blade" damage="55" material="wood sword" lore="`9ⓘ `7Enchanted with Knockback II. `f5`7 uses!" amount="1" price="2" currency="emerald" prevent-sharing="true">
                 <enchantment level="2">knockback</enchantment>
             </item>
-            <item name="`bThe Motörhead `f(Speed II)" damage="2" material="potion" lore="`9ⓘ `7Speed II for `f10`7 seconds.||`8Parallelogram." amount="1" price="5" currency="emerald" prevent-sharing="true">
-                <effect duration="10s" amplifier="2">speed</effect>
+            <item name="`bThe Motörhead `f(Speed II)" damage="2" material="potion" lore="`9ⓘ `7Speed II for `f20`7 seconds.||`8Parallelogram." amount="1" price="3" currency="emerald" prevent-sharing="true">
+                <effect duration="20s" amplifier="2">speed</effect>
             </item>
-            <item name="`aChartreuse `f(Jump Boost II)" damage="11" material="potion" lore="`9ⓘ `7Jump Boost II for `f15`7 seconds." amount="1" price="5" currency="emerald" prevent-sharing="true">
+            <item name="`aChartreuse `f(Jump Boost II)" damage="11" material="potion" lore="`9ⓘ `7Jump Boost II for `f15`7 seconds." amount="1" price="3" currency="emerald" prevent-sharing="true">
                 <effect duration="15s" amplifier="2">jump_boost</effect>
             </item>
-            <item name="`4Cognac `f(Strength I)" damage="9" material="potion" lore="`9ⓘ `7Strength I for `f15`7 seconds." amount="1" price="5" currency="emerald" prevent-sharing="true">
+            <item name="`4Cognac `f(Strength I)" damage="9" material="potion" lore="`9ⓘ `7Strength I for `f15`7 seconds." amount="1" price="3" currency="emerald" prevent-sharing="true">
                 <effect duration="15s">strength</effect>
             </item>
-            <item name="`6Sagojn `fBow" damage="384" material="bow" lore="`9ⓘ `7Enchanted with Punch II." amount="1" price="7" currency="emerald" prevent-sharing="true">
+            <item name="`6Sagojn `fBow" damage="375" material="bow" lore="`9ⓘ `7Enchanted with Punch II. `f10`7 uses!" amount="1" price="5" currency="emerald" prevent-sharing="true">
                 <enchantment level="2">punch</enchantment>
             </item>
-            <item name="`eBroken Crown" damage="77" material="gold helmet" lore="`9ⓘ `7Use this to show off your wealth!" amount="1" price="12" currency="emerald" prevent-sharing="true">
+            <item name="`eBroken Crown" damage="77" material="gold helmet" lore="`9ⓘ `7Use this to show off your wealth!||`8Very damaged!" amount="1" price="10" currency="emerald" prevent-sharing="true">
                 <enchantment level="4">protection environmental</enchantment>
             </item>
         </category>
@@ -273,6 +308,14 @@
                 <find material="gold helmet"/>
                 <replace material="air"/>
             </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="monster egg"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="fireball"/>
+                <replace material="air"/>
+            </replace-item>
             <kit id="adventure-kit"/>
             <message text=" `e⚠ `cYour weapons have been removed!"/>
             <sound preset="death_other"/>
@@ -317,11 +360,17 @@
     <item>wood sword</item>
     <item>potion</item>
     <item>snow ball</item>
+    <item>bow</item>
+    <item>monster egg</item>
+    <item>fireball</item>
 </itemkeep>
 <itemremove>
     <item>seeds</item>
     <item>double plant</item>
     <item>147</item>
     <item>gold block</item>
+    <item>bone</item>
+    <item>coal</item>
+    <item>skull item</item>
 </itemremove>
 </map>
