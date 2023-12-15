@@ -1,7 +1,7 @@
 <map proto="1.4.2">
 <name>Player Blender</name>
 <variant id="lifesteal">Lifesteal</variant>
-<version>1.0.5</version>
+<version>1.0.6</version>
 <phase>development</phase>
 <unless variant="lifesteal">
     <objective>Eliminate the enemy teams!</objective>
@@ -69,7 +69,26 @@
         <helmet unbreakable="true" team-color="true" material="leather helmet" locked="true"/>
         <game-mode>adventure</game-mode>
     </kit>
+    <kit id="wither-kit" force="true">
+        <health>1</health>
+        <clear effects="true" items="false" armor="false"/>
+        <effect>wither</effect>
+    </kit>
 </kits>
+<filters>
+    <after id="after-spawn" duration="4s">
+        <all>
+            <any>
+                <region id="red-spawn-area"/>
+                <region id="blue-spawn-area"/>
+                <region id="green-spawn-area"/>
+                <region id="yellow-spawn-area"/>
+            </any>
+            <alive/>
+            <participating/>
+        </all>
+    </after>
+</filters>
 <regions>
     <apply block="never" use="never"/>
     <!-- spawns -->
@@ -88,6 +107,13 @@
     <apply velocity="0,0.5,-5" region="green-pad"/>
     <apply velocity="0,0.5,5" region="yellow-pad"/>
     <apply velocity="0,2.5,0" region="center-pad"/>
+    <!-- spawn areas -->
+    <union id="spawn-areas">
+        <rectangle id="red-spawn-area" min="-33,6" max="-25,-3"/>
+        <mirror id="blue-spawn-area" region="red-spawn-area" origin="0.5,0,1.5" normal="1,0,0"/>
+        <mirror id="green-spawn-area" region="red-spawn-area" origin="0.5,0,1.5" normal="1,0,1"/>
+        <mirror id="yellow-spawn-area" region="red-spawn-area" origin="0.5,0,1.5" normal="1,0,-1"/>
+    </union>
     <!-- misc -->
     <complement id="outside-blender">
         <below y="52"/>
@@ -95,6 +121,13 @@
     </complement>
     <apply kit="void-death" region="outside-blender"/>
 </regions>
+<actions>
+    <trigger filter="after-spawn" scope="player">
+        <action scope="player">
+            <kit id="wither-kit"/>
+        </action>
+    </trigger>
+</actions>
 <portals sound="false" observers="never">
     <portal y="@-110" region="outside-blender"/>
 </portals>
