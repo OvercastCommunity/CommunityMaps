@@ -1,12 +1,13 @@
 <map proto="1.4.2" game="Wins">
 <name>The Grand Dueling Tournament II</name>
-<version>2.3.2</version>
+<version>2.3.3</version>
 <objective>Win the tournament.</objective>
 <phase>development</phase>
 <variant id="spleef" world="spleef" override="true">The Grand Spleefing Tournament II</variant>
 <variant id="cannon" world="cannon" override="true">The Grand Cannoning Tournament II</variant>
 <constant id="tournament-type">Dueling</constant>
 <constant id="tournament-action">fight</constant>
+<constant id="kit-count">13</constant>
 <constant id="kit-0-name">`bIron</constant>
 <constant id="kit-1-name">`6Gold</constant>
 <constant id="kit-2-name">`bSlappy Fish</constant>
@@ -25,6 +26,7 @@
 <if variant="spleef">
     <constant id="tournament-type">Spleefing</constant>
     <constant id="tournament-action">spleef</constant>
+    <constant id="kit-count">5</constant>
     <constant id="kit-0-name">`bClassic</constant>
     <constant id="kit-1-name">`aBuild</constant>
     <constant id="kit-2-name">`cGrenade</constant>
@@ -109,7 +111,7 @@
     <kit id="survival-kit" force="true">
         <game-mode>survival</game-mode>
     </kit>
-    <unless variant="spleef, cannon">
+    <if variant="default">
         <kit id="kit-0"> <!-- iron -->
             <item slot="0" material="iron sword" unbreakable="true"/>
             <item slot="1" material="bow" unbreakable="true"/>
@@ -232,6 +234,7 @@
             <boots material="diamond boots" damage="300">
                 <enchantment level="1">protection environmental</enchantment>
             </boots>
+            <effect amplifier="2">speed</effect>
             <action>
                 <set var="current_kill_reward" value="4"/>
             </action>
@@ -253,6 +256,7 @@
             <boots material="diamond boots" damage="300">
                 <enchantment level="3">protection environmental</enchantment>
             </boots>
+            <effect amplifier="2">speed</effect>
         </kit>
         <kit id="kit-9"> <!-- gunz -->
             <item slot="0" material="wood hoe" unbreakable="true" projectile="egg-gun" name="`rEgg Gun"/>
@@ -320,7 +324,7 @@
             <item slot="2" material="golden apple" amount="3" consumable="uhc-gapple"/>
             <item slot="28" material="arrow" amount="32"/>
         </kit>
-    </unless>
+    </if>
     <if variant="spleef">
         <kit id="kit-0"> <!-- classic -->
             <item slot="0" material="diamond spade" unbreakable="true">
@@ -470,19 +474,19 @@
     <projectile id="egg-gun" name="Egg Gun" projectile="Egg" velocity="3.5" damage="1.5" throwable="false" cooldown="0s"/>
     <projectile id="tnt-gun" name="TNT Gun" projectile="TNTPrimed" velocity="2" damage="10" throwable="false" cooldown="3s"/>
 </projectiles>
-<unless variant="cannon">
+<if variant="default, spleef">
     <tnt>
         <instantignite>on</instantignite>
         <fuse>1.25s</fuse>
         <power>3</power>
     </tnt>
-</unless>
+</if>
 <hunger>
     <depletion>off</depletion>
 </hunger>
 <timelock>on</timelock>
 <kill-rewards>
-    <unless variant="spleef, cannon">
+    <if variant="default">
         <kill-reward filter="current_kill_reward=1">
             <item material="golden apple"/>
             <item material="arrow" amount="12"/>
@@ -516,7 +520,7 @@
             <item material="snow ball" amount="12" name="`rGrenade" grenade="true" grenade-power="1.2"/>
             <item material="potion" damage="8229"/>
         </kill-reward>
-    </unless>
+    </if>
     <if variant="spleef">
         <kill-reward filter="current_kill_reward=1">
             <item material="snow ball" amount="16"/>
@@ -542,11 +546,11 @@
 </kill-rewards>
 <damage>
     <deny>
-        <unless variant="spleef">
+        <if variant="default, cannon">
             <not>
                 <region id="all-arenas"/>
             </not>
-        </unless>
+        </if>
         <if variant="spleef">
             <any>
                 <cause>melee</cause>
@@ -561,11 +565,11 @@
     <damage ally="true" self="true" enemy="false" other="false">block explosion</damage>
 </disabledamage>
 <filters>
-    <unless variant="spleef, cannon">
+    <if variant="default">
         <all id="breakable-blocks">
             <never/>
         </all>
-    </unless>
+    </if>
     <if variant="spleef">
         <all id="breakable-blocks">
             <region id="all-arenas"/>
@@ -1414,10 +1418,10 @@
         <cuboid id="arena-4" min="49,-oo,-65"  max="12,25,128"/>
     </union>
     <union id="all-arena-spawns">
-        <unless variant="cannon">
+        <if variant="default, spleef">
             <point id="round-1-arena-1-spawn-1">162.5,11,-61.5</point>
             <point id="round-1-arena-1-spawn-2">162.5,11,-7.5</point>
-        </unless>
+        </if>
         <if variant="cannon">
             <point id="round-1-arena-1-spawn-1">162.5,11,-56.5</point>
             <point id="round-1-arena-1-spawn-2">162.5,11,-12.5</point>
@@ -1480,9 +1484,9 @@
         <cuboid id="arena-4-spectator" min="56,10,-65" max="49,18,128"/>
     </union>
     <apply region="lobby" use="never" block-place="allow-tnt" block-break="never"/>
-    <unless variant="cannon">
+    <if variant="default, spleef">
         <apply block-break="breakable-blocks"/>
-    </unless>
+    </if>
     <if variant="cannon">
         <union id="arena-bridges">
             <union id="round-1-bridges">
@@ -1510,96 +1514,56 @@
         <apply block="buildable-area"/>
     </if>
 </regions>
-<variables>
+<variables scope="match" default="0">
     <score id="score"/>
-    <variable id="round_1_kit" scope="match" default="0"/>
-    <variable id="round_2_kit" scope="match" default="0"/>
-    <variable id="round_3_kit" scope="match" default="0"/>
-    <variable id="announce_kit" scope="match" default="1"/>
-    <variable id="current_round" scope="match" default="0"/>
-    <variable id="current_kit" scope="match" default="0"/>
-    <variable id="current_kit_requires_survival" scope="player" default="0"/>
-    <variable id="current_kill_reward" scope="player" default="0"/>
-    <variable id="t" scope="match"/>
-    <variable id="k0" scope="match"/>
-    <variable id="k1" scope="match"/>
-    <variable id="k2" scope="match"/>
-    <variable id="k3" scope="match"/>
-    <variable id="k4" scope="match"/>
-    <variable id="k5" scope="match"/>
-    <variable id="k6" scope="match"/>
-    <variable id="k7" scope="match"/>
-    <variable id="k8" scope="match"/>
-    <variable id="k9" scope="match"/>
-    <variable id="k10" scope="match"/>
-    <variable id="k11" scope="match"/>
-    <variable id="k12" scope="match"/>
+    <array id="kit" size="${kit-count}"/>
+    <variable id="temp"/>
+    <variable id="index"/>
+    <variable id="min_index"/>
+    <variable id="round_1_kit"/>
+    <variable id="round_2_kit"/>
+    <variable id="round_3_kit"/>
+    <variable id="announce_kit" default="1"/>
+    <variable id="current_round"/>
+    <variable id="current_kit"/>
+    <variable id="current_kit_requires_survival" scope="player"/>
+    <variable id="current_kill_reward" scope="player"/>
 </variables>
 <actions>
     <!--
     kit decider
     cheers, Pablo
     -->
-    <trigger scope="match" filter="always">
-        <action>
-            <set var="k0" value="random()"/>
-            <set var="k1" value="random()"/>
-            <set var="k2" value="random()"/>
-            <set var="k3" value="random()"/>
-            <set var="k4" value="random()"/>
-            <set var="k5" value="random()"/>
-            <set var="k6" value="random()"/>
-            <set var="k7" value="random()"/>
-            <set var="k8" value="random()"/>
-            <set var="k9" value="random()"/>
-            <set var="k10" value="random()"/>
-            <set var="k11" value="random()"/>
-            <set var="k12" value="random()"/>
-            <action id="pick-unique-kit"/>
-            <set var="round_1_kit" value="t"/>
-            <action id="pick-unique-kit"/>
-            <set var="round_2_kit" value="t"/>
-            <action id="pick-unique-kit"/>
-            <set var="round_3_kit" value="t"/>
-        </action>
-    </trigger>
-    <action id="pick-unique-kit" scope="match">
-        <unless variant="spleef, cannon">
-            <set var="t" value="min(k0, k1, k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12)"/>
-        </unless>
-        <if variant="spleef">
-            <set var="t" value="min(k0, k1, k2, k3, k4)"/>
-        </if>
-        <if variant="cannon">
-            <set var="t" value="0"/>
-        </if>
-        <set var="k0" value="k0 - t"/>
-        <set var="k1" value="k1 - t"/>
-        <set var="k2" value="k2 - t"/>
-        <set var="k3" value="k3 - t"/>
-        <set var="k4" value="k4 - t"/>
-        <set var="k5" value="k5 - t"/>
-        <set var="k6" value="k6 - t"/>
-        <set var="k7" value="k7 - t"/>
-        <set var="k8" value="k8 - t"/>
-        <set var="k9" value="k9 - t"/>
-        <set var="k10" value="k10 - t"/>
-        <set var="k11" value="k11 - t"/>
-        <set var="k12" value="k12 - t"/>
-        <action filter="k0=0"><set var="k0" value="9"/><set var="t" value="0"/></action>
-        <action filter="k1=0"><set var="k1" value="9"/><set var="t" value="1"/></action>
-        <action filter="k2=0"><set var="k2" value="9"/><set var="t" value="2"/></action>
-        <action filter="k3=0"><set var="k3" value="9"/><set var="t" value="3"/></action>
-        <action filter="k4=0"><set var="k4" value="9"/><set var="t" value="4"/></action>
-        <action filter="k5=0"><set var="k5" value="9"/><set var="t" value="5"/></action>
-        <action filter="k6=0"><set var="k6" value="9"/><set var="t" value="6"/></action>
-        <action filter="k7=0"><set var="k7" value="9"/><set var="t" value="7"/></action>
-        <action filter="k8=0"><set var="k8" value="9"/><set var="t" value="8"/></action>
-        <action filter="k9=0"><set var="k9" value="9"/><set var="t" value="9"/></action>
-        <action filter="k10=0"><set var="k10" value="9"/><set var="t" value="10"/></action>
-        <action filter="k11=0"><set var="k11" value="9"/><set var="t" value="11"/></action>
-        <action filter="k12=0"><set var="k12" value="9"/><set var="t" value="12"/></action>
-    </action>
+    <if variant="default, spleef">
+        <trigger scope="match" filter="always">
+            <action>
+                <action id="init" filter="all(index=0..${kit-count}, not(index=${kit-count}))">
+                    <set var="kit" index="index" value="random()"/>
+                    <set var="index" value="index + 1"/>
+                    <action id="init"/>
+                </action>
+                <action id="pick-next-kit">
+                    <set var="index" value="1"/>
+                    <set var="min_index" value="0"/>
+                    <action id="search" filter="all(index=0..${kit-count}, not(index=${kit-count}))">
+                        <set var="temp" value="kit[min_index] - kit[index]"/>
+                        <action filter="temp=0..">
+                            <set var="min_index" value="index"/>
+                        </action>
+                        <set var="index" value="index + 1"/>
+                        <action id="search"/>
+                    </action>
+                </action>
+                <set var="round_1_kit" value="min_index"/>
+                <set var="kit" index="min_index" value="999"/>
+                <action id="pick-next-kit"/>
+                <set var="round_2_kit" value="min_index"/>
+                <set var="kit" index="min_index" value="999"/>
+                <action id="pick-next-kit"/>
+                <set var="round_3_kit" value="min_index"/>
+            </action>
+        </trigger>
+    </if>
     <!--
     pre-match introduction announcements
     -->
@@ -1618,7 +1582,7 @@
             <sound key="mob.villager.haggle"/>
         </action>
     </trigger>
-    <unless variant="cannon">
+    <if variant="default, spleef">
         <trigger scope="match">
             <filter>
                 <time>6s</time>
@@ -1665,7 +1629,7 @@
                 <sound key="mob.villager.haggle"/>
             </action>
         </trigger>
-    </unless>
+    </if>
     <if variant="cannon">
         <trigger scope="match">
             <filter>
@@ -1699,7 +1663,7 @@
                 <kit id="kit-0"/>
             </switch-scope>
         </action>
-        <unless variant="cannon">
+        <if variant="default, spleef">
             <action filter="current_kit=1">
                 <action filter="announce_kit=1">
                     <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-1-name}`r!"/>
@@ -1732,8 +1696,8 @@
                     <kit id="kit-4"/>
                 </switch-scope>
             </action>
-        </unless>
-        <unless variant="spleef, cannon">
+        </if>
+        <if variant="default">
             <action filter="current_kit=5">
                 <action filter="announce_kit=1">
                     <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-5-name}`r!"/>
@@ -1798,7 +1762,7 @@
                     <kit id="kit-12"/>
                 </switch-scope>
             </action>
-        </unless>
+        </if>
     </action>
     <action id="clear-kit-applicator" scope="match"> <!-- all references to this action come from a match scoped trigger -->
         <switch-scope inner="player" filter="participating">
@@ -1825,7 +1789,6 @@
     <trigger scope="match" filter="round-1-begin">
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Let The Grand ${tournament-type} Tournament begin!"/>
-            <sound key="mob.enderdragon.growl" volume="1.2" pitch="0.8"/>
             <set var="current_round" value="1"/>
             <action id="kit-applicator"/>
         </action>
@@ -1841,7 +1804,6 @@
     <trigger scope="match" filter="round-2-begin">
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Aaaaand fight!"/>
-            <sound key="mob.enderdragon.growl" volume="1.2" pitch="0.8"/>
             <set var="current_round" value="2"/>
             <action id="kit-applicator"/>
         </action>
@@ -1857,7 +1819,6 @@
     <trigger scope="match" filter="round-3-begin">
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: May the best team win!"/>
-            <sound key="mob.enderdragon.growl" volume="1.2" pitch="0.8"/>
             <set var="current_round" value="3"/>
             <action id="kit-applicator"/>
         </action>
