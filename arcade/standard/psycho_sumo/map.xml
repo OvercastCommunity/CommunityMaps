@@ -1,0 +1,106 @@
+<map proto="1.4.2">
+<name>Psycho Sumo</name>
+<version>1.0</version>
+<phase>development</phase>
+<unless variant="lifesteal">
+    <objective>Get the highest amount of kills, or stand on the Emerald blocks at the center for 20 seconds to win!</objective>
+</unless>
+<if variant="lifesteal">
+    <objective>Eliminate all players, or stand on the Emerald blocks at the center for 20 seconds to win! You get extra lives when you get kills!</objective>
+</if>
+<created>2024-01-21</created>
+<maxbuildheight>24</maxbuildheight>
+<include id="item-sumo"/>
+<constants>
+    <constant id="map-origin">-77.5,-56.5</constant>
+    <constant id="item-spawn-point">-77.5,6,-56.5</constant>
+</constants>
+<authors>
+    <author uuid="f34625ab-8f27-4cb5-8424-671fa82d4033"/> <!-- Nidho0gg -->
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
+</authors>
+<broadcasts>
+    <alert after="2s">The glass platform will dissapear in 3...</alert>
+    <alert after="3s">The glass platform will dissapear in 2...</alert>
+    <alert after="4s">The glass platform will dissapear in 1...</alert>
+    <alert after="5s">The glass platform has dissapeared!</alert>
+</broadcasts>
+<players max="24" colors="true"/>
+<spawns>
+    <spawn kit="spawn-kit" spread="true" safe="true" filter="initial-spawns">
+        <region angle="-77.5,14,-56.5">
+            <cylinder base="-77.5,44,-56.5" height="0" radius="40.5"/>
+        </region>
+    </spawn>
+    <spawn kit="spawn-kit" spread="true" filter="later-spawns">
+        <regions angle="-77.5,10,-56.5">
+            <point>-108.5,9,-56.5</point>
+            <point>-101.5,9,-80.5</point>
+            <point>-77.5,9,-87.5</point>
+            <point>-101.5,9,-32.5</point>
+            <point>-77.5,9,-25.5</point>
+            <point>-53.5,9,-32.5</point>
+            <point>-46.5,9,-56.5</point>
+            <point>-53.5,9,-80.5</point>
+        </regions>
+    </spawn>
+    <default kit="night-vision-kit">
+        <region yaw="-45">
+            <point>-77.5,50,-56.5</point>
+        </region>
+    </default>
+</spawns>
+<kits>
+    <kit id="night-vision-kit">
+        <effect>night vision</effect>
+    </kit>
+    <give kit="night-vision-kit">
+        <filter>
+            <alive/>
+        </filter>
+    </give>
+</kits>
+<filters>
+    <material id="only-glass">stained glass</material>
+    <all id="initial-spawns">
+        <match-started/>
+        <not>
+            <filter id="later-spawns"/>
+        </not>
+    </all>
+    <time id="later-spawns">4s</time>
+    <time id="platform-delete">5s</time>
+</filters>
+<regions>
+    <cylinder id="platform" base="-77.5,43,-56.5" radius="40.5" height="1"/>
+    <circle id="playable-area" center="${map-origin}" radius="38.5"/>
+    <union id="center-region">
+        <block>-78,6,-58</block>
+        <block>-77,6,-57</block>
+        <block>-78,6,-57</block>
+        <block>-78,6,-56</block>
+        <block>-79,6,-57</block>
+    </union>
+    <union id="spawn-areas">
+        <cylinder base="-108.5,9,-56.5" height="2" radius="0.5"/>
+        <cylinder base="-101.5,9,-80.5" height="2" radius="0.5"/>
+        <cylinder base="-77.5,9,-87.5" height="2" radius="0.5"/>
+        <cylinder base="-101.5,9,-32.5" height="2" radius="0.5"/>
+        <cylinder base="-77.5,9,-25.5" height="2" radius="0.5"/>
+        <cylinder base="-53.5,9,-32.5" height="2" radius="0.5"/>
+        <cylinder base="-46.5,9,-56.5" height="2" radius="0.5"/>
+        <cylinder base="-53.5,9,-80.5" height="2" radius="0.5"/>
+    </union>
+    <apply block="never" region="spawn-areas" message="You may not place blocks in spawn areas"/>
+</regions>
+<actions>
+    <trigger scope="match" filter="platform-delete">
+        <action>
+            <fill material="air" region="platform" filter="only-glass"/>
+        </action>
+    </trigger>
+</actions>
+<world>
+    <timeset>18000</timeset>
+</world>
+</map>
