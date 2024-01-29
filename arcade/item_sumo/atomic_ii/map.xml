@@ -1,0 +1,143 @@
+<map proto="1.4.2">
+<name>Atomic II</name>
+<version>1.0</version>
+<unless variant="lifesteal">
+    <objective>Get the highest amount of kills, or stand on the Emerald blocks for 20 seconds to win!</objective>
+</unless>
+<if variant="lifesteal">
+    <objective>Eliminate all players, or stand on the Emerald blocks for 20 seconds to win! You get extra lives when you get kills!</objective>
+</if>
+<created>2024-01-29</created>
+<maxbuildheight>84</maxbuildheight>
+<include id="item-sumo"/>
+<constants>
+    <constant id="item-spawn-point">0,66.25,0</constant>
+    <constant id="void-plane">55</constant>
+    <constant id="hill-name">Point A</constant>
+</constants>
+<authors>
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
+</authors>
+<players max="18" colors="true"/>
+<spawns>
+    <spawn kit="spawn-kit" spread="true">
+        <regions>
+            <!-- A -->
+            <point angle="19,72,-19">-11.5,71,-27.5</point>
+            <point angle="19,72,-19">-3.5,71,-41.5</point>
+            <point angle="19,72,-19">10.5,71,-49.5</point>
+            <point angle="19,72,-19">27.5,71,-49.5</point>
+            <point angle="19,72,-19">41.5,71,-41.5</point>
+            <point angle="19,72,-19">49.5,71,-27.5</point>
+            <point angle="19,72,-19">49.5,71,-10.5</point>
+            <point angle="19,72,-19">41.5,71,3.5</point>
+            <point angle="19,72,-19">27.5,71,11.5</point>
+            <!-- B -->
+            <point angle="-19,72,19">11.5,71,27.5</point>
+            <point angle="-19,72,19">3.5,71,41.5</point>
+            <point angle="-19,72,19">-10.5,71,49.5</point>
+            <point angle="-19,72,19">-27.5,71,49.5</point>
+            <point angle="-19,72,19">-41.5,71,41.5</point>
+            <point angle="-19,72,19">-49.5,71,27.5</point>
+            <point angle="-19,72,19">-49.5,71,10.5</point>
+            <point angle="-19,72,19">-41.5,71,-3.5</point>
+            <point angle="-19,72,19">-27.5,71,-11.5</point>
+        </regions>
+    </spawn>
+    <default>
+        <regions angle="0,98,0">
+            <cylinder base="30,97,30" height="0" radius="2.5"/>
+            <cylinder base="-30,97,-30" height="0" radius="2.5"/>
+        </regions>
+    </default>
+</spawns>
+<filters>
+    <material id="lamp">124</material>
+    <countdown duration="${hill-capture-time}" message="`fA player is `ccapturing`f the Point B hill! `b{0} left">
+        <players min="1" max="1">
+            <region id="point-b-region"/>
+        </players>
+    </countdown>
+</filters>
+<regions>
+    <complement id="playable-area">
+        <union>
+            <circle center="19,-19" radius="38"/>
+            <circle center="-19,19" radius="38"/>
+        </union>
+        <region id="spawn-areas"/>
+        <below y="60"/>
+        <above y="93"/>
+    </complement>
+    <cuboid id="center-region" min="18,66,-18" max="20,67,-20"/> <!-- Point A -->
+    <cuboid id="point-b-region" min="-20,66,20" max="-18,67,18"/> <!-- Point B -->
+    <union id="point-b-blocks">
+        <translate offset="0,-1,0"><region id="point-b-region"/></translate>
+        <translate offset="0,-2,0"><region id="point-b-region"/></translate>
+    </union>
+    <apply enter="never" region="point-b-blocks"/>
+    <union id="spawn-areas">
+        <cylinder base="-11.5,71,-27.5" height="2" radius="0.5"/>
+        <cylinder base="-3.5,71,-41.5" height="2" radius="0.5"/>
+        <cylinder base="10.5,71,-49.5" height="2" radius="0.5"/>
+        <cylinder base="27.5,71,-49.5" height="2" radius="0.5"/>
+        <cylinder base="41.5,71,-41.5" height="2" radius="0.5"/>
+        <cylinder base="49.5,71,-27.5" height="2" radius="0.5"/>
+        <cylinder base="49.5,71,-10.5" height="2" radius="0.5"/>
+        <cylinder base="41.5,71,3.5" height="2" radius="0.5"/>
+        <cylinder base="27.5,71,11.5" height="2" radius="0.5"/>
+        <cylinder base="11.5,71,27.5" height="2" radius="0.5"/>
+        <cylinder base="3.5,71,41.5" height="2" radius="0.5"/>
+        <cylinder base="-10.5,71,49.5" height="2" radius="0.5"/>
+        <cylinder base="-27.5,71,49.5" height="2" radius="0.5"/>
+        <cylinder base="-41.5,71,41.5" height="2" radius="0.5"/>
+        <cylinder base="-49.5,71,27.5" height="2" radius="0.5"/>
+        <cylinder base="-49.5,71,10.5" height="2" radius="0.5"/>
+        <cylinder base="-41.5,71,-3.5" height="2" radius="0.5"/>
+        <cylinder base="-27.5,71,-11.5" height="2" radius="0.5"/>
+    </union>
+    <apply leave="never">
+        <region>
+            <negative>
+                <union>
+                    <circle center="50,-50" radius="9"/>
+                    <circle center="50,50" radius="9"/>
+                    <circle center="-50,-50" radius="9"/>
+                    <circle center="-50,50" radius="9"/>
+                    <above y="93"/>
+                </union>
+            </negative>
+        </region>
+    </apply>
+    <apply block-physics="deny(lamp)"/>
+</regions>
+<control-points capture-rule="exclusive" show-progress="true">
+    <control-point name="Point B" capture-time="${hill-capture-time}">
+        <capture><region id="point-b-region"/></capture>
+    </control-point>
+</control-points>
+<renewables>
+    <renewable interval="10s" particles="false" sound="true" avoid-players="0">
+        <region>
+            <cylinder base="19,66.25,-19" radius="2.5" height="4"/> <!-- Point A -->
+        </region>
+        <renew-filter>
+            <material>air</material>
+        </renew-filter>
+        <replace-filter>
+            <material>wool</material>
+        </replace-filter>
+    </renewable>
+    <renewable interval="10s" particles="false" sound="true" avoid-players="0">
+        <region>
+            <cylinder base="-19,66.25,19" radius="2.5" height="4"/> <!-- Point B -->
+        </region>
+        <renew-filter>
+            <material>air</material>
+        </renew-filter>
+        <replace-filter>
+            <material>wool</material>
+        </replace-filter>
+    </renewable>
+</renewables>
+</map>
