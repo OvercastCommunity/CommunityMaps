@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Procedural: Shroom Towers</name>
-<version>1.6.2</version>
+<version>1.6.3</version>
 <created>2023-09-06</created>
 <objective>Runners have 12 minutes to score 300 points. Towers must hold them back.</objective>
 <gamemode>Scorebox</gamemode>
@@ -113,7 +113,7 @@
         <effect duration="oo" amplifier="1">instant_damage</effect>
     </kit>
     <kit id="air-kit">
-        <item slot="5" amount="1" locked="true" material="166"/>
+        <item slot="5" amount="1" locked="true" material="barrier"/>
     </kit>
     <kit id="arrow-kit">
         <item slot="5" locked="true" material="arrow"/>
@@ -168,7 +168,7 @@
     <!-- <lend kit="speed-kit" filter="speed-lanes"/>-->
     <give kit="arrow-kit" filter="not-flying-and-at-shooting-height"/>
     <give kit="air-kit" filter="flying-and-in-game-area"/>
-    <give kit="air-kit" filter="below-shooting-height"/>
+    <give kit="air-kit" filter="all(below-shooting-height,playing)"/>
     <lend kit="poison-kit" filter="runner-on-grass"/>
 </kits>
 <shops>
@@ -246,8 +246,7 @@
     <cuboid id="on-grass" min="-5,6,0" max="75,12,150"/>
     <cuboid id="blue-ground-left" min="0,0,0" max="35,9,150"/>
     <cuboid id="blue-ground-right" min="35,0,0" max="70,9,150"/>
-    <apply block-break="breakable" region="everywhere"/>
-    <apply block-break="never" block-place="never" region="everywhere"/>
+    <apply block-break="breakable" block-place="never"/>
     <!-- apply generation -->
     <cuboid id="fill-cuboid" min="5,11,15" size="5,2,5"/>
     <apply block="participating"/>
@@ -271,7 +270,7 @@
     </any>
     <all id="not-flying-and-at-shooting-height">
         <not><flying/></not>
-        <participating/>
+        <participating id="playing"/>
         <region id="shooting-height"/>
     </all>
     <all id="flying-and-in-game-area">
@@ -279,12 +278,10 @@
         <participating/>
         <region id="game-area"/>
     </all>
-
     <all id="runner-on-grass">
         <team>runners</team>
         <region id="on-grass"/>
     </all>
-
     <team id="only-red">towers</team>
     <team id="only-blue">runners</team>
     <!-- Allows when the t_score variable is greater than or equal to 100 -->
@@ -1967,6 +1964,9 @@
 <disabledamage>
     <damage>fall</damage>
 </disabledamage>
+<gamerules>
+    <doTileDrops>false</doTileDrops>
+</gamerules>
 <broadcasts>
     <alert after="0s" every="3m">`cTowers `fcan only shoot from Mushroom platforms, and can `bFly</alert>
     <alert after="1s" every="3m">`9Runners `fhave to make it across to score</alert>
