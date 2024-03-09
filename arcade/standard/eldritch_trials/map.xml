@@ -1,6 +1,6 @@
 <map proto="1.4.2" game="Humanity">
 <name>Eldritch Trials</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Restore your humanity and survive the onslaught of beasts the longest!</objective>
 <created>2024-03-07</created>
 <phase>development</phase>
@@ -229,7 +229,7 @@
     </projectile>
 </projectiles>
 <shops>
-    <shop id="wrath-shop" name="`cWorships">
+    <shop id="wrath-shop" name="Worships">
         <category id="worships" name="`rcWorships" material="blaze powder">
             <item filter="all(is_human=0, not(wrath_kit=0), wrath_kit_level=0)" material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 0 -> 1)">
                 <payment price="4" currency="blaze powder"/>
@@ -280,9 +280,9 @@
     <participating id="participating"/>
     <alive id="alive"/>
     <after id="delayed-alive" filter="alive" duration="0.1s"/>
-    <time id="finalise-humans">0.1s</time>
-    <time id="finalise-humans-timeout">0.5s</time>
-    <players id="count-sm" filter="participating" min="1" max="9"/>
+    <time id="finalise-humans">0.2s</time>
+    <time id="finalise-humans-timeout">1s</time>
+    <players id="count-sm" filter="participating" max="9"/>
     <players id="count-md" filter="participating" min="10" max="19"/>
     <players id="count-lg" filter="participating" min="20" max="29"/>
     <players id="count-xl" filter="participating" min="30"/>
@@ -327,18 +327,24 @@
     <!--
       Teams
     -->
-    <trigger scope="player" filter="all(match-started, participating)">
-        <action>
-            <set var="start_human_sm" value="1"/>
-            <set var="start_human_md" value="1"/>
-            <set var="start_human_lg" value="1"/>
-            <set var="start_human_xl" value="1"/>
+    <action id="random-humans" scope="player">
+        <set var="start_human_sm" value="1"/>
+        <set var="start_human_md" value="1"/>
+        <set var="start_human_lg" value="1"/>
+        <set var="start_human_xl" value="1"/>
+    </action>
+    <action id="distribute-humans" scope="player">
+        <action filter="any(all(count-sm, start_human_sm=1), all(count-md, start_human_md=1), all(count-lg, start_human_lg=1), all(count-xl, start_human_xl=1))">
+            <action id="become-human"/>
         </action>
-    </trigger>
-    <trigger scope="player" filter="all(not(finalise-humans), participating, any(all(count-sm, start_human_sm=1), all(count-md, start_human_md=1), all(count-lg, start_human_lg=1), all(count-xl, start_human_xl=1)))" action="become-human"/>
-    <trigger scope="player" filter="all(finalise-humans, participating, is_human=0)">
+    </action>
+    <trigger scope="player" filter="all(match-started, participating)" action="random-humans"/>
+    <trigger scope="player" filter="all(match-started, participating, finalise-humans, not(finalise-humans-timeout))">
         <action>
-            <message text=" `7`oKill the human and take their place to restore your humanity..."/>
+            <action id="distribute-humans"/>
+            <action filter="is_human=0">
+                <message text=" `7`oKill the human and take their place to restore your humanity..."/>
+            </action>
         </action>
     </trigger>
     <action id="become-human" scope="player">
@@ -353,6 +359,7 @@
     <action id="become-wrath" scope="player">
         <set var="is_human" value="0"/>
         <message text=" `7`oYou are not yet free to die, but rise again as an abomination, deranged and delirious..."/>
+        <message text=" `7`oKill the human and take their place to restore your humanity..."/>
     </action>
     <!--
       Points
