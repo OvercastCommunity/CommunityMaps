@@ -1,6 +1,6 @@
-<map proto="1.4.2" game="Humanity">
+<map proto="1.4.2">
 <name>Eldritch Trials</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <objective>Restore your humanity and survive the onslaught of beasts the longest!</objective>
 <created>2024-03-07</created>
 <phase>development</phase>
@@ -25,7 +25,7 @@
             <point>-49.5,6,0.5</point>
         </regions>
     </spawn>
-    <default>
+    <default kit="obs-kit">
         <regions angle="0.5,18,0.5">
             <point>0.5,29,-47.5</point>
             <point>48.5,29.5,0.5</point>
@@ -35,12 +35,38 @@
     </default>
 </spawns>
 <kits>
+    <kit id="obs-kit">
+        <book show-other="false">
+            <title>`e`lHow to Play</title>
+            <author>mitchiii</author>
+            <pages>
+                <page>
+                    `2» `lELDRITCH TRIALS`0
+
+                    Kill the humans to
+                    become the new human.
+                    Earn points for every
+                    second you survive as
+                    a human.
+
+                    Beasts gain `cwrath`0 to
+                    upgrade their kits at
+                    the shopkeepers
+                    located next to each
+                    spawn portal.
+                </page>
+            </pages>
+        </book>
+    </kit>
+    <kit id="clear-effects">
+        <clear items="false" armor="false" effects="true"/>
+    </kit>
     <kit id="human-kit">
         <clear effects="true"/>
         <double-jump enabled="false"/>
         <effect duration="3">night vision</effect>
-        <effect duration="3" amplifier="3">speed</effect>
-        <effect duration="3" amplifier="3">strength</effect>
+        <effect duration="3" amplifier="2">speed</effect>
+        <effect duration="3" amplifier="1">strength</effect>
         <effect amplifier="2">resistance</effect>
         <health>20</health>
         <action filter="wrath_kit_level=0..">
@@ -92,10 +118,15 @@
         <effect>invisibility</effect>
         <effect>night vision</effect>
         <walk-speed>1.05</walk-speed>
+        <action filter="not(finalise-humans)">
+            <kit>
+                <effect duration="1">blindness</effect>
+            </kit>
+        </action>
         <action filter="all(wrath_kit=0, wrath_kit_level=0)">
             <kit force="true">
                 <item slot="0" material="wood sword" unbreakable="true"/>
-                <head name="Momot" uuid="00000000-0000-0000-0000-000000000000" slot="slot.armor.head">
+                <head name="Momot" uuid="00000000-0000-0000-0000-000000000000" slot="slot.armor.head" locked="true">
                     <skin>eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDdmY2ZhNWIwYWY4NTVmMzE0NjA2YTVjZDJiNTk3NDc1Mjg2YTE1MmQxZWUwOGQ5OTQ5YTYzODZjYmM0NmE4ZSJ9fX0=</skin>
                 </head>
                 <chestplate material="leather chestplate" unbreakable="true" locked="true" color="233e6d"/>
@@ -104,7 +135,7 @@
         <action filter="all(wrath_kit=1, wrath_kit_level=0..)">
             <kit force="true">
                 <item slot="0" material="stone sword" unbreakable="true"/>
-                <head name="Gholoth" uuid="00000000-0000-0000-0000-000000000001" slot="slot.armor.head">
+                <head name="Gholoth" uuid="00000000-0000-0000-0000-000000000001" slot="slot.armor.head" locked="true">
                     <skin>eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTU5OTExMzZiZWY2ZjdiMGQyMjNlZmZjYzhiYWI2YTdhMjZiNTk1OGFmZmU2ZWJkZmRiOTBlYTgxNGIwZjQ1MiJ9fX0=</skin>
                 </head>
                 <chestplate material="leather chestplate" unbreakable="true" locked="true" color="8c3e4c"/>
@@ -135,9 +166,11 @@
         <action filter="all(wrath_kit=2, wrath_kit_level=0..)">
             <kit force="true">
                 <item slot="0" material="wood sword" unbreakable="true"/>
-                <item slot="1" material="bow" unbreakable="true"/>
-                <item slot="7" material="arrow" amount="6"/>
-                <head name="Shrim" uuid="00000000-0000-0000-0000-000000000002" slot="slot.armor.head">
+                <item slot="1" material="bow" unbreakable="true">
+                    <enchantment>infinity</enchantment>
+                </item>
+                <item slot="9" material="arrow" amount="1"/>
+                <head name="Shrim" uuid="00000000-0000-0000-0000-000000000002" slot="slot.armor.head" locked="true">
                     <skin>eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjhjODljZDMzM2IwZmNiY2E4ODQyNDI1OTcyOWI4ODk1OWZhZThmODlhZjhkMGMxMjBlNjIxMDJkNTNjOWRiYiJ9fX0=</skin>
                 </head>
                 <chestplate material="leather chestplate" unbreakable="true" locked="true" color="96898b"/>
@@ -145,18 +178,23 @@
         </action>
         <action filter="all(wrath_kit=2, wrath_kit_level=1..)">
             <kit force="true">
-                <item slot="7" material="arrow" amount="12"/>
+                <item slot="1" material="bow" unbreakable="true">
+                    <enchantment>infinity</enchantment>
+                    <enchantment>power</enchantment>
+                </item>
+                <item slot="2" material="iron barding" projectile="wrath-2-lv-1-proj" amount="4" name="`rCrossbow" lore="`r`7Right-click to fire!"/>
                 <boots material="leather boots" unbreakable="true" locked="true" color="96898b"/>
             </kit>
         </action>
         <action filter="all(wrath_kit=2, wrath_kit_level=2..)">
             <kit force="true">
                 <item slot="1" material="bow" unbreakable="true">
-                    <enchantment>power</enchantment>
+                    <enchantment>infinity</enchantment>
+                    <enchantment level="2">power</enchantment>
                 </item>
-                <item slot="7" material="arrow" amount="16"/>
+                <item slot="2" material="iron barding" projectile="wrath-2-lv-1-proj" amount="16" name="`rCrossbow" lore="`r`7Right-click to fire!"/>
                 <chestplate material="leather chestplate" unbreakable="true" locked="true" color="96898b">
-                    <enchantment level="2">protection projectile</enchantment>
+                    <enchantment level="4">protection projectile</enchantment>
                 </chestplate>
                 <leggings material="leather leggings" unbreakable="true" locked="true" color="96898b"/>
             </kit>
@@ -165,7 +203,9 @@
             <kit force="true">
                 <item slot="0" material="stone sword" unbreakable="true"/>
                 <item slot="1" material="bow" unbreakable="true">
+                    <enchantment>infinity</enchantment>
                     <enchantment level="2">power</enchantment>
+                    <enchantment>flame</enchantment>
                 </item>
                 <effect>speed</effect>
             </kit>
@@ -173,8 +213,8 @@
         <action filter="all(wrath_kit=3, wrath_kit_level=0..)">
             <kit force="true">
                 <item slot="0" material="wood sword" unbreakable="true"/>
-                <item slot="1" material="snowball" amount="3" projectile="wrath-3-lv-0-proj"/>
-                <head name="Xophant" uuid="00000000-0000-0000-0000-000000000003" slot="slot.armor.head">
+                <item slot="1" material="snowball" name="`rWeb Ball" amount="3" projectile="wrath-3-lv-0-proj"/>
+                <head name="Xophant" uuid="00000000-0000-0000-0000-000000000003" slot="slot.armor.head" locked="true">
                     <skin>eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2Y3NmU0MDM4ZWY2ZDYxZjUyNGIxZWNkMDFiODJhYmE4MmY2MmZhNjNhNzgzMTlhM2RlYzQzMTdjNGQxMmJhNiJ9fX0=</skin>
                 </head>
                 <chestplate material="leather chestplate" unbreakable="true" locked="true" color="2a5e33"/>
@@ -191,6 +231,7 @@
         </action>
         <action filter="all(wrath_kit=3, wrath_kit_level=2..)">
             <kit force="true">
+                <item slot="0" material="stone sword" unbreakable="true"/>
                 <item slot="2" material="skull item" damage="1" amount="8" projectile="wrath-3-lv-2-proj"/>
                 <chestplate material="leather chestplate" unbreakable="true" locked="true" color="2a5e33">
                     <enchantment level="2">thorns</enchantment>
@@ -200,15 +241,12 @@
         </action>
         <action filter="all(wrath_kit=3, wrath_kit_level=3..)">
             <kit force="true">
-                <item slot="0" material="stone sword" unbreakable="true"/>
+                <item slot="1" material="ender pearl" name="`rTeleportation Web Ball" amount="3" projectile="wrath-3-lv-3-proj" grenade="true" grenade-power="3" grenade-fire="true" grenade-destroy="false"/>
                 <effect amplifier="2">speed</effect>
                 <effect>regeneration</effect>
                 <double-jump power="3.5" recharge-time="1s" recharge-before-landing="true"/>
             </kit>
         </action>
-    </kit>
-    <kit id="clear-effects">
-        <clear items="false" armor="false" effects="true"/>
     </kit>
 </kits>
 <kill-rewards>
@@ -220,6 +258,7 @@
     </kill-reward>
 </kill-rewards>
 <projectiles>
+    <projectile id="wrath-2-lv-1-proj" name="crossbow bolt" velocity="4" damage="20" throwable="true" cooldown="1.5s"/>
     <projectile id="wrath-3-lv-0-proj" name="web" projectile="Snowball" velocity="3" damage="5" throwable="true" cooldown="0">
         <effect duration="6s" amplifier="2">slowness</effect>
     </projectile>
@@ -227,17 +266,20 @@
     <projectile id="wrath-3-lv-2-proj" name="wrath" projectile="WitherSkull" velocity="5" damage="10" throwable="true" cooldown="0">
         <effect duration="2s">blindness</effect>
     </projectile>
+    <projectile id="wrath-3-lv-3-proj" name="web" projectile="EnderPearl" damage="20" throwable="true" cooldown="3">
+        <effect duration="6s" amplifier="3">slowness</effect>
+    </projectile>
 </projectiles>
 <shops>
     <shop id="wrath-shop" name="Worships">
-        <category id="worships" name="`rcWorships" material="blaze powder">
-            <item filter="all(is_human=0, not(wrath_kit=0), wrath_kit_level=0)" material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 0 -> 1)">
+        <category id="worships" name="`r`cWorships" material="blaze powder">
+            <item filter="all(is_human=0, not(wrath_kit=0), wrath_kit_level=0)" material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 0 -> 1)" lore="`r`7Increasing your devotion|`r`7upgrades your kit skills.|">
                 <payment price="4" currency="blaze powder"/>
             </item>
-            <item filter="all(is_human=0, not(wrath_kit=0), wrath_kit_level=1)" material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 1 -> 2)">
+            <item filter="all(is_human=0, not(wrath_kit=0), wrath_kit_level=1)" material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 1 -> 2)" lore="`r`7Increasing your devotion|`r`7upgrades your kit skills.|">
                 <payment price="8" currency="blaze powder"/>
             </item>
-            <item filter="all(is_human=0, not(wrath_kit=0), wrath_kit_level=2)" material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 2 -> 3)">
+            <item filter="all(is_human=0, not(wrath_kit=0), wrath_kit_level=2)" material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 2 -> 3)" lore="`r`7Increasing your devotion|`r`7upgrades your kit skills.|">
                 <payment price="12" currency="blaze powder"/>
             </item>
             <item filter="all(is_human=0, wrath_kit=0)" material="rotten flesh" name="`r`cWorship Gholoth">
@@ -249,13 +291,13 @@
             <item filter="all(is_human=0, wrath_kit=0)" material="fermented spider eye" name="`r`cWorship Xophant">
                 <payment price="2" currency="blaze powder"/>
             </item>
-            <item filter="all(is_human=0, not(any(wrath_kit=0, wrath_kit=1)))" material="rotten flesh" name="`r`6Change worship to `cGholoth">
+            <item filter="all(is_human=0, not(any(wrath_kit=0, wrath_kit=1)))" material="rotten flesh" name="`r`6Change Worship to `cGholoth" lore="`r`7Changing your worship will|`r`7give you a different kit.|">
                 <payment price="2" currency="blaze powder"/>
             </item>
-            <item filter="all(is_human=0, not(any(wrath_kit=0, wrath_kit=2)))" material="bone" name="`r`6Change worship to `cS'hrim">
+            <item filter="all(is_human=0, not(any(wrath_kit=0, wrath_kit=2)))" material="bone" name="`r`6Change Worship to `cS'hrim" lore="`r`7Changing your worship will|`r`7give you a different kit.|">
                 <payment price="2" currency="blaze powder"/>
             </item>
-            <item filter="all(is_human=0, not(any(wrath_kit=0, wrath_kit=3)))" material="fermented spider eye" name="`r`6Change worship to `cXophant">
+            <item filter="all(is_human=0, not(any(wrath_kit=0, wrath_kit=3)))" material="fermented spider eye" name="`r`6Change Worship to `cXophant" lore="`r`7Changing your worship will|`r`7give you a different kit.|">
                 <payment price="2" currency="blaze powder"/>
             </item>
         </category>
@@ -278,14 +320,16 @@
 <filters>
     <match-started id="match-started"/>
     <participating id="participating"/>
+    <observing id="observing"/>
     <alive id="alive"/>
     <after id="delayed-alive" filter="alive" duration="0.1s"/>
     <time id="finalise-humans">0.2s</time>
     <time id="finalise-humans-timeout">1s</time>
-    <players id="count-sm" filter="participating" max="9"/>
-    <players id="count-md" filter="participating" min="10" max="19"/>
-    <players id="count-lg" filter="participating" min="20" max="29"/>
-    <players id="count-xl" filter="participating" min="30"/>
+    <players id="count-xs" filter="participating" max="9"/>
+    <players id="count-sm" filter="participating" min="10" max="19"/>
+    <players id="count-md" filter="participating" min="20" max="29"/>
+    <players id="count-lg" filter="participating" min="30" max="39"/>
+    <players id="count-xl" filter="participating" min="40"/>
     <any id="allow-destruction">
         <material>torch</material>
         <material>dead bush</material>
@@ -306,7 +350,7 @@
 <regions>
     <cylinder id="human-spawn" base="0.5,8,0.5" height="1" radius="2"/>
     <apply block-break="allow-destruction" block-place="fire"/>
-    <apply leave="never" message="You may not leave the Trial!">
+    <apply leave="never" message="You may not leave the trial!">
         <region>
             <sphere origin="0.5,6,0.5" radius="52"/>
         </region>
@@ -314,10 +358,11 @@
 </regions>
 <variables scope="player">
     <score id="humanity"/>
-    <variable id="start_human_sm" exclusive="1"/>
-    <variable id="start_human_md" exclusive="2"/>
-    <variable id="start_human_lg" exclusive="3"/>
-    <variable id="start_human_xl" exclusive="5"/>
+    <variable id="start_human_xs" exclusive="1"/>
+    <variable id="start_human_sm" exclusive="2"/>
+    <variable id="start_human_md" exclusive="3"/>
+    <variable id="start_human_lg" exclusive="5"/>
+    <variable id="start_human_xl" exclusive="7"/>
     <variable id="is_human" default="0"/>
     <variable id="wrath" default="0"/>
     <variable id="wrath_kit" default="0"/>
@@ -328,13 +373,14 @@
       Teams
     -->
     <action id="random-humans" scope="player">
+        <set var="start_human_xs" value="1"/>
         <set var="start_human_sm" value="1"/>
         <set var="start_human_md" value="1"/>
         <set var="start_human_lg" value="1"/>
         <set var="start_human_xl" value="1"/>
     </action>
     <action id="distribute-humans" scope="player">
-        <action filter="any(all(count-sm, start_human_sm=1), all(count-md, start_human_md=1), all(count-lg, start_human_lg=1), all(count-xl, start_human_xl=1))">
+        <action filter="any(all(count-xs, start_human_xs=1), all(count-sm, start_human_sm=1), all(count-md, start_human_md=1), all(count-lg, start_human_lg=1), all(count-xl, start_human_xl=1))">
             <action id="become-human"/>
         </action>
     </action>
@@ -375,8 +421,8 @@
     <trigger scope="player">
         <filter>
             <all>
-                <time>10s</time>
-                <pulse duration="9s" period="10s" filter="all(participating, alive, is_human=0, wrath=..11)"/>
+                <time>8s</time>
+                <pulse duration="7s" period="8s" filter="all(participating, alive, is_human=0, wrath=..11)"/>
             </all>
         </filter>
         <action>
@@ -386,7 +432,7 @@
             <sound key="note.bass" pitch="0.3"/>
             <action filter="wrath=12">
                 <message text=" `e⚠ `aMaximum `cwrath `aobtained"/>
-                <message text=" `bSpend your Wrath at the shopkeeper for upgrades!"/>
+                <message text=" `bSpend your Wrath at the spawn portal shopkeepers for upgrades!"/>
             </action>
         </action>
     </trigger>
@@ -394,62 +440,62 @@
     <action id="update-wrath-count" scope="player">
         <action filter="wrath=1">
             <kit>
-                <item slot="8" locked="true" material="blaze powder" amount="1" name="`r`cWrath"/>
+                <item slot="8" locked="true" material="blaze powder" amount="1" name="`r`cWrath" lore="`r`7Spend `cwrath `r`7at the spawn portal|`r`7shopkeepers to upgrade your kit."/>
             </kit>
         </action>
         <action filter="wrath=2">
             <kit>
-                <item slot="8" locked="true" material="blaze powder" amount="2" name="`r`cWrath"/>
+                <item slot="8" locked="true" material="blaze powder" amount="2" name="`r`cWrath" lore="`r`7Spend `cwrath `r`7at the spawn portal|`r`7shopkeepers to upgrade your kit."/>
             </kit>
         </action>
         <action filter="wrath=3">
             <kit>
-                <item slot="8" locked="true" material="blaze powder" amount="3" name="`r`cWrath"/>
+                <item slot="8" locked="true" material="blaze powder" amount="3" name="`r`cWrath" lore="`r`7Spend `cwrath `r`7at the spawn portal|`r`7shopkeepers to upgrade your kit."/>
             </kit>
         </action>
         <action filter="wrath=4">
             <kit>
-                <item slot="8" locked="true" material="blaze powder" amount="4" name="`r`cWrath"/>
+                <item slot="8" locked="true" material="blaze powder" amount="4" name="`r`cWrath" lore="`r`7Spend `cwrath `r`7at the spawn portal|`r`7shopkeepers to upgrade your kit."/>
             </kit>
         </action>
         <action filter="wrath=5">
             <kit>
-                <item slot="8" locked="true" material="blaze powder" amount="5" name="`r`cWrath"/>
+                <item slot="8" locked="true" material="blaze powder" amount="5" name="`r`cWrath" lore="`r`7Spend `cwrath `r`7at the spawn portal|`r`7shopkeepers to upgrade your kit."/>
             </kit>
         </action>
         <action filter="wrath=6">
             <kit>
-                <item slot="8" locked="true" material="blaze powder" amount="6" name="`r`cWrath"/>
+                <item slot="8" locked="true" material="blaze powder" amount="6" name="`r`cWrath" lore="`r`7Spend `cwrath `r`7at the spawn portal|`r`7shopkeepers to upgrade your kit."/>
             </kit>
         </action>
         <action filter="wrath=7">
             <kit>
-                <item slot="8" locked="true" material="blaze powder" amount="7" name="`r`cWrath"/>
+                <item slot="8" locked="true" material="blaze powder" amount="7" name="`r`cWrath" lore="`r`7Spend `cwrath `r`7at the spawn portal|`r`7shopkeepers to upgrade your kit."/>
             </kit>
         </action>
         <action filter="wrath=8">
             <kit>
-                <item slot="8" locked="true" material="blaze powder" amount="8" name="`r`cWrath"/>
+                <item slot="8" locked="true" material="blaze powder" amount="8" name="`r`cWrath" lore="`r`7Spend `cwrath `r`7at the spawn portal|`r`7shopkeepers to upgrade your kit."/>
             </kit>
         </action>
         <action filter="wrath=9">
             <kit>
-                <item slot="8" locked="true" material="blaze powder" amount="9" name="`r`cWrath"/>
+                <item slot="8" locked="true" material="blaze powder" amount="9" name="`r`cWrath" lore="`r`7Spend `cwrath `r`7at the spawn portal|`r`7shopkeepers to upgrade your kit."/>
             </kit>
         </action>
         <action filter="wrath=10">
             <kit>
-                <item slot="8" locked="true" material="blaze powder" amount="10" name="`r`cWrath"/>
+                <item slot="8" locked="true" material="blaze powder" amount="10" name="`r`cWrath" lore="`r`7Spend `cwrath `r`7at the spawn portal|`r`7shopkeepers to upgrade your kit."/>
             </kit>
         </action>
         <action filter="wrath=11">
             <kit>
-                <item slot="8" locked="true" material="blaze powder" amount="11" name="`r`cWrath"/>
+                <item slot="8" locked="true" material="blaze powder" amount="11" name="`r`cWrath" lore="`r`7Spend `cwrath `r`7at the spawn portal|`r`7shopkeepers to upgrade your kit."/>
             </kit>
         </action>
         <action filter="wrath=12">
             <kit>
-                <item slot="8" locked="true" material="blaze powder" amount="12" name="`r`cWrath"/>
+                <item slot="8" locked="true" material="blaze powder" amount="12" name="`r`cWrath" lore="`r`7Spend `cwrath `r`7at the spawn portal|`r`7shopkeepers to upgrade your kit."/>
             </kit>
         </action>
     </action>
@@ -463,7 +509,7 @@
                     <item material="rotten flesh" name="`r`cWorship Gholoth"/>
                 </carrying>
                 <carrying>
-                    <item material="rotten flesh" name="`r`6Change worship to `cGholoth"/>
+                    <item material="rotten flesh" name="`r`6Change Worship to `cGholoth" lore="`r`7Changing your worship will|`r`7give you a different kit.|"/>
                 </carrying>
             </any>
         </filter>
@@ -481,7 +527,7 @@
                     <item material="bone" name="`r`cWorship S'hrim"/>
                 </carrying>
                 <carrying>
-                    <item material="bone" name="`r`6Change worship to `cS'hrim"/>
+                    <item material="bone" name="`r`6Change Worship to `cS'hrim" lore="`r`7Changing your worship will|`r`7give you a different kit.|"/>
                 </carrying>
             </any>
         </filter>
@@ -499,7 +545,7 @@
                     <item material="fermented spider eye" name="`r`cWorship Xophant"/>
                 </carrying>
                 <carrying>
-                    <item material="fermented spider eye" name="`r`6Change worship to `cXophant"/>
+                    <item material="fermented spider eye" name="`r`6Change Worship to `cXophant" lore="`r`7Changing your worship will|`r`7give you a different kit.|"/>
                 </carrying>
             </any>
         </filter>
@@ -514,13 +560,13 @@
         <filter>
             <any>
                 <carrying>
-                    <item material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 0 -> 1)"/>
+                    <item material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 0 -> 1)" lore="`r`7Increasing your devotion|`r`7upgrades your kit skills.|"/>
                 </carrying>
                 <carrying>
-                    <item material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 1 -> 2)"/>
+                    <item material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 1 -> 2)" lore="`r`7Increasing your devotion|`r`7upgrades your kit skills.|"/>
                 </carrying>
                 <carrying>
-                    <item material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 2 -> 3)"/>
+                    <item material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 2 -> 3)" lore="`r`7Increasing your devotion|`r`7upgrades your kit skills.|"/>
                 </carrying>
             </any>
         </filter>
@@ -608,6 +654,8 @@
     <item>wood</item>
     <item>wood step</item>
     <item>note block</item>
+    <item>iron barding</item>
+    <item>ender pearl</item>
 </itemremove>
 <hunger>
     <depletion>off</depletion>
