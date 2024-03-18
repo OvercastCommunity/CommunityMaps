@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Avant Garde</name>
-<version>1.2</version>
+<version>1.2.1</version>
 <objective>Break the enemy's monument, then jump into the enemy team's portal located below their spawn point!</objective>
 <created>2023-06-04</created>
 <include id="bridge"/>
@@ -14,6 +14,10 @@
     <constant id="team-two-spawn">-50.5,70,28.5</constant>
     <constant id="team-two-yaw">-135</constant>
 </constants>
+<broadcasts>
+    <tip after="2s" every="5m">`7Monuments are either made out of `fIron Blocks`7 or `bPacked Ice`7, and regenerate each round!</tip>
+    <tip after="3s" every="5m">`7Beacons above the `cenemy`7 side let you know where you need to go!</tip>
+</broadcasts>
 <authors>
     <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
 </authors>
@@ -38,12 +42,27 @@
     </kit>
 </kits>
 <filters>
+    <any id="only-mon-materials">
+        <material id="only-iron">iron block</material>
+        <material id="only-packed-ice">packed ice</material>
+    </any>
+    <material id="only-bedrock">bedrock</material>
     <any id="block-list">
         <material>stained clay:2</material>
         <material>stained clay:11</material>
         <material>stained clay:0</material>
-        <material id="only-iron">iron block</material>
-        <material>packed ice</material>
+        <any>
+            <all>
+                <filter id="only-mon-materials"/>
+                <region id="magenta-monument"/>
+                <filter id="only-team-two"/>
+            </all>
+            <all>
+                <filter id="only-mon-materials"/>
+                <region id="blue-monument"/>
+                <filter id="only-team-one"/>
+            </all>
+        </any>
         <material>long grass</material>
         <material>dead bush</material>
         <material>double plant</material>
@@ -69,8 +88,6 @@
             <material>dead bush</material>
         </any>
     </deny>
-    <material id="only-packed-ice">packed ice</material>
-    <material id="only-bedrock">bedrock</material>
     <all id="magenta-zzuf-monument">
         <!-- top -->
         <offset vector="38,69,13" filter="not(any(only-iron,only-packed-ice))"/>
@@ -191,6 +208,14 @@
         <cuboid id="magenta-monument" min="38,67,13" size="3,3,3"/>
         <cuboid id="blue-monument" min="-40,67,-15" size="3,3,3"/>
     </union>
+    <!-- 
+    <apply block="only-team-one" region="blue-monument">
+        <message>{"translate":"objective.damageOwn"}</message>
+    </apply>
+    <apply block="only-team-two" region="magenta-monument">
+        <message>{"translate":"objective.damageOwn"}</message>
+    </apply>
+    -->
     <block id="magenta-m-marker">39,95,14</block>
     <block id="magenta-p-marker">55,94,-24</block>
     <block id="blue-m-marker">-39,95,-14</block>
