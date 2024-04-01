@@ -9,7 +9,7 @@
                                                     Definitive Edition
 -->
 <name>The Grand Dueling Tournament II</name>
-<version>2.5.0</version>
+<version>2.5.1</version>
 <objective>Win the tournament!</objective>
 <phase>development</phase>
 <variant id="spleef" world="spleef" override="true">The Grand Spleefing Tournament II</variant>
@@ -120,7 +120,7 @@
     <team id="team-3" color="dark green"   max="6" min="1">Green</team>
     <team id="team-4" color="dark purple"  max="6" min="1">Purple</team>
     <team id="team-5" color="yellow"       max="6" min="1">Yellow</team>
-    <team id="team-6" color="white"        max="6" min="1">White</team>
+    <team id="team-6" color="gold"         max="6" min="1">Orange</team>
     <team id="team-7" color="light purple" max="6" min="1">Pink</team>
     <team id="team-8" color="dark aqua"    max="6" min="1">Cyan</team>
 </teams>
@@ -561,7 +561,7 @@
             <helmet material="leather helmet" team-color="true" unbreakable="true" locked="true"/>
             <health>20</health>
             <max-health>20</max-health>
-            <knockback-reduction>0.25</knockback-reduction>
+            <knockback-reduction>0.15</knockback-reduction>
             <effect amplifier="10">resistance</effect>
         </kit>
     </if>
@@ -570,8 +570,8 @@
     <consumable id="uhc-gapple" action="uhc-gapple-eat" on="eat" override="false"/>
 </consumables>
 <projectiles>
-    <projectile id="egg-gun" name="Egg Gun" projectile="Egg" velocity="3.5" damage="1.5" throwable="false" cooldown="0s"/>
-    <projectile id="tnt-gun" name="TNT Gun" projectile="TNTPrimed" velocity="2" damage="10" throwable="false" cooldown="3s"/>
+    <projectile id="egg-gun" name="Egg Gun" projectile="Egg" velocity="3.5" damage="3" throwable="false" cooldown="0s"/>
+    <projectile id="tnt-gun" name="TNT Gun" projectile="TNTPrimed" velocity="2" damage="15" throwable="false" cooldown="3s"/>
 </projectiles>
 <unless variant="cannon">
     <tnt>
@@ -680,9 +680,12 @@
     </deny>
 </damage>
 <disabledamage>
-    <unless variant="cacti">
+    <if variant="default, spleef">
         <damage ally="true" self="true" enemy="false" other="false">block explosion</damage>
-    </unless>
+    </if>
+    <if variant="cannon">
+        <damage ally="false" self="false" enemy="false" other="false">block explosion</damage>
+    </if>
     <if variant="cacti">
         <damage ally="true" self="true" enemy="true" other="true">block explosion</damage>
     </if>
@@ -700,9 +703,26 @@
         </all>
     </if>
     <if variant="cannon">
-        <offset id="cannon-is-team-2" vector="~0,~0,~8">
-            <material>stained glass</material>
-        </offset>
+        <any id="arena-wall-material">
+            <material>stained glass:7</material>
+            <material>stained glass:8</material>
+        </any>
+        <any id="bridge-material">
+            <material>stained glass:0</material>
+            <material>stained glass:5</material>
+        </any>
+        <players id="competitor-inside-round-1-arena-1-overtime-capture" min="1" filter="all(round-1-arena-1-competitors, round-1-overtime-capture-area, overtime_level=3)"/>
+        <players id="competitor-inside-round-1-arena-2-overtime-capture" min="1" filter="all(round-1-arena-2-competitors, round-1-overtime-capture-area, overtime_level=3)"/>
+        <players id="competitor-inside-round-1-arena-3-overtime-capture" min="1" filter="all(round-1-arena-3-competitors, round-1-overtime-capture-area, overtime_level=3)"/>
+        <players id="competitor-inside-round-1-arena-4-overtime-capture" min="1" filter="all(round-1-arena-4-competitors, round-1-overtime-capture-area, overtime_level=3)"/>
+        <players id="competitor-inside-round-2-arena-1-overtime-capture" min="1" filter="all(round-2-arena-1-competitors, round-2-overtime-capture-area, overtime_level=3)"/>
+        <players id="competitor-inside-round-2-arena-2-overtime-capture" min="1" filter="all(round-2-arena-2-competitors, round-2-overtime-capture-area, overtime_level=3)"/>
+        <players id="competitor-inside-round-2-arena-3-overtime-capture" min="1" filter="all(round-2-arena-3-competitors, round-2-overtime-capture-area, overtime_level=3)"/>
+        <players id="competitor-inside-round-2-arena-4-overtime-capture" min="1" filter="all(round-2-arena-4-competitors, round-2-overtime-capture-area, overtime_level=3)"/>
+        <players id="competitor-inside-round-3-arena-1-overtime-capture" min="1" filter="all(round-3-arena-1-competitors, round-3-overtime-capture-area, overtime_level=3)"/>
+        <players id="competitor-inside-round-3-arena-2-overtime-capture" min="1" filter="all(round-3-arena-2-competitors, round-3-overtime-capture-area, overtime_level=3)"/>
+        <players id="competitor-inside-round-3-arena-3-overtime-capture" min="1" filter="all(round-3-arena-3-competitors, round-3-overtime-capture-area, overtime_level=3)"/>
+        <players id="competitor-inside-round-3-arena-4-overtime-capture" min="1" filter="all(round-3-arena-4-competitors, round-3-overtime-capture-area, overtime_level=3)"/>
     </if>
     <if variant="cacti">
         <any id="allowed-interactions">
@@ -1024,14 +1044,14 @@
     <captured id="round-3-arena-2-team-8" team="team-8">round-3-arena-2-decider</captured>
     <captured id="round-3-arena-3-team-8" team="team-8">round-3-arena-3-decider</captured>
     <captured id="round-3-arena-4-team-8" team="team-8">round-3-arena-4-decider</captured>
-    <!-- .................................................... -->
-    <!-- :         : Round 1        : Round 2   : Round 3   : -->
-    <!-- .................................................... -->
-    <!-- : Arena 1 : Red v Blue     : A1W v A2W : A1W v A3W : -->
-    <!-- : Arena 2 : Green v Purple : A1L v A2L : A2W v A4W : -->
-    <!-- : Arena 3 : Yellow v White : A3W v A4W : A1L v A3L : -->
-    <!-- : Arena 4 : Pink v Cyan    : A3L v A4L : A2L v A4L : -->
-    <!-- .................................................... -->
+    <!-- ..................................................... -->
+    <!-- :         : Round 1         : Round 2   : Round 3   : -->
+    <!-- ..................................................... -->
+    <!-- : Arena 1 : Red v Blue      : A1W v A2W : A1W v A3W : -->
+    <!-- : Arena 2 : Green v Purple  : A3W v A4W : A2W v A4W : -->
+    <!-- : Arena 3 : Yellow v Orange : A1L v A2L : A1L v A3L : -->
+    <!-- : Arena 4 : Pink v Cyan     : A3L v A4L : A2L v A4L : -->
+    <!-- ..................................................... -->
     <!--
     round 2 match ups
     -->
@@ -1593,11 +1613,11 @@
         </apply>
         <cuboid id="fake-platforms" min="180,9,-64" max="13,10,127"/>
     </if>
-    <union id="all-arenas"> <!-- using translations here causes a stackoverflow error, so just don't do that I guess -->
+    <union id="all-arenas">
         <cuboid id="arena-1" min="180,-oo,-64" max="145,${arena-height},127"/>
-        <cuboid id="arena-2" min="136,-oo,-64" max="101,${arena-height},127"/>
-        <cuboid id="arena-3" min="92,-oo,-64"  max="57,${arena-height},127"/>
-        <cuboid id="arena-4" min="48,-oo,-64"  max="13,${arena-height},127"/>
+        <translate id="arena-2" offset="-44,0,0" region="arena-1"/>
+        <translate id="arena-3" offset="-44,0,0" region="arena-2"/>
+        <translate id="arena-4" offset="-44,0,0" region="arena-3"/>
     </union>
     <intersect id="round-1-arenas">
         <cuboid id="round-1-region" min="0,0,-65" max="188,${arena-height},0"/>
@@ -1798,6 +1818,16 @@
             <translate id="round-2-bridges-lower" offset="0,-2,0" region="round-2-bridges"/>
             <translate id="round-3-bridges-lower" offset="0,-2,0" region="round-3-bridges"/>
         </union>
+        <union id="arena-overtime-capture-area">
+            <cuboid id="round-1-overtime-capture-area" min="12,0,-36" max="181,${arena-height},-33"/>
+            <translate id="round-2-overtime-capture-area" offset="0,0,66" region="round-1-overtime-capture-area"/>
+            <translate id="round-3-overtime-capture-area" offset="0,0,66" region="round-2-overtime-capture-area"/>
+        </union>
+        <union id="buildable-area-middle-identifier">
+            <cuboid id="round-1-buildable-area-middle-identifier" min="12,1,-50" max="181,23,-19"/>
+            <translate id="round-2-buildable-area-middle-identifier" offset="0,0,66" region="round-1-buildable-area-middle-identifier"/>
+            <translate id="round-3-buildable-area-middle-identifier" offset="0,0,66" region="round-2-buildable-area-middle-identifier"/>
+        </union>
         <union id="buildable-area">
             <union id="round-1-buildable-area">
                 <union id="round-1-arena-1-buildable-area">
@@ -1810,6 +1840,16 @@
             </union>
             <translate id="round-2-buildable-area" offset="0,0,66" region="round-1-buildable-area"/>
             <translate id="round-3-buildable-area" offset="0,0,66" region="round-2-buildable-area"/>
+        </union>
+        <union id="buildable-area-middle">
+            <union id="round-1-buildable-area-middle">
+                <cuboid id="round-1-arena-1-buildable-area-middle" min="156,1,-50" max="169,23,-19"/>
+                <translate id="round-1-arena-2-buildable-area-middle" offset="-44,0,0" region="round-1-arena-1-buildable-area-middle"/>
+                <translate id="round-1-arena-3-buildable-area-middle" offset="-44,0,0" region="round-1-arena-2-buildable-area-middle"/>
+                <translate id="round-1-arena-4-buildable-area-middle" offset="-44,0,0" region="round-1-arena-3-buildable-area-middle"/>
+            </union>
+            <translate id="round-2-buildable-area-middle" offset="0,0,66" region="round-1-buildable-area-middle"/>
+            <translate id="round-3-buildable-area-middle" offset="0,0,66" region="round-2-buildable-area-middle"/>
         </union>
         <union id="buildable-area-wide">
             <union id="round-1-buildable-area-wide">
@@ -1824,7 +1864,17 @@
             <translate id="round-2-buildable-area-wide" offset="0,0,66" region="round-1-buildable-area-wide"/>
             <translate id="round-3-buildable-area-wide" offset="0,0,66" region="round-2-buildable-area-wide"/>
         </union>
-        <apply block="any(all(current_kit=0..1, buildable-area), all(current_kit=2..6, buildable-area-wide))"/>
+        <union id="buildable-area-wide-middle">
+            <union id="round-1-buildable-area-wide-middle">
+                <cuboid id="round-1-arena-1-buildable-area-wide-middle" min="147,1,-50" max="178,23,-19"/>
+                <translate id="round-1-arena-2-buildable-area-wide-middle" offset="-44,0,0" region="round-1-arena-1-buildable-area-wide-middle"/>
+                <translate id="round-1-arena-3-buildable-area-wide-middle" offset="-44,0,0" region="round-1-arena-2-buildable-area-wide-middle"/>
+                <translate id="round-1-arena-4-buildable-area-wide-middle" offset="-44,0,0" region="round-1-arena-3-buildable-area-wide-middle"/>
+            </union>
+            <translate id="round-2-buildable-area-wide-middle" offset="0,0,66" region="round-1-buildable-area-wide-middle"/>
+            <translate id="round-3-buildable-area-wide-middle" offset="0,0,66" region="round-2-buildable-area-wide-middle"/>
+        </union>
+        <apply block="all(not(bridge-material), any(all(current_kit=0..1, any(buildable-area, all(overtime_level=2.., buildable-area-middle))), all(current_kit=2..6, any(buildable-area-wide, all(overtime_level=2.., buildable-area-wide-middle)))))" message="You may not modify that block"/>
     </if>
     <if variant="cacti">
         <union id="snowball-spawners">
@@ -2047,6 +2097,7 @@
     <variable id="round_2_kit"/>
     <variable id="round_3_kit"/>
     <variable id="announce_kit" default="1"/>
+    <variable id="overtime_level"/>
     <variable id="current_round"/>
     <variable id="current_kit"/>
     <variable id="current_kit_requires_survival" scope="player"/>
@@ -2098,7 +2149,7 @@
             <foodlevel>16</foodlevel>
         </kit>
     </action>
-    <trigger scope="player" filter="all(current_kit_requires_survival=1, all-arenas)" action="survival-kit"/>
+    <trigger scope="player" filter="all(participating, current_kit_requires_survival=1, all-arenas)" action="survival-kit"/>
     <!--
     pre-match introduction announcements
     -->
@@ -2719,6 +2770,7 @@
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Let The Grand ${tournament-type} Tournament begin!"/>
             <set var="current_round" value="1"/>
+            <set var="overtime_level" value="0"/>
             <action id="kit-applicator"/>
         </action>
     </trigger>
@@ -2734,6 +2786,7 @@
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Aaaaand fight!"/>
             <set var="current_round" value="2"/>
+            <set var="overtime_level" value="0"/>
             <action id="kit-applicator"/>
         </action>
     </trigger>
@@ -2749,6 +2802,7 @@
         <action>
             <message text="`7[`6Arena Master`7] `6Tirion`r: May the best team win!"/>
             <set var="current_round" value="3"/>
+            <set var="overtime_level" value="0"/>
             <action id="kit-applicator"/>
         </action>
     </trigger>
@@ -2781,7 +2835,7 @@
                 <message text="`7[`6Arena Master`7] `6Tirion`r: Congratulations `eYellow `ron winning The Grand ${tournament-type} Tournament!"/>
             </action>
             <action filter="round-3-arena-1-team-6">
-                <message text="`7[`6Arena Master`7] `6Tirion`r: Congratulations `fWhite `ron winning The Grand ${tournament-type} Tournament!"/>
+                <message text="`7[`6Arena Master`7] `6Tirion`r: Congratulations `6Orange `ron winning The Grand ${tournament-type} Tournament!"/>
             </action>
             <action filter="round-3-arena-1-team-7">
                 <message text="`7[`6Arena Master`7] `6Tirion`r: Congratulations `dPink `ron winning The Grand ${tournament-type} Tournament!"/>
@@ -2791,7 +2845,7 @@
             </action>
         </action>
     </trigger>
-    <trigger scope="player" filter="all(all-arena-spectator, participating)" action="spectating-kit"/>
+    <trigger scope="player" filter="all(any(all-arena-spectator, alive=0), participating, not(between-rounds))" action="spectating-kit"/>
     <if variant="spleef">
         <trigger scope="match">
             <filter>
@@ -2801,6 +2855,7 @@
             </filter>
             <action>
                 <message text="`7[`6Arena Master`7] `6Tirion`r: Let's make this sudden death a little... `cexplosive`r!"/>
+                <set var="overtime_level" value="1"/>
                 <switch-scope inner="player" filter="all(all-arenas, participating)">
                     <kit>
                         <item material="egg" amount="128" name="`rMega Grenade" grenade="true" grenade-power="4">
@@ -2820,11 +2875,40 @@
             </filter>
             <action>
                 <message text="`7[`6Arena Master`7] `6Tirion`r: The platforms have been connected by a bridge!"/>
-                <fill region="arena-bridges" material="stained glass:8" filter="all(current_kit=0..1, any(all(current_round=1, round-1-bridges), all(current_round=2, round-2-bridges), all(current_round=3, round-3-bridges)))"/>
-                <fill region="arena-bridges-wide" material="stained glass:8" filter="all(any(current_kit=2, current_kit=6), any(all(current_round=1, round-1-bridges-wide), all(current_round=2, round-2-bridges-wide), all(current_round=3, round-3-bridges-wide)))"/>
-                <fill region="arena-bridges-diagonal" material="stained glass:8" filter="all(current_kit=3, any(all(current_round=1, round-1-bridges-diagonal), all(current_round=2, round-2-bridges-diagonal), all(current_round=3, round-3-bridges-diagonal)))"/>
-                <fill region="arena-bridges-side" material="stained glass:8" filter="all(current_kit=4, any(all(current_round=1, round-1-bridges-side), all(current_round=2, round-2-bridges-side), all(current_round=3, round-3-bridges-side)))"/>
-                <fill region="arena-bridges-lower" material="stained glass:8" filter="all(current_kit=5, any(all(current_round=1, round-1-bridges-lower), all(current_round=2, round-2-bridges-lower), all(current_round=3, round-3-bridges-lower)))"/>
+                <set var="overtime_level" value="1"/>
+                <sound preset="OBJECTIVE_MODE"/>
+                <fill region="arena-bridges" material="stained glass:0" filter="all(current_kit=0..1, any(all(current_round=1, round-1-bridges), all(current_round=2, round-2-bridges), all(current_round=3, round-3-bridges)))"/>
+                <fill region="arena-bridges-wide" material="stained glass:0" filter="all(any(current_kit=2, current_kit=6), any(all(current_round=1, round-1-bridges-wide), all(current_round=2, round-2-bridges-wide), all(current_round=3, round-3-bridges-wide)))"/>
+                <fill region="arena-bridges-diagonal" material="stained glass:0" filter="all(current_kit=3, any(all(current_round=1, round-1-bridges-diagonal), all(current_round=2, round-2-bridges-diagonal), all(current_round=3, round-3-bridges-diagonal)))"/>
+                <fill region="arena-bridges-side" material="stained glass:0" filter="all(current_kit=4, any(all(current_round=1, round-1-bridges-side), all(current_round=2, round-2-bridges-side), all(current_round=3, round-3-bridges-side)))"/>
+                <fill region="arena-bridges-lower" material="stained glass:0" filter="all(current_kit=5, any(all(current_round=1, round-1-bridges-lower), all(current_round=2, round-2-bridges-lower), all(current_round=3, round-3-bridges-lower)))"/>
+            </action>
+        </trigger>
+        <trigger scope="match">
+            <filter>
+                <after duration="30s" message="The middle will become buildable in {0}">
+                    <after duration="3m30s" filter="all(any(all(current_round=1, round-1-starting), all(current_round=2, round-2-starting), all(current_round=3, round-3-starting)), not(between-rounds))"/>
+                </after>
+            </filter>
+            <action>
+                <message text="`7[`6Arena Master`7] `6Tirion`r: You can now build between the platforms!"/>
+                <set var="overtime_level" value="2"/>
+                <sound preset="OBJECTIVE_MODE"/>
+                <fill region="buildable-area-middle-identifier" material="stained glass:7" filter="all(arena-wall-material, any(all(current_round=1, round-1-buildable-area-middle-identifier), all(current_round=2, round-2-buildable-area-middle-identifier), all(current_round=3, round-3-buildable-area-middle-identifier)))"/>
+            </action>
+        </trigger>
+        <trigger scope="match">
+            <filter>
+                <after duration="30s" message="Sudden death in {0}">
+                    <after duration="5m30s" filter="all(any(all(current_round=1, round-1-starting), all(current_round=2, round-2-starting), all(current_round=3, round-3-starting)), not(between-rounds))"/>
+                </after>
+            </filter>
+            <action>
+                <message text="`7[`6Arena Master`7] `6Tirion`r: Alright, this is taking far too long..."/>
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The first team to reach the `agreen safe zone `rwins the round!"/>
+                <set var="overtime_level" value="3"/>
+                <sound preset="OBJECTIVE_MODE"/>
+                <fill region="arena-overtime-capture-area" material="stained glass:5" filter="all(any(arena-wall-material, bridge-material), any(all(current_round=1, round-1-overtime-capture-area), all(current_round=2, round-2-overtime-capture-area), all(current_round=3, round-3-overtime-capture-area)))"/>
             </action>
         </trigger>
         <trigger scope="match">
@@ -2832,14 +2916,14 @@
                 <after duration="1s" filter="all(current_kit=3, any(all(current_round=1, round-1-starting), all(current_round=2, round-2-starting), all(current_round=3, round-3-starting)), not(between-rounds))"/>
             </filter>
             <action>
-                <fill region="fake-platforms" material="air" filter="only-barrier"/>
+                <fill region="fake-platforms" material="air" filter="all(only-barrier, any(all(current_round=1, round-1-arenas), all(current_round=2, round-2-arenas), all(current_round=3, round-3-arenas)))"/>
             </action>
         </trigger>
     </if>
     <if variant="cacti">
         <trigger scope="match">
             <filter>
-                <after duration="60s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
+                <after duration="40s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
             </filter>
             <action>
                 <fill region="arenas-segment-13" material="sand:1" filter="all(sand, any(all(round-1, round-1-arenas), all(round-2, round-2-arenas), all(round-3, round-3-arenas)))"/>
@@ -2848,7 +2932,7 @@
         </trigger>
         <trigger scope="match">
             <filter>
-                <after duration="68s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
+                <after duration="48s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
             </filter>
             <action>
                 <fill region="arenas-segment-12" material="sand:1" filter="all(sand, any(all(round-1, round-1-arenas), all(round-2, round-2-arenas), all(round-3, round-3-arenas)))"/>
@@ -2857,7 +2941,7 @@
         </trigger>
         <trigger scope="match">
             <filter>
-                <after duration="76s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
+                <after duration="56s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
             </filter>
             <action>
                 <fill region="arenas-segment-11" material="sand:1" filter="all(sand, any(all(round-1, round-1-arenas), all(round-2, round-2-arenas), all(round-3, round-3-arenas)))"/>
@@ -2866,7 +2950,7 @@
         </trigger>
         <trigger scope="match">
             <filter>
-                <after duration="81s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
+                <after duration="61s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
             </filter>
             <action>
                 <fill region="arenas-segment-10" material="sand:1" filter="all(sand, any(all(round-1, round-1-arenas), all(round-2, round-2-arenas), all(round-3, round-3-arenas)))"/>
@@ -2875,7 +2959,7 @@
         </trigger>
         <trigger scope="match">
             <filter>
-                <after duration="86s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
+                <after duration="66s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
             </filter>
             <action>
                 <fill region="arenas-segment-9" material="sand:1" filter="all(sand, any(all(round-1, round-1-arenas), all(round-2, round-2-arenas), all(round-3, round-3-arenas)))"/>
@@ -2884,7 +2968,7 @@
         </trigger>
         <trigger scope="match">
             <filter>
-                <after duration="91s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
+                <after duration="71s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
             </filter>
             <action>
                 <fill region="arenas-segment-8" material="sand:1" filter="all(sand, any(all(round-1, round-1-arenas), all(round-2, round-2-arenas), all(round-3, round-3-arenas)))"/>
@@ -2893,7 +2977,7 @@
         </trigger>
         <trigger scope="match">
             <filter>
-                <after duration="96s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
+                <after duration="76s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
             </filter>
             <action>
                 <fill region="arenas-segment-7" material="sand:1" filter="all(sand, any(all(round-1, round-1-arenas), all(round-2, round-2-arenas), all(round-3, round-3-arenas)))"/>
@@ -2902,7 +2986,7 @@
         </trigger>
         <trigger scope="match">
             <filter>
-                <after duration="101s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
+                <after duration="81s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
             </filter>
             <action>
                 <fill region="arenas-segment-6" material="sand:1" filter="all(sand, any(all(round-1, round-1-arenas), all(round-2, round-2-arenas), all(round-3, round-3-arenas)))"/>
@@ -2911,7 +2995,7 @@
         </trigger>
         <trigger scope="match">
             <filter>
-                <after duration="125s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
+                <after duration="105s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
             </filter>
             <action>
                 <fill region="arenas-segment-5" material="sand:1" filter="all(sand, any(all(round-1, round-1-arenas), all(round-2, round-2-arenas), all(round-3, round-3-arenas)))"/>
@@ -2920,7 +3004,7 @@
         </trigger>
         <trigger scope="match">
             <filter>
-                <after duration="130s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
+                <after duration="110s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
             </filter>
             <action>
                 <fill region="arenas-segment-4" material="sand:1" filter="all(sand, any(all(round-1, round-1-arenas), all(round-2, round-2-arenas), all(round-3, round-3-arenas)))"/>
@@ -2929,7 +3013,7 @@
         </trigger>
         <trigger scope="match">
             <filter>
-                <after duration="135s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
+                <after duration="115s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
             </filter>
             <action>
                 <fill region="arenas-segment-3" material="sand:1" filter="all(sand, any(all(round-1, round-1-arenas), all(round-2, round-2-arenas), all(round-3, round-3-arenas)))"/>
@@ -2938,7 +3022,7 @@
         </trigger>
         <trigger scope="match">
             <filter>
-                <after duration="140s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
+                <after duration="120s" filter="any(all(round-1, not(round-1-finished)), all(round-2, not(round-2-finished)), all(round-3, not(round-3-finished)))"/>
             </filter>
             <action>
                 <fill region="arenas-segment-2" material="sand:1" filter="all(sand, any(all(round-1, round-1-arenas), all(round-2, round-2-arenas), all(round-3, round-3-arenas)))"/>
@@ -2953,57 +3037,57 @@
     <message id="team-1-defeat-team-3-msg" text="`7[`6Arena Master`7] `6Tirion`r: `4Red `rhas defeated `2Green`r!"/>
     <message id="team-1-defeat-team-4-msg" text="`7[`6Arena Master`7] `6Tirion`r: `4Red `rhas defeated `5Purple`r!"/>
     <message id="team-1-defeat-team-5-msg" text="`7[`6Arena Master`7] `6Tirion`r: `4Red `rhas defeated `eYellow`r!"/>
-    <message id="team-1-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `4Red `rhas defeated `fWhite`r!"/>
+    <message id="team-1-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `4Red `rhas defeated `6Orange`r!"/>
     <message id="team-1-defeat-team-7-msg" text="`7[`6Arena Master`7] `6Tirion`r: `4Red `rhas defeated `dPink`r!"/>
     <message id="team-1-defeat-team-8-msg" text="`7[`6Arena Master`7] `6Tirion`r: `4Red `rhas defeated `3Cyan`r!"/>
     <message id="team-2-defeat-team-1-msg" text="`7[`6Arena Master`7] `6Tirion`r: `9Blue `rhas defeated `4Red`r!"/>
     <message id="team-2-defeat-team-3-msg" text="`7[`6Arena Master`7] `6Tirion`r: `9Blue `rhas defeated `2Green`r!"/>
     <message id="team-2-defeat-team-4-msg" text="`7[`6Arena Master`7] `6Tirion`r: `9Blue `rhas defeated `5Purple`r!"/>
     <message id="team-2-defeat-team-5-msg" text="`7[`6Arena Master`7] `6Tirion`r: `9Blue `rhas defeated `eYellow`r!"/>
-    <message id="team-2-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `9Blue `rhas defeated `fWhite`r!"/>
+    <message id="team-2-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `9Blue `rhas defeated `6Orange`r!"/>
     <message id="team-2-defeat-team-7-msg" text="`7[`6Arena Master`7] `6Tirion`r: `9Blue `rhas defeated `dPink`r!"/>
     <message id="team-2-defeat-team-8-msg" text="`7[`6Arena Master`7] `6Tirion`r: `9Blue `rhas defeated `3Cyan`r!"/>
     <message id="team-3-defeat-team-1-msg" text="`7[`6Arena Master`7] `6Tirion`r: `2Green `rhas defeated `4Red`r!"/>
     <message id="team-3-defeat-team-2-msg" text="`7[`6Arena Master`7] `6Tirion`r: `2Green `rhas defeated `9Blue`r!"/>
     <message id="team-3-defeat-team-4-msg" text="`7[`6Arena Master`7] `6Tirion`r: `2Green `rhas defeated `5Purple`r!"/>
     <message id="team-3-defeat-team-5-msg" text="`7[`6Arena Master`7] `6Tirion`r: `2Green `rhas defeated `eYellow`r!"/>
-    <message id="team-3-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `2Green `rhas defeated `fWhite`r!"/>
+    <message id="team-3-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `2Green `rhas defeated `6Orange`r!"/>
     <message id="team-3-defeat-team-7-msg" text="`7[`6Arena Master`7] `6Tirion`r: `2Green `rhas defeated `dPink`r!"/>
     <message id="team-3-defeat-team-8-msg" text="`7[`6Arena Master`7] `6Tirion`r: `2Green `rhas defeated `3Cyan`r!"/>
     <message id="team-4-defeat-team-1-msg" text="`7[`6Arena Master`7] `6Tirion`r: `5Purple `rhas defeated `4Red`r!"/>
     <message id="team-4-defeat-team-2-msg" text="`7[`6Arena Master`7] `6Tirion`r: `5Purple `rhas defeated `9Blue`r!"/>
     <message id="team-4-defeat-team-3-msg" text="`7[`6Arena Master`7] `6Tirion`r: `5Purple `rhas defeated `2Green`r!"/>
     <message id="team-4-defeat-team-5-msg" text="`7[`6Arena Master`7] `6Tirion`r: `5Purple `rhas defeated `eYellow`r!"/>
-    <message id="team-4-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `5Purple `rhas defeated `fWhite`r!"/>
+    <message id="team-4-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `5Purple `rhas defeated `6Orange`r!"/>
     <message id="team-4-defeat-team-7-msg" text="`7[`6Arena Master`7] `6Tirion`r: `5Purple `rhas defeated `dPink`r!"/>
     <message id="team-4-defeat-team-8-msg" text="`7[`6Arena Master`7] `6Tirion`r: `5Purple `rhas defeated `3Cyan`r!"/>
     <message id="team-5-defeat-team-1-msg" text="`7[`6Arena Master`7] `6Tirion`r: `eYellow `rhas defeated `4Red`r!"/>
     <message id="team-5-defeat-team-2-msg" text="`7[`6Arena Master`7] `6Tirion`r: `eYellow `rhas defeated `9Blue`r!"/>
     <message id="team-5-defeat-team-3-msg" text="`7[`6Arena Master`7] `6Tirion`r: `eYellow `rhas defeated `2Green`r!"/>
     <message id="team-5-defeat-team-4-msg" text="`7[`6Arena Master`7] `6Tirion`r: `eYellow `rhas defeated `5Purple`r!"/>
-    <message id="team-5-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `eYellow `rhas defeated `fWhite`r!"/>
+    <message id="team-5-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `eYellow `rhas defeated `6Orange`r!"/>
     <message id="team-5-defeat-team-7-msg" text="`7[`6Arena Master`7] `6Tirion`r: `eYellow `rhas defeated `dPink`r!"/>
     <message id="team-5-defeat-team-8-msg" text="`7[`6Arena Master`7] `6Tirion`r: `eYellow `rhas defeated `3Cyan`r!"/>
-    <message id="team-6-defeat-team-1-msg" text="`7[`6Arena Master`7] `6Tirion`r: `fWhite `rhas defeated `4Red`r!"/>
-    <message id="team-6-defeat-team-2-msg" text="`7[`6Arena Master`7] `6Tirion`r: `fWhite `rhas defeated `9Blue`r!"/>
-    <message id="team-6-defeat-team-3-msg" text="`7[`6Arena Master`7] `6Tirion`r: `fWhite `rhas defeated `2Green`r!"/>
-    <message id="team-6-defeat-team-4-msg" text="`7[`6Arena Master`7] `6Tirion`r: `fWhite `rhas defeated `5Purple`r!"/>
-    <message id="team-6-defeat-team-5-msg" text="`7[`6Arena Master`7] `6Tirion`r: `fWhite `rhas defeated `eYellow`r!"/>
-    <message id="team-6-defeat-team-7-msg" text="`7[`6Arena Master`7] `6Tirion`r: `fWhite `rhas defeated `dPink`r!"/>
-    <message id="team-6-defeat-team-8-msg" text="`7[`6Arena Master`7] `6Tirion`r: `fWhite `rhas defeated `3Cyan`r!"/>
+    <message id="team-6-defeat-team-1-msg" text="`7[`6Arena Master`7] `6Tirion`r: `6Orange `rhas defeated `4Red`r!"/>
+    <message id="team-6-defeat-team-2-msg" text="`7[`6Arena Master`7] `6Tirion`r: `6Orange `rhas defeated `9Blue`r!"/>
+    <message id="team-6-defeat-team-3-msg" text="`7[`6Arena Master`7] `6Tirion`r: `6Orange `rhas defeated `2Green`r!"/>
+    <message id="team-6-defeat-team-4-msg" text="`7[`6Arena Master`7] `6Tirion`r: `6Orange `rhas defeated `5Purple`r!"/>
+    <message id="team-6-defeat-team-5-msg" text="`7[`6Arena Master`7] `6Tirion`r: `6Orange `rhas defeated `eYellow`r!"/>
+    <message id="team-6-defeat-team-7-msg" text="`7[`6Arena Master`7] `6Tirion`r: `6Orange `rhas defeated `dPink`r!"/>
+    <message id="team-6-defeat-team-8-msg" text="`7[`6Arena Master`7] `6Tirion`r: `6Orange `rhas defeated `3Cyan`r!"/>
     <message id="team-7-defeat-team-1-msg" text="`7[`6Arena Master`7] `6Tirion`r: `dPink `rhas defeated `4Red`r!"/>
     <message id="team-7-defeat-team-2-msg" text="`7[`6Arena Master`7] `6Tirion`r: `dPink `rhas defeated `9Blue`r!"/>
     <message id="team-7-defeat-team-3-msg" text="`7[`6Arena Master`7] `6Tirion`r: `dPink `rhas defeated `2Green`r!"/>
     <message id="team-7-defeat-team-4-msg" text="`7[`6Arena Master`7] `6Tirion`r: `dPink `rhas defeated `5Purple`r!"/>
     <message id="team-7-defeat-team-5-msg" text="`7[`6Arena Master`7] `6Tirion`r: `dPink `rhas defeated `eYellow`r!"/>
-    <message id="team-7-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `dPink `rhas defeated `fWhite`r!"/>
+    <message id="team-7-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `dPink `rhas defeated `6Orange`r!"/>
     <message id="team-7-defeat-team-8-msg" text="`7[`6Arena Master`7] `6Tirion`r: `dPink `rhas defeated `3Cyan`r!"/>
     <message id="team-8-defeat-team-1-msg" text="`7[`6Arena Master`7] `6Tirion`r: `3Cyan `rhas defeated `4Red`r!"/>
     <message id="team-8-defeat-team-2-msg" text="`7[`6Arena Master`7] `6Tirion`r: `3Cyan `rhas defeated `9Blue`r!"/>
     <message id="team-8-defeat-team-3-msg" text="`7[`6Arena Master`7] `6Tirion`r: `3Cyan `rhas defeated `2Green`r!"/>
     <message id="team-8-defeat-team-4-msg" text="`7[`6Arena Master`7] `6Tirion`r: `3Cyan `rhas defeated `5Purple`r!"/>
     <message id="team-8-defeat-team-5-msg" text="`7[`6Arena Master`7] `6Tirion`r: `3Cyan `rhas defeated `eYellow`r!"/>
-    <message id="team-8-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `3Cyan `rhas defeated `fWhite`r!"/>
+    <message id="team-8-defeat-team-6-msg" text="`7[`6Arena Master`7] `6Tirion`r: `3Cyan `rhas defeated `6Orange`r!"/>
     <message id="team-8-defeat-team-7-msg" text="`7[`6Arena Master`7] `6Tirion`r: `3Cyan `rhas defeated `dPink`r!"/>
     <trigger scope="match" action="team-1-defeat-team-2-msg" filter="round-1-arena-1-team-1"/>
     <trigger scope="match" action="team-2-defeat-team-1-msg" filter="round-1-arena-1-team-2"/>
@@ -3085,18 +3169,34 @@
     <trigger scope="team" action="round-win-msg" filter="round-3-arena-4-winner"/>
 </actions>
 <control-points required="false" capture-time="0s" points="0" capture-rule="exclusive" permanent="true" show="false">
-    <control-point id="round-1-arena-1-decider" name="round-1-arena-1-decider" capture="arena-1" capture-filter="allow-round-1-completion" player-filter="round-1-arena-1-competitors"/>
-    <control-point id="round-1-arena-2-decider" name="round-1-arena-2-decider" capture="arena-2" capture-filter="allow-round-1-completion" player-filter="round-1-arena-2-competitors"/>
-    <control-point id="round-1-arena-3-decider" name="round-1-arena-3-decider" capture="arena-3" capture-filter="allow-round-1-completion" player-filter="round-1-arena-3-competitors"/>
-    <control-point id="round-1-arena-4-decider" name="round-1-arena-4-decider" capture="arena-4" capture-filter="allow-round-1-completion" player-filter="round-1-arena-4-competitors"/>
-    <control-point id="round-2-arena-1-decider" name="round-2-arena-1-decider" capture="arena-1" capture-filter="allow-round-2-completion" player-filter="round-2-arena-1-competitors"/>
-    <control-point id="round-2-arena-2-decider" name="round-2-arena-2-decider" capture="arena-2" capture-filter="allow-round-2-completion" player-filter="round-2-arena-2-competitors"/>
-    <control-point id="round-2-arena-3-decider" name="round-2-arena-3-decider" capture="arena-3" capture-filter="allow-round-2-completion" player-filter="round-2-arena-3-competitors"/>
-    <control-point id="round-2-arena-4-decider" name="round-2-arena-4-decider" capture="arena-4" capture-filter="allow-round-2-completion" player-filter="round-2-arena-4-competitors"/>
-    <control-point id="round-3-arena-1-decider" name="round-3-arena-1-decider" capture="arena-1" capture-filter="allow-round-3-completion" player-filter="round-3-arena-1-competitors"/>
-    <control-point id="round-3-arena-2-decider" name="round-3-arena-2-decider" capture="arena-2" capture-filter="allow-round-3-completion" player-filter="round-3-arena-2-competitors"/>
-    <control-point id="round-3-arena-3-decider" name="round-3-arena-3-decider" capture="arena-3" capture-filter="allow-round-3-completion" player-filter="round-3-arena-3-competitors"/>
-    <control-point id="round-3-arena-4-decider" name="round-3-arena-4-decider" capture="arena-4" capture-filter="allow-round-3-completion" player-filter="round-3-arena-4-competitors"/>
+    <unless variant="cannon">
+        <control-point id="round-1-arena-1-decider" name="round-1-arena-1-decider" capture="arena-1" capture-filter="allow-round-1-completion" player-filter="all(alive=1, round-1-arena-1-competitors)"/>
+        <control-point id="round-1-arena-2-decider" name="round-1-arena-2-decider" capture="arena-2" capture-filter="allow-round-1-completion" player-filter="all(alive=1, round-1-arena-2-competitors)"/>
+        <control-point id="round-1-arena-3-decider" name="round-1-arena-3-decider" capture="arena-3" capture-filter="allow-round-1-completion" player-filter="all(alive=1, round-1-arena-3-competitors)"/>
+        <control-point id="round-1-arena-4-decider" name="round-1-arena-4-decider" capture="arena-4" capture-filter="allow-round-1-completion" player-filter="all(alive=1, round-1-arena-4-competitors)"/>
+        <control-point id="round-2-arena-1-decider" name="round-2-arena-1-decider" capture="arena-1" capture-filter="allow-round-2-completion" player-filter="all(alive=1, round-2-arena-1-competitors)"/>
+        <control-point id="round-2-arena-2-decider" name="round-2-arena-2-decider" capture="arena-2" capture-filter="allow-round-2-completion" player-filter="all(alive=1, round-2-arena-2-competitors)"/>
+        <control-point id="round-2-arena-3-decider" name="round-2-arena-3-decider" capture="arena-3" capture-filter="allow-round-2-completion" player-filter="all(alive=1, round-2-arena-3-competitors)"/>
+        <control-point id="round-2-arena-4-decider" name="round-2-arena-4-decider" capture="arena-4" capture-filter="allow-round-2-completion" player-filter="all(alive=1, round-2-arena-4-competitors)"/>
+        <control-point id="round-3-arena-1-decider" name="round-3-arena-1-decider" capture="arena-1" capture-filter="allow-round-3-completion" player-filter="all(alive=1, round-3-arena-1-competitors)"/>
+        <control-point id="round-3-arena-2-decider" name="round-3-arena-2-decider" capture="arena-2" capture-filter="allow-round-3-completion" player-filter="all(alive=1, round-3-arena-2-competitors)"/>
+        <control-point id="round-3-arena-3-decider" name="round-3-arena-3-decider" capture="arena-3" capture-filter="allow-round-3-completion" player-filter="all(alive=1, round-3-arena-3-competitors)"/>
+        <control-point id="round-3-arena-4-decider" name="round-3-arena-4-decider" capture="arena-4" capture-filter="allow-round-3-completion" player-filter="all(alive=1, round-3-arena-4-competitors)"/>
+    </unless>
+    <if variant="cannon">
+        <control-point id="round-1-arena-1-decider" name="round-1-arena-1-decider" capture="arena-1" capture-filter="allow-round-1-completion" player-filter="all(alive=1, any(all(round-1-arena-1-competitors, not(all(competitor-inside-round-1-arena-1-overtime-capture, overtime_level=3))), all(round-1-arena-1-competitors, overtime_level=3, round-1-buildable-area-middle)))"/>
+        <control-point id="round-1-arena-2-decider" name="round-1-arena-2-decider" capture="arena-2" capture-filter="allow-round-1-completion" player-filter="all(alive=1, any(all(round-1-arena-2-competitors, not(all(competitor-inside-round-1-arena-2-overtime-capture, overtime_level=3))), all(round-1-arena-2-competitors, overtime_level=3, round-1-buildable-area-middle)))"/>
+        <control-point id="round-1-arena-3-decider" name="round-1-arena-3-decider" capture="arena-3" capture-filter="allow-round-1-completion" player-filter="all(alive=1, any(all(round-1-arena-3-competitors, not(all(competitor-inside-round-1-arena-3-overtime-capture, overtime_level=3))), all(round-1-arena-3-competitors, overtime_level=3, round-1-buildable-area-middle)))"/>
+        <control-point id="round-1-arena-4-decider" name="round-1-arena-4-decider" capture="arena-4" capture-filter="allow-round-1-completion" player-filter="all(alive=1, any(all(round-1-arena-4-competitors, not(all(competitor-inside-round-1-arena-4-overtime-capture, overtime_level=3))), all(round-1-arena-4-competitors, overtime_level=3, round-1-buildable-area-middle)))"/>
+        <control-point id="round-2-arena-1-decider" name="round-2-arena-1-decider" capture="arena-1" capture-filter="allow-round-2-completion" player-filter="all(alive=1, any(all(round-2-arena-1-competitors, not(all(competitor-inside-round-2-arena-1-overtime-capture, overtime_level=3))), all(round-2-arena-1-competitors, overtime_level=3, round-2-buildable-area-middle)))"/>
+        <control-point id="round-2-arena-2-decider" name="round-2-arena-2-decider" capture="arena-2" capture-filter="allow-round-2-completion" player-filter="all(alive=1, any(all(round-2-arena-2-competitors, not(all(competitor-inside-round-2-arena-2-overtime-capture, overtime_level=3))), all(round-2-arena-2-competitors, overtime_level=3, round-2-buildable-area-middle)))"/>
+        <control-point id="round-2-arena-3-decider" name="round-2-arena-3-decider" capture="arena-3" capture-filter="allow-round-2-completion" player-filter="all(alive=1, any(all(round-2-arena-3-competitors, not(all(competitor-inside-round-2-arena-3-overtime-capture, overtime_level=3))), all(round-2-arena-3-competitors, overtime_level=3, round-2-buildable-area-middle)))"/>
+        <control-point id="round-2-arena-4-decider" name="round-2-arena-4-decider" capture="arena-4" capture-filter="allow-round-2-completion" player-filter="all(alive=1, any(all(round-2-arena-4-competitors, not(all(competitor-inside-round-2-arena-4-overtime-capture, overtime_level=3))), all(round-2-arena-4-competitors, overtime_level=3, round-2-buildable-area-middle)))"/>
+        <control-point id="round-3-arena-1-decider" name="round-3-arena-1-decider" capture="arena-1" capture-filter="allow-round-3-completion" player-filter="all(alive=1, any(all(round-3-arena-1-competitors, not(all(competitor-inside-round-3-arena-1-overtime-capture, overtime_level=3))), all(round-3-arena-1-competitors, overtime_level=3, round-3-buildable-area-middle)))"/>
+        <control-point id="round-3-arena-2-decider" name="round-3-arena-2-decider" capture="arena-2" capture-filter="allow-round-3-completion" player-filter="all(alive=1, any(all(round-3-arena-2-competitors, not(all(competitor-inside-round-3-arena-2-overtime-capture, overtime_level=3))), all(round-3-arena-2-competitors, overtime_level=3, round-3-buildable-area-middle)))"/>
+        <control-point id="round-3-arena-3-decider" name="round-3-arena-3-decider" capture="arena-3" capture-filter="allow-round-3-completion" player-filter="all(alive=1, any(all(round-3-arena-3-competitors, not(all(competitor-inside-round-3-arena-3-overtime-capture, overtime_level=3))), all(round-3-arena-3-competitors, overtime_level=3, round-3-buildable-area-middle)))"/>
+        <control-point id="round-3-arena-4-decider" name="round-3-arena-4-decider" capture="arena-4" capture-filter="allow-round-3-completion" player-filter="all(alive=1, any(all(round-3-arena-4-competitors, not(all(competitor-inside-round-3-arena-4-overtime-capture, overtime_level=3))), all(round-3-arena-4-competitors, overtime_level=3, round-3-buildable-area-middle)))"/>
+    </if>
     <if variant="cacti">
         <control-points visual-materials="visual-blocks">
             <control-point id="round-1-arena-1-spawn-1-color-decider" name="round-1-arena-1-spawn-1-color-decider" capture="round-1-arena-1-spawn-1-color-objects" captured="round-1-arena-1-spawn-1-color-objects"/>
@@ -3285,167 +3385,167 @@
         <structure id="arena-struct-north-6" region="arena-layout-north-6" air="true"/>
         <structure id="arena-struct-south-6" region="arena-layout-south-6" air="true"/>
         <!-- round 1 layout 1 -->
-        <dynamic structure="arena-struct-north-1" location="144,0,-65" trigger="all(round_1_kit=1)"/>
-        <dynamic structure="arena-struct-south-1" location="144,0,-20" trigger="all(round_1_kit=1)"/>
-        <dynamic structure="arena-struct-north-1" location="100,0,-65" trigger="all(round_1_kit=1)"/>
-        <dynamic structure="arena-struct-south-1" location="100,0,-20" trigger="all(round_1_kit=1)"/>
-        <dynamic structure="arena-struct-north-1" location="56,0,-65" trigger="all(round_1_kit=1)"/>
-        <dynamic structure="arena-struct-south-1" location="56,0,-20" trigger="all(round_1_kit=1)"/>
-        <dynamic structure="arena-struct-north-1" location="12,0,-65" trigger="all(round_1_kit=1)"/>
-        <dynamic structure="arena-struct-south-1" location="12,0,-20" trigger="all(round_1_kit=1)"/>
+        <dynamic structure="arena-struct-north-1" location="144,0,-65" trigger="round_1_kit=1"/>
+        <dynamic structure="arena-struct-south-1" location="144,0,-20" trigger="round_1_kit=1"/>
+        <dynamic structure="arena-struct-north-1" location="100,0,-65" trigger="round_1_kit=1"/>
+        <dynamic structure="arena-struct-south-1" location="100,0,-20" trigger="round_1_kit=1"/>
+        <dynamic structure="arena-struct-north-1" location="56,0,-65" trigger="round_1_kit=1"/>
+        <dynamic structure="arena-struct-south-1" location="56,0,-20" trigger="round_1_kit=1"/>
+        <dynamic structure="arena-struct-north-1" location="12,0,-65" trigger="round_1_kit=1"/>
+        <dynamic structure="arena-struct-south-1" location="12,0,-20" trigger="round_1_kit=1"/>
         <!-- round 1 layout 2 -->
-        <dynamic structure="arena-struct-north-2" location="144,0,-65" trigger="all(round_1_kit=2)"/>
-        <dynamic structure="arena-struct-south-2" location="144,0,-20" trigger="all(round_1_kit=2)"/>
-        <dynamic structure="arena-struct-north-2" location="100,0,-65" trigger="all(round_1_kit=2)"/>
-        <dynamic structure="arena-struct-south-2" location="100,0,-20" trigger="all(round_1_kit=2)"/>
-        <dynamic structure="arena-struct-north-2" location="56,0,-65" trigger="all(round_1_kit=2)"/>
-        <dynamic structure="arena-struct-south-2" location="56,0,-20" trigger="all(round_1_kit=2)"/>
-        <dynamic structure="arena-struct-north-2" location="12,0,-65" trigger="all(round_1_kit=2)"/>
-        <dynamic structure="arena-struct-south-2" location="12,0,-20" trigger="all(round_1_kit=2)"/>
+        <dynamic structure="arena-struct-north-2" location="144,0,-65" trigger="round_1_kit=2"/>
+        <dynamic structure="arena-struct-south-2" location="144,0,-20" trigger="round_1_kit=2"/>
+        <dynamic structure="arena-struct-north-2" location="100,0,-65" trigger="round_1_kit=2"/>
+        <dynamic structure="arena-struct-south-2" location="100,0,-20" trigger="round_1_kit=2"/>
+        <dynamic structure="arena-struct-north-2" location="56,0,-65" trigger="round_1_kit=2"/>
+        <dynamic structure="arena-struct-south-2" location="56,0,-20" trigger="round_1_kit=2"/>
+        <dynamic structure="arena-struct-north-2" location="12,0,-65" trigger="round_1_kit=2"/>
+        <dynamic structure="arena-struct-south-2" location="12,0,-20" trigger="round_1_kit=2"/>
         <!-- round 1 layout 3 -->
-        <dynamic structure="arena-struct-north-3" location="144,0,-65" trigger="all(round_1_kit=3)"/>
-        <dynamic structure="arena-struct-south-3" location="144,0,-20" trigger="all(round_1_kit=3)"/>
-        <dynamic structure="arena-struct-north-3" location="100,0,-65" trigger="all(round_1_kit=3)"/>
-        <dynamic structure="arena-struct-south-3" location="100,0,-20" trigger="all(round_1_kit=3)"/>
-        <dynamic structure="arena-struct-north-3" location="56,0,-65" trigger="all(round_1_kit=3)"/>
-        <dynamic structure="arena-struct-south-3" location="56,0,-20" trigger="all(round_1_kit=3)"/>
-        <dynamic structure="arena-struct-north-3" location="12,0,-65" trigger="all(round_1_kit=3)"/>
-        <dynamic structure="arena-struct-south-3" location="12,0,-20" trigger="all(round_1_kit=3)"/>
+        <dynamic structure="arena-struct-north-3" location="144,0,-65" trigger="round_1_kit=3"/>
+        <dynamic structure="arena-struct-south-3" location="144,0,-20" trigger="round_1_kit=3"/>
+        <dynamic structure="arena-struct-north-3" location="100,0,-65" trigger="round_1_kit=3"/>
+        <dynamic structure="arena-struct-south-3" location="100,0,-20" trigger="round_1_kit=3"/>
+        <dynamic structure="arena-struct-north-3" location="56,0,-65" trigger="round_1_kit=3"/>
+        <dynamic structure="arena-struct-south-3" location="56,0,-20" trigger="round_1_kit=3"/>
+        <dynamic structure="arena-struct-north-3" location="12,0,-65" trigger="round_1_kit=3"/>
+        <dynamic structure="arena-struct-south-3" location="12,0,-20" trigger="round_1_kit=3"/>
         <!-- round 1 layout 4 -->
-        <dynamic structure="arena-struct-north-4" location="144,0,-65" trigger="all(round_1_kit=4)"/>
-        <dynamic structure="arena-struct-south-4" location="144,0,-20" trigger="all(round_1_kit=4)"/>
-        <dynamic structure="arena-struct-north-4" location="100,0,-65" trigger="all(round_1_kit=4)"/>
-        <dynamic structure="arena-struct-south-4" location="100,0,-20" trigger="all(round_1_kit=4)"/>
-        <dynamic structure="arena-struct-north-4" location="56,0,-65" trigger="all(round_1_kit=4)"/>
-        <dynamic structure="arena-struct-south-4" location="56,0,-20" trigger="all(round_1_kit=4)"/>
-        <dynamic structure="arena-struct-north-4" location="12,0,-65" trigger="all(round_1_kit=4)"/>
-        <dynamic structure="arena-struct-south-4" location="12,0,-20" trigger="all(round_1_kit=4)"/>
+        <dynamic structure="arena-struct-north-4" location="144,0,-65" trigger="round_1_kit=4"/>
+        <dynamic structure="arena-struct-south-4" location="144,0,-20" trigger="round_1_kit=4"/>
+        <dynamic structure="arena-struct-north-4" location="100,0,-65" trigger="round_1_kit=4"/>
+        <dynamic structure="arena-struct-south-4" location="100,0,-20" trigger="round_1_kit=4"/>
+        <dynamic structure="arena-struct-north-4" location="56,0,-65" trigger="round_1_kit=4"/>
+        <dynamic structure="arena-struct-south-4" location="56,0,-20" trigger="round_1_kit=4"/>
+        <dynamic structure="arena-struct-north-4" location="12,0,-65" trigger="round_1_kit=4"/>
+        <dynamic structure="arena-struct-south-4" location="12,0,-20" trigger="round_1_kit=4"/>
         <!-- round 1 layout 5 -->
-        <dynamic structure="arena-struct-north-5" location="144,0,-65" trigger="all(round_1_kit=5)"/>
-        <dynamic structure="arena-struct-south-5" location="144,0,-20" trigger="all(round_1_kit=5)"/>
-        <dynamic structure="arena-struct-north-5" location="100,0,-65" trigger="all(round_1_kit=5)"/>
-        <dynamic structure="arena-struct-south-5" location="100,0,-20" trigger="all(round_1_kit=5)"/>
-        <dynamic structure="arena-struct-north-5" location="56,0,-65" trigger="all(round_1_kit=5)"/>
-        <dynamic structure="arena-struct-south-5" location="56,0,-20" trigger="all(round_1_kit=5)"/>
-        <dynamic structure="arena-struct-north-5" location="12,0,-65" trigger="all(round_1_kit=5)"/>
-        <dynamic structure="arena-struct-south-5" location="12,0,-20" trigger="all(round_1_kit=5)"/>
+        <dynamic structure="arena-struct-north-5" location="144,0,-65" trigger="round_1_kit=5"/>
+        <dynamic structure="arena-struct-south-5" location="144,0,-20" trigger="round_1_kit=5"/>
+        <dynamic structure="arena-struct-north-5" location="100,0,-65" trigger="round_1_kit=5"/>
+        <dynamic structure="arena-struct-south-5" location="100,0,-20" trigger="round_1_kit=5"/>
+        <dynamic structure="arena-struct-north-5" location="56,0,-65" trigger="round_1_kit=5"/>
+        <dynamic structure="arena-struct-south-5" location="56,0,-20" trigger="round_1_kit=5"/>
+        <dynamic structure="arena-struct-north-5" location="12,0,-65" trigger="round_1_kit=5"/>
+        <dynamic structure="arena-struct-south-5" location="12,0,-20" trigger="round_1_kit=5"/>
         <!-- round 1 layout 6 -->
-        <dynamic structure="arena-struct-north-6" location="144,0,-65" trigger="all(round_1_kit=6)"/>
-        <dynamic structure="arena-struct-south-6" location="144,0,-20" trigger="all(round_1_kit=6)"/>
-        <dynamic structure="arena-struct-north-6" location="100,0,-65" trigger="all(round_1_kit=6)"/>
-        <dynamic structure="arena-struct-south-6" location="100,0,-20" trigger="all(round_1_kit=6)"/>
-        <dynamic structure="arena-struct-north-6" location="56,0,-65" trigger="all(round_1_kit=6)"/>
-        <dynamic structure="arena-struct-south-6" location="56,0,-20" trigger="all(round_1_kit=6)"/>
-        <dynamic structure="arena-struct-north-6" location="12,0,-65" trigger="all(round_1_kit=6)"/>
-        <dynamic structure="arena-struct-south-6" location="12,0,-20" trigger="all(round_1_kit=6)"/>
+        <dynamic structure="arena-struct-north-6" location="144,0,-65" trigger="round_1_kit=6"/>
+        <dynamic structure="arena-struct-south-6" location="144,0,-20" trigger="round_1_kit=6"/>
+        <dynamic structure="arena-struct-north-6" location="100,0,-65" trigger="round_1_kit=6"/>
+        <dynamic structure="arena-struct-south-6" location="100,0,-20" trigger="round_1_kit=6"/>
+        <dynamic structure="arena-struct-north-6" location="56,0,-65" trigger="round_1_kit=6"/>
+        <dynamic structure="arena-struct-south-6" location="56,0,-20" trigger="round_1_kit=6"/>
+        <dynamic structure="arena-struct-north-6" location="12,0,-65" trigger="round_1_kit=6"/>
+        <dynamic structure="arena-struct-south-6" location="12,0,-20" trigger="round_1_kit=6"/>
         <!-- round 2 layout 1 -->
-        <dynamic structure="arena-struct-north-1" location="144,0,1" trigger="all(round_2_kit=1)"/>
-        <dynamic structure="arena-struct-south-1" location="144,0,46" trigger="all(round_2_kit=1)"/>
-        <dynamic structure="arena-struct-north-1" location="100,0,1" trigger="all(round_2_kit=1)"/>
-        <dynamic structure="arena-struct-south-1" location="100,0,46" trigger="all(round_2_kit=1)"/>
-        <dynamic structure="arena-struct-north-1" location="56,0,1" trigger="all(round_2_kit=1)"/>
-        <dynamic structure="arena-struct-south-1" location="56,0,46" trigger="all(round_2_kit=1)"/>
-        <dynamic structure="arena-struct-north-1" location="12,0,1" trigger="all(round_2_kit=1)"/>
-        <dynamic structure="arena-struct-south-1" location="12,0,46" trigger="all(round_2_kit=1)"/>
+        <dynamic structure="arena-struct-north-1" location="144,0,1" trigger="round_2_kit=1"/>
+        <dynamic structure="arena-struct-south-1" location="144,0,46" trigger="round_2_kit=1"/>
+        <dynamic structure="arena-struct-north-1" location="100,0,1" trigger="round_2_kit=1"/>
+        <dynamic structure="arena-struct-south-1" location="100,0,46" trigger="round_2_kit=1"/>
+        <dynamic structure="arena-struct-north-1" location="56,0,1" trigger="round_2_kit=1"/>
+        <dynamic structure="arena-struct-south-1" location="56,0,46" trigger="round_2_kit=1"/>
+        <dynamic structure="arena-struct-north-1" location="12,0,1" trigger="round_2_kit=1"/>
+        <dynamic structure="arena-struct-south-1" location="12,0,46" trigger="round_2_kit=1"/>
         <!-- round 2 layout 2 -->
-        <dynamic structure="arena-struct-north-2" location="144,0,1" trigger="all(round_2_kit=2)"/>
-        <dynamic structure="arena-struct-south-2" location="144,0,46" trigger="all(round_2_kit=2)"/>
-        <dynamic structure="arena-struct-north-2" location="100,0,1" trigger="all(round_2_kit=2)"/>
-        <dynamic structure="arena-struct-south-2" location="100,0,46" trigger="all(round_2_kit=2)"/>
-        <dynamic structure="arena-struct-north-2" location="56,0,1" trigger="all(round_2_kit=2)"/>
-        <dynamic structure="arena-struct-south-2" location="56,0,46" trigger="all(round_2_kit=2)"/>
-        <dynamic structure="arena-struct-north-2" location="12,0,1" trigger="all(round_2_kit=2)"/>
-        <dynamic structure="arena-struct-south-2" location="12,0,46" trigger="all(round_2_kit=2)"/>
+        <dynamic structure="arena-struct-north-2" location="144,0,1" trigger="round_2_kit=2"/>
+        <dynamic structure="arena-struct-south-2" location="144,0,46" trigger="round_2_kit=2"/>
+        <dynamic structure="arena-struct-north-2" location="100,0,1" trigger="round_2_kit=2"/>
+        <dynamic structure="arena-struct-south-2" location="100,0,46" trigger="round_2_kit=2"/>
+        <dynamic structure="arena-struct-north-2" location="56,0,1" trigger="round_2_kit=2"/>
+        <dynamic structure="arena-struct-south-2" location="56,0,46" trigger="round_2_kit=2"/>
+        <dynamic structure="arena-struct-north-2" location="12,0,1" trigger="round_2_kit=2"/>
+        <dynamic structure="arena-struct-south-2" location="12,0,46" trigger="round_2_kit=2"/>
         <!-- round 2 layout 3 -->
-        <dynamic structure="arena-struct-north-3" location="144,0,1" trigger="all(round_2_kit=3)"/>
-        <dynamic structure="arena-struct-south-3" location="144,0,46" trigger="all(round_2_kit=3)"/>
-        <dynamic structure="arena-struct-north-3" location="100,0,1" trigger="all(round_2_kit=3)"/>
-        <dynamic structure="arena-struct-south-3" location="100,0,46" trigger="all(round_2_kit=3)"/>
-        <dynamic structure="arena-struct-north-3" location="56,0,1" trigger="all(round_2_kit=3)"/>
-        <dynamic structure="arena-struct-south-3" location="56,0,46" trigger="all(round_2_kit=3)"/>
-        <dynamic structure="arena-struct-north-3" location="12,0,1" trigger="all(round_2_kit=3)"/>
-        <dynamic structure="arena-struct-south-3" location="12,0,46" trigger="all(round_2_kit=3)"/>
+        <dynamic structure="arena-struct-north-3" location="144,0,1" trigger="round_2_kit=3"/>
+        <dynamic structure="arena-struct-south-3" location="144,0,46" trigger="round_2_kit=3"/>
+        <dynamic structure="arena-struct-north-3" location="100,0,1" trigger="round_2_kit=3"/>
+        <dynamic structure="arena-struct-south-3" location="100,0,46" trigger="round_2_kit=3"/>
+        <dynamic structure="arena-struct-north-3" location="56,0,1" trigger="round_2_kit=3"/>
+        <dynamic structure="arena-struct-south-3" location="56,0,46" trigger="round_2_kit=3"/>
+        <dynamic structure="arena-struct-north-3" location="12,0,1" trigger="round_2_kit=3"/>
+        <dynamic structure="arena-struct-south-3" location="12,0,46" trigger="round_2_kit=3"/>
         <!-- round 2 layout 4 -->
-        <dynamic structure="arena-struct-north-4" location="144,0,1" trigger="all(round_2_kit=4)"/>
-        <dynamic structure="arena-struct-south-4" location="144,0,46" trigger="all(round_2_kit=4)"/>
-        <dynamic structure="arena-struct-north-4" location="100,0,1" trigger="all(round_2_kit=4)"/>
-        <dynamic structure="arena-struct-south-4" location="100,0,46" trigger="all(round_2_kit=4)"/>
-        <dynamic structure="arena-struct-north-4" location="56,0,1" trigger="all(round_2_kit=4)"/>
-        <dynamic structure="arena-struct-south-4" location="56,0,46" trigger="all(round_2_kit=4)"/>
-        <dynamic structure="arena-struct-north-4" location="12,0,1" trigger="all(round_2_kit=4)"/>
-        <dynamic structure="arena-struct-south-4" location="12,0,46" trigger="all(round_2_kit=4)"/>
+        <dynamic structure="arena-struct-north-4" location="144,0,1" trigger="round_2_kit=4"/>
+        <dynamic structure="arena-struct-south-4" location="144,0,46" trigger="round_2_kit=4"/>
+        <dynamic structure="arena-struct-north-4" location="100,0,1" trigger="round_2_kit=4"/>
+        <dynamic structure="arena-struct-south-4" location="100,0,46" trigger="round_2_kit=4"/>
+        <dynamic structure="arena-struct-north-4" location="56,0,1" trigger="round_2_kit=4"/>
+        <dynamic structure="arena-struct-south-4" location="56,0,46" trigger="round_2_kit=4"/>
+        <dynamic structure="arena-struct-north-4" location="12,0,1" trigger="round_2_kit=4"/>
+        <dynamic structure="arena-struct-south-4" location="12,0,46" trigger="round_2_kit=4"/>
         <!-- round 2 layout 5 -->
-        <dynamic structure="arena-struct-north-5" location="144,0,1" trigger="all(round_2_kit=5)"/>
-        <dynamic structure="arena-struct-south-5" location="144,0,46" trigger="all(round_2_kit=5)"/>
-        <dynamic structure="arena-struct-north-5" location="100,0,1" trigger="all(round_2_kit=5)"/>
-        <dynamic structure="arena-struct-south-5" location="100,0,46" trigger="all(round_2_kit=5)"/>
-        <dynamic structure="arena-struct-north-5" location="56,0,1" trigger="all(round_2_kit=5)"/>
-        <dynamic structure="arena-struct-south-5" location="56,0,46" trigger="all(round_2_kit=5)"/>
-        <dynamic structure="arena-struct-north-5" location="12,0,1" trigger="all(round_2_kit=5)"/>
-        <dynamic structure="arena-struct-south-5" location="12,0,46" trigger="all(round_2_kit=5)"/>
+        <dynamic structure="arena-struct-north-5" location="144,0,1" trigger="round_2_kit=5"/>
+        <dynamic structure="arena-struct-south-5" location="144,0,46" trigger="round_2_kit=5"/>
+        <dynamic structure="arena-struct-north-5" location="100,0,1" trigger="round_2_kit=5"/>
+        <dynamic structure="arena-struct-south-5" location="100,0,46" trigger="round_2_kit=5"/>
+        <dynamic structure="arena-struct-north-5" location="56,0,1" trigger="round_2_kit=5"/>
+        <dynamic structure="arena-struct-south-5" location="56,0,46" trigger="round_2_kit=5"/>
+        <dynamic structure="arena-struct-north-5" location="12,0,1" trigger="round_2_kit=5"/>
+        <dynamic structure="arena-struct-south-5" location="12,0,46" trigger="round_2_kit=5"/>
         <!-- round 2 layout 6 -->
-        <dynamic structure="arena-struct-north-6" location="144,0,1" trigger="all(round_2_kit=6)"/>
-        <dynamic structure="arena-struct-south-6" location="144,0,46" trigger="all(round_2_kit=6)"/>
-        <dynamic structure="arena-struct-north-6" location="100,0,1" trigger="all(round_2_kit=6)"/>
-        <dynamic structure="arena-struct-south-6" location="100,0,46" trigger="all(round_2_kit=6)"/>
-        <dynamic structure="arena-struct-north-6" location="56,0,1" trigger="all(round_2_kit=6)"/>
-        <dynamic structure="arena-struct-south-6" location="56,0,46" trigger="all(round_2_kit=6)"/>
-        <dynamic structure="arena-struct-north-6" location="12,0,1" trigger="all(round_2_kit=6)"/>
-        <dynamic structure="arena-struct-south-6" location="12,0,46" trigger="all(round_2_kit=6)"/>
+        <dynamic structure="arena-struct-north-6" location="144,0,1" trigger="round_2_kit=6"/>
+        <dynamic structure="arena-struct-south-6" location="144,0,46" trigger="round_2_kit=6"/>
+        <dynamic structure="arena-struct-north-6" location="100,0,1" trigger="round_2_kit=6"/>
+        <dynamic structure="arena-struct-south-6" location="100,0,46" trigger="round_2_kit=6"/>
+        <dynamic structure="arena-struct-north-6" location="56,0,1" trigger="round_2_kit=6"/>
+        <dynamic structure="arena-struct-south-6" location="56,0,46" trigger="round_2_kit=6"/>
+        <dynamic structure="arena-struct-north-6" location="12,0,1" trigger="round_2_kit=6"/>
+        <dynamic structure="arena-struct-south-6" location="12,0,46" trigger="round_2_kit=6"/>
         <!-- round 3 layout 1 -->
-        <dynamic structure="arena-struct-north-1" location="144,0,67" trigger="all(round_3_kit=1)"/>
-        <dynamic structure="arena-struct-south-1" location="144,0,112" trigger="all(round_3_kit=1)"/>
-        <dynamic structure="arena-struct-north-1" location="100,0,67" trigger="all(round_3_kit=1)"/>
-        <dynamic structure="arena-struct-south-1" location="100,0,112" trigger="all(round_3_kit=1)"/>
-        <dynamic structure="arena-struct-north-1" location="56,0,67" trigger="all(round_3_kit=1)"/>
-        <dynamic structure="arena-struct-south-1" location="56,0,112" trigger="all(round_3_kit=1)"/>
-        <dynamic structure="arena-struct-north-1" location="12,0,67" trigger="all(round_3_kit=1)"/>
-        <dynamic structure="arena-struct-south-1" location="12,0,112" trigger="all(round_3_kit=1)"/>
+        <dynamic structure="arena-struct-north-1" location="144,0,67" trigger="round_3_kit=1"/>
+        <dynamic structure="arena-struct-south-1" location="144,0,112" trigger="round_3_kit=1"/>
+        <dynamic structure="arena-struct-north-1" location="100,0,67" trigger="round_3_kit=1"/>
+        <dynamic structure="arena-struct-south-1" location="100,0,112" trigger="round_3_kit=1"/>
+        <dynamic structure="arena-struct-north-1" location="56,0,67" trigger="round_3_kit=1"/>
+        <dynamic structure="arena-struct-south-1" location="56,0,112" trigger="round_3_kit=1"/>
+        <dynamic structure="arena-struct-north-1" location="12,0,67" trigger="round_3_kit=1"/>
+        <dynamic structure="arena-struct-south-1" location="12,0,112" trigger="round_3_kit=1"/>
         <!-- round 3 layout 2 -->
-        <dynamic structure="arena-struct-north-2" location="144,0,67" trigger="all(round_3_kit=2)"/>
-        <dynamic structure="arena-struct-south-2" location="144,0,112" trigger="all(round_3_kit=2)"/>
-        <dynamic structure="arena-struct-north-2" location="100,0,67" trigger="all(round_3_kit=2)"/>
-        <dynamic structure="arena-struct-south-2" location="100,0,112" trigger="all(round_3_kit=2)"/>
-        <dynamic structure="arena-struct-north-2" location="56,0,67" trigger="all(round_3_kit=2)"/>
-        <dynamic structure="arena-struct-south-2" location="56,0,112" trigger="all(round_3_kit=2)"/>
-        <dynamic structure="arena-struct-north-2" location="12,0,67" trigger="all(round_3_kit=2)"/>
-        <dynamic structure="arena-struct-south-2" location="12,0,112" trigger="all(round_3_kit=2)"/>
+        <dynamic structure="arena-struct-north-2" location="144,0,67" trigger="round_3_kit=2"/>
+        <dynamic structure="arena-struct-south-2" location="144,0,112" trigger="round_3_kit=2"/>
+        <dynamic structure="arena-struct-north-2" location="100,0,67" trigger="round_3_kit=2"/>
+        <dynamic structure="arena-struct-south-2" location="100,0,112" trigger="round_3_kit=2"/>
+        <dynamic structure="arena-struct-north-2" location="56,0,67" trigger="round_3_kit=2"/>
+        <dynamic structure="arena-struct-south-2" location="56,0,112" trigger="round_3_kit=2"/>
+        <dynamic structure="arena-struct-north-2" location="12,0,67" trigger="round_3_kit=2"/>
+        <dynamic structure="arena-struct-south-2" location="12,0,112" trigger="round_3_kit=2"/>
         <!-- round 3 layout 3 -->
-        <dynamic structure="arena-struct-north-3" location="144,0,67" trigger="all(round_3_kit=3)"/>
-        <dynamic structure="arena-struct-south-3" location="144,0,112" trigger="all(round_3_kit=3)"/>
-        <dynamic structure="arena-struct-north-3" location="100,0,67" trigger="all(round_3_kit=3)"/>
-        <dynamic structure="arena-struct-south-3" location="100,0,112" trigger="all(round_3_kit=3)"/>
-        <dynamic structure="arena-struct-north-3" location="56,0,67" trigger="all(round_3_kit=3)"/>
-        <dynamic structure="arena-struct-south-3" location="56,0,112" trigger="all(round_3_kit=3)"/>
-        <dynamic structure="arena-struct-north-3" location="12,0,67" trigger="all(round_3_kit=3)"/>
-        <dynamic structure="arena-struct-south-3" location="12,0,112" trigger="all(round_3_kit=3)"/>
+        <dynamic structure="arena-struct-north-3" location="144,0,67" trigger="round_3_kit=3"/>
+        <dynamic structure="arena-struct-south-3" location="144,0,112" trigger="round_3_kit=3"/>
+        <dynamic structure="arena-struct-north-3" location="100,0,67" trigger="round_3_kit=3"/>
+        <dynamic structure="arena-struct-south-3" location="100,0,112" trigger="round_3_kit=3"/>
+        <dynamic structure="arena-struct-north-3" location="56,0,67" trigger="round_3_kit=3"/>
+        <dynamic structure="arena-struct-south-3" location="56,0,112" trigger="round_3_kit=3"/>
+        <dynamic structure="arena-struct-north-3" location="12,0,67" trigger="round_3_kit=3"/>
+        <dynamic structure="arena-struct-south-3" location="12,0,112" trigger="round_3_kit=3"/>
         <!-- round 3 layout 4 -->
-        <dynamic structure="arena-struct-north-4" location="144,0,67" trigger="all(round_3_kit=4)"/>
-        <dynamic structure="arena-struct-south-4" location="144,0,112" trigger="all(round_3_kit=4)"/>
-        <dynamic structure="arena-struct-north-4" location="100,0,67" trigger="all(round_3_kit=4)"/>
-        <dynamic structure="arena-struct-south-4" location="100,0,112" trigger="all(round_3_kit=4)"/>
-        <dynamic structure="arena-struct-north-4" location="56,0,67" trigger="all(round_3_kit=4)"/>
-        <dynamic structure="arena-struct-south-4" location="56,0,112" trigger="all(round_3_kit=4)"/>
-        <dynamic structure="arena-struct-north-4" location="12,0,67" trigger="all(round_3_kit=4)"/>
-        <dynamic structure="arena-struct-south-4" location="12,0,112" trigger="all(round_3_kit=4)"/>
+        <dynamic structure="arena-struct-north-4" location="144,0,67" trigger="round_3_kit=4"/>
+        <dynamic structure="arena-struct-south-4" location="144,0,112" trigger="round_3_kit=4"/>
+        <dynamic structure="arena-struct-north-4" location="100,0,67" trigger="round_3_kit=4"/>
+        <dynamic structure="arena-struct-south-4" location="100,0,112" trigger="round_3_kit=4"/>
+        <dynamic structure="arena-struct-north-4" location="56,0,67" trigger="round_3_kit=4"/>
+        <dynamic structure="arena-struct-south-4" location="56,0,112" trigger="round_3_kit=4"/>
+        <dynamic structure="arena-struct-north-4" location="12,0,67" trigger="round_3_kit=4"/>
+        <dynamic structure="arena-struct-south-4" location="12,0,112" trigger="round_3_kit=4"/>
         <!-- round 3 layout 5 -->
-        <dynamic structure="arena-struct-north-5" location="144,0,67" trigger="all(round_3_kit=5)"/>
-        <dynamic structure="arena-struct-south-5" location="144,0,112" trigger="all(round_3_kit=5)"/>
-        <dynamic structure="arena-struct-north-5" location="100,0,67" trigger="all(round_3_kit=5)"/>
-        <dynamic structure="arena-struct-south-5" location="100,0,112" trigger="all(round_3_kit=5)"/>
-        <dynamic structure="arena-struct-north-5" location="56,0,67" trigger="all(round_3_kit=5)"/>
-        <dynamic structure="arena-struct-south-5" location="56,0,112" trigger="all(round_3_kit=5)"/>
-        <dynamic structure="arena-struct-north-5" location="12,0,67" trigger="all(round_3_kit=5)"/>
-        <dynamic structure="arena-struct-south-5" location="12,0,112" trigger="all(round_3_kit=5)"/>
+        <dynamic structure="arena-struct-north-5" location="144,0,67" trigger="round_3_kit=5"/>
+        <dynamic structure="arena-struct-south-5" location="144,0,112" trigger="round_3_kit=5"/>
+        <dynamic structure="arena-struct-north-5" location="100,0,67" trigger="round_3_kit=5"/>
+        <dynamic structure="arena-struct-south-5" location="100,0,112" trigger="round_3_kit=5"/>
+        <dynamic structure="arena-struct-north-5" location="56,0,67" trigger="round_3_kit=5"/>
+        <dynamic structure="arena-struct-south-5" location="56,0,112" trigger="round_3_kit=5"/>
+        <dynamic structure="arena-struct-north-5" location="12,0,67" trigger="round_3_kit=5"/>
+        <dynamic structure="arena-struct-south-5" location="12,0,112" trigger="round_3_kit=5"/>
         <!-- round 3 layout 6 -->
-        <dynamic structure="arena-struct-north-6" location="144,0,67" trigger="all(round_3_kit=6)"/>
-        <dynamic structure="arena-struct-south-6" location="144,0,112" trigger="all(round_3_kit=6)"/>
-        <dynamic structure="arena-struct-north-6" location="100,0,67" trigger="all(round_3_kit=6)"/>
-        <dynamic structure="arena-struct-south-6" location="100,0,112" trigger="all(round_3_kit=6)"/>
-        <dynamic structure="arena-struct-north-6" location="56,0,67" trigger="all(round_3_kit=6)"/>
-        <dynamic structure="arena-struct-south-6" location="56,0,112" trigger="all(round_3_kit=6)"/>
-        <dynamic structure="arena-struct-north-6" location="12,0,67" trigger="all(round_3_kit=6)"/>
-        <dynamic structure="arena-struct-south-6" location="12,0,112" trigger="all(round_3_kit=6)"/>
+        <dynamic structure="arena-struct-north-6" location="144,0,67" trigger="round_3_kit=6"/>
+        <dynamic structure="arena-struct-south-6" location="144,0,112" trigger="round_3_kit=6"/>
+        <dynamic structure="arena-struct-north-6" location="100,0,67" trigger="round_3_kit=6"/>
+        <dynamic structure="arena-struct-south-6" location="100,0,112" trigger="round_3_kit=6"/>
+        <dynamic structure="arena-struct-north-6" location="56,0,67" trigger="round_3_kit=6"/>
+        <dynamic structure="arena-struct-south-6" location="56,0,112" trigger="round_3_kit=6"/>
+        <dynamic structure="arena-struct-north-6" location="12,0,67" trigger="round_3_kit=6"/>
+        <dynamic structure="arena-struct-south-6" location="12,0,112" trigger="round_3_kit=6"/>
     </structures>
 </if>
 <if variant="cacti">
@@ -3552,6 +3652,9 @@
     <item>redstone torch on</item>
     <item>redstone block</item>
     <item>redstone</item>
+    <item>lever</item>
+    <item>piston base</item>
+    <item>nether fence</item>
     <item>stained glass</item>
     <item>stained clay</item>
     <item>sulphur</item>
