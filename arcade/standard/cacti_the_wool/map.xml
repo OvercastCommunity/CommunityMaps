@@ -1,0 +1,428 @@
+<map proto="1.4.2">
+<name>Cacti the Wool</name>
+<variant id="dtc" world="core" override="true">Cacti the Core</variant>
+<variant id="koth" world="hill" override="true">Cacti the Hill</variant>
+<variant id="dtm" world="monument" override="true">Cacti the Monument</variant>
+<variant id="rage" world="rage" override="true">Cacti the RAGE</variant>
+<version>1.0.0</version>
+<!-- Variant Controls -->
+<if variant="default">
+    <gamemode>ctw</gamemode>
+    <constant id="game-objective">Capture the enemy team's wool!</constant>
+    <constant id="game-duration">10m</constant>
+</if>
+<if variant="dtc">
+    <gamemode>dtc</gamemode>
+    <constant id="game-objective">Leak the enemy team's melon core!</constant>
+    <constant id="game-duration">10m</constant>
+</if>
+<if variant="koth">
+    <gamemode>koth</gamemode>
+    <constant id="game-objective">Be the first team to reach 500 points!</constant>
+    <constant id="game-duration" delete="true"/>
+</if>
+<if variant="dtm">
+    <gamemode>dtm</gamemode>
+    <constant id="game-objective">Destroy both of the enemy team's melon monuments!</constant>
+    <constant id="game-duration">10m</constant>
+</if>
+<if variant="rage">
+    <gamemode>rage</gamemode>
+    <gamemode>tdm</gamemode>
+    <constant id="game-objective">Be the team with the most points after 5 minutes!</constant>
+    <constant id="game-duration">5m</constant>
+</if>
+<objective>${game-objective}</objective>
+<created>2024-03-31</created>
+<!-- Authors and Contributors -->
+<authors>
+    <author uuid="76db4f74-9cf4-45b7-a3a8-ae96b5979bfd" contribution="Executive Producer"/> <!-- stupid3700 -->
+</authors>
+<contributors>
+    <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Director"/> <!-- Cazadorian -->
+    <contributor uuid="3a3dab52-a356-4eed-a506-a9a7e53a3f68" contribution="Cacti Panic author"/> <!-- Akorlith --> 
+</contributors>
+<!-- Teams -->
+<teams>
+    <team id="blue" color="blue" max="32">Blue</team>
+    <team id="red" color="red" max="32">Red</team>
+</teams>
+<unless variant="koth">
+    <time>${game-duration}</time>
+</unless>
+<!-- Kits -->
+<kits>
+    <kit id="spawn-kit">
+        <unless variant="rage"> <!-- Normal items -->
+            <item slot="0" amount="16" material="cactus"/>
+            <item slot="1" amount="1" unbreakable="true" material="fishing rod"/>
+        </unless>
+        <if variant="rage"> <!-- RAGE-only items -->
+            <item slot="0" amount="16" name="`r`2`lExtra Pointy Cactus" enchantment="damage all:10" lore="`aInsta melee kill!" material="cactus"/>
+            <item slot="1" amount="1" name="`r`3`lSharpened Fishing Rod" enchantment="damage all:10" lore="`aInsta melee kill!" unbreakable="true" material="fishing rod"/>
+        </if>
+        <helmet unbreakable="true" team-color="true" material="stained glass"/>
+        <effect amplifier="20">weakness</effect>
+        <effect duration="3" amplifier="255">damage resistance</effect>
+        <max-health>1</max-health>
+    </kit>
+</kits>
+<!-- Spawns -->
+<spawns>
+    <if variant="default,dtm,koth,rage">
+        <default yaw="0">
+            <regions>
+                <cylinder base="0.5,22,-31.5" radius="2" height="0"/>
+            </regions>
+        </default>
+        <spawn team="blue" kit="spawn-kit" yaw="90">
+            <regions>
+                <unless variant="rage">
+                    <cylinder id="blue-spawnpoint" base="29.5,4,0.5" radius="2" height="0"/>
+                </unless>
+                <if variant="rage">
+                    <cylinder id="blue-spawnpoint" base="29.5,5,0.5" radius="2" height="0"/>
+                </if>
+            </regions>
+        </spawn>
+        <spawn team="red" kit="spawn-kit" yaw="-90">
+            <regions>
+                <unless variant="rage">
+                    <cylinder id="red-spawnpoint" base="-28.5,4,0.5" radius="2" height="0"/>
+                </unless>
+                <if variant="rage">
+                    <cylinder id="red-spawnpoint" base="-28.5,5,0.5" radius="2" height="0"/>
+                </if>
+            </regions>
+        </spawn>
+    </if>
+    <if variant="dtc">
+        <default yaw="-90">
+            <regions>
+                <cylinder base="-32.5,22,0.5" radius="2" height="0"/>
+            </regions>
+        </default>
+        <spawn team="blue" kit="spawn-kit" yaw="0">
+            <regions>
+                <cylinder base="0.5,4,-29.5" radius="2" height="0"/>
+            </regions>
+        </spawn>
+        <spawn team="red" kit="spawn-kit" yaw="180">
+            <regions>
+                <cylinder base="0.5,4,30.5" radius="2" height="0"/>
+            </regions>
+        </spawn>
+    </if>
+</spawns>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<itemremove>
+    <item>leather helmet</item>
+    <item>fishing rod</item>
+    <item>melon</item>
+    <item>stained glass</item>
+</itemremove>
+<itemkeep>
+    <item>cactus</item>
+</itemkeep>
+<!-- Filters -->
+<filters>
+    <any id="allowed-interactions">
+        <all>
+            <any>
+                <cause>explosion</cause>
+                <cause>player</cause>
+            </any>
+            <any>
+                <material>cactus</material>
+                <material>tnt</material>
+            </any>
+        </all>
+        <all>
+            <cause>world</cause>
+            <not>
+                <cause>explosion</cause>
+            </not>
+        </all>
+        <if variant="dtc,dtm">
+            <all>
+                <cause>player</cause>
+                <material>melon block</material>
+            </all>
+        </if>
+    </any>
+    <team id="only-blue">blue</team>
+    <team id="only-red">red</team>
+</filters>
+<!-- Regions -->
+<regions>
+    <union id="spawn-regions">
+        <if variant="default,koth,dtm,rage">
+            <cylinder id="blue-spawn-region" base="29.5,3,0.5" radius="4" height="5"/>
+            <cylinder id="red-spawn-region" base="-28.5,3,0.5" radius="4" height="5"/>
+        </if>
+        <if variant="dtc">
+            <cylinder id="blue-spawn-region" base="0.5,3,-29.5" radius="4" height="5"/>
+            <cylinder id="red-spawn-region" base="0.5,3,30.5" radius="4" height="5"/>
+        </if>
+    </union>
+    <if variant="default,dtm">
+        <point id="snowball-spawn">0.5,4.5,0.5</point>
+    </if>
+    <if variant="dtc">
+        <point id="west-snowball-spawn">-17.5,4,0.5</point>
+        <point id="east-snowball-spawn">18.5,4,0.5</point>
+    </if>
+    <if variant="koth">
+        <point id="south-snowball-spawn">-16.5,4,18.5</point>
+        <point id="north-snowball-spawn">17.5,4,-17.5</point>
+    </if>
+    <if variant="default">
+        <point id="purple-wool-spawn">-26.5,4.5,-17.5</point>
+        <point id="orange-wool-spawn">-26.5,4.5,18.5</point>
+        <point id="cyan-wool-spawn">27.5,4.5,-17.5</point>
+        <point id="yellow-wool-spawn">27.5,4.5,18.5</point>
+    </if>
+    <if variant="default,dtm,rage">
+        <point id="south-tnt-spawn">0.5,5,19.5</point>
+        <point id="north-tnt-spawn">0.5,5,-18.5</point>
+    </if>
+    <if variant="dtc">
+        <point id="tnt-spawn">0.5,4,0.5</point>
+    </if>
+    <if variant="koth">
+        <point id="south-tnt-spawn">17.5,4,18.5</point>
+        <point id="north-tnt-spawn">-16.5,4,-17.5</point>
+    </if>
+    <!-- Woolrooms -->
+    <union id="wool-rooms">
+        <union id="red-wool-rooms"> <!-- Red defends -->
+            <rectangle id="purple-wool-room" min="-21,-20" max="-29,-15"/>
+            <rectangle id="orange-wool-room" min="-21,16" max="-29,21"/>
+        </union>
+        <union id="blue-wool-rooms"> <!-- Blue defends -->
+            <rectangle id="yellow-wool-room" min="22,16" max="30,21"/>
+            <rectangle id="cyan-wool-room" min="22,-20" max="30,-15"/>
+        </union>
+    </union>
+    <!-- RAGE scoreboxes -->
+    <union id="scorebox-rooms">
+        <union id="red-scorebox-rooms"> <!-- Red defends -->
+            <rectangle id="north-red-scorebox-room" min="-22,-20" max="-29,-15"/>
+            <rectangle id="south-red-scorebox-room" min="-22,16" max="-29,21"/>
+        </union>
+        <union id="blue-scorebox-rooms"> <!-- Blue defends -->
+            <rectangle id="south-blue-scorebox-room" min="23,16" max="30,21"/>
+            <rectangle id="north-blue-scorebox-room" min="23,-20" max="30,-15"/>
+        </union>
+    </union>
+    <union id="red-scoreboxes">
+        <cylinder id="north-red-scorebox-point" base="27.5,2,-17.5" radius="2" height="1"/>
+        <cylinder id="south-red-scorebox-point" base="27.5,2,18.5" radius="2" height="1"/>
+    </union>
+    <union id="blue-scoreboxes">
+        <cylinder id="north-blue-scorebox-point" base="-26.5,2,-17.5" radius="2" height="1"/>
+        <cylinder id="south-blue-scorebox-point" base="-26.5,2,18.5" radius="2" height="1"/>
+    </union>
+    <apply enter="only-blue" region="blue-spawn-region" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-red" region="red-spawn-region" message="You may not enter the opponent's spawn!"/>
+    <apply block="never" region="spawn-regions" message="You may not interact with this block!"/>
+    <if variant="default">
+        <apply enter="only-blue" region="red-wool-rooms" message="You may not enter the opponent's woolroom!"/>
+        <apply enter="only-red" region="blue-wool-rooms" message="You may not enter the opponent's woolroom!"/>
+        <apply block="never" region="wool-rooms" message="You may not interact with this block!"/>
+    </if>
+    <if variant="rage">
+        <apply enter="only-blue" region="red-scorebox-rooms" message="You may not enter the opponent's scorebox!"/>
+        <apply enter="only-red" region="blue-scorebox-rooms" message="You may not enter the opponent's scorebox!"/>
+        <apply block="never" region="scorebox-rooms" message="You may not interact with this block!"/>
+    </if>
+    <apply block="allowed-interactions"/>
+</regions>
+<!-- Objectives -->
+<if variant="default">
+    <wools craftable="false">
+        <wool team="blue" color="purple" location="-26.5,4,-17.5">
+            <monument>
+                <block>34,4,-2</block>
+            </monument>
+        </wool>
+        <wool team="blue" color="orange" location="-26.5,4,18.5">
+            <monument>
+                <block>34,4,2</block>
+            </monument>
+        </wool>
+        <wool team="red" color="cyan" location="27.5,4,-17.5">
+            <monument>
+                <block>-34,4,-2</block>
+            </monument>
+        </wool>
+        <wool team="red" color="yellow" location="27.5,4,18.5">
+            <monument>
+                <block>-34,4,2</block>
+            </monument>
+        </wool>
+    </wools>
+</if>
+<if variant="dtc">
+    <cores material="melon block" leak="3">
+        <core team="blue">
+            <region>
+                <cuboid min="-1,8,-9" max="2,11,-12"/>
+            </region>
+        </core>
+        <core team="red">
+            <region>
+                <cuboid min="-1,8,10" max="2,11,13"/>
+            </region>
+        </core>
+    </cores>
+</if>
+<if variant="dtm">
+    <destroyables materials="melon block" completion="100%" required="true">
+        <destroyable owner="blue" name="North Monument">
+            <region>
+                <cuboid min="17,8,-17" max="18,10,-18"/>
+            </region>
+        </destroyable>
+        <destroyable owner="blue" name="South Monument">
+            <region>
+                <cuboid min="17,8,18" max="18,10,19"/>
+            </region>
+        </destroyable>
+        <destroyable owner="red" name="North Monument">
+            <region>
+                <cuboid min="-16,8,-17" max="-17,10,-18"/>
+            </region>
+        </destroyable>
+        <destroyable owner="red" name="South Monument">
+            <region>
+                <cuboid min="-16,8,18" max="-17,10,19"/>
+            </region>
+        </destroyable>
+    </destroyables>
+</if>
+<if variant="koth">
+    <control-points required="false" capture-time="5s" points="2" time-multiplier="0" show-progress="true" neutral-state="false" incremental="true" permanent="false">
+        <control-point name="Hill A">
+            <capture-region>
+                <cylinder base="0.5,3,-18.5" radius="3" height="5"/>
+            </capture-region>
+            <progress-display-region>
+                <cylinder base="0.5,3,-18.5" radius="4" height="25"/>
+            </progress-display-region>
+        </control-point>
+        <control-point name="Hill B">
+            <capture-region>
+                <cylinder base="0.5,3,19.5" radius="3" height="5"/>
+            </capture-region>
+            <progress-display-region>
+                <cylinder base="0.5,3,19.5" radius="4" height="25"/>
+            </progress-display-region>
+        </control-point>
+        <control-point name="Hill C">
+            <capture-region>
+                <cylinder base="0.5,4,0.5" radius="3" height="5"/>
+            </capture-region>
+            <progress-display-region>
+                <cylinder base="0.5,4,0.5" radius="4" height="25"/>
+            </progress-display-region>
+        </control-point>
+    </control-points>
+    <score>
+        <limit>500</limit>
+    </score>
+</if>
+<if variant="rage">
+    <score>
+        <box region="red-scoreboxes" points="10" filter="only-red"/>
+        <box region="blue-scoreboxes" points="10" filter="only-blue"/>
+    </score>
+    <portals>
+        <portal filter="only-red" yaw="@-90" region="red-scoreboxes" destination="red-spawnpoint"/>
+        <portal filter="only-blue" yaw="@90" region="blue-scoreboxes" destination="blue-spawnpoint"/>
+    </portals>
+    <rage/>
+</if>
+<!-- Spawners -->
+<spawners>
+    <!-- Snowball spawners -->
+    <if variant="default,dtm">
+        <spawner spawn-region="snowball-spawn" player-region="everywhere" delay="1s">
+            <item material="snow ball"/>
+        </spawner>
+    </if>
+    <if variant="dtc">
+        <spawner spawn-region="west-snowball-spawn" player-region="everywhere" delay="1s">
+            <item material="snow ball"/>
+        </spawner>
+        <spawner spawn-region="east-snowball-spawn" player-region="everywhere" delay="1s">
+            <item material="snow ball"/>
+        </spawner>
+    </if>
+    <if variant="koth">
+        <spawner spawn-region="south-snowball-spawn" player-region="everywhere" delay="1s" max-entities="1">
+            <item material="snow ball"/>
+        </spawner>
+        <spawner spawn-region="north-snowball-spawn" player-region="everywhere" delay="1s" max-entities="1">
+            <item material="snow ball"/>
+        </spawner>
+    </if>
+    <!-- Wool spawners -->
+    <if variant="default">
+        <spawner spawn-region="purple-wool-spawn" player-region="purple-wool-room" delay="1s">
+            <item material="wool" amount="1" damage="10"/>
+        </spawner>
+        <spawner spawn-region="orange-wool-spawn" player-region="orange-wool-room" delay="1s">
+            <item material="wool" amount="1" damage="1"/>
+        </spawner>
+        <spawner spawn-region="cyan-wool-spawn" player-region="cyan-wool-room" delay="1s">
+            <item material="wool" amount="1" damage="9"/>
+        </spawner>
+        <spawner spawn-region="yellow-wool-spawn" player-region="yellow-wool-room" delay="1s">
+            <item material="wool" amount="1" damage="4"/>
+        </spawner>
+    </if>
+    <!-- TNT spawners -->
+    <if variant="default,dtm,koth,rage">
+        <spawner spawn-region="south-tnt-spawn" player-region="everywhere" delay="10s" max-entities="1">
+            <item material="tnt" amount="1"/>
+        </spawner>
+        <spawner spawn-region="north-tnt-spawn" player-region="everywhere" delay="10s" max-entities="1">
+            <item material="tnt" amount="1"/>
+        </spawner>
+    </if>
+    <if variant="dtc">
+        <spawner spawn-region="tnt-spawn" player-region="everywhere" delay="10s" max-entities="1">
+            <item material="tnt" amount="1"/>
+        </spawner>
+    </if>
+</spawners>
+<gamerules>
+    <naturalRegeneration>false</naturalRegeneration>
+</gamerules>
+<tnt>
+    <fuse>2s</fuse>
+    <power>2</power>
+    <blockdamage>true</blockdamage>
+    <instantignite>true</instantignite>
+</tnt>
+<disabledamage>
+    <damage ally="true" self="false" enemy="false" other="true">block explosion</damage>
+</disabledamage>
+<kill-rewards>
+    <kill-reward>
+        <unless variant="rage"> <!-- Normal kill reward -->
+            <item material="cactus" amount="4"/>
+        </unless>
+        <if variant="rage"> <!-- RAGE-only kill reward -->
+            <item name="`r`2`lExtra Pointy Cactus" enchantment="damage all:10" lore="`aInsta melee kill!" material="cactus" amount="4"/>
+        </if>
+        <item material="tnt"/>
+    </kill-reward>
+</kill-rewards>
+<crafting>
+    <disable>snow block</disable>
+</crafting>
+</map>
