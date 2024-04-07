@@ -1,0 +1,87 @@
+<map proto="1.4.2">
+<name>Thistle Terrace</name>
+<version>1.0.0</version>
+<created>2024-04-07</created>
+<include id="kotf"/>
+<constant id="damage-resistance">3s</constant>
+<objective>Control the flag for ${score} seconds to win!</objective>
+<authors>
+    <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii_ -->
+</authors>
+<teams>
+    <team id="blue" color="blue" max="8">Blue</team>
+    <team id="red" color="dark red" max="8">Red</team>
+</teams>
+<spawns>
+    <spawn team="blue" kit="base-kit" filter="has-flag">
+        <region yaw="0">
+            <point>0.5,4,-40.5</point>
+        </region>
+    </spawn>
+    <spawn team="red" kit="base-kit" filter="has-flag">
+        <region yaw="180">
+            <point>0.5,4,41.5</point>
+        </region>
+    </spawn>
+    <default>
+        <regions angle="0.5,14,0.5">
+            <point>-34.5,12.5,0.5</point>
+            <point>35.5,12.5,0.5</point>
+        </regions>
+    </default>
+</spawns>
+<filters>
+    <team id="only-blue">blue</team>
+    <team id="only-red">red</team>
+</filters>
+<regions>
+    <apply velocity="0,1,0">
+        <region>
+            <union id="jump-pads">
+                <cuboid min="-28.5,3,2" max="-30,4,-1"/>
+                <cuboid min="29.5,3,2" max="31,4,-1"/>
+            </union>
+        </region>
+    </apply>
+    <apply enter="all(only-blue, not(flag-carrier))">
+        <region>
+            <below z="-29"/>
+        </region>
+    </apply>
+    <apply enter="all(only-red, not(flag-carrier))">
+        <region>
+            <above z="30"/>
+        </region>
+    </apply>
+    <apply block="never"/>
+</regions>
+<flags>
+    <flag id="flag"
+          name="Flag"
+          color="purple"
+          shared="true"
+          points-rate="1"
+          pickup-kit="flag-kit"
+          drop-kit="reset-health"
+          flag-proximity-metric="none"
+          show-respawn-on-pickup="${announce-post-pickup}">
+        <post return-time="0s" respawn-time="${flag-respawn-timer}">
+            <post name="Mid Post" yaw="90">0.5,3,0.5</post>
+            <post name="East Post" yaw="90">12.5,9,0.5</post>
+            <post name="West Post" yaw="-90">-11.5,9,0.5</post>
+        </post>
+    </flag>
+</flags>
+<damage>
+    <deny>
+        <all>
+            <any>
+                <region id="jump-pads"/>
+                <cylinder base="-29,0,0.5" radius="5" height="12"/>
+                <cylinder base="30,0,0.5" radius="5" height="12"/>
+            </any>
+            <cause>fall</cause>
+        </all>
+    </deny>
+</damage>
+</map>
