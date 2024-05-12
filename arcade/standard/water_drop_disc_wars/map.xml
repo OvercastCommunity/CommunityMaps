@@ -1,8 +1,11 @@
 <map proto="1.4.2" game="Water Drop">
 <name>Water Drop: Disc Wars</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Reach the end 2 times!</objective>
 <include id="void-death"/>
+<constants>
+    <constant id="void-plane">2</constant>
+</constants>
 <authors>
     <author uuid="4011d739-4dfb-41f6-8e60-5179d035cab7"/> <!-- MishM0sh -->
 </authors>
@@ -32,7 +35,7 @@
         <leggings unbreakable="true" team-color="true" name="`r`lDigitalized Armour" material="leather leggings"/>
         <boots unbreakable="true" team-color="true" name="`r`lDigitalized Armour" material="leather boots"/>
         <effect duration="2s" amplifier="255">resistance</effect>
-        <effect amplifier="-2">health boost</effect>
+        <max-health>2</max-health>
     </kit>
 </kits>
 <filters>
@@ -45,20 +48,24 @@
             <cause>world</cause>
         </not>
     </all>
+    <void id="nothingness"/>
 </filters>
 <regions>
     <apply block="never" region="jump-pads" message="You may not place water here!"/>
-    <apply block="never" message="You may not place water here!">
-        <region><circle center="0.5,0.5" radius="10.5"/></region>
-    </apply>
-    <apply block-place="water" block-break="water" block-physics="never"/>
+    <apply block="never" region="no-blocks" message="You may not place water here!"/>
+    <apply block-place="all(water,deny(nothingness))" block-break="all(water,deny(nothingness))" block-physics="never" message="You may not place water here!"/>
     <union id="jump-pads">
         <cuboid id="jump-pad-1" min="-1,176,-83" size="3,1,1"/>
         <cuboid id="jump-pad-2" min="-2,136,-187" size="5,1,1"/>
     </union>
+    <cuboid id="no-blocks" min="6,103,-244" max="-5,96,-237"/>
     <apply velocity="0,2.5,-3.5" region="jump-pads"/>
     <cylinder id="the-end" base="0.5,4,-443.5" radius="2.5" height="1"/>
     <cylinder id="final-destination" base="0.5,200,0.5" height="0" radius="5"/>
+    <union id="no-pvp-zone">
+        <rectangle min="8,-451" max="-6,-412"/>
+        <circle center="0.5,0.5" radius="10.5"/>
+    </union>
 </regions>
 <score>
     <limit>2</limit>
@@ -67,6 +74,19 @@
 <portals>
     <portal region="the-end" yaw="@180" pitch="@0" destination="final-destination"/>
 </portals>
+<damage>
+    <deny>
+        <all>
+            <relation>enemy</relation>
+            <attacker>
+                <filter id="no-pvp-zone"/>
+            </attacker>
+            <victim>
+                <filter id="no-pvp-zone"/>
+            </victim>
+        </all>
+    </deny>
+</damage>
 <hunger>
     <depletion>off</depletion>
 </hunger>
