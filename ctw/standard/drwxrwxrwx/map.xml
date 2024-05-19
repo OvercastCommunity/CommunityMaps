@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>drwxrwxrwx</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <created>2024-04-13</created>
 <phase>development</phase>
 <objective>Capture both enemy wools!</objective>
@@ -20,17 +20,26 @@
         <item slot="0" material="iron sword" unbreakable="true"/>
         <item slot="1" material="bow" unbreakable="true" enchantment="infinity"/>
         <item slot="28" amount="1" material="arrow"/>
-        <item slot="2" material="iron pickaxe" />
+        <item slot="2" material="iron pickaxe">
+            <enchantment level="5">efficiency</enchantment>
+        </item>
         <item slot="3" material="stained clay" team-color="true" amount="64"/>
-        <item slot="4" material="stained glass" team-color="true" amount="32"/>
-        <item slot="5" material="tnt" amount="4"/>
-        <item slot="6" material="flint and steel" />
+        <item slot="4" material="stained glass" team-color="true" amount="16"/>
+        <item slot="5" material="flint and steel" />
         <helmet team-color="true" material="leather helmet" unbreakable="true"/>
         <chestplate team-color="true" material="leather chestplate" unbreakable="true"/>
         <leggings color="000000" material="leather leggings" unbreakable="true"/>
         <boots color="000000" material="leather boots" unbreakable="true"/>
         <game-mode>survival</game-mode>
     </kit>
+    <kit id="valley-buff-kit">
+        <walk-speed>1.8</walk-speed>
+    </kit>
+    <kit id="launchzone-kit">
+        <double-jump power="10"/>
+    </kit>
+    <lend kit="valley-buff-kit" filter="valley-buff-region"/>
+    <lend kit="launchzone-kit" filter="launchzones"/>
 </kits>
 <spawns>
     <spawn team="blue-team" kit="spawn-kit" region="blue-spawn"/>
@@ -38,7 +47,8 @@
     <default region="default-spawn" yaw="90"/>
 </spawns>
 <regions>
-    <cuboid id="iron-pit" min="-31,0,-99" max="32,4,0"/>
+    <cuboid id="valley-buff-region" min="-31,0,-99" max="32,10,0"/>
+    <cuboid id="valley-resource-region" min="-31,0,-99" max="32,4,0"/>
     <cuboid id="playable-area" min="-69,0,-160" max="70,80,60"/>
     <negative id="out-of-bounds">
         <region id="playable-area"/>
@@ -49,6 +59,10 @@
         <cuboid id="red-spawn-prot" min="7,45,36" max="-5,62,51"/>
         <cuboid id="blue-spawn-prot" min="-5,45,-136" max="6,62,-150"/>
         <cylinder id="default-spawn" base="90,57,-48" radius="1" height="0"/>
+    </union>
+    <union id="sides">
+        <cuboid id="red-side" min="-31,0,-1" max="32,50,36"/>
+        <cuboid id="blue-side" min="-31,0,-136" max="32,50,-99"/>
     </union>
     <union id="wool-rooms">
         <cuboid id="lime-wool-room" min="-56,51,-126" max="-46,66,-116"/>
@@ -72,16 +86,23 @@
         <cuboid id="pink-yellow-deadzone" min="32,0,-2" max="71,80,-98"/>
         <cuboid id="purple-green-deadzone" min="-31,0,-2" max="-70,80,-98"/>
     </union>
+    <union id="launchzones">
+        <cuboid id="red-launchzone" min="-4,29,-24" max="6,44,-14"/>
+        <cuboid id="blue-launchzone" min="-4,29,-86" max="6,44,-76"/>
+    </union>
     <apply enter="only-red" region="lime-wool-room" message="You may not enter your team's wool room!"/>
     <apply enter="only-red" region="yellow-wool-room" message="You may not enter your team's wool room!"/>
     <apply enter="only-blue" region="pink-wool-room" message="You may not enter your team's wool room!"/>
     <apply enter="only-blue" region="purple-wool-room" message="You may not enter your team's wool room!"/>
     <apply enter="only-red" region="red-spawn-prot" message="You may not enter the other team's spawn!"/>
     <apply enter="only-blue" region="blue-spawn-prot" message="You may not enter the other team's spawn!"/>
+    <apply block="never" region="launchzones" message="You may not modify the Gold Monuments!"/>
     <apply block="never" region="wool-rooms" message="You may not modify the wool room!"/>
     <apply block="never" region="spawns" message="You may not modify spawn!"/>
     <apply block="never" region="out-of-bounds" message="You may not build out of bounds!"/>
     <apply block="never" region="deadzones" message="You may not build out of bounds!"/>
+    <apply block-break="blastproof-glass" region="playable-area"/>
+    <apply block-break="blastproof-chests" region="playable-area"/>
 </regions>
 <wools>
     <wool team="blue-team" color="purple" location="-51,5,-21" craftable="false" monument="purple-victory-monument" />
@@ -94,8 +115,23 @@
     <team id="only-blue">blue-team</team>
 </filters>
 <renewables>
-    <renewable region="iron-pit" rate="2" grow="true" particles="true" sound="true"/>
+    <renewable region="valley-resource-region" rate="0.5" grow="true" particles="true" sound="true"/>
+    <renewable region="sides" rate="0.2" grow="true" particles="true" sound="true" avoid-players="4"/>
 </renewables>
+<filters>
+    <deny id="blastproof-glass">
+        <all>
+            <material>stained glass</material>
+            <cause>explosion</cause>
+        </all>
+    </deny>
+    <deny id="blastproof-chests">
+        <all>
+            <material>chest</material>
+            <cause>explosion</cause>
+        </all>
+    </deny>
+</filters>
 <spawners>
     <!-- Blue -->
     <spawner spawn-region="lime-wool-spawner" player-region="lime-wool-room" delay="2">
@@ -104,12 +140,24 @@
     <spawner spawn-region="yellow-wool-spawner" player-region="yellow-wool-room" delay="2">
         <item material="wool" amount="1" damage="4"/>
     </spawner>
+    <spawner spawn-region="lime-wool-spawner" player-region="lime-wool-room" delay="5">
+        <item material="golden apple" amount="1"/>
+    </spawner>
+    <spawner spawn-region="yellow-wool-spawner" player-region="yellow-wool-room" delay="5">
+        <item material="golden apple" amount="1"/>
+    </spawner>
     <!-- Red -->
     <spawner spawn-region="purple-wool-spawner" player-region="purple-wool-room" delay="2">
         <item material="wool" amount="1" damage="10"/>
     </spawner>
     <spawner spawn-region="pink-wool-spawner" player-region="pink-wool-room" delay="2">
         <item material="wool" amount="1" damage="6"/>
+    </spawner>
+    <spawner spawn-region="purple-wool-spawner" player-region="purple-wool-room" delay="5">
+        <item material="golden apple" amount="1"/>
+    </spawner>
+    <spawner spawn-region="pink-wool-spawner" player-region="pink-wool-room" delay="5">
+        <item material="golden apple" amount="1"/>
     </spawner>
 </spawners> 
 <kill-rewards>
@@ -120,6 +168,7 @@
 </kill-rewards>
 <toolrepair>
     <tool>iron sword</tool>
+    <tool>iron pickaxe</tool>
     <tool>bow</tool>
 </toolrepair>
 <itemremove>
