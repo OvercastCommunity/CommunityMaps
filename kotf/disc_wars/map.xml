@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Disc Wars</name>
-<version>1.2.4</version>
+<version>1.2.5</version>
 <objective>Control the flag for 200 seconds to win!</objective>
 <gamemode>kotf</gamemode>
 <gamemode>rage</gamemode>
@@ -45,7 +45,10 @@
     <kit id="default-kit">
         <effect>night vision</effect>
     </kit>
-    <kit id="spawn-kit" parents="default-kit">
+    <kit id="speed-kit">
+        <effect>speed</effect>
+    </kit>
+    <kit id="spawn-kit" parents="default-kit,speed-kit">
         <clear/>
         <item slot="1" unbreakable="true" name="`r`lLaser Rifle" enchantment="arrow damage:10;damage all:10" lore="`aInsta kill!" material="bow"/>
         <item slot="2" amount="2" material="arrow"/>
@@ -54,7 +57,6 @@
         <boots material="leather boots" locked="true" name="`r`lDigitalized Armour" team-color="true" attributes="generic.maxHealth:base:-0.7" unbreakable="true"/>
         <effect duration="3s" amplifier="255">regeneration</effect>
         <effect duration="3s" amplifier="255">damage resistance</effect>
-        <effect>speed</effect>
         <game-mode>adventure</game-mode>
     </kit>
     <kit id="red-kit" parents="spawn-kit">
@@ -68,7 +70,8 @@
     <kit id="boost-kit">
         <effect amplifier="2">speed</effect>
     </kit>
-    <lend kit="boost-kit" filter="boost-pads"/>
+    <give kit="boost-kit" filter="boost-pads"/>
+    <give kit="speed-kit" filter="not(boost-pads)"/>
 </kits>
 <filters>
     <any id="has-flag">
@@ -180,9 +183,12 @@
         </post>
     </flag>
 </flags>
-<respawn spectate="true" auto="true">
-    <message>{"translate":"death.respawn.confirmed.waiting.flagDropped"}</message>
-</respawn>
+<respawns auto="true">
+    <respawn filter="not(has-flag)" spectate="true">
+        <message>{"translate":"death.respawn.confirmed.waiting.flagDropped"}</message>
+    </respawn>
+    <respawn filter="has-flag"/>
+</respawns>
 <kill-reward>
     <item amount="2" material="arrow"/>
 </kill-reward>
