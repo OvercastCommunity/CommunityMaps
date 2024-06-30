@@ -1,7 +1,7 @@
 <map proto="1.4.2">
 <name>TNT Tag: Block Fortress</name>
-<version>1.0.0</version>
-<objective>Survive the TNT onslaught!</objective>
+<version>1.1.0</version>
+<objective>Pass the TNT to another player before it explodes!</objective>
 <gamemode>arcade</gamemode>
 <gamemode>ffa</gamemode>
 <authors>
@@ -16,6 +16,7 @@
 <players max="64"/>
 <kits>
     <kit id="tnt-kit" force="true">
+        <game-mode>adventure</game-mode>
         <helmet material="tnt" locked="true"/>
         <chestplate material="leather chestplate" color="993333" locked="true" unbreakable="true"/>
         <leggings material="leather leggings" color="993333" locked="true" unbreakable="true"/>
@@ -33,6 +34,7 @@
         <effect>speed</effect>
     </kit>
     <kit id="tnt-flash-kit" force="true">
+        <game-mode>adventure</game-mode>
         <helmet material="snow block" name="`rTNT" locked="true"/>
         <chestplate material="leather chestplate" color="ffffff" locked="true" unbreakable="true"/>
         <leggings material="leather leggings" color="ffffff" locked="true" unbreakable="true"/>
@@ -55,6 +57,7 @@
     </kit>
     <kit id="hider-kit">
         <clear effects="true"/>
+        <game-mode>adventure</game-mode>
         <effect amplifier="127">resistance</effect>
     </kit>
 </kits>
@@ -62,11 +65,7 @@
     <player filter="is_tnt=0" show-player="true"/>
 </compass>
 <spawns>
-    <spawn spread="true" safe="true">
-        <regions>
-            <cuboid min="32,3,-32" max="-32,14,32"/>
-        </regions>
-    </spawn>
+    <spawn region="center-spawn" safe="true"/>
     <default yaw="180">
         <regions>
             <cuboid min="-2,23,-48" max="2,23,-52"/>
@@ -76,27 +75,49 @@
 <filters>
     <match-started id="match-started"/>
     <participating id="participating"/>
-    <observing id="observing"/>
-    <after id="round-1-begin" duration="10s" message="Round 1 begins in {0}">
-        <time id="round-1-starting">0s</time>
-    </after>
-    <after id="round-2-begin" duration="10s" message="Round 2 begins in {0}">
-        <time id="round-2-starting">1m</time>
-    </after>
-    <after id="round-3-begin" duration="10s" message="Round 3 begins in {0}">
-        <time id="round-3-starting">2m</time>
-    </after>
-    <after id="round-4-begin" duration="10s" message="Round 4 begins in {0}">
-        <time id="round-4-starting">3m</time>
-    </after>
-    <after id="round-5-begin" duration="10s" message="Round 5 begins in {0}">
-        <time id="round-5-starting">4m</time>
-    </after>
-    <players id="count-xs" filter="participating" max="5"/>
-    <players id="count-sm" filter="participating" min="6" max="14"/>
-    <players id="count-md" filter="participating" min="15" max="29"/>
-    <players id="count-lg" filter="participating" min="30" max="39"/>
-    <players id="count-xl" filter="participating" min="40"/>
+    <players id="count-xs" filter="participating" max="3"/>
+    <players id="count-sm" filter="participating" min="4" max="5"/>
+    <players id="count-md" filter="participating" min="6" max="11"/>
+    <players id="count-lg" filter="participating" min="12" max="19"/>
+    <players id="count-xl" filter="participating" min="20" max="29"/>
+    <players id="count-xxl" filter="participating" min="30"/>
+    <after id="round-idle-end" duration="1s" filter="round_state=0"/>
+    <after id="round-starting" duration="3s" filter="round_state=1" message="The next round begins in {0}"/>
+    <variable id="round-begin" var="round_state">2</variable>
+    <any id="round-end">
+        <after id="round-lg-end" duration="45s" message="TNT explodes in {0}">
+            <all id="round-lg-begin">
+                <any>
+                    <filter id="count-xxl"/>
+                    <filter id="count-xl"/>
+                </any>
+                <variable var="round_state">2</variable>
+            </all>
+        </after>
+        <after id="round-md-end" duration="25s" message="TNT explodes in {0}">
+            <all id="round-md-begin">
+                <any>
+                    <filter id="count-lg"/>
+                    <filter id="count-md"/>
+                </any>
+                <variable var="round_state">2</variable>
+            </all>
+        </after>
+        <after id="round-sm-end" duration="15s" message="TNT explodes in {0}">
+            <all id="round-sm-begin">
+                <any>
+                    <filter id="count-sm"/>
+                    <filter id="count-xs"/>
+                </any>
+                <variable var="round_state">2</variable>
+            </all>
+        </after>
+    </any>
+    <any id="start-tnt-fuse">
+        <after duration="40s" filter="round-lg-begin"/>
+        <after duration="20s" filter="round-md-begin"/>
+        <after duration="10s" filter="round-sm-begin"/>
+    </any>
     <attacker id="attacker-is-tnt">
         <variable id="is-tnt" var="is_tnt">1</variable>
     </attacker>
@@ -104,16 +125,36 @@
         <variable id="is-hider" var="is_tnt">0</variable>
     </victim>
 </filters>
+<regions>
+    <cylinder id="center-spawn" base="0,2,0" radius="3" height="1"/>
+    <apply block="never"/>
+    <apply leave="never">
+        <region>
+            <rectangle min="-32,-32" max="32,32"/>
+        </region>
+    </apply>
+</regions>
+<portals>
+    <portal forward="all(participating, round-begin, any(count-xs, count-sm))" destination="center-spawn" sound="false"/>
+</portals>
 <variables scope="player">
     <variable id="start_tnt_xs" exclusive="1"/>
     <variable id="start_tnt_sm" exclusive="2"/>
     <variable id="start_tnt_md" exclusive="3"/>
     <variable id="start_tnt_lg" exclusive="5"/>
-    <variable id="start_tnt_xl" exclusive="7"/>
+    <variable id="start_tnt_xl" exclusive="8"/>
+    <variable id="start_tnt_xxl" exclusive="12"/>
     <variable id="is_tnt" default="0"/>
     <variable id="tnt_fuse" default="0" scope="match"/>
     <variable id="tmp" default="0" scope="match"/>
-    <variable id="round_num" default="0" scope="match"/>
+    <variable id="round" default="0" scope="match"/>
+    <variable id="round_state" default="0" scope="match"/>
+    <variable id="round_deathmatch" default="0" scope="match"/>
+    <!--
+    0: idle
+    1: starting
+    2: running
+    -->
 </variables>
 <actions>
     <!--
@@ -126,6 +167,7 @@
             <set var="start_tnt_md" value="1"/>
             <set var="start_tnt_lg" value="1"/>
             <set var="start_tnt_xl" value="1"/>
+            <set var="start_tnt_xxl" value="1"/>
         </switch-scope>
     </action>
     <action id="distribute-tnt-kits" scope="match">
@@ -142,33 +184,54 @@
             <set var="tmp" value="5"/>
         </action>
         <action filter="count-xl">
-            <set var="tmp" value="7"/>
+            <set var="tmp" value="8"/>
+        </action>
+        <action filter="count-xxl">
+            <set var="tmp" value="12"/>
         </action>
         <switch-scope inner="player" filter="participating">
-            <action filter="any(all(count-xs, start_tnt_xs=1), all(count-sm, start_tnt_sm=1), all(count-md, start_tnt_md=1), all(count-lg, start_tnt_lg=1), all(count-xl, start_tnt_xl=1))">
+            <action filter="any(all(count-xs, start_tnt_xs=1), all(count-sm, start_tnt_sm=1), all(count-md, start_tnt_md=1), all(count-lg, start_tnt_lg=1), all(count-xl, start_tnt_xl=1), all(count-xxl, start_tnt_xxl=1))">
                 <action id="become-tnt"/>
             </action>
         </switch-scope>
     </action>
-    <action id="round-start-message" scope="match">
+    <action id="round-begin-message" scope="match">
         <message text=" "/>
-        <message text="`b`l» Round {num} has started!">
-            <replacements>
-                <decimal id="num" value="round_num"/>
-            </replacements>
-        </message>
-        <message text="`e» The TNT has been released to `c{num} `eplayers!">
-            <replacements>
-                <decimal id="num" value="tmp"/>
-            </replacements>
-        </message>
+        <action filter="round_deathmatch=0">
+            <message text="`b`l» Round {num} has started!">
+                <replacements>
+                    <decimal id="num" value="round"/>
+                </replacements>
+            </message>
+        </action>
+        <action filter="round_deathmatch=1..">
+            <message text="`d» `lDeathmatch {num} has started!">
+                <replacements>
+                    <decimal id="num" value="round_deathmatch"/>
+                </replacements>
+            </message>
+        </action>
+        <action filter="not(count-xs)">
+            <message text="`e» The TNT has been released to `c{num} `eplayers!">
+                <replacements>
+                    <decimal id="num" value="tmp"/>
+                </replacements>
+            </message>
+        </action>
+        <action filter="count-xs">
+            <message text="`e» The TNT has been released to `c{num} `eplayer!">
+                <replacements>
+                    <decimal id="num" value="tmp"/>
+                </replacements>
+            </message>
+        </action>
         <switch-scope inner="player" filter="participating">
             <message text=" "/>
             <action filter="is_tnt=1">
                 <message text="`c» You have started as TNT! Tag someone quickly!"/>
             </action>
             <action filter="is_tnt=0">
-                <message text="`a» You did not start as TNT! Run away!"/>
+                <message text="`a» Run away from the TNT!"/>
             </action>
         </switch-scope>
         <message text=" "/>
@@ -176,49 +239,35 @@
     <!--
       Rounds
     -->
-    <trigger scope="match" filter="round-1-starting" action="pick-next-tnt"/>
-    <trigger scope="match" filter="round-1-begin">
+    <trigger scope="match" filter="round-idle-end">
         <action>
-            <set var="round_num" value="1"/>
-            <set var="tnt_fuse" value="92"/>
-            <action id="distribute-tnt-kits"/>
-            <action id="round-start-message"/>
+            <set var="round_state" value="1"/>
         </action>
     </trigger>
-    <trigger scope="match" filter="round-2-starting" action="pick-next-tnt"/>
-    <trigger scope="match" filter="round-2-begin">
+    <trigger scope="match" filter="round-starting">
         <action>
-            <set var="round_num" value="2"/>
-            <set var="tnt_fuse" value="92"/>
-            <action id="distribute-tnt-kits"/>
-            <action id="round-start-message"/>
+            <action id="pick-next-tnt"/>
+            <set var="round" value="round+1"/>
+            <set var="round_state" value="2"/>
         </action>
     </trigger>
-    <trigger scope="match" filter="round-3-starting" action="pick-next-tnt"/>
-    <trigger scope="match" filter="round-3-begin">
+    <trigger scope="match" filter="round-begin">
         <action>
-            <set var="round_num" value="3"/>
-            <set var="tnt_fuse" value="92"/>
+            <action filter="any(count-xs, count-sm)">
+                <set var="round_deathmatch" value="round_deathmatch+1"/>
+            </action>
+            <set var="tnt_fuse" value="100"/>
             <action id="distribute-tnt-kits"/>
-            <action id="round-start-message"/>
+            <action id="round-begin-message"/>
         </action>
     </trigger>
-    <trigger scope="match" filter="round-4-starting" action="pick-next-tnt"/>
-    <trigger scope="match" filter="round-4-begin">
+    <trigger scope="match" filter="round-end">
         <action>
-            <set var="round_num" value="4"/>
-            <set var="tnt_fuse" value="92"/>
-            <action id="distribute-tnt-kits"/>
-            <action id="round-start-message"/>
-        </action>
-    </trigger>
-    <trigger scope="match" filter="round-5-starting" action="pick-next-tnt"/>
-    <trigger scope="match" filter="round-5-begin">
-        <action>
-            <set var="round_num" value="5"/>
-            <set var="tnt_fuse" value="92"/>
-            <action id="distribute-tnt-kits"/>
-            <action id="round-start-message"/>
+            <set var="round_state" value="0"/>
+            <sound key="random.explode"/>
+            <switch-scope inner="player" filter="all(is_tnt=1, participating)">
+                <kit id="tnt-kill"/>
+            </switch-scope>
         </action>
     </trigger>
     <!--
@@ -235,49 +284,29 @@
         <kit id="hider-kit"/>
         <message text="`aYou tagged another player!"/>
     </action>
-    <trigger scope="player">
-        <filter>
-            <pulse period="1s" duration="0.25s" filter="not(tnt_fuse=0)"/>
-        </filter>
+    <trigger scope="match" filter="start-tnt-fuse">
         <action>
-            <message actionbar="`aTNT explodes in {num} seconds!">
-                <replacements>
-                    <decimal id="num" value="tnt_fuse/2"/>
-                </replacements>
-            </message>
+            <sound key="game.tnt.primed"/>
         </action>
     </trigger>
     <trigger scope="match">
         <filter>
-            <pulse period="0.5s" duration="0.25s" filter="tnt_fuse=1.."/>
+            <pulse period="0.5s" duration="0.25s" filter="start-tnt-fuse"/>
         </filter>
         <action>
             <set var="tnt_fuse" value="tnt_fuse-1"/>
-            <action filter="tnt_fuse=1..20">
-                <set var="tmp" value="tnt_fuse % 2"/>
-                <action filter="tnt_fuse=20">
-                    <sound key="game.tnt.primed"/>
-                </action>
-                <action filter="tmp=0">
-                    <sound key="random.fizz"/>
-                    <switch-scope inner="player" filter="all(is_tnt=1, participating)">
-                        <kit id="tnt-flash-kit"/>
-                    </switch-scope>
-                </action>
-                <action filter="not(tmp=0)">
-                    <switch-scope inner="player" filter="all(is_tnt=1, participating)">
-                        <kit id="tnt-kit"/>
-                    </switch-scope>
-                </action>
+            <set var="tmp" value="tnt_fuse % 2"/>
+            <action filter="tmp=0">
+                <sound key="random.fizz" volume="0.5"/>
+                <switch-scope inner="player" filter="all(is_tnt=1, participating)">
+                    <kit id="tnt-flash-kit"/>
+                </switch-scope>
             </action>
-        </action>
-    </trigger>
-    <trigger scope="match" filter="tnt_fuse=0">
-        <action>
-            <sound key="random.explode"/>
-            <switch-scope inner="player" filter="all(is_tnt=1, participating)">
-                <kit id="tnt-kill"/>
-            </switch-scope>
+            <action filter="not(tmp=0)">
+                <switch-scope inner="player" filter="all(is_tnt=1, participating)">
+                    <kit id="tnt-kit"/>
+                </switch-scope>
+            </action>
         </action>
     </trigger>
     <action id="attack-action" scope="player" filter="all(attacker-is-tnt, victim-is-hider)">
