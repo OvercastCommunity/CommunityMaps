@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Eldritch Trials</name>
-<version>1.0.6</version>
+<version>1.0.7</version>
 <objective>Restore your humanity and survive the onslaught of beasts the longest!</objective>
 <created>2024-03-07</created>
 <phase>staging</phase>
@@ -329,11 +329,10 @@
     <after id="delayed-alive" filter="alive" duration="0.1s"/>
     <time id="finalise-humans">0.2s</time>
     <time id="finalise-humans-timeout">1s</time>
-    <players id="count-xs" filter="participating" max="9"/>
-    <players id="count-sm" filter="participating" min="10" max="19"/>
-    <players id="count-md" filter="participating" min="20" max="29"/>
-    <players id="count-lg" filter="participating" min="30" max="39"/>
-    <players id="count-xl" filter="participating" min="40"/>
+    <players id="count-sm" filter="participating" min="6"/>
+    <players id="count-md" filter="participating" min="12"/>
+    <players id="count-lg" filter="participating" min="25"/>
+    <players id="count-xl" filter="participating" min="35"/>
     <any id="allow-destruction">
         <material>torch</material>
         <material>dead bush</material>
@@ -360,35 +359,76 @@
         </region>
     </apply>
 </regions>
-<variables scope="player">
+<variables scope="player" default="0">
     <score id="humanity"/>
-    <variable id="start_human_xs" exclusive="1"/>
-    <variable id="start_human_sm" exclusive="2"/>
-    <variable id="start_human_md" exclusive="3"/>
-    <variable id="start_human_lg" exclusive="5"/>
-    <variable id="start_human_xl" exclusive="7"/>
-    <variable id="is_human" default="0"/>
-    <variable id="wrath" default="0"/>
-    <variable id="wrath_kit" default="0"/>
-    <variable id="wrath_kit_level" default="0"/>
+    <variable id="min_tmp" scope="match"/>
+    <variable id="tmp"/>
+    <variable id="is_human"/>
+    <variable id="wrath"/>
+    <variable id="wrath_kit"/>
+    <variable id="wrath_kit_level"/>
+    <variable id="struct1" scope="match"/>
+    <variable id="struct2" scope="match"/>
+    <variable id="struct3" scope="match"/>
 </variables>
 <actions>
+    <trigger scope="match" filter="always">
+        <action>
+            <set var="struct1" value="floor(random() * 2)"/>
+            <set var="struct2" value="floor(random() * 2)"/>
+            <set var="struct3" value="floor(random() * 2)"/>
+            <kill-entities>
+                <filter>
+                    <entity>dropped item</entity>
+                </filter>
+            </kill-entities>
+        </action>
+    </trigger>
     <!--
       Teams
     -->
-    <action id="random-humans" scope="player">
-        <set var="start_human_xs" value="1"/>
-        <set var="start_human_sm" value="1"/>
-        <set var="start_human_md" value="1"/>
-        <set var="start_human_lg" value="1"/>
-        <set var="start_human_xl" value="1"/>
-    </action>
-    <action id="distribute-humans" scope="player">
-        <action filter="any(all(count-xs, start_human_xs=1), all(count-sm, start_human_sm=1), all(count-md, start_human_md=1), all(count-lg, start_human_lg=1), all(count-xl, start_human_xl=1))">
-            <action id="become-human"/>
+    <action id="random-humans" scope="match">
+        <action id="pick-player"/>
+        <action filter="count-sm">
+            <action id="pick-player"/>
+        </action>
+        <action filter="count-md">
+            <action id="pick-player"/>
+        </action>
+        <action filter="count-lg">
+            <action id="pick-player"/>
+            <action id="pick-player"/>
+        </action>
+        <action filter="count-xl">
+            <action id="pick-player"/>
+            <action id="pick-player"/>
+            <action id="pick-player"/>
         </action>
     </action>
-    <trigger scope="player" filter="all(match-started, participating)" action="random-humans"/>
+    <action id="pick-player" scope="match">
+        <set var="min_tmp" value="99"/>
+        <switch-scope inner="player" filter="participating">
+            <set var="min_tmp" value="min(tmp, min_tmp)"/>
+        </switch-scope>
+        <switch-scope inner="player" filter="participating">
+            <set var="tmp" value="tmp - min_tmp"/>
+            <action filter="tmp=0">
+                <set var="tmp" value="99"/>
+                <set var="is_human" value="1"/>
+            </action>
+        </switch-scope>
+    </action>
+    <action id="distribute-humans" scope="player" filter="all(is_human=1, participating)">
+        <action id="become-human"/>
+    </action>
+    <trigger scope="match" filter="match-started">
+        <action>
+            <switch-scope inner="player" filter="participating">
+                <set var="tmp" value="random()"/>
+            </switch-scope>
+            <action id="random-humans"/>
+        </action>
+    </trigger>
     <trigger scope="player" filter="all(match-started, participating, finalise-humans, not(finalise-humans-timeout))">
         <action>
             <action id="distribute-humans"/>
@@ -596,6 +636,27 @@
 <portals>
     <portal forward="all(finalise-humans, not(finalise-humans-timeout), participating, is_human=1)" destination="human-spawn" sound="false"/>
 </portals>
+<structures>
+    <structure id="struct1-alt" air="true">
+        <region>
+            <cuboid min="-35,40,14" size="18,10,10"/>
+        </region>
+    </structure>
+    <structure id="struct2-alt" air="true">
+        <region>
+            <cuboid min="-4,40,2" size="16,17,17"/>
+        </region>
+    </structure>
+    <structure id="struct3-alt" air="true">
+        <region>
+            <cuboid min="25,40,-29" size="10,16,10"/>
+        </region>
+    </structure>
+
+    <dynamic structure="struct1-alt" trigger="struct1=1" location="-35,7,14"/>
+    <dynamic structure="struct2-alt" trigger="struct2=1" location="-4,7,2"/>
+    <dynamic structure="struct3-alt" trigger="struct3=1" location="25,6,-29"/>
+</structures>
 <damage>
     <deny>
         <any>
