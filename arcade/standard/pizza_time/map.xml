@@ -1,0 +1,232 @@
+<map proto="1.4.2">
+<name>Pizza Time</name>
+<version>1.0</version>
+<objective>Destroy the blocks below your enemies, and eat toppings to get bonuses!</objective>
+<created>2023-07-04</created>
+<game>Pizza Spleef</game>
+<include id="void-death"/>
+<constants>
+    <constant id="void-plane">55</constant>
+</constants>
+<authors>
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
+</authors>
+<contributors>
+    <contributor uuid="55a2e72e-0161-4c85-b191-a0b227ff758a" contribution="Pizza Spleef and Ghost Squadron creator"/> <!-- SethBling -->
+</contributors>
+<players max="10" colors="true" show-name-tags="false"/>
+<broadcasts>
+    <alert after="4m10s">`fAll players will receive `6Fireball `fprojectiles in 20 seconds!</alert>
+    <alert after="4m30s">`fAll players have received `6Fireball `fprojectiles!</alert>
+</broadcasts>
+<spawns>
+    <spawn kit="spawn-kit" safe="true">
+        <regions angle="0.5,65,0.5">
+            <cylinder base="16.5,64,0.5" height="0" radius="8"/>
+            <cylinder base="-15.5,64,0.5" height="0" radius="8"/>
+            <cylinder base="0.5,64,16.5" height="0" radius="8"/>
+            <cylinder base="0.5,64,-15.5" height="0" radius="8"/>
+        </regions>
+    </spawn>
+    <default>
+        <region>
+            <cylinder base="0.5,100,-58.5" height="0" radius="0.5"/>
+        </region>
+    </default>
+</spawns>
+<kits>
+    <kit id="spawn-kit">
+        <item name="`fPizza Cutter" lore="`8Cuts right through pizza" material="diamond pickaxe" enchantments="efficiency:6" unbreakable="true"/>
+        <effect amplifier="127">resistance</effect>
+    </kit>
+    <kit id="before-match-end-kit">
+        <item name="`fAnti-Camping Measure" material="fireball" amount="3" projectile="fireball-projectile"/>
+    </kit>
+    <give kit="before-match-end-kit" filter="all(4m30s,is-playing)"/>
+</kits>
+<projectiles>
+    <projectile id="fireball-projectile" name="Fireball" projectile="Fireball" click="right" damage="10" power="4" throwable="true" cooldown="1s"/>
+</projectiles>
+<blitz/>
+<time>5m</time>
+<filters>
+    <participating id="is-playing"/>
+    <time id="4m30s">4m30s</time>
+    <after duration="20s" message="`fAll players will receive `6Fireball `fprojectiles in {0}">
+        <time>4m10s</time>
+    </after>
+    <deny id="deny-explosions">
+        <cause>explosion</cause>
+    </deny>
+</filters>
+<regions>
+    <apply>
+        <block>
+            <never/>
+        </block>
+        <enter>
+            <never/>
+        </enter>
+        <region>
+            <cylinder base="0.5,95,-58.5" height="oo" radius="12"/>
+        </region>
+    </apply>
+</regions>
+<actions>
+    <action id="give-blindness" scope="match">
+        <switch-scope outer="match" inner="player">
+            <action id="give-blindness-effect"/>
+        </switch-scope>
+    </action>
+    <action id="give-nausea" scope="match">
+        <switch-scope outer="match" inner="player">
+            <action id="give-nausea-effect"/>
+        </switch-scope>
+    </action>
+    <!-- Effects -->
+    <action filter="is-playing" id="give-blindness-effect" scope="player">
+        <kit force="true">
+            <effect duration="7s">blindness</effect>
+        </kit>
+    </action>
+    <action filter="is-playing" id="give-nausea-effect" scope="player">
+        <kit>
+            <effect>nausea</effect>
+        </kit>
+    </action>
+    <!-- Misc. -->
+    <trigger scope="match">
+        <filter>
+            <match-started/>
+        </filter>
+        <action>
+            <message text=" `b`lLet the feast begin!"/>
+        </action>
+    </trigger>
+</actions>
+<block-drops>
+    <rule>
+        <filter>
+            <all>
+                <material>redstone block</material>
+                <filter id="deny-explosions"/>
+            </all>
+        </filter>
+        <kit force="true">
+            <effect amplifier="2" duration="5s">speed</effect>
+            <action>
+                <message text=" `fYou ate a `cPepperoni`f! `7You're faster for the next `e5 `7seconds!"/>
+            </action>
+        </kit>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>obsidian</material>
+                <filter id="deny-explosions"/>
+            </all>
+        </filter>
+        <kit force="true">
+            <action>
+                <message text=" `fYou ate an `8Olive`f! `7Everyone else is blind for `e7 `7seconds!"/>
+                <switch-scope outer="player" inner="match">
+                    <action id="give-blindness"/>
+                </switch-scope>
+                <kit force="true">
+                    <effect duration="0s">blindness</effect>
+                </kit>
+            </action>
+        </kit>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>wool</material>
+                <filter id="deny-explosions"/>
+            </all>
+        </filter>
+        <kit force="true">
+            <effect amplifier="6" duration="10s">jump_boost</effect>
+            <action>
+                <message text=" `fYou ate a `aPepper`f! `7You jump higher for the next `e10 `7seconds!"/>
+            </action>
+        </kit>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>stained glass</material>
+                <filter id="deny-explosions"/>
+            </all>
+        </filter>
+        <kit force="true">
+            <effect duration="10s">invisibility</effect>
+            <action>
+                <message text=" `fYou ate an `7Onion`f! `7You're invisible for the next `e10 `7seconds!"/>
+            </action>
+        </kit>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>wood</material>
+                <filter id="deny-explosions"/>
+            </all>
+        </filter>
+        <kit force="true">
+            <item material="monster egg" damage="50" name="`fExplosive" amount="3"/>
+            <action>
+                <message text=" `fYou ate a `4Sausage`f! `7You've received some explosives!"/>
+            </action>
+        </kit>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>soul sand</material>
+                <filter id="deny-explosions"/>
+            </all>
+        </filter>
+        <kit force="true">
+            <item material="potion" damage="16394" name="`fSlow Bomb" lore="Slows down your enemies, but be careful not to hit yourself!" amount="3">
+                <effect duration="15s" amplifier="2">slowness</effect>
+            </item>
+            <action>
+                <message text=" `fYou ate a `6Mushroom`f! `7You've received some slowness potions!"/>
+            </action>
+        </kit>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>gold block</material>
+                <filter id="deny-explosions"/>
+            </all>
+        </filter>
+        <kit force="true">
+            <action>
+                <message text=" `fYou ate an `eEgg`f! `7Everyone else is nauseous for the rest of the game!"/>
+                <switch-scope outer="player" inner="match">
+                    <action id="give-nausea"/>
+                </switch-scope>
+                <kit force="true">
+                    <effect duration="0s">nausea</effect>
+                </kit>
+            </action>
+        </kit>
+    </rule>
+</block-drops>
+<toolrepair>
+    <tool>diamond pickaxe</tool>
+</toolrepair>
+<damage>
+    <not>
+        <any>
+            <relation>ally</relation>
+        </any>
+    </not>
+</damage>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
