@@ -20,7 +20,6 @@
         </regions>
     </default>
 </spawns>
-<time result="score">15m</time>
 <world>
     <timeset>18000</timeset>
 </world>
@@ -40,7 +39,6 @@
 <broadcasts>
     <alert after="1s" filter="only-team-one">`7`lDestroy the Blue Team's Bed!</alert>
     <alert after="1s" filter="only-team-two">`7`lDestroy the Red Team's Bed!</alert>
-    <alert after="10m">`7If neither team has won by then, the match will end in `c`l5 minutes`7!</alert>
     <alert after="13m">`7If neither team has won by then, the match will end in `c`l2 minutes`7!</alert>
     <alert after="14m">`7If neither team has won by then, the match will end in `c`l1 minute`7!</alert>
     <alert after="14m30s">`7If neither team has won by then, the match will end in `c`l30 seconds`7!</alert>
@@ -72,21 +70,19 @@
         <clear effects="true" items="false" armor="false"/>
         <health>1</health>
     </kit>
-    <!-- slow digging critical to preventing an out-of-sync bed break by other team -->
-    <give filter="complete-state">
+    <give filter="round_state=10"> <!-- complete-state -->
         <kit>
+            <clear/>
             <effect duration="9s" amplifier="255">slow_digging</effect>
             <effect duration="9s">invisibility</effect>
         </kit>
     </give>
-    <give filter="reset2-state">
+    <give filter="round_state=30"> <!-- reset2-state -->
         <kit>
             <effect duration="10s" amplifier="255">resistance</effect>
         </kit>
     </give>
-    <give filter="reset1-state">
-        <kit id="spawn-kit"/>
-    </give>
+    <give filter="all(gameover=0,round_state=20)" kit="spawn-kit"/> <!-- reset1-state -->
 </kits>
 <filters>
     <all id="only-team-one">
@@ -97,39 +93,8 @@
         <team>team-two</team>
         <participating/>
     </all>
-    <!-- game state machine sequence -->
-    <all id="running-state">
+    <all id="match-started">
         <match-running/>
-        <variable var="round_state">9</variable>
-    </all>
-    <all id="complete-state">
-        <match-running/>
-        <variable var="round_state">10</variable>
-    </all>
-    <all id="reset1-state">
-        <match-running/>
-        <variable var="gameover">0</variable>
-        <variable var="round_state">20</variable>
-    </all>
-    <all id="reset2-state">
-        <match-running/>
-        <variable var="round_state">30</variable>
-    </all>
-    <all id="countdown3-state">
-        <match-running/>
-        <variable var="round_state">3</variable>
-    </all>
-    <all id="countdown2-state">
-        <match-running/>
-        <variable var="round_state">2</variable>
-    </all>
-    <all id="countdown1-state">
-        <match-running/>
-        <variable var="round_state">1</variable>
-    </all>
-    <all id="countdown0-state">
-        <match-running/>
-        <variable var="round_state">0</variable>
     </all>
     <after id="countdown-bossbar" message="`a» `fNext round begins in {0} `a«" duration="5s">
         <all>
@@ -139,10 +104,7 @@
     </after>
     <any id="countdown">
         <variable var="round_state">30</variable> <!-- reset2-state -->
-        <variable var="round_state">3</variable>
-        <variable var="round_state">2</variable>
-        <variable var="round_state">1</variable>
-        <variable var="round_state">0</variable>
+        <variable var="round_state">0..3</variable>
     </any>
     <offset id="red-bed-broke" vector="0,10,-41">
         <material>air</material>
@@ -157,12 +119,14 @@
     <offset id="blue-bed-broke-2" vector="0,10,42">
         <material>air</material>
     </offset>
-    <all id="should-tp">
-        <variable var="round_state">20</variable> <!-- reset1-state -->
-        <participating/>
-        <match-running/>
-        <alive/>
-    </all>
+    <after id="should-tp" duration="0.05s">
+        <all>
+            <variable var="round_state">20</variable> <!-- reset1-state -->
+            <participating/>
+            <match-running/>
+            <alive/>
+        </all>
+    </after>
     <deny id="original-block-protection-filter">
         <blocks region="original-block-protection">
             <not>
@@ -176,45 +140,11 @@
             </not>
         </blocks>
     </deny>
-    <deny id="red-bed-protect-1">
-        <all>
-            <blocks region="bed-red-1">
-                <all>
-                    <material>bed block</material>
-                </all>
-            </blocks>
-            <team>team-one</team>
-        </all>
-    </deny>
-    <deny id="red-bed-protect-2">
-        <all>
-            <blocks region="bed-red-2">
-                <all>
-                    <material>bed block</material>
-                </all>
-        </blocks>
+    <deny id="deny-red">
         <team>team-one</team>
-        </all>
     </deny>
-    <deny id="blue-bed-protect-1">
-        <all>
-            <blocks region="bed-blue-1">
-                <all>
-                    <material>bed block</material>
-                </all>
-            </blocks>
-            <team>team-two</team>
-        </all>
-    </deny>
-    <deny id="blue-bed-protect-2">
-        <all>
-            <blocks region="bed-blue-2">
-                <all>
-                    <material>bed block</material>
-                </all>
-            </blocks>
-            <team>team-two</team>
-        </all>
+    <deny id="deny-blue">
+        <team>team-two</team>
     </deny>
     <all id="red-team-win">
         <variable var="red_team_win">1</variable>
@@ -254,6 +184,7 @@
     </any>
 </filters>
 <variables>
+    <timelimit id="timer_variable"/>
     <variable id="round_number" scope="match" default="1"/>
     <variable id="round_state" scope="match" default="9"/> <!-- running state, skip cages first round -->
     <variable id="scoring_team" scope="match" default="0"/>
@@ -261,162 +192,126 @@
     <with-team id="red_team_score" var="team_score" team="team-one"/>
     <with-team id="blue_team_score" var="team_score" team="team-two"/>
     <variable id="player_score" scope="player" default="0"/>
-    <variable id="red_team_win" scope="match" default="0"/>
-    <variable id="red_team_lose" scope="match" default="0"/>
-    <variable id="blue_team_win" scope="match" default="0"/>
-    <variable id="blue_team_lose" scope="match" default="0"/>
+    <variable id="team_win" scope="team" default="0"/>
+    <with-team id="red_team_win" var="team_win" team="team-one"/>
+    <with-team id="blue_team_win" var="team_win" team="team-two"/>
+    <variable id="team_lose" scope="team" default="0"/>
+    <with-team id="red_team_lose" var="team_lose" team="team-one"/>
+    <with-team id="blue_team_lose" var="team_lose" team="team-two"/>
     <variable id="gameover" scope="match" default="0"/>
 </variables>
 <actions>
+    <action id="thunder-sounds" scope="team">
+        <sound key="ambient.weather.thunder" volume="1" pitch="1"/>
+        <sound key="ambient.weather.thunder" volume="1" pitch=".9"/>
+        <sound key="ambient.weather.thunder" volume="1" pitch=".8"/>
+    </action>
+    <action id="good-sounds" scope="team">
+        <action id="thunder-sounds"/>
+        <sound key="fireworks.blast_far" volume="1" pitch="1"/>
+        <sound key="fireworks.twinkle" volume="1" pitch="1"/>
+        <sound key="fireworks.twinkle" volume="1" pitch=".8"/>
+        <sound key="objective_good" volume="1" pitch="1"/>
+    </action>
+    <action id="bad-sounds" scope="team">
+        <sound key="mob.enderdragon.growl" volume="1" pitch="1"/>
+        <sound key="mob.enderdragon.growl" volume="1" pitch=".9"/>
+        <sound key="mob.enderdragon.growl" volume="1" pitch=".8"/>
+        <sound key="objective_bad" volume="1" pitch="1"/>
+    </action>
     <!-- show to Red team on a round Win -->
-    <trigger filter="red-team-win" action="red-team-win-action" scope="player"/>
-    <action id="red-team-win-action" scope="player">
-        <switch-scope outer="player" inner="match">
-            <switch-scope outer="match" inner="team" filter="only-team-one">
-                <set var="red_team_win" value="0"/>
-                <sound key="ambient.weather.thunder" volume="1" pitch="1"/>
-                <sound key="ambient.weather.thunder" volume="1" pitch=".9"/>
-                <sound key="ambient.weather.thunder" volume="1" pitch=".8"/>
-
-                <sound key="fireworks.blast_far" volume="1" pitch="1"/>
-                <sound key="fireworks.twinkle" volume="1" pitch="1"/>
-                <sound key="fireworks.twinkle" volume="1" pitch=".8"/>
-                <sound key="objective_good" volume="1" pitch="1"/>
-                <message fade-in="0.5s" stay="3s" fade-out="0.5s">
-                    <title>`cRED SCORED!!</title>
-                    <subtitle>`6Your team won the round</subtitle>
-                </message>
-                <message text="`6`lYour team won the round!"/>
-            </switch-scope>
-        </switch-scope>
+    <trigger filter="red-team-win" action="red-team-win-action" scope="team"/>
+    <action id="red-team-win-action" scope="team">
+        <set var="red_team_win" value="0"/>
+        <action id="good-sounds"/>
+        <message fade-in="0.5s" stay="3s" fade-out="0.5s">
+            <title>`cRED SCORED!!</title>
+            <subtitle>`6Your team won the round</subtitle>
+        </message>
+        <message text="`6`lYour team won the round!"/>
     </action>
     <!-- show to Blue team on a round Win -->
-    <trigger filter="blue-team-win" action="blue-team-win-action" scope="player"/>
-    <action id="blue-team-win-action" scope="player">
-        <switch-scope outer="player" inner="match">
-            <switch-scope outer="match" inner="team" filter="only-team-two">
-                <set var="blue_team_win" value="0"/>
-                <sound key="ambient.weather.thunder" volume="1" pitch="1"/>
-                <sound key="ambient.weather.thunder" volume="1" pitch=".9"/>
-                <sound key="ambient.weather.thunder" volume="1" pitch=".8"/>
-
-                <sound key="fireworks.blast_far" volume="1" pitch="1"/>
-                <sound key="fireworks.twinkle" volume="1" pitch="1"/>
-                <sound key="fireworks.twinkle" volume="1" pitch=".8"/>
-                <sound key="objective_good" volume="1" pitch="1"/>
-                <message fade-in="0.5s" stay="3s" fade-out="0.5s">
-                    <title>`9BLUE SCORED!!</title>
-                    <subtitle>`6Your team won the round</subtitle>
-                </message>
-                <message text="`6`lYour team won the round!"/>
-            </switch-scope>
-        </switch-scope>
+    <trigger filter="blue-team-win" action="blue-team-win-action" scope="team"/>
+    <action id="blue-team-win-action" scope="team">
+        <set var="blue_team_win" value="0"/>
+        <action id="good-sounds"/>
+        <message fade-in="0.5s" stay="3s" fade-out="0.5s">
+            <title>`9BLUE SCORED!!</title>
+            <subtitle>`6Your team won the round</subtitle>
+        </message>
+        <message text="`6`lYour team won the round!"/>
     </action>
     <!-- show to Red team on a round Loss -->
-    <trigger filter="red-team-lose" action="red-team-lose-action" scope="player"/>
-    <action id="red-team-lose-action" scope="player">
-        <switch-scope outer="player" inner="match">
-            <switch-scope outer="match" inner="team" filter="only-team-one">
-                <set var="red_team_lose" value="0"/>
-                <sound key="mob.enderdragon.growl" volume="1" pitch="1"/>
-                <sound key="mob.enderdragon.growl" volume="1" pitch=".9"/>
-                <sound key="mob.enderdragon.growl" volume="1" pitch=".8"/>
-                <sound key="objective_bad" volume="1" pitch="1"/>
-                <message fade-in="0.5s" stay="3s" fade-out="0.5s">
-                    <title>`9RED BED DESTROYED</title>
-                    <subtitle>`6Your team lost the round</subtitle>
-                </message>
-                <message text="`7`lYour team lost the round!"/>
-            </switch-scope>
-        </switch-scope>
+    <trigger filter="red-team-lose" action="red-team-lose-action" scope="team"/>
+    <action id="red-team-lose-action" scope="team">
+        <set var="red_team_lose" value="0"/>
+        <action id="bad-sounds"/>
+        <message fade-in="0.5s" stay="3s" fade-out="0.5s">
+            <title>`9RED BED DESTROYED</title>
+            <subtitle>`6Your team lost the round</subtitle>
+        </message>
+        <message text="`7`lYour team lost the round!"/>
     </action>
     <!-- show to Blue team on a round Loss -->
-    <trigger filter="blue-team-lose" action="blue-team-lose-action" scope="player"/>
-    <action id="blue-team-lose-action" scope="player">
-        <switch-scope outer="player" inner="match">
-            <switch-scope outer="match" inner="team" filter="only-team-two">
-                <set var="blue_team_lose" value="0"/>
-                <sound key="mob.enderdragon.growl" volume="1" pitch="1"/>
-                <sound key="mob.enderdragon.growl" volume="1" pitch=".9"/>
-                <sound key="mob.enderdragon.growl" volume="1" pitch=".8"/>
-                <sound key="objective_bad" volume="1" pitch="1"/>
-                <message fade-in="0.5s" stay="3s" fade-out="0.5s">
-                    <title>`9BLUE BED DESTROYED</title>
-                    <subtitle>`6Your team lost the round</subtitle>
-                </message>
-                <message text="`7`lYour team lost the round!"/>
-            </switch-scope>
-        </switch-scope>
+    <trigger filter="blue-team-lose" action="blue-team-lose-action" scope="team"/>
+    <action id="blue-team-lose-action" scope="team">
+        <set var="blue_team_lose" value="0"/>
+        <action id="bad-sounds"/>
+        <message fade-in="0.5s" stay="3s" fade-out="0.5s">
+            <title>`9BLUE BED DESTROYED</title>
+            <subtitle>`6Your team lost the round</subtitle>
+        </message>
+        <message text="`7`lYour team lost the round!"/>
     </action>
-    <trigger filter="red-team-win-final" scope="player">
-        <action scope="player">
+    <trigger filter="red-team-win-final" scope="team">
+        <action>
             <set var="red_team_win" value="0"/>
             <set var="blue_team_lose" value="2"/>
             <set var="gameover" value="1"/>
-            <sound key="ambient.weather.thunder" volume="1" pitch="1"/>
-            <sound key="ambient.weather.thunder" volume="1" pitch=".9"/>
-            <sound key="ambient.weather.thunder" volume="1" pitch=".8"/>
+            <action id="thunder-sounds"/>
         </action>
     </trigger>
-    <trigger filter="blue-team-win-final" scope="player">
-        <action scope="player">
+    <trigger filter="blue-team-win-final" scope="team">
+        <action>
             <set var="blue_team_win" value="0"/>
             <set var="red_team_lose" value="2"/>
             <set var="gameover" value="1"/>
-            <sound key="ambient.weather.thunder" volume="1" pitch="1"/>
-            <sound key="ambient.weather.thunder" volume="1" pitch=".9"/>
-            <sound key="ambient.weather.thunder" volume="1" pitch=".8"/>
+            <action id="thunder-sounds"/>
         </action>
     </trigger>
     <trigger filter="red-final" scope="team">
-        <action scope="team">
-            <switch-scope outer="team" inner="match">
-                <action scope="match">
-                    <set var="red_team_win" value="2"/>
-                </action>
-            </switch-scope>
+        <action>
+            <set var="red_team_win" value="2"/>
         </action>
     </trigger>
     <trigger filter="blue-final" scope="team">
-        <action scope="team">
-            <switch-scope outer="team" inner="match">
-                <action scope="match">
-                    <set var="blue_team_win" value="2"/>
-                </action>
-            </switch-scope>
+        <action>
+            <set var="blue_team_win" value="2"/>
         </action>
     </trigger>
     <trigger filter="red-bed-broke" scope="match">
-        <action scope="match">
-                <set var="round_state" value="10"/> <!-- start complete-state --> 
-                <set var="blue_team_score" value="blue_team_score+1"/>
-                <set var="blue_team_win" value="1"/>
-                <set var="red_team_lose" value="1"/>
+        <action>
+            <set var="round_state" value="10"/> <!-- start complete-state -->
+            <set var="blue_team_score" value="blue_team_score+1"/>
+            <set var="blue_team_win" value="1"/>
+            <set var="red_team_lose" value="1"/>
         </action>
     </trigger>
     <trigger filter="blue-bed-broke" scope="match">
-        <action scope="match">
-                <set var="round_state" value="10"/> <!-- start complete-state --> 
-                <set var="red_team_score" value="red_team_score+1"/>
-                <set var="red_team_win" value="1"/>
-                <set var="blue_team_lose" value="1"/>
-        </action>
-    </trigger>
-    <trigger filter="red-bed-broke-2" scope="match">
-        <action scope="match">
-        </action>
-    </trigger>
-    <trigger filter="blue-bed-broke-2" scope="match">
-        <action scope="match">
+        <action>
+            <set var="round_state" value="10"/> <!-- start complete-state -->
+            <set var="red_team_score" value="red_team_score+1"/>
+            <set var="red_team_win" value="1"/>
+            <set var="blue_team_lose" value="1"/>
         </action>
     </trigger>
     <trigger scope="match">
         <filter>
-            <after duration="1.8s" filter="complete-state"/>
+            <after duration="1.8s" filter="round_state=10"/> <!-- complete-state -->
         </filter>
-        <action scope="match">
+        <action>
             <set var="round_number" value="round_number+1"/>
-            <fill region="cages" material="stained glass"/>
+            <fill region="cages" material="stained glass:15"/>
             <!-- tp players via portal -->
             <set var="round_state" value="20"/> <!-- start reset1-state -->
             <message text="`6`lRound `e{amount}`2 `6`lis about to start!">
@@ -429,9 +324,9 @@
     </trigger>
     <trigger scope="match">
         <filter>
-            <after duration="1.0s" filter="reset1-state"/>
+            <after duration="1.0s" filter="round_state=20"/> <!-- reset1-state -->
         </filter>
-        <action scope="match">
+        <action>
             <sound key="fireworks.twinkle_far" volume="1" pitch="1"/>
             <set var="round_state" value="30"/> <!-- start reset2-state -->
             <!-- structure used to refresh map -->
@@ -439,18 +334,18 @@
     </trigger>
     <trigger scope="match">
         <filter>
-            <after duration="1.0s" filter="reset2-state"/>
+            <after duration="1.0s" filter="round_state=30"/> <!-- reset2-state -->
         </filter>
-        <action scope="match">
+        <action>
             <set var="round_state" value="3"/> <!-- start countdown3-state -->
             <kill-entities filter="remove-entities"/>
         </action>
     </trigger>
     <trigger scope="match">
         <filter>
-            <after duration="1.0s" filter="countdown3-state"/>
+            <after duration="1.0s" filter="round_state=3"/> <!-- countdown3-state -->
         </filter>
-        <action scope="match">
+        <action>
             <message fade-in="0.0s" stay="0.7s" fade-out="0.3s">
                 <title>`63</title>
             </message>
@@ -460,9 +355,9 @@
     </trigger>
     <trigger scope="match">
         <filter>
-            <after duration="1s" filter="countdown2-state"/>
+            <after duration="1s" filter="round_state=2"/> <!-- countdown2-state -->
         </filter>
-        <action scope="match">
+        <action>
             <message fade-in="0.0s" stay="0.7s" fade-out="0.3s">
                 <title>`62</title>
             </message>
@@ -472,9 +367,9 @@
     </trigger>
     <trigger scope="match">
         <filter>
-            <after duration="1s" filter="countdown1-state"/>
+            <after duration="1s" filter="round_state=1"/> <!-- countdown1-state -->
         </filter>
-        <action scope="match">
+        <action>
             <message fade-in="0.0s" stay="0.7s" fade-out="0.3s">
                 <title>`61</title>
             </message>
@@ -482,20 +377,28 @@
             <sound key="note.pling" volume="1" pitch="1"/>
         </action>
     </trigger>
+     <trigger scope="match">
+         <filter>
+             <after duration="1s" filter="round_state=0"/>
+         </filter>
+         <action>
+             <sound key="note.pling" volume="1" pitch="2"/>
+             <fill region="cages" material="air"/>
+             <set var="round_state" value="9"/> <!-- start running-state -->
+             <message fade-in="0.0s" stay="0.7s" fade-out="0.3s" subtitle="`6`lRound `e{amount}">
+                 <title>`2Go</title>
+                 <replacements>
+                     <decimal id="amount" value="round_number"/>
+                 </replacements>
+             </message>
+         </action>
+     </trigger>
     <trigger scope="match">
         <filter>
-            <after duration="1s" filter="countdown0-state"/>
+            <after duration="8m" filter="match-started"/>
         </filter>
-        <action scope="match">
-            <sound key="note.pling" volume="1" pitch="2"/>
-            <fill region="cages" material="air"/>
-            <set var="round_state" value="9"/> <!-- start running-state -->
-            <message fade-in="0.0s" stay="0.7s" fade-out="0.3s" subtitle="`6`lRound `e{amount}">
-                <title>`2Go</title>
-                <replacements>
-                    <decimal id="amount" value="round_number"/>
-                </replacements>
-            </message>
+        <action>
+            <set var="timer_variable" value="120"/>
         </action>
     </trigger>
 </actions>
@@ -507,7 +410,7 @@
     </structure>
     <dynamic structure="course">
         <trigger>
-            <filter id="reset1-state"/>
+            <filter id="all(gameover=0,round_state=20)"/> <!-- reset1-state -->
         </trigger>
     </dynamic>
 </structures>
@@ -537,19 +440,23 @@
         <cylinder id="team-two-spawn-cage" base="${team-two-spawn}" height="4" radius="4"/>
     </union>
     <!-- bed locations -->
-    <cuboid id="bed-red-1" min="0,10,-40" max="1,11,-41"/>
-    <cuboid id="bed-red-2" min="0,10,-41" max="1,11,-42"/>
-    <cuboid id="bed-blue-1" min="0,10,41" max="1,11,42"/>
-    <cuboid id="bed-blue-2" min="0,10,42" max="1,11,43"/>
+    <union id="bed-red">
+        <block id="bed-red-1">0,10,-41</block>
+        <block id="bed-red-2">0,10,-42</block>
+    </union>
+    <union id="bed-blue">
+        <block id="bed-blue-1">0,10,41</block>
+        <block id="bed-blue-2">0,10,42</block>
+    </union>
     <!-- applies -->
     <apply enter="never" region="ceiling" message="You may not climb higher!"/>
     <apply enter="never" region="no-go" message="You may not leave the course!"/>
     <apply block="original-block-protection-filter" message="You can't modify that block!"/>
     <apply block-place="never" region="not-buildable" message="You may not build in this area!"/>
-    <apply block-break="red-bed-protect-1" region="bed-red-1" message="You may not break your own bed!"/>
-    <apply block-break="red-bed-protect-2" region="bed-red-2" message="You may not break your own bed!"/>
-    <apply block-break="blue-bed-protect-1" region="bed-blue-1" message="You may not break your own bed!"/>
-    <apply block-break="blue-bed-protect-2" region="bed-blue-2" message="You may not break your own bed!"/>
+    <apply block-place="never" region="bed-red"/>
+    <apply block-place="never" region="bed-blue"/>
+    <apply block-break="deny-red" region="bed-red" message="You may not break your own bed!"/>
+    <apply block-break="deny-blue" region="bed-blue" message="You may not break your own bed!"/>
     <apply block-place="never" region="spawn-protections" message="You may not build in the spawn area!"/>
     <apply kit="void-death" region="void"/>
 </regions>
