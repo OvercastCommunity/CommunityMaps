@@ -1,0 +1,93 @@
+<map proto="1.4.2">
+<name>Treflip</name>
+<version>1.0.1</version>
+<variant id="5v5">5v5</variant>
+<objective>Get the most points!</objective>
+<constant id="damage-resistance">2s</constant>
+<constant id="respawn-timer">2s</constant>
+<if variant="5v5">
+    <include id="conquest-comp"/>
+    <constant id="max">5</constant>
+    <constant id="max-overfill">5</constant>
+</if>
+<unless variant="5v5">
+    <include id="conquest"/>
+    <constant id="max">8</constant>
+    <constant id="max-overfill" delete="true"/>
+</unless>
+<created>2024-08-08</created>
+<gamemode>koth</gamemode>
+<authors>
+    <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
+</authors>
+<teams>
+    <team id="red" color="red" max="${max}" max-overfill="${max-overfill}">Red</team>
+    <team id="blue" color="blue" max="${max}" max-overfill="${max-overfill}">Blue</team>
+</teams>
+<kits>
+    <kit id="spawn-kit" parent="base-kit">
+        <action>
+            <replace-item>
+                <find unbreakable="true" material="iron boots"/>
+                <replace unbreakable="true" enchantment="feather_falling" material="iron boots"/>
+            </replace-item>
+        </action>
+    </kit>
+</kits>
+<spawns>
+    <spawn team="blue" kit="spawn-kit">
+        <regions yaw="-135">
+            <point>-22.5,8,26.5</point>
+        </regions>
+    </spawn>
+    <spawn team="red" kit="spawn-kit">
+        <regions yaw="35">
+            <point>23.5,8,-25.5</point>
+        </regions>
+    </spawn>
+    <default>
+        <regions>
+            <point>0.5,37,0.5</point>
+        </regions>
+    </default>
+</spawns>
+<regions>
+    <union id="spawns">
+        <cuboid id="blue-spawn" min="-10,7,20" max="-27,20,29"/>
+        <cuboid id="red-spawn" min="11,7,-19" max="28,20,-28"/>
+    </union>
+    <union id="point-a-regions">
+        <cuboid id="point-a-capture" min="-15,5,-15" max="-22,9,-22"/>
+        <!-- Display regions -->
+        <cuboid min="-17,33,-17" max="-20,36,-20"/>
+        <cuboid min="-28,19,-35" max="-35,24,-28"/>
+    </union>
+    <union id="point-b-regions">
+        <cuboid id="point-b-capture" min="4,1,4" max="-3,5,-3"/>
+        <!-- Display regions -->
+        <cuboid min="-3,18,15" max="-11,14,14"/>
+        <cuboid min="4,18,-14" max="12,14,-13"/>
+        <cuboid min="-1,38,2" max="2,34,-1"/>
+    </union>
+    <union id="point-c-regions">
+        <cuboid id="point-c-capture" min="16,5,16" max="23,9,23"/>
+        <!-- Display regions -->
+        <cuboid min="18,33,18" max="21,36,21"/>
+        <cuboid min="29,19,36" max="36,24,29"/>
+    </union>
+    <apply enter="blue-only" region="blue-spawn" message="You may not enter this area!"/>
+    <apply enter="red-only" region="red-spawn" message="You may not enter this area!"/>
+</regions>
+<filters>
+    <team id="blue-only">blue</team>
+    <team id="red-only">red</team>
+</filters>
+<control-points required="false" capture-rule="lead" points="1" capture-time="3s" show-progress="true" neutral-state="true" decay-rate="0">
+    <control-point id="point-a" name="Hill A" capture="point-a-capture" progress="point-a-capture" captured="point-a-regions"/>
+    <control-point id="point-b" name="Hill B" capture="point-b-capture" progress="point-b-capture" captured="point-b-regions"/>
+    <control-point id="point-c" name="Hill C" capture="point-c-capture" progress="point-c-capture" captured="point-c-regions"/>
+</control-points>
+<score>
+    <limit>750</limit>
+</score>
+</map>
