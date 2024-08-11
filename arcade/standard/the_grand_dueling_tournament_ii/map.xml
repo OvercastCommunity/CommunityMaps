@@ -9,7 +9,7 @@
                                                     Definitive Edition
 -->
 <name>The Grand Dueling Tournament II</name>
-<version>2.5.5</version>
+<version>2.6.0</version>
 <objective>Win the tournament!</objective>
 <phase>staging</phase>
 <variant id="spleef" world="spleef" override="true">The Grand Spleefing Tournament II</variant>
@@ -809,6 +809,11 @@
     <any id="visual-blocks">
         <material>wool:0</material>
         <material>stained clay:0</material>
+    </any>
+    <any id="clearable-entities">
+        <entity>dropped item</entity>
+        <entity>arrow</entity>
+        <entity>creeper</entity>
     </any>
     <after id="allow-round-1-completion" duration="1s">
         <after id="round-1-begin" duration="${round-begin-after-seconds}s" message="Round 1 begins in {0}">
@@ -2251,6 +2256,7 @@
             <time>12s</time>
         </filter>
         <action>
+            <action id="clear-dropped-lobby-entities"/>
             <action filter="not(temp=0)">
                 <message text="`7[`6Arena Master`7] `6Tirion`r: In the second round your ${kit-type} will be..."/>
                 <set var="current_kit" value="round_2_kit"/>
@@ -2273,6 +2279,7 @@
             <time>15s</time>
         </filter>
         <action filter="not(temp=0)">
+            <action id="clear-dropped-lobby-entities"/>
             <message text="`7[`6Arena Master`7] `6Tirion`r: And for the grand finale..."/>
             <set var="current_kit" value="round_3_kit"/>
             <action id="clear-kit-applicator"/>
@@ -2281,51 +2288,64 @@
             <sound key="mob.villager.haggle"/>
         </action>
     </trigger>
+    <action id="clear-dropped-lobby-entities" scope="match">
+        <kill-entities filter="all(lobby, clearable-entities)"/>
+    </action>
     <action id="kit-applicator" scope="match">
         <switch-scope inner="player" filter="participating">
             <set var="alive" value="1"/>
         </switch-scope>
-        <action filter="current_kit=0">
-            <action filter="announce_kit=1">
-                <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-0-name}`r!"/>
+        <if constant="kit-count" constant-value="1..99" constant-comparison="range">
+            <action filter="current_kit=0">
+                <action filter="announce_kit=1">
+                    <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-0-name}`r!"/>
+                </action>
+                <switch-scope inner="player" filter="participating">
+                    <kit id="kit-0"/>
+                </switch-scope>
             </action>
-            <switch-scope inner="player" filter="participating">
-                <kit id="kit-0"/>
-            </switch-scope>
-        </action>
-        <action filter="current_kit=1">
-            <action filter="announce_kit=1">
-                <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-1-name}`r!"/>
+        </if>
+        <if constant="kit-count" constant-value="2.." constant-comparison="range">
+            <action filter="current_kit=1">
+                <action filter="announce_kit=1">
+                    <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-1-name}`r!"/>
+                </action>
+                <switch-scope inner="player" filter="participating">
+                    <kit id="kit-1"/>
+                </switch-scope>
             </action>
-            <switch-scope inner="player" filter="participating">
-                <kit id="kit-1"/>
-            </switch-scope>
-        </action>
-        <action filter="current_kit=2">
-            <action filter="announce_kit=1">
-                <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-2-name}`r!"/>
+        </if>
+        <if constant="kit-count" constant-value="3.." constant-comparison="range">
+            <action filter="current_kit=2">
+                <action filter="announce_kit=1">
+                    <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-2-name}`r!"/>
+                </action>
+                <switch-scope inner="player" filter="participating">
+                    <kit id="kit-2"/>
+                </switch-scope>
             </action>
-            <switch-scope inner="player" filter="participating">
-                <kit id="kit-2"/>
-            </switch-scope>
-        </action>
-        <action filter="current_kit=3">
-            <action filter="announce_kit=1">
-                <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-3-name}`r!"/>
+        </if>
+        <if constant="kit-count" constant-value="4.." constant-comparison="range">
+            <action filter="current_kit=3">
+                <action filter="announce_kit=1">
+                    <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-3-name}`r!"/>
+                </action>
+                <switch-scope inner="player" filter="participating">
+                    <kit id="kit-3"/>
+                </switch-scope>
             </action>
-            <switch-scope inner="player" filter="participating">
-                <kit id="kit-3"/>
-            </switch-scope>
-        </action>
-        <action filter="current_kit=4">
-            <action filter="announce_kit=1">
-                <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-4-name}`r!"/>
+        </if>
+        <if constant="kit-count" constant-value="5.." constant-comparison="range">
+            <action filter="current_kit=4">
+                <action filter="announce_kit=1">
+                    <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-4-name}`r!"/>
+                </action>
+                <switch-scope inner="player" filter="participating">
+                    <kit id="kit-4"/>
+                </switch-scope>
             </action>
-            <switch-scope inner="player" filter="participating">
-                <kit id="kit-4"/>
-            </switch-scope>
-        </action>
-        <if variant="default, cannon">
+        </if>
+        <if constant="kit-count" constant-value="6.." constant-comparison="range">
             <action filter="current_kit=5">
                 <action filter="announce_kit=1">
                     <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-5-name}`r!"/>
@@ -2334,6 +2354,8 @@
                     <kit id="kit-5"/>
                 </switch-scope>
             </action>
+        </if>
+        <if constant="kit-count" constant-value="7.." constant-comparison="range">
             <action filter="current_kit=6">
                 <action filter="announce_kit=1">
                     <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-6-name}`b!"/>
@@ -2343,7 +2365,7 @@
                 </switch-scope>
             </action>
         </if>
-        <if variant="default">
+        <if constant="kit-count" constant-value="8.." constant-comparison="range">
             <action filter="current_kit=7">
                 <action filter="announce_kit=1">
                     <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-7-name}`r!"/>
@@ -2352,6 +2374,8 @@
                     <kit id="kit-7"/>
                 </switch-scope>
             </action>
+        </if>
+        <if constant="kit-count" constant-value="9.." constant-comparison="range">
             <action filter="current_kit=8">
                 <action filter="announce_kit=1">
                     <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-8-name}`r!"/>
@@ -2360,6 +2384,8 @@
                     <kit id="kit-8"/>
                 </switch-scope>
             </action>
+        </if>
+        <if constant="kit-count" constant-value="10.." constant-comparison="range">
             <action filter="current_kit=9">
                 <action filter="announce_kit=1">
                     <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-9-name}`r!"/>
@@ -2368,6 +2394,8 @@
                     <kit id="kit-9"/>
                 </switch-scope>
             </action>
+        </if>
+        <if constant="kit-count" constant-value="11.." constant-comparison="range">
             <action filter="current_kit=10">
                 <action filter="announce_kit=1">
                     <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-10-name}`r!"/>
@@ -2376,6 +2404,8 @@
                     <kit id="kit-10"/>
                 </switch-scope>
             </action>
+        </if>
+        <if constant="kit-count" constant-value="12.." constant-comparison="range">
             <action filter="current_kit=11">
                 <action filter="announce_kit=1">
                     <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-11-name}`r!"/>
@@ -2384,6 +2414,8 @@
                     <kit id="kit-11"/>
                 </switch-scope>
             </action>
+        </if>
+        <if constant="kit-count" constant-value="13.." constant-comparison="range">
             <action filter="current_kit=12">
                 <action filter="announce_kit=1">
                     <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-12-name}`r!"/>
@@ -2392,6 +2424,8 @@
                     <kit id="kit-12"/>
                 </switch-scope>
             </action>
+        </if>
+        <if constant="kit-count" constant-value="14.." constant-comparison="range">
             <action filter="current_kit=13">
                 <action filter="announce_kit=1">
                     <message text="`7[`6Arena Master`7] `6Tirion`r: ${kit-13-name}`r!"/>
@@ -2427,47 +2461,57 @@
         <message>
             <text>{"text": "","extra":[{"text":" [1] ","hoverEvent":{"action":"show_text","contents":{"text":"Round 1","color":"dark_aqua"}},"color":"dark_aqua"},{"text":"[2] ","hoverEvent":{"action":"show_text","contents":{"text":"Round 2","color":"dark_aqua"}},"color":"dark_aqua"},{"text":"[3]","hoverEvent":{"action":"show_text","contents":{"text":"Round 3","color":"dark_aqua"}},"color":"dark_aqua"}],"color": "white"}</text>
         </message>
-        <message>
-            <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-0"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-0-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-0"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-0-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-0"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-0-name}","color":"aqua"}},"color":"aqua"},{"text":" - 0: ${kit-0-name}"}],"color": "white"}</text>
-            <replacements>
-                <decimal id="r1" value="(bound(abs(round_1_kit - 0), 0, 1) + 1) % 2"/>
-                <decimal id="r2" value="(bound(abs(round_2_kit - 0), 0, 1) + 1) % 2"/>
-                <decimal id="r3" value="(bound(abs(round_3_kit - 0), 0, 1) + 1) % 2"/>
-            </replacements>
-        </message>
-        <message>
-            <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-1"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-1-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-1"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-1-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-1"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-1-name}","color":"aqua"}},"color":"aqua"},{"text":" - 1: ${kit-1-name}"}],"color": "white"}</text>
-            <replacements>
-                <decimal id="r1" value="(bound(abs(round_1_kit - 1), 0, 1) + 1) % 2"/>
-                <decimal id="r2" value="(bound(abs(round_2_kit - 1), 0, 1) + 1) % 2"/>
-                <decimal id="r3" value="(bound(abs(round_3_kit - 1), 0, 1) + 1) % 2"/>
-            </replacements>
-        </message>
-        <message>
-            <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-2"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-2-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-2"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-2-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-2"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-2-name}","color":"aqua"}},"color":"aqua"},{"text":" - 2: ${kit-2-name}"}],"color": "white"}</text>
-            <replacements>
-                <decimal id="r1" value="(bound(abs(round_1_kit - 2), 0, 1) + 1) % 2"/>
-                <decimal id="r2" value="(bound(abs(round_2_kit - 2), 0, 1) + 1) % 2"/>
-                <decimal id="r3" value="(bound(abs(round_3_kit - 2), 0, 1) + 1) % 2"/>
-            </replacements>
-        </message>
-        <message>
-            <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-3"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-3-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-3"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-3-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-3"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-3-name}","color":"aqua"}},"color":"aqua"},{"text":" - 3: ${kit-3-name}"}],"color": "white"}</text>
-            <replacements>
-                <decimal id="r1" value="(bound(abs(round_1_kit - 3), 0, 1) + 1) % 2"/>
-                <decimal id="r2" value="(bound(abs(round_2_kit - 3), 0, 1) + 1) % 2"/>
-                <decimal id="r3" value="(bound(abs(round_3_kit - 3), 0, 1) + 1) % 2"/>
-            </replacements>
-        </message>
-        <message>
-            <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-4"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-4-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-4"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-4-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-4"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-4-name}","color":"aqua"}},"color":"aqua"},{"text":" - 4: ${kit-4-name}"}],"color": "white"}</text>
-            <replacements>
-                <decimal id="r1" value="(bound(abs(round_1_kit - 4), 0, 1) + 1) % 2"/>
-                <decimal id="r2" value="(bound(abs(round_2_kit - 4), 0, 1) + 1) % 2"/>
-                <decimal id="r3" value="(bound(abs(round_3_kit - 4), 0, 1) + 1) % 2"/>
-            </replacements>
-        </message>
-        <if variant="default, cannon">
+        <if constant="kit-count" constant-value="1.." constant-comparison="range">
+            <message>
+                <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-0"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-0-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-0"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-0-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-0"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-0-name}","color":"aqua"}},"color":"aqua"},{"text":" - 0: ${kit-0-name}"}],"color": "white"}</text>
+                <replacements>
+                    <decimal id="r1" value="(bound(abs(round_1_kit - 0), 0, 1) + 1) % 2"/>
+                    <decimal id="r2" value="(bound(abs(round_2_kit - 0), 0, 1) + 1) % 2"/>
+                    <decimal id="r3" value="(bound(abs(round_3_kit - 0), 0, 1) + 1) % 2"/>
+                </replacements>
+            </message>
+        </if>
+        <if constant="kit-count" constant-value="2.." constant-comparison="range">
+            <message>
+                <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-1"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-1-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-1"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-1-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-1"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-1-name}","color":"aqua"}},"color":"aqua"},{"text":" - 1: ${kit-1-name}"}],"color": "white"}</text>
+                <replacements>
+                    <decimal id="r1" value="(bound(abs(round_1_kit - 1), 0, 1) + 1) % 2"/>
+                    <decimal id="r2" value="(bound(abs(round_2_kit - 1), 0, 1) + 1) % 2"/>
+                    <decimal id="r3" value="(bound(abs(round_3_kit - 1), 0, 1) + 1) % 2"/>
+                </replacements>
+            </message>
+        </if>
+        <if constant="kit-count" constant-value="3.." constant-comparison="range">
+            <message>
+                <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-2"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-2-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-2"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-2-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-2"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-2-name}","color":"aqua"}},"color":"aqua"},{"text":" - 2: ${kit-2-name}"}],"color": "white"}</text>
+                <replacements>
+                    <decimal id="r1" value="(bound(abs(round_1_kit - 2), 0, 1) + 1) % 2"/>
+                    <decimal id="r2" value="(bound(abs(round_2_kit - 2), 0, 1) + 1) % 2"/>
+                    <decimal id="r3" value="(bound(abs(round_3_kit - 2), 0, 1) + 1) % 2"/>
+                </replacements>
+            </message>
+        </if>
+        <if constant="kit-count" constant-value="4.." constant-comparison="range">
+            <message>
+                <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-3"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-3-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-3"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-3-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-3"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-3-name}","color":"aqua"}},"color":"aqua"},{"text":" - 3: ${kit-3-name}"}],"color": "white"}</text>
+                <replacements>
+                    <decimal id="r1" value="(bound(abs(round_1_kit - 3), 0, 1) + 1) % 2"/>
+                    <decimal id="r2" value="(bound(abs(round_2_kit - 3), 0, 1) + 1) % 2"/>
+                    <decimal id="r3" value="(bound(abs(round_3_kit - 3), 0, 1) + 1) % 2"/>
+                </replacements>
+            </message>
+        </if>
+        <if constant="kit-count" constant-value="5.." constant-comparison="range">
+            <message>
+                <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-4"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-4-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-4"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-4-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-4"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-4-name}","color":"aqua"}},"color":"aqua"},{"text":" - 4: ${kit-4-name}"}],"color": "white"}</text>
+                <replacements>
+                    <decimal id="r1" value="(bound(abs(round_1_kit - 4), 0, 1) + 1) % 2"/>
+                    <decimal id="r2" value="(bound(abs(round_2_kit - 4), 0, 1) + 1) % 2"/>
+                    <decimal id="r3" value="(bound(abs(round_3_kit - 4), 0, 1) + 1) % 2"/>
+                </replacements>
+            </message>
+        </if>
+        <if constant="kit-count" constant-value="6.." constant-comparison="range">
             <message>
                 <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-5"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-5-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-5"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-5-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-5"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-5-name}","color":"aqua"}},"color":"aqua"},{"text":" - 5: ${kit-5-name}"}],"color": "white"}</text>
                 <replacements>
@@ -2476,6 +2520,8 @@
                     <decimal id="r3" value="(bound(abs(round_3_kit - 5), 0, 1) + 1) % 2"/>
                 </replacements>
             </message>
+        </if>
+        <if constant="kit-count" constant-value="7.." constant-comparison="range">
             <message>
                 <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-6"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-6-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-6"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-6-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-6"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-6-name}","color":"aqua"}},"color":"aqua"},{"text":" - 6: ${kit-6-name}"}],"color": "white"}</text>
                 <replacements>
@@ -2485,7 +2531,7 @@
                 </replacements>
             </message>
         </if>
-        <if variant="default">
+        <if constant="kit-count" constant-value="8.." constant-comparison="range">
             <message>
                 <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-7"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-7-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-7"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-7-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-7"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-7-name}","color":"aqua"}},"color":"aqua"},{"text":" - 7: ${kit-7-name}"}],"color": "white"}</text>
                 <replacements>
@@ -2494,6 +2540,8 @@
                     <decimal id="r3" value="(bound(abs(round_3_kit - 7), 0, 1) + 1) % 2"/>
                 </replacements>
             </message>
+        </if>
+        <if constant="kit-count" constant-value="9.." constant-comparison="range">
             <message>
                 <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-8"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-8-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-8"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-8-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-8"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-8-name}","color":"aqua"}},"color":"aqua"},{"text":" - 8: ${kit-8-name}"}],"color": "white"}</text>
                 <replacements>
@@ -2502,6 +2550,8 @@
                     <decimal id="r3" value="(bound(abs(round_3_kit - 8), 0, 1) + 1) % 2"/>
                 </replacements>
             </message>
+        </if>
+        <if constant="kit-count" constant-value="10.." constant-comparison="range">
             <message>
                 <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-9"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-9-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-9"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-9-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-9"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-9-name}","color":"aqua"}},"color":"aqua"},{"text":" - 9: ${kit-9-name}"}],"color": "white"}</text>
                 <replacements>
@@ -2510,6 +2560,8 @@
                     <decimal id="r3" value="(bound(abs(round_3_kit - 9), 0, 1) + 1) % 2"/>
                 </replacements>
             </message>
+        </if>
+        <if constant="kit-count" constant-value="11.." constant-comparison="range">
             <message>
                 <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-10"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-10-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-10"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-10-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-10"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-10-name}","color":"aqua"}},"color":"aqua"},{"text":" - 10: ${kit-10-name}"}],"color": "white"}</text>
                 <replacements>
@@ -2518,6 +2570,8 @@
                     <decimal id="r3" value="(bound(abs(round_3_kit - 10), 0, 1) + 1) % 2"/>
                 </replacements>
             </message>
+        </if>
+        <if constant="kit-count" constant-value="12.." constant-comparison="range">
             <message>
                 <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-11"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-11-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-11"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-11-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-11"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-11-name}","color":"aqua"}},"color":"aqua"},{"text":" - 11: ${kit-11-name}"}],"color": "white"}</text>
                 <replacements>
@@ -2526,6 +2580,8 @@
                     <decimal id="r3" value="(bound(abs(round_3_kit - 11), 0, 1) + 1) % 2"/>
                 </replacements>
             </message>
+        </if>
+        <if constant="kit-count" constant-value="13.." constant-comparison="range">
             <message>
                 <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-12"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-12-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-12"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-12-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-12"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-12-name}","color":"aqua"}},"color":"aqua"},{"text":" - 12: ${kit-12-name}"}],"color": "white"}</text>
                 <replacements>
@@ -2534,6 +2590,8 @@
                     <decimal id="r3" value="(bound(abs(round_3_kit - 12), 0, 1) + 1) % 2"/>
                 </replacements>
             </message>
+        </if>
+        <if constant="kit-count" constant-value="14.." constant-comparison="range">
             <message>
                 <text>{"text": "","extra":[{"text":" [{r1}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-13"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-type} to ${kit-13-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r2}] ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-13"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-type} to ${kit-13-name}","color":"aqua"}},"color":"aqua"},{"text":"[{r3}]","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-13"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-type} to ${kit-13-name}","color":"aqua"}},"color":"aqua"},{"text":" - 12: ${kit-13-name}"}],"color": "white"}</text>
                 <replacements>
@@ -2544,112 +2602,122 @@
             </message>
         </if>
     </action>
-    <action id="set-round-1-kit-0" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-0-name}`r!"/>
-            <set var="round_1_kit" value="0"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-2-kit-0" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 2 has been set to ${kit-0-name}`r!"/>
-            <set var="round_2_kit" value="0"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-3-kit-0" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 3 has been set to ${kit-0-name}`r!"/>
-            <set var="round_3_kit" value="0"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-1-kit-1" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-1-name}`r!"/>
-            <set var="round_1_kit" value="1"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-2-kit-1" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 2 has been set to ${kit-1-name}`r!"/>
-            <set var="round_2_kit" value="1"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-3-kit-1" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 3 has been set to ${kit-1-name}`r!"/>
-            <set var="round_3_kit" value="1"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-1-kit-2" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-2-name}`r!"/>
-            <set var="round_1_kit" value="2"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-2-kit-2" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 2 has been set to ${kit-2-name}`r!"/>
-            <set var="round_2_kit" value="2"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-3-kit-2" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 3 has been set to ${kit-2-name}`r!"/>
-            <set var="round_3_kit" value="2"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-1-kit-3" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-3-name}`r!"/>
-            <set var="round_1_kit" value="3"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-2-kit-3" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 2 has been set to ${kit-3-name}`r!"/>
-            <set var="round_2_kit" value="3"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-3-kit-3" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 3 has been set to ${kit-3-name}`r!"/>
-            <set var="round_3_kit" value="3"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-1-kit-4" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-4-name}`r!"/>
-            <set var="round_1_kit" value="4"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-2-kit-4" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 2 has been set to ${kit-4-name}`r!"/>
-            <set var="round_2_kit" value="4"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <action id="set-round-3-kit-4" scope="player" expose="true" filter="not(match-started)">
-        <switch-scope inner="match">
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 3 has been set to ${kit-4-name}`r!"/>
-            <set var="round_3_kit" value="4"/>
-        </switch-scope>
-        <action id="kit-console"/>
-    </action>
-    <if variant="default, cannon">
+    <if constant="kit-count" constant-value="1.." constant-comparison="range">
+        <action id="set-round-1-kit-0" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-0-name}`r!"/>
+                <set var="round_1_kit" value="0"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+        <action id="set-round-2-kit-0" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 2 has been set to ${kit-0-name}`r!"/>
+                <set var="round_2_kit" value="0"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+        <action id="set-round-3-kit-0" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 3 has been set to ${kit-0-name}`r!"/>
+                <set var="round_3_kit" value="0"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+    </if>
+    <if constant="kit-count" constant-value="2.." constant-comparison="range">
+        <action id="set-round-1-kit-1" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-1-name}`r!"/>
+                <set var="round_1_kit" value="1"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+        <action id="set-round-2-kit-1" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 2 has been set to ${kit-1-name}`r!"/>
+                <set var="round_2_kit" value="1"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+        <action id="set-round-3-kit-1" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 3 has been set to ${kit-1-name}`r!"/>
+                <set var="round_3_kit" value="1"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+    </if>
+    <if constant="kit-count" constant-value="3.." constant-comparison="range">
+        <action id="set-round-1-kit-2" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-2-name}`r!"/>
+                <set var="round_1_kit" value="2"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+        <action id="set-round-2-kit-2" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 2 has been set to ${kit-2-name}`r!"/>
+                <set var="round_2_kit" value="2"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+        <action id="set-round-3-kit-2" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 3 has been set to ${kit-2-name}`r!"/>
+                <set var="round_3_kit" value="2"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+    </if>
+    <if constant="kit-count" constant-value="4.." constant-comparison="range">
+        <action id="set-round-1-kit-3" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-3-name}`r!"/>
+                <set var="round_1_kit" value="3"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+        <action id="set-round-2-kit-3" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 2 has been set to ${kit-3-name}`r!"/>
+                <set var="round_2_kit" value="3"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+        <action id="set-round-3-kit-3" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 3 has been set to ${kit-3-name}`r!"/>
+                <set var="round_3_kit" value="3"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+    </if>
+    <if constant="kit-count" constant-value="5.." constant-comparison="range">
+        <action id="set-round-1-kit-4" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-4-name}`r!"/>
+                <set var="round_1_kit" value="4"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+        <action id="set-round-2-kit-4" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 2 has been set to ${kit-4-name}`r!"/>
+                <set var="round_2_kit" value="4"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+        <action id="set-round-3-kit-4" scope="player" expose="true" filter="not(match-started)">
+            <switch-scope inner="match">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 3 has been set to ${kit-4-name}`r!"/>
+                <set var="round_3_kit" value="4"/>
+            </switch-scope>
+            <action id="kit-console"/>
+        </action>
+    </if>
+    <if constant="kit-count" constant-value="6.." constant-comparison="range">
         <action id="set-round-1-kit-5" scope="player" expose="true" filter="not(match-started)">
             <switch-scope inner="match">
                 <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-5-name}`r!"/>
@@ -2671,6 +2739,8 @@
             </switch-scope>
             <action id="kit-console"/>
         </action>
+    </if>
+    <if constant="kit-count" constant-value="7.." constant-comparison="range">
         <action id="set-round-1-kit-6" scope="player" expose="true" filter="not(match-started)">
             <switch-scope inner="match">
                 <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-6-name}`r!"/>
@@ -2693,7 +2763,7 @@
             <action id="kit-console"/>
         </action>
     </if>
-    <if variant="default">
+    <if constant="kit-count" constant-value="8.." constant-comparison="range">
         <action id="set-round-1-kit-7" scope="player" expose="true" filter="not(match-started)">
             <switch-scope inner="match">
                 <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-7-name}`r!"/>
@@ -2715,6 +2785,8 @@
             </switch-scope>
             <action id="kit-console"/>
         </action>
+    </if>
+    <if constant="kit-count" constant-value="19.." constant-comparison="range">
         <action id="set-round-1-kit-8" scope="player" expose="true" filter="not(match-started)">
             <switch-scope inner="match">
                 <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-8-name}`r!"/>
@@ -2736,6 +2808,8 @@
             </switch-scope>
             <action id="kit-console"/>
         </action>
+    </if>
+    <if constant="kit-count" constant-value="10.." constant-comparison="range">
         <action id="set-round-1-kit-9" scope="player" expose="true" filter="not(match-started)">
             <switch-scope inner="match">
                 <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-9-name}`r!"/>
@@ -2757,6 +2831,8 @@
             </switch-scope>
             <action id="kit-console"/>
         </action>
+    </if>
+    <if constant="kit-count" constant-value="11.." constant-comparison="range">
         <action id="set-round-1-kit-10" scope="player" expose="true" filter="not(match-started)">
             <switch-scope inner="match">
                 <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-10-name}`r!"/>
@@ -2778,6 +2854,8 @@
             </switch-scope>
             <action id="kit-console"/>
         </action>
+    </if>
+    <if constant="kit-count" constant-value="12.." constant-comparison="range">
         <action id="set-round-1-kit-11" scope="player" expose="true" filter="not(match-started)">
             <switch-scope inner="match">
                 <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-11-name}`r!"/>
@@ -2799,6 +2877,8 @@
             </switch-scope>
             <action id="kit-console"/>
         </action>
+    </if>
+    <if constant="kit-count" constant-value="13.." constant-comparison="range">
         <action id="set-round-1-kit-12" scope="player" expose="true" filter="not(match-started)">
             <switch-scope inner="match">
                 <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-12-name}`r!"/>
@@ -2820,6 +2900,8 @@
             </switch-scope>
             <action id="kit-console"/>
         </action>
+    </if>
+    <if constant="kit-count" constant-value="14.." constant-comparison="range">
         <action id="set-round-1-kit-13" scope="player" expose="true" filter="not(match-started)">
             <switch-scope inner="match">
                 <message text="`7[`6Arena Master`7] `6Tirion`r: The ${kit-type} for round 1 has been set to ${kit-13-name}`r!"/>
@@ -2847,6 +2929,7 @@
     -->
     <trigger scope="match" filter="round-1-starting">
         <action>
+            <action id="clear-dropped-lobby-entities"/>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Get ready, the first round is about to commence in ${round-begin-after-seconds} seconds!"/>
             <sound key="mob.villager.haggle"/>
             <action id="clear-kit-applicator"/>
