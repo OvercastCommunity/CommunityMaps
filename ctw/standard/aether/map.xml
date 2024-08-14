@@ -1,0 +1,333 @@
+<map proto="1.4.2">
+<include id="gapple-kill-reward"/>
+<name>Aether</name>
+<version>1.0.2</version>
+<objective>Capture the enemy team's wool!</objective>
+<created>2024-08-07</created>
+<gamemode>ctw</gamemode>
+<authors>
+    <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
+</authors>
+<contributors>
+    <contributor uuid="534470be-4122-4762-83e1-f45abb474cdc" contribution="XML"/> <!-- Necrozma -->
+</contributors>
+<teams>
+    <team id="blue" color="blue" max="16">Blue</team>
+    <team id="red" color="dark red" max="16">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow" enchantment="infinity"/>
+        <item slot="2" unbreakable="true" material="iron pickaxe"/>
+        <item slot="3" unbreakable="true" material="iron axe"/>
+        <item slot="4" material="wood" amount="64"/>
+        <item slot="5" material="leaves" damage="2" amount="64"/>
+        <item slot="6" unbreakable="true" material="shears"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <item slot="30" unbreakable="true" material="iron spade"/>
+        <item slot="31" material="wood" amount="32"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+        <boots unbreakable="true" team-color="true" material="leather boots" enchantment="depth_strider"/>
+        <effect duration="3.5" amplifier="5">damage resistance</effect>
+    </kit>
+    <lend filter="on_quicksoil=1">
+        <kit>
+            <effect amplifier="2">speed</effect>
+        </kit>
+    </lend>
+</kits>
+<spawns>
+    <default yaw="90">
+        <regions>
+            <cuboid min="43,16,2" max="47,16,-2"/>
+        </regions>
+    </default>
+    <spawn team="blue" kit="spawn-kit" angle="27,13.5,-77">
+        <regions>
+            <cuboid min="29.5,12,-81.5" max="31.5,12,-79.5"/>
+        </regions>
+    </spawn>
+    <spawn team="red" kit="spawn-kit" angle="-27,13.5,77">
+        <regions>
+            <cuboid min="-31.5,12,79.5" max="-29.5,12,81.5"/>
+        </regions>
+    </spawn>
+</spawns>
+<wools craftable="false">
+    <wool team="blue" color="lime" location="10,4,94">
+        <monument>
+            <block>32,13,-83</block>
+        </monument>
+    </wool>
+    <wool team="red" color="orange" location="-10,4,-94">
+        <monument>
+            <block>-33,13,82</block>
+        </monument>
+    </wool>
+</wools>
+<filters>
+    <all id="blue-in-wr">
+        <team id="only-blue">blue</team>
+        <not>
+            <filter id="wr-filter"/>
+        </not>
+    </all>
+    <all id="red-in-wr">
+        <team id="only-red">red</team>
+        <not>
+            <filter id="wr-filter"/>
+        </not>
+    </all>
+    <any id="wr-filter">
+        <material>chest</material>
+    </any>
+    <not id="deny-void">
+       <void/>
+    </not>
+    <material id="only-iron">iron block</material>
+    <material id="only-leaves">leaves</material>
+    <pulse id="check-quicksoil" period="0.1s" duration="0.05s">
+        <match-running/>
+    </pulse>
+    <any id="quicksoil-offset">
+        <offset vector="~0,~-1,~0">
+            <material>huge mushroom 1</material>
+        </offset>   
+        <offset vector="~0,~-1.5,~0">
+            <material>huge mushroom 1</material>
+        </offset>   
+    </any>
+    <not id="deny-sponging">
+        <all>
+            <material>sponge</material>
+        </all>
+    </not>
+    <deny id="deny-freezing">
+        <all>
+            <cause>world</cause>
+            <material>ice</material>
+        </all>
+    </deny>
+    <deny id="deny-ladder">
+        <any>
+            <material>ladder</material>
+        </any>
+    </deny>
+</filters>
+<actions>
+    <action id="apply-quicksoil" scope="player">
+        <action filter="quicksoil-offset" scope="player">
+            <set var="on_quicksoil" value="1"/>
+        </action>
+        <action filter="not(quicksoil-offset)" scope="player">
+            <set var="on_quicksoil" value="0"/>
+        </action>
+    </action>
+    <trigger filter="check-quicksoil" action="apply-quicksoil" scope="player"/>
+    <action id="apply-ambrosium" scope="player">
+        <sound key="random.burp" pitch="1.0"/>
+        <sound key="random.successful_hit" pitch="1.5"/>
+        <kit>
+            <effect duration="0.05">instant_health</effect>
+        </kit>
+    </action>
+</actions>
+<variables>
+    <variable id="on_quicksoil" scope="player" default="0"/>
+</variables>
+<regions>      
+    <union id="spawn-protection">
+        <rectangle id="blue-protection" min="24,-74" max="36,-86"/>
+        <rectangle id="red-protection" min="-36,74" max="-24,86"/>
+    </union>
+    <union id="wool-rooms">
+        <union id="blue-wool-rooms">
+            <rectangle id="orange-wool-room" min="-15,-99" max="-5,-87"/>
+        </union>
+        <union id="red-wool-rooms">
+            <rectangle id="lime-wool-room" min="5,87" max="15,99"/>
+        </union>
+    </union>
+    <union id="spawners">
+        <cuboid min="-11,3,-95" max="-9,8,-93"/>
+        <cuboid min="9,8,93" max="11,3,95"/>  
+    </union>
+    <union id="lanes">
+        <rectangle id="main-quad" min="-25,-75" max="25,75"/>
+        <rectangle id="orange-lane" min="-15,-87" max="-5,-75"/>
+        <rectangle id="lime-lane" min="5,75" max="15,87"/>
+    </union>
+    <negative id="void-area">
+        <region id="spawn-protection"/>
+        <region id="wool-rooms"/>
+        <region id="lanes"/>
+    </negative>
+    <apply block-place="never" message="You have reached the maximum build height!">
+        <region>
+            <above y="27"/>
+        </region>
+    </apply>    
+    <apply block-place="only-leaves" message="Only leaves can be placed at this height!">
+        <region>
+            <above y="25"/>
+        </region>
+    </apply>  
+    <apply block-physics="deny-ladder" region="wool-rooms"/>
+    <apply block-place="deny-freezing" block-physics="deny-sponging"/> 
+    <apply block="never" region="spawners" message="You may not obstruct the spawners!"/>   
+    <apply enter="only-blue" region="blue-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-red" region="red-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply block="blue-in-wr" use="only-blue" region="red-wool-rooms" message="You may not interact with this block in the wool room!"/>
+    <apply block="red-in-wr" use="only-red" region="blue-wool-rooms" message="You may not interact with this block in the wool room!"/>
+    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
+</regions>
+<renewables>
+    <renewable renew-filter="only-iron" interval="3" grow="false"/>
+</renewables>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>shears</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>sponge</item>
+    <item>rotten flesh</item>
+    <item>carrot item</item>
+    <item>potato item</item>    
+</itemremove>
+<itemkeep>
+    <item>wood</item>
+    <item>leaves</item>
+    <item>golden apple</item>
+</itemkeep>
+<block-drops>
+    <rule>
+        <filter>
+            <material>gravel</material>
+        </filter>
+        <drops>
+            <item material="gravel"/>
+        </drops>        
+    </rule>
+    <rule>
+        <filter>
+            <material>skull</material>
+        </filter>
+        <experience>5</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>huge mushroom 1</material>
+        </filter>
+        <drops>
+            <item material="huge mushroom 1"/>
+        </drops>
+    </rule>    
+    <rule trample="true">
+        <filter>
+            <all>
+                <material>huge mushroom 1:14</material>
+                <cause>trample</cause>
+            </all>
+        </filter>
+        <replacement>huge mushroom 1:0</replacement>
+    </rule>
+    <rule>
+        <filter>
+            <material>lapis ore</material>
+        </filter>
+        <drops>
+            <item material="ink_sack" name="`rZanite Gemstone" damage="4" enchantment="unbreaking" show-enchantments="false" lore="`7Can be used to craft a pickaxe"/>
+        </drops>
+    </rule>   
+    <rule>
+        <filter>
+            <material>gold ore</material>
+        </filter>
+        <drops>
+            <item material="ink_sack" name="`rAmbrosium Shard" damage="11" enchantment="unbreaking" show-enchantments="false" lore="`7Heals the user for `4❤❤ `7||`e⚠ `cConsumed on use" consumable="ambrosium"/>
+        </drops>
+    </rule>        
+</block-drops>
+<consumables>
+    <consumable id="ambrosium" action="apply-ambrosium" on="right click" consume="true"/>
+</consumables>
+<kill-rewards>
+    <kill-reward>
+        <item amount="24" material="wood"/>
+        <item amount="12" material="leaves" damage="2"/>
+    </kill-reward>
+</kill-rewards>
+<item-mods>
+    <rule>
+        <match>
+            <material>iron boots</material>
+        </match>
+        <modify>
+            <enchantment>depth_strider</enchantment>
+        </modify>
+    </rule>
+    <rule>
+        <match>
+            <material>huge mushroom 1</material>
+        </match>
+        <modify name="`rQuicksoil"/>
+    </rule>
+    <rule>
+        <match>
+            <material>wool:1</material>
+            <material>wool:5</material>
+        </match>
+        <modify show-enchantments="false">
+            <enchantment level="3">depth strider</enchantment>
+        </modify>
+    </rule>    
+</item-mods>
+<crafting>
+    <shaped>
+        <result material="diamond pickaxe" name="`rZanite Pickaxe" enchantment="efficiency"/>
+        <shape>
+            <row>LLL</row>
+            <row>.S.</row>
+            <row>.S.</row>
+        </shape>
+        <ingredient symbol="L">ink sack:4</ingredient >
+        <ingredient symbol="S">stick</ingredient>
+    </shaped>
+</crafting>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<difficulty>hard</difficulty>
+<world>
+    <timeset>6000</timeset>
+</world>
+<gamerules>
+    <doDaylightCycle>false</doDaylightCycle>
+    <doMobLoot>true</doMobLoot>
+</gamerules>
+<damage>
+    <deny>
+        <all>
+            <cause>melee</cause>
+            <not>
+                <attacker><always/></attacker>
+            </not>
+         </all>
+    </deny>
+</damage>
+</map>
