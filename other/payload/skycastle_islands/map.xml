@@ -1,84 +1,65 @@
 <map proto="1.4.2">
-
 <name>Skycastle Islands</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>(Attackers) Escort the payload to the enemy castle! (Defenders) Stop the attackers from invading the castle!</objective>
 <phase>staging</phase>
 <created>2024-07-12</created>
-
 <variant id="rush-rage">Rush Rage</variant>
-
 <constants>
     <constant id="team-size">24</constant>
-
     <constant id="starting-time">15m</constant>
     <constant id="time-increment">600</constant>
     <constant id="attacker-release-time">20s</constant>
-
     <constant id="capture-time">90s</constant>
-    <constant id="recovery-rate">0.3</constant>
-
+    <constant id="recovery-rate">0.25</constant>
     <constant id="attacker-arrow-count">24</constant>
     <constant id="defender-arrow-count">32</constant>
-
     <constant id="arrow-kill-reward">8</constant>
-
     <constant id="kit-used">spawn-kit</constant>
 </constants>
-
 <if variant="rush-rage">
     <rage/>
-
     <constant id="team-size">99999</constant>
-    <constant id="starting-time">7m</constant>
-    <constant id="time-increment">240</constant>
+    <constant id="starting-time">6m</constant>
+    <constant id="time-increment">180</constant>
     <constant id="attacker-release-time">15s</constant>
-    <constant id="capture-time">40s</constant>
-    <constant id="recovery-rate">0.1</constant>
+    <constant id="capture-time">30s</constant>
+    <constant id="recovery-rate">0</constant>
     <constant id="attacker-arrow-count">4</constant>
     <constant id="defender-arrow-count">6</constant>
     <constant id="arrow-kill-reward">2</constant>
     <constant id="kit-used">rage-kit</constant>
 </if>
-
 <authors>
     <author uuid="a1e6faac-7bfa-4f5c-b5df-06942518d218"/> <!-- EpicPuppy613 -->
     <author uuid="b5d34569-d365-4626-9865-1e4e2da7dda8"/> <!-- NxRawrr -->
 </authors>
-
 <time result="defender">${starting-time}</time>
-
 <teams>
     <team id="attacker" color="dark red" max="${team-size}">Attackers</team>
     <team id="defender" color="blue" max="${team-size}">Defenders</team>
 </teams>
-
 <broadcasts>
     <alert after="2s" filter="only-attacker">Escort the payload to the defenders' castle to win!</alert>
     <alert after="2s" filter="only-defender">Stop the attackers from brining the payload to the castle!</alert>
 </broadcasts>
-
 <kits>
     <kit id="spawn-kit">
         <clear/>
-
         <item slot="0" unbreakable="true" material="stone sword" />
         <item slot="1" unbreakable="true" material="bow" />
         <item slot="2" material="golden apple" />
-
         <helmet unbreakable="true" team-color="true" material="leather helmet" />
         <chestplate unbreakable="true" team-color="true" material="leather chestplate" />
         <leggings unbreakable="true" material="chainmail leggings">
             <enchantment level="3">projectile_protection</enchantment>
         </leggings>
         <boots unbreakable="true" material="iron boots" />
-
         <effect duration="3s" amplifier="255">resistance</effect>
         <game-mode>adventure</game-mode>
     </kit>
     <kit id="rage-kit">
         <clear/>
-
         <item slot="0" unbreakable="true" material="stone sword">
             <enchantment level="1">sharpness</enchantment>
         </item>
@@ -86,14 +67,12 @@
             <enchantment level="1">power</enchantment>
         </item>
         <item slot="2" material="golden apple" />
-
         <helmet unbreakable="true" team-color="true" material="leather helmet" />
         <chestplate unbreakable="true" team-color="true" material="leather chestplate" />
         <leggings unbreakable="true" material="chainmail leggings">
             <enchantment level="3">projectile_protection</enchantment>
         </leggings>
         <boots unbreakable="true" material="iron boots" />
-
         <effect duration="3s" amplifier="255">resistance</effect>
         <effect duration="oo" amplifier="3">speed</effect>
         <game-mode>adventure</game-mode>
@@ -104,8 +83,10 @@
     <kit id="blue-kit" parent="${kit-used}">
         <item slot="8" amount="${defender-arrow-count}" material="arrow"/>
     </kit>
+    <kit id="initial-kit" parent="red-kit">
+        <effect duration="${attacker-release-time}">invisibility</effect>
+    </kit>
 </kits>
-
 <spawns>
     <default>
         <region yaw="180">
@@ -113,7 +94,7 @@
         </region>
     </default>
     <spawns team="attacker" kit="red-kit">
-        <spawn id="attacker-pre" filter="stage-pregame">
+        <spawn id="attacker-pre" filter="stage-pregame" kit="initial-kit">
             <region yaw="180">
                 <point>0.5,28,123.5</point>
             </region>
@@ -158,7 +139,6 @@
         </spawn>
     </spawns>
 </spawns>
-
 <regions>
     <cuboid id="attacker-gate-area" min="-1,26,122" max="2,28,125"/>
     <apply block="never" />
@@ -200,15 +180,12 @@
         </region>
     </apply>
 </regions>
-
 <filters>
     <team id="only-attacker">attacker</team>
     <team id="only-defender">defender</team>
-
     <after id="release-attackers" duration="${attacker-release-time}" message="Attackers will be released in {0}">
         <match-started/>
     </after>
-
     <not id="stage-pregame">
         <filter id="release-attackers" />
     </not>
@@ -216,7 +193,7 @@
         <any>
             <filter id="stage-pregame" />
             <filter id="stage-2" />
-            <filter id="stage-3" />>
+            <filter id="stage-3" />
         </any>
     </not>
     <all id="stage-2">
@@ -227,7 +204,6 @@
         payload-2
     </completed>
 </filters>
-
 <payloads capture-filter="only-attacker" radius="3.5" permanent="true" recovery-rate="${recovery-rate}" time-multiplier="0.1" capture-time="${capture-time}" points="0" show-progress="true" neutral-state="false">
     <payload location="0.5,21,106.5" id="payload-1" display-filter="stage-1" player-filter="stage-1" name="Outer Gate">
         <captured>
@@ -245,15 +221,12 @@
         </captured>
     </payload>
 </payloads>
-
 <variables>
-    <timelimit id="tl" />>
+    <timelimit id="tl" />
 </variables>
-
 <actions>
     <fill id="remove-attacker-gate" material="air" region="attacker-gate-area" />
     <trigger filter="release-attackers" action="remove-attacker-gate" scope="match"/>
-
     <action id="on-capture" scope="match">
         <set var="tl" value="tl + ${time-increment}"/>
     </action>
@@ -268,7 +241,6 @@
         </filter>
     </trigger>
 </actions>
-
 <toolrepair>
     <tool>stone sword</tool>
     <tool>bow</tool>
@@ -285,7 +257,6 @@
     <item>stone sword</item>
     <item>bow</item>
 </itemkeep>
-
 <kill-rewards>
     <kill-reward>
         <item amount="${arrow-kill-reward}" material="arrow"/>
@@ -294,20 +265,16 @@
         </if>
     </kill-reward>
 </kill-rewards>
-
 <respawns>
     <respawn delay="2s" filter="only-attacker"/>
     <respawn delay="4s" filter="only-defender"/>
 </respawns>
-
 <hunger>
     <depletion>off</depletion>
 </hunger>
-
 <damage>
     <deny>
         <cause>fall</cause>
     </deny>
 </damage>
-
 </map>
