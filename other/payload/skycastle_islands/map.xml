@@ -1,20 +1,20 @@
 <map proto="1.4.2">
 <name>Skycastle Islands</name>
-<version>1.0.3</version>
+<version>1.1.0</version>
 <objective>(Attackers) Escort the payload to the enemy castle! (Defenders) Stop the attackers from invading the castle!</objective>
 <phase>staging</phase>
 <created>2024-07-12</created>
 <variant id="rush-rage">Rush Rage</variant>
 <constants>
-    <constant id="team-size">24</constant>
+    <constant id="team-size">20</constant>
     <constant id="starting-time">15m</constant>
     <constant id="time-increment">600</constant>
-    <constant id="attacker-release-time">20s</constant>
+    <constant id="attacker-release-time">15s</constant>
     <constant id="capture-time">90s</constant>
-    <constant id="recovery-rate">0.25</constant>
-    <constant id="attacker-arrow-count">24</constant>
-    <constant id="defender-arrow-count">32</constant>
-    <constant id="arrow-kill-reward">8</constant>
+    <constant id="decay-rate">0.1</constant>
+    <constant id="attacker-arrow-count">16</constant>
+    <constant id="defender-arrow-count">8</constant>
+    <constant id="arrow-kill-reward">4</constant>
     <constant id="kit-used">spawn-kit</constant>
 </constants>
 <if variant="rush-rage">
@@ -22,11 +22,11 @@
     <constant id="team-size">99999</constant>
     <constant id="starting-time">6m</constant>
     <constant id="time-increment">180</constant>
-    <constant id="attacker-release-time">15s</constant>
+    <constant id="attacker-release-time">12s</constant>
     <constant id="capture-time">30s</constant>
-    <constant id="recovery-rate">0</constant>
+    <constant id="decay-rate">0</constant>
     <constant id="attacker-arrow-count">4</constant>
-    <constant id="defender-arrow-count">6</constant>
+    <constant id="defender-arrow-count">3</constant>
     <constant id="arrow-kill-reward">2</constant>
     <constant id="kit-used">rage-kit</constant>
 </if>
@@ -51,9 +51,6 @@
         <item slot="2" material="golden apple" />
         <helmet unbreakable="true" team-color="true" material="leather helmet" />
         <chestplate unbreakable="true" team-color="true" material="leather chestplate" />
-        <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="3">projectile_protection</enchantment>
-        </leggings>
         <boots unbreakable="true" material="iron boots" />
         <effect duration="3s" amplifier="255">resistance</effect>
         <game-mode>adventure</game-mode>
@@ -69,22 +66,29 @@
         <item slot="2" material="golden apple" />
         <helmet unbreakable="true" team-color="true" material="leather helmet" />
         <chestplate unbreakable="true" team-color="true" material="leather chestplate" />
-        <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="3">projectile_protection</enchantment>
-        </leggings>
         <boots unbreakable="true" material="iron boots" />
         <effect duration="3s" amplifier="255">resistance</effect>
-        <effect duration="oo" amplifier="3">speed</effect>
+        <effect duration="oo" amplifier="2">speed</effect>
         <game-mode>adventure</game-mode>
     </kit>
     <kit id="red-kit" parent="${kit-used}">
         <item slot="8" amount="${attacker-arrow-count}" material="arrow"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="3">projectile_protection</enchantment>
+        </leggings>
+        <effect duration="8" amplifier="2">speed</effect>
     </kit>
     <kit id="blue-kit" parent="${kit-used}">
         <item slot="8" amount="${defender-arrow-count}" material="arrow"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="2">projectile_protection</enchantment>
+        </leggings>
     </kit>
     <kit id="initial-kit" parent="red-kit">
         <effect duration="${attacker-release-time}">invisibility</effect>
+    </kit>
+    <kit id="speed-kit">
+        <walk-speed>2</walk-speed>
     </kit>
 </kits>
 <spawns>
@@ -106,7 +110,7 @@
         </spawn>
         <spawn id="attacker-2" filter="stage-2">
             <region yaw="180">
-                <point>-29.5,27,5.5</point>
+                <point>-9.5,27,4.5</point>
             </region>
         </spawn>
         <spawn id="attacker-3" filter="stage-3">
@@ -117,13 +121,13 @@
     </spawns>
     <spawns team="defender" kit="blue-kit">
         <spawn id="defender-pre" filter="stage-pregame">
-            <region yaw="0">
-                <point>-18.5,28,-34.5</point>
+            <region yaw="-90">
+                <point>-34.5,28,-34.5</point>
             </region>
         </spawn>
         <spawn id="defender-1" filter="stage-1">
-            <region yaw="0">
-                <point>-18.5,28,-34.5</point>
+            <region yaw="-90">
+                <point>-34.5,28,-34.5</point>
             </region>
         </spawn>
         <spawn id="defender-2" filter="stage-2">
@@ -155,28 +159,40 @@
             <cuboid min="-19,26,89" size="3,1,1"/>
         </region>
     </apply>
+    <!-- Lime Pad -->
+    <apply velocity="0.5,1.25,-2.5">
+        <region>
+            <cuboid min="4,22,40" size="3,1,1"/>
+        </region>
+    </apply>
     <!-- Lime Tower -->
-    <apply velocity="-1.6,0.75,0">
+    <apply velocity="-1.4,0.75,-0.75">
         <region>
             <cuboid min="4,32,13" size="1,1,3"/>
         </region>
     </apply>
     <!-- Magenta Tower -->
-    <apply velocity="2,0.75,-0.75">
+    <apply velocity="2,0.9,-0.75">
         <region>
             <cuboid min="28,35,-56" size="1,1,3"/>
         </region>
     </apply>
     <!-- Purple Tower -->
-    <apply velocity="0,0.75,-3">
+    <apply velocity="0.1,1.2,-2.3">
         <region>
             <cuboid min="62,40,-126" size="3,1,1"/>
         </region>
     </apply>
     <!-- Light Blue Tower -->
-    <apply velocity="0,0.75,-3">
+    <apply velocity="-0.1,1.2,-2.3">
         <region>
             <cuboid min="108,40,-126" size="3,1,1"/>
+        </region>
+    </apply>
+    <!-- Speed Zone-->
+    <apply lend-kit="speed-kit">
+        <region>
+            <cuboid min="-3,18,82" max="4,24,120"/>
         </region>
     </apply>
 </regions>
@@ -193,7 +209,7 @@
         <any>
             <filter id="stage-pregame" />
             <filter id="stage-2" />
-            <filter id="stage-3" />
+            <filter id="stage-3" />>
         </any>
     </not>
     <all id="stage-2">
@@ -204,8 +220,8 @@
         payload-2
     </completed>
 </filters>
-<payloads capture-filter="only-attacker" radius="3.5" permanent="true" recovery-rate="${recovery-rate}" time-multiplier="0.1" capture-time="${capture-time}" points="0" show-progress="true" neutral-state="false">
-    <payload location="0.5,21,106.5" id="payload-1" display-filter="stage-1" player-filter="stage-1" name="Outer Gate">
+<payloads capture-filter="only-attacker" radius="3.5" permanent="true" decay-rate="${decay-rate}" time-multiplier="0.1" capture-time="${capture-time}" points="0" show-progress="true" neutral-state="false">
+    <payload location="0.5,21,80.5" id="payload-1" display-filter="stage-1" player-filter="stage-1" name="Outer Gate">
         <captured>
             <cuboid min="-22,42,7" size="5,7,1"/>
         </captured>
@@ -222,7 +238,7 @@
     </payload>
 </payloads>
 <variables>
-    <timelimit id="tl" />
+    <timelimit id="tl" />>
 </variables>
 <actions>
     <fill id="remove-attacker-gate" material="air" region="attacker-gate-area" />
@@ -260,14 +276,14 @@
 <kill-rewards>
     <kill-reward>
         <item amount="${arrow-kill-reward}" material="arrow"/>
-        <if variant="normal">
+        <if variant="default">
             <item material="golden apple"/>
         </if>
     </kill-reward>
 </kill-rewards>
 <respawns>
     <respawn delay="2s" filter="only-attacker"/>
-    <respawn delay="4s" filter="only-defender"/>
+    <respawn delay="6s" filter="only-defender"/>
 </respawns>
 <hunger>
     <depletion>off</depletion>
