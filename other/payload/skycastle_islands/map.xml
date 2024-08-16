@@ -1,39 +1,45 @@
 <map proto="1.4.2">
 <name>Skycastle Islands</name>
-<version>1.1.0</version>
+<version>1.1.1</version>
 <objective>(Attackers) Escort the payload to the enemy castle! (Defenders) Stop the attackers from invading the castle!</objective>
+<gamemode>payload</gamemode>
 <phase>staging</phase>
 <created>2024-07-12</created>
 <variant id="rush-rage">Rush Rage</variant>
 <constants>
-    <constant id="team-size">20</constant>
-    <constant id="starting-time">15m</constant>
-    <constant id="time-increment">600</constant>
-    <constant id="attacker-release-time">15s</constant>
-    <constant id="capture-time">90s</constant>
+    <constant id="team-size">16</constant>
+    <constant id="starting-time">7m</constant>
+    <constant id="time-increment">240</constant>
+    <constant id="attacker-release-time">5s</constant>
+    <constant id="capture-time">10s</constant>
     <constant id="decay-rate">0.1</constant>
     <constant id="attacker-arrow-count">16</constant>
     <constant id="defender-arrow-count">8</constant>
-    <constant id="arrow-kill-reward">4</constant>
+    <constant id="arrow-kill-reward">6</constant>
     <constant id="kit-used">spawn-kit</constant>
+    <constant id="stage-delay">12s</constant>
 </constants>
 <if variant="rush-rage">
     <rage/>
     <constant id="team-size">99999</constant>
-    <constant id="starting-time">6m</constant>
-    <constant id="time-increment">180</constant>
-    <constant id="attacker-release-time">12s</constant>
+    <constant id="starting-time">4m</constant>
+    <constant id="time-increment">120</constant>
+    <constant id="attacker-release-time">5s</constant>
     <constant id="capture-time">30s</constant>
     <constant id="decay-rate">0</constant>
     <constant id="attacker-arrow-count">4</constant>
     <constant id="defender-arrow-count">3</constant>
     <constant id="arrow-kill-reward">2</constant>
     <constant id="kit-used">rage-kit</constant>
+    <constant id="stage-delay">8s</constant>
 </if>
 <authors>
     <author uuid="a1e6faac-7bfa-4f5c-b5df-06942518d218"/> <!-- EpicPuppy613 -->
     <author uuid="b5d34569-d365-4626-9865-1e4e2da7dda8"/> <!-- NxRawrr -->
 </authors>
+<contributors>
+    <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="Balance Changes"/> <!-- Pablete1234 -->
+</contributors>
 <time result="defender">${starting-time}</time>
 <teams>
     <team id="attacker" color="dark red" max="${team-size}">Attackers</team>
@@ -53,6 +59,9 @@
         <chestplate unbreakable="true" team-color="true" material="leather chestplate" />
         <boots unbreakable="true" material="iron boots" />
         <effect duration="3s" amplifier="255">resistance</effect>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="3">projectile_protection</enchantment>
+        </leggings>
         <game-mode>adventure</game-mode>
     </kit>
     <kit id="rage-kit">
@@ -73,16 +82,10 @@
     </kit>
     <kit id="red-kit" parent="${kit-used}">
         <item slot="8" amount="${attacker-arrow-count}" material="arrow"/>
-        <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="3">projectile_protection</enchantment>
-        </leggings>
         <effect duration="8" amplifier="2">speed</effect>
     </kit>
     <kit id="blue-kit" parent="${kit-used}">
         <item slot="8" amount="${defender-arrow-count}" material="arrow"/>
-        <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="2">projectile_protection</enchantment>
-        </leggings>
     </kit>
     <kit id="initial-kit" parent="red-kit">
         <effect duration="${attacker-release-time}">invisibility</effect>
@@ -206,37 +209,51 @@
         <filter id="release-attackers" />
     </not>
     <not id="stage-1">
-        <any>
-            <filter id="stage-pregame" />
-            <filter id="stage-2" />
-            <filter id="stage-3" />>
-        </any>
+        <completed>payload-1</completed>
     </not>
+    <completed id="stage-2-start">
+        delay-1
+    </completed>
     <all id="stage-2">
         <completed>payload-1</completed>
-        <not><filter id="stage-3" /></not>
+        <not><completed>payload-2</completed></not>
     </all>
+    <completed id="stage-3-start">
+        delay-2
+    </completed>
     <completed id="stage-3">
         payload-2
     </completed>
 </filters>
-<payloads capture-filter="only-attacker" radius="3.5" permanent="true" decay-rate="${decay-rate}" time-multiplier="0.1" capture-time="${capture-time}" points="0" show-progress="true" neutral-state="false">
+<payloads capture-filter="only-attacker" radius="3.5" permanent="true" recovery-rate="0" decay-rate="${decay-rate}" time-multiplier="0.1" capture-time="${capture-time}" points="0" show-progress="true" neutral-state="false">
     <payload location="0.5,21,80.5" id="payload-1" display-filter="stage-1" player-filter="stage-1" name="Outer Gate">
         <captured>
             <cuboid min="-22,42,7" size="5,7,1"/>
         </captured>
     </payload>
-    <payload location="-19.5,27,3.5" id="payload-2" display-filter="stage-2" player-filter="stage-2" name="Mesa Base">
+    <payload location="-19.5,27,3.5" id="payload-2" display-filter="stage-2" player-filter="stage-2-start" name="Mesa Base">
         <captured>
             <cuboid min="62,46,-65" size="4,7,4"/>
         </captured>
     </payload>
-    <payload location="67.5,31,-63.5" id="payload-3" display-filter="stage-3" player-filter="stage-3" name="Castle">
+    <payload location="67.5,31,-63.5" id="payload-3" display-filter="stage-3" player-filter="stage-3-start" name="Castle">
         <captured>
             <cuboid min="84,53,-163" size="5,7,1"/>
         </captured>
     </payload>
 </payloads>
+<control-points show="false" capture-time="${stage-delay}" player-filter="only-attacker" capture="everywhere">
+    <control-point id="delay-1" capture-filter="stage-2">
+        <progress>
+            <cylinder base="-19.5,26,7.5" radius="3" height="2"/>
+        </progress>
+    </control-point>
+    <control-point id="delay-2" capture-filter="stage-3">
+        <progress>
+            <cylinder base="63.5,30,-63.5" radius="3" height="2"/>
+        </progress>
+    </control-point>
+</control-points>
 <variables>
     <timelimit id="tl" />>
 </variables>
@@ -283,7 +300,7 @@
 </kill-rewards>
 <respawns>
     <respawn delay="2s" filter="only-attacker"/>
-    <respawn delay="6s" filter="only-defender"/>
+    <respawn delay="4s" filter="only-defender"/>
 </respawns>
 <hunger>
     <depletion>off</depletion>
