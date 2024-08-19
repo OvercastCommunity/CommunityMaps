@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Skycastle Islands</name>
-<version>1.1.3</version>
+<version>1.1.4</version>
 <objective>(Attackers) Escort the payload to the enemy castle! (Defenders) Stop the attackers from invading the castle!</objective>
 <gamemode>payload</gamemode>
 <phase>staging</phase>
@@ -8,16 +8,16 @@
 <variant id="rush-rage">Rush Rage</variant>
 <constants>
     <constant id="team-size">16</constant>
-    <constant id="starting-time">7m</constant>
-    <constant id="time-increment">240</constant>
+    <constant id="starting-time">6m</constant>
+    <constant id="time-increment">180</constant>
     <constant id="attacker-release-time">5s</constant>
-    <constant id="capture-time">90s</constant>
-    <constant id="decay-rate">0.1</constant>
+    <constant id="capture-time">70s</constant>
+    <constant id="decay-rate">0.15</constant>
     <constant id="attacker-arrow-count">16</constant>
-    <constant id="defender-arrow-count">8</constant>
+    <constant id="defender-arrow-count">10</constant>
     <constant id="arrow-kill-reward">6</constant>
     <constant id="kit-used">spawn-kit</constant>
-    <constant id="stage-delay">12s</constant>
+    <constant id="stage-delay">20s</constant>
 </constants>
 <if variant="rush-rage">
     <rage/>
@@ -225,10 +225,10 @@
         payload-2
     </completed>
     <time id="time-1">4m</time>
-    <time id="time-2">8m</time>
-    <time id="time-3">12m</time>
+    <time id="time-2">6m</time>
+    <time id="time-3">8m</time>
 </filters>
-<payloads capture-rule="majority" capture-filter="only-attacker" radius="3.5" permanent="true" contested-rate="0" decay-rate="${decay-rate}" recovery-rate="${decay-rate}" time-multiplier="0.1" capture-time="${capture-time}" points="0" show-progress="true" neutral-state="true">
+<payloads capture-rule="majority" capture-filter="only-attacker" radius="3.5" permanent="true" contested-rate="0" decay-rate="${decay-rate}" recovery-rate="${decay-rate}" time-multiplier="0.05" capture-time="${capture-time}" points="0" show-progress="true" neutral-state="true">
     <payload location="0.5,21,80.5" id="payload-1" display-filter="stage-1" player-filter="stage-1" name="Outer Gate">
         <captured>
             <cuboid min="-22,42,7" size="5,7,1"/>
@@ -265,6 +265,18 @@
     <trigger filter="release-attackers" action="remove-attacker-gate" scope="match"/>
     <action id="on-capture" scope="match">
         <set var="tl" value="tl + ${time-increment}"/>
+        <switch-scope inner="team" filter="only-defender">
+            <message>
+                <title>`cPoint lost</title>
+                <subtitle>`6Fallback and regroup!</subtitle>
+            </message>
+        </switch-scope>
+        <switch-scope inner="team" filter="only-attacker">
+            <message>
+                <title>`aPoint captured!</title>
+                <subtitle>`6Next point starts rolling in ${stage-delay}!</subtitle>
+            </message>
+        </switch-scope>
     </action>
     <trigger action="on-capture" scope="match">
         <filter>
