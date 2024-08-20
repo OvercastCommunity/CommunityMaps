@@ -1,19 +1,20 @@
 <map proto="1.4.2">
 <name>Kiwi Ironworks</name>
-<version>0.2.2</version>
+<version>0.2.4</version>
 <phase>staging</phase>
+<include id="gapple-kill-reward"/>
 <objective>Attackers must push the payload to the end of the map, defenders must stop them from doing so!</objective>
 <created>2022-09-24</created>
 <authors>
     <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Layout, XML, Theming"/> <!-- Cazadorian -->
     <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa" contribution="Layout, Aesthetics"/> <!-- Eliminate -->
-    <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e" contribution="Aesthetics" /> <!-- Mewzzy -->
-    <author uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="Layout" /> <!-- Pablete1234 -->
+    <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e" contribution="Aesthetics"/> <!-- Mewzzy -->
+    <author uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="Layout"/> <!-- Pablete1234 -->
     <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Aesthetics"/> <!-- Tundren -->
 </authors>
 <contributors>
     <contributor uuid="74271a2f-47c0-4bd7-9a9f-4dc7eaedabe0" contribution="Misc additions"/> <!-- envyother-->
-    <contributor uuid="74948888-fdb8-4446-9340-f7688c2435cc" contribution="Aesthetics" /> <!-- Zero_Frosty -->
+    <contributor uuid="74948888-fdb8-4446-9340-f7688c2435cc" contribution="Aesthetics"/> <!-- Zero_Frosty -->
 </contributors>
 <time result="blue">10m25s</time>
 <broadcasts>
@@ -40,10 +41,10 @@
         <game-mode>adventure</game-mode>
     </kit>
     <kit id="red-kit" parent="spawn-kit">
-        <item slot="8" amount="8" material="arrow"/>
+        <item slot="8" amount="16" material="arrow"/>
     </kit>
     <kit id="blue-kit" parent="spawn-kit">
-        <item slot="8" amount="16" material="arrow"/>
+        <item slot="8" amount="10" material="arrow"/>
     </kit>
 </kits>
 <spawns>
@@ -177,6 +178,9 @@
         <completed>second-checkpoint</completed>
         <team>blue</team>
     </any>
+    <after id="release-attackers" duration="25s" message="Attackers will be released in {0}">
+        <match-started/>
+    </after>
     <team id="only-blue">blue</team>
     <team id="only-red">red</team>
 </filters>
@@ -186,22 +190,28 @@
     <trigger filter="first-checkpoint-completed" trigger="spawns-forward-1" scope="player"/>
     <trigger filter="second-checkpoint-completed" trigger="spawns-forward-2" scope="player"/>
 </actions>
-<payloads permanent="true" radius="3.5" capture-filter="only-red" capture-time="75s" decay-rate="0.1" recovery-rate="0.5" contested-rate="0" time-multiplier="0.1">
-  <payload id="first-checkpoint" name="Checkpoint A" location="-8.5,5,13.5" captured="first-captured-region" display-filter="first-spawn"/>
-  <payload id="second-checkpoint" name="Checkpoint B" location="18.5,3,47.5" captured="second-captured-region" player-filter="first-checkpoint-completed" display-filter="second-spawn"/>
-  <payload id="third-checkpoint" name="Checkpoint C" location="29.5,9,84.5" player-filter="second-checkpoint-completed" display-filter="third-spawn"/>
+<payloads permanent="true" radius="3.5" capture-filter="only-red" capture-time="65s" decay-rate="0.15" recovery-rate="0.5" contested-rate="0" time-multiplier="0.05" capture-rule="majority">
+    <payload id="first-checkpoint" name="Checkpoint A" location="-8.5,5,13.5" captured="first-captured-region" display-filter="first-spawn"/>
+    <payload id="second-checkpoint" name="Checkpoint B" location="18.5,3,47.5" captured="second-captured-region" player-filter="first-checkpoint-completed" display-filter="second-spawn"/>
+    <payload id="third-checkpoint" name="Checkpoint C" location="29.5,9,84.5" player-filter="second-checkpoint-completed" display-filter="third-spawn"/>
 </payloads>
-<destroyables show="false" required="false">
-    <!-- Gates, will eventually be phased out in favour of structures -->
-    <destroyable region="warmup-gates" id="warmup-gates-monument" name="warmupgates" owner="blue" materials="iron fence" modes="warmup-gates-mode"/>
-    <destroyable region="first-gates" id="first-gates-monument" name="firstgates" owner="blue" materials="iron fence" modes="first-checkpoint-gates"/>
-    <destroyable region="second-gates" id="second-gates-monuments" name="secondgates" owner="blue" materials="iron fence" modes="second-checkpoint-gates"/>
-</destroyables>
-<modes>
-    <mode after="25s" show-before="25s" id="warmup-gates-mode" name="Attackers will be released" material="air"/>
-    <mode after="0s" filter="first-checkpoint-completed" show-before="0" id="first-checkpoint-gates" material="air"/>
-    <mode after="0s" filter="second-checkpoint-completed" show-before="0" id="second-checkpoint-gates" material="air"/>
-</modes>
+<actions>
+    <trigger scope="match" filter="release-attackers">
+        <action>
+            <fill region="warmup-gates" material="air"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="first-checkpoint-completed">
+        <action>
+            <fill region="first-gates" material="air"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="second-checkpoint-completed">
+        <action>
+            <fill region="second-gates" material="air"/>
+        </action>
+    </trigger>
+</actions>
 <spawners>
     <spawner spawn-region="first-gap-point" player-region="first-gap-player" delay="8s">
         <item material="golden apple" amount="1"/>
@@ -238,10 +248,11 @@
     <item>golden apple</item>
     <item>arrow</item>
 </itemkeep>
-<kill-reward>
-    <item material="golden apple"/>
-    <item amount="6" material="arrow"/>
-</kill-reward>
+<kill-rewards>
+    <kill-reward>
+        <item amount="6" material="arrow"/>
+    </kill-reward>
+</kill-rewards>
 <respawns>
     <respawn delay="3.5s" filter="only-red"/>
     <respawn delay="4.5s" filter="only-blue"/>
