@@ -1,6 +1,6 @@
 <map proto="1.4.0">
 <name>Sheep CTW</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <objective>Capture both wools!</objective>
 <gamemode>ctw</gamemode>
 <phase>development</phase>
@@ -49,10 +49,10 @@
     <default yaw="-90" region="obs-spawn-point"/>
 </spawns>
 <wools craftable="false">
-    <wool team="blue-team" color="orange" monument="blue-team-orange-wool" location="30.5,15,90.5"/>
-    <wool team="blue-team" color="pink" monument="blue-team-pink-wool" location="-30.5,15,90.5"/>
-    <wool team="red-team" color="lime" monument="red-team-lime-wool" location="-30.5,15,-90.5"/>
-    <wool team="red-team" color="yellow" monument="red-team-yellow-wool" location="30.5,15,-90.5"/>
+    <wool team="blue-team" color="orange" monument="blue-team-orange-wool" id="blue-team-orange-wool-monument" location="30.5,15,90.5"/>
+    <wool team="blue-team" color="pink" monument="blue-team-pink-wool" id="blue-team-pink-wool-monument" location="-30.5,15,90.5"/>
+    <wool team="red-team" color="lime" monument="red-team-lime-wool" id="red-team-lime-wool-monument" location="-30.5,15,-90.5"/>
+    <wool team="red-team" color="yellow" monument="red-team-yellow-wool" id="red-team-yellow-wool-monument" location="30.5,15,-90.5"/>
 </wools>
 <filters>
     <team id="only-blue">blue-team</team>
@@ -91,7 +91,144 @@
     <deny id="deny-redstone">
         <material>redstone wire</material>
     </deny>
+    <all id="carrying-orange-dye-filter">
+        <team>blue-team</team>
+        <carrying ignore-durability="false" ignore-metadata="true">
+            <item material="ink sack" damage="14"/>
+        </carrying>
+        <not>
+            <objective>blue-team-orange-wool-monument</objective>
+        </not>
+        <variable var="orange_dye">0</variable>
+    </all>
+    <all id="carrying-pink-dye-filter">
+        <team>blue-team</team>
+        <carrying ignore-durability="false" ignore-metadata="true">
+            <item material="ink sack" damage="9"/>
+        </carrying>
+        <not>
+            <objective>blue-team-pink-wool-monument</objective>
+        </not>
+        <variable var="pink_dye">0</variable>
+    </all>
+    <all id="carrying-lime-dye-filter">
+        <team>red-team</team>
+        <carrying ignore-durability="false" ignore-metadata="true">
+            <item material="ink sack" damage="10"/>
+        </carrying>
+        <not>
+            <objective>red-team-lime-wool-monument</objective>
+        </not>
+        <variable var="lime_dye">0</variable>
+    </all>
+    <all id="carrying-yellow-dye-filter">
+        <team>red-team</team>
+        <carrying ignore-durability="false" ignore-metadata="true">
+            <item material="ink sack" damage="11"/>
+        </carrying>
+        <not>
+            <objective>red-team-yellow-wool-monument</objective>
+        </not>
+        <variable var="yellow_dye">0</variable>
+    </all>
+    <dead id="dead-filter"/>
+    <observing id="observing-filter"/>
+    <variable id="recent-dye-pickup-filter" var="recent_dye_pickup">0</variable>
 </filters>
+<variables>
+    <variable id="orange_dye" scope="player"/>
+    <variable id="pink_dye" scope="player"/>
+    <variable id="lime_dye" scope="player"/>
+    <variable id="yellow_dye" scope="player"/>
+    <variable id="recent_dye_pickup" exclusive="1" scope="player"/>
+</variables>
+<!-- add once implemented
+<replacements>
+        <player id="player"/>
+    </replacements>
+</message>
+-->
+<actions>
+    <action id="pickup-orange-dye-action" scope="player">
+        <set var="orange_dye" value="1"/>
+        <set var="recent_dye_pickup" value="1"/>
+        <sound key="random.levelup" pitch="1.5"/>
+        <message text="You picked up `6Orange Dye `rfor `9Blue"/>
+        <switch-scope inner="team">
+            <switch-scope inner="player" filter="recent-dye-pickup-filter">
+                <message text="`9(Blue) `6Orange Dye `rwas picked up by `9{player} `rfor `9Blue"/>
+            </switch-scope>
+        </switch-scope>
+        <switch-scope inner="match">
+            <switch-scope inner="team" filter="observing-filter">
+                <message text="`9(Blue) `6Orange Dye `rwas picked up by `9{player} `rfor `9Blue"/>
+            </switch-scope>
+        </switch-scope>
+        <set var="recent_dye_pickup" value="0"/>
+    </action>
+    <action id="pickup-pink-dye-action" scope="player">
+        <set var="pink_dye" value="1"/>
+        <set var="recent_dye_pickup" value="1"/>
+        <sound key="random.levelup" pitch="1.5"/>
+        <message text="You picked up `cPink Dye `rfor `9Blue"/>
+        <switch-scope inner="team">
+            <switch-scope inner="player" filter="recent-dye-pickup-filter">
+                <message text="`9(Blue) `cPink Dye `rwas picked up by `9{player} `rfor `9Blue"/>
+            </switch-scope>
+        </switch-scope>
+        <switch-scope inner="match">
+            <switch-scope inner="team" filter="observing-filter">
+                <message text="`9(Blue) `cPink Dye `rwas picked up by `9{player} `rfor `9Blue"/>
+            </switch-scope>
+        </switch-scope>
+        <set var="recent_dye_pickup" value="0"/>
+    </action>
+    <action id="pickup-lime-dye-action" scope="player">
+        <set var="lime_dye" value="1"/>
+        <set var="recent_dye_pickup" value="1"/>
+        <sound key="random.levelup" pitch="1.5"/>
+        <message text="You picked up `aLime Dye `rfor `cRed"/>
+        <switch-scope inner="team">
+            <switch-scope inner="player" filter="recent-dye-pickup-filter">
+                <message text="`c(Red) `aLime Dye `rwas picked up by `c{player} `rfor `cRed"/>
+            </switch-scope>
+        </switch-scope>
+        <switch-scope inner="match">
+            <switch-scope inner="team" filter="observing-filter">
+                <message text="`c(Red) `aLime Dye `rwas picked up by `c{player} `rfor `cRed"/>
+            </switch-scope>
+        </switch-scope>
+        <set var="recent_dye_pickup" value="0"/>
+    </action>
+    <action id="pickup-yellow-dye-action" scope="player">
+        <set var="yellow_dye" value="1"/>
+        <set var="recent_dye_pickup" value="1"/>
+        <sound key="random.levelup" pitch="1.5"/>
+        <message text="You picked up `eYellow Dye `rfor `cRed"/>
+        <switch-scope inner="team">
+            <switch-scope inner="player" filter="recent-dye-pickup-filter">
+                <message text="`c(Red) `eYellow Dye `rwas picked up by `c{player} `rfor `cRed"/>
+            </switch-scope>
+        </switch-scope>
+        <switch-scope inner="match">
+            <switch-scope inner="team" filter="observing-filter">
+                <message text="`c(Red) `eYellow Dye `rwas picked up by `c{player} `rfor `cRed"/>
+            </switch-scope>
+        </switch-scope>
+        <set var="recent_dye_pickup" value="0"/>
+    </action>
+    <action id="reset-pickup-var" scope="player">
+        <set var="orange_dye" value="0"/>
+        <set var="pink_dye" value="0"/>
+        <set var="lime_dye" value="0"/>
+        <set var="yellow_dye" value="0"/>
+    </action>
+    <trigger filter="carrying-orange-dye-filter" action="pickup-orange-dye-action" scope="player"/>
+    <trigger filter="carrying-pink-dye-filter" action="pickup-pink-dye-action" scope="player"/>
+    <trigger filter="carrying-lime-dye-filter" action="pickup-lime-dye-action" scope="player"/>
+    <trigger filter="carrying-yellow-dye-filter" action="pickup-yellow-dye-action" scope="player"/>
+    <trigger filter="dead-filter" action="reset-pickup-var" scope="player"/>
+</actions>
 <regions>
     <cylinder id="blue-spawn-point" base="0,13,-80.5" radius="1" height="0"/>
     <cylinder id="red-spawn-point" base="0,13,80.5" radius="1" height="0"/>
@@ -114,12 +251,12 @@
         <union id="blues-woolrooms"> <!-- blue defends / red attacks -->
             <rectangle id="lime-woolroom" min="-38,-96" max="-23,-81"/>
             <rectangle id="yellow-woolroom" min="38,-96" max="23,-81"/>
-            <rectangle id="blues-sheeproom" min="-7,-23" max="7,-10"/>
+            <rectangle id="blues-sheeproom" min="-7,0" max="7,-16"/>
         </union>
         <union id="reds-woolrooms"> <!-- red defends / blue attacks -->
             <rectangle id="orange-woolroom" min="38,96" max="23,81"/>
             <rectangle id="pink-woolroom" min="-38,96" max="-23,81"/>
-            <rectangle id="reds-sheeproom" min="-7,23" max="7,10"/>
+            <rectangle id="reds-sheeproom" min="-7,0" max="7,16"/>
         </union>
     </union>
     <negative id="not-build-region">
@@ -220,6 +357,7 @@
             <material>shears</material>
             <material>bow</material>
             <material>diamond chestplate</material>
+            <material>diamond helmet</material>
         </match>
         <modify unbreakable="true"/>
     </rule>
@@ -275,7 +413,7 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<maxbuildheight>26</maxbuildheight>
+<maxbuildheight>22</maxbuildheight>
 <kill-rewards>
     <kill-reward>
         <item material="wheat" amount="2"/>
