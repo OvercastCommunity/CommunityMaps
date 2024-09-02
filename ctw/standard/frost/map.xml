@@ -1,6 +1,7 @@
 <map proto="1.4.2">
 <name>Frost</name>
-<version>1.0.5</version>
+<version>1.0.6</version>
+<include id="gapple-kill-reward"/>
 <objective>Capture both enemy wools and return them to your Palace!</objective>
 <created>2021-07-31</created>
 <authors>
@@ -14,8 +15,8 @@
     <contributor uuid="65ffe1e4-d09e-4835-85d3-bfa6972b8a25" contribution="testing help"/> <!-- Pibo -->
 </contributors>
 <teams>
-    <team id="cyan" color="dark aqua" max="45">Cyan</team>
-    <team id="purple" color="dark purple" max="45">Purple</team>
+    <team id="cyan" color="dark aqua" max="35">Cyan</team>
+    <team id="purple" color="dark purple" max="35">Purple</team>
 </teams>
 <kits>
     <kit id="default-kit">
@@ -35,21 +36,15 @@
             <enchantment>efficiency</enchantment>
         </item>
         <item slot="4" amount="64" damage="2" material="wood"/>
+        <item slot="5" amount="64" team-color="true" material="stained glass"/>
         <item slot="31" amount="64" damage="2" material="wood"/>
         <item slot="32" amount="64" damage="2" material="wood"/>
-        <item slot="7" material="golden apple"/>
-        <item slot="8" amount="64" material="golden carrot"/>
+        <item slot="8" material="golden apple"/>
         <item slot="30" material="stone spade"/>
-    </kit>
-    <kit id="cyan-kit" parents="spawn-kit">
-        <item slot="5" damage="9" amount="64" material="stained glass"/>
-        <helmet unbreakable="true" color="4C7F99" material="leather helmet"/>
-        <chestplate unbreakable="true" color="4C7F99" material="leather chestplate"/>
-    </kit>
-    <kit id="purple-kit" parents="spawn-kit">
-        <item slot="5" damage="10" amount="64" material="stained glass"/>
-        <helmet unbreakable="true" color="7F3FB2" material="leather helmet"/>
-        <chestplate unbreakable="true" color="7F3FB2" material="leather chestplate"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+        <boots unbreakable="true" team-color="true" material="leather boots"/>
     </kit>
 </kits>
 <spawns>
@@ -58,61 +53,36 @@
             <cuboid id="default-sp" min="-2,66,83" max="0,66,81"/>
         </region>
     </default>
-    <spawn team="cyan" kit="cyan-kit">
+    <spawn team="cyan" kit="spawn-kit">
         <region yaw="90">
             <cylinder id="cyan-sp" base="182,23,0" radius="3" height="0"/>
         </region>
     </spawn>
-    <spawn team="purple" kit="purple-kit">
+    <spawn team="purple" kit="spawn-kit">
         <region yaw="270">
             <cylinder id="purple-sp" base="-184,23,-1" radius="3" height="0"/>
         </region>
     </spawn>
 </spawns>
 <filters>
-    <not id="deny-void">
-        <void/>
-    </not>
-    <not id="cyan-in-wr">
+    <team id="only-cyan">cyan</team>
+    <team id="only-purple">purple</team>
+    <deny id="deny-wr-blocks">
         <any>
-            <team id="only-purple">purple</team>
             <material>chest</material>
-            <material>beacon</material>
+            <material id="beacon">beacon</material>
             <material id="only-iron">iron block</material>
         </any>
-    </not>
-    <not id="purple-in-wr">
-        <any>
-            <team id="only-cyan">cyan</team>
-            <material>chest</material>
-            <material>beacon</material>
-            <filter id="only-iron"/>
-        </any>
-    </not>
-    <not id="only-cyan-usage">
-        <any>
-            <all>
-                <any>
-                    <material>chest</material>
-                    <material>workbench</material>
-                </any>
-                <filter id="only-purple"/>
-            </all>
-            <material>beacon</material>
-        </any>
-    </not>
-    <not id="only-purple-usage">
-        <any>
-            <all>
-                <any>
-                    <material>chest</material>
-                    <material>workbench</material>
-                </any>
-                <filter id="only-cyan"/>
-            </all>
-            <material>beacon</material>
-        </any>
-    </not>
+    </deny>
+    <deny id="no-ice">
+        <all>
+            <cause>world</cause>
+            <material>ice</material>
+        </all>
+    </deny>
+    <deny id="deny-void">
+        <void/>
+    </deny>
     <deny id="deny-players">
         <participating/>
     </deny>
@@ -123,13 +93,13 @@
         <cuboid id="purple-spawn-room" min="-149,0,-40" max="-203,75,40"/>
     </union>
     <union id="wool-rooms">
-        <union id="cyan-wrs"> <!-- cyan defends -->
+        <union id="cyan-wool-rooms"> <!-- cyan defends -->
             <rectangle id="blue-wr" min="150,50" max="187,83"/>
             <rectangle id="blue-wr2" min="150,62" max="149,83"/>
             <rectangle id="lightblue-wr" min="150,-50" max="187,-83"/>
             <rectangle id="lightblue-wr2" min="150,-62" max="149,-83"/>
         </union>
-        <union id="purple-wrs"> <!-- purple defends -->
+        <union id="purple-wool-rooms"> <!-- purple defends -->
             <rectangle id="magenta-wr" min="-151,-50" max="-188,-83"/>
             <rectangle id="magenta-wr2" min="-151,-62" max="-150,-83"/>
             <rectangle id="pink-wr" min="-151,50" max="-188,83"/>
@@ -161,6 +131,7 @@
         <rectangle min="114,-83" max="149,-62"/> <!-- light blue woool lane -->
         <rectangle min="-115,-83" max="-150,-62"/> <!-- magenta wool lane -->
         <rectangle min="-115,83" max="-150,62"/> <!-- pink wool lane -->
+        <region id="wool-rooms"/>
     </complement>
     <union id="underbridge-nono">
         <cuboid min="-115,0,62" max="-188,8,83"/>
@@ -172,19 +143,26 @@
         <cuboid min="114,0,62" max="187,8,83"/>
         <cuboid min="150,0,50" max="187,8,83"/>
     </union>
+    <!-- Deny beacon usage -->
+    <apply use="deny(beacon)"/>
     <!-- Prevent teams from entering each other's spawns -->
-    <apply enter="only-cyan" message="You may not enter Cyan's spawn room!" region="cyan-spawn-room"/>
-    <apply enter="only-purple" message="You may not enter purple's spawn room!" region="purple-spawn-room"/>
+    <apply enter="only-cyan" region="cyan-spawn-room" message="You may not enter the enemy team's spawn room!"/>
+    <apply enter="only-purple" region="purple-spawn-room" message="You may not enter the enemy team's spawn room!"/>
     <!-- Wool entry restriction -->
-    <apply enter="only-cyan" message="You may not enter your own wool rooms!" region="purple-wrs"/>
-    <apply enter="only-purple" message="You may not enter your own wool rooms!" region="cyan-wrs"/>
+    <apply enter="only-cyan" region="purple-wool-rooms" message="You may not enter your team's own wool rooms!"/>
+    <apply enter="only-purple" region="cyan-wool-rooms" message="You may not enter your team's own wool rooms!"/>
     <!-- Underbridge deny -->
     <apply block="never" region="underbridge-nono" message="You may not bridge under the bedrock lane!"/>
     <!-- Wool room block actions and usage -->
-    <apply block="cyan-in-wr" use="only-cyan-usage" region="purple-wrs"/>
-    <apply block="purple-in-wr" use="only-purple-usage" region="cyan-wrs"/>
+    <apply use="only-cyan" region="purple-wool-rooms"/>
+    <apply use="only-purple" region="cyan-wool-rooms"/>
+    <apply block="deny(only-cyan)" region="cyan-wool-rooms" message="You may not interfere with your team's own wool rooms!"/>
+    <apply block="deny(only-purple)" region="purple-wool-rooms" message="You may not interfere with your team's own wool rooms!"/>
+    <apply block="deny-wr-blocks" region="wool-rooms" message="You may not break or place this block here!"/>
     <!-- Deny anyone in the match from placing blocks in spawn, but allow iron to be broken -->
     <apply block-place="deny-players" block-break="only-iron" message="You can only break iron in spawn!" region="spawn-rooms"/>
+    <!-- Stop water from freezing -->
+    <apply block="no-ice"/>
     <!-- Void filter -->
     <apply block="deny-void" message="You may not modify the void area!" region="void-area"/>
 </regions>
@@ -222,13 +200,15 @@
     <tool>arrow</tool>
 </toolrepair>
 <itemremove>
-    <item>golden carrot</item>
     <item>leather helmet</item>
     <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
     <item>stone</item>
     <item>prismarine crystals</item>
     <item>quartz block</item>
     <item>string</item>
+    <item>beacon</item>
 </itemremove>
 <itemkeep>
     <item>wood</item>
@@ -238,27 +218,27 @@
 <block-drops>
     <rule>
         <filter>
-            <material>wood</material>
+            <any>
+                <material>wood</material>
+                <material>stained glass</material>
+            </any>
         </filter>
         <drops>
-            <item chance="0" material="wood"/>
-        </drops>
-    </rule>
-    <rule>
-        <filter>
-            <material>stained glass</material>
-        </filter>
-        <drops>
-            <item chance="0" material="stained glass"/>
+            <item chance="0" material="glass"/>
         </drops>
     </rule>
 </block-drops>
-<kill-reward>
-    <item material="golden apple"/>
-	<item material="wood" damage="2" amount="32"/>
-</kill-reward>
+<kill-rewards>
+    <kill-reward>
+        <item amount="32" damage="2" material="wood"/>
+        <item amount="16" team-color="true" material="stained glass"/>
+    </kill-reward>
+</kill-rewards>
 <maxbuildheight>41</maxbuildheight>
 <world>
     <timeset>18000</timeset>
 </world>
+<gamerules>
+    <randomTickSpeed>0</randomTickSpeed>
+</gamerules>
 </map>
