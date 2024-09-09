@@ -1,8 +1,8 @@
 <map proto="1.4.2">
 <name>Lupa</name>
-<version>1.1.1</version>
+<version>1.1.2</version>
+<include id="gapple-kill-reward"/>
 <objective>Capture the enemy team's two wools!</objective>
-<gamemode>ctw</gamemode>
 <created>2021-07-30</created>
 <authors>
     <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
@@ -35,12 +35,12 @@
         <item slot="4" amount="64" material="wood"/>
         <item slot="31" amount="64" material="wood"/>
         <item slot="5" amount="64" material="glass"/>
-        <item slot="7" material="golden apple"/>
-        <item slot="8" amount="64" material="cooked beef"/>
+        <item slot="6" material="bucket"/>
+        <item slot="8" material="golden apple"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
-        <chestplate unbreakable="true" team-color="true" material="leather chestplate">
-            <enchantment>projectile_protection</enchantment>
-        </chestplate>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+        <boots unbreakable="true" material="leather boots"/>
     </kit>
 </kits>
 <spawns>
@@ -61,50 +61,26 @@
     </spawn>
 </spawns>
 <filters>
-    <not id="blue-in-wr">
+    <after id="add-side-lanes" duration="180s" message="`eWool room side lanes will open in {0}">
+        <time>22m</time>
+    </after>
+    <deny id="deny-in-wr">
         <any>
-            <team id="only-red">red</team>
             <material>chest</material>
-            <material>beacon</material>
+            <material id="beacon">beacon</material>
             <material>iron block</material>
         </any>
-    </not>
-    <not id="red-in-wr">
-        <any>
-            <team id="only-blue">blue</team>
-            <material>chest</material>
-            <material>beacon</material>
-            <material>iron block</material>
-        </any>
-    </not>
-    <not id="only-blue-usage">
-        <any>
-            <all>
-                <any>
-                    <material>chest</material>
-                    <material>workbench</material>
-                </any>
-                <filter id="only-red"/>
-            </all>
-            <material>beacon</material>
-        </any>
-    </not>
-    <not id="only-red-usage">
-        <any>
-            <all>
-                <any>
-                    <material>chest</material>
-                    <material>workbench</material>
-                </any>
-                <filter id="only-blue"/>
-            </all>
-            <material>beacon</material>
-        </any>
-    </not>
-    <not id="deny-void">
+    </deny>
+    <deny id="deny-blue">
+        <team id="only-blue">blue</team>
+    </deny>
+    <deny id="deny-red">
+        <team id="only-red">red</team>
+    </deny>
+    <deny id="deny-void">
         <void/>
-    </not>
-    <deny id="deny-players">
+    </deny>
+    <deny id="deny-participating">
         <participating/>
     </deny>
     <material id="only-iron">iron block</material>
@@ -170,51 +146,54 @@
         <point id="blue-gapple-point">-107.5,13.3,1.5</point>
         <point id="red-gapple-point">48.5,13.3,1.5</point>
     </union>
+    <apply use="deny(beacon)"/>
+    <apply use="deny-blue" region="blue-wool-rooms"/>
+    <apply use="deny-red" region="red-wool-rooms"/>
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-blue" region="blue-room" message="You may not enter the enemy team's shrine!"/>
     <apply enter="only-red" region="red-room" message="You may not enter the enemy team's shrine!"/>
-    <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool room!"/>
-    <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your team's own wool room!"/>
+    <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your team's own wool room!"/>
     <apply block="never" region="spawner-stuff" message="You may not destroy the spawners!"/>
-    <apply block="blue-in-wr" use="only-blue-usage" region="blue-room"/>
-    <apply block="red-in-wr" use="only-red-usage" region="red-room"/>
-    <apply block="blue-in-wr" use="only-blue-usage" region="red-wool-rooms"/>
-    <apply block="red-in-wr" use="only-red-usage" region="blue-wool-rooms"/>
-    <apply block-break="only-iron" block-place="deny-players" region="spawns" message="Only iron blocks may be broken in the spawns!"/>
+    <apply block="deny-in-wr" region="shrines" message="You may not break or place this block here!"/>
+    <apply block="deny-in-wr" region="wool-rooms" message="You may not break or place this block here!"/>
+    <apply block="deny-blue" region="red-room" message="You may not interfere with your team's own wool rooms!"/>
+    <apply block="deny-red" region="blue-room" message="You may not interfere with your team's own wool rooms!"/>
+    <apply block="deny-blue" region="blue-wool-rooms" message="You may not interfere with your team's own wool rooms!"/>
+    <apply block="deny-red" region="red-wool-rooms" message="You may not interfere with your team's own wool rooms!"/>
+    <apply block-break="only-iron" block-place="deny-participating" region="spawns" message="Only iron blocks may be broken in the spawns!"/>
     <apply block="deny-void" region="void-area" message="You may not build in the void area!"/>
 </regions>
-<wools team="blue" craftable="false">
-    <wool color="pink" location="-129,23,-83">
-        <monument>
-            <block>107.5,19,-8.5</block>
-        </monument>
-    </wool>
-    <wool color="lime" location="-129,23,86">
+<actions>
+    <trigger scope="match" filter="add-side-lanes">
+        <action>
+            <fill region="lanes" material="water"/>
+        </action>
+    </trigger>
+</actions>
+<wools craftable="false">
+    <wool team="blue" color="lime" location="-129,23,86">
         <monument>
             <block>107.5,19,11.5</block>
         </monument>
     </wool>
-</wools>
-<wools team="red" craftable="false">
-    <wool color="orange" location="70,23,86">
+    <wool team="blue" color="pink" location="-129,23,-83">
         <monument>
-            <block>-166.5,19,11.5</block>
+            <block>107.5,19,-8.5</block>
         </monument>
-   </wool>
-    <wool color="magenta" location="70,23,-83">
+    </wool>
+    <wool team="red" color="magenta" location="70,23,-83">
         <monument>
             <block>-166.5,19,-8.5</block>
         </monument>
     </wool>
+    <wool team="red" color="orange" location="70,23,86">
+        <monument>
+            <block>-166.5,19,11.5</block>
+        </monument>
+    </wool>
 </wools>
-<modes>
-    <mode id="side-lane" after="25m" name="`eWool room side lanes open in" material="water" show-before="3m"/>
-</modes>
-<destroyables name="lanes" materials="air;water" completion="0%" required="false" show="false" modes="side-lane" repairable="false">
-    <destroyable owner="blue" region="blue-lanes"/>
-    <destroyable owner="red" region="red-lanes"/>
-</destroyables>
 <renewables>
     <renewable region="spawns" renew-filter="only-iron" rate="2" grow="false" particles="true" sound="true"/>
 </renewables>
@@ -235,9 +214,10 @@
     <tool>arrow</tool>
 </toolrepair>
 <itemremove>
-    <item>cooked beef</item>
     <item>leather helmet</item>
     <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
     <item>sapling</item>
     <item>31</item>
     <item>37</item>
@@ -258,15 +238,10 @@
 <block-drops>
     <rule>
         <filter>
-            <material>wood</material>
-        </filter>
-        <drops>
-            <item chance="0" material="wood"/>
-        </drops>
-    </rule>
-    <rule>
-        <filter>
-            <material>glass</material>
+            <any>
+                <material>wood</material>
+                <material>glass</material>
+            </any>
         </filter>
         <drops>
             <item chance="0" material="glass"/>
@@ -278,10 +253,14 @@
     <item>glass</item>
     <item>golden apple</item>
 </itemkeep>
-<kill-reward>
-    <item amount="32" material="wood"/>
-    <item amount="16" material="glass"/>
-    <item material="golden apple"/>
-</kill-reward>
+<kill-rewards>
+    <kill-reward>
+        <item amount="32" material="wood"/>
+        <item amount="16" material="glass"/>
+    </kill-reward>
+</kill-rewards>
 <maxbuildheight>35</maxbuildheight>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
 </map>
