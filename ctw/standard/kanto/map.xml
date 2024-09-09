@@ -1,6 +1,8 @@
 <map proto="1.4.2">
 <name>Kanto</name>
-<version>1.4.0</version>
+<version>1.4.1</version>
+<include id="gapple-kill-reward"/>
+<include id="iron-bulkcrafting"/>
 <objective>Capture the enemy's wools!</objective>
 <created>2021-12-21</created>
 <phase>development</phase>
@@ -18,20 +20,20 @@
 <kits>
     <kit id="spawn-kit">
         <clear/>
-        <item slot="0" material="iron sword"/>
-        <item slot="1" material="bow" enchantment="arrow infinite"/>
-        <item slot="2" material="diamond pickaxe"/>
-        <item slot="3" material="diamond axe"/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow" enchantment="infinity"/>
+        <item slot="2" unbreakable="true" material="diamond pickaxe"/>
+        <item slot="3" unbreakable="true" material="diamond axe"/>
         <item slot="4" material="wood" amount="64" damage="1" />
         <item slot="5" material="smooth brick" amount="64" damage="3"/>
         <item slot="6" material="water bucket"/>
         <item slot="8" material="golden apple"/>
         <item slot="28" material="arrow"/>
-        <item slot="31" material="wood" amount="32" damage="1" />
-        <helmet material="leather helmet" team-color="true"/>
-        <chestplate material="leather chestplate" team-color="true"/>
-        <leggings material="chainmail leggings"/>
-        <boots material="leather boots" team-color="true"/>
+        <item slot="31" material="wood" amount="64" damage="1" />
+        <helmet unbreakable="true" material="leather helmet" team-color="true"/>
+        <chestplate unbreakable="true" material="leather chestplate" team-color="true"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+        <boots unbreakable="true" material="leather boots" team-color="true"/>
         <effect duration="5s" amplifier="255">damage resistance</effect>
     </kit>
 </kits>
@@ -40,7 +42,7 @@
     <spawn team="blue" kit="spawn-kit" yaw="0" region="blue-spawn-point"/>
     <spawn team="red" kit="spawn-kit" yaw="180" region="red-spawn-point"/>
 </spawns>
-<wools craftable="false">
+<wools craftable="false" wool-proximity-metric="none" monument-proximity-metric="closest block">
     <wool team="red" color="pink" monument="red-pink-wool" location="37.5,15.2,-107.5"/>
     <wool team="red" color="purple" monument="red-purple-wool" location="-36.5,15.2,-107.5"/>
     <wool team="blue" color="yellow" monument="blue-yellow-wool" location="-36.5,15.2,108.5"/>
@@ -64,6 +66,9 @@
     </deny>
     <deny id="deny-beacon">
         <material>beacon</material>
+    </deny>
+    <deny id="deny-participating">
+        <participating/>
     </deny>
     <all id="only-iron-renew">
         <material id="only-iron">iron block</material>
@@ -120,8 +125,19 @@
             <cuboid min="30,0,-35" max="46,1,-67"/> <!-- blue east water lane -->
         </union>
     </union>
-    <apply use="only-blue" region="red-wool-rooms"/>
-    <apply use="only-red" region="blue-wool-rooms"/>
+    <negative id="outside-map">
+        <complement>
+            <rectangle min="-45,-125" max="46,126"/>
+            <rectangle min="14,85" max="29,126"/>
+            <rectangle min="-28,85" max="-13,126"/>
+            <rectangle min="14,-125" max="29,-84"/>
+            <rectangle min="-28,-125" max="-13,-84"/>
+        </complement>
+    </negative>
+    <apply use="deny-red" region="red-wool-rooms"/>
+    <apply use="deny-blue" region="blue-wool-rooms"/>
+    <apply use="deny-beacon" message="You may not use the beacon!"/>
+    <apply use="deny-participating" region="outside-map"/>
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool room!"/>
@@ -132,7 +148,6 @@
     <apply block-place="only-iron-renew" block-break="only-iron" region="spawns" message="You may only break iron blocks in spawn!"/>
     <apply block="add-water-lane" region="water-lanes"/>
     <apply block="deny-in-wr" region="wool-rooms" message="You may not break the beacon!"/>
-    <apply use="deny-beacon" message="You may not use the beacon!"/>
 </regions>
 <!-- Water lanes -->
 <actions>
@@ -181,8 +196,7 @@
 </itemkeep>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
-        <item material="wood" amount="16" damage="1"/>
+        <item material="wood" amount="32" damage="1"/>
         <item material="smooth brick" amount="16" damage="3"/>
     </kill-reward>
 </kill-rewards>
@@ -190,66 +204,4 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<item-mods>
-    <rule>
-        <match>
-            <material>iron sword</material>
-            <material>bow</material>
-            <material>diamond pickaxe</material>
-            <material>diamond axe</material>
-            <material>shears</material>
-            <material>iron helmet</material>
-            <material>iron chestplate</material>
-            <material>iron leggings</material>
-            <material>iron boots</material>
-            <material>diamond leggings</material>
-        </match>
-        <modify unbreakable="true"/>
-    </rule>
-</item-mods>
-<crafting>
-    <!-- bulk crafting -->
-    <shaped override="false">
-        <result material="iron helmet" amount="9"/>
-        <shape>
-            <row>III</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron chestplate" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>III</row>
-            <row>III</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron leggings" amount="9"/>
-        <shape>
-            <row>III</row>
-            <row>I.I</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron boots" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="bucket" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>.I.</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-</crafting>
 </map>
