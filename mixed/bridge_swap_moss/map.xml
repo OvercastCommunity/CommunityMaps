@@ -1,0 +1,299 @@
+<map proto="1.4.2">
+<name>Bridge Swap: Moss</name>
+<version>1.0</version>
+<objective>Break the enemy team's quartz blocks, located below their spawn point!</objective>
+<created>2024-09-14</created>
+<include id="bridge"/>
+<game>Bridge and Block Swap</game>
+<constants>
+    <constant id="map-origin">0.5,0,0.5</constant>
+    <!-- Match -->
+    <constant id="score-limit">4</constant>
+    <!-- Teams -->
+    <constant id="team-one-spawn">-40.5,15,0.5</constant>
+    <constant id="team-one-yaw">-90</constant>
+    <constant id="team-two-spawn">41.5,15,0.5</constant>
+    <constant id="team-two-yaw">90</constant>
+    <!-- Misc. -->
+    <constant id="show-tutorial">0</constant>
+</constants>
+<authors>
+    <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML"/> <!-- zzuf -->
+</authors>
+<teams>
+    <team id="team-one" color="red" max="5">Red</team>
+    <team id="team-two" color="blue" max="5">Blue</team>
+</teams>
+<spawns>
+    <default>
+        <region>
+            <point>0.5,12,-30.5</point>
+        </region>
+    </default>
+</spawns>
+<kits>
+    <kit id="zzuf-obs-kit">
+        <book show-other="false">
+            <title>`e`lHow to Play</title>
+            <author>zzuf</author>
+            <pages>
+                <page>
+                    `2» `lBRIDGE +
+                    `2» `lBLOCK SWAP`0
+                    
+                    Each team has a
+                    `6quartz platform`0,
+                    below or behind their
+                    spawn point.
+                    
+                    Convert all the enemy
+                    `8quartz blocks`0 into
+                    `cwo`9ol`0!
+                </page>
+            </pages>
+        </book>
+    </kit>
+    <give kit="zzuf-obs-kit" filter="all(is-observer)"/>
+</kits>
+<filters>
+    <any id="block-list">
+        <material id="only-red-block">wool:14</material>
+        <material id="only-blue-block">wool:11</material>
+        <material>stained clay:14</material>
+        <material>stained clay:11</material>
+        <material>stained clay:0</material>
+        <material>quartz block</material>
+    </any>
+    <all id="team-one-controlling-point"> <!-- Blue side -->
+        <offset vector="37,6,1" filter="only-red-block"/>
+        <offset vector="37,6,0" filter="only-red-block"/>
+        <offset vector="37,6,-1" filter="only-red-block"/>
+        <offset vector="38,6,1" filter="only-red-block"/>
+        <offset vector="38,6,0" filter="only-red-block"/>
+        <offset vector="38,6,-1" filter="only-red-block"/>
+        <offset vector="39,6,1" filter="only-red-block"/>
+        <offset vector="39,6,0" filter="only-red-block"/>
+        <offset vector="39,6,-1" filter="only-red-block"/>
+    </all>
+    <all id="team-two-controlling-point"> <!-- Red side -->
+        <offset vector="-39,6,1" filter="only-blue-block"/>
+        <offset vector="-39,6,0" filter="only-blue-block"/>
+        <offset vector="-39,6,-1" filter="only-blue-block"/>
+        <offset vector="-38,6,1" filter="only-blue-block"/>
+        <offset vector="-38,6,0" filter="only-blue-block"/>
+        <offset vector="-38,6,-1" filter="only-blue-block"/>
+        <offset vector="-37,6,1" filter="only-blue-block"/>
+        <offset vector="-37,6,0" filter="only-blue-block"/>
+        <offset vector="-37,6,-1" filter="only-blue-block"/>
+    </all>
+    <all id="team-one-own-point">
+        <filter id="team-one-controlling-point"/>
+        <filter id="only-team-one"/>
+    </all>
+    <all id="team-two-own-point">
+        <filter id="team-two-controlling-point"/>
+        <filter id="only-team-two"/>
+    </all>
+    <all id="team-one-other-point">
+        <filter id="team-two-controlling-point"/>
+        <filter id="only-team-one"/>
+    </all>
+    <all id="team-two-other-point">
+        <filter id="team-one-controlling-point"/>
+        <filter id="only-team-two"/>
+    </all>
+</filters>
+<regions>
+    <negative id="not-buildable">
+        <union>
+            <cuboid min="31,0,17" max="-30,16,-16"/>
+            <region id="points"/>
+        </union>
+    </negative>
+    <!--
+    <empty id="team-one-portal"/>
+    <empty id="team-two-portal"/>
+    -->
+    <cuboid id="team-one-portal" min="0,0,0" size="0,0,0"/>
+    <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
+    <union id="cages">
+        <cylinder id="team-one-spawn-cage" base="${team-one-spawn}" height="3" radius="2"/>
+        <cylinder id="team-two-spawn-cage" base="${team-two-spawn}" height="3" radius="2"/>
+    </union>
+    <union id="points">
+        <cuboid id="team-one-point" min="-39,6,-1" size="3,1,3"/>
+        <mirror id="team-two-point" region="team-one-point" origin="${map-origin}" normal="1,0,0"/>
+    </union>
+    <apply block="only-team-one" region="team-two-point" message="You may not modify your own `8Quartz Platform`r!"/>
+    <apply block="only-team-two" region="team-one-point" message="You may not modify your own `8Quartz Platform`r!"/>
+</regions>
+<actions>
+    <action id="increment-round-custom" scope="player">
+        <switch-scope outer="player" inner="match">
+            <set var="can_score" value="0"/>
+            <set var="round_status" value="1"/>
+            <action id="set-buytime"/>
+            <kill-entities filter="remove-entities"/>
+        </switch-scope>
+        <action id="tiebreaker-win"/>
+    </action>
+    
+    <action id="increment-score-t1" scope="match">
+        <set var="team_one_score" value="team_one_score+1"/>
+    </action>
+    <action id="increment-score-t2" scope="match">
+        <set var="team_two_score" value="team_two_score+1"/>
+    </action>
+    
+    <trigger filter="team-one-controlling-point" action="increment-score-t1" scope="match"/>
+    <trigger filter="team-two-controlling-point" action="increment-score-t2" scope="match"/>
+    
+    <trigger filter="team-one-own-point" action="increment-round-custom" scope="player"/>
+    <trigger filter="team-two-own-point" action="increment-round-custom" scope="player"/>
+    <trigger filter="team-one-controlling-point" action="reset-points" scope="match"/>
+    <trigger filter="team-two-controlling-point" action="reset-points" scope="match"/>
+    <action id="reset-points" scope="match">
+        <fill region="points" material="quartz block"/>
+    </action>
+    <trigger filter="team-one-controlling-point" action="set-team-one" scope="player"/>
+    <trigger filter="team-two-controlling-point" action="set-team-two" scope="player"/>
+    <action id="platform-sfx-good-t1-check" scope="player">
+        <switch-scope outer="player" inner="match">
+            <switch-scope outer="match" inner="player">
+                <action id="platform-sfx-good-t1"/>
+            </switch-scope>
+        </switch-scope>
+    </action>
+    <action id="platform-sfx-good-t1" scope="player" filter="only-team-one">
+        <sound key="fireworks.twinkle"/>
+        <!-- <message text=" `cRed`f has damaged `9Blue Platform`r"/> -->
+        <switch-scope outer="player" inner="match">
+            <action id="platform-sfx-bad-t2-check"/>
+        </switch-scope>
+    </action>
+    <action id="platform-sfx-bad-t1-check" scope="match">
+        <switch-scope outer="match" inner="player">
+            <action id="platform-sfx-bad-t1"/>
+        </switch-scope>
+    </action>
+    <action id="platform-sfx-bad-t1" scope="player" filter="only-team-one">
+        <sound key="mob.wither.hurt" volume="0.4"/>
+        <!-- <message text=" `9Blue`f has damaged `cRed Platform`r"/> -->
+    </action>
+    <action id="platform-sfx-good-t2-check" scope="player">
+        <switch-scope outer="player" inner="match">
+            <switch-scope outer="match" inner="player">
+                <action id="platform-sfx-good-t2"/>
+            </switch-scope>
+        </switch-scope>
+    </action>
+    <action id="platform-sfx-good-t2" scope="player" filter="only-team-two">
+        <sound key="fireworks.twinkle"/>
+        <!-- <message text=" `9Blue`f has damaged `cRed Platform`r"/> -->
+        <switch-scope outer="player" inner="match">
+            <action id="platform-sfx-bad-t1-check"/>
+        </switch-scope>
+    </action>
+    <action id="platform-sfx-bad-t2-check" scope="match">
+        <switch-scope outer="match" inner="player">
+            <action id="platform-sfx-bad-t2"/>
+        </switch-scope>
+    </action>
+    <action id="platform-sfx-bad-t2" scope="player" filter="only-team-two">
+        <sound key="mob.wither.hurt" volume="0.4"/>
+        <!-- <message text=" `cRed`f has damaged `9Blue Platform`r"/> -->
+    </action>
+</actions>
+<itemremove>
+    <item>quartz block</item>
+</itemremove>
+<block-drops>
+    <rule>
+        <filter>
+            <all>
+                <material>quartz block</material>
+                <team>team-one</team>
+                <region id="team-two-point"/>
+            </all>
+        </filter>
+        <replacement>wool:14</replacement>
+        <kit>
+            <action id="platform-sfx-good-t1-check"/>
+        </kit>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>quartz block</material>
+                <team>team-two</team>
+                <region id="team-one-point"/>
+            </all>
+        </filter>
+        <replacement>wool:11</replacement>
+        <kit>
+            <action id="platform-sfx-good-t2-check"/>
+        </kit>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>quartz block</material>
+                <team>team-two</team>
+                <region id="team-two-point"/>
+            </all>
+        </filter>
+        <replacement>quartz block</replacement>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>quartz block</material>
+                <team>team-one</team>
+                <region id="team-one-point"/>
+            </all>
+        </filter>
+        <replacement>quartz block</replacement>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>wool</material>
+                <team>team-two</team>
+                <region id="team-two-point"/>
+            </all>
+        </filter>
+        <replacement>wool:14</replacement>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>wool:11</material>
+                <team>team-one</team>
+                <region id="team-one-point"/>
+            </all>
+        </filter>
+        <replacement>wool:11</replacement>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>wool</material>
+                <team>team-two</team>
+                <region id="team-one-point"/>
+            </all>
+        </filter>
+        <replacement>wool:11</replacement>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <material>wool</material>
+                <team>team-one</team>
+                <region id="team-two-point"/>
+            </all>
+        </filter>
+        <replacement>wool:14</replacement>
+    </rule>
+</block-drops>
+</map>
