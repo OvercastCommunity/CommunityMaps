@@ -1,12 +1,25 @@
 <map proto="1.4.2">
 <name>Double Take</name>
-<version>1.0.11</version>
-<objective>Jump into the enemy team's portals, located to either side of their spawn point!</objective>
+<variant id="bridge-swap" override="true">Bridge Swap: Double Take</variant>
+<version>1.1</version>
 <created>2023-03-31</created>
-<include id="bridge"/>
+<unless variant="bridge-swap">
+    <objective>Jump into the enemy team's portals, located to either side of their spawn point!</objective>
+    <include id="bridge"/>
+</unless>
+<if variant="bridge-swap">
+    <objective>Break the enemy team's quartz blocks, located to either side of their spawn point!</objective>
+    <include id="bridge-swap"/>
+</if>
 <constants>
-    <constant id="score-limit">7</constant>
-    <constant id="mercy-limit">5</constant>
+    <if variant="bridge-swap">
+        <constant id="team-one-block">wool:14</constant>
+        <constant id="team-two-block">wool:4</constant>
+    </if>
+    <unless variant="bridge-swap">
+        <constant id="score-limit">7</constant>
+        <constant id="mercy-limit">5</constant>
+    </unless>
     <constant id="void-plane">0</constant>
     <!-- Teams -->
     <constant id="team-one-spawn">-65.5,33,0.5</constant>
@@ -22,7 +35,13 @@
     <team id="team-two" color="yellow" max="26">Yellow</team>
 </teams>
 <broadcasts>
-    <tip after="2s" every="5m">This map has `n2`r goals, located to each side of the enemy's spawn. Block entrances, and use portals to move around quicker!</tip>
+    <unless variant="bridge-swap">
+        <tip after="2s" every="5m">This map has `n2`r goals, located to each side of the enemy's spawn. Block entrances, and use portals to move around quicker!</tip>
+    </unless>
+    <if variant="bridge-swap">
+        <tip after="2s" every="5m">This map has `n2`r quartz platforms, located to each side of the enemy's spawn. You must capture both to score. Pay attention to the beacons!</tip>
+        <tip after="12s" every="5m">Every 60 seconds, a `fPlatform Cleaner`r spawns at middle. Use this item to erase wool blocks on platforms that haven't been fully captured!</tip>
+    </if>
 </broadcasts>
 <spawns>
     <default>
@@ -39,6 +58,30 @@
     <kit id="survival-kit">
         <game-mode>survival</game-mode>
     </kit>
+    <if variant="bridge-swap">
+        <kit id="cleared-message-team-one">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find>shears</find>
+                    <replace>air</replace>
+                </replace-item>
+                <switch-scope outer="player" inner="match">
+                    <message text=" `4Red `chave removed a wool block from their platforms!`r"/>
+                </switch-scope>
+            </action>
+        </kit>
+        <kit id="cleared-message-team-two">
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find>shears</find>
+                    <replace>air</replace>
+                </replace-item>
+                <switch-scope outer="player" inner="match">
+                    <message text=" `eYellow `chave removed a wool block from their platforms!`r"/>
+                </switch-scope>
+            </action>
+        </kit>
+    </if>
 </kits>
 <filters>
     <any id="block-list">
@@ -47,7 +90,14 @@
         <material>stained clay:0</material>
         <material>dead bush</material>
         <material>double plant</material>
+        <if variant="bridge-swap">
+            <material id="only-red-block">${team-one-block}</material>
+            <material id="only-yellow-block">${team-two-block}</material>
+            <material>quartz block:0</material>
+        </if>
     </any>
+    <material id="only-clay">stained clay</material>
+    <material id="only-obsidian">obsidian</material>
     <deny id="deny-physics">
         <any>
             <material>double plant</material>
@@ -58,34 +108,120 @@
             <material>stationary water</material>
         </any>
     </deny>
+    <if variant="bridge-swap">
+        <all id="team-one-controlling-point"> <!-- Yellow side -->
+            <all id="team-one-controlling-south-point">
+                <offset vector="55,11,29" filter="only-red-block"/>
+                <offset vector="55,11,30" filter="only-red-block"/>
+                <offset vector="55,11,31" filter="only-red-block"/>
+                <offset vector="54,11,29" filter="only-red-block"/>
+                <offset vector="54,11,30" filter="only-red-block"/>
+                <offset vector="54,11,31" filter="only-red-block"/>
+                <offset vector="53,11,29" filter="only-red-block"/>
+                <offset vector="53,11,30" filter="only-red-block"/>
+                <offset vector="53,11,31" filter="only-red-block"/>
+            </all>
+            <all id="team-one-controlling-north-point">
+                <offset vector="55,11,-29" filter="only-red-block"/>
+                <offset vector="55,11,-30" filter="only-red-block"/>
+                <offset vector="55,11,-31" filter="only-red-block"/>
+                <offset vector="54,11,-29" filter="only-red-block"/>
+                <offset vector="54,11,-30" filter="only-red-block"/>
+                <offset vector="54,11,-31" filter="only-red-block"/>
+                <offset vector="53,11,-29" filter="only-red-block"/>
+                <offset vector="53,11,-30" filter="only-red-block"/>
+                <offset vector="53,11,-31" filter="only-red-block"/>
+            </all>
+        </all>
+        <all id="team-two-controlling-point"> <!-- Red side -->
+            <all id="team-two-controlling-south-point">
+                <offset vector="-55,11,29" filter="only-yellow-block"/>
+                <offset vector="-55,11,30" filter="only-yellow-block"/>
+                <offset vector="-55,11,31" filter="only-yellow-block"/>
+                <offset vector="-54,11,29" filter="only-yellow-block"/>
+                <offset vector="-54,11,30" filter="only-yellow-block"/>
+                <offset vector="-54,11,31" filter="only-yellow-block"/>
+                <offset vector="-53,11,29" filter="only-yellow-block"/>
+                <offset vector="-53,11,30" filter="only-yellow-block"/>
+                <offset vector="-53,11,31" filter="only-yellow-block"/>
+            </all>
+            <all id="team-two-controlling-north-point">
+                <offset vector="-55,11,-29" filter="only-yellow-block"/>
+                <offset vector="-55,11,-30" filter="only-yellow-block"/>
+                <offset vector="-55,11,-31" filter="only-yellow-block"/>
+                <offset vector="-54,11,-29" filter="only-yellow-block"/>
+                <offset vector="-54,11,-30" filter="only-yellow-block"/>
+                <offset vector="-54,11,-31" filter="only-yellow-block"/>
+                <offset vector="-53,11,-29" filter="only-yellow-block"/>
+                <offset vector="-53,11,-30" filter="only-yellow-block"/>
+                <offset vector="-53,11,-31" filter="only-yellow-block"/>
+            </all>
+        </all>
+        <pulse id="shears-pulse" duration="0.25s" period="60s">
+            <after duration="60s">
+                <match-running/>
+            </after>
+        </pulse>
+    </if>
 </filters>
 <regions>
     <negative id="not-buildable">
-        <complement>
-            <cuboid min="-41,5,38" max="42,19,-37"/>
-            <union id="team-one-buildings">
-                <rectangle min="-24,-15" max="-38,16"/> <!-- Center building -->
-                <rectangle id="team-one-south-portal-building" min="-38,26" max="-41,38"/> <!-- South portal building -->
-                <union id="team-one-front-south-building">
-                    <complement>
-                        <cuboid min="-17,19,22" max="-29,7,38"/>
-                        <cuboid min="-26,12,22" max="-29,19,28"/>
-                        <cuboid min="-26,16,22" max="-20,19,25"/>
-                        <cuboid min="-20,5,35" size="3,19,3"/>
-                    </complement>
+        <union>
+            <complement>
+                <cuboid min="-41,5,38" max="42,19,-37"/>
+                <union id="team-one-buildings">
+                    <rectangle min="-24,-15" max="-38,16"/> <!-- Center building -->
+                    <rectangle id="team-one-south-portal-building" min="-38,26" max="-41,38"/> <!-- South portal building -->
+                    <union id="team-one-front-south-building">
+                        <complement>
+                            <cuboid min="-17,19,22" max="-29,7,38"/>
+                            <cuboid min="-26,12,22" max="-29,19,28"/>
+                            <cuboid min="-26,16,22" max="-20,19,25"/>
+                            <cuboid min="-20,5,35" size="3,19,3"/>
+                        </complement>
+                    </union>
+                    <mirror region="team-one-south-portal-building" origin="${map-origin}" normal="0,0,1"/>
+                    <mirror region="team-one-front-south-building" origin="${map-origin}" normal="0,0,1"/>
                 </union>
-                <mirror region="team-one-south-portal-building" origin="${map-origin}" normal="0,0,1"/>
-                <mirror region="team-one-front-south-building" origin="${map-origin}" normal="0,0,1"/>
-            </union>
-            <mirror region="team-one-buildings" origin="${map-origin}" normal="1,0,0"/>
-        </complement>
+                <mirror region="team-one-buildings" origin="${map-origin}" normal="1,0,0"/>
+                <region id="middle-island"/>
+            </complement>
+            <region id="points"/>
+        </union>
     </negative>
     <!-- Portals -->
-    <union id="team-one-portal">
-        <cuboid id="team-one-south-portal" min="-55,6,29" size="3,1,3"/>
-        <mirror region="team-one-south-portal" origin="${map-origin}" normal="0,0,1"/>
-    </union>
-    <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
+    <unless variant="bridge-swap">
+        <union id="team-one-portal">
+            <cuboid id="team-one-south-portal" min="-55,6,29" size="3,1,3"/>
+            <mirror region="team-one-south-portal" origin="${map-origin}" normal="0,0,1"/>
+        </union>
+        <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
+        <cuboid id="points" min="0,0,0" max="0,0,0"/>
+        <cuboid id="middle-island" min="0,0,0" max="0,0,0"/>
+    </unless>
+    <if variant="bridge-swap">
+        <union id="points">
+            <union id="team-one-point">
+                <cuboid id="team-one-south-point" min="-55,11,29" size="3,1,3"/>
+                <mirror id="team-one-north-point" region="team-one-south-point" origin="${map-origin}" normal="0,0,1"/>
+            </union>
+            <union id="team-two-point">
+                <mirror id="team-two-south-point" region="team-one-south-point" origin="${map-origin}" normal="1,0,0"/>
+                <mirror id="team-two-north-point" region="team-one-north-point" origin="${map-origin}" normal="1,0,0"/>
+            </union>
+        </union>
+        <cuboid id="middle-island" min="2,12,2" max="-1,15,-1"/>
+        <union id="portal-arrows">
+            <union id="team-one-arrows">
+                <cuboid id="team-one-south-arrow" min="-53,49,33" max="-54,39,28"/>
+                <mirror id="team-one-north-arrow" region="team-one-south-arrow" origin="${map-origin}" normal="0,0,1"/>
+            </union>
+            <union id="team-two-arrows">
+                <mirror id="team-two-south-arrow" region="team-one-south-arrow" origin="${map-origin}" normal="1,0,0"/>
+                <mirror id="team-two-north-arrow" region="team-one-north-arrow" origin="${map-origin}" normal="1,0,0"/>
+            </union>
+        </union>
+    </if>
     <!-- Round cages -->
     <union id="cages">
         <complement id="team-one-spawn-cage">
@@ -105,6 +241,14 @@
                     <rectangle id="red-extra-level" min="-29,38" max="29,-37"/>
                     <mirror region="red-extra-level" origin="${map-origin}" normal="1,0,0"/>
                     <rectangle min="-21,39" max="22,-38"/>
+                    <if variant="bridge-swap">
+                        <!-- Points -->
+                        <union id="team-one-prot">
+                            <cylinder id="team-one-prot-south" base="-53.5,12,30.5" height="5" radius="5"/>
+                            <mirror region="team-one-prot-south" origin="${map-origin}" normal="0,0,1"/>
+                        </union>
+                        <mirror region="team-one-prot" origin="${map-origin}" normal="1,0,0"/>
+                    </if>
                 </union>
             </negative>
         </union>
@@ -159,7 +303,109 @@
             </fill>
         </action>
     </trigger>
+    <if variant="bridge-swap">
+        <trigger scope="match">
+            <filter>
+                <match-phase>starting</match-phase>
+            </filter>
+            <action>
+                <fill material="quartz block:0" region="points"/>
+                <fill material="double step">
+                    <cuboid min="-2,9,-2" max="3,12,3"/>
+                </fill>
+                <fill material="stone">
+                    <cuboid min="-2,10,-2" max="3,11,3"/>
+                </fill>
+                <fill material="mycel">
+                    <cuboid min="-1,11,-1" max="2,12,2"/>
+                </fill>
+                <fill material="stained clay:15">
+                    <cuboid min="-1,9,-1" max="2,10,2"/>
+                </fill>
+                <fill material="124">
+                    <block>0,11,0</block>
+                </fill>
+                <fill material="redstone block">
+                    <block>0,10,0</block>
+                </fill>
+            </action>
+        </trigger>
+        <trigger filter="team-one-controlling-south-point" scope="match">
+            <action>
+                <message text=" `4Red `fhas captured `eSouth Platform`r"/>
+                <fill material="obsidian">
+                    <block>43,28,31</block>
+                </fill>
+                <fill material="obsidian" filter="only-clay" region="team-two-south-arrow"/>
+            </action>
+        </trigger>
+        <trigger filter="team-one-controlling-north-point" scope="match">
+            <action>
+                <message text=" `4Red `fhas captured `eNorth Platform`r"/>
+                <fill material="obsidian">
+                    <block>43,28,-31</block>
+                </fill>
+                <fill material="obsidian" filter="only-clay" region="team-two-north-arrow"/>
+            </action>
+        </trigger>
+        <trigger filter="team-two-controlling-south-point" scope="match">
+            <action>
+                <message text=" `eYellow `fhas captured `4South Platform`r"/>
+                <fill material="obsidian">
+                    <block>-43,28,31</block>
+                </fill>
+                <fill material="obsidian" filter="only-clay" region="team-one-south-arrow"/>
+            </action>
+        </trigger>
+        <trigger filter="team-two-controlling-north-point" scope="match">
+            <action>
+                <message text=" `eYellow `fhas captured `4North Platform`r"/>
+                <fill material="obsidian">
+                    <block>-43,28,-31</block>
+                </fill>
+                <fill material="obsidian" filter="only-clay" region="team-one-north-arrow"/>
+            </action>
+        </trigger>
+        <trigger filter="round-0" scope="match">
+            <action>
+                <fill material="stained glass:4">
+                    <block>43,28,31</block>
+                    <block>43,28,-31</block>
+                </fill>
+                <fill material="stained glass:14">
+                    <block>-43,28,31</block>
+                    <block>-43,28,-31</block>
+                </fill>
+                <fill material="stained clay:14" filter="only-obsidian" region="team-one-arrows"/>
+                <fill material="stained clay:4" filter="only-obsidian" region="team-two-arrows"/>
+            </action>
+        </trigger>
+        <trigger scope="player">
+            <filter>
+                <carrying ignore-metadata="true"><item material="diamond block"/></carrying>
+            </filter>
+            <action>
+                <replace-item ignore-metadata="true">
+                    <find>diamond block</find>
+                    <replace>air</replace>
+                </replace-item>
+                <kit>
+                    <item material="shears" damage="238"/>
+                </kit>
+            </action>
+        </trigger>
+    </if>
 </actions>
+<if variant="bridge-swap">
+    <spawners>
+        <spawner player-region="everywhere" delay="0" filter="shears-pulse" max-entities="1">
+            <spawn-region>
+                <point>0.5,12,0.5</point>
+            </spawn-region>
+            <item material="diamond block"/>
+        </spawner>
+    </spawners>
+</if>
 <portals>
     <!-- Red -->
     <portal destination="team-one-south-defportal-point" filter="only-team-one" region="team-one-south-defportal" yaw="@45" pitch="@0"/>
@@ -176,5 +422,80 @@
     <item>seeds</item>
     <item>double plant</item>
     <item>stick</item>
+    <item>shears</item>
 </itemremove>
+<item-mods>
+    <rule>
+        <match>
+            <material>shears</material>
+        </match>
+        <modify name="`fPlatform Cleaner" show-enchantments="false" lore="`9ⓘ `7Use this item to erase wool blocks on platforms|`7that haven't been captured yet!">
+            <enchantment level="1">efficiency</enchantment>
+        </modify>
+    </rule>
+</item-mods>
+<if variant="bridge-swap">
+    <block-drops>
+        <rule>
+            <filter>
+                <all>
+                    <material>wool:14</material>
+                    <team>team-two</team>
+                    <region id="team-two-south-point"/>
+                    <filter id="not(team-one-controlling-south-point)"/>
+                    <holding ignore-metadata="true">
+                        <item material="shears"/>
+                    </holding>
+                </all>
+            </filter>
+            <replacement>quartz block:0</replacement>
+            <kit id="cleared-message-team-two"/>
+        </rule>
+        <rule>
+            <filter>
+                <all>
+                    <material>wool:4</material>
+                    <team>team-one</team>
+                    <region id="team-one-south-point"/>
+                    <filter id="not(team-two-controlling-south-point)"/>
+                    <holding ignore-metadata="true">
+                        <item material="shears"/>
+                    </holding>
+                </all>
+            </filter>
+            <replacement>quartz block:0</replacement>
+            <kit id="cleared-message-team-one"/>
+        </rule>
+        <rule>
+            <filter>
+                <all>
+                    <material>wool:14</material>
+                    <team>team-two</team>
+                    <region id="team-two-north-point"/>
+                    <filter id="not(team-one-controlling-north-point)"/>
+                    <holding ignore-metadata="true">
+                        <item material="shears"/>
+                    </holding>
+                </all>
+            </filter>
+            <replacement>quartz block:0</replacement>
+            <kit id="cleared-message-team-two"/>
+        </rule>
+        <rule>
+            <filter>
+                <all>
+                    <material>wool:4</material>
+                    <team>team-one</team>
+                    <region id="team-one-north-point"/>
+                    <filter id="not(team-two-controlling-north-point)"/>
+                    <holding ignore-metadata="true">
+                        <item material="shears"/>
+                    </holding>
+                </all>
+            </filter>
+            <replacement>quartz block:0</replacement>
+            <kit id="cleared-message-team-one"/>
+        </rule>
+    </block-drops>
+</if>
 </map>
