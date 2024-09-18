@@ -1,7 +1,6 @@
 <map proto="1.4.2">
 <name>Bed Rush</name>
-<version>1.0.2</version>
-<phase>staging</phase>
+<version>1.0.3</version>
 <objective>Destroy the Bed to win the Round. First Team to 5 Wins!</objective>
 <created>2024-07-01</created>
 <authors>
@@ -70,6 +69,7 @@
         <chestplate material="leather chestplate" enchantment="protection:3" team-color="false" unbreakable="true" locked="true"/>
         <leggings material="leather leggings" enchantment="protection:2" team-color="true" unbreakable="true" locked="true"/>
         <boots material="leather boots" enchantment="protection:3;feather_falling:1" team-color="true" unbreakable="true" locked="true"/>
+        <health>20</health>
     </kit>
     <kit id="void-death" force="true">
         <clear effects="true" items="false" armor="false"/>
@@ -85,6 +85,15 @@
     </give>
     <give filter="resetting-kit" kit="spawn-kit"/>
 </kits>
+<damage>
+    <deny>
+        <all>
+            <variable var="fall_damage">0</variable>
+            <cause>fall</cause>
+            <alive/>
+        </all>
+    </deny>
+</damage>
 <filters>
     <alive id="alive"/>
     <participating id="participating"/>
@@ -99,10 +108,15 @@
         <match-running/>
         <variable var="round_state">${resetting}</variable>
     </all>
-    <after id="countdown-bossbar" filter="countdown" message="`a» `fNext round begins in {0} `a«" duration="5s"/>
-    <after id="countdown" filter="resetting" duration="2.8s"/>
-    <after id="resetting-kit" filter="all(resetting,alive)" duration="1.8s"/>
-    <after id="should-tp" filter="resetting" duration="1.85s"/>
+    <all id="running">
+        <match-running/>
+        <variable var="round_state">${running}</variable>
+    </all>
+    <after id="countdown-bossbar" filter="all(countdown,match-running)" message="`a» `fNext round begins in {0} `a«" duration="5s"/>
+    <after id="countdown" filter="all(resetting,match-running)" duration="2.8s"/>
+    <after id="resetting-kit" filter="all(resetting,alive,match-running)" duration="1.8s"/>
+    <after id="should-tp" filter="all(resetting,match-running)" duration="1.85s"/>
+    <after id="turn-on-fall-damage" filter="running" duration="5s"/>
     <any id="red-bed-broke">
         <offset vector="0,10,-41">
             <material>air</material>
@@ -141,10 +155,16 @@
     <timelimit id="timelimit"/>
     <variable id="round_number" scope="match" default="1"/>
     <variable id="round_state" scope="match" default="${running}"/> <!-- running state, skip cages first round -->
+    <variable id="fall_damage" scope="match" default="0"/>
     <variable id="scoring_team" scope="team" default="0" exclusive="1"/>
     <score id="team_score"/>
 </variables>
 <actions>
+    <trigger filter="turn-on-fall-damage" scope="match">
+        <action>
+            <set var="fall_damage" value="1"/>
+        </action>
+    </trigger>
     <action id="good-sounds-match" scope="match">
         <sound key="ambient.weather.thunder" volume="1" pitch="1"/>
         <sound key="ambient.weather.thunder" volume="1" pitch=".9"/>
@@ -217,6 +237,7 @@
         </filter>
         <action>
             <set var="round_number" value="round_number+1"/>
+            <set var="fall_damage" value="0"/>
             <fill region="cages" material="stained glass:15"/>
             <!-- tp players via portal -->
             <message text="`6`lRound `e{amount}`2 `6`lis about to start!">
@@ -327,10 +348,6 @@
     <!-- spawn locations -->
     <point id="red-team-spawn-point">${red-team-spawn}</point>
     <point id="blue-team-spawn-point">${blue-team-spawn}</point>
-    <union id="spawn-protections">
-        <cuboid id="red-team-spawn-protection" min="-3,20,-42.5" max="4,66,-36.5"/>
-        <cuboid id="blue-team-spawn-protection" min="-3,20,43.5" max="4,66,36.5"/>
-    </union>
     <union id="cages">
         <cylinder id="red-team-spawn-cage" base="${red-team-spawn}" height="4" radius="4"/>
         <cylinder id="blue-team-spawn-cage" base="${blue-team-spawn}" height="4" radius="4"/>
@@ -353,7 +370,6 @@
     <apply block-place="never" region="bed-blue"/>
     <apply block-break="deny-red" region="bed-red" message="You may not break your own bed!"/>
     <apply block-break="deny-blue" region="bed-blue" message="You may not break your own bed!"/>
-    <apply block-place="never" region="spawn-protections" message="You may not build in the spawn area!"/>
     <apply kit="void-death" region="void"/>
 </regions>
 <portals sound="false" observers="never">
