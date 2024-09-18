@@ -1,0 +1,515 @@
+<map proto="1.4.2">
+<name>Bed Rush: Anubis</name>
+<version>1.0.0</version>
+<phase>development</phase>
+<objective>Destroy the Bed to win the Round. First Team to 5 Wins!</objective>
+<created>2024-08-01</created>
+<authors>
+    <author uuid="5e295775-a85d-467f-b041-bf817b28241c" contribution="Concept, Map"/> <!-- Lorzz -->
+    <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb" contribution="XML, Map Aesthetics"/> <!-- arcadeboss -->
+</authors>
+<contributors>
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="Bridge Snippets"/> <!-- zzuf -->
+    <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="XML Tips"/> <!-- Pablete1234 -->
+</contributors>
+<teams>
+    <team id="red-team" color="red" max="22">Red</team>
+    <team id="blue-team" color="blue" max="22">Blue</team>
+</teams>
+<!-- observer spawn -->
+<spawns>
+    <default>
+        <regions>
+            <point yaw="180" pitch="20">0.5,79,52.5</point>
+        </regions>
+    </default>
+</spawns>
+<world>
+    <timeset>18000</timeset>
+</world>
+<gamerules>
+    <doDaylightCycle>false</doDaylightCycle>
+</gamerules>
+<maxbuildheight>77</maxbuildheight>
+<!-- prefered gamemode is "bedrush" displayed as "Bed Rush" -->
+<gamemode>bridge</gamemode>
+<gamemode>bedwars</gamemode>
+<respawn auto="true" delay="0s"/>
+<constants>
+    <constant id="score-limit">5</constant>
+    <constant id="red-team-spawn">-70,77,0.5</constant>
+    <constant id="blue-team-spawn">71,77,0.5</constant>
+    <constant id="running">0</constant>
+    <constant id="resetting">1</constant>
+    <constant id="over">2</constant>
+</constants>
+<broadcasts>
+    <alert after="1s" filter="red-only">`7`lDestroy the Blue Team's Bed!</alert>
+    <alert after="1s" filter="blue-only">`7`lDestroy the Red Team's Bed!</alert>
+    <tip after="15s">`7`lThe map will reset after each round!</tip>
+    <alert after="12m">`7If neither team wins 5 rounds the match will end in `c`l3 minutes`7!</alert>
+</broadcasts>
+<spawns>
+    <spawn team="red-team" kit="spawn-kit" yaw="270" pitch="0" region="red-team-spawn-point"/>
+    <spawn team="blue-team" kit="spawn-kit" yaw="90" pitch="0" region="blue-team-spawn-point"/>
+</spawns>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item material="iron sword" enchantment="sharpness:1" unbreakable="true"/>
+        <item material="iron pickaxe" enchantment="efficiency:1" unbreakable="true"/>
+        <item material="iron axe" enchantment="efficiency:1" unbreakable="true"/>
+        <item material="golden apple" amount="8"/>
+        <item material="sandstone" damage="2" amount="64"/>
+        <item material="sandstone" damage="2" amount="64"/>
+        <item material="sandstone" damage="2" amount="64"/>
+        <item material="sandstone" damage="2" amount="64"/>
+        <item material="wood" amount="64"/>
+        <effect duration="6s" amplifier="255">resistance</effect>
+        <helmet material="leather helmet" enchantment="protection:2" team-color="true" unbreakable="true" locked="true"/>
+        <chestplate material="leather chestplate" enchantment="protection:3" team-color="false" unbreakable="true" locked="true"/>
+        <leggings material="leather leggings" enchantment="protection:2" team-color="true" unbreakable="true" locked="true"/>
+        <boots material="leather boots" enchantment="protection:3;feather_falling:1" team-color="true" unbreakable="true" locked="true"/>
+        <health>20</health>
+    </kit>
+    <kit id="void-death" force="true">
+        <clear effects="true" items="false" armor="false"/>
+        <health>1</health>
+    </kit>
+    <give filter="all(resetting,alive)">
+        <kit>
+            <clear/>
+            <effect duration="9s" amplifier="255">slow_digging</effect>
+            <effect duration="9s">invisibility</effect>
+            <effect duration="11s" amplifier="255">resistance</effect>
+        </kit>
+    </give>
+    <give filter="resetting-kit" kit="spawn-kit"/>
+</kits>
+<damage>
+    <deny>
+        <all>
+            <variable var="fall_damage">0</variable>
+            <cause>fall</cause>
+            <alive/>
+        </all>
+    </deny>
+</damage>
+<filters>
+    <alive id="alive"/>
+    <participating id="participating"/>
+    <match-running id="match-running"/>
+    <deny id="deny-red">
+        <team id="red-only">red-team</team>
+    </deny>
+    <deny id="deny-blue">
+        <team id="blue-only">blue-team</team>
+    </deny>
+    <all id="resetting">
+        <match-running/>
+        <variable var="round_state">${resetting}</variable>
+    </all>
+    <all id="running">
+        <match-running/>
+        <variable var="round_state">${running}</variable>
+    </all>
+    <after id="countdown-bossbar" filter="all(countdown,match-running)" message="`a» `fNext round begins in {0} `a«" duration="5s"/>
+    <after id="countdown" filter="all(resetting,match-running)" duration="2.8s"/>
+    <after id="resetting-kit" filter="all(resetting,alive,match-running)" duration="1.8s"/>
+    <after id="should-tp" filter="all(resetting,match-running)" duration="1.85s"/>
+    <after id="turn-on-fall-damage" filter="running" duration="5s"/>
+    <any id="red-bed-broke">
+        <offset vector="-65,63,0">
+            <material>air</material>
+        </offset>
+        <offset vector="-64,63,0">
+            <material>air</material>
+        </offset>
+    </any>
+    <any id="blue-bed-broke">
+        <offset vector="65,63,0">
+            <material>air</material>
+        </offset>
+        <offset vector="64,63,0">
+            <material>air</material>
+        </offset>
+    </any>
+    <deny id="original-block-protection-filter">
+        <blocks region="original-block-protection">
+            <not>
+                <any>
+                    <!-- List of blocks in the original map that players can modify -->
+                    <material>air</material>
+                    <material>water</material>
+                    <material>stationary water</material>
+                    <material>bed block</material>
+                    <material>sandstone</material>
+                    <material>sand</material>
+                    <material>stained clay:6</material>
+                    <material>stained clay:3</material>
+                    <material>wool</material>
+                    <material>stone slab2</material>
+                    <material>log</material>
+                    <material>log 2</material>
+                    <material>birch wood stairs</material>
+                    <material>nether brick stairs</material>
+                    <material>sandstone stairs</material>
+                    <material>quartz stairs</material>
+                    <material>step</material>
+                    <material>wood button</material>
+                    <material>wood step</material>
+                    <material>double step</material>
+                    <material>coal block</material>
+                    <material>gold block</material>
+                    <material>lapis block</material>
+                    <material>redstone block</material>
+                    <material>redstone wire</material>
+                    <material>redstone torch on</material>
+                    <material>hay block</material>
+                    <material>fence</material>
+                    <material>jungle fence</material>
+                    <material>acacia fence</material>
+                    <material>birch fence</material>
+                    <material>birch fence gate</material>
+                    <material>hard clay</material>
+                    <material>nether brick</material>
+                    <material>flower pot</material>
+                    <material>flower pot item</material>
+                    <material>web</material>
+                    <material>wall banner</material>
+                    <material>red sandstone</material>
+                    <material>red sandstone stairs</material>
+                    <material>quartz block</material>
+                    <material>quartz block:1</material>
+                    <material>quartz block:2</material>
+                    <material>skull</material>
+                    <material>daylight detector</material>
+                    <material>daylight detector inverted</material>
+                    <material>netherrack</material>
+                    <material>chest</material>
+                    <material>torch</material>
+                    <material>glowstone</material>
+                    <material>fire</material>
+                    <material>beacon</material>
+                    <material>glass</material>
+                    <material>gold plate</material>
+                </any>
+            </not>
+        </blocks>
+    </deny>
+    <any id="remove-entities">
+        <entity>dropped item</entity>
+        <entity>boat</entity>
+    </any>
+</filters>
+<variables>
+    <timelimit id="timelimit"/>
+    <variable id="round_number" scope="match" default="1"/>
+    <variable id="round_state" scope="match" default="${running}"/> <!-- running state, skip cages first round -->
+    <variable id="fall_damage" scope="match" default="0"/>
+    <variable id="scoring_team" scope="team" default="0" exclusive="1"/>
+    <score id="team_score"/>
+</variables>
+<actions>
+    <trigger filter="turn-on-fall-damage" scope="match">
+        <action>
+            <set var="fall_damage" value="1"/>
+        </action>
+    </trigger>
+    <action id="good-sounds-match" scope="match">
+        <sound key="ambient.weather.thunder" volume="1" pitch="1"/>
+        <sound key="ambient.weather.thunder" volume="1" pitch=".9"/>
+        <sound key="ambient.weather.thunder" volume="1" pitch=".8"/>
+        <sound key="fireworks.blast_far" volume="1" pitch="1"/>
+        <sound key="fireworks.twinkle" volume="1" pitch="1"/>
+        <sound key="fireworks.twinkle" volume="1" pitch=".8"/>
+        <sound preset="objective_good" volume=".2" pitch="2"/>
+    </action>
+    <action id="thunder-sounds" scope="team">
+        <sound key="ambient.weather.thunder" volume="1" pitch="1"/>
+        <sound key="ambient.weather.thunder" volume="1" pitch=".9"/>
+        <sound key="ambient.weather.thunder" volume="1" pitch=".8"/>
+    </action>
+    <action id="bad-sounds" scope="team">
+        <sound key="mob.enderdragon.growl" volume="1" pitch="1"/>
+        <sound key="mob.enderdragon.growl" volume="1" pitch=".9"/>
+        <sound key="mob.enderdragon.growl" volume="1" pitch=".8"/>
+        <sound preset="objective_bad" volume=".3" pitch="1"/>
+    </action>
+    <!-- Winning message shown to all: observers, red and blue teams -->
+    <trigger filter="red-bed-broke" scope="match">
+        <action>
+            <message fade-in="0.5s" stay="3s" fade-out="0.5s">
+                <title>`9BLUE SCORED!!</title>
+                <subtitle>`9Blue team won the round</subtitle>
+            </message>
+            <message text="`6`lThe Blue team won the round!"/>
+            <switch-scope inner="team" filter="blue-only">
+                <action id="bed-broke"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger filter="blue-bed-broke" scope="match">
+        <action>
+            <message fade-in="0.5s" stay="3s" fade-out="0.5s">
+                <title>`cRED SCORED!!</title>
+                <subtitle>`6Red team won the round</subtitle>
+            </message>
+            <message text="`6`lThe Red team won the round!"/>
+            <switch-scope inner="team" filter="red-only">
+                <action id="bed-broke"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <!-- Ran at end of round with the scope of the winning team -->
+    <action id="bed-broke" scope="team">
+        <set var="team_score" value="team_score+1"/>
+        <action filter="not(team_score=${score-limit}..)">
+            <set var="round_state" value="${resetting}"/>
+        </action>
+        <action filter="team_score=${score-limit}..">
+            <set var="round_state" value="${over}"/>
+            <action id="thunder-sounds"/>
+        </action>
+        <set var="scoring_team" value="1"/>
+        <sound key="fireworks.launch" volume="1" pitch="1"/>
+        <sound preset="objective_good" volume=".4" pitch="1"/>
+        <switch-scope inner="match" filter="round_state=${resetting}">
+            <action id="good-sounds-match"/>
+            <!-- Scope of the loser team -->
+            <switch-scope inner="team" filter="scoring_team=0">
+                <action id="bad-sounds"/>
+            </switch-scope>
+        </switch-scope>
+    </action>
+    <trigger scope="match">
+        <filter>
+            <after duration="1.8s" filter="resetting"/> <!-- reset0 -->
+        </filter>
+        <action>
+            <set var="round_number" value="round_number+1"/>
+            <set var="fall_damage" value="0"/>
+            <fill region="cages" material="stained glass:15"/>
+            <!-- tp players via portal -->
+            <message text="`6`lRound `e{amount}`2 `6`lis about to start!">
+                <replacements>
+                    <decimal id="amount" value="round_number"/>
+                </replacements>
+            </message>
+            <sound key="fireworks.twinkle" volume="1" pitch="1"/>
+            <sound key="fireworks.twinkle" volume="1" pitch="0.9"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="2.8s" filter="resetting"/> <!-- reset1 -->
+        </filter>
+        <action>
+            <sound key="fireworks.twinkle_far" volume="1" pitch="1"/>
+            <!-- structure used to refresh map -->
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="3.8s" filter="resetting"/> <!-- reset2 -->
+        </filter>
+        <action>
+            <kill-entities filter="remove-entities"/>
+            <sound key="fireworks.twinkle_far" volume=".5" pitch=".9"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="4.8s" filter="resetting"/> <!-- countdown3 -->
+        </filter>
+        <action>
+            <message fade-in="0.0s" stay="0.7s" fade-out="0.3s" title="`63"/>
+            <sound key="note.pling" volume="1" pitch="1"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="5.8s" filter="resetting"/> <!-- countdown2 -->
+        </filter>
+        <action>
+            <message fade-in="0.0s" stay="0.7s" fade-out="0.3s" title="`62"/>
+            <sound key="note.pling" volume="1" pitch="1"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="6.8s" filter="resetting"/> <!-- countdown1 -->
+        </filter>
+        <action>
+            <message fade-in="0.0s" stay="0.7s" fade-out="0.3s" title="`61"/>
+            <sound key="note.pling" volume="1" pitch="1"/>
+        </action>
+    </trigger>
+     <trigger scope="match">
+         <filter>
+             <after duration="7.8s" filter="resetting"/>
+         </filter>
+         <action>
+             <sound key="note.pling" volume="1" pitch="2"/>
+             <fill region="cages" material="air"/>
+             <set var="round_state" value="${running}"/>
+             <message fade-in="0.0s" stay="0.7s" fade-out="0.3s" subtitle="`6`lRound `e{amount}">
+                 <title>`2Go</title>
+                 <replacements>
+                     <decimal id="amount" value="round_number"/>
+                 </replacements>
+             </message>
+         </action>
+     </trigger>
+    <trigger scope="match">
+        <filter>
+            <time>13m</time>
+        </filter>
+        <action>
+            <set var="timelimit" value="120"/>
+        </action>
+    </trigger>
+</actions>
+<structures>
+    <structure id="course" air="true" clear="false">
+        <region>
+            <cuboid min="-75,55,-23" max="75,77,23"/>
+            <!-- to avoid cages being removed by structure, capture these separately -->
+            <cuboid min="34,77,-5" max="37,79,5"/> <!-- tall statue blue -->
+            <cuboid min="-34,77,-5" max="-37,79,5"/> <!-- tall statue red -->
+        </region>
+    </structure>
+    <dynamic structure="course">
+        <trigger>
+            <filter id="countdown"/>
+        </trigger>
+    </dynamic>
+</structures>
+<regions>
+    <!-- course boundaries -->
+    <below id="void" y="50"/>
+    <above y="79.5" id="ceiling"/>
+    <union id="no-go">
+        <cuboid id="zone-1a" min="-52,56,23" max="-51,79,34"/>
+        <cuboid id="zone-1b" min="-52,56,-22" max="-51,79,-33"/>
+        <cuboid id="zone-2a" min="53,56,23" max="52,79,34"/>
+        <cuboid id="zone-2b" min="53,56,-22" max="52,79,-33"/>
+    </union>
+    <negative id="not-buildable">
+        <cuboid id="buildable" min="-74,56,-21" max="75,77,22"/>
+    </negative>
+    <cylinder id="original-block-protection" base=".5,0,.5" radius="100" height="176"/>
+    <!-- spawn locations -->
+    <point id="red-team-spawn-point">${red-team-spawn}</point>
+    <point id="blue-team-spawn-point">${blue-team-spawn}</point>
+    <union id="cages">
+        <cylinder id="red-team-spawn-cage" base="${red-team-spawn}" height="4" radius="4"/>
+        <cylinder id="blue-team-spawn-cage" base="${blue-team-spawn}" height="4" radius="4"/>
+    </union>
+    <!-- bed locations -->
+    <union id="bed-red">
+        <block id="bed-red-1">-65,63,0</block>
+        <block id="bed-red-2">-64,63,0</block>
+    </union>
+    <union id="bed-blue">
+        <block id="bed-blue-1">65,63,0</block>
+        <block id="bed-blue-2">64,63,0</block>
+    </union>
+    <point id="red-team-tool-point">-67.5,64,0.5</point>
+    <point id="blue-team-tool-point">68.5,64,0.5</point>
+    <point id="red-poison-point">-10,59,-11</point>
+    <point id="blue-poison-point">11,59,12</point>
+    <point id="red-sword-point">-3.5,62,9.5</point>
+    <point id="blue-sword-point">4.5,62,-8.5</point>
+    <point id="regen-center-point">0,65,0</point>
+    <!-- applies -->
+    <apply enter="never" region="ceiling" message="You may not climb higher!"/>
+    <apply enter="never" region="no-go" message="You may not leave the course!"/>
+    <apply block="original-block-protection-filter" message="You can't modify that block!"/>
+    <apply block-place="never" region="not-buildable" message="You may not build in this area!"/>
+    <apply block-place="never" region="bed-red"/>
+    <apply block-place="never" region="bed-blue"/>
+    <apply block-break="deny-red" region="bed-red" message="You may not break your own bed!"/>
+    <apply block-break="deny-blue" region="bed-blue" message="You may not break your own bed!"/>
+    <apply kit="void-death" region="void"/>
+</regions>
+<spawners>
+    <spawner spawn-region="regen-center-point" player-region="everywhere" max-entities="2" delay="35s">
+        <item material="potion" damage="16389">
+            <effect amplifier="2" duration="1">instant health</effect>
+        </item>
+    </spawner>
+    <spawner spawn-region="red-team-tool-point" player-region="everywhere" max-entities="2" delay="90s">
+        <item material="gold pickaxe" enchantment="efficiency:4;unbreaking:3" amount="1"/>
+        <item material="gold axe" enchantment="efficiency:4" amount="1"/>
+    </spawner>
+    <spawner spawn-region="blue-team-tool-point" player-region="everywhere" max-entities="2" delay="90s">
+        <item material="gold pickaxe" enchantment="efficiency:4;unbreaking:3" amount="1"/>
+        <item material="gold axe" enchantment="efficiency:4" amount="1"/>
+    </spawner>
+    <spawner spawn-region="red-poison-point" player-region="everywhere" max-entities="2" delay="60s">
+        <item material="potion" damage="16388">
+            <effect duration="10s" amplifier="1">poison</effect>
+        </item>
+    </spawner>16396
+    <spawner spawn-region="blue-poison-point" player-region="everywhere" max-entities="2" delay="60s">
+        <item material="potion" damage="16388">
+            <effect duration="10s" amplifier="1">poison</effect>
+        </item>
+    </spawner>
+    <spawner spawn-region="red-sword-point" player-region="everywhere" max-entities="1" delay="60s">
+        <item material="gold sword" enchantment="sharpness:4" amount="1"/>
+    </spawner>
+    <spawner spawn-region="blue-sword-point" player-region="everywhere" max-entities="1" delay="60s">
+        <item material="gold sword" enchantment="sharpness:4" amount="1"/>
+    </spawner>
+</spawners>
+<portals sound="false" observers="never">
+    <portal destination="red-team-spawn-point" forward="all(should-tp,alive)" filter="red-only" yaw="@270" pitch="@0"/>
+    <portal destination="blue-team-spawn-point" forward="all(should-tp,alive)" filter="blue-only" yaw="@90" pitch="@0"/>
+</portals>
+<score>
+    <limit>${score-limit}</limit>
+</score>
+<itemkeep>
+    <item>gold sword</item>
+    <item>potion</item>
+    <item>sandstone</item>
+    <item>wood</item>
+    <item>gold plate</item>
+</itemkeep>
+<itemremove>
+    <item>iron sword</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>golden apple</item>
+    <item>bed</item>
+    <item>daylight detector</item>
+    <item>daylight detector inverted</item>
+    <item>flower pot</item>
+    <item>dead bush</item>
+    <item>netherrack</item>
+    <item>glowstone dust</item>
+    <item>redstone</item>
+</itemremove>
+<crafting>
+    <disable>gold helmet</disable>
+    <disable>gold chestplate</disable>
+    <disable>gold leggings</disable>
+    <disable>gold boots</disable>
+</crafting>
+<kill-rewards>
+    <kill-reward>
+        <item material="golden apple"/>
+        <item material="wood" amount="16"/>
+        <item material="sandstone" damage="2" amount="16"/>
+    </kill-reward>
+</kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
