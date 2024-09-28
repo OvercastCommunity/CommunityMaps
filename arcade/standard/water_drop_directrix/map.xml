@@ -1,8 +1,9 @@
 <map proto="1.4.2" game="Water Drop">
 <name>Water Drop: Directrix</name>
-<version>2.0.1</version>
+<version>2.0.2</version>
 <objective>Reach the end 2 times!</objective>
 <gamemode>Arcade</gamemode>
+<include id="void-death"/>
 <authors>
     <author uuid="dad8b95c-cf6a-44df-982e-8c8dd70201e0" contribution="Original map theme"/> <!-- ElectroidFilms -->
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c" contribution="Water Drop adaptation"/> <!-- mitchiii_ -->
@@ -46,12 +47,11 @@
 <regions>
     <cylinder id="spawn" base="-158.5,39.5,-42.5" radius="3" height=".1"/>
     <sphere id="end" origin="-159.5,51,337.5" radius="3"/>
-    <below id="void-death" y="12"/>
+    <cuboid id="spawn-prot" min="-177,34,-19" max="-138,46,-53"/>
     <union id="no-fall-region">
-      <cylinder id="tower" base="-202,63,48" radius="4" height="1"/>
-      <region id="spawn"/>
+        <cylinder id="tower" base="-202,63,48" radius="4" height="1"/>
+        <region id="spawn"/>
     </union>
-    
     <apply block="never">
         <region>
             <union>
@@ -74,9 +74,8 @@
             </union>
         </region>
     </apply>
-
+    <apply region="spawn-prot" block-place="never"/>
     <apply block-place="water" block-break="water" block-physics="never"/>
-
     <!-- blue segment east 1 -->
     <apply velocity="0,2,2">
         <region>
@@ -176,7 +175,7 @@
 </regions>
 <flags>
     <flag id="blue-flag" name="Flag" color="red" show="false" beam="true">
-      <post yaw="-180" recover-time="0" pickup-filter="never">-159.5,51,337.5</post>
+        <post yaw="-180" recover-time="0" pickup-filter="never">-159.5,51,337.5</post>
     </flag>
 </flags>
 <score>
@@ -184,7 +183,6 @@
     <box points="1" region="end"/>
 </score>
 <portals>
-    <portal region="void-death" y="-1000"/>
     <portal region="end" destination="spawn" yaw="0"/>
 </portals>
 <hunger>
@@ -192,10 +190,13 @@
 </hunger>
 <damage>
     <deny>
-        <all>
-            <region id="no-fall-region"/>
-            <cause>fall</cause>
-        </all>
+        <any>
+            <region id="spawn-prot"/>
+            <all>
+                <region id="no-fall-region"/>
+                <cause>fall</cause>
+            </all>
+        </any>
     </deny>
 </damage>
 <itemremove>
