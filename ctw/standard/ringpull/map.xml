@@ -1,18 +1,43 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Ringpull</name>
-<version>1.2</version>
+<version>1.2.1</version>
+<variant id="halloween" world="halloween" override="true">Ringnull</variant>
+<variant id="christmas" world="christmas" override="true">Crackerpull</variant>
 <objective>Capture the enemy team's wool!</objective>
-<created>2022-03-08</created>
-<gamemode>ctw</gamemode>
+<constant id="red-defends">orange</constant>
+<if variant="default">
+    <created>2022-03-08</created>
+</if>
+<if variant="halloween">
+    <created>2022-09-10</created>
+    <!-- "Red" (Orange) team defends yellow wool in halloween version -->
+    <constant id="red-defends">yellow</constant>
+</if>
+<if variant="christmas">
+    <created>2022-11-23</created>
+</if>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4"/> <!-- Cazadorian -->
 </authors>
 <teams>
-    <team id="blue" color="blue" max="8">Blue</team>
-    <team id="red" color="dark red" max="8">Red</team>
+    <unless variant="halloween">
+        <team id="blue" color="blue" max="8">Blue</team>
+        <team id="red" color="dark red" max="8">Red</team>
+    </unless>
+    <if variant="halloween">
+        <team id="blue" color="dark purple" max="8">Purple</team>
+        <team id="red" color="gold" max="8">Orange</team>
+    </if>
 </teams>
 <kits>
-    <kit id="spawn-kit">
+    <kit id="default-kit">
+        <clear items="false" armor="false" effects="true"/> <!-- kits can't be empty, so this is here as a close-to-no-op -->
+        <if variant="halloween">
+            <effect>night vision</effect>
+        </if>
+    </kit>
+    <kit id="spawn-kit" parent="default-kit">
         <clear/>
         <item slot="0" unbreakable="true" material="stone sword"/>
         <item slot="1" unbreakable="true" material="bow" />
@@ -20,36 +45,36 @@
         <item slot="3" unbreakable="true" material="iron axe"/>
         <item slot="4" amount="64" material="wood"/>
         <item slot="5" material="stained glass" team-color="true" amount="64"/>
-        <item slot="6" material="golden apple"/>
-        <item slot="8" material="bucket"/>
+        <item slot="6" material="bucket"/>
+        <item slot="8" material="golden apple"/>
         <item slot="28" material="arrow" amount="48"/>
         <item slot="31" unbreakable="true" material="iron spade"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
         <leggings material="leather leggings" team-color="true" unbreakable="true"/>
         <boots material="iron boots" unbreakable="true"/>
-        <effect duration="4" amplifier="255">damage resistance</effect>
+        <effect duration="4s" amplifier="255">damage resistance</effect>
     </kit>
 </kits>
 <spawns>
-    <default yaw="0">
-        <regions>
+    <default kit="default-kit">
+        <region>
             <point>27.5,53,1.5</point>
-        </regions>
+        </region>
     </default>
-    <spawn team="red" kit="spawn-kit" yaw="90">
-        <regions>
-            <point>75.5,11,1.5</point>
-        </regions>
-    </spawn>
-    <spawn team="blue" kit="spawn-kit" yaw="-90">
-        <regions>
+    <spawn team="blue" kit="spawn-kit">
+        <region yaw="-90">
             <point>-20.5,11,1.5</point>
-        </regions>
+        </region>
+    </spawn>
+    <spawn team="red" kit="spawn-kit">
+        <region yaw="90">
+            <point>75.5,11,1.5</point>
+        </region>
     </spawn>
 </spawns>
 <wools craftable="false">
-    <wool team="blue" color="orange" location="113.5,14,1.5">
+    <wool team="blue" color="${red-defends}" location="113.5,14,1.5">
         <monument>
             <block>-24,12,1</block>
         </monument>
@@ -138,6 +163,9 @@
     <item>redstone</item>
     <item>redstone torch off</item>
     <item>flint</item>
+    <if variant="christmas">
+        <item>snow ball</item>
+    </if>
 </itemremove>
 <itemkeep>
     <item>arrow</item>
@@ -165,7 +193,6 @@
     <kill-reward>
         <item material="wood" amount="16"/>
         <item material="arrow" amount="16"/>
-        <item material="golden apple"/>
     </kill-reward>
 </kill-rewards>
 </map>
