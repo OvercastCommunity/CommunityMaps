@@ -1,6 +1,6 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Icecream Sandwiched II</name>
-<version>1.1.3</version>
+<version>1.1.4</version>
 <objective>Capture both of the enemy team's wools!</objective>
 <created>2022-08-26</created>
 <include id="gapple-kill-reward"/>
@@ -86,16 +86,18 @@
     <not id="wr-filter">
         <material>chest</material>
     </not>
-    <not id="deny-void">
-       <void/>
-    </not>
     <deny id="deny-players">
           <participating/>
     </deny>
     <material id="only-iron">iron block</material>
+    <material id="only-air">air</material>
     <any id="water-lane-building">
-        <time id="after-25m">25m</time>
-        <filter id="deny-void"/>
+        <after id="add-water-lane" duration="30s" message="`eWater lanes will be added in {0}">
+            <time>25m</time>
+        </after>
+        <not>
+            <void/>
+        </not>
     </any>
 </filters>
 <regions>
@@ -125,7 +127,7 @@
         <rectangle id="blue-side" min="-85,25" max="-118,-24"/>
         <rectangle id="red-side" min="119,25" max="86,-24"/>
     </union>
-    <union id="monument-water-lanes">
+    <union id="water-lanes">
         <union id="blue-water-lanes">
             <cuboid id="lime-water-lane" min="-80,0,-28" max="-95,1,-47"/>
             <cuboid id="cyan-water-lane" min="-80,0,29" max="-95,1,48"/>
@@ -150,7 +152,7 @@
         <region id="wool-rooms"/>
         <region id="lanes"/>
         <region id="gap-spawner"/>
-        <region id="monument-water-lanes"/>
+        <region id="water-lanes"/>
         <region id="building-water-lanes"/>
     </negative>
     <apply enter="only-blue" region="blue-prot" message="You may not enter the opponent's spawn!"/>
@@ -159,18 +161,17 @@
     <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool room!"/>
     <apply block="blue-in-wr" use="only-blue" region="red-wool-rooms" message="You may not interact with this block!"/>
     <apply block="red-in-wr" use="only-red" region="blue-wool-rooms" message="You may not interact with this block!"/>
-    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block-place="not(void)" region="void-area" message="You may not build in the void area!"/>
     <apply block="water-lane-building" region="building-water-lanes" message="You may not build in the void area!"/>
     <apply block-break="only-iron" block-place="deny-players" region="spawn-protection" message="You may not modify the spawns!"/>
     <apply block="never" region="gap-spawner-prot" message="You may not break the spawner"/>
 </regions>
-<modes>
-    <mode id="water-lane" after="25m" name="`eWater Lanes added" material="water" show-before="30s"/>
-</modes>
-<destroyables name="lanes" materials="air;water" completion="0%" required="false" show="false" modes="water-lane">
-    <destroyable owner="blue" region="blue-water-lanes"/>
-    <destroyable owner="red" region="red-water-lanes"/>
-</destroyables>
+<actions>
+    <action id="water-lane" scope="match" expose="true">
+        <fill region="water-lanes" material="water" filter="only-air"/>
+    </action>
+    <trigger scope="match" action="water-lane" filter="add-water-lane"/>
+</actions>
 <spawners>
     <spawner spawn-region="gap-spawner-point" player-region="gap-spawner-region" delay="8s">
         <item material="golden apple" amount="1"/>
