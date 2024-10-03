@@ -1,8 +1,9 @@
 <map proto="1.4.2">
 <name>Bed Rush: Anubis</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <phase>staging</phase>
 <include id="gapple-kill-reward"/>
+<include id="void-death"/>
 <objective>Destroy the Bed to win the Round. First Team to 5 Wins!</objective>
 <created>2024-08-01</created>
 <authors>
@@ -35,7 +36,7 @@
 <!-- prefered gamemode is "bedrush" displayed as "Bed Rush" -->
 <gamemode>bridge</gamemode>
 <gamemode>bedwars</gamemode>
-<respawn auto="true" delay="0s"/>
+<respawn auto="true" delay="2s"/>
 <constants>
     <constant id="score-limit">5</constant>
     <constant id="red-team-spawn">-70,77,0.5</constant>
@@ -43,6 +44,8 @@
     <constant id="running">0</constant>
     <constant id="resetting">1</constant>
     <constant id="over">2</constant>
+    <constant id="void-plane">50</constant>
+    <constant id="health">1</constant>
 </constants>
 <broadcasts>
     <alert after="1s" filter="red-only">`7`lDestroy the Blue Team's Bed!</alert>
@@ -74,10 +77,6 @@
         <boots material="leather boots" enchantment="protection:3;feather_falling:1" team-color="true" unbreakable="true" locked="true"/>
         <health>20</health>
     </kit>
-    <kit id="void-death" force="true">
-        <clear effects="true" items="false" armor="false"/>
-        <health>1</health>
-    </kit>
     <give filter="all(resetting,alive)">
         <kit>
             <clear/>
@@ -87,6 +86,7 @@
         </kit>
     </give>
     <give filter="resetting-kit" kit="spawn-kit"/>
+    <give filter="naked" kit="spawn-kit"/>
 </kits>
 <damage>
     <deny>
@@ -99,7 +99,6 @@
 </damage>
 <filters>
     <alive id="alive"/>
-    <participating id="participating"/>
     <match-running id="match-running"/>
     <deny id="deny-red">
         <team id="red-only">red-team</team>
@@ -107,6 +106,17 @@
     <deny id="deny-blue">
         <team id="blue-only">blue-team</team>
     </deny>
+    <all id="naked">
+        <alive/>
+        <match-running/>
+        <variable var="round_state">${running}</variable>
+        <region id="above-void"/>
+        <not>
+            <wearing ignore-metadata="true">
+                <item material="leather helmet"/>
+            </wearing>
+        </not>
+    </all>
     <all id="resetting">
         <match-running/>
         <variable var="round_state">${resetting}</variable>
@@ -388,8 +398,8 @@
 </structures>
 <regions>
     <!-- course boundaries -->
-    <below id="void" y="50"/>
-    <above y="79.5" id="ceiling"/>
+    <above y="50" id="above-void"/>
+    <above y="80.5" id="ceiling"/>
     <union id="no-go">
         <cuboid id="zone-1a" min="-52,56,23" max="-51,79,34"/>
         <cuboid id="zone-1b" min="-52,56,-22" max="-51,79,-33"/>
@@ -432,7 +442,6 @@
     <apply block-place="never" region="bed-blue"/>
     <apply block-break="deny-red" region="bed-red" message="You may not break your own bed!"/>
     <apply block-break="deny-blue" region="bed-blue" message="You may not break your own bed!"/>
-    <apply kit="void-death" region="void"/>
 </regions>
 <spawners>
     <spawner spawn-region="regen-center-point" player-region="everywhere" max-entities="2" delay="35s">
