@@ -1,6 +1,6 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Eldritch Trials</name>
-<version>1.0.7</version>
+<version>1.0.8</version>
 <objective>Restore your humanity and survive the onslaught of beasts the longest!</objective>
 <created>2024-03-07</created>
 <phase>staging</phase>
@@ -235,7 +235,7 @@
         <action filter="all(wrath_kit=3, wrath_kit_level=2..)">
             <kit force="true">
                 <item slot="0" material="stone sword" unbreakable="true"/>
-                <item slot="2" material="skull item" damage="1" amount="8" projectile="wrath-3-lv-2-proj"/>
+                <item slot="2" material="web" damage="1" amount="12" projectile="wrath-3-lv-2-proj"/>
                 <chestplate material="leather chestplate" unbreakable="true" locked="true" color="2a5e33">
                     <enchantment level="2">thorns</enchantment>
                 </chestplate>
@@ -244,7 +244,7 @@
         </action>
         <action filter="all(wrath_kit=3, wrath_kit_level=3..)">
             <kit force="true">
-                <item slot="1" material="ender pearl" name="`rTeleportation Web Ball" amount="3" projectile="wrath-3-lv-3-proj" grenade="true" grenade-power="3" grenade-fire="true" grenade-destroy="false"/>
+                <item slot="1" material="ender pearl" name="`rTeleportation Slowness Ball" amount="3" projectile="wrath-3-lv-3-proj" grenade="true" grenade-power="3" grenade-fire="true" grenade-destroy="false"/>
                 <effect amplifier="2">speed</effect>
                 <effect>regeneration</effect>
                 <double-jump power="3.5" recharge-time="1s" recharge-before-landing="true"/>
@@ -267,9 +267,7 @@
         <effect duration="6s" amplifier="2">slowness</effect>
     </projectile>
     <projectile id="wrath-3-lv-1-proj" name="wrath" projectile="WitherSkull" velocity="3" damage="5" throwable="true" cooldown="0"/>
-    <projectile id="wrath-3-lv-2-proj" name="wrath" projectile="WitherSkull" velocity="5" damage="10" throwable="true" cooldown="0">
-        <effect duration="2s">blindness</effect>
-    </projectile>
+    <projectile id="wrath-3-lv-2-proj" name="web" throwable="true" projectile="FallingBlock" material="web" velocity="2"/>
     <projectile id="wrath-3-lv-3-proj" name="web" projectile="EnderPearl" damage="20" throwable="true" cooldown="3">
         <effect duration="6s" amplifier="3">slowness</effect>
     </projectile>
@@ -322,10 +320,6 @@
     </shopkeeper>
 </shopkeepers>
 <filters>
-    <match-started id="match-started"/>
-    <participating id="participating"/>
-    <observing id="observing"/>
-    <alive id="alive"/>
     <after id="delayed-alive" filter="alive" duration="0.1s"/>
     <time id="finalise-humans">0.2s</time>
     <time id="finalise-humans-timeout">1s</time>
@@ -338,7 +332,10 @@
         <material>dead bush</material>
         <material>brown mushroom</material>
         <material>leaves</material>
-        <material id="fire">fire</material>
+        <any id="allow-place">
+            <material>web</material>
+            <material>fire</material>
+        </any>
         <all>
             <cause>explosion</cause>
             <any>
@@ -352,7 +349,7 @@
 </filters>
 <regions>
     <cylinder id="human-spawn" base="0.5,8,0.5" height="1" radius="2"/>
-    <apply block-break="allow-destruction" block-place="fire"/>
+    <apply block-break="allow-destruction" block-place="allow-place"/>
     <apply leave="never" message="You may not leave the trial!">
         <region>
             <sphere origin="0.5,6,0.5" radius="52"/>
@@ -370,6 +367,7 @@
     <variable id="struct1" scope="match"/>
     <variable id="struct2" scope="match"/>
     <variable id="struct3" scope="match"/>
+    <variable id="last_human" scope="player" exclusive="1"/>
 </variables>
 <actions>
     <trigger scope="match" filter="always">
@@ -438,12 +436,18 @@
         </action>
     </trigger>
     <action id="become-human" scope="player">
+        <set var="last_human" value="1"/>
         <set var="is_human" value="1"/>
         <kit id="human-kit"/>
         <message title="`e`lHUMANITY RESTORED" subtitle="`bSurvive the onslaught of beasts!"/>
         <sound key="mob.horse.skeleton.death"/>
-        <switch-scope inner="match">
+        <switch-scope inner="match" filter="finalise-humans-timeout">
             <sound key="ambient.weather.thunder"/>
+            <message text="{p1} restored their humanity">
+                <replacements>
+                    <player id="p1" var="last_human"/>
+                </replacements>
+            </message>
         </switch-scope>
     </action>
     <action id="become-wrath" scope="player">
@@ -548,14 +552,9 @@
     -->
     <trigger scope="player">
         <filter>
-            <any>
-                <carrying>
-                    <item material="rotten flesh" name="`r`cWorship Gholoth"/>
-                </carrying>
-                <carrying>
-                    <item material="rotten flesh" name="`r`6Change Worship to `cGholoth" lore="`r`7Changing your worship will|`r`7give you a different kit.|"/>
-                </carrying>
-            </any>
+            <carrying ignore-name="true" ignore-metadata="true">
+                <item material="rotten flesh"/>
+            </carrying>
         </filter>
         <action>
             <set var="wrath" value="wrath - 2"/>
@@ -566,14 +565,9 @@
     </trigger>
     <trigger scope="player">
         <filter>
-            <any>
-                <carrying>
-                    <item material="bone" name="`r`cWorship S'hrim"/>
-                </carrying>
-                <carrying>
-                    <item material="bone" name="`r`6Change Worship to `cS'hrim" lore="`r`7Changing your worship will|`r`7give you a different kit.|"/>
-                </carrying>
-            </any>
+            <carrying ignore-name="true" ignore-metadata="true">
+                <item material="bone"/>
+            </carrying>
         </filter>
         <action>
             <set var="wrath" value="wrath - 2"/>
@@ -584,14 +578,9 @@
     </trigger>
     <trigger scope="player">
         <filter>
-            <any>
-                <carrying>
-                    <item material="fermented spider eye" name="`r`cWorship Xophant"/>
-                </carrying>
-                <carrying>
-                    <item material="fermented spider eye" name="`r`6Change Worship to `cXophant" lore="`r`7Changing your worship will|`r`7give you a different kit.|"/>
-                </carrying>
-            </any>
+            <carrying ignore-name="true" ignore-metadata="true">
+                <item material="fermented spider eye"/>
+            </carrying>
         </filter>
         <action>
             <set var="wrath" value="wrath - 2"/>
@@ -602,17 +591,9 @@
     </trigger>
     <trigger scope="player">
         <filter>
-            <any>
-                <carrying>
-                    <item material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 0 -> 1)" lore="`r`7Increasing your devotion|`r`7upgrades your kit skills.|"/>
-                </carrying>
-                <carrying>
-                    <item material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 1 -> 2)" lore="`r`7Increasing your devotion|`r`7upgrades your kit skills.|"/>
-                </carrying>
-                <carrying>
-                    <item material="ghast tear" name="`r`aIncrease Devotion `7(Lv. 2 -> 3)" lore="`r`7Increasing your devotion|`r`7upgrades your kit skills.|"/>
-                </carrying>
-            </any>
+            <carrying ignore-name="true" ignore-metadata="true">
+                <item material="ghast tear"/>
+            </carrying>
         </filter>
         <action>
             <action filter="wrath_kit_level=0">
@@ -652,7 +633,6 @@
             <cuboid min="25,40,-29" size="10,16,10"/>
         </region>
     </structure>
-
     <dynamic structure="struct1-alt" trigger="struct1=1" location="-35,7,14"/>
     <dynamic structure="struct2-alt" trigger="struct2=1" location="-4,7,2"/>
     <dynamic structure="struct3-alt" trigger="struct3=1" location="25,6,-29"/>
@@ -721,6 +701,8 @@
     <item>note block</item>
     <item>iron barding</item>
     <item>ender pearl</item>
+    <item>string</item>
+    <item>web</item>
 </itemremove>
 <hunger>
     <depletion>off</depletion>
