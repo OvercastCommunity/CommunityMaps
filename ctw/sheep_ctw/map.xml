@@ -1,6 +1,6 @@
 <map proto="1.4.0">
 <name>Sheep CTW</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Capture both wools!</objective>
 <gamemode>ctw</gamemode>
 <phase>development</phase>
@@ -55,8 +55,12 @@
     <wool team="red-team" color="yellow" monument="red-team-yellow-wool" id="red-team-yellow-wool-monument" location="30.5,15,-90.5"/>
 </wools>
 <filters>
-    <team id="only-blue">blue-team</team>
-    <team id="only-red">red-team</team>
+    <deny id="deny-blue">
+        <team id="only-blue">blue-team</team>
+    </deny>
+    <deny id="deny-red">
+        <team id="only-red">red-team</team>
+    </deny>
     <not id="void-filter">
         <void/>
     </not>
@@ -68,21 +72,26 @@
         <team>red-team</team>
         <filter id="woolrooms-filter"/>
     </all>
-    <any id="woolrooms-filter">
-        <material>web</material>
-        <material>wood:0</material>
-        <material>stained clay:14</material>
-        <material>stained clay:11</material>
-        <material>red rose</material>
-        <material>long grass</material>
-        <all>
-            <cause>player</cause>
-            <any>
-                <material>stationary water</material>
-                <material>water</material>
-            </any>
-        </all>
-    </any>
+    <all id="woolrooms-filter">
+        <any>
+            <material>web</material>
+            <material>wood:0</material>
+            <material>stained clay:14</material>
+            <material>stained clay:11</material>
+            <material>red rose</material>
+            <material>long grass</material>
+            <all>
+                <cause>player</cause>
+                <any>
+                    <material>stationary water</material>
+                    <material>water</material>
+                </any>
+            </all>
+        </any>
+        <not>
+            <void/>
+        </not>
+    </all>
     <all id="only-iron-cause-world">
         <material id="only-iron">iron block</material>
         <cause>world</cause>
@@ -134,6 +143,14 @@
     <dead id="dead-filter"/>
     <observing id="observing-filter"/>
     <variable id="recent-dye-pickup-filter" var="recent_dye_pickup">0</variable>
+    <any id="enter-reds-sheeproom-filter">
+        <variable var="orange_dye">1</variable>
+        <variable var="pink_dye">1</variable>
+    </any>
+    <any id="enter-blues-sheeproom-filter">
+        <variable var="lime_dye">1</variable>
+        <variable var="yellow_dye">1</variable>
+    </any>
 </filters>
 <variables>
     <variable id="orange_dye" scope="player"/>
@@ -142,12 +159,6 @@
     <variable id="yellow_dye" scope="player"/>
     <variable id="recent_dye_pickup" exclusive="1" scope="player"/>
 </variables>
-<!-- add once implemented
-<replacements>
-        <player id="player"/>
-    </replacements>
-</message>
--->
 <actions>
     <action id="pickup-orange-dye-action" scope="player">
         <set var="orange_dye" value="1"/>
@@ -156,12 +167,20 @@
         <message text="You picked up `6Orange Dye `rfor `9Blue"/>
         <switch-scope inner="team">
             <switch-scope inner="player" filter="recent-dye-pickup-filter">
-                <message text="`9(Blue) `6Orange Dye `rwas picked up by `9{player} `rfor `9Blue"/>
+                <message text="`9(Blue) `6Orange Dye `rwas picked up by `9{player} `rfor `9Blue">
+                    <replacements>
+                        <player id="player" var="recent_dye_pickup"/>
+                    </replacements>
+                </message>
             </switch-scope>
         </switch-scope>
         <switch-scope inner="match">
             <switch-scope inner="team" filter="observing-filter">
-                <message text="`9(Blue) `6Orange Dye `rwas picked up by `9{player} `rfor `9Blue"/>
+                <message text="`9(Blue) `6Orange Dye `rwas picked up by `9{player} `rfor `9Blue">
+                    <replacements>
+                        <player id="player" var="recent_dye_pickup"/>
+                    </replacements>
+                </message>
             </switch-scope>
         </switch-scope>
         <set var="recent_dye_pickup" value="0"/>
@@ -173,12 +192,20 @@
         <message text="You picked up `cPink Dye `rfor `9Blue"/>
         <switch-scope inner="team">
             <switch-scope inner="player" filter="recent-dye-pickup-filter">
-                <message text="`9(Blue) `cPink Dye `rwas picked up by `9{player} `rfor `9Blue"/>
+                <message text="`9(Blue) `cPink Dye `rwas picked up by `9{player} `rfor `9Blue">
+                    <replacements>
+                        <player id="player" var="recent_dye_pickup"/>
+                    </replacements>
+                </message>
             </switch-scope>
         </switch-scope>
         <switch-scope inner="match">
             <switch-scope inner="team" filter="observing-filter">
-                <message text="`9(Blue) `cPink Dye `rwas picked up by `9{player} `rfor `9Blue"/>
+                <message text="`9(Blue) `cPink Dye `rwas picked up by `9{player} `rfor `9Blue">
+                    <replacements>
+                        <player id="player" var="recent_dye_pickup"/>
+                    </replacements>
+                </message>
             </switch-scope>
         </switch-scope>
         <set var="recent_dye_pickup" value="0"/>
@@ -190,12 +217,20 @@
         <message text="You picked up `aLime Dye `rfor `cRed"/>
         <switch-scope inner="team">
             <switch-scope inner="player" filter="recent-dye-pickup-filter">
-                <message text="`c(Red) `aLime Dye `rwas picked up by `c{player} `rfor `cRed"/>
+                <message text="`c(Red) `aLime Dye `rwas picked up by `c{player} `rfor `cRed">
+                    <replacements>
+                        <player id="player" var="recent_dye_pickup"/>
+                    </replacements>
+                </message>
             </switch-scope>
         </switch-scope>
         <switch-scope inner="match">
             <switch-scope inner="team" filter="observing-filter">
-                <message text="`c(Red) `aLime Dye `rwas picked up by `c{player} `rfor `cRed"/>
+                <message text="`c(Red) `aLime Dye `rwas picked up by `c{player} `rfor `cRed">
+                    <replacements>
+                        <player id="player" var="recent_dye_pickup"/>
+                    </replacements>
+                </message>
             </switch-scope>
         </switch-scope>
         <set var="recent_dye_pickup" value="0"/>
@@ -207,12 +242,20 @@
         <message text="You picked up `eYellow Dye `rfor `cRed"/>
         <switch-scope inner="team">
             <switch-scope inner="player" filter="recent-dye-pickup-filter">
-                <message text="`c(Red) `eYellow Dye `rwas picked up by `c{player} `rfor `cRed"/>
+                <message text="`c(Red) `eYellow Dye `rwas picked up by `c{player} `rfor `cRed">
+                    <replacements>
+                        <player id="player" var="recent_dye_pickup"/>
+                    </replacements>
+                </message>
             </switch-scope>
         </switch-scope>
         <switch-scope inner="match">
             <switch-scope inner="team" filter="observing-filter">
-                <message text="`c(Red) `eYellow Dye `rwas picked up by `c{player} `rfor `cRed"/>
+                <message text="`c(Red) `eYellow Dye `rwas picked up by `c{player} `rfor `cRed">
+                    <replacements>
+                        <player id="player" var="recent_dye_pickup"/>
+                    </replacements>
+                </message>
             </switch-scope>
         </switch-scope>
         <set var="recent_dye_pickup" value="0"/>
@@ -251,13 +294,15 @@
         <union id="blues-woolrooms"> <!-- blue defends / red attacks -->
             <rectangle id="lime-woolroom" min="-38,-96" max="-23,-81"/>
             <rectangle id="yellow-woolroom" min="38,-96" max="23,-81"/>
-            <rectangle id="blues-sheeproom" min="-7,0" max="7,-16"/>
         </union>
         <union id="reds-woolrooms"> <!-- red defends / blue attacks -->
             <rectangle id="orange-woolroom" min="38,96" max="23,81"/>
             <rectangle id="pink-woolroom" min="-38,96" max="-23,81"/>
-            <rectangle id="reds-sheeproom" min="-7,0" max="7,16"/>
         </union>
+    </union>
+    <union id="sheeprooms">
+        <rectangle id="blues-sheeproom" min="-7.5,0" max="7.5,-16"/> <!-- blue defends / red attacks -->
+        <rectangle id="reds-sheeproom" min="-7.5,0" max="7.5,16"/> <!-- red defends / blue attacks -->
     </union>
     <negative id="not-build-region">
         <union id="build-region">
@@ -272,12 +317,19 @@
     <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-red" region="blues-woolrooms" message="You may not enter your own wool room!"/>
     <apply enter="only-blue" region="reds-woolrooms" message="You may not enter your own wool room!"/>
+    <apply enter="deny-blue" region="blues-sheeproom" message="You may not enter your own sheep room!"/>
+    <apply enter="deny-red" region="reds-sheeproom" message="You may not enter your own sheep room!"/>
+    <apply enter="enter-blues-sheeproom-filter" region="blues-sheeproom" message="You may not enter without dye!"/>
+    <apply enter="enter-reds-sheeproom-filter" region="reds-sheeproom" message="You may not enter without dye!"/>
     <apply block-place="only-iron-cause-world" block-break="only-iron" region="spawns" message="You may not edit spawn!"/>
     <apply block="blues-woolrooms-filter" region="blues-woolrooms" message="You may not edit the wool room!"/>
     <apply block="reds-woolrooms-filter" region="reds-woolrooms" message="You may not edit the wool room!"/>
+    <apply block="blues-woolrooms-filter" region="blues-sheeproom" message="You may not edit the sheep room!"/>
+    <apply block="reds-woolrooms-filter" region="reds-sheeproom" message="You may not edit the sheep room!"/>
     <apply block="void-filter" region="not-build-region" message="You may not edit the void!"/>
     <apply kit="reset-resistance-kit" region="not-spawns"/>
     <apply block-physics="deny-redstone" region="woolrooms"/>
+    <apply block-physics="deny-redstone" region="sheeprooms"/>
 </regions>
 <spawners>
     <spawner spawn-region="orange-wool-spawn" player-region="orange-woolroom" delay="7s">
