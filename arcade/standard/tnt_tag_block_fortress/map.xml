@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>TNT Tag: Block Fortress</name>
-<version>1.1.2</version>
+<version>1.2.0</version>
 <include id="tnt-tag"/>
 <authors>
     <author uuid="2a289d2a-d970-49c5-9a6c-01fc0264e317"/> <!-- Stealth5061 -->
@@ -21,5 +21,87 @@
             <rectangle min="-32,-32" max="32,32"/>
         </region>
     </apply>
+    <union id="a">
+        <union id="r">
+            <cuboid id="rt" min="-20,6,18" size="2,2,2"/>
+            <cuboid id="rb" min="-16,2,14" size="2,2,2"/>
+        </union>
+        <union id="y">
+            <cuboid id="yt" min="10,6,12" size="2,2,2"/>
+            <cuboid id="yb" min="16,2,16" size="2,2,2"/>
+        </union>
+        <union id="b">
+            <cuboid id="bt" min="18,6,-20" size="2,2,2"/>
+            <cuboid id="bb" min="14,2,-16" size="2,2,2"/>
+        </union>
+        <union id="g">
+            <cuboid id="gt" min="-12,6,-14" size="2,2,2"/>
+            <cuboid id="gb" min="-18,2,-18" size="2,2,2"/>
+        </union>
+    </union>
 </regions>
+<filters>
+    <material id="glass">stained glass</material>
+    <material id="stone">double step</material>
+</filters>
+<variables scope="match" default="0">
+    <array id="forts" size="8"/>
+    <variable id="i"/>
+    <variable id="local_min"/>
+    <variable id="local_tmp"/>
+</variables>
+<actions>
+    <action id="pick" scope="match">
+        <set var="i" value="0"/>
+        <set var="local_min" value="0"/>
+        <repeat times="8">
+            <set var="local_tmp" value="forts[local_min] - forts[i]"/>
+            <action filter="local_tmp=0..">
+                <set var="local_min" value="i"/>
+            </action>
+            <set var="i" value="i + 1"/>
+        </repeat>
+        <set var="forts" index="local_min" value="99"/>
+    </action>
+    <trigger scope="match" filter="all(round-running, delayed)">
+        <action>
+            <set var="i" value="0"/>
+            <repeat times="8">
+                <set var="forts" index="i" value="random()"/>
+                <set var="i" value="i + 1"/>
+            </repeat>
+            <repeat times="3">
+                <action id="pick"/>
+            </repeat>
+            <repeat times="2" filter="players=8..">
+                <action id="pick"/>
+            </repeat>
+            <repeat times="1" filter="players=26..">
+                <action id="pick"/>
+            </repeat>
+            <fill region="a" material="double step:8" filter="glass"/>
+            <fill region="rt" material="stained glass:5" filter="all(forts[0]=99, stone)"/>
+            <fill region="rb" material="stained glass:5" filter="all(forts[1]=99, stone)"/>
+            <fill region="yt" material="stained glass:5" filter="all(forts[2]=99, stone)"/>
+            <fill region="yb" material="stained glass:5" filter="all(forts[3]=99, stone)"/>
+            <fill region="bt" material="stained glass:5" filter="all(forts[4]=99, stone)"/>
+            <fill region="bb" material="stained glass:5" filter="all(forts[5]=99, stone)"/>
+            <fill region="gt" material="stained glass:5" filter="all(forts[6]=99, stone)"/>
+            <fill region="gb" material="stained glass:5" filter="all(forts[7]=99, stone)"/>
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <any>
+                <filter id="any(all(rt, forts[0]=99), all(rb, forts[1]=99))"/>
+                <filter id="any(all(yt, forts[2]=99), all(yb, forts[3]=99))"/>
+                <filter id="any(all(bt, forts[4]=99), all(bb, forts[5]=99))"/>
+                <filter id="any(all(gt, forts[6]=99), all(gb, forts[7]=99))"/>
+            </any>
+        </filter>
+        <action>
+            <velocity x="0" y="1" z="0"/>
+        </action>
+    </trigger>
+</actions>
 </map>
