@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Fall of Babylon</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <include id="gapple-kill-reward"/>
 <phase>staging</phase>
 <gamemode>ctw</gamemode>
@@ -270,6 +270,23 @@
     <tip after="4m" every="11m" filter="only-blue">`r`9`lBelshazzar`r`7`l bestows `r`6`lGold`r`7`l &#38; `r`6`ltreasure`r`7`l for kills.`r</tip>
 </broadcasts>
 <actions>
+    <!-- Spy alert cooldown resets -->
+    <trigger scope="match">
+        <filter>
+            <after duration="3s" filter="all(spy_armor_cooldown=1,match-running)"/>
+        </filter>
+        <action>
+            <set var="spy_armor_cooldown" value="0"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="3s" filter="all(spy_sword_cooldown=1,match-running)"/>
+        </filter>
+        <action>
+            <set var="spy_sword_cooldown" value="0"/>
+        </action>
+    </trigger>
     <!-- Replace missing yellow glass -->
     <trigger scope="match">
         <filter>
@@ -288,52 +305,40 @@
     <trigger filter="all(lime-seal-broke,match-running)" scope="player">
         <action>
             <set var="lime_seal_breaker" value="1"/>
-            <switch-scope inner="match">
+            <switch-scope inner="match" filter="all(lime_seal_breaker=1,lime_seal_done=0)">
                 <action id="thunder-sounds"/>
-                <message text="`6⚡⚡⚡ `7`oThe `r`aLime Wool`r`7`l seal `r`7`ohas been broken by {player}!`r">
-                    <replacements>
-                        <player id="player" var="lime_seal_breaker"/>
-                    </replacements>
-                </message>
+                <message text="`6⚡⚡⚡ `7`oThe `r`aLime Wool`r`7`l seal `r`7`ohas been broken!`r"/>
+                <set var="lime_seal_done" value="1"/>
             </switch-scope>
         </action>
     </trigger>
     <trigger filter="all(cyan-seal-broke,match-running)" scope="player">
         <action>
             <set var="cyan_seal_breaker" value="1"/>
-            <switch-scope inner="match">
+            <switch-scope inner="match"  filter="all(cyan_seal_breaker=1,cyan_seal_done=0)">
                 <action id="thunder-sounds"/>
-                <message text="`6⚡⚡⚡ `7`oThe `r`3Cyan Wool`r`7`l seal `r`7`ohas been broken by {player}!`r">
-                    <replacements>
-                        <player id="player" var="cyan_seal_breaker"/>
-                    </replacements>
-                </message>
+                <message text="`6⚡⚡⚡ `7`oThe `r`3Cyan Wool`r`7`l seal `r`7`ohas been broken!`r"/>
+                <set var="cyan_seal_done" value="1"/>
             </switch-scope>
         </action>
     </trigger>
     <trigger filter="all(yellow-seal-broke,match-running)" scope="player">
         <action>
             <set var="yellow_seal_breaker" value="1"/>
-            <switch-scope inner="match">
+            <switch-scope inner="match" filter="all(yellow_seal_breaker=1,yellow_seal_done=0)">
                 <action id="thunder-sounds"/>
-                <message text="`6⚡⚡⚡ `7`oThe `r`eYellow Wool`r`7`l seal `r`7`ohas been broken by {player}!`r">
-                    <replacements>
-                        <player id="player" var="yellow_seal_breaker"/>
-                    </replacements>
-                </message>
+                <message text="`6⚡⚡⚡ `7`oThe `r`eYellow Wool`r`7`l seal `r`7`ohas been broken!`r"/>
+                <set var="yellow_seal_done" value="1"/>
             </switch-scope>
         </action>
     </trigger>
     <trigger filter="all(orange-seal-broke,match-running)" scope="player">
         <action>
             <set var="orange_seal_breaker" value="1"/>
-            <switch-scope inner="match">
+            <switch-scope inner="match" filter="all(orange_seal_breaker=1,orange_seal_done=0)">
                 <action id="thunder-sounds"/>
-                <message text="`6⚡⚡⚡ `7`oThe `r`6Orange Wool`r`7`l seal `r`7`ohas been broken by {player}!`r">
-                    <replacements>
-                        <player id="player" var="orange_seal_breaker"/>
-                    </replacements>
-                </message>
+                <message text="`6⚡⚡⚡ `7`oThe `r`6Orange Wool`r`7`l seal `r`7`ohas been broken!`r"/>
+                <set var="orange_seal_done" value="1"/>
             </switch-scope>
         </action>
     </trigger>
@@ -411,25 +416,27 @@
     <action id="team-upgrade-armor-with-spy-report" scope="player">
         <action id="team-upgrade-sounds"/>
         <set var="upgrading_team" value="1"/>
-        <switch-scope inner="match">
+        <switch-scope inner="match" filter="spy_armor_cooldown=0">
             <switch-scope inner="team" filter="upgrading_team=0">
                 <sound key="fireworks.twinkle_far" volume="0.9" pitch="1"/>
                 <sound preset="objective_mode" volume="0.3" pitch="1.5"/>
                 <sound preset="custom" volume="0.5"/>
                 <message text="`4☠☠☠ `e`oSpies report that the enemy has upgraded armor!`r"/>
             </switch-scope>
+            <set var="spy_armor_cooldown" value="1"/>
         </switch-scope>
     </action>
     <action id="team-upgrade-sword-with-spy-report" scope="player">
         <action id="team-upgrade-sounds"/>
         <set var="upgrading_team" value="1"/>
-        <switch-scope inner="match">
+        <switch-scope inner="match" filter="spy_sword_cooldown=0">
             <switch-scope inner="team" filter="upgrading_team=0">
                 <sound key="fireworks.twinkle_far" volume="0.9" pitch="1"/>
                 <sound preset="objective_mode" volume="0.3" pitch="1.5"/>
                 <sound preset="custom" volume="0.5"/>
                 <message text="`4☠☠☠ `e`oSpies report that the enemy has upgraded swords!`r"/>
             </switch-scope>
+            <set var="spy_sword_cooldown" value="1"/>
         </switch-scope>
     </action>
     <!-- Woolroom Webs -->
@@ -1955,6 +1962,13 @@
     <variable id="web_breaking_team" scope="team" default="0" exclusive="1"/>
     <variable id="webs_activated" scope="team" default="0" exclusive="1"/>
     <variable id="webs_to_be_activated" scope="team" default="0" exclusive="1"/>
+    <!-- Match -->
+    <variable id="lime_seal_done" scope="match"/>
+    <variable id="cyan_seal_done" scope="match"/>
+    <variable id="yellow_seal_done" scope="match"/>
+    <variable id="orange_seal_done" scope="match"/>
+    <variable id="spy_armor_cooldown" scope="match"/>
+    <variable id="spy_sword_cooldown" scope="match"/>
 </variables>
 <filters>
     <alive id="alive"/>
