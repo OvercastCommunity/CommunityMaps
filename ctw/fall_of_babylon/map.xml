@@ -1,6 +1,6 @@
 <map proto="1.4.2">
 <name>Fall of Babylon</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <include id="gapple-kill-reward"/>
 <phase>staging</phase>
 <gamemode>ctw</gamemode>
@@ -118,6 +118,20 @@
     <kit id="gold-block" force="true" filter="always">
         <item material="gold block"/>
     </kit>
+    <kit id="seal-breaker-kit" force="true">
+        <action filter="lime-woolroom">
+            <set var="lime_seal_breaker" value="1"/>
+        </action>
+        <action filter="cyan-woolroom">
+            <set var="cyan_seal_breaker" value="1"/>
+        </action>
+        <action filter="orange-woolroom">
+            <set var="orange_seal_breaker" value="1"/>
+        </action>
+        <action filter="yellow-woolroom">
+            <set var="yellow_seal_breaker" value="1"/>
+        </action>
+    </kit>
 </kits>
 <spawns>
     <spawn team="blue-team" kit="blue-kit" yaw="0" region="blue-spawn-point"/>
@@ -152,11 +166,17 @@
     </wool>
 </wools>
 <block-drops>
-    <rule>
+    <rule region="woolrooms" kit="seal-breaker-kit">
         <filter>
-            <any>
-                <material>diamond block</material>
-            </any>
+            <material>diamond block</material>
+        </filter>
+        <drops>
+            <item chance="1" amount="12" material="diamond"/>
+        </drops>
+    </rule>
+    <rule region="not-woolrooms">
+        <filter>
+            <material>diamond block</material>
         </filter>
         <drops>
             <item chance="1" amount="10" material="diamond"/>
@@ -270,71 +290,48 @@
     <tip after="4m" every="11m" filter="only-blue">`r`9`lBelshazzar`r`7`l bestows `r`6`lGold`r`7`l &#38; `r`6`ltreasure`r`7`l for kills.`r</tip>
 </broadcasts>
 <actions>
-    <!-- Replace missing yellow glass -->
-    <trigger scope="match">
-        <filter>
-            <after duration="50s" filter="all(gapple-seal-broke,match-running)"/>
-        </filter>
-        <action>
-            <switch-scope inner="match">
-                <fill region="gapple-seal" material="stained glass:4" events="true"/>
-            </switch-scope>
-        </action>
-    </trigger>
     <!-- Wool seals - alerts entire match -->
     <action id="thunder-sounds" scope="match">
         <sound key="ambient.weather.thunder" volume=".6" pitch="1"/>
     </action>
-    <trigger filter="all(lime-seal-broke,match-running)" scope="player">
+    <trigger filter="all(lime-seal-broke,match-running)" scope="match">
         <action>
-            <set var="lime_seal_breaker" value="1"/>
-            <switch-scope inner="match">
-                <action id="thunder-sounds"/>
-                <message text="`6⚡⚡⚡ `7`oThe `r`aLime Wool`r`7`l seal `r`7`ohas been broken by {player}!`r">
-                    <replacements>
-                        <player id="player" var="lime_seal_breaker"/>
-                    </replacements>
-                </message>
-            </switch-scope>
+            <action id="thunder-sounds"/>
+            <message text="`6⚡⚡⚡ `7`oThe `r`aLime Wool`r`7`l seal `r`7`ohas been broken by {player}!`r">
+                <replacements>
+                    <player id="player" var="lime_seal_breaker"/>
+                </replacements>
+            </message>
         </action>
     </trigger>
-    <trigger filter="all(cyan-seal-broke,match-running)" scope="player">
+    <trigger filter="all(cyan-seal-broke,match-running)" scope="match">
         <action>
-            <set var="cyan_seal_breaker" value="1"/>
-            <switch-scope inner="match">
-                <action id="thunder-sounds"/>
-                <message text="`6⚡⚡⚡ `7`oThe `r`3Cyan Wool`r`7`l seal `r`7`ohas been broken by {player}!`r">
-                    <replacements>
-                        <player id="player" var="cyan_seal_breaker"/>
-                    </replacements>
-                </message>
-            </switch-scope>
+            <action id="thunder-sounds"/>
+            <message text="`6⚡⚡⚡ `7`oThe `r`3Cyan Wool`r`7`l seal `r`7`ohas been broken by {player}!`r">
+                <replacements>
+                    <player id="player" var="cyan_seal_breaker"/>
+                </replacements>
+            </message>
         </action>
     </trigger>
-    <trigger filter="all(yellow-seal-broke,match-running)" scope="player">
+    <trigger filter="all(yellow-seal-broke,match-running)" scope="match">
         <action>
-            <set var="yellow_seal_breaker" value="1"/>
-            <switch-scope inner="match">
-                <action id="thunder-sounds"/>
-                <message text="`6⚡⚡⚡ `7`oThe `r`eYellow Wool`r`7`l seal `r`7`ohas been broken by {player}!`r">
-                    <replacements>
-                        <player id="player" var="yellow_seal_breaker"/>
-                    </replacements>
-                </message>
-            </switch-scope>
+            <action id="thunder-sounds"/>
+            <message text="`6⚡⚡⚡ `7`oThe `r`eYellow Wool`r`7`l seal `r`7`ohas been broken by {player}!`r">
+                <replacements>
+                    <player id="player" var="yellow_seal_breaker"/>
+                </replacements>
+            </message>
         </action>
     </trigger>
-    <trigger filter="all(orange-seal-broke,match-running)" scope="player">
+    <trigger filter="all(orange-seal-broke,match-running)" scope="match">
         <action>
-            <set var="orange_seal_breaker" value="1"/>
-            <switch-scope inner="match">
-                <action id="thunder-sounds"/>
-                <message text="`6⚡⚡⚡ `7`oThe `r`6Orange Wool`r`7`l seal `r`7`ohas been broken by {player}!`r">
-                    <replacements>
-                        <player id="player" var="orange_seal_breaker"/>
-                    </replacements>
-                </message>
-            </switch-scope>
+            <action id="thunder-sounds"/>
+            <message text="`6⚡⚡⚡ `7`oThe `r`6Orange Wool`r`7`l seal `r`7`ohas been broken by {player}!`r">
+                <replacements>
+                    <player id="player" var="orange_seal_breaker"/>
+                </replacements>
+            </message>
         </action>
     </trigger>
     <!-- Defensive webs -->
@@ -407,9 +404,13 @@
         <sound key="random.levelup" volume="0.4" pitch="0.8"/>
         <sound key="fireworks.twinkle" volume="0.4" pitch="1"/>
     </action>
+    <action id="team-upgrade-sounds-team" scope="team">
+        <sound key="random.levelup" volume="0.4" pitch="0.8"/>
+        <sound key="fireworks.twinkle" volume="0.4" pitch="1"/>
+    </action>
     <!-- Spy reports limited to Protection and Sharpness upgrades -->
-    <action id="team-upgrade-armor-with-spy-report" scope="player">
-        <action id="team-upgrade-sounds"/>
+    <action id="team-upgrade-armor-with-spy-report" scope="team">
+        <action id="team-upgrade-sounds-team"/>
         <set var="upgrading_team" value="1"/>
         <switch-scope inner="match">
             <switch-scope inner="team" filter="upgrading_team=0">
@@ -420,8 +421,8 @@
             </switch-scope>
         </switch-scope>
     </action>
-    <action id="team-upgrade-sword-with-spy-report" scope="player">
-        <action id="team-upgrade-sounds"/>
+    <action id="team-upgrade-sword-with-spy-report" scope="team">
+        <action id="team-upgrade-sounds-team"/>
         <set var="upgrading_team" value="1"/>
         <switch-scope inner="match">
             <switch-scope inner="team" filter="upgrading_team=0">
@@ -465,55 +466,55 @@
         <set var="webs_activated" value="0"/>
         <set var="webs_to_be_activated" value="1"/>
     </action>
-    <trigger filter="all(armor_upgrade_variable=1)" scope="player">
+    <trigger filter="all(armor_upgrade_variable=1)" scope="team">
         <action>
             <message text="`4`l❥❥❥`e`l [`6`lTeam Upgrade`e`l] `b`lArmor`2`l ➡ `f`lProtection I`r"/>
             <action id="team-upgrade-armor-with-spy-report"/>
         </action>
     </trigger>
-    <trigger filter="all(armor_upgrade_variable=2)" scope="player">
+    <trigger filter="all(armor_upgrade_variable=2)" scope="team">
         <action>
             <message text="`4`l❥❥❥`e`l [`6`lTeam Upgrade`e`l] `b`lArmor`2`l ➡ `f`lProtection II`r"/>
             <action id="team-upgrade-armor-with-spy-report"/>
         </action>
     </trigger>
-    <trigger filter="all(armor_upgrade_variable=3)" scope="player">
+    <trigger filter="all(armor_upgrade_variable=3)" scope="team">
         <action>
             <message text="`4`l❥❥❥`e`l [`6`lTeam Upgrade`e`l] `b`lArmor`2`l ➡ `f`lProtection III`r"/>
             <action id="team-upgrade-armor-with-spy-report"/>
         </action>
     </trigger>
-    <trigger filter="all(armor_upgrade_variable=4)" scope="player">
+    <trigger filter="all(armor_upgrade_variable=4)" scope="team">
         <action>
             <message text="`4`l❥❥❥`e`l [`6`lTeam Upgrade`e`l] `b`lArmor`2`l ➡ `f`lProtection IV`r"/>
             <action id="team-upgrade-armor-with-spy-report"/>
         </action>
     </trigger>
-    <trigger filter="all(armor_upgrade_variable=5)" scope="player">
+    <trigger filter="all(armor_upgrade_variable=5)" scope="team">
         <action>
             <message text="`4`l❥❥❥`e`l [`6`lTeam Upgrade`e`l] `b`lArmor`2`l ➡ `f`lProtection V`r"/>
             <action id="team-upgrade-armor-with-spy-report"/>
         </action>
     </trigger>
-    <trigger filter="all(sharp_upgrade_variable=1)" scope="player">
+    <trigger filter="all(sharp_upgrade_variable=1)" scope="team">
         <action>
             <message text="`4`l❥❥❥`e`l [`6`lTeam Upgrade`e`l] `b`lSword`2`l ➡ `f`lSharpness I`r"/>
             <action id="team-upgrade-sword-with-spy-report"/>
         </action>
     </trigger>
-    <trigger filter="all(sharp_upgrade_variable=2)" scope="player">
+    <trigger filter="all(sharp_upgrade_variable=2)" scope="team">
         <action>
             <message text="`4`l❥❥❥`e`l [`6`lTeam Upgrade`e`l] `b`lSword`2`l ➡ `f`lSharpness II`r"/>
             <action id="team-upgrade-sword-with-spy-report"/>
         </action>
     </trigger>
-    <trigger filter="all(sharp_upgrade_variable=3)" scope="player">
+    <trigger filter="all(sharp_upgrade_variable=3)" scope="team">
         <action>
             <message text="`4`l❥❥❥`e`l [`6`lTeam Upgrade`e`l] `b`lSword`2`l ➡ `f`lSharpness III`r"/>
             <action id="team-upgrade-sword-with-spy-report"/>
         </action>
     </trigger>
-    <trigger filter="all(sharp_upgrade_variable=4)" scope="player">
+    <trigger filter="all(sharp_upgrade_variable=4)" scope="team">
         <action>
             <message text="`4`l❥❥❥`e`l [`6`lTeam Upgrade`e`l] `b`lSword`2`l ➡ `f`lSharpness IV`r"/>
             <action id="team-upgrade-sword-with-spy-report"/>
@@ -2377,14 +2378,18 @@
                 <rectangle min="-141,-119" max="142,-74"/> <!-- blue main square -->
                 <rectangle min="-100,-15" max="101,16"/> <!-- central gold spawner -->
             </union>
-            <union id="reds-woolrooms">
-                <rectangle id="lime-woolroom" min="-142,146" max="-115,120"/>
-                <rectangle id="cyan-woolroom" min="116,146" max="143,120"/>
-            </union>
-            <union id="blues-woolrooms">
-                <rectangle id="orange-woolroom" min="143,-146" max="116,-119"/>
-                <rectangle id="yellow-woolroom" min="-115,-146" max="-142,-119"/>
-            </union>
+            <negative id="not-woolrooms">
+                <union id="woolrooms">
+                    <union id="reds-woolrooms">
+                        <rectangle id="lime-woolroom" min="-142,146" max="-115,120"/>
+                        <rectangle id="cyan-woolroom" min="116,146" max="143,120"/>
+                    </union>
+                    <union id="blues-woolrooms">
+                        <rectangle id="orange-woolroom" min="143,-146" max="116,-119"/>
+                        <rectangle id="yellow-woolroom" min="-115,-146" max="-142,-119"/>
+                    </union>
+                </union>
+            </negative>
         </negative>
         <rectangle min="-92,107" max="-116,121"/> <!-- lime void -->
         <rectangle min="93,107" max="117,121"/> <!-- cyan void -->
