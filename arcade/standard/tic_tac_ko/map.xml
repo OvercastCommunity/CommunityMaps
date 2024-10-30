@@ -1,0 +1,879 @@
+<map proto="1.5.0">
+<name>Tic Tac K.O.</name>
+<version>1.0.0</version>
+<objective>Get 3 tiles in a row to win!</objective>
+<include id="countdown"/>
+<authors>
+    <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
+</authors>
+<contributors>
+      <contributor uuid="79d4d76e-e08a-4a35-9411-05dd2397361f" contribution="Charge design inspiration"/> <!-- Hydrosion  -->
+      <contributor uuid="a6a99e23-34c4-4957-8974-b78b4da9ce7c" contribution="Dead Heat design inspiration"/> <!-- AntonyMo  -->
+      <contributor uuid="5986da63-a546-49c5-812d-d5c41a42510a" contribution="BlockBlock design inspiration"/> <!-- Lyzak  -->
+      <contributor uuid="2b7f4dfc-8711-4f07-8347-c5e8873d2189" contribution="Wooly Woods design inspiration"/> <!-- kp10708  -->
+      <contributor uuid="340ffc4d-d41a-49b1-b772-3834fd91a3b1" contribution="Wooly Woods design inspiration"/> <!-- JoeltheMole  -->
+</contributors>
+<constants>
+    <constant id="platform_count">10</constant>
+    <constant id="kit_count">6</constant>
+</constants>
+<time result="tie">999h</time>
+<score>
+    <limit>3</limit>
+</score>
+<teams>
+    <team id="o-team" color="dark red" max="6" min="1">Naughts</team>
+    <team id="x-team" color="blue" max="6" min="1">Crosses</team>
+</teams>
+<spawns>
+    <spawn region="main-spawn" yaw="-180" kit="main-kit" filter="not(state=4)"/>
+    <default region="main-spawn" yaw="-180"/>
+</spawns>
+<respawn auto="true" delay="0" spectate="true"/>
+<kits>
+    <kit id="main-kit" force="true">
+        <clear effects="true"/>
+        <max-health>20</max-health>
+        <health>20</health>
+        <foodlevel>20</foodlevel>
+        <game-mode>adventure</game-mode>
+        <effect amplifier="100" duration="1">instant health</effect>
+        <action filter="not(state=3)">
+            <kit>
+                <effect amplifier="3">speed</effect>
+            </kit>
+        </action>
+    </kit>
+    <kit id="void-death" force="true">
+        <health>1</health>
+        <clear effects="true" items="false" armor="false"/>
+    </kit>
+    <kit id="reset-effects">
+        <clear effects="true" items="false" armor="false"/>
+    </kit>
+    <kit id="kit-0" parent="reset-effects"> <!-- conquest -->
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true"/>
+        <item slot="2" material="golden apple"/>
+        <item slot="8" material="arrow" amount="12"/>
+        <helmet material="leather helmet" unbreakable="true" team-color="true"/>
+        <chestplate material="leather chestplate" unbreakable="true" team-color="true"/>
+        <leggings material="leather leggings" unbreakable="true" team-color="true">
+            <enchantment level="3">protection projectile</enchantment>
+        </leggings>
+        <boots material="iron boots" unbreakable="true"/>
+    </kit>
+    <kit id="kit-1" parent="reset-effects"> <!-- archer -->
+        <item slot="0" material="bow" unbreakable="true">
+            <enchantment level="1">arrow damage</enchantment>
+            <enchantment level="1">arrow infinite</enchantment>
+        </item>
+        <item slot="27" material="arrow"/>
+        <helmet material="iron helmet"/>
+        <chestplate material="leather chestplate" team-color="true"/>
+        <leggings material="leather leggings" team-color="true"/>
+        <boots material="iron boots"/>
+    </kit>
+    <kit id="kit-2" parent="reset-effects"> <!-- mcsg -->
+        <item slot="0" material="stone sword"/>
+        <item slot="1" material="bow"/>
+        <item slot="2" material="fishing rod"/>
+        <item slot="3" material="golden apple"/>
+        <item slot="8" material="arrow" amount="16"/>
+        <helmet material="chainmail helmet"/>
+        <chestplate material="chainmail chestplate"/>
+        <leggings material="chainmail leggings"/>
+        <boots material="chainmail boots"/>
+    </kit>
+    <kit id="kit-3" parent="reset-effects"> <!-- sumo -->
+        <effect amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="kit-4" parent="reset-effects"> <!-- slappy fish -->
+        <item slot="0" material="raw fish">
+            <enchantment level="1">damage all</enchantment>
+            <enchantment level="1">knockback</enchantment>
+        </item>
+    </kit>
+    <kit id="kit-5" parent="reset-effects"> <!-- rage -->
+        <item slot="0" material="diamond sword">
+            <enchantment level="255">sharpness</enchantment>
+        </item>
+        <max-health>2</max-health>
+    </kit>
+</kits>
+<regions>
+    <cylinder id="map" base="10.5,0,-9.5" radius="40" height="35"/>
+    <cylinder id="main-spawn" base="10.5,18.5,13.5" radius="1.5" height="1"/>
+    <cuboid id="voting-pit" min="-6,9,-26" size="33,8,33"/>
+    <cuboid id="voting-pit-above" min="-4,18,-24" size="29,2,29"/>
+    <cuboid id="voting-pit-barrier" min="-5,17,-25" size="31,1,31"/>
+    <cuboid id="fighting-zone" min="-4,11,-24" size="27,20,27"/>
+    <below id="in-void" y="-10"/>
+    <!--
+      starting from north west corner
+      | 0 | 1 | 2 |
+      | 3 | 4 | 5 |
+      | 6 | 7 | 8 |
+    -->
+    <cuboid id="reg-0" min="-4,7,-24" size="9,9,9"/>
+    <translate id="reg-1" region="reg-0" offset="10,0,0"/>
+    <translate id="reg-2" region="reg-1" offset="10,0,0"/>
+    <translate id="reg-3" region="reg-0" offset="0,0,10"/>
+    <translate id="reg-4" region="reg-3" offset="10,0,0"/>
+    <translate id="reg-5" region="reg-4" offset="10,0,0"/>
+    <translate id="reg-6" region="reg-3" offset="0,0,10"/>
+    <translate id="reg-7" region="reg-6" offset="10,0,0"/>
+    <translate id="reg-8" region="reg-7" offset="10,0,0"/>
+    <cuboid id="reg-x-symbol" min="-3,9,-13" size="7,2,7"/>
+    <cuboid id="reg-o-symbol" min="-3,9,-23" size="7,2,7"/>
+    <cuboid id="reg-x-win-ver" min="-1,11,-23" size="3,1,27"/>
+    <cuboid id="reg-x-win-hor" min="-3,12,-21" size="27,1,3"/>
+    <cuboid id="reg-x-win-dia-lef" min="-3,13,-23" size="27,1,27"/>
+    <cuboid id="reg-x-win-dia-rig" min="-3,14,-23" size="27,1,27"/>
+    <cuboid id="reg-o-win-ver" min="9,11,-23" size="3,1,27"/>
+    <cuboid id="reg-o-win-hor" min="-3,12,-11" size="27,1,3"/>
+    <cuboid id="reg-o-win-dia-lef" min="-3,15,-23" size="27,1,27"/>
+    <cuboid id="reg-o-win-dia-rig" min="-3,16,-23" size="27,1,27"/>
+    <cuboid id="reg-platform-0" min="-4,51,-24" size="29,5,29"/>
+    <cuboid id="reg-platform-1" min="-4,57,-24" size="29,4,29"/>
+    <cuboid id="reg-platform-2" min="-4,63,-24" size="29,5,29"/>
+    <cuboid id="reg-platform-3" min="-4,69,-24" size="29,3,29"/>
+    <cuboid id="reg-platform-4" min="-4,72,-24" size="29,5,29"/>
+    <cuboid id="reg-platform-5" min="-4,78,-24" size="29,3,29"/>
+    <cuboid id="reg-platform-6" min="-4,82,-24" size="29,1,29"/>
+    <cuboid id="reg-platform-7" min="-4,84,-24" size="29,6,29"/>
+    <cuboid id="reg-platform-8" min="-4,91,-24" size="29,5,29"/>
+    <cuboid id="reg-platform-9" min="-4,97,-24" size="29,8,29"/>
+    <union id="x-firework">
+        <union id="x-firework-south">
+            <block location="1,18,15"/>
+            <block location="-13,18,13"/>
+            <block location="-15,18,-1"/>
+        </union>
+        <block location="-19,18,-10"/>
+        <mirror region="x-firework-south" origin="10.5,0,-9.5" normal="0,0,-1"/>
+    </union>
+    <mirror id="o-firework" region="x-firework" origin="10.5,0,-9.5" normal="1,0,0"/>
+    <apply region="map" block-break="deny-player" block-place="deny-player" use="deny-player" block-physics="deny-lava"/>
+</regions>
+<filters>
+    <team id="only-x">x-team</team>
+    <team id="only-o">o-team</team>
+    <not id="deny-player">
+        <cause>player</cause>
+    </not>
+    <not id="deny-lava">
+        <any>
+            <material>lava</material>
+            <material>stationary lava</material>
+        </any>
+    </not>
+    <all id="countdown-start">
+        <match-running/>
+        <any>
+            <after duration="9s" filter="state=3..4"/>
+        </any>
+    </all>
+    <any id="clearable-entities">
+        <entity>dropped item</entity>
+        <entity>arrow</entity>
+    </any>
+    <material id="material-air">air</material>
+    <material id="material-barrier">barrier</material>
+    <all id="game-tied">
+        <not>
+            <any id="game-won">
+                <any id="x-win">
+                    <all id="x-win-hor-top"><filter id="all(captured[0]=1, captured[1]=1, captured[3]=1)"/></all>
+                    <all id="x-win-hor-mid"><filter id="all(captured[3]=1, captured[4]=1, captured[5]=1)"/></all>
+                    <all id="x-win-hor-bot"><filter id="all(captured[6]=1, captured[7]=1, captured[8]=1)"/></all>
+                    <all id="x-win-ver-lef"><filter id="all(captured[0]=1, captured[3]=1, captured[6]=1)"/></all>
+                    <all id="x-win-ver-mid"><filter id="all(captured[1]=1, captured[4]=1, captured[7]=1)"/></all>
+                    <all id="x-win-ver-rig"><filter id="all(captured[2]=1, captured[5]=1, captured[8]=1)"/></all>
+                    <all id="x-win-dia-lef"><filter id="all(captured[0]=1, captured[4]=1, captured[8]=1)"/></all>
+                    <all id="x-win-dia-rig"><filter id="all(captured[2]=1, captured[4]=1, captured[6]=1)"/></all>
+                </any>
+                <any id="o-win">
+                    <all id="o-win-hor-top"><filter id="all(captured[0]=2, captured[1]=2, captured[2]=2)"/></all>
+                    <all id="o-win-hor-mid"><filter id="all(captured[3]=2, captured[4]=2, captured[5]=2)"/></all>
+                    <all id="o-win-hor-bot"><filter id="all(captured[6]=2, captured[7]=2, captured[8]=2)"/></all>
+                    <all id="o-win-ver-lef"><filter id="all(captured[0]=2, captured[3]=2, captured[6]=2)"/></all>
+                    <all id="o-win-ver-mid"><filter id="all(captured[1]=2, captured[4]=2, captured[7]=2)"/></all>
+                    <all id="o-win-ver-rig"><filter id="all(captured[2]=2, captured[5]=2, captured[8]=2)"/></all>
+                    <all id="o-win-dia-lef"><filter id="all(captured[0]=2, captured[4]=2, captured[8]=2)"/></all>
+                    <all id="o-win-dia-rig"><filter id="all(captured[2]=2, captured[4]=2, captured[6]=2)"/></all>
+                </any>
+            </any>
+        </not>
+        <filter id="not(any(captured[0]=0, captured[1]=0, captured[2]=0, captured[3]=0, captured[4]=0, captured[5]=0, captured[6]=0, captured[7]=0, captured[8]=0))"/>
+    </all>
+</filters>
+<!--
+  TEAMS
+  0 -> no one
+  1 -> x crosses
+  2 -> o naughts
+
+  STATES
+  0 -> idle
+  1 -> voting starting
+  2 -> voting
+  3 -> k.o. starting
+  4 -> k.o.
+-->
+<variables scope="match" default="0">
+  <score id="score"/>
+  <with-team id="x_score" var="score" team="x-team"/>
+  <with-team id="o_score" var="score" team="o-team"/>
+  <array id="captured" size="9"/>
+  <array id="votes" size="9"/>
+  <array id="kits" size="${kit_count}"/>
+  <array id="platforms" size="${platform_count}"/>
+  <variable id="current_kit" default="-1"/>
+  <variable id="current_platform" default="-1"/>
+  <variable id="announce"/>
+  <variable id="round"/>
+  <variable id="state"/>
+  <variable id="overtime"/>
+  <variable id="next_voter"/>
+  <variable id="currently_voting" scope="team"/>
+  <with-team id="x_currently_voting" var="currently_voting" team="x-team"/>
+  <with-team id="o_currently_voting" var="currently_voting" team="o-team"/>
+  <variable id="top"/>
+  <variable id="tmp"/>
+  <variable id="calc"/>
+  <variable id="i"/>
+</variables>
+<actions>
+    <!--
+    pre-match introduction announcements
+    -->
+    <trigger scope="match" filter="match-started">
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: Welcome to `aTic Tac K.O.`r!"/>
+            <sound key="mob.villager.haggle"/>
+                <set var="timelimit" value="-1"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <time>3s</time>
+        </filter>
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: Each round you will face off against the opposing team in an epic duel!"/>
+            <sound key="mob.villager.haggle"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <time>6s</time>
+        </filter>
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: The winning team will then `avote `ron which grid space to claim!"/>
+            <sound key="mob.villager.haggle"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <time>9s</time>
+        </filter>
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: The first team to claim `athree spaces in a row `rwill win the game!"/>
+            <sound key="mob.villager.haggle"/>
+            <set var="state" value="3"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="2s" filter="all(match-running, state=3)"/>
+        </filter>
+        <action>
+            <set var="round" value="round + 1"/>
+            <set var="announce" value="1"/>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: Get ready, `eRound {0} `ris about to begin!">
+                <replacements>
+                    <decimal id="0" value="round"/>
+                </replacements>
+            </message>
+            <sound key="mob.villager.haggle"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="5s" filter="all(match-running, state=3)"/>
+        </filter>
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: The arena for this round will be..."/>
+            <sound key="mob.villager.haggle"/>
+            <action id="platform-picker"/>
+            <action id="platform-applicator"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="8s" filter="all(match-running, state=3)"/>
+        </filter>
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: And the kit you will be using is..."/>
+            <sound key="mob.villager.haggle"/>
+            <action id="kit-picker"/>
+            <action id="kit-applicator"/>
+            <set var="announce" value="0"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="12s" filter="all(match-running, state=3)" message="The next duel begins in {0}"/>
+        </filter>
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: Let the best team win!"/>
+            <sound key="mob.villager.haggle"/>
+            <fill region="voting-pit-barrier" material="air" filter="material-barrier"/>
+            <fill region="x-firework" material="stone"/>
+            <fill region="o-firework" material="stone"/>
+            <set var="x_currently_voting" value="-1"/>
+            <set var="o_currently_voting" value="-1"/>
+            <action id="platform-applicator"/>
+            <action id="kit-applicator"/>
+            <action id="clear-dropped-lobby-entities"/>
+            <switch-scope inner="player" filter="only-x">
+                <teleport x="1.5" y="18.5" z="-9.5" yaw="-90"/>
+            </switch-scope>
+            <switch-scope inner="player" filter="only-o">
+                <teleport x="19.5" y="18.5" z="-9.5" yaw="90"/>
+            </switch-scope>
+            <set var="state" value="4"/>
+        </action>
+    </trigger>
+    <trigger scope="team">
+        <filter>
+            <pulse duration="0.1s" period="0.2s" filter="all(match-running, state=4)"/>
+        </filter>
+        <action>
+            <set var="currently_voting" value="0"/>
+            <switch-scope inner="player" filter="all(participating, alive, fighting-zone)">
+                <set var="currently_voting" value="currently_voting + 1"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(match-running, state=4, any(all(x_currently_voting=0, not(o_currently_voting=0)), all(o_currently_voting=0, not(x_currently_voting=0))))">
+        <action>
+            <action filter="x_currently_voting=0"> <!-- o win -->
+                <set var="next_voter" value="2"/>
+                <fill region="o-firework" material="redstone block"/>
+            </action>
+            <action filter="o_currently_voting=0"> <!-- x win -->
+                <set var="next_voter" value="1"/>
+                <fill region="x-firework" material="redstone block"/>
+            </action>
+            <set var="current_platform" value="-1"/>
+            <set var="current_kit" value="-1"/>
+            <set var="state" value="1"/>
+            <set var="overtime" value="0"/>
+            <switch-scope inner="player" observers="true" filter="any(observing, all(only-x, o_currently_voting=0), all(only-o, x_currently_voting=0))">
+                  <sound preset="OBJECTIVE_GOOD"/>
+                  <action filter="participating">
+                      <message text="`aYour team won the duel!"/>
+                  </action>
+            </switch-scope>
+            <switch-scope inner="player" filter="any(all(only-x, x_currently_voting=0), all(only-o, o_currently_voting=0))">
+                  <sound preset="OBJECTIVE_BAD"/>
+                  <message text="`cYour team lost the duel"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <action id="force-decide-duel-winner" scope="match">
+        <set var="calc" value="x_currently_voting - o_currently_voting"/>
+        <action filter="calc=0">
+            <action filter="overtime=0">
+                <message text="overtime"/>
+                <set var="overtime" value="1"/>
+            </action>
+            <action filter="overtime=1">
+                <set var="tmp" value="floor(random() * 2)"/>
+                    <message text="set calc to -1"/>
+                <set var="calc" value="-1"/>
+                <action filter="tmp=1">
+                    <message text="set calc to 1"/>
+                    <set var="calc" value="1"/>
+                </action>
+            </action>
+        </action>
+        <action filter="calc=1..">
+            <message text="x has more alive players"/>
+            <!-- x has more alive players -->
+            <set var="o_currently_voting" value="0"/>
+        </action>
+        <action filter="calc=..-1">
+            <message text="o has more alive players"/>
+            <!-- o has more alive players -->
+            <set var="x_currently_voting" value="0"/>
+        </action>
+    </action>
+    <trigger scope="match" action="force-decide-duel-winner">
+        <filter>
+            <after duration="45s" filter="all(match-running, state=4)" message="Time Remaining: {0}"/>
+        </filter>
+    </trigger>
+    <trigger scope="match" action="force-decide-duel-winner">
+        <filter>
+            <after duration="15s" filter="all(match-running, state=4, overtime=1)" message="Time Remaining: {0}"/>
+        </filter>
+    </trigger>
+    <trigger scope="match" filter="all(match-running, state=1)">
+        <action>
+            <fill region="voting-pit-barrier" material="barrier"/>
+            <switch-scope inner="player">
+                <kit id="main-kit"/>
+            </switch-scope>
+            <action id="clear-dropped-lobby-entities"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="1s" filter="all(match-running, state=1)"/>
+        </filter>
+        <action>
+            <action filter="next_voter=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rwill now vote on which space on the grid to claim!"/>
+            </action>
+            <action filter="next_voter=2">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rwill now vote on which space on the grid to claim!"/>
+            </action>
+            <action id="start-next-vote"/>
+            <switch-scope inner="team" filter="currently_voting=1">
+                <sound key="random.orb" volume="1" pitch="1.2"/>
+                <message text="`7`oFrom `6Tirion`r: Stand on the space which you want to claim. The available space with the most teammates on it will be claimed by your team!"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <message id="x-claim-a1" text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhas claimed `aA1`r!"/>
+    <message id="x-claim-b1" text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhas claimed `aB1`r!"/>
+    <message id="x-claim-c1" text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhas claimed `aC1`r!"/>
+    <message id="x-claim-a2" text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhas claimed `aA2`r!"/>
+    <message id="x-claim-b2" text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhas claimed `aB2`r!"/>
+    <message id="x-claim-c2" text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhas claimed `aC2`r!"/>
+    <message id="x-claim-a3" text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhas claimed `aA3`r!"/>
+    <message id="x-claim-b3" text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhas claimed `aB3`r!"/>
+    <message id="x-claim-c3" text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhas claimed `aC3`r!"/>
+    <message id="o-claim-a1" text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rhas claimed `aA1`r!"/>
+    <message id="o-claim-b1" text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rhas claimed `aB1`r!"/>
+    <message id="o-claim-c1" text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rhas claimed `aC1`r!"/>
+    <message id="o-claim-a2" text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rhas claimed `aA2`r!"/>
+    <message id="o-claim-b2" text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rhas claimed `aB2`r!"/>
+    <message id="o-claim-c2" text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rhas claimed `aC2`r!"/>
+    <message id="o-claim-a3" text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rhas claimed `aA3`r!"/>
+    <message id="o-claim-b3" text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rhas claimed `aB3`r!"/>
+    <message id="o-claim-c3" text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rhas claimed `aC3`r!"/>
+    <trigger scope="match" filter="captured[0]=1" action="x-claim-a1"/>
+    <trigger scope="match" filter="captured[1]=1" action="x-claim-b1"/>
+    <trigger scope="match" filter="captured[2]=1" action="x-claim-c1"/>
+    <trigger scope="match" filter="captured[3]=1" action="x-claim-a2"/>
+    <trigger scope="match" filter="captured[4]=1" action="x-claim-b2"/>
+    <trigger scope="match" filter="captured[5]=1" action="x-claim-c2"/>
+    <trigger scope="match" filter="captured[6]=1" action="x-claim-a3"/>
+    <trigger scope="match" filter="captured[7]=1" action="x-claim-b3"/>
+    <trigger scope="match" filter="captured[8]=1" action="x-claim-c3"/>
+    <trigger scope="match" filter="captured[0]=2" action="o-claim-a1"/>
+    <trigger scope="match" filter="captured[1]=2" action="o-claim-b1"/>
+    <trigger scope="match" filter="captured[2]=2" action="o-claim-c1"/>
+    <trigger scope="match" filter="captured[3]=2" action="o-claim-a2"/>
+    <trigger scope="match" filter="captured[4]=2" action="o-claim-b2"/>
+    <trigger scope="match" filter="captured[5]=2" action="o-claim-c2"/>
+    <trigger scope="match" filter="captured[6]=2" action="o-claim-a3"/>
+    <trigger scope="match" filter="captured[7]=2" action="o-claim-b3"/>
+    <trigger scope="match" filter="captured[8]=2" action="o-claim-c3"/>
+    <trigger scope="match" filter="x-win">
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhas captured `athree-in-a-row `rand won the game!"/>
+            <set var="x_score" value="3"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="o-win">
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rhas captured `athree-in-a-row `rand won the game!"/>
+            <set var="o_score" value="3"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="game-tied">
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: Oh no! The game has ended in a tie!"/>
+            <set var="timelimit" value="0"/>
+        </action>
+    </trigger>
+    <!--
+      Applicators
+    -->
+    <action id="platform-picker" scope="match">
+        <set var="i" value="0"/>
+        <repeat times="${platform_count}">
+            <set var="platforms" index="i" value="random()"/>
+            <set var="i" value="i + 1"/>
+        </repeat>
+        <set var="i" value="0"/>
+        <set var="top" value="0"/> <!-- top in this context is actually min value -->
+        <repeat times="${platform_count}">
+            <set var="tmp" value="platforms[top] - platforms[i]"/>
+            <action filter="tmp=0..">
+                <set var="top" value="i"/>
+            </action>
+            <set var="i" value="i + 1"/>
+        </repeat>
+        <set var="current_platform" value="top"/>
+    </action>
+    <action id="platform-applicator" scope="match">
+        <action filter="current_platform=0">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `cIncendiary`r!"/>
+            </action>
+        </action>
+        <action filter="current_platform=1">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `3Mushroom`r!"/>
+            </action>
+        </action>
+        <action filter="current_platform=2">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `2Forest`r!"/>
+            </action>
+        </action>
+        <action filter="current_platform=3">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `6Desert`r!"/>>
+            </action>
+        </action>
+        <action filter="current_platform=4">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `8Constellation`r!"/>
+            </action>
+        </action>
+        <action filter="current_platform=5">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `6Arid`r!"/>
+            </action>
+        </action>
+        <action filter="current_platform=6">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `dCharge`r!"/>
+            </action>
+        </action>
+        <action filter="current_platform=7">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `cHeat`r!"/>
+            </action>
+        </action>
+        <action filter="current_platform=8">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `eBlock`r!"/>
+            </action>
+        </action>
+        <action filter="current_platform=9">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `eWooly`r!"/>
+            </action>
+        </action>
+    </action>
+    <action id="kit-picker" scope="match">
+        <set var="i" value="0"/>
+        <repeat times="${kit_count}">
+            <set var="kits" index="i" value="random()"/>
+            <set var="i" value="i + 1"/>
+        </repeat>
+        <set var="i" value="0"/>
+        <set var="top" value="0"/>
+        <repeat times="${kit_count}">
+            <set var="tmp" value="kits[top] - kits[i]"/>
+            <action filter="tmp=0..">
+                <set var="top" value="i"/>
+            </action>
+            <set var="i" value="i + 1"/>
+        </repeat>
+        <set var="current_kit" value="top"/>
+    </action>
+    <action id="kit-applicator" scope="match">
+        <action filter="current_kit=0">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `bConquest`r!"/>
+            </action>
+            <switch-scope inner="player">
+                <kit id="kit-0"/>
+            </switch-scope>
+        </action>
+        <action filter="current_kit=1">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `aArcher`r!"/>
+            </action>
+            <switch-scope inner="player">
+                <kit id="kit-1"/>
+            </switch-scope>
+        </action>
+        <action filter="current_kit=2">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `cMCSG`r!"/>
+            </action>
+            <switch-scope inner="player">
+                <kit id="kit-2"/>
+            </switch-scope>
+        </action>
+        <action filter="current_kit=3">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `dSumo`r!"/>
+            </action>
+            <switch-scope inner="player">
+                <kit id="kit-3"/>
+            </switch-scope>
+        </action>
+        <action filter="current_kit=4">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `bSlappy Fish`r!"/>
+            </action>
+            <switch-scope inner="player">
+                <kit id="kit-4"/>
+            </switch-scope>
+        </action>
+        <action filter="current_kit=5">
+            <action filter="announce=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `5RAGE`r!"/>
+            </action>
+            <switch-scope inner="player">
+                <kit id="kit-5"/>
+            </switch-scope>
+        </action>
+    </action>
+    <!--
+    utils
+    -->
+    <action id="clear-dropped-lobby-entities" scope="match">
+        <kill-entities filter="all(map, clearable-entities)"/>
+    </action>
+    <action id="set-voting-kits" scope="player">
+        <action filter="all(currently_voting=1, not(voting-pit-above))">
+            <teleport x="10" y="10" z="-10"/>
+        </action>
+        <action filter="all(currently_voting=1, voting-pit-above)">
+            <teleport x="player.x" y="9.5" z="player.z"/>
+        </action>
+        <action filter="all(currently_voting=0, voting-pit)">
+            <teleport x="player.x" y="18.5" z="player.z"/>
+        </action>
+    </action>
+    <action id="start-next-vote" scope="match">
+        <action filter="next_voter=1">
+            <action id="x-turn">
+                <set var="x_currently_voting" value="1"/>
+                <set var="o_currently_voting" value="0"/>
+            </action>
+        </action>
+        <action filter="next_voter=2">
+            <action id="o-turn">
+                <set var="x_currently_voting" value="0"/>
+                <set var="o_currently_voting" value="1"/>
+            </action>
+        </action>
+        <switch-scope inner="player">
+            <action id="set-voting-kits"/>
+        </switch-scope>
+        <set var="state" value="2"/>
+    </action>
+    <action id="switch-voter" scope="match">
+        <action filter="any(o_currently_voting=1, all(x_currently_voting=0, o_currently_voting=0))">
+            <set var="next_voter" value="1"/>
+        </action>
+        <action filter="x_currently_voting=1">
+            <set var="next_voter" value="2"/>
+        </action>
+    </action>
+    <action id="count-votes" scope="match">
+        <set var="top" value="0"/>
+        <set var="tmp" value="0"/>
+        <set var="i" value="0"/>
+        <repeat times="9">
+            <set var="votes" index="i" value="0"/>
+            <set var="i" value="i + 1"/>
+        </repeat>
+        <switch-scope inner="player" filter="currently_voting=1">
+            <action filter="all(reg-0, captured[0]=0)">
+                <set var="votes" index="0" value="votes[0] + 1"/>
+            </action>
+            <action filter="all(reg-1, captured[1]=0)">
+                <set var="votes" index="1" value="votes[1] + 1"/>
+            </action>
+            <action filter="all(reg-2, captured[2]=0)">
+                <set var="votes" index="2" value="votes[2] + 1"/>
+            </action>
+            <action filter="all(reg-3, captured[3]=0)">
+                <set var="votes" index="3" value="votes[3] + 1"/>
+            </action>
+            <action filter="all(reg-4, captured[4]=0)">
+                <set var="votes" index="4" value="votes[4] + 1"/>
+            </action>
+            <action filter="all(reg-5, captured[5]=0)">
+                <set var="votes" index="5" value="votes[5] + 1"/>
+            </action>
+            <action filter="all(reg-6, captured[6]=0)">
+                <set var="votes" index="6" value="votes[6] + 1"/>
+            </action>
+            <action filter="all(reg-7, captured[7]=0)">
+                <set var="votes" index="7" value="votes[7] + 1"/>
+            </action>
+            <action filter="all(reg-8, captured[8]=0)">
+                <set var="votes" index="8" value="votes[8] + 1"/>
+            </action>
+        </switch-scope>
+        <!-- get highest num of votes -->
+        <action id="get-top-voted-index">
+            <set var="i" value="0"/>
+            <repeat times="9">
+                <set var="top" value="max(top, votes[i])"/>
+                <set var="i" value="i + 1"/>
+            </repeat>
+        </action>
+        <!-- if no valid spaces were voted for pick a random one -->
+        <action filter="top=0">
+            <set var="i" value="0"/>
+            <repeat times="9">
+                <set var="tmp" value="captured[i]"/>
+                <action filter="tmp=0">
+                    <set var="votes" index="i" value="random()"/>
+                </action>
+                <action filter="not(tmp=0)">
+                    <set var="votes" index="i" value="-1"/>
+                </action>
+                <set var="i" value="i + 1"/>
+            </repeat>
+            <action id="get-top-voted-index"/>
+        </action>
+        <!-- get index of highest votes -->
+        <set var="i" value="0"/>
+        <repeat times="9" filter="not(tmp=-1)">
+            <set var="calc" value="top - votes[i]"/>
+            <action filter="calc=0">
+                <action filter="x_currently_voting=1">
+                    <set var="captured" index="i" value="1"/>
+                </action>
+                <action filter="o_currently_voting=1">
+                    <set var="captured" index="i" value="2"/>
+                </action>
+                <set var="tmp" value="-1"/>
+            </action>
+            <set var="i" value="i + 1"/>
+        </repeat>
+    </action>
+    <trigger scope="match">
+        <filter>
+            <after duration="10s" filter="all(match-running, state=2)" message="Voting ends in {0}"/>
+        </filter>
+        <action>
+            <action id="count-votes"/>
+            <switch-scope inner="player" filter="all(match-running, voting-pit)">
+                <teleport x="player.x" y="18.5" z="player.z"/>
+            </switch-scope>
+            <set var="x_currently_voting" value="0"/>
+            <set var="o_currently_voting" value="0"/>
+            <sound key="dig.cloth"/>
+            <set var="state" value="3"/>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(match-running, alive, state=4, not(fighting-zone))">
+        <action>
+            <kit id="void-death"/>
+            <teleport x="player.x" y="-110" z="player.z"/>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(match-running, not(alive), in-void)">
+        <action>
+            <teleport x="player.x" y="9" z="player.z"/>
+        </action>
+    </trigger>
+</actions>
+<structures>
+    <structure id="str-x-symbol" region="reg-x-symbol" origin="0,10,-10"/>
+    <structure id="str-o-symbol" region="reg-o-symbol" origin="0,10,-20"/>
+    <structure id="str-x-win-ver" region="reg-x-win-ver" origin="0,11,-20"/>
+    <structure id="str-x-win-hor" region="reg-x-win-hor" origin="0,12,-20"/>
+    <structure id="str-x-win-dia-lef" region="reg-x-win-dia-lef" origin="0,13,-20"/>
+    <structure id="str-x-win-dia-rig" region="reg-x-win-dia-rig" origin="0,14,-20"/>
+    <structure id="str-o-win-ver" region="reg-o-win-ver" origin="10,11,-20"/>
+    <structure id="str-o-win-hor" region="reg-o-win-hor" origin="0,12,-10"/>
+    <structure id="str-o-win-dia-lef" region="reg-o-win-dia-lef" origin="0,15,-20"/>
+    <structure id="str-o-win-dia-rig" region="reg-o-win-dia-rig" origin="0,16,-20"/>
+    <dynamic structure="str-x-symbol" location="0,8,-20" trigger="captured[0]=1"/>
+    <dynamic structure="str-x-symbol" location="10,8,-20" trigger="captured[1]=1"/>
+    <dynamic structure="str-x-symbol" location="20,8,-20" trigger="captured[2]=1"/>
+    <dynamic structure="str-x-symbol" location="0,8,-10" trigger="captured[3]=1"/>
+    <dynamic structure="str-x-symbol" location="10,8,-10" trigger="captured[4]=1"/>
+    <dynamic structure="str-x-symbol" location="20,8,-10" trigger="captured[5]=1"/>
+    <dynamic structure="str-x-symbol" location="0,8,0" trigger="captured[6]=1"/>
+    <dynamic structure="str-x-symbol" location="10,8,0" trigger="captured[7]=1"/>
+    <dynamic structure="str-x-symbol" location="20,8,0" trigger="captured[8]=1"/>
+    <dynamic structure="str-o-symbol" location="0,8,-20" trigger="captured[0]=2"/>
+    <dynamic structure="str-o-symbol" location="10,8,-20" trigger="captured[1]=2"/>
+    <dynamic structure="str-o-symbol" location="20,8,-20" trigger="captured[2]=2"/>
+    <dynamic structure="str-o-symbol" location="0,8,-10" trigger="captured[3]=2"/>
+    <dynamic structure="str-o-symbol" location="10,8,-10" trigger="captured[4]=2"/>
+    <dynamic structure="str-o-symbol" location="20,8,-10" trigger="captured[5]=2"/>
+    <dynamic structure="str-o-symbol" location="0,8,0" trigger="captured[6]=2"/>
+    <dynamic structure="str-o-symbol" location="10,8,0" trigger="captured[7]=2"/>
+    <dynamic structure="str-o-symbol" location="20,8,0" trigger="captured[8]=2"/>
+    <dynamic structure="str-x-win-ver" location="0,9,-20" trigger="x-win-ver-lef"/>
+    <dynamic structure="str-x-win-ver" location="10,9,-20" trigger="x-win-ver-mid"/>
+    <dynamic structure="str-x-win-ver" location="20,9,-20" trigger="x-win-ver-rig"/>
+    <dynamic structure="str-x-win-hor" location="0,9,-20" trigger="x-win-hor-top"/>
+    <dynamic structure="str-x-win-hor" location="0,9,-10" trigger="x-win-hor-mid"/>
+    <dynamic structure="str-x-win-hor" location="0,9,0" trigger="x-win-hor-bot"/>
+    <dynamic structure="str-x-win-dia-lef" location="0,9,-20" trigger="x-win-dia-lef"/>
+    <dynamic structure="str-x-win-dia-rig" location="0,9,-20" trigger="x-win-dia-rig"/>
+    <dynamic structure="str-o-win-ver" location="0,9,-20" trigger="o-win-ver-lef"/>
+    <dynamic structure="str-o-win-ver" location="10,9,-20" trigger="o-win-ver-mid"/>
+    <dynamic structure="str-o-win-ver" location="20,9,-20" trigger="o-win-ver-rig"/>
+    <dynamic structure="str-o-win-hor" location="0,9,-20" trigger="o-win-hor-top"/>
+    <dynamic structure="str-o-win-hor" location="0,9,-10" trigger="o-win-hor-mid"/>
+    <dynamic structure="str-o-win-hor" location="0,9,0" trigger="o-win-hor-bot"/>
+    <dynamic structure="str-o-win-dia-lef" location="0,9,-20" trigger="o-win-dia-lef"/>
+    <dynamic structure="str-o-win-dia-rig" location="0,9,-20" trigger="o-win-dia-rig"/>
+    <structure id="str-platform-0" region="reg-platform-0" origin="10,52,-10"/>
+    <structure id="str-platform-1" region="reg-platform-1" origin="10,58,-10"/>
+    <structure id="str-platform-2" region="reg-platform-2" origin="10,64,-10"/>
+    <structure id="str-platform-3" region="reg-platform-3" origin="10,70,-10"/>
+    <structure id="str-platform-4" region="reg-platform-4" origin="10,74,-10"/>
+    <structure id="str-platform-5" region="reg-platform-5" origin="10,79,-10"/>
+    <structure id="str-platform-6" region="reg-platform-6" origin="10,82,-10"/>
+    <structure id="str-platform-7" region="reg-platform-7" origin="10,85,-10"/>
+    <structure id="str-platform-8" region="reg-platform-8" origin="10,91,-10"/>
+    <structure id="str-platform-9" region="reg-platform-9" origin="10,98,-10"/>
+    <dynamic structure="str-platform-0" location="10,17,-10" trigger="all(state=3..4, current_platform=0)"/>
+    <dynamic structure="str-platform-1" location="10,17,-10" trigger="all(state=3..4, current_platform=1)"/>
+    <dynamic structure="str-platform-2" location="10,17,-10" trigger="all(state=3..4, current_platform=2)"/>
+    <dynamic structure="str-platform-3" location="10,17,-10" trigger="all(state=3..4, current_platform=3)"/>
+    <dynamic structure="str-platform-4" location="10,17,-10" trigger="all(state=3..4, current_platform=4)"/>
+    <dynamic structure="str-platform-5" location="10,17,-10" trigger="all(state=3..4, current_platform=5)"/>
+    <dynamic structure="str-platform-6" location="10,17,-10" trigger="all(state=3..4, current_platform=6)"/>
+    <dynamic structure="str-platform-7" location="10,17,-10" trigger="all(state=3..4, current_platform=7)"/>
+    <dynamic structure="str-platform-8" location="10,17,-10" trigger="all(state=3..4, current_platform=8)"/>
+    <dynamic structure="str-platform-9" location="10,17,-10" trigger="all(state=3..4, current_platform=9)"/>
+</structures>
+<damage>
+    <deny>
+        <any>
+            <cause>fall</cause>
+            <not>
+                <any>
+                    <all>
+                        <region id="fighting-zone"/>
+                        <variable var="state">4</variable>
+                    </all>
+                    <cause>void</cause>
+                </any>
+            </not>
+        </any>
+    </deny>
+</damage>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<itemremove>
+    <item>seeds</item>
+    <item>ladder</item>
+</itemremove>
+<timelock>on</timelock>
+</map>
