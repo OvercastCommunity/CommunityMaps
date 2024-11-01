@@ -1,6 +1,6 @@
 <map proto="1.5.0" game="Arcade">
 <name>Tic Tac K.O.</name>
-<version>1.0.4</version>
+<version>1.0.5</version>
 <objective>Claim 3 tiles in a row to win!</objective>
 <include id="countdown"/>
 <authors>
@@ -429,32 +429,41 @@
             </switch-scope>
         </action>
     </trigger>
+    <action id="end-duel" scope="match">
+        <action filter="next_voter=${team_o}">
+            <fill region="o-firework" material="redstone block"/>
+        </action>
+        <action filter="next_voter=${team_x}">
+            <fill region="x-firework" material="redstone block"/>
+        </action>
+        <set var="current_platform" value="-1"/>
+        <set var="current_kit" value="-1"/>
+        <set var="state" value="${state_vote_cd}"/>
+        <set var="overtime" value="0"/>
+        <set var="x_currently_voting" value="${team_none}"/>
+        <set var="o_currently_voting" value="${team_none}"/>
+        <switch-scope inner="player" observers="true" filter="any(observing, all(only-x, next_voter=${team_x}), all(only-o, next_voter=${team_o}))">
+            <sound preset="OBJECTIVE_GOOD"/>
+            <action filter="participating">
+                <message text="{ translate: 'broadcast.gameOver.teamWon', color: 'green' }"/>
+            </action>
+        </switch-scope>
+        <switch-scope inner="player" filter="any(all(only-x, next_voter=${team_o}), all(only-o, next_voter=${team_x}))">
+            <sound preset="OBJECTIVE_BAD"/>
+            <message text="{ translate: 'broadcast.gameOver.teamLost', color: 'red' }"/>
+        </switch-scope>
+    </action>
     <trigger scope="match" filter="all(match-running, state=${state_duel}, any(all(x_currently_voting=0, not(o_currently_voting=0)), all(o_currently_voting=0, not(x_currently_voting=0))))">
         <action>
             <action filter="x_currently_voting=0">
                 <!-- o win -->
                 <set var="next_voter" value="${team_o}"/>
-                <fill region="o-firework" material="redstone block"/>
             </action>
             <action filter="o_currently_voting=0">
                 <!-- x win -->
                 <set var="next_voter" value="${team_x}"/>
-                <fill region="x-firework" material="redstone block"/>
             </action>
-            <set var="current_platform" value="-1"/>
-            <set var="current_kit" value="-1"/>
-            <set var="state" value="${state_vote_cd}"/>
-            <set var="overtime" value="0"/>
-            <switch-scope inner="player" observers="true" filter="any(observing, all(only-x, o_currently_voting=0), all(only-o, x_currently_voting=0))">
-                <sound preset="OBJECTIVE_GOOD"/>
-                <action filter="participating">
-                    <message text="{ translate: 'broadcast.gameOver.teamWon', color: 'green' }"/>
-                </action>
-            </switch-scope>
-            <switch-scope inner="player" filter="any(all(only-x, x_currently_voting=0), all(only-o, o_currently_voting=0))">
-                <sound preset="OBJECTIVE_BAD"/>
-                <message text="{ translate: 'broadcast.gameOver.teamLost', color: 'red' }"/>
-            </switch-scope>
+            <action id="end-duel"/>
         </action>
     </trigger>
     <action id="force-decide-duel-winner" scope="match">
@@ -470,18 +479,22 @@
             </action>
             <action filter="calc=1..">
                 <!-- x has more alive players -->
-                <set var="o_currently_voting" value="0"/>
+                <set var="next_voter" value="${team_x}"/>
             </action>
             <action filter="calc=..-1">
                 <!-- o has more alive players -->
-                <set var="x_currently_voting" value="0"/>
+                <set var="next_voter" value="${team_o}"/>
             </action>
+            <set var="overtime" value="2"/>
         </action>
         <action filter="overtime=0">
             <message text="`7[`6Arena Master`7] `6Tirion`r: I will pick a winner at random if there is no winner in `a15 seconds`r!"/>
             <message text="`7[`6Arena Master`7] `6Tirion`r: Most players left alive wins!"/>
             <sound key="ambient.weather.thunder"/>
             <set var="overtime" value="1"/>
+        </action>
+        <action filter="overtime=2">
+            <action id="end-duel"/>
         </action>
     </action>
     <trigger scope="match" action="force-decide-duel-winner">
@@ -880,8 +893,9 @@
             <switch-scope inner="player" filter="all(match-running, voting-pit)">
                 <teleport x="player.x" y="18.5" z="player.z"/>
             </switch-scope>
-            <set var="x_currently_voting" value="0"/>
-            <set var="o_currently_voting" value="0"/>
+            <set var="next_voter" value="${team_none}"/>
+            <set var="x_currently_voting" value="${team_none}"/>
+            <set var="o_currently_voting" value="${team_none}"/>
             <sound key="dig.cloth"/>
             <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
             <set var="state" value="${state_duel_cd}"/>
