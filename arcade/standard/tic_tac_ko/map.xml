@@ -1,6 +1,6 @@
 <map proto="1.5.0" game="Arcade">
 <name>Tic Tac K.O.</name>
-<version>1.0.5</version>
+<version>1.0.6</version>
 <objective>Claim 3 tiles in a row to win!</objective>
 <include id="countdown"/>
 <authors>
@@ -51,6 +51,7 @@
         <game-mode>adventure</game-mode>
         <effect amplifier="100" duration="1">instant health</effect>
         <action filter="not(state=3)">
+            <set var="current_kill_reward" value="0"/>
             <kit>
                 <effect amplifier="3">speed</effect>
             </kit>
@@ -74,6 +75,9 @@
             <enchantment level="3">protection projectile</enchantment>
         </leggings>
         <boots material="iron boots" unbreakable="true"/>
+        <action>
+            <set var="current_kill_reward" value="2"/>
+        </action>
     </kit>
     <kit id="kit-1" parent="reset-effects"> <!-- archer -->
         <item slot="0" material="bow" unbreakable="true">
@@ -85,6 +89,9 @@
         <chestplate material="leather chestplate" team-color="true"/>
         <leggings material="leather leggings" team-color="true"/>
         <boots material="iron boots"/>
+        <action>
+            <set var="current_kill_reward" value="1"/>
+        </action>
     </kit>
     <kit id="kit-2" parent="reset-effects"> <!-- mcsg -->
         <item slot="0" material="stone sword"/>
@@ -96,6 +103,9 @@
         <chestplate material="chainmail chestplate"/>
         <leggings material="chainmail leggings"/>
         <boots material="chainmail boots"/>
+        <action>
+            <set var="current_kill_reward" value="1"/>
+        </action>
     </kit>
     <kit id="kit-3" parent="reset-effects"> <!-- sumo -->
         <effect amplifier="255">damage resistance</effect>
@@ -107,7 +117,7 @@
         </item>
     </kit>
     <kit id="kit-5" parent="reset-effects"> <!-- rage -->
-        <item slot="0" material="diamond sword">
+        <item slot="0" material="diamond sword" unbreakable="true">
             <enchantment level="255">sharpness</enchantment>
         </item>
         <max-health>2</max-health>
@@ -120,6 +130,9 @@
         <chestplate material="iron chestplate"/>
         <leggings material="iron leggings"/>
         <boots material="iron boots"/>
+        <action>
+            <set var="current_kill_reward" value="2"/>
+        </action>
     </kit>
     <kit id="kit-7" parent="reset-effects"> <!-- gold -->
         <item slot="0" material="stone sword" unbreakable="true"/>
@@ -129,6 +142,9 @@
         <chestplate material="gold chestplate"/>
         <leggings material="gold leggings"/>
         <boots material="gold boots"/>
+        <action>
+            <set var="current_kill_reward" value="2"/>
+        </action>
     </kit>
     <kit id="kit-8" parent="reset-effects"> <!-- diamond -->
         <item slot="0" material="diamond sword" unbreakable="true"/>
@@ -139,6 +155,9 @@
         <chestplate material="diamond chestplate"/>
         <leggings material="diamond leggings"/>
         <boots material="diamond boots"/>
+        <action>
+            <set var="current_kill_reward" value="1"/>
+        </action>
     </kit>
     <kit id="kit-9" force="true" parent="reset-effects"> <!-- soup -->
         <foodlevel>16</foodlevel>
@@ -187,6 +206,15 @@
 <consumables>
     <consumable id="soup" action="soup-eat" on="click" override="true" consume="true"/>
 </consumables>
+<kill-rewards>
+    <kill-reward filter="current_kill_reward=1">
+        <item material="golden apple"/>
+    </kill-reward>
+    <kill-reward filter="current_kill_reward=2">
+        <item material="golden apple"/>
+        <item material="arrow" amount="12"/>
+    </kill-reward>
+</kill-rewards>
 <regions>
     <cylinder id="map" base="10.5,0,-9.5" radius="40" height="35"/>
     <cylinder id="main-spawn" base="10.5,18.5,13.5" radius="1.5" height="1"/>
@@ -304,6 +332,7 @@
     <array id="platforms" size="${platform_count}"/>
     <variable id="current_kit" default="-1"/>
     <variable id="current_platform" default="-1"/>
+    <variable id="current_kill_reward" default="-1"/>
     <variable id="announce"/>
     <variable id="round"/>
     <variable id="state"/>
@@ -532,6 +561,8 @@
                 <sound key="random.orb" volume="1" pitch="1.2"/>
                 <message text="`7`oFrom `6Tirion`r: Stand on the space which you want to claim. The available space with the most teammates on it will be claimed by your team!"/>
             </switch-scope>
+            <fill region="x-firework" material="stone"/>
+            <fill region="o-firework" material="stone"/>
         </action>
     </trigger>
     <message id="x-claim-a1" text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhas claimed `aA1`r!"/>
@@ -893,6 +924,12 @@
             <switch-scope inner="player" filter="all(match-running, voting-pit)">
                 <teleport x="player.x" y="18.5" z="player.z"/>
             </switch-scope>
+            <action filter="next_voter=${team_o}">
+                <fill region="o-firework" material="redstone block"/>
+            </action>
+            <action filter="next_voter=${team_x}">
+                <fill region="x-firework" material="redstone block"/>
+            </action>
             <set var="next_voter" value="${team_none}"/>
             <set var="x_currently_voting" value="${team_none}"/>
             <set var="o_currently_voting" value="${team_none}"/>
@@ -968,6 +1005,7 @@
     <structure id="str-platform-7" region="reg-platform-7" origin="10,85,-10"/>
     <structure id="str-platform-8" region="reg-platform-8" origin="10,91,-10"/>
     <structure id="str-platform-9" region="reg-platform-9" origin="10,98,-10"/>
+    <!-- arenas with ladders pasted twice to ensure all ladders are placed correctly -->
     <dynamic structure="str-platform-0" location="10,17,-10" trigger="all(state=${state_duel_and_cd}, current_platform=0)"/>
     <dynamic structure="str-platform-1" location="10,17,-10" trigger="all(state=${state_duel_and_cd}, current_platform=1)"/>
     <dynamic structure="str-platform-2" location="10,17,-10" trigger="all(state=${state_duel_and_cd}, current_platform=2)"/>
@@ -976,7 +1014,9 @@
     <dynamic structure="str-platform-5" location="10,17,-10" trigger="all(state=${state_duel_and_cd}, current_platform=5)"/>
     <dynamic structure="str-platform-6" location="10,17,-10" trigger="all(state=${state_duel_and_cd}, current_platform=6)"/>
     <dynamic structure="str-platform-7" location="10,17,-10" trigger="all(state=${state_duel_and_cd}, current_platform=7)"/>
+    <dynamic structure="str-platform-7" location="10,17,-10" trigger="all(state=${state_duel_and_cd}, current_platform=7)"/>
     <dynamic structure="str-platform-8" location="10,17,-10" trigger="all(state=${state_duel_and_cd}, current_platform=8)"/>
+    <dynamic structure="str-platform-9" location="10,17,-10" trigger="all(state=${state_duel_and_cd}, current_platform=9)"/>
     <dynamic structure="str-platform-9" location="10,17,-10" trigger="all(state=${state_duel_and_cd}, current_platform=9)"/>
 </structures>
 <damage>
