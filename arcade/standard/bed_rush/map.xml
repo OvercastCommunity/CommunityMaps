@@ -1,7 +1,7 @@
 <map proto="1.4.2">
 <name>Bed Rush</name>
 <game>Bed Rush</game>
-<version>1.0.6</version>
+<version>1.0.7</version>
 <include id="gapple-kill-reward"/>
 <include id="void-death"/>
 <objective>Destroy the Bed to win the Round. First Team to 5 Wins!</objective>
@@ -33,7 +33,7 @@
     <doDaylightCycle>false</doDaylightCycle>
 </gamerules>
 <maxbuildheight>21</maxbuildheight>
-<respawn auto="true" delay="2s"/>
+<respawn auto="true" delay="2.5s"/>
 <constants>
     <constant id="score-limit">5</constant>
     <constant id="red-team-spawn">0.5,21,-38.5</constant>
@@ -83,6 +83,11 @@
     </give>
     <give filter="resetting-kit" kit="spawn-kit"/>
     <give filter="naked" kit="spawn-kit"/>
+    <kit id="bed-breaker-kit" force="true">
+        <action>
+            <set var="bed_breaker" value="1"/>
+        </action>
+    </kit>
 </kits>
 <damage>
     <deny>
@@ -93,6 +98,13 @@
         </all>
     </deny>
 </damage>
+<block-drops>
+    <rule kit="bed-breaker-kit">
+        <filter>
+            <material>bed block</material>
+        </filter>
+    </rule>
+</block-drops>
 <filters>
     <alive id="alive"/>
     <match-running id="match-running"/>
@@ -167,6 +179,7 @@
     <variable id="round_state" scope="match" default="${running}"/> <!-- running state, skip cages first round -->
     <variable id="fall_damage" scope="match" default="0"/>
     <variable id="scoring_team" scope="team" default="0" exclusive="1"/>
+    <variable id="bed_breaker" scope="player" exclusive="1"/>
     <score id="team_score"/>
 </variables>
 <actions>
@@ -199,7 +212,10 @@
         <action>
             <message fade-in="0.5s" stay="3s" fade-out="0.5s">
                 <title>`9BLUE SCORED!!</title>
-                <subtitle>`9Blue team won the round</subtitle>
+                <subtitle>`9Red Bed broken by {player}</subtitle>
+                <replacements>
+                    <player id="player" var="bed_breaker"/>
+                </replacements>
             </message>
             <message text="`6`lThe Blue team won the round!"/>
             <switch-scope inner="team" filter="blue-only">
@@ -211,7 +227,10 @@
         <action>
             <message fade-in="0.5s" stay="3s" fade-out="0.5s">
                 <title>`cRED SCORED!!</title>
-                <subtitle>`6Red team won the round</subtitle>
+                <subtitle>`cBlue Bed broken by {player}</subtitle>
+                <replacements>
+                    <player id="player" var="bed_breaker"/>
+                </replacements>
             </message>
             <message text="`6`lThe Red team won the round!"/>
             <switch-scope inner="team" filter="red-only">
