@@ -1,0 +1,821 @@
+<map proto="1.5.0" game="Arcade">
+<name>Connect 4</name>
+<version>1.0.0</version>
+<objective>Claim 4 tiles in a row to win!</objective>
+<authors>
+    <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
+</authors>
+<contributors>
+    <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="XML advice"/> <!-- Pablete1234 -->
+</contributors>
+<constants>
+    <constant id="off">0</constant>
+    <constant id="on">1</constant>
+    <constant id="team_none">-1</constant>
+    <constant id="team_x">1</constant>
+    <constant id="team_o">2</constant>
+    <constant id="state_idle">0</constant>
+    <constant id="state_vote_cd">1</constant>
+    <constant id="state_vote">2</constant>
+</constants>
+<time result="tie">1h</time>
+<score>
+    <limit>4</limit>
+</score>
+<teams>
+    <team id="o-team" color="dark red" max="6" min="1">Red</team>
+    <team id="x-team" color="yellow" max="6" min="1">Yellow</team>
+</teams>
+<spawns>
+    <spawn region="main-spawn" yaw="0" kit="main-kit" filter="not(state=4)"/>
+    <default region="main-spawn" yaw="0"/>
+</spawns>
+<respawn auto="true" delay="0" spectate="true"/>
+<kits>
+    <kit id="main-kit" force="true">
+        <clear effects="true"/>
+        <game-mode>adventure</game-mode>
+        <effect amplifier="3">speed</effect>
+    </kit>
+    <kit id="invis-kit" force="true">
+        <effect>invisibility</effect>
+    </kit>
+</kits>
+<regions>
+    <cylinder id="map" base="10.5,0,-9.5" radius="40" height="35"/>
+    <cuboid id="main-spawn" min="6,18,-30" size="10,1,3"/>
+    <cuboid id="frame-barrier" min="-7,18,9" size="36,31,1"/>
+    <union id="col-capture">
+        <cuboid id="col-capture-0" min="-8,17,-18" size="8,5,8"/>
+        <translate id="col-capture-1" region="col-capture-0" offset="5,0,-8"/>
+        <translate id="col-capture-2" region="col-capture-0" offset="10,0,0"/>
+        <translate id="col-capture-3" region="col-capture-2" offset="5,0,-8"/>
+        <translate id="col-capture-4" region="col-capture-2" offset="10,0,0"/>
+        <translate id="col-capture-5" region="col-capture-4" offset="5,0,-8"/>
+        <translate id="col-capture-6" region="col-capture-4" offset="10,0,0"/>
+    </union>
+    <cuboid id="col-display-0" min="-6,17,-24" size="4,1,33"/>
+    <translate id="col-display-1" region="col-display-0" offset="5,0,0"/>
+    <translate id="col-display-2" region="col-display-1" offset="5,0,0"/>
+    <translate id="col-display-3" region="col-display-2" offset="5,0,0"/>
+    <translate id="col-display-4" region="col-display-3" offset="5,0,0"/>
+    <translate id="col-display-5" region="col-display-4" offset="5,0,0"/>
+    <translate id="col-display-6" region="col-display-5" offset="5,0,0"/>
+    <union id="col-display-piece-0">
+        <cuboid min="-5,52,9" size="2,4,1"/>
+        <cuboid min="-6,53,9" size="4,2,1"/>
+    </union>
+    <translate id="col-display-piece-1" region="col-display-piece-0" offset="5,0,0"/>
+    <translate id="col-display-piece-2" region="col-display-piece-1" offset="5,0,0"/>
+    <translate id="col-display-piece-3" region="col-display-piece-2" offset="5,0,0"/>
+    <translate id="col-display-piece-4" region="col-display-piece-3" offset="5,0,0"/>
+    <translate id="col-display-piece-5" region="col-display-piece-4" offset="5,0,0"/>
+    <translate id="col-display-piece-6" region="col-display-piece-5" offset="5,0,0"/>
+    <cuboid id="fill-0" min="-6,55,10" size="4,5,1"/>
+    <translate id="fill-1" region="fill-0" offset="5,0,0"/>
+    <translate id="fill-2" region="fill-1" offset="5,0,0"/>
+    <translate id="fill-3" region="fill-2" offset="5,0,0"/>
+    <translate id="fill-4" region="fill-3" offset="5,0,0"/>
+    <translate id="fill-5" region="fill-4" offset="5,0,0"/>
+    <translate id="fill-6" region="fill-5" offset="5,0,0"/>
+    <cuboid id="space-0" min="-7,43,9" size="6,6,1"/>
+    <translate id="space-1" region="space-0" offset="0,-5,0"/>
+    <translate id="space-2" region="space-1" offset="0,-5,0"/>
+    <translate id="space-3" region="space-2" offset="0,-5,0"/>
+    <translate id="space-4" region="space-3" offset="0,-5,0"/>
+    <translate id="space-5" region="space-4" offset="0,-5,0"/>
+    <translate id="space-6" region="space-0" offset="5,0,0"/>
+    <translate id="space-7" region="space-6" offset="0,-5,0"/>
+    <translate id="space-8" region="space-7" offset="0,-5,0"/>
+    <translate id="space-9" region="space-8" offset="0,-5,0"/>
+    <translate id="space-10" region="space-9" offset="0,-5,0"/>
+    <translate id="space-11" region="space-10" offset="0,-5,0"/>
+    <translate id="space-12" region="space-6" offset="5,0,0"/>
+    <translate id="space-13" region="space-12" offset="0,-5,0"/>
+    <translate id="space-14" region="space-13" offset="0,-5,0"/>
+    <translate id="space-15" region="space-14" offset="0,-5,0"/>
+    <translate id="space-16" region="space-15" offset="0,-5,0"/>
+    <translate id="space-17" region="space-16" offset="0,-5,0"/>
+    <translate id="space-18" region="space-12" offset="5,0,0"/>
+    <translate id="space-19" region="space-18" offset="0,-5,0"/>
+    <translate id="space-20" region="space-19" offset="0,-5,0"/>
+    <translate id="space-21" region="space-20" offset="0,-5,0"/>
+    <translate id="space-22" region="space-21" offset="0,-5,0"/>
+    <translate id="space-23" region="space-22" offset="0,-5,0"/>
+    <translate id="space-24" region="space-18" offset="5,0,0"/>
+    <translate id="space-25" region="space-24" offset="0,-5,0"/>
+    <translate id="space-26" region="space-25" offset="0,-5,0"/>
+    <translate id="space-27" region="space-26" offset="0,-5,0"/>
+    <translate id="space-28" region="space-27" offset="0,-5,0"/>
+    <translate id="space-29" region="space-28" offset="0,-5,0"/>
+    <translate id="space-30" region="space-24" offset="5,0,0"/>
+    <translate id="space-31" region="space-30" offset="0,-5,0"/>
+    <translate id="space-32" region="space-31" offset="0,-5,0"/>
+    <translate id="space-33" region="space-32" offset="0,-5,0"/>
+    <translate id="space-34" region="space-33" offset="0,-5,0"/>
+    <translate id="space-35" region="space-34" offset="0,-5,0"/>
+    <translate id="space-36" region="space-30" offset="5,0,0"/>
+    <translate id="space-37" region="space-36" offset="0,-5,0"/>
+    <translate id="space-38" region="space-37" offset="0,-5,0"/>
+    <translate id="space-39" region="space-38" offset="0,-5,0"/>
+    <translate id="space-40" region="space-39" offset="0,-5,0"/>
+    <translate id="space-41" region="space-40" offset="0,-5,0"/>
+    <union id="x-firework">
+        <union id="x-firework-south">
+            <block location="1,18,15"/>
+            <block location="-13,18,13"/>
+            <block location="-15,18,-1"/>
+        </union>
+        <block location="-19,18,-10"/>
+        <mirror region="x-firework-south" origin="11,0,-9.5" normal="0,0,-1"/>
+    </union>
+    <mirror id="o-firework" region="x-firework" origin="11,0,-9.5" normal="1,0,0"/>
+    <apply region="frame-barrier" enter="never"/>
+    <apply block="deny-player"/>
+</regions>
+<filters>
+    <team id="only-x">x-team</team>
+    <team id="only-o">o-team</team>
+    <not id="deny-player">
+        <cause>player</cause>
+    </not>
+    <players id="players-voting" min="1" filter="all(col-capture, any(all(only-x, x_currently_voting=1), all(only-o, o_currently_voting=1)))"/>
+    <material id="game-frame">stained clay:11</material>
+    <material id="game-column">wool</material>
+    <any id="x-owns-next">
+        <all><variable var="next">0</variable><variable var="captured" index="0">${team_x}</variable></all>
+        <all><variable var="next">1</variable><variable var="captured" index="1">${team_x}</variable></all>
+        <all><variable var="next">2</variable><variable var="captured" index="2">${team_x}</variable></all>
+        <all><variable var="next">3</variable><variable var="captured" index="3">${team_x}</variable></all>
+        <all><variable var="next">4</variable><variable var="captured" index="4">${team_x}</variable></all>
+        <all><variable var="next">5</variable><variable var="captured" index="5">${team_x}</variable></all>
+        <all><variable var="next">6</variable><variable var="captured" index="6">${team_x}</variable></all>
+        <all><variable var="next">7</variable><variable var="captured" index="7">${team_x}</variable></all>
+        <all><variable var="next">8</variable><variable var="captured" index="8">${team_x}</variable></all>
+        <all><variable var="next">9</variable><variable var="captured" index="9">${team_x}</variable></all>
+        <all><variable var="next">10</variable><variable var="captured" index="10">${team_x}</variable></all>
+        <all><variable var="next">11</variable><variable var="captured" index="11">${team_x}</variable></all>
+        <all><variable var="next">12</variable><variable var="captured" index="12">${team_x}</variable></all>
+        <all><variable var="next">13</variable><variable var="captured" index="13">${team_x}</variable></all>
+        <all><variable var="next">14</variable><variable var="captured" index="14">${team_x}</variable></all>
+        <all><variable var="next">15</variable><variable var="captured" index="15">${team_x}</variable></all>
+        <all><variable var="next">16</variable><variable var="captured" index="16">${team_x}</variable></all>
+        <all><variable var="next">17</variable><variable var="captured" index="17">${team_x}</variable></all>
+        <all><variable var="next">18</variable><variable var="captured" index="18">${team_x}</variable></all>
+        <all><variable var="next">19</variable><variable var="captured" index="19">${team_x}</variable></all>
+        <all><variable var="next">20</variable><variable var="captured" index="20">${team_x}</variable></all>
+        <all><variable var="next">21</variable><variable var="captured" index="21">${team_x}</variable></all>
+        <all><variable var="next">22</variable><variable var="captured" index="22">${team_x}</variable></all>
+        <all><variable var="next">23</variable><variable var="captured" index="23">${team_x}</variable></all>
+        <all><variable var="next">24</variable><variable var="captured" index="24">${team_x}</variable></all>
+        <all><variable var="next">25</variable><variable var="captured" index="25">${team_x}</variable></all>
+        <all><variable var="next">26</variable><variable var="captured" index="26">${team_x}</variable></all>
+        <all><variable var="next">27</variable><variable var="captured" index="27">${team_x}</variable></all>
+        <all><variable var="next">28</variable><variable var="captured" index="28">${team_x}</variable></all>
+        <all><variable var="next">29</variable><variable var="captured" index="29">${team_x}</variable></all>
+        <all><variable var="next">30</variable><variable var="captured" index="30">${team_x}</variable></all>
+        <all><variable var="next">31</variable><variable var="captured" index="31">${team_x}</variable></all>
+        <all><variable var="next">32</variable><variable var="captured" index="32">${team_x}</variable></all>
+        <all><variable var="next">33</variable><variable var="captured" index="33">${team_x}</variable></all>
+        <all><variable var="next">34</variable><variable var="captured" index="34">${team_x}</variable></all>
+        <all><variable var="next">35</variable><variable var="captured" index="35">${team_x}</variable></all>
+        <all><variable var="next">36</variable><variable var="captured" index="36">${team_x}</variable></all>
+        <all><variable var="next">37</variable><variable var="captured" index="37">${team_x}</variable></all>
+        <all><variable var="next">38</variable><variable var="captured" index="38">${team_x}</variable></all>
+        <all><variable var="next">39</variable><variable var="captured" index="39">${team_x}</variable></all>
+        <all><variable var="next">40</variable><variable var="captured" index="40">${team_x}</variable></all>
+        <all><variable var="next">41</variable><variable var="captured" index="41">${team_x}</variable></all>
+    </any>
+    <any id="o-owns-next">
+        <all><variable var="next">0</variable><variable var="captured" index="0">${team_o}</variable></all>
+        <all><variable var="next">1</variable><variable var="captured" index="1">${team_o}</variable></all>
+        <all><variable var="next">2</variable><variable var="captured" index="2">${team_o}</variable></all>
+        <all><variable var="next">3</variable><variable var="captured" index="3">${team_o}</variable></all>
+        <all><variable var="next">4</variable><variable var="captured" index="4">${team_o}</variable></all>
+        <all><variable var="next">5</variable><variable var="captured" index="5">${team_o}</variable></all>
+        <all><variable var="next">6</variable><variable var="captured" index="6">${team_o}</variable></all>
+        <all><variable var="next">7</variable><variable var="captured" index="7">${team_o}</variable></all>
+        <all><variable var="next">8</variable><variable var="captured" index="8">${team_o}</variable></all>
+        <all><variable var="next">9</variable><variable var="captured" index="9">${team_o}</variable></all>
+        <all><variable var="next">10</variable><variable var="captured" index="10">${team_o}</variable></all>
+        <all><variable var="next">11</variable><variable var="captured" index="11">${team_o}</variable></all>
+        <all><variable var="next">12</variable><variable var="captured" index="12">${team_o}</variable></all>
+        <all><variable var="next">13</variable><variable var="captured" index="13">${team_o}</variable></all>
+        <all><variable var="next">14</variable><variable var="captured" index="14">${team_o}</variable></all>
+        <all><variable var="next">15</variable><variable var="captured" index="15">${team_o}</variable></all>
+        <all><variable var="next">16</variable><variable var="captured" index="16">${team_o}</variable></all>
+        <all><variable var="next">17</variable><variable var="captured" index="17">${team_o}</variable></all>
+        <all><variable var="next">18</variable><variable var="captured" index="18">${team_o}</variable></all>
+        <all><variable var="next">19</variable><variable var="captured" index="19">${team_o}</variable></all>
+        <all><variable var="next">20</variable><variable var="captured" index="20">${team_o}</variable></all>
+        <all><variable var="next">21</variable><variable var="captured" index="21">${team_o}</variable></all>
+        <all><variable var="next">22</variable><variable var="captured" index="22">${team_o}</variable></all>
+        <all><variable var="next">23</variable><variable var="captured" index="23">${team_o}</variable></all>
+        <all><variable var="next">24</variable><variable var="captured" index="24">${team_o}</variable></all>
+        <all><variable var="next">25</variable><variable var="captured" index="25">${team_o}</variable></all>
+        <all><variable var="next">26</variable><variable var="captured" index="26">${team_o}</variable></all>
+        <all><variable var="next">27</variable><variable var="captured" index="27">${team_o}</variable></all>
+        <all><variable var="next">28</variable><variable var="captured" index="28">${team_o}</variable></all>
+        <all><variable var="next">29</variable><variable var="captured" index="29">${team_o}</variable></all>
+        <all><variable var="next">30</variable><variable var="captured" index="30">${team_o}</variable></all>
+        <all><variable var="next">31</variable><variable var="captured" index="31">${team_o}</variable></all>
+        <all><variable var="next">32</variable><variable var="captured" index="32">${team_o}</variable></all>
+        <all><variable var="next">33</variable><variable var="captured" index="33">${team_o}</variable></all>
+        <all><variable var="next">34</variable><variable var="captured" index="34">${team_o}</variable></all>
+        <all><variable var="next">35</variable><variable var="captured" index="35">${team_o}</variable></all>
+        <all><variable var="next">36</variable><variable var="captured" index="36">${team_o}</variable></all>
+        <all><variable var="next">37</variable><variable var="captured" index="37">${team_o}</variable></all>
+        <all><variable var="next">38</variable><variable var="captured" index="38">${team_o}</variable></all>
+        <all><variable var="next">39</variable><variable var="captured" index="39">${team_o}</variable></all>
+        <all><variable var="next">40</variable><variable var="captured" index="40">${team_o}</variable></all>
+        <all><variable var="next">41</variable><variable var="captured" index="41">${team_o}</variable></all>
+    </any>
+    <all id="game-tied">
+        <filter id="not(any(captured[0]=0, captured[6]=0, captured[12]=0, captured[18]=0, captured[24]=0, captured[30]=0, captured[36]=0))"/>
+    </all>
+</filters>
+<variables scope="match" default="0">
+    <score id="score"/>
+    <with-team id="x_score" var="score" team="x-team"/>
+    <with-team id="o_score" var="score" team="o-team"/>
+    <array id="captured" size="42"/>
+    <array id="votes" size="7"/>
+    <array id="dir" size="4"/>
+    <array id="connection" size="7"/>
+    <variable id="state"/>
+    <variable id="next_voter"/>
+    <variable id="currently_voting" scope="team"/>
+    <with-team id="x_currently_voting" var="currently_voting" team="x-team"/>
+    <with-team id="o_currently_voting" var="currently_voting" team="o-team"/>
+    <variable id="top"/>
+    <variable id="streak"/>
+    <variable id="tmp"/>
+    <variable id="calc"/>
+    <variable id="i"/>
+    <variable id="j"/>
+    <variable id="k"/>
+    <variable id="next"/>
+    <variable id="skip"/>
+    <variable id="count"/>
+    <variable id="debug"/>
+</variables>
+<actions>
+    <!--
+    Pre-match introduction announcements
+    -->
+    <trigger scope="match" filter="match-started">
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: Welcome to `aConnect 4`r!"/>
+            <sound key="mob.villager.haggle"/>
+            <set var="timelimit" value="-1"/>
+            <set var="dir" index="0" value="1"/> <!-- vertical -->
+            <set var="dir" index="1" value="5"/> <!-- diagonal right -->
+            <set var="dir" index="2" value="6"/> <!-- horizontal -->
+            <set var="dir" index="3" value="7"/> <!-- diagonal right -->
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <time>2s</time>
+        </filter>
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: Teams will take turns `avoting `ron which column to drop their chip!"/>
+            <sound key="mob.villager.haggle"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <time>4s</time>
+        </filter>
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: The first team to line up at least `afour chips in a row `rwill win the game!"/>
+            <sound key="mob.villager.haggle"/>
+            <set var="state" value="${state_vote_cd}"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="3s" filter="all(match-running, state=${state_vote_cd})"/>
+        </filter>
+        <action>
+            <action id="update-previous-move-score"/>
+            <action id="switch-voter"/>
+            <action id="start-next-vote"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="10s" filter="all(match-running, state=${state_vote})" message="Voting ends in {0}"/>
+        </filter>
+        <action>
+            <set var="state" value="${state_idle}"/>
+            <action id="count-votes"/>
+            <action id="place-visual-piece"/>
+            <action id="highlight-current-preference"/>
+            <action id="print-board"/>
+            <action id="check-win"/>
+            <action filter="next_voter=${team_o}">
+                <fill region="o-firework" material="redstone block"/>
+            </action>
+            <action filter="next_voter=${team_x}">
+                <fill region="x-firework" material="redstone block"/>
+            </action>
+            <sound key="dig.cloth"/>
+            <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+            <action filter="any(state=${state_idle}, state=${state_vote})">
+                <set var="state" value="${state_vote_cd}"/>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <pulse duration="0.5s" period="1s" filter="all(match-running, state=${state_vote})"/>
+        </filter>
+        <action>
+            <action id="count-votes"/>
+            <action id="highlight-current-preference"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="3s" filter="any(state=-${team_x}, state=-${team_o})"/>
+        </filter>
+        <action>
+            <action id="place-visual-win-marker"/>
+            <action filter="state=-${team_x}">
+                <set var="x_score" value="4"/>
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `eYellow `rhas made `a{0} in a row `rand won the game!">
+                    <replacements>
+                        <decimal id="0" value="top"/>
+                    </replacements>
+                </message>
+            </action>
+            <action filter="state=-${team_o}">
+                <set var="o_score" value="4"/>
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `4Red `rhas made `a{0} in a row `rand won the game!">
+                    <replacements>
+                        <decimal id="0" value="top"/>
+                    </replacements>
+                </message>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="1s" filter="game-tied"/>
+        </filter>
+        <action>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: Oh no! The game has ended in a tie!"/>
+            <set var="timelimit" value="0"/>
+        </action>
+    </trigger>
+    <action id="switch-voter" scope="match">
+        <action filter="any(o_currently_voting=1, all(x_currently_voting=0, o_currently_voting=0))">
+            <set var="next_voter" value="${team_x}"/>
+        </action>
+        <action filter="x_currently_voting=1">
+            <set var="next_voter" value="${team_o}"/>
+        </action>
+    </action>
+    <action id="start-next-vote" scope="match">
+        <action filter="next_voter=${team_x}">
+            <set var="x_currently_voting" value="1"/>
+            <set var="o_currently_voting" value="0"/>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: `eYellow `rwill now vote on which column to drop their next chip!"/>
+        </action>
+        <action filter="next_voter=${team_o}">
+            <set var="x_currently_voting" value="0"/>
+            <set var="o_currently_voting" value="1"/>
+            <message text="`7[`6Arena Master`7] `6Tirion`r: `4Red `rwill now vote on which column to drop their next chip!"/>
+        </action>
+        <switch-scope inner="team" filter="currently_voting=1">
+            <switch-scope inner="player">
+                <kit id="main-kit"/>
+            </switch-scope>
+            <sound key="random.orb" volume="1" pitch="1.2"/>
+            <message text="`7`oFrom `6Tirion`r: Stand under the numbered pad of the column you want to play next. The column with the most teammates on it is where your team's next chip will be dropped!"/>
+        </switch-scope>
+        <switch-scope inner="player" filter="not(currently_voting=1)">
+            <kit id="invis-kit"/>
+        </switch-scope>
+        <fill region="x-firework" material="stone"/>
+        <fill region="o-firework" material="stone"/>
+        <set var="state" value="${state_vote}"/>
+    </action>
+    <action id="count-votes" scope="match">
+        <set var="top" value="0"/>
+        <set var="tmp" value="0"/>
+        <set var="i" value="0"/>
+        <repeat times="7">
+            <set var="votes" index="i" value="0"/>
+            <set var="connection" index="i" value="-1"/>
+            <set var="i" value="i + 1"/>
+        </repeat>
+        <switch-scope inner="player" filter="currently_voting=1">
+            <action filter="all(col-capture-0, captured[0]=0)"><set var="votes" index="0" value="votes[0] + 1"/></action>
+            <action filter="all(col-capture-1, captured[6]=0)"><set var="votes" index="1" value="votes[1] + 1"/></action>
+            <action filter="all(col-capture-2, captured[12]=0)"><set var="votes" index="2" value="votes[2] + 1"/></action>
+            <action filter="all(col-capture-3, captured[18]=0)"><set var="votes" index="3" value="votes[3] + 1"/></action>
+            <action filter="all(col-capture-4, captured[24]=0)"><set var="votes" index="4" value="votes[4] + 1"/></action>
+            <action filter="all(col-capture-5, captured[30]=0)"><set var="votes" index="5" value="votes[5] + 1"/></action>
+            <action filter="all(col-capture-6, captured[36]=0)"><set var="votes" index="6" value="votes[6] + 1"/></action>
+        </switch-scope>
+        <!-- get highest num of votes -->
+        <action id="get-top-voted-index">
+            <set var="i" value="0"/>
+            <repeat times="7">
+                <set var="top" value="max(top, votes[i])"/>
+                <set var="i" value="i + 1"/>
+            </repeat>
+        </action>
+        <!-- if no valid spaces were voted for pick a random one -->
+        <action filter="all(state=${state_idle}, top=0)">
+            <set var="i" value="0"/>
+            <repeat times="7">
+                <set var="tmp" value="captured[i * 6]"/>
+                <action filter="tmp=0">
+                    <set var="votes" index="i" value="random()"/>
+                </action>
+                <action filter="not(tmp=0)">
+                    <set var="votes" index="i" value="-1"/>
+                </action>
+                <set var="i" value="i + 1"/>
+            </repeat>
+            <action id="get-top-voted-index"/>
+        </action>
+        <!-- get index of highest votes -->
+        <set var="i" value="0"/>
+        <repeat times="7" filter="not(tmp=-1)">
+            <set var="calc" value="top - votes[i]"/>
+            <action filter="calc=0">
+                <set var="tmp" value="0"/>
+                <set var="j" value="i * 6"/>
+                <repeat times="5" filter="all(state=${state_idle}, not(tmp=-1))">
+                    <set var="next" value="j + 1"/>
+                    <set var="calc" value="captured[next]"/>
+                    <action filter="calc=0">
+                        <set var="j" value="j + 1"/>
+                    </action>
+                    <action filter="not(calc=0)">
+                        <set var="tmp" value="-1"/>
+                    </action>
+                </repeat>
+                <set var="tmp" value="-1"/>
+            </action>
+            <action filter="not(tmp=-1)">
+                <set var="i" value="i + 1"/>
+            </action>
+        </repeat>
+    </action>
+    <action id="update-previous-move-score" scope="match">
+        <action filter="x_currently_voting=1">
+            <set var="x_score" value="max(x_score, streak)"/>
+        </action>
+        <action filter="o_currently_voting=1">
+            <set var="o_score" value="max(o_score, streak)"/>
+        </action>
+    </action>
+    <action id="check-win" scope="match">
+        <set var="k" value="0"/>
+        <set var="streak" value="1"/>
+        <repeat times="4" filter="all(match-running, skip=0)">
+            <set var="skip" value="0"/>
+            <repeat times="7">
+                <set var="connection" index="skip" value="-1"/>
+                <set var="skip" value="skip + 1"/>
+            </repeat>
+            <action filter="debug=1">
+                <message text="`7Checking direction offset +-{1}">
+                    <replacements>
+                        <decimal id="1" value="dir[k]"/>
+                    </replacements>
+                </message>
+            </action>
+            <set var="connection" index="0" value="j"/>
+            <set var="top" value="1"/>
+            <set var="next" value="j + dir[k]"/>
+            <set var="skip" value="0"/>
+            <set var="tmp" value="1"/>
+            <repeat times="3" filter="skip=0">
+                <set var="skip" value="1"/>
+                <action filter="all(next=0..41, any(all(next_voter=${team_x}, x-owns-next), all(next_voter=${team_o}, o-owns-next)))">
+                    <set var="calc" value="0"/> <!-- is valid horizontal connection -->
+                    <action filter="k=0"><set var="calc" value="floor(next / 6) - floor(j / 6)"/></action> <!-- is valid vertical connection -->
+                    <action filter="any(k=1, k=3)"><set var="calc" value="floor(next / 6) - (floor(j / 6) + tmp)"/></action> <!-- is valid diagonal connection -->
+                    <action filter="calc=0">
+                        <set var="connection" index="top" value="next"/>
+                        <set var="tmp" value="tmp + 1"/>
+                        <set var="top" value="top + 1"/>
+                        <action filter="debug=1">
+                            <message text="`aFound adjacent in offset {1} at position {0} (current streak {2})">
+                                <replacements>
+                                    <decimal id="0" value="next"/>
+                                    <decimal id="1" value="dir[k]"/>
+                                    <decimal id="2" value="top"/>
+                                </replacements>
+                            </message>
+                        </action>
+                        <set var="next" value="next + dir[k]"/>
+                        <set var="skip" value="0"/>
+                    </action>
+                </action>
+            </repeat>
+            <set var="next" value="j - dir[k]"/>
+            <set var="skip" value="0"/>
+            <set var="tmp" value="1"/>
+            <repeat times="3" filter="skip=0">
+                <set var="skip" value="1"/>
+                <action filter="all(next=0..41, any(all(next_voter=${team_x}, x-owns-next), all(next_voter=${team_o}, o-owns-next)))">
+                    <set var="calc" value="0"/> <!-- is valid horizontal connection -->
+                    <action filter="k=0"><set var="calc" value="floor(next / 6) - floor(j / 6)"/></action> <!-- is valid vertical connection -->
+                    <action filter="any(k=1, k=3)"><set var="calc" value="floor(next / 6) - (floor(j / 6) - tmp)"/></action> <!-- is valid diagonal connection -->
+                    <action filter="calc=0">
+                        <set var="connection" index="top" value="next"/>
+                        <set var="tmp" value="tmp + 1"/>
+                        <set var="top" value="top + 1"/>
+                        <action filter="debug=1">
+                            <message text="`aFound adjacent in offset -{1} at position {0} (current streak {2})">
+                                <replacements>
+                                    <decimal id="0" value="next"/>
+                                    <decimal id="1" value="dir[k]"/>
+                                    <decimal id="2" value="top"/>
+                                </replacements>
+                            </message>
+                        </action>
+                        <set var="next" value="next - dir[k]"/>
+                        <set var="skip" value="0"/>
+                    </action>
+                </action>
+            </repeat>
+            <set var="skip" value="0"/>
+            <set var="streak" value="max(streak, top)"/>
+            <action filter="top=4..">
+                <action filter="next_voter=${team_x}">
+                    <set var="state" value="-${team_x}"/>
+                </action>
+                <action filter="next_voter=${team_o}">
+                    <set var="state" value="-${team_o}"/>
+                </action>
+                <set var="skip" value="1"/>
+            </action>
+            <set var="k" value="k + 1"/>
+        </repeat>
+    </action>
+    <action id="place-visual-piece" scope="match">
+        <action filter="x_currently_voting=1">
+            <set var="captured" index="j" value="${team_x}"/>
+            <action filter="i=0"><fill region="fill-0" material="stained clay:4" events="true"/></action>
+            <action filter="i=1"><fill region="fill-1" material="stained clay:4" events="true"/></action>
+            <action filter="i=2"><fill region="fill-2" material="stained clay:4" events="true"/></action>
+            <action filter="i=3"><fill region="fill-3" material="stained clay:4" events="true"/></action>
+            <action filter="i=4"><fill region="fill-4" material="stained clay:4" events="true"/></action>
+            <action filter="i=5"><fill region="fill-5" material="stained clay:4" events="true"/></action>
+            <action filter="i=6"><fill region="fill-6" material="stained clay:4" events="true"/></action>
+        </action>
+        <action filter="o_currently_voting=1">
+            <set var="captured" index="j" value="${team_o}"/>
+            <action filter="i=0"><fill region="fill-0" material="stained clay:14" events="true"/></action>
+            <action filter="i=1"><fill region="fill-1" material="stained clay:14" events="true"/></action>
+            <action filter="i=2"><fill region="fill-2" material="stained clay:14" events="true"/></action>
+            <action filter="i=3"><fill region="fill-3" material="stained clay:14" events="true"/></action>
+            <action filter="i=4"><fill region="fill-4" material="stained clay:14" events="true"/></action>
+            <action filter="i=5"><fill region="fill-5" material="stained clay:14" events="true"/></action>
+            <action filter="i=6"><fill region="fill-6" material="stained clay:14" events="true"/></action>
+        </action>
+    </action>
+    <action id="place-visual-win-marker" scope="match">
+        <set var="i" value="0"/>
+        <repeat times="7">
+            <set var="tmp" value="connection[i]"/>
+            <action filter="tmp=0"><fill region="space-0" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=1"><fill region="space-1" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=2"><fill region="space-2" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=3"><fill region="space-3" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=4"><fill region="space-4" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=5"><fill region="space-5" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=6"><fill region="space-6" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=7"><fill region="space-7" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=8"><fill region="space-8" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=9"><fill region="space-9" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=10"><fill region="space-10" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=11"><fill region="space-11" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=12"><fill region="space-12" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=13"><fill region="space-13" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=14"><fill region="space-14" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=15"><fill region="space-15" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=16"><fill region="space-16" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=17"><fill region="space-17" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=18"><fill region="space-18" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=19"><fill region="space-19" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=20"><fill region="space-20" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=21"><fill region="space-21" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=22"><fill region="space-22" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=23"><fill region="space-23" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=24"><fill region="space-24" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=25"><fill region="space-25" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=26"><fill region="space-26" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=27"><fill region="space-27" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=28"><fill region="space-28" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=29"><fill region="space-29" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=30"><fill region="space-30" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=31"><fill region="space-31" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=32"><fill region="space-32" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=33"><fill region="space-33" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=34"><fill region="space-34" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=35"><fill region="space-35" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=36"><fill region="space-36" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=37"><fill region="space-37" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=38"><fill region="space-38" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=39"><fill region="space-39" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=40"><fill region="space-40" filter="game-frame" material="stained clay:3"/></action>
+            <action filter="tmp=41"><fill region="space-41" filter="game-frame" material="stained clay:3"/></action>
+            <set var="i" value="i + 1"/>
+        </repeat>
+    </action>
+    <action id="highlight-current-preference" scope="match">
+        <action filter="all(state=${state_vote}, x_currently_voting=1, players-voting)">
+            <action filter="i=0">
+                <fill region="col-display-0" filter="game-column" material="wool:4"/>
+                <fill region="col-display-piece-0" material="stained glass:4"/>
+            </action>
+            <action filter="i=1">
+                <fill region="col-display-1" filter="game-column" material="wool:4"/>
+                <fill region="col-display-piece-1" material="stained glass:4"/>
+            </action>
+            <action filter="i=2">
+                <fill region="col-display-2" filter="game-column" material="wool:4"/>
+                <fill region="col-display-piece-2" material="stained glass:4"/>
+            </action>
+            <action filter="i=3">
+                <fill region="col-display-3" filter="game-column" material="wool:4"/>
+                <fill region="col-display-piece-3" material="stained glass:4"/>
+            </action>
+            <action filter="i=4">
+                <fill region="col-display-4" filter="game-column" material="wool:4"/>
+                <fill region="col-display-piece-4" material="stained glass:4"/>
+            </action>
+            <action filter="i=5">
+                <fill region="col-display-5" filter="game-column" material="wool:4"/>
+                <fill region="col-display-piece-5" material="stained glass:4"/>
+            </action>
+            <action filter="i=6">
+                <fill region="col-display-6" filter="game-column" material="wool:4"/>
+                <fill region="col-display-piece-6" material="stained glass:4"/>
+            </action>
+        </action>
+        <action filter="all(state=${state_vote}, o_currently_voting=1, players-voting)">
+            <action filter="i=0">
+                <fill region="col-display-0" filter="game-column" material="wool:14"/>
+                <fill region="col-display-piece-0" material="stained glass:14"/>
+            </action>
+            <action filter="i=1">
+                <fill region="col-display-1" filter="game-column" material="wool:14"/>
+                <fill region="col-display-piece-1" material="stained glass:14"/>
+            </action>
+            <action filter="i=2">
+                <fill region="col-display-2" filter="game-column" material="wool:14"/>
+                <fill region="col-display-piece-2" material="stained glass:14"/>
+            </action>
+            <action filter="i=3">
+                <fill region="col-display-3" filter="game-column" material="wool:14"/>
+                <fill region="col-display-piece-3" material="stained glass:14"/>
+            </action>
+            <action filter="i=4">
+                <fill region="col-display-4" filter="game-column" material="wool:14"/>
+                <fill region="col-display-piece-4" material="stained glass:14"/>
+            </action>
+            <action filter="i=5">
+                <fill region="col-display-5" filter="game-column" material="wool:14"/>
+                <fill region="col-display-piece-5" material="stained glass:14"/>
+            </action>
+            <action filter="i=6">
+                <fill region="col-display-6" filter="game-column" material="wool:14"/>
+                <fill region="col-display-piece-6" material="stained glass:14"/>
+            </action>
+        </action>
+        <action filter="any(state=${state_idle}, not(i=0))">
+            <fill region="col-display-0" filter="game-column" material="wool:8"/>
+            <fill region="col-display-piece-0" material="air"/>
+        </action>
+        <action filter="any(state=${state_idle}, not(i=1))">
+            <fill region="col-display-1" filter="game-column" material="wool:8"/>
+            <fill region="col-display-piece-1" material="air"/>
+        </action>
+        <action filter="any(state=${state_idle}, not(i=2))">
+            <fill region="col-display-2" filter="game-column" material="wool:8"/>
+            <fill region="col-display-piece-2" material="air"/>
+        </action>
+        <action filter="any(state=${state_idle}, not(i=3))">
+            <fill region="col-display-3" filter="game-column" material="wool:8"/>
+            <fill region="col-display-piece-3" material="air"/>
+        </action>
+        <action filter="any(state=${state_idle}, not(i=4))">
+            <fill region="col-display-4" filter="game-column" material="wool:8"/>
+            <fill region="col-display-piece-4" material="air"/>
+        </action>
+        <action filter="any(state=${state_idle}, not(i=5))">
+            <fill region="col-display-5" filter="game-column" material="wool:8"/>
+            <fill region="col-display-piece-5" material="air"/>
+        </action>
+        <action filter="any(state=${state_idle}, not(i=6))">
+            <fill region="col-display-6" filter="game-column" material="wool:8"/>
+            <fill region="col-display-piece-6" material="air"/>
+        </action>
+    </action>
+    <action id="print-board" scope="match" filter="debug=1" expose="true">
+        <message text="{0} {1} {2} {3} {4} {5} {6}">
+            <replacements>
+                <decimal id="0" value="captured[36]"/>
+                <decimal id="1" value="captured[30]"/>
+                <decimal id="2" value="captured[24]"/>
+                <decimal id="3" value="captured[18]"/>
+                <decimal id="4" value="captured[12]"/>
+                <decimal id="5" value="captured[6]"/>
+                <decimal id="6" value="captured[0]"/>
+            </replacements>
+        </message>
+        <message text="{0} {1} {2} {3} {4} {5} {6}">
+            <replacements>
+                <decimal id="0" value="captured[37]"/>
+                <decimal id="1" value="captured[31]"/>
+                <decimal id="2" value="captured[25]"/>
+                <decimal id="3" value="captured[19]"/>
+                <decimal id="4" value="captured[13]"/>
+                <decimal id="5" value="captured[7]"/>
+                <decimal id="6" value="captured[1]"/>
+            </replacements>
+        </message>
+        <message text="{0} {1} {2} {3} {4} {5} {6}">
+            <replacements>
+                <decimal id="0" value="captured[38]"/>
+                <decimal id="1" value="captured[32]"/>
+                <decimal id="2" value="captured[26]"/>
+                <decimal id="3" value="captured[20]"/>
+                <decimal id="4" value="captured[14]"/>
+                <decimal id="5" value="captured[8]"/>
+                <decimal id="6" value="captured[2]"/>
+            </replacements>
+        </message>
+        <message text="{0} {1} {2} {3} {4} {5} {6}">
+            <replacements>
+                <decimal id="0" value="captured[39]"/>
+                <decimal id="1" value="captured[33]"/>
+                <decimal id="2" value="captured[27]"/>
+                <decimal id="3" value="captured[21]"/>
+                <decimal id="4" value="captured[15]"/>
+                <decimal id="5" value="captured[9]"/>
+                <decimal id="6" value="captured[3]"/>
+            </replacements>
+        </message>
+        <message text="{0} {1} {2} {3} {4} {5} {6}">
+            <replacements>
+                <decimal id="0" value="captured[40]"/>
+                <decimal id="1" value="captured[34]"/>
+                <decimal id="2" value="captured[28]"/>
+                <decimal id="3" value="captured[22]"/>
+                <decimal id="4" value="captured[16]"/>
+                <decimal id="5" value="captured[10]"/>
+                <decimal id="6" value="captured[4]"/>
+            </replacements>
+        </message>
+        <message text="{0} {1} {2} {3} {4} {5} {6}">
+            <replacements>
+                <decimal id="0" value="captured[41]"/>
+                <decimal id="1" value="captured[35]"/>
+                <decimal id="2" value="captured[29]"/>
+                <decimal id="3" value="captured[23]"/>
+                <decimal id="4" value="captured[17]"/>
+                <decimal id="5" value="captured[11]"/>
+                <decimal id="6" value="captured[5]"/>
+            </replacements>
+        </message>
+    </action>
+</actions>
+<falling-blocks>
+    <rule>
+        <filter>
+            <any>
+                <material>stained clay:4</material>
+                <material>stained clay:14</material>
+            </any>
+        </filter>
+        <sticky>
+            <any>
+                <material>wood</material>
+                <material>glass</material>
+            </any>
+        </sticky>
+    </rule>
+</falling-blocks>
+<damage>
+    <deny>
+        <not>
+            <cause>void</cause>
+        </not>
+    </deny>
+</damage>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<timelock>on</timelock>
+</map>
