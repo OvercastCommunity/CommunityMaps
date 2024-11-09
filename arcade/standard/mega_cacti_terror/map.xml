@@ -1,11 +1,17 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Mega Cacti Terror</name>
-<version>2.0.8</version>
+<version>2.1.0</version>
 <objective>Be the last man standing!</objective>
 <created>2023-03-17</created>
+<variant id="party">Party Mode</variant>
 <authors>
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
 </authors>
+<if variant="party">
+    <contributors>
+        <contributor uuid="f1352a57-4fe3-4f0c-b867-56b771fc1a0f" contribution="Cacti Mayhem Overdrive item mechanics"/> <!-- teagod -->
+    </contributors>
+</if>
 <players min="2" max="64">Players</players>
 <blitz/>
 <time>3m45s</time>
@@ -37,13 +43,75 @@
     <kit id="obs-kit" force="true">
         <fly flying="true"/>
     </kit>
+    <kit id="lucky-block-kit" deduct-items="false">
+        <item material="gold block" consumable="lucky-block-item" enchantment="fortune"/>
+    </kit>
+    <kit id="power-0" deduct-items="false">
+        <item material="cactus" name="`eTall Cactus" amount="3" consumable="tall-cacti-item" enchantment="fortune"/>
+        <action>
+            <message text="You unboxed a `eTall Cactus"/>
+        </action>
+    </kit>
+    <kit id="power-1" deduct-items="false">
+        <item material="cactus" name="`bVery Tall Cactus" amount="2" consumable="taller-cacti-item" enchantment="fortune"/>
+        <action>
+            <message text="You unboxed a `bVery Tall Cactus"/>
+        </action>
+    </kit>
+    <kit id="power-2" deduct-items="false">
+        <item material="cactus" name="`dMega Cactus" consumable="mega-cacti-item" enchantment="fortune"/>
+        <action>
+            <message text="You unboxed `dMega Cactus"/>
+        </action>
+    </kit>
+    <kit id="power-3" deduct-items="false">
+        <item material="cactus" name="`eThrowable Cactus" amount="3" projectile="cacti-gun" enchantment="fortune"/>
+        <action>
+            <message text="You unboxed `eThrowable Cactus"/>
+        </action>
+    </kit>
+    <kit id="power-4" deduct-items="false">
+        <item material="feather" name="`eMega Jump" amount="2" consumable="jump-item" enchantment="fortune"/>
+        <action>
+            <message text="You unboxed a `eMega Jump"/>
+        </action>
+    </kit>
+    <kit id="power-5" deduct-items="false">
+        <item material="monster egg" name="`eCreeper Egg" damage="50" amount="3"/>
+        <action>
+            <message text="You unboxed a `eCreeper Egg"/>
+        </action>
+    </kit>
+    <kit id="power-6" deduct-items="false">
+        <item material="tnt" amount="2"/>
+        <action>
+            <message text="You unboxed TNT"/>
+        </action>
+    </kit>
+    <kit id="power-7" deduct-items="false">
+        <item material="tnt" name="`bThrowable TNT" amount="2" projectile="tnt-gun"/>
+        <action>
+            <message text="You unboxed `bThrowable TNT"/>
+        </action>
+    </kit>
+    <kit id="power-8" deduct-items="false">
+        <item material="egg" name="`bGrenade" amount="3" grenade="true" grenade-power="0.8"/>
+        <action>
+            <message text="You unboxed a `bGrenade"/>
+        </action>
+    </kit>
 </kits>
-<gamerules>
-    <naturalRegeneration>false</naturalRegeneration>
-</gamerules>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
+<consumables>
+    <consumable id="lucky-block-item" action="lucky-block-action" on="click" consume="true"/>
+    <consumable id="tall-cacti-item" action="paste-tall-cacti" on="right click" consume="false"/>
+    <consumable id="taller-cacti-item" action="paste-taller-cacti" on="right click" consume="false"/>
+    <consumable id="mega-cacti-item" action="paste-mega-cacti" on="right click" consume="false"/>
+    <consumable id="jump-item" action="jump-action" on="right click" consume="true"/>
+</consumables>
+<projectiles>
+    <projectile id="tnt-gun" name="TNT" projectile="TNTPrimed" velocity="0.75" damage="0" throwable="true" cooldown="0s"/>
+    <projectile id="cacti-gun" name="cactus" projectile="FallingBlock" material="cactus" velocity="0.75" damage="0" throwable="true" cooldown="0s"/>
+</projectiles>
 <filters>
     <any id="allowed-interactions">
         <all>
@@ -117,6 +185,7 @@
         <region id="out-of-bounds"/>
         <participating/>
     </all>
+    <variable id="looking_at_block" scope="player" value="player.has_target">1</variable>
 </filters>
 <regions>
     <point id="center">0.5,8,0.5</point>
@@ -259,213 +328,292 @@
         <cuboid id="cuboid-33" min="-36,6,-36" size="73,3,73"/>
         <region id="cuboid-32"/>
     </complement>
+    <translate id="spawner-4" region="cuboid-30" offset="0,3,0"/>
+    <translate id="spawner-3" region="cuboid-25" offset="0,3,0"/>
+    <translate id="spawner-2" region="cuboid-15" offset="0,3,0"/>
+    <translate id="spawner-1" region="cuboid-8" offset="0,3,0"/>
+    <translate id="spawner-0" region="segment-0" offset="0,3,0"/>
+    <cuboid id="tall-cacti-region" min="-35,9,35" size="1,3,1"/>
+    <cuboid id="taller-cacti-region" min="-35,9,33" size="1,8,1"/>
+    <cuboid id="mega-cacti-region" min="-35,9,29" size="3,3,3"/>
     <apply region="out-of-bounds" block="never"/>
     <apply region="playable-zone" block="allowed-interactions"/>
     <apply region="lava-region" block="never"/>
 </regions>
+<structures>
+    <structure id="tall-cacti" region="tall-cacti-region" origin="-35,9,35"/>
+    <structure id="taller-cacti" region="taller-cacti-region" origin="-35,9,33"/>
+    <structure id="mega-cacti" region="mega-cacti-region" origin="-34,9,30"/>
+</structures>
+<variables>
+    <variable id="power" scope="player" default="-1"/>
+</variables>
 <actions>
+    <action id="give-lucky-block-random" scope="match" expose="true">
+        <switch-scope inner="player">
+            <set var="power" value="floor(random() * 4)"/>
+            <action filter="power=1">
+                <kit id="lucky-block-kit"/>
+                <sound preset="TIP"/>
+            </action>
+        </switch-scope>
+    </action>
+    <action id="give-lucky-block-all" scope="match" expose="true">
+        <switch-scope inner="player">
+            <kit id="lucky-block-kit"/>
+            <sound preset="TIP"/>
+        </switch-scope>
+    </action>
+    <action id="lucky-block-action" scope="player">
+        <set var="power" value="floor(random() * 9)"/>
+        <action filter="power=0"><kit id="power-0"/></action>
+        <action filter="power=1"><kit id="power-1"/></action>
+        <action filter="power=2"><kit id="power-2"/></action>
+        <action filter="power=3"><kit id="power-3"/></action>
+        <action filter="power=4"><kit id="power-4"/></action>
+        <action filter="power=5"><kit id="power-5"/></action>
+        <action filter="power=6"><kit id="power-6"/></action>
+        <action filter="power=7"><kit id="power-7"/></action>
+        <action filter="power=8"><kit id="power-8"/></action>
+        <sound key="random.levelup" volume="0.5" pitch="1.5"/>
+        <set var="power" value="-1"/>
+    </action>
+    <action id="paste-tall-cacti" scope="player" filter="looking_at_block">
+        <take-payment>
+            <payment price="1">
+                <item material="cactus" consumable="tall-cacti-item" name="`eTall Cactus" enchantment="fortune"/>
+            </payment>
+            <success-action>
+                <paste-structure structure="tall-cacti" x="player.place_x+1" y="9" z="player.place_z+1" update="false"/>
+            </success-action>
+        </take-payment>
+    </action>
+    <action id="paste-taller-cacti" scope="player" filter="looking_at_block">
+        <take-payment>
+            <payment price="1">
+                <item material="cactus" consumable="taller-cacti-item" name="`bVery Tall Cactus" enchantment="fortune"/>
+            </payment>
+            <success-action>
+                <paste-structure structure="taller-cacti" x="player.place_x+1" y="9" z="player.place_z+1" update="false"/>
+            </success-action>
+        </take-payment>
+    </action>
+    <action id="paste-mega-cacti" scope="player" filter="looking_at_block">
+        <take-payment>
+            <payment price="1">
+                <item material="cactus" consumable="mega-cacti-item" name="`dMega Cactus" enchantment="fortune"/>
+            </payment>
+            <success-action>
+                <paste-structure structure="mega-cacti" x="player.place_x" y="9" z="player.place_z" update="false"/>
+            </success-action>
+        </take-payment>
+    </action>
+    <action id="jump-action" scope="player">
+        <velocity x="player.vel_x" y="2" z="player.vel_z"/>
+        <sound key="dig.cloth"/>
+    </action>
     <trigger filter="t-33" scope="match">
         <action>
             <fill region="segment-33" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-33" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-33" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-32" scope="match">
         <action>
             <fill region="segment-32" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-32" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-32" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-31" scope="match">
         <action>
             <fill region="segment-31" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-31" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-31" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-30" scope="match">
         <action>
             <fill region="segment-30" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-30" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-30" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-29" scope="match">
         <action>
             <fill region="segment-29" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-29" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-29" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-28" scope="match">
         <action>
             <fill region="segment-28" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-28" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-28" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-27" scope="match">
         <action>
             <fill region="segment-27" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-27" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-27" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-26" scope="match">
         <action>
             <fill region="segment-26" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-26" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-26" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-25" scope="match">
         <action>
             <fill region="segment-25" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-25" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-25" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-24" scope="match">
         <action>
             <fill region="segment-24" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-24" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-24" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-23" scope="match">
         <action>
             <fill region="segment-23" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-23" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-23" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-22" scope="match">
         <action>
             <fill region="segment-22" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-22" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-22" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-21" scope="match">
         <action>
             <fill region="segment-21" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-21" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-21" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-20" scope="match">
         <action>
             <fill region="segment-20" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-20" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-20" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-19" scope="match">
         <action>
             <fill region="segment-19" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-19" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-19" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-18" scope="match">
         <action>
             <fill region="segment-18" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-18" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-18" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-17" scope="match">
         <action>
             <fill region="segment-17" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-17" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-17" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-16" scope="match">
         <action>
             <fill region="segment-16" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-16" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-16" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-15" scope="match">
         <action>
             <fill region="segment-15" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-15" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-15" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-14" scope="match">
         <action>
             <fill region="segment-14" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-14" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-14" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-13" scope="match">
         <action>
             <fill region="segment-13" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-13" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-13" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-12" scope="match">
         <action>
             <fill region="segment-12" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-12" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-12" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-11" scope="match">
         <action>
             <fill region="segment-11" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-11" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-11" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-10" scope="match">
         <action>
             <fill region="segment-10" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-10" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-10" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-9" scope="match">
         <action>
             <fill region="segment-9" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-9" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-9" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-8" scope="match">
         <action>
             <fill region="segment-8" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-8" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-8" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-7" scope="match">
         <action>
             <fill region="segment-7" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-7" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-7" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-6" scope="match">
         <action>
             <fill region="segment-6" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-6" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-6" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-5" scope="match">
         <action>
             <fill region="segment-5" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-5" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-5" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-4" scope="match">
         <action>
             <fill region="segment-4" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-4" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-4" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-3" scope="match">
         <action>
             <fill region="segment-3" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-3" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-3" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-2" scope="match">
         <action>
             <fill region="segment-2" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-2" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-2" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-1" scope="match">
         <action>
             <fill region="segment-1" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-1" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-1" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="t-0" scope="match">
         <action>
             <fill region="segment-0" material="lava" filter="arena-material-lava-stilt"/>
-            <fill region="segment-0" material="sand:1" filter="arena-materials-sand"/>
+            <fill region="segment-0" material="sand:1" filter="arena-materials-sand" update="false"/>
         </action>
     </trigger>
     <trigger filter="bad-cacti" scope="player">
@@ -475,7 +623,7 @@
     </trigger>
 </actions>
 <portals>
-    <portal region="out-of-bounds" filter="bad-cacti" x="@0.5" y="@64" z="@0.5" pitch="90" observers="never"/>
+    <portal region="out-of-bounds" filter="bad-cacti" x="@0.5" y="@-64" z="@0.5" pitch="90" observers="never" sound="false"/>
 </portals>
 <falling-blocks>
     <rule filter="arena-materials-dark" sticky="arena-materials-dark-sticky" delay="2"/>
@@ -485,11 +633,33 @@
     <spawner spawn-region="center" player-region="playable-zone" delay="3s">
         <item material="snow ball"/>
     </spawner>
+    <if variant="party">
+        <spawner spawn-region="spawner-4" player-region="playable-zone" delay="1s" filter="not(t-30)">
+            <item material="gold block" name="`dLucky Block" consumable="lucky-block-item" enchantment="fortune"/>
+        </spawner>
+        <spawner spawn-region="spawner-3" player-region="playable-zone" delay="1s" filter="all(t-30, not(t-20))">
+            <item material="gold block" name="`dLucky Block" consumable="lucky-block-item" enchantment="fortune"/>
+        </spawner>
+        <spawner spawn-region="spawner-2" player-region="playable-zone" delay="1s" filter="all(t-20, not(t-10))">
+            <item material="gold block" name="`dLucky Block" consumable="lucky-block-item" enchantment="fortune"/>
+        </spawner>
+        <spawner spawn-region="spawner-1" player-region="playable-zone" delay="1s" filter="all(t-10, not(t-0))">
+            <item material="gold block" name="`dLucky Block" consumable="lucky-block-item" enchantment="fortune"/>
+        </spawner>
+        <spawner spawn-region="spawner-0" player-region="playable-zone" delay="1s" filter="t-0">
+            <item material="gold block" name="`dLucky Block" consumable="lucky-block-item" enchantment="fortune"/>
+        </spawner>
+    </if>
 </spawners>
 <kill-rewards>
     <kill-reward>
         <item material="cactus" amount="4"/>
-        <item material="tnt"/>
+        <if variant="default">
+            <item material="tnt"/>
+        </if>
+        <if variant="party">
+            <item material="gold block" name="`dLucky Block" consumable="lucky-block-item" enchantment="fortune"/>
+        </if>
     </kill-reward>
 </kill-rewards>
 <tnt>
@@ -501,9 +671,27 @@
 <disabledamage>
     <damage ally="true" self="true" enemy="true" other="true">block explosion</damage>
 </disabledamage>
+<damage>
+    <deny>
+        <cause>fall</cause>
+    </deny>
+</damage>
+<gamerules>
+    <naturalRegeneration>false</naturalRegeneration>
+</gamerules>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
 <itemkeep>
     <item>cactus</item>
     <item>fishing rod</item>
     <item>snow ball</item>
+    <item>gold block</item>
+    <item>monster egg</item>
+    <item>egg</item>
+    <item>feather</item>
+    <if variant="party">
+        <item>tnt</item>
+    </if>
 </itemkeep>
 </map>
