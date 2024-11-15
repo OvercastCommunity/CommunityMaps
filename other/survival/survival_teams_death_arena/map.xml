@@ -1,0 +1,461 @@
+<map proto="1.4.2">
+<name>Survival Teams: Death Arena</name>
+<version>1.0.0</version>
+<include id="gapple-kill-reward"/>
+<include id="void-death"/>
+<phase>development</phase>
+<objective>Craft armor and weapons for Battle</objective>
+<gamemode>tdm</gamemode>
+<created>2024-11-01</created>
+<authors>
+    <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb"/> <!-- arcadeboss -->
+</authors>
+<constants>
+    <!-- Match time = survival + cage + arena -->
+    <constant id="survival-minutes">9</constant> <!-- collection phase -->
+    <constant id="warning-minutes">8</constant> <!-- one minute warning -->
+    <constant id="cage-seconds">15</constant> <!-- transition to combat -->
+    <constant id="arena-minutes">3</constant> <!-- combat/scoring phase -->
+    <!-- Game state -->
+    <constant id="survival">0</constant>
+    <constant id="cage">1</constant>
+    <constant id="arena">2</constant>
+    <!-- Void death -->
+    <constant id="void-plane">0</constant>
+    <constant id="arena-void-plane">11</constant>
+    <constant id="health">1</constant>
+</constants>
+<respawn auto="true" delay="5.0s"/>
+<score>
+    <kills>1</kills>
+</score>
+<gamerules>
+    <doDaylightCycle>true</doDaylightCycle>
+</gamerules>
+<world>
+    <timeset>1000</timeset>
+    <timelock>off</timelock>
+</world>
+<terrain vanilla="true"/>
+<world-borders center="0.5,0.5">
+    <world-border size="350"/>
+    <world-border size="350" when="survival"/>
+    <world-border size="63" when="any(cage,arena)"/>
+</world-borders>
+<mobs>
+    <filter>
+        <not>
+            <region id="arena-keep-out"/>
+        </not>
+    </filter>
+</mobs>
+<maxbuildheight>160</maxbuildheight>
+<teams>
+    <team id="red-team" color="red" max="20">Mother Poggers</team>
+    <team id="blue-team" color="blue" max="20">Count Dookuwu</team>
+</teams>
+<spawns>
+    <default>
+        <regions>
+    	    <point>0.5,49,0.5</point>
+        </regions>
+    </default>
+    <spawn team="red-team" kit="survival-kit" yaw="90" region="red-survival-spawn"/>
+    <spawn team="blue-team" kit="survival-kit" yaw="-90" region="blue-survival-spawn"/>
+</spawns>
+<kits>
+    <kit id="survival-kit" force="false">
+        <item slot="0" material="stone pickaxe"/>
+        <item slot="1" material="stone axe"/>
+        <item slot="2" material="stone spade"/>
+        <item slot="3" material="wood" amount="25"/>
+        <item slot="4" material="cobblestone" amount="40"/>
+        <item slot="5" material="torch" amount="10"/>
+        <item slot="6" material="coal" amount="5"/>
+        <item slot="17" material="arrow" amount="4"/> <!-- in case they find/make bow -->
+        <chestplate material="leather chestplate" enchantment="protection:2" team-color="true" unbreakable="true" locked="false"/>
+        <health>20</health>
+    </kit>
+    <lend filter="all(alive,survival)">
+        <kit>
+            <effect amplifier="255">damage resistance</effect>
+        </kit>
+    </lend>
+    <give filter="all(alive,cage)">
+        <kit>
+            <clear armor="false" items="false" effects="true"/>
+            <item material="golden apple"/>
+            <effect amplifier="255" duration="${cage-seconds}s">mining fatigue</effect>
+            <effect amplifier="255" duration="${cage-seconds}s">damage resistance</effect>
+            <effect amplifier="255" duration="15s">fire resistance</effect>
+        </kit>
+    </give>
+    <give filter="all(alive,arena)">
+        <kit>
+            <effect amplifier="255" duration="8s">damage resistance</effect>
+            <health>20</health>
+        </kit>
+    </give>
+    <give filter="all(alive,arena,arena-spawn-protect)">
+        <kit>
+            <effect amplifier="1" duration="30s">absorption</effect>
+        </kit>
+    </give>
+</kits>
+<block-drops>
+    <rule>
+        <filter>
+            <any>
+                <material>iron ore</material>
+            </any>
+        </filter>
+        <drops>
+            <item amount="2" material="iron ore"/>
+        </drops>
+    </rule>
+</block-drops>
+<regions>
+    <negative id="restricted-space">
+        <rectangle min="-180,-180" max="180,180"/>
+    </negative>
+    <cylinder id="red-area" base="-121.5,0,128.5" radius="65" height="165"/>
+    <cylinder id="blue-area" base="122,0,-127.5" radius="65" height="165"/>
+    <point id="red-survival-spawn">-121.5,163,128.5</point>
+    <point id="blue-survival-spawn">122,163,-127.5</point>
+    <point id="red-arena-spawn">-15.5,55,15.5</point>
+    <point id="blue-arena-spawn">15.5,55,-15.5</point>
+    <union id="arena-spawn-protect">
+        <rectangle min="-12.5,13.5" max="-17.5,18.5"/> <!-- Red -->
+        <rectangle min="13.5,-12.5" max="17.5,-17.5"/> <!-- Blue -->
+    </union>
+    <apply kit="void-death" region="arena-void"/>
+    <rectangle id="arena-keep-out" min="-33,-33" max="33,33"/>
+    <cuboid id="arena-void" min="-32,0,-32" max="33,${arena-void-plane},33"/>
+    <cuboid id="arena-ceiling" min="-33,53,-33" max="34,500,34"/>
+    <cuboid id="arena-no-clutch" min="-33,0,-33" max="34,49,34"/>
+    <cuboid id="cage-region" min="-3,-2,-3" max="3,3,3"/>
+    <cuboid id="space" min="-2,-1,-2" max="2,2,2"/>
+    <translate id="cage-red" offset="-15,56,16"><mirror normal="1,0,0" origin="0,0,0"><region id="cage-region"/></mirror></translate>
+    <translate id="space-red" offset="-15,56,16"><mirror normal="1,0,0" origin="0,0,0"><region id="space"/></mirror></translate>
+    <translate id="cage-blue" offset="16,56,-15"><mirror normal="1,0,1" origin="0,0,0"><region id="cage-region"/></mirror></translate>
+    <translate id="space-blue" offset="16,56,-15"><mirror normal="1,0,1" origin="0,0,0"><region id="space"/></mirror></translate>
+    <apply block-place="never" region="arena-spawn-protect" message="You may not obstruct spawn!"/>
+    <apply enter="never" region="restricted-space" message="You may not leave the map!"/>
+    <apply enter="red-only" region="red-area" message="You may not enter Red's domain!"/>
+    <apply enter="blue-only" region="blue-area" message="You may not enter Blue's domain!"/>
+    <apply block="original-block-protection-filter" message="You may not break this block!"/>
+    <apply block-place="never" region="arena-ceiling" message="You may not build higher!"/>
+    <apply block-place="never" region="arena-no-clutch" message="You may not build this low!"/>
+    <apply enter="all(alive,any(arena,cage))" region="arena-keep-out" message="You may not enter the Arena during Survival phase!"/>
+    <apply block-place="all(any(arena,cage),alive)" block-break="all(any(arena,cage),alive)" region="arena-keep-out" message="You may not edit the Arena during Survival phase!"/>
+</regions>
+<portals>
+    <portal destination="red-arena-spawn" forward="all(any(arena,cage),alive)" filter="red-only" yaw="@-135" pitch="@0"/>
+    <portal destination="blue-arena-spawn" forward="all(any(arena,cage),alive)" filter="blue-only" yaw="@45" pitch="@0"/>
+    <portal y="@-110" sound="false" observers="${affect-obs}">
+        <region>
+            <region id="arena-void"/>
+        </region>
+    </portal>
+</portals>
+<actions>
+    <!-- Game state -->
+    <trigger scope="match">
+        <filter>
+            <time>${survival-minutes}m</time>
+        </filter>
+        <action>
+            <set var="match_state" value="${cage}"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="${cage-seconds}s" filter="cage"/>
+        </filter>
+        <action>
+            <set var="match_state" value="${arena}"/>
+        </action>
+    </trigger>
+    <!-- Alert on Duration of Gearing-up Phase -->
+    <trigger filter="survival" scope="match">
+        <action>
+            <message text="`7[`e`lAlert`7] `6`oYou have `r`e`l`o{amount} minutes`r`6`o to craft armor and weapons!">
+                <replacements>
+                    <decimal id="amount" value="${survival-minutes}"/>
+                </replacements>
+            </message>
+            <sound preset="alert"/>
+        </action>
+    </trigger>
+    <!-- 1 Minute Warning -->
+    <trigger scope="match">
+        <filter>
+            <after duration="${warning-minutes}m" filter="survival"/>
+        </filter>
+        <action>
+            <message text="`7[`e`lAlert`7] `e`l`o1 minute`r`6`o until `lteleport to Arena`r`6`o!"/>
+            <sound preset="alert"/>
+            <sound preset="portal"/>
+        </action>
+    </trigger>
+    <!-- Build Arena Cages -->
+    <trigger filter="cage" scope="match">
+        <action>
+	        <message text="`7[`e`lAlert`7] `6`oPrepare for battle in `e`l`o{amount} seconds`r`6`o!">
+                <replacements>
+                    <decimal id="amount" value="${cage-seconds}"/>
+                </replacements>
+            </message>
+            <sound preset="alert"/>
+            <fill region="cage-red" material="95:14" events="false"/>
+            <fill region="space-red" material="air" events="false"/>
+            <fill region="cage-blue" material="95:11" events="false"/>
+            <fill region="space-blue" material="air" events="false"/>
+        </action>
+    </trigger>
+    <!-- Prepare to Fight, plus Teleport Countdown -->
+    <trigger scope="match">
+        <filter>
+            <after message="`6Teleport to Arena`r in {0}" duration="${survival-minutes}m" filter="survival"/>
+        </filter>
+        <action>
+            <message fade-in="0.5s" stay="2s" fade-out="0.5s">
+                <title>`cARENA BATTLE!</title>
+                <subtitle>`fPrepare to fight!</subtitle>
+            </message>
+        </action>
+    </trigger>
+    <!-- Give Initial Gapple -->
+    <trigger scope="match">
+        <filter>
+            <after duration="3s" filter="cage"/>
+        </filter>
+        <action>
+            <sound preset="alert"/>
+	        <message text="`7[`e`lAlert`7] `6`oYou have received a `r`e`l`oGolden Apple`r`6`o!"/>
+        </action>
+    </trigger>
+    <!-- Cages Removal Countdown and Release -->
+    <trigger scope="match">
+        <filter>
+            <after message="`6Battle begins in {0}" duration="${cage-seconds}s" filter="cage"/>
+        </filter>
+        <action>
+            <fill region="cage-red" material="air" events="false"/>
+            <fill region="cage-blue" material="air" events="false"/>
+            <message fade-in="0.5s" stay="2s" fade-out="0.5s">
+                <title>`cFIGHT!</title>
+            </message>
+            <sound preset="alert"/>
+        </action>
+    </trigger>
+    <!-- Timelimit Countdown -->
+    <trigger filter="arena" scope="match">
+        <action>
+            <set var="timelimit" value="${arena-minutes}*60"/>
+        </action>
+    </trigger>
+    <!-- Scoring Alert -->
+    <trigger scope="match">
+        <filter>
+            <after duration="10s" filter="arena"/>
+        </filter>
+        <action>
+            <message text="`7[`e`lAlert`7] `6`oTeam with `lmost kills`r`6`o wins!"/>
+            <sound preset="alert"/>
+        </action>
+    </trigger>
+    <!-- Spawn Buff Alert -->
+    <trigger scope="match">
+        <filter>
+            <after duration="40s" filter="arena"/>
+        </filter>
+        <action>
+            <message text="`7[`e`lAlert`7] `6`oFall back to spawn platform for `e`l`oAbsorption`r`6`o!"/>
+            <sound preset="alert"/>
+        </action>
+    </trigger>
+</actions>
+<broadcasts>
+    <alert after="15s">`bPlayers are `linvincible`r`b during the Survival phase.`r</alert>
+    <alert after="30s">`bFocus on `liron`r`b, `lcoal`r`b and visible `ldiamonds`r`b.`r</alert>
+    <alert after="1m">`b`lArmor`r`b and `lweapons`r`b are kept if you `ldie`r`b.`r</alert>
+</broadcasts>
+<filters>
+    <alive id="alive"/>
+    <match-running id="match-running"/>
+    <team id="red-only">red-team</team>
+    <team id="blue-only">blue-team</team>
+    <all id="survival">
+        <match-running/>
+        <variable var="match_state">${survival}</variable>
+    </all>
+    <all id="cage">
+        <match-running/>
+        <variable var="match_state">${cage}</variable>
+    </all>
+    <all id="arena">
+        <match-running/>
+        <variable var="match_state">${arena}</variable>
+    </all>
+    <deny id="original-block-protection-filter">
+        <any>
+            <!-- List of blocks in the original map that players can not modify -->
+            <material>obsidian</material>
+            <material>stained_glass:15</material>
+            <material>stained_glass:14</material>
+            <material>stained_glass:11</material>
+            <material>quartz stairs</material>
+            <material>quartz block</material>
+            <material>step:7</material> <!-- quartz -->
+            <material>redstone block</material>
+            <material>lapis block</material>
+            <material>sea lantern</material>
+            <material>cobble wall</material>
+            <material>beacon</material>
+            <material>stone:4</material> <!-- polished diorite -->
+        </any>
+    </deny>
+</filters>
+<variables>
+    <timelimit id="timelimit"/>
+    <variable id="match_state" scope="match" default="${survival}"/>
+</variables>
+<itemremove>
+    <item>ender pearl</item>
+</itemremove>
+<itemkeep>
+    <item>stone</item>
+    <item>cobblestone</item>
+    <item>wood</item>
+    <item>log</item>
+    <item>stick</item>
+    <item>sign</item>
+    <item>stone button</item>
+    <item>wood button</item>
+    <item>stone plate</item>
+    <item>wood plate</item>
+    <item>gold plate</item>
+    <item>iron plate</item>
+    <item>ladder</item>
+    <item>vine</item>
+    <item>step</item>
+    <item>coal</item>
+    <item>torch</item>
+    <item>stick</item>
+    <item>wood sword</item>
+    <item>stone sword</item>
+    <item>iron sword</item>
+    <item>diamond sword</item>
+    <item>wood pickaxe</item>
+    <item>stone pickaxe</item>
+    <item>iron pickaxe</item>
+    <item>diamond pickaxe</item>
+    <item>wood axe</item>
+    <item>stone axe</item>
+    <item>iron axe</item>
+    <item>diamond axe</item>
+    <item>wood spade</item>
+    <item>stone spade</item>
+    <item>iron spade</item>
+    <item>diamond spade</item>
+    <item>wood hoe</item>
+    <item>stone hoe</item>
+    <item>iron hoe</item>
+    <item>diamond hoe</item>
+    <item>tnt</item>
+    <item>bucket</item>
+    <item>lava bucket</item>
+    <item>water bucket</item>
+    <item>fishing rod</item>
+    <item>bow</item>
+    <item>arrow</item>
+    <item>snowball</item>
+    <item>flint and steel</item>
+    <item>golden apple</item>
+    <item>golden_apple:1</item>
+    <item>firework</item>
+    <item>firework charge</item>
+    <item>fireball</item>
+    <item>spider eye</item>
+    <item>ender pearl</item>
+    <item>shears</item>
+    <item>bone</item>
+    <item>egg</item>
+    <item>minecart</item>
+    <item>prismarine</item>
+    <item>stained clay</item>
+    <item>sandstone</item>
+    <item>clay</item>
+    <item>sand</item>
+    <item>gravel</item>
+    <item>dirt</item>
+    <item>leather</item>
+    <item>string</item>
+    <item>iron ore</item>
+    <item>diamond ore</item>
+    <item>gold ore</item>
+    <item>coal ore</item>
+    <item>iron ingot</item>
+    <item>gold ingot</item>
+    <item>gold nugget</item>
+    <item>diamond</item>
+    <item>emerald</item>
+    <item>furnace</item>
+    <item>workbench</item>
+    <item>compass</item>
+    <item>wool</item>
+    <item>leaves</item>
+    <item>brick</item>
+    <item>boat</item>
+    <item>saddle</item>
+    <!-- armor in the inventory -->
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>chainmail helmet</item>
+    <item>chainmail chestplate</item>
+    <item>chainmail leggings</item>
+    <item>chainmail boots</item>
+    <item>iron helmet</item>
+    <item>iron chestplate</item>
+    <item>iron leggings</item>
+    <item>iron boots</item>
+    <item>diamond helmet</item>
+    <item>diamond chestplate</item>
+    <item>diamond leggings</item>
+    <item>diamond boots</item>
+</itemkeep>
+<armorkeep>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>chainmail helmet</item>
+    <item>chainmail chestplate</item>
+    <item>chainmail leggings</item>
+    <item>chainmail boots</item>
+    <item>iron helmet</item>
+    <item>iron chestplate</item>
+    <item>iron leggings</item>
+    <item>iron boots</item>
+    <item>diamond helmet</item>
+    <item>diamond chestplate</item>
+    <item>diamond leggings</item>
+    <item>diamond boots</item>
+</armorkeep>
+<disabledamage>
+    <damage ally="true" self="true" enemy="false" other="false">block explosion</damage>
+</disabledamage>
+<tnt>
+    <instantignite>true</instantignite>
+    <blockdamage>true</blockdamage>
+    <friendly-defuse>off</friendly-defuse>
+    <fuse>2s</fuse>
+    <power>4</power>
+</tnt>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
