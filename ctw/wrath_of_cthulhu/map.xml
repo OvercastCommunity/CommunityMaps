@@ -1,7 +1,7 @@
 <map proto="1.5.0">
 <include id="gapple-kill-reward"/>
 <name>Wrath of Cthulhu</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Capture the two wools of the enemy team!</objective>
 <created>2024-11-02</created>
 <phase>staging</phase>
@@ -12,7 +12,7 @@
 </authors>
 <contributors>
     <contributor uuid="430ec559-364a-4363-ac7a-2529050440ac" contribution="Map Feedback"/> <!-- mameBT -->
-    <contributor uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb" contribution="Map Feedback"/> <!-- arcadeboss -->
+    <contributor uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb" contribution="Map Feedback/XML"/> <!-- arcadeboss -->
     <contributor uuid="63ddf58a-ba2c-4d39-8481-6358bb46c63a" contribution="XML"/> <!-- samschaap -->
 </contributors>
 <teams>
@@ -57,21 +57,8 @@
     </spawn>
 </spawns>
 <filters>
-    <deny id="deny-wr-break">
-        <any>
-            <material>chest</material>
-            <material>mob spawner</material>
-            <material>beacon</material>
-        </any>
-    </deny>
-    <all id="only-red-wr">
-        <team id="only-red">red-team</team>
-        <filter id="deny-wr-break"/>
-    </all>
-    <all id="only-blue-wr">
-        <team id="only-blue">blue-team</team>
-        <filter id="deny-wr-break"/>
-    </all>
+    <team id="only-red">red-team</team>
+    <team id="only-blue">blue-team</team>
     <all id="only-iron-renew">
         <material id="only-iron">iron block</material>
         <cause>world</cause>
@@ -79,11 +66,13 @@
     <deny id="deny-redstone">
         <material>redstone wire</material>
     </deny>
+    <material id="only-web">web</material>
 </filters>
 <regions>
+    <rectangle id="playable-space" min="-73,-174" max="73,174"/>
     <union id="spawns">
-        <rectangle id="red-spawn" min="-18,166" max="19,101"/>
-        <rectangle id="blue-spawn" min="19,-165" max="-18,-100"/>
+        <rectangle id="red-spawn" min="-18,166" max="19,113"/>
+        <rectangle id="blue-spawn" min="19,-165" max="-18,-112"/>
     </union>
     <union id="wool-rooms">
         <union id="red-wool-rooms">  <!-- Blue capture, Red defend -->
@@ -95,6 +84,12 @@
             <rectangle id="yellow-wool-room" min="64,-170" max="35,-141"/>
         </union>
     </union>
+    <union id="wool-room-to-spawn-walls">
+        <rectangle min="31,119" max="32,172"/> <!-- blue -->
+        <rectangle min="-32,119" max="-31,172"/> <!-- lime -->
+        <rectangle min="-32,-173" max="-31,-118"/> <!-- orange -->
+        <rectangle min="31,-173" max="32,-118"/> <!-- yellow -->
+    </union>
     <union id="victory-monuments">
         <cuboid min="-2,15,161" max="3,18,163"/>
         <cuboid min="3,15,-160" max="-2,18,-162"/>    
@@ -103,12 +98,14 @@
     <point id="lime-wool-spawn">-48.5,16,152.5</point>
     <point id="orange-wool-spawn">-48.5,16,-151.5</point>
     <point id="yellow-wool-spawn">49.5,16,-151.5</point>
+    <apply enter="never" region="wool-room-to-spawn-walls"/>
+    <apply leave="never" region="playable-space" message="You may not leave the map!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the enemy team's spawn!"/>
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy team's spawn!"/>
     <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool rooms!"/>
     <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool rooms!"/>
-    <apply block="only-red-wr" use="only-red" region="blue-wool-rooms" message="You may not modify your own wool rooms!"/>
-    <apply block="only-blue-wr" use="only-blue" region="red-wool-rooms" message="You may not modify your own wool rooms!"/>
+    <apply block-break="only-web" block-place="never" region="blue-wool-rooms" message="You may not modify the wool room!"/>
+    <apply block-break="only-web" block-place="never" region="red-wool-rooms" message="You may not modify the wool room!"/>
     <apply enter="never" region="victory-monuments" message="You may not obstruct the victory monuments!"/>
     <apply block-break="only-iron" block-place="only-iron-renew" region="spawns" message="You may only break iron blocks in the spawn area!"/>
     <apply block="deny(void)" block-physics="deny-redstone" message="You may not modify the void area!"/> <!-- Block 36 -->
@@ -165,21 +162,10 @@
     <item>chainmail leggings</item>
     <item>leather boots</item>
     <item>string</item>
-    <item>beacon</item>
 </itemremove>
-<block-drops>
-    <rule>
-        <filter>
-            <any>
-                <material>wood</material>
-                <material>glass</material>
-            </any>
-        </filter>
-        <drops>
-            <item chance="0" material="glass"/>
-        </drops>
-    </rule>
-</block-drops>
+<crafting>
+    <disable>minecart</disable>
+</crafting>
 <itemkeep>
     <item>arrow</item>
     <item>wood</item>
@@ -194,9 +180,6 @@
     </kill-reward>
 </kill-rewards>
 <maxbuildheight>32</maxbuildheight>
-<crafting>
-    <disable>boat</disable>
-</crafting>
 <hunger>
     <depletion>off</depletion>
 </hunger>
