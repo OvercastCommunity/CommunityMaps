@@ -1,7 +1,7 @@
 <map proto="1.5.0">
 <include id="gapple-kill-reward"/>
 <name>Wrath of Cthulhu</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Capture the two wools of the enemy team!</objective>
 <created>2024-11-02</created>
 <phase>staging</phase>
@@ -57,8 +57,22 @@
     </spawn>
 </spawns>
 <filters>
-    <team id="only-red">red-team</team>
-    <team id="only-blue">blue-team</team>
+    <deny id="deny-wr-break">
+        <any>
+            <material>chest</material>
+            <material>mob spawner</material>
+            <material id="beacon">beacon</material>
+            <material>stained glass</material>
+        </any>
+    </deny>
+    <all id="only-red-wr">
+        <team id="only-red">red-team</team>
+        <filter id="deny-wr-break"/>
+    </all>
+    <all id="only-blue-wr">
+        <team id="only-blue">blue-team</team>
+        <filter id="deny-wr-break"/>
+    </all>
     <all id="only-iron-renew">
         <material id="only-iron">iron block</material>
         <cause>world</cause>
@@ -66,7 +80,6 @@
     <deny id="deny-redstone">
         <material>redstone wire</material>
     </deny>
-    <material id="only-web">web</material>
 </filters>
 <regions>
     <rectangle id="playable-space" min="-73,-174" max="73,174"/>
@@ -98,14 +111,15 @@
     <point id="lime-wool-spawn">-48.5,16,152.5</point>
     <point id="orange-wool-spawn">-48.5,16,-151.5</point>
     <point id="yellow-wool-spawn">49.5,16,-151.5</point>
+    <apply use="deny(beacon)"/>
     <apply enter="never" region="wool-room-to-spawn-walls"/>
     <apply leave="never" region="playable-space" message="You may not leave the map!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the enemy team's spawn!"/>
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy team's spawn!"/>
     <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool rooms!"/>
     <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool rooms!"/>
-    <apply block-break="only-web" block-place="never" region="blue-wool-rooms" message="You may not modify the wool room!"/>
-    <apply block-break="only-web" block-place="never" region="red-wool-rooms" message="You may not modify the wool room!"/>
+    <apply block="only-red-wr" use="only-red" region="blue-wool-rooms" message="You may not modify your own wool rooms!"/>
+    <apply block="only-blue-wr" use="only-blue" region="red-wool-rooms" message="You may not modify your own wool rooms!"/>
     <apply enter="never" region="victory-monuments" message="You may not obstruct the victory monuments!"/>
     <apply block-break="only-iron" block-place="only-iron-renew" region="spawns" message="You may only break iron blocks in the spawn area!"/>
     <apply block="deny(void)" block-physics="deny-redstone" message="You may not modify the void area!"/> <!-- Block 36 -->
