@@ -1,6 +1,7 @@
 <map proto="1.5.0">
 <name>Winter Solstice</name>
-<version>1.0.4</version>
+<variant id="classic">Classic</variant>
+<version>1.1.0</version>
 <created>2023-02-22</created>
 <objective>Destroy the enemy's monuments and leak their core to win!</objective>
 <include id="gapple-kill-reward"/>
@@ -15,8 +16,8 @@
 </contributors>
 <!-- Teams and Kits -->
 <teams>
-    <team id="blue-team" color="blue" max="35">Blue</team>
-    <team id="red-team" color="red" max="35">Red</team>
+    <team id="blue-team" color="blue" max="24">Blue</team>
+    <team id="red-team" color="red" max="24">Red</team>
 </teams>
 <kits>
     <kit id="default">
@@ -36,12 +37,34 @@
         <item slot="5" amount="64" damage="5" material="wood"/>
         <item slot="32" amount="64" damage="5" material="wood"/>
         <item slot="6" amount="64" material="glass"/>
-        <item slot="7" material="bucket"/>
         <item slot="8" material="golden apple"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
         <leggings unbreakable="true" material="chainmail leggings"/>
-        <boots unbreakable="true" team-color="true" material="leather boots"/>
+        <unless variant="classic">
+            <item slot="23" amount="16" material="stone button"/>
+            <item slot="13" amount="16" material="stone plate"/>
+            <item slot="14" amount="32" material="redstone"/>
+            <item slot="33" amount="16" material="ladder"/>
+            <item slot="24" amount="16" material="wood step"/>
+            <item slot="15" amount="16" material="nether fence"/>
+            <item slot="7" material="water bucket"/>
+            <item slot="34" material="water bucket"/>
+            <item slot="25" material="water bucket"/>
+            <item slot="16" material="water bucket"/>
+            <item slot="35" amount="64" material="tnt"/>
+            <item slot="26" amount="64" material="tnt"/>
+            <item slot="17" amount="64" material="tnt"/>
+            <boots unbreakable="true" material="iron boots">
+                <enchantment level="4">feather_falling</enchantment>
+                <enchantment>blast_protection</enchantment>
+            </boots>
+            <effect duration="5s" amplifier="255">damage_resistance</effect>
+        </unless>
+        <if variant="classic">
+            <item slot="7" material="bucket"/>
+            <boots unbreakable="true" team-color="true" material="leather boots"/>
+        </if>
     </kit>
 </kits>
 <spawns>
@@ -100,12 +123,6 @@
         <cuboid id="red-exit-portal" min="-82,37,311" max="-76,43,309"/>
         <cuboid id="red-spawn-portal" min="-76,35,259" max="-82,41,261"/>
     </union>
-    <union id="spawners">
-        <point id="gap-spawner-a">-7.5,16,87.5</point>
-        <cylinder id="spawner-a-platform" base="-7.5,14,87.5" radius="3" height="4"/>
-        <block id="gap-spawner-b">-149.5,16,87.5</block>
-        <cylinder id="spawner-b-platform" base="-149.5,14,87.5" radius="3" height="4"/>
-    </union>
     <union id="monuments">
         <cuboid id="east-blue-mon" min="-20,33,-41" max="-26,40,-35"/>
         <cuboid id="west-blue-mon" min="-132,33,-41" max="-138,40,-35"/>
@@ -116,24 +133,17 @@
         <cuboid id="blue-core" min="-75,18,-1" max="-83,26,7"/>
         <cuboid id="red-core" min="-83,18,175" max="-75,26,167"/>
     </union>
-    <union id="lanes">
-        <rectangle id="lane-east" min="-30,55" max="-45,120"/>
-        <rectangle id="lane-middle" min="-71,64" max="-86,111"/>
-        <rectangle id="lane-west" min="-112,55" max="-127,120"/>
-    </union>
     <negative id="not-map">
         <rectangle id="map" min="-2,-81" max="-155,255"/>
     </negative>
     <!-- Applications -->
-    <apply region="spawners" block="never" message="You may not obstruct the spawners!"/>
     <apply region="pools" block="only-water" message="You can only collect water with a bucket!"/>
     <apply region="team-renewables" block-break="only-iron" block-place="only-iron-renew" message="You can only break iron blocks!"/>
-    <apply region="lanes" block="never" message="You are not allowed to modify terrain here."/>
     <apply region="not-map" block-place="never" block-break="only-leaves" message="You are not allowed to modify terrain here."/>
     <apply use="deny-beacon"/>
 </regions>
 <!-- Objectives and Modes -->
-<destroyables materials="emerald block" show-progress="true" completion="100%" repairable="false" required="true">
+<destroyables materials="emerald block" show-progress="true" repairable="false" required="true">
     <destroyable name="East Monument" owner="blue-team" region="east-blue-mon"/>
     <destroyable name="West Monument" owner="blue-team" region="west-blue-mon"/>
     <destroyable name="West Monument" owner="red-team" region="west-red-mon"/>
@@ -143,10 +153,6 @@
     <core team="blue-team" region="blue-core"/>
     <core team="red-team" region="red-core"/>
 </cores>
-<!-- <modes>
-    <mode id="coal-mode" after="30m" material="coal block"/>
-    <mode id="gold-mode" after="1h" material="gold block"/>
-</modes> -->
 <!-- Misc -->
 <portals protect="true" sound="false">
     <portal region="blue-exit-portal" destination="blue-exit-dest" filter="only-blue" yaw="@0"/>
@@ -157,14 +163,6 @@
 <renewables>
     <renewable region="team-renewables" renew-filter="only-iron" interval="15s" sound="false"/>
 </renewables>
-<spawners player-region="everywhere">
-    <spawner spawn-region="gap-spawner-a" max-entities="2" delay="25s">
-        <item material="golden apple"/>
-    </spawner>
-    <spawner spawn-region="gap-spawner-b" max-entities="2" delay="25s">
-        <item material="golden apple"/>
-    </spawner>
-</spawners>
 <toolrepair>
     <tool>iron sword</tool>
     <tool>bow</tool>
@@ -188,19 +186,28 @@
     <item>emerald block</item>
     <item>gold block</item>
     <item>snowball</item>
-    <item>red_rose</item>
-    <item>yellow_flower</item>
-    <item>flower_pot_item</item>
+    <item>red rose</item>
+    <item>yellow flower</item>
+    <item>flower pot item</item>
     <item>seeds</item>
     <item>sapling</item>
     <item>apple</item>
     <item>golden apple</item>
-    <item>double_plant</item>
+    <item>double plant</item>
 </itemremove>
 <kill-rewards>
     <kill-reward>
-        <item amount="16" damage="5" material="wood"/>
+        <item amount="32" damage="5" material="wood"/>
     </kill-reward>
+    <unless variant="classic">
+        <kill-reward>
+            <filter>
+                <kill-streak repeat="true" count="2"/>
+            </filter>
+            <item amount="16" material="tnt"/>
+            <item amount="16" material="redstone"/>
+        </kill-reward>
+    </unless>
 </kill-rewards>
 <hunger>
     <depletion>off</depletion>
