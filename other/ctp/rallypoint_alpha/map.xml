@@ -1,26 +1,25 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Rallypoint Alpha</name>
-<version>1.0.0</version>
+<version>1.1.0</version>
 <objective>Capture hills to connect your team's two bases together</objective>
 <gamemode>cp</gamemode>
 <created>2024-07-05</created>
 <phase>development</phase>
 <include id="void-death"/>
-<constants>
-    <constant id="void-plane">14</constant>
-    <constant id="affect-obs">never</constant>
-</constants>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
 </authors>
+<score/>
+<time>12m</time>
 <teams>
-    <team id="purple-team" color="dark purple" max="24">Purple</team>
-    <team id="orange-team" color="gold" max="24">Orange</team>
+    <team id="purple-team" color="dark purple" max="18">Purple</team>
+    <team id="orange-team" color="gold" max="18">Orange</team>
 </teams>
 <spawns>
-    <default kit="obs" angle="0.5,114,-2.5" safe="true">
+    <default kit="obs" angle="0.5,95,-2.5" safe="true">
         <region>
-            <cuboid min="-2,113,0" max="3,113,-1"/>
+            <cylinder base="0.5,93,1.5" radius="2" height="1"/>
         </region>
     </default>
     <spawn team="purple-team" angle="0.5,21,0.5" kit="spawn-kit">
@@ -58,26 +57,47 @@
     <kit id="spawn-kit">
         <clear/>
         <item slot="0" material="stone sword" unbreakable="true"/>
-        <item slot="1" material="bow" unbreakable="true">
-            <enchantment>arrow infinite</enchantment>
-        </item>
+        <item slot="1" material="bow" unbreakable="true"/>
         <item slot="2" material="stone axe" unbreakable="true">
             <enchantment>dig speed</enchantment>
         </item>
         <item slot="3" material="wood" damage="2" amount="64"/>
         <item slot="4" material="wood" damage="2" amount="64"/>
         <item slot="8" material="golden apple"/>
-        <item slot="28" material="arrow"/>
+        <action filter="bow=0">
+            <kit>
+                <item slot="28" material="arrow" amount="36"/>
+            </kit>
+        </action>
+        <action filter="bow=1..">
+            <kit>
+                <item slot="28" material="arrow"/>
+            </kit>
+        </action>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
         <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="3">projectile_protection</enchantment>
+            <enchantment level="3">projectile protection</enchantment>
         </leggings>
         <boots unbreakable="true" material="iron boots"/>
         <effect duration="3s" amplifier="255">resistance</effect>
         <effect>night vision</effect>
     </kit>
+    <kit id="fireball" deduct-items="false">
+        <item projectile="throwable-fireball" material="fireball" name="`rFireball"/>
+    </kit>
 </kits>
+<kill-rewards>
+    <kill-reward>
+        <item material="emerald"/>
+    </kill-reward>
+    <kill-reward filter="bow=0">
+        <item material="arrow" amount="8"/>
+    </kill-reward>
+</kill-rewards>
+<projectiles>
+    <projectile id="throwable-fireball" name="Fireball" projectile="Fireball" velocity=".6" click="right" power="4" damage="1" cooldown="1s"/>
+</projectiles>
 <filters>
     <team id="only-purple">purple-team</team>
     <team id="only-orange">orange-team</team>
@@ -166,26 +186,24 @@
         <translate id="orange-spawn-a" region="purple-spawn-a" offset="126,0,0"/>
         <translate id="orange-spawn-b" region="purple-spawn-a" offset="0,0,126"/>
     </union>
-    <block id="purple-a" location="-69,20,-69"/>
-    <block id="purple-b" location="69,20,69"/>
-    <block id="orange-b" location="-68,20,69"/>
-    <block id="orange-a" location="69,20,-68"/>
-    <union id="purple-warp-to-b">
-        <cuboid min="-71,20,-60" max="-72,24,-65"/>
-        <cuboid min="-65,10,-71" max="-60,24,-72"/>
-    </union>
-    <mirror id="orange-warp-to-b" region="purple-warp-to-b" origin="0.5,0,0.5" normal="1,0,0"/>
-    <mirror id="purple-warp-to-a" region="purple-warp-to-b" origin="0.5,0,0.5" normal="1,0,1"/>
-    <mirror id="orange-warp-to-a" region="purple-warp-to-b" origin="0.5,0,0.5" normal="0,0,1"/>
-    <negative id="out-of-bounds">
-        <rectangle id="playable" min="-50,-50" max="51,51"/>
+    <block id="purple-b" location="-70,13,-69"/>
+    <block id="purple-a" location="70,13,70"/>
+    <block id="orange-a" location="-70,13,70"/>
+    <block id="orange-b" location="70,13,-69"/>
+    <cuboid id="purple-warp-to-b" min="62,13,72" size="3,3,1"/>
+    <cuboid id="orange-warp-to-b" min="-72,13,62" size="1,3,3"/>
+    <cuboid id="purple-warp-to-a" min="-64,13,-72" size="3,3,1"/>
+    <cuboid id="orange-warp-to-a" min="72,13,-64" size="1,3,3"/>
+    <negative id="nonplayable">
+        <union id="playable">
+            <rectangle id="playable-main" min="-50,-50" max="51,51"/>
+            <rectangle id="playable-pb-oa" min="-47,-57" max="-36,58"/>
+            <rectangle id="playable-pb-ob" min="-57,-36" max="58,-47"/>
+            <rectangle id="playable-pa-oa" min="58,48" max="-57,37"/>
+            <rectangle id="playable-pa-ob" min="48,58" max="37,-57"/>
+        </union>
     </negative>
-    <apply region="purple-spawn" enter="only-purple" message="You cannot enter the enemy spawn!"/>
-    <apply region="orange-spawn" enter="only-orange" message="You cannot enter the enemy spawn!"/>
-    <apply block="deny-void"/>
-    <apply region="playable" block="allowed-blocks"/>
-    <apply block="never"/>
-    <cylinder id="11-capture" base="-41.5,20,-41.5" radius="5" height="4"/>
+    <cylinder id="11-capture" base="-41.5,13,-41.5" radius="5" height="4"/>
     <translate id="12-capture" region="11-capture" offset="21,0,0"/>
     <translate id="13-capture" region="12-capture" offset="21,2,0"/>
     <translate id="14-capture" region="13-capture" offset="21,-2,0"/>
@@ -235,13 +253,19 @@
     <translate id="53-display" region="43-display" offset="0,0,21"/>
     <translate id="54-display" region="44-display" offset="0,0,21"/>
     <translate id="55-display" region="45-display" offset="0,0,21"/>
-    <sphere id="win-display" origin="0.5,50,0.5" radius="8"/>
-    <cuboid id="ew-conn-purple" min="-57,8,-45" size="10,7,7"/>
-    <cuboid id="ns-conn-purple" min="-45,8,-57" size="7,7,10"/>
-    <cuboid id="ew-conn-orange" min="48,8,-45" size="10,7,7"/>
-    <cuboid id="ns-conn-orange" min="39,8,-57" size="7,7,10"/>
+    <sphere id="win-display" origin="0.5,80,0.5" radius="7"/>
+    <cuboid id="ew-decor-indicator-purple-r" min="-57,1,-45" size="10,7,7"/>
+    <cuboid id="ns-decor-indicator-purple-r" min="-45,1,-57" size="7,7,10"/>
+    <cuboid id="ew-decor-indicator-orange-r" min="48,1,-45" size="10,7,7"/>
+    <cuboid id="ns-decor-indicator-orange-r" min="39,1,-57" size="7,7,10"/>
+    <cuboid id="ew-sky-indicator-purple-r" min="-59,69,-43" size="14,3,3"/>
+    <cuboid id="ns-sky-indicator-purple-r" min="-43,69,-59" size="3,3,14"/>
+    <cuboid id="ew-sky-indicator-orange-r" min="46,69,-43" size="14,3,3"/>
+    <cuboid id="ns-sky-indicator-orange-r" min="41,69,-59" size="3,3,14"/>
+    <cuboid id="ew-cube-indicator-purple-r" min="-44,68,-44" size="5,5,5"/>
+    <cuboid id="ew-cube-indicator-orange-r" min="40,68,-44" size="5,5,5"/>
     <union id="11-mini">
-        <block id="11-mini-prime" location="-67,18,-67"/>
+        <block id="11-mini-prime" location="-67,11,-67"/>
         <translate region="11-mini-prime" offset="126,0,0"/>
         <translate region="11-mini-prime" offset="126,0,126"/>
         <translate region="11-mini-prime" offset="0,0,126"/>
@@ -310,13 +334,299 @@
     <translate id="25-35-mini" region="21-31-mini" offset="8,0,0"/>
     <translate id="35-45-mini" region="31-41-mini" offset="8,0,0"/>
     <translate id="45-55-mini" region="41-51-mini" offset="8,0,0"/>
+    <block id="spawner-east" location="42.5,15,0.5"/>
+    <block id="spawner-south" location="42.5,15,0.5"/>
+    <block id="spawner-west" location="0.5,15,-41.5"/>
+    <block id="spawner-north" location="-41.5,15,0.5"/>
+    <block id="spawner-center" location="0.5,15,0.5"/>
+    <sphere id="spawner-east-detect" origin="42.5,15,0.5" radius="3"/>
+    <sphere id="spawner-south-detect" origin="0.5,15,42.5" radius="3"/>
+    <sphere id="spawner-west-detect" origin="0.5,15,-41.5" radius="3"/>
+    <sphere id="spawner-north-detect" origin="-41.5,15,0.5" radius="3"/>
+    <sphere id="spawner-center-detect" origin="0.5,15,0.5" radius="3"/>
+    <apply region="purple-spawn" enter="only-purple" message="You cannot enter the enemy spawn!"/>
+    <apply region="orange-spawn" enter="only-orange" message="You cannot enter the enemy spawn!"/>
+    <apply region="playable" block="allowed-blocks"/>
+    <apply region="nonplayable" block="never"/>
 </regions>
 <portals>
-    <portal region="purple-warp-to-a" destination="purple-a" yaw="@-135"/>
-    <portal region="purple-warp-to-b" destination="purple-b" yaw="@135"/>
-    <portal region="orange-warp-to-a" destination="orange-a" yaw="@45"/>
-    <portal region="orange-warp-to-b" destination="orange-b" yaw="@-135"/>
+    <portal region="purple-warp-to-a" destination="purple-a" yaw="@135"/>
+    <portal region="purple-warp-to-b" destination="purple-b" yaw="@-45"/>
+    <portal region="orange-warp-to-a" destination="orange-a" yaw="@-135"/>
+    <portal region="orange-warp-to-b" destination="orange-b" yaw="@45"/>
 </portals>
+<control-points points="0" owner-points="1" neutral-state="true" capture-rule="majority" required="false" visual-materials="visual-materials" decay-rate="0" owned-decay-rate=".1" show-sidebar="false" show-effects="false" show-info="false">
+    <control-point id="11-hill" name="A1" capture="11-capture" progress="11-display" captured="11-display" capture-time="06s"/>
+    <control-point id="12-hill" name="A2" capture="12-capture" progress="12-display" captured="12-display" capture-time="06s"/>
+    <control-point id="13-hill" name="A3" capture="13-capture" progress="13-display" captured="13-display" capture-time="06s"/>
+    <control-point id="14-hill" name="A4" capture="14-capture" progress="14-display" captured="14-display" capture-time="06s"/>
+    <control-point id="15-hill" name="A5" capture="15-capture" progress="15-display" captured="15-display" capture-time="06s"/>
+    <control-point id="21-hill" name="B1" capture="21-capture" progress="21-display" captured="21-display" capture-time="06s"/>
+    <control-point id="22-hill" name="B2" capture="22-capture" progress="22-display" captured="22-display" capture-time="12s"/>
+    <control-point id="23-hill" name="B3" capture="23-capture" progress="23-display" captured="23-display" capture-time="18s"/>
+    <control-point id="24-hill" name="B4" capture="24-capture" progress="24-display" captured="24-display" capture-time="12s"/>
+    <control-point id="25-hill" name="B5" capture="25-capture" progress="25-display" captured="25-display" capture-time="06s"/>
+    <control-point id="31-hill" name="C1" capture="31-capture" progress="31-display" captured="31-display" capture-time="06s"/>
+    <control-point id="32-hill" name="C2" capture="32-capture" progress="32-display" captured="32-display" capture-time="18s"/>
+    <control-point id="33-hill" name="C3" capture="33-capture" progress="33-display" captured="33-display" capture-time="18s"/>
+    <control-point id="34-hill" name="C4" capture="34-capture" progress="34-display" captured="34-display" capture-time="18s"/>
+    <control-point id="35-hill" name="C5" capture="35-capture" progress="35-display" captured="35-display" capture-time="06s"/>
+    <control-point id="41-hill" name="D1" capture="41-capture" progress="41-display" captured="41-display" capture-time="06s"/>
+    <control-point id="42-hill" name="D2" capture="42-capture" progress="42-display" captured="42-display" capture-time="12s"/>
+    <control-point id="43-hill" name="D3" capture="43-capture" progress="43-display" captured="43-display" capture-time="18s"/>
+    <control-point id="44-hill" name="D4" capture="44-capture" progress="44-display" captured="44-display" capture-time="12s"/>
+    <control-point id="45-hill" name="D5" capture="45-capture" progress="45-display" captured="45-display" capture-time="06s"/>
+    <control-point id="51-hill" name="E1" capture="51-capture" progress="51-display" captured="51-display" capture-time="06s"/>
+    <control-point id="52-hill" name="E2" capture="52-capture" progress="52-display" captured="52-display" capture-time="06s"/>
+    <control-point id="53-hill" name="E3" capture="53-capture" progress="53-display" captured="53-display" capture-time="06s"/>
+    <control-point id="54-hill" name="E4" capture="54-capture" progress="54-display" captured="54-display" capture-time="06s"/>
+    <control-point id="55-hill" name="E5" capture="55-capture" progress="55-display" captured="55-display" capture-time="06s"/>
+    <control-point id="win" name="Rallypoint" capture="everywhere" captured="win-display" player-filter="allow-win" required="true" capture-time="0s"/>
+</control-points>
+<structures>
+    <!-- decorative connectors -->
+    <structure id="ew-decor-indicator-purple" region="ew-decor-indicator-purple-r" origin="-62,20,-41"/>
+    <structure id="ns-decor-indicator-purple" region="ns-decor-indicator-purple-r" origin="-41,20,-62"/>
+    <structure id="ew-decor-indicator-orange" region="ew-decor-indicator-orange-r" origin="42,20,-41"/>
+    <structure id="ns-decor-indicator-orange" region="ns-decor-indicator-orange-r" origin="42,20,-62"/>
+    <dynamic structure="ew-decor-indicator-purple" location="-62,20,-41" trigger="p-11"/>
+    <dynamic structure="ns-decor-indicator-purple" location="-41,20,-62" trigger="p-11"/>
+    <dynamic structure="ew-decor-indicator-orange" location="42,20,-41" trigger="o-15"/>
+    <dynamic structure="ns-decor-indicator-orange" location="42,20,-62" trigger="o-15"/>
+    <dynamic structure="ew-decor-indicator-purple" location="43,20,43" trigger="p-55"/>
+    <dynamic structure="ns-decor-indicator-purple" location="43,20,43" trigger="p-55"/>
+    <dynamic structure="ew-decor-indicator-orange" location="-63,20,43" trigger="o-51"/>
+    <dynamic structure="ns-decor-indicator-orange" location="-42,20,43" trigger="o-51"/>
+    <dynamic structure="ew-decor-indicator-purple" location="-41,20,-41" trigger="all(p-11, p-12)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="-20,20,-41" trigger="all(p-12, p-13)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="1,20,-41" trigger="all(p-13, p-14)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="22,20,-41" trigger="all(p-14, p-15)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="-41,20,-20" trigger="all(p-21, p-22)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="-20,20,-20" trigger="all(p-22, p-23)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="1,20,-20" trigger="all(p-23, p-24)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="22,20,-20" trigger="all(p-24, p-25)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="-41,20,1" trigger="all(p-31, p-32)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="-20,20,1" trigger="all(p-32, p-33)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="1,20,1" trigger="all(p-33, p-34)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="22,20,1" trigger="all(p-34, p-35)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="-41,20,22" trigger="all(p-41, p-42)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="-20,20,22" trigger="all(p-42, p-43)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="1,20,22" trigger="all(p-43, p-44)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="22,20,22" trigger="all(p-44, p-45)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="-41,20,43" trigger="all(p-51, p-52)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="-20,20,43" trigger="all(p-52, p-53)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="1,20,43" trigger="all(p-53, p-54)"/>
+    <dynamic structure="ew-decor-indicator-purple" location="22,20,43" trigger="all(p-54, p-55)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="-41,20,-41" trigger="all(p-11, p-21)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="-41,20,-20" trigger="all(p-21, p-31)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="-41,20,1" trigger="all(p-31, p-41)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="-41,20,22" trigger="all(p-41, p-51)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="-20,20,-41" trigger="all(p-12, p-22)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="-20,20,-20" trigger="all(p-22, p-32)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="-20,20,1" trigger="all(p-32, p-42)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="-20,20,22" trigger="all(p-42, p-52)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="1,20,-41" trigger="all(p-13, p-23)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="1,20,-20" trigger="all(p-23, p-33)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="1,20,1" trigger="all(p-33, p-43)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="1,20,22" trigger="all(p-43, p-53)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="22,20,-41" trigger="all(p-14, p-24)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="22,20,-20" trigger="all(p-24, p-34)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="22,20,1" trigger="all(p-34, p-44)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="22,20,22" trigger="all(p-44, p-54)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="43,20,-41" trigger="all(p-15, p-25)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="43,20,-20" trigger="all(p-25, p-35)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="43,20,1" trigger="all(p-35, p-45)"/>
+    <dynamic structure="ns-decor-indicator-purple" location="43,20,22" trigger="all(p-45, p-55)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="-42,20,-41" trigger="all(o-11, o-12)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="-21,20,-41" trigger="all(o-12, o-13)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="0,20,-41" trigger="all(o-13, o-14)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="21,20,-41" trigger="all(o-14, o-15)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="-42,20,-20" trigger="all(o-21, o-22)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="-21,20,-20" trigger="all(o-22, o-23)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="0,20,-20" trigger="all(o-23, o-24)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="21,20,-20" trigger="all(o-24, o-25)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="-42,20,1" trigger="all(o-31, o-32)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="-21,20,1" trigger="all(o-32, o-33)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="0,20,1" trigger="all(o-33, o-34)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="21,20,1" trigger="all(o-34, o-35)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="-42,20,22" trigger="all(o-41, o-42)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="-21,20,22" trigger="all(o-42, o-43)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="0,20,22" trigger="all(o-43, o-44)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="21,20,22" trigger="all(o-44, o-45)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="-42,20,43" trigger="all(o-51, o-52)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="-21,20,43" trigger="all(o-52, o-53)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="0,20,43" trigger="all(o-53, o-54)"/>
+    <dynamic structure="ew-decor-indicator-orange" location="21,20,43" trigger="all(o-54, o-55)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="-42,20,-41" trigger="all(o-11, o-21)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="-42,20,-20" trigger="all(o-21, o-31)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="-42,20,1" trigger="all(o-31, o-41)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="-42,20,22" trigger="all(o-41, o-51)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="-21,20,-41" trigger="all(o-12, o-22)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="-21,20,-20" trigger="all(o-22, o-32)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="-21,20,1" trigger="all(o-32, o-42)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="-21,20,22" trigger="all(o-42, o-52)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="0,20,-41" trigger="all(o-13, o-23)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="0,20,-20" trigger="all(o-23, o-33)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="0,20,1" trigger="all(o-33, o-43)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="0,20,22" trigger="all(o-43, o-53)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="21,20,-41" trigger="all(o-14, o-24)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="21,20,-20" trigger="all(o-24, o-34)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="21,20,1" trigger="all(o-34, o-44)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="21,20,22" trigger="all(o-44, o-54)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="42,20,-41" trigger="all(o-15, o-25)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="42,20,-20" trigger="all(o-25, o-35)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="42,20,1" trigger="all(o-35, o-45)"/>
+    <dynamic structure="ns-decor-indicator-orange" location="42,20,22" trigger="all(o-45, o-55)"/>
+
+    <!-- sky connectors -->
+    <structure id="ew-sky-indicator-purple" region="ew-sky-indicator-purple-r" origin="-62,20,-41"/>
+    <structure id="ns-sky-indicator-purple" region="ns-sky-indicator-purple-r" origin="-41,20,-62"/>
+    <structure id="ew-sky-indicator-orange" region="ew-sky-indicator-orange-r" origin="42,20,-41"/>
+    <structure id="ns-sky-indicator-orange" region="ns-sky-indicator-orange-r" origin="42,20,-62"/>
+    <dynamic structure="ew-sky-indicator-purple" location="-62,20,-41" trigger="p-11"/>
+    <dynamic structure="ns-sky-indicator-purple" location="-41,20,-62" trigger="p-11"/>
+    <dynamic structure="ew-sky-indicator-orange" location="42,20,-41" trigger="o-15"/>
+    <dynamic structure="ns-sky-indicator-orange" location="42,20,-62" trigger="o-15"/>
+    <dynamic structure="ew-sky-indicator-purple" location="43,20,43" trigger="p-55"/>
+    <dynamic structure="ns-sky-indicator-purple" location="43,20,43" trigger="p-55"/>
+    <dynamic structure="ew-sky-indicator-orange" location="-63,20,43" trigger="o-51"/>
+    <dynamic structure="ns-sky-indicator-orange" location="-42,20,43" trigger="o-51"/>
+    <dynamic structure="ew-sky-indicator-purple" location="-41,20,-41" trigger="all(p-11, p-12)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="-20,20,-41" trigger="all(p-12, p-13)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="1,20,-41" trigger="all(p-13, p-14)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="22,20,-41" trigger="all(p-14, p-15)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="-41,20,-20" trigger="all(p-21, p-22)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="-20,20,-20" trigger="all(p-22, p-23)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="1,20,-20" trigger="all(p-23, p-24)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="22,20,-20" trigger="all(p-24, p-25)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="-41,20,1" trigger="all(p-31, p-32)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="-20,20,1" trigger="all(p-32, p-33)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="1,20,1" trigger="all(p-33, p-34)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="22,20,1" trigger="all(p-34, p-35)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="-41,20,22" trigger="all(p-41, p-42)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="-20,20,22" trigger="all(p-42, p-43)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="1,20,22" trigger="all(p-43, p-44)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="22,20,22" trigger="all(p-44, p-45)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="-41,20,43" trigger="all(p-51, p-52)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="-20,20,43" trigger="all(p-52, p-53)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="1,20,43" trigger="all(p-53, p-54)"/>
+    <dynamic structure="ew-sky-indicator-purple" location="22,20,43" trigger="all(p-54, p-55)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="-41,20,-41" trigger="all(p-11, p-21)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="-41,20,-20" trigger="all(p-21, p-31)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="-41,20,1" trigger="all(p-31, p-41)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="-41,20,22" trigger="all(p-41, p-51)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="-20,20,-41" trigger="all(p-12, p-22)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="-20,20,-20" trigger="all(p-22, p-32)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="-20,20,1" trigger="all(p-32, p-42)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="-20,20,22" trigger="all(p-42, p-52)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="1,20,-41" trigger="all(p-13, p-23)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="1,20,-20" trigger="all(p-23, p-33)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="1,20,1" trigger="all(p-33, p-43)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="1,20,22" trigger="all(p-43, p-53)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="22,20,-41" trigger="all(p-14, p-24)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="22,20,-20" trigger="all(p-24, p-34)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="22,20,1" trigger="all(p-34, p-44)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="22,20,22" trigger="all(p-44, p-54)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="43,20,-41" trigger="all(p-15, p-25)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="43,20,-20" trigger="all(p-25, p-35)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="43,20,1" trigger="all(p-35, p-45)"/>
+    <dynamic structure="ns-sky-indicator-purple" location="43,20,22" trigger="all(p-45, p-55)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="-42,20,-41" trigger="all(o-11, o-12)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="-21,20,-41" trigger="all(o-12, o-13)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="0,20,-41" trigger="all(o-13, o-14)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="21,20,-41" trigger="all(o-14, o-15)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="-42,20,-20" trigger="all(o-21, o-22)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="-21,20,-20" trigger="all(o-22, o-23)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="0,20,-20" trigger="all(o-23, o-24)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="21,20,-20" trigger="all(o-24, o-25)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="-42,20,1" trigger="all(o-31, o-32)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="-21,20,1" trigger="all(o-32, o-33)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="0,20,1" trigger="all(o-33, o-34)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="21,20,1" trigger="all(o-34, o-35)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="-42,20,22" trigger="all(o-41, o-42)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="-21,20,22" trigger="all(o-42, o-43)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="0,20,22" trigger="all(o-43, o-44)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="21,20,22" trigger="all(o-44, o-45)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="-42,20,43" trigger="all(o-51, o-52)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="-21,20,43" trigger="all(o-52, o-53)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="0,20,43" trigger="all(o-53, o-54)"/>
+    <dynamic structure="ew-sky-indicator-orange" location="21,20,43" trigger="all(o-54, o-55)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="-42,20,-41" trigger="all(o-11, o-21)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="-42,20,-20" trigger="all(o-21, o-31)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="-42,20,1" trigger="all(o-31, o-41)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="-42,20,22" trigger="all(o-41, o-51)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="-21,20,-41" trigger="all(o-12, o-22)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="-21,20,-20" trigger="all(o-22, o-32)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="-21,20,1" trigger="all(o-32, o-42)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="-21,20,22" trigger="all(o-42, o-52)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="0,20,-41" trigger="all(o-13, o-23)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="0,20,-20" trigger="all(o-23, o-33)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="0,20,1" trigger="all(o-33, o-43)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="0,20,22" trigger="all(o-43, o-53)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="21,20,-41" trigger="all(o-14, o-24)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="21,20,-20" trigger="all(o-24, o-34)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="21,20,1" trigger="all(o-34, o-44)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="21,20,22" trigger="all(o-44, o-54)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="42,20,-41" trigger="all(o-15, o-25)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="42,20,-20" trigger="all(o-25, o-35)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="42,20,1" trigger="all(o-35, o-45)"/>
+    <dynamic structure="ns-sky-indicator-orange" location="42,20,22" trigger="all(o-45, o-55)"/>
+
+    <!-- cube connectors -->
+    <structure id="ew-cube-indicator-purple" region="ew-cube-indicator-purple-r" origin="-42,0,-42"/>
+    <structure id="ew-cube-indicator-orange" region="ew-cube-indicator-orange-r" origin="42,0,-42"/>
+    <dynamic structure="ew-cube-indicator-purple" location="-42,0,-42" trigger="p-11"/>
+    <dynamic structure="ew-cube-indicator-purple" location="-21,0,-42" trigger="p-12"/>
+    <dynamic structure="ew-cube-indicator-purple" location="0,0,-42" trigger="p-13"/>
+    <dynamic structure="ew-cube-indicator-purple" location="21,0,-42" trigger="p-14"/>
+    <dynamic structure="ew-cube-indicator-purple" location="42,0,-42" trigger="p-15"/>
+    <dynamic structure="ew-cube-indicator-purple" location="-42,0,-21" trigger="p-21"/>
+    <dynamic structure="ew-cube-indicator-purple" location="-21,0,-21" trigger="p-22"/>
+    <dynamic structure="ew-cube-indicator-purple" location="0,0,-21" trigger="p-23"/>
+    <dynamic structure="ew-cube-indicator-purple" location="21,0,-21" trigger="p-24"/>
+    <dynamic structure="ew-cube-indicator-purple" location="42,0,-21" trigger="p-25"/>
+    <dynamic structure="ew-cube-indicator-purple" location="-42,0,0" trigger="p-31"/>
+    <dynamic structure="ew-cube-indicator-purple" location="-21,0,0" trigger="p-32"/>
+    <dynamic structure="ew-cube-indicator-purple" location="0,0,0" trigger="p-33"/>
+    <dynamic structure="ew-cube-indicator-purple" location="21,0,0" trigger="p-34"/>
+    <dynamic structure="ew-cube-indicator-purple" location="42,0,0" trigger="p-35"/>
+    <dynamic structure="ew-cube-indicator-purple" location="-42,0,21" trigger="p-41"/>
+    <dynamic structure="ew-cube-indicator-purple" location="-21,0,21" trigger="p-42"/>
+    <dynamic structure="ew-cube-indicator-purple" location="0,0,21" trigger="p-43"/>
+    <dynamic structure="ew-cube-indicator-purple" location="21,0,21" trigger="p-44"/>
+    <dynamic structure="ew-cube-indicator-purple" location="42,0,21" trigger="p-45"/>
+    <dynamic structure="ew-cube-indicator-purple" location="-42,0,42" trigger="p-51"/>
+    <dynamic structure="ew-cube-indicator-purple" location="-21,0,42" trigger="p-52"/>
+    <dynamic structure="ew-cube-indicator-purple" location="0,0,42" trigger="p-53"/>
+    <dynamic structure="ew-cube-indicator-purple" location="21,0,42" trigger="p-54"/>
+    <dynamic structure="ew-cube-indicator-purple" location="42,0,42" trigger="p-55"/>
+
+    <dynamic structure="ew-cube-indicator-orange" location="-42,0,-42" trigger="o-11"/>
+    <dynamic structure="ew-cube-indicator-orange" location="-21,0,-42" trigger="o-12"/>
+    <dynamic structure="ew-cube-indicator-orange" location="0,0,-42" trigger="o-13"/>
+    <dynamic structure="ew-cube-indicator-orange" location="21,0,-42" trigger="o-14"/>
+    <dynamic structure="ew-cube-indicator-orange" location="42,0,-42" trigger="o-15"/>
+    <dynamic structure="ew-cube-indicator-orange" location="-42,0,-21" trigger="o-21"/>
+    <dynamic structure="ew-cube-indicator-orange" location="-21,0,-21" trigger="o-22"/>
+    <dynamic structure="ew-cube-indicator-orange" location="0,0,-21" trigger="o-23"/>
+    <dynamic structure="ew-cube-indicator-orange" location="21,0,-21" trigger="o-24"/>
+    <dynamic structure="ew-cube-indicator-orange" location="42,0,-21" trigger="o-25"/>
+    <dynamic structure="ew-cube-indicator-orange" location="-42,0,0" trigger="o-31"/>
+    <dynamic structure="ew-cube-indicator-orange" location="-21,0,0" trigger="o-32"/>
+    <dynamic structure="ew-cube-indicator-orange" location="0,0,0" trigger="o-33"/>
+    <dynamic structure="ew-cube-indicator-orange" location="21,0,0" trigger="o-34"/>
+    <dynamic structure="ew-cube-indicator-orange" location="42,0,0" trigger="o-35"/>
+    <dynamic structure="ew-cube-indicator-orange" location="-42,0,21" trigger="o-41"/>
+    <dynamic structure="ew-cube-indicator-orange" location="-21,0,21" trigger="o-42"/>
+    <dynamic structure="ew-cube-indicator-orange" location="0,0,21" trigger="o-43"/>
+    <dynamic structure="ew-cube-indicator-orange" location="21,0,21" trigger="o-44"/>
+    <dynamic structure="ew-cube-indicator-orange" location="42,0,21" trigger="o-45"/>
+    <dynamic structure="ew-cube-indicator-orange" location="-42,0,42" trigger="o-51"/>
+    <dynamic structure="ew-cube-indicator-orange" location="-21,0,42" trigger="o-52"/>
+    <dynamic structure="ew-cube-indicator-orange" location="0,0,42" trigger="o-53"/>
+    <dynamic structure="ew-cube-indicator-orange" location="21,0,42" trigger="o-54"/>
+    <dynamic structure="ew-cube-indicator-orange" location="42,0,42" trigger="o-55"/>
+</structures>
 <actions>
     <trigger scope="match" filter="p-11">
         <action>
@@ -1293,125 +1603,200 @@
             <fill region="45-55-mini" material="air"/>
         </action>
     </trigger>
+    <trigger scope="player" filter="alive">
+        <action>
+            <action filter="sword=1"><action id="sword-1"/></action>
+            <action filter="sword=2"><action id="sword-2"/></action>
+            <action filter="sword=3"><action id="sword-3"/></action>
+            <action filter="bow=1"><action id="bow-1"/></action>
+            <action filter="bow=2"><action id="bow-2"/></action>
+            <action filter="bow=3"><action id="bow-3"/></action>
+            <action filter="tool=1"><action id="tool-1"/></action>
+            <action filter="tool=2"><action id="tool-2"/></action>
+            <action filter="tool=3"><action id="tool-3"/></action>
+            <action filter="armor=1"><action id="armor-1"/></action>
+            <action filter="armor=2"><action id="armor-2"/></action>
+            <action filter="armor=3"><action id="armor-3"/></action>
+        </action>
+    </trigger>
+    <action id="sword-1" scope="player">
+        <set var="sword" value="1"/>
+        <replace-item ignore-metadata="true">
+            <find material="stone sword"/>
+            <replace material="iron sword" unbreakable="true"/>
+        </replace-item>
+    </action>
+    <action id="sword-2" scope="player">
+        <set var="sword" value="2"/>
+        <replace-item ignore-metadata="true">
+            <find material="iron sword"/>
+            <replace material="diamond sword" unbreakable="true"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="stone sword"/>
+            <replace material="diamond sword" unbreakable="true"/>
+        </replace-item>
+    </action>
+    <action id="sword-3" scope="player">
+        <set var="sword" value="3"/>
+        <replace-item ignore-metadata="true">
+            <find material="diamond sword"/>
+            <replace material="diamond sword" unbreakable="true">
+                <enchantment>sharpness</enchantment>
+            </replace>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="stone sword"/>
+            <replace material="diamond sword" unbreakable="true">
+                <enchantment>sharpness</enchantment>
+            </replace>
+        </replace-item>
+    </action>
+    <action id="bow-1" scope="player">
+        <set var="bow" value="1"/>
+        <replace-item ignore-metadata="true">
+            <find material="bow"/>
+            <replace material="bow" unbreakable="true">
+                <enchantment>infinity</enchantment>
+            </replace>
+        </replace-item>
+    </action>
+    <action id="bow-2" scope="player">
+        <set var="bow" value="2"/>
+        <replace-item ignore-metadata="true">
+            <find material="bow"/>
+            <replace material="bow" unbreakable="true">
+                <enchantment>infinity</enchantment>
+                <enchantment>power</enchantment>
+            </replace>
+        </replace-item>
+    </action>
+    <action id="bow-3" scope="player">
+        <set var="bow" value="3"/>
+        <replace-item ignore-metadata="true">
+            <find material="bow"/>
+            <replace material="bow" unbreakable="true">
+                <enchantment>infinity</enchantment>
+                <enchantment level="2">power</enchantment>
+            </replace>
+        </replace-item>
+    </action>
+    <action id="tool-1" scope="player">
+        <set var="tool" value="1"/>
+        <replace-item ignore-metadata="true">
+            <find material="stone axe"/>
+            <replace material="stone axe" unbreakable="true">
+                <enchantment level="2">dig speed</enchantment>
+            </replace>
+        </replace-item>
+    </action>
+    <action id="tool-2" scope="player">
+        <set var="tool" value="2"/>
+        <replace-item ignore-metadata="true">
+            <find material="stone axe"/>
+            <replace material="stone axe" unbreakable="true">
+                <enchantment level="3">dig speed</enchantment>
+            </replace>
+        </replace-item>
+    </action>
+    <action id="tool-3" scope="player">
+        <set var="tool" value="3"/>
+        <replace-item ignore-metadata="true">
+            <find material="stone axe"/>
+            <replace material="stone axe" unbreakable="true">
+                <enchantment level="5">dig speed</enchantment>
+            </replace>
+        </replace-item>
+    </action>
+    <action id="armor-1" scope="player">
+        <set var="armor" value="1"/>
+        <replace-item ignore-metadata="true">
+            <find material="leather helmet"/>
+            <replace material="iron helmet" unbreakable="true"/>
+        </replace-item>
+        <replace-item ignore-metadata="true" keep-enchants="true">
+            <find material="chainmail leggings"/>
+            <replace material="iron leggings" unbreakable="true"/>
+        </replace-item>
+    </action>
+    <action id="armor-2" scope="player">
+        <action id="armor-1"/>
+        <set var="armor" value="2"/>
+        <replace-item ignore-metadata="true">
+            <find material="leather chestplate"/>
+            <replace material="iron chestplate" unbreakable="true"/>
+        </replace-item>
+    </action>
+    <action id="armor-3" scope="player">
+        <action id="armor-1"/>
+        <action id="armor-2"/>
+        <set var="armor" value="3"/>
+        <replace-item ignore-metadata="true">
+            <find material="iron chestplate"/>
+            <replace material="iron chestplate" unbreakable="true">
+                <enchantment>protection environmental</enchantment>
+            </replace>
+        </replace-item>
+    </action>
 </actions>
-<score/>
-<time>7m</time>
-<control-points capture-time="5s" points="0" owner-points="1" neutral-state="true" capture-rule="majority" decay="1" show-sidebar="false" required="false" visual-materials="visual-materials">
-    <control-point id="11-hill" name="1-1" capture="11-capture" progress="11-display" captured="11-display" permanent="true" initial-owner="purple-team"/>
-    <control-point id="12-hill" name="1-2" capture="12-capture" progress="12-display" captured="12-display"/>
-    <control-point id="13-hill" name="1-3" capture="13-capture" progress="13-display" captured="13-display"/>
-    <control-point id="14-hill" name="1-4" capture="14-capture" progress="14-display" captured="14-display"/>
-    <control-point id="15-hill" name="1-5" capture="15-capture" progress="15-display" captured="15-display" permanent="true" initial-owner="orange-team"/>
-    <control-point id="21-hill" name="2-1" capture="21-capture" progress="21-display" captured="21-display"/>
-    <control-point id="22-hill" name="2-2" capture="22-capture" progress="22-display" captured="22-display"/>
-    <control-point id="23-hill" name="2-3" capture="23-capture" progress="23-display" captured="23-display"/>
-    <control-point id="24-hill" name="2-4" capture="24-capture" progress="24-display" captured="24-display"/>
-    <control-point id="25-hill" name="2-5" capture="25-capture" progress="25-display" captured="25-display"/>
-    <control-point id="31-hill" name="3-1" capture="31-capture" progress="31-display" captured="31-display"/>
-    <control-point id="32-hill" name="3-2" capture="32-capture" progress="32-display" captured="32-display"/>
-    <control-point id="33-hill" name="3-3" capture="33-capture" progress="33-display" captured="33-display"/>
-    <control-point id="34-hill" name="3-4" capture="34-capture" progress="34-display" captured="34-display"/>
-    <control-point id="35-hill" name="3-5" capture="35-capture" progress="35-display" captured="35-display"/>
-    <control-point id="41-hill" name="4-1" capture="41-capture" progress="41-display" captured="41-display"/>
-    <control-point id="42-hill" name="4-2" capture="42-capture" progress="42-display" captured="42-display"/>
-    <control-point id="43-hill" name="4-3" capture="43-capture" progress="43-display" captured="43-display"/>
-    <control-point id="44-hill" name="4-4" capture="44-capture" progress="44-display" captured="44-display"/>
-    <control-point id="45-hill" name="4-5" capture="45-capture" progress="45-display" captured="45-display"/>
-    <control-point id="51-hill" name="5-1" capture="51-capture" progress="51-display" captured="51-display" permanent="true" initial-owner="orange-team"/>
-    <control-point id="52-hill" name="5-2" capture="52-capture" progress="52-display" captured="52-display"/>
-    <control-point id="53-hill" name="5-3" capture="53-capture" progress="53-display" captured="53-display"/>
-    <control-point id="54-hill" name="5-4" capture="54-capture" progress="54-display" captured="54-display"/>
-    <control-point id="55-hill" name="5-5" capture="55-capture" progress="55-display" captured="55-display" permanent="true" initial-owner="purple-team"/>
-    <control-point id="win" name="Control" capture="everywhere" captured="win-display" player-filter="allow-win" show-sidebar="true" required="true" capture-time="0s"/>
-</control-points>
-<structures>
-    <structure id="ew-purple" region="ew-conn-purple" clear="false" origin="-62,20,-41"/>
-    <structure id="ns-purple" region="ns-conn-purple" clear="false" origin="-41,20,-62"/>
-    <structure id="ew-orange" region="ew-conn-orange" clear="false" origin="42,20,-41"/>
-    <structure id="ns-orange" region="ns-conn-orange" clear="false" origin="42,20,-62"/>
-    <dynamic structure="ew-purple" location="-41,20,-41" trigger="all(p-11, p-12)"/>
-    <dynamic structure="ew-purple" location="-20,20,-41" trigger="all(p-12, p-13)"/>
-    <dynamic structure="ew-purple" location="1,20,-41" trigger="all(p-13, p-14)"/>
-    <dynamic structure="ew-purple" location="22,20,-41" trigger="all(p-14, p-15)"/>
-    <dynamic structure="ew-purple" location="-41,20,-20" trigger="all(p-21, p-22)"/>
-    <dynamic structure="ew-purple" location="-20,20,-20" trigger="all(p-22, p-23)"/>
-    <dynamic structure="ew-purple" location="1,20,-20" trigger="all(p-23, p-24)"/>
-    <dynamic structure="ew-purple" location="22,20,-20" trigger="all(p-24, p-25)"/>
-    <dynamic structure="ew-purple" location="-41,20,1" trigger="all(p-31, p-32)"/>
-    <dynamic structure="ew-purple" location="-20,20,1" trigger="all(p-32, p-33)"/>
-    <dynamic structure="ew-purple" location="1,20,1" trigger="all(p-33, p-34)"/>
-    <dynamic structure="ew-purple" location="22,20,1" trigger="all(p-34, p-35)"/>
-    <dynamic structure="ew-purple" location="-41,20,22" trigger="all(p-41, p-42)"/>
-    <dynamic structure="ew-purple" location="-20,20,22" trigger="all(p-42, p-43)"/>
-    <dynamic structure="ew-purple" location="1,20,22" trigger="all(p-43, p-44)"/>
-    <dynamic structure="ew-purple" location="22,20,22" trigger="all(p-44, p-45)"/>
-    <dynamic structure="ew-purple" location="-41,20,43" trigger="all(p-51, p-52)"/>
-    <dynamic structure="ew-purple" location="-20,20,43" trigger="all(p-52, p-53)"/>
-    <dynamic structure="ew-purple" location="1,20,43" trigger="all(p-53, p-54)"/>
-    <dynamic structure="ew-purple" location="22,20,43" trigger="all(p-54, p-55)"/>
-    <dynamic structure="ns-purple" location="-41,20,-41" trigger="all(p-11, p-21)"/>
-    <dynamic structure="ns-purple" location="-41,20,-20" trigger="all(p-21, p-31)"/>
-    <dynamic structure="ns-purple" location="-41,20,1" trigger="all(p-31, p-41)"/>
-    <dynamic structure="ns-purple" location="-41,20,22" trigger="all(p-41, p-51)"/>
-    <dynamic structure="ns-purple" location="-20,20,-41" trigger="all(p-12, p-22)"/>
-    <dynamic structure="ns-purple" location="-20,20,-20" trigger="all(p-22, p-32)"/>
-    <dynamic structure="ns-purple" location="-20,20,1" trigger="all(p-32, p-42)"/>
-    <dynamic structure="ns-purple" location="-20,20,22" trigger="all(p-42, p-52)"/>
-    <dynamic structure="ns-purple" location="1,20,-41" trigger="all(p-13, p-23)"/>
-    <dynamic structure="ns-purple" location="1,20,-20" trigger="all(p-23, p-33)"/>
-    <dynamic structure="ns-purple" location="1,20,1" trigger="all(p-33, p-43)"/>
-    <dynamic structure="ns-purple" location="1,20,22" trigger="all(p-43, p-53)"/>
-    <dynamic structure="ns-purple" location="22,20,-41" trigger="all(p-14, p-24)"/>
-    <dynamic structure="ns-purple" location="22,20,-20" trigger="all(p-24, p-34)"/>
-    <dynamic structure="ns-purple" location="22,20,1" trigger="all(p-34, p-44)"/>
-    <dynamic structure="ns-purple" location="22,20,22" trigger="all(p-44, p-54)"/>
-    <dynamic structure="ns-purple" location="43,20,-41" trigger="all(p-15, p-25)"/>
-    <dynamic structure="ns-purple" location="43,20,-20" trigger="all(p-25, p-35)"/>
-    <dynamic structure="ns-purple" location="43,20,1" trigger="all(p-35, p-45)"/>
-    <dynamic structure="ns-purple" location="43,20,22" trigger="all(p-45, p-55)"/>
-    <dynamic structure="ew-orange" location="-42,20,-41" trigger="all(o-11, o-12)"/>
-    <dynamic structure="ew-orange" location="-21,20,-41" trigger="all(o-12, o-13)"/>
-    <dynamic structure="ew-orange" location="0,20,-41" trigger="all(o-13, o-14)"/>
-    <dynamic structure="ew-orange" location="21,20,-41" trigger="all(o-14, o-15)"/>
-    <dynamic structure="ew-orange" location="-42,20,-20" trigger="all(o-21, o-22)"/>
-    <dynamic structure="ew-orange" location="-21,20,-20" trigger="all(o-22, o-23)"/>
-    <dynamic structure="ew-orange" location="0,20,-20" trigger="all(o-23, o-24)"/>
-    <dynamic structure="ew-orange" location="21,20,-20" trigger="all(o-24, o-25)"/>
-    <dynamic structure="ew-orange" location="-42,20,1" trigger="all(o-31, o-32)"/>
-    <dynamic structure="ew-orange" location="-21,20,1" trigger="all(o-32, o-33)"/>
-    <dynamic structure="ew-orange" location="0,20,1" trigger="all(o-33, o-34)"/>
-    <dynamic structure="ew-orange" location="21,20,1" trigger="all(o-34, o-35)"/>
-    <dynamic structure="ew-orange" location="-42,20,22" trigger="all(o-41, o-42)"/>
-    <dynamic structure="ew-orange" location="-21,20,22" trigger="all(o-42, o-43)"/>
-    <dynamic structure="ew-orange" location="0,20,22" trigger="all(o-43, o-44)"/>
-    <dynamic structure="ew-orange" location="21,20,22" trigger="all(o-44, o-45)"/>
-    <dynamic structure="ew-orange" location="-42,20,43" trigger="all(o-51, o-52)"/>
-    <dynamic structure="ew-orange" location="-21,20,43" trigger="all(o-52, o-53)"/>
-    <dynamic structure="ew-orange" location="0,20,43" trigger="all(o-53, o-54)"/>
-    <dynamic structure="ew-orange" location="21,20,43" trigger="all(o-54, o-55)"/>
-    <dynamic structure="ns-orange" location="-42,20,-41" trigger="all(o-11, o-21)"/>
-    <dynamic structure="ns-orange" location="-42,20,-20" trigger="all(o-21, o-31)"/>
-    <dynamic structure="ns-orange" location="-42,20,1" trigger="all(o-31, o-41)"/>
-    <dynamic structure="ns-orange" location="-42,20,22" trigger="all(o-41, o-51)"/>
-    <dynamic structure="ns-orange" location="-21,20,-41" trigger="all(o-12, o-22)"/>
-    <dynamic structure="ns-orange" location="-21,20,-20" trigger="all(o-22, o-32)"/>
-    <dynamic structure="ns-orange" location="-21,20,1" trigger="all(o-32, o-42)"/>
-    <dynamic structure="ns-orange" location="-21,20,22" trigger="all(o-42, o-52)"/>
-    <dynamic structure="ns-orange" location="0,20,-41" trigger="all(o-13, o-23)"/>
-    <dynamic structure="ns-orange" location="0,20,-20" trigger="all(o-23, o-33)"/>
-    <dynamic structure="ns-orange" location="0,20,1" trigger="all(o-33, o-43)"/>
-    <dynamic structure="ns-orange" location="0,20,22" trigger="all(o-43, o-53)"/>
-    <dynamic structure="ns-orange" location="21,20,-41" trigger="all(o-14, o-24)"/>
-    <dynamic structure="ns-orange" location="21,20,-20" trigger="all(o-24, o-34)"/>
-    <dynamic structure="ns-orange" location="21,20,1" trigger="all(o-34, o-44)"/>
-    <dynamic structure="ns-orange" location="21,20,22" trigger="all(o-44, o-54)"/>
-    <dynamic structure="ns-orange" location="42,20,-41" trigger="all(o-15, o-25)"/>
-    <dynamic structure="ns-orange" location="42,20,-20" trigger="all(o-25, o-35)"/>
-    <dynamic structure="ns-orange" location="42,20,1" trigger="all(o-35, o-45)"/>
-    <dynamic structure="ns-orange" location="42,20,22" trigger="all(o-45, o-55)"/>
-</structures>
+<variables scope="player">
+    <variable id="sword"/>
+    <variable id="bow"/>
+    <variable id="tool"/>
+    <variable id="armor"/>
+</variables>
+<shopkeepers>
+    <shopkeepers name="Upgrades" shop="item-shop">
+        <shopkeeper mob="Villager" yaw="-90">-72.5,13,-62.5</shopkeeper>
+        <shopkeeper mob="Villager" yaw="0">63.5,13,-72.5</shopkeeper>
+        <shopkeeper mob="Villager" yaw="90">73.5,13,63.5</shopkeeper>
+        <shopkeeper mob="Villager" yaw="180">-62.5,13,73.5</shopkeeper>
+    </shopkeepers>
+</shopkeepers>
+<shops>
+    <shop id="item-shop" name="Items">
+        <category id="shop" material="emerald">
+            <item material="golden apple" price="2" currency="emerald"/>
+            <item material="fireball" name="`rFireball" lore="`7Right-click to launch!" price="3" currency="emerald" kit="fireball"/>
+            <item material="tnt" lore="`7Instantly ignites once placed." price="5" currency="emerald"/>
+            <item material="wood" amount="16" damage="2" price="1" currency="emerald"/>
+
+            <item action="sword-1" price="5" currency="emerald" filter="sword=0" material="iron sword" name="`aPermanent Sword Upgrade `7(Lv. 0 -> 1)"/>
+            <item action="sword-2" price="8" currency="emerald" filter="sword=1" material="diamond sword" name="`aPermanent Sword Upgrade `7(Lv. 1 -> 2)"/>
+            <item action="sword-3" price="12" currency="emerald" filter="sword=2" material="diamond sword" name="`aPermanent Sword Upgrade `7(Lv. 2 -> 3)"/>
+            <item action="bow-1" price="5" currency="emerald" filter="bow=0" material="bow" name="`aPermanent Bow Upgrade `7(Lv. 0 -> 1)"/>
+            <item action="bow-2" price="8" currency="emerald" filter="bow=1" material="bow" name="`aPermanent Bow Upgrade `7(Lv. 1 -> 2)"/>
+            <item action="bow-3" price="12" currency="emerald" filter="bow=2" material="bow" name="`aPermanent Bow Upgrade `7(Lv. 2 -> 3)"/>
+            <item action="tool-1" price="5" currency="emerald" filter="tool=0" material="iron axe" name="`aPermanent Tool Upgrade `7(Lv. 0 -> 1)"/>
+            <item action="tool-2" price="8" currency="emerald" filter="tool=1" material="diamond axe" name="`aPermanent Tool Upgrade `7(Lv. 1 -> 2)"/>
+            <item action="tool-3" price="12" currency="emerald" filter="tool=2" material="diamond axe" name="`aPermanent Tool Upgrade `7(Lv. 2 -> 3)"/>
+            <item action="armor-1" price="8" currency="emerald" filter="armor=0" material="chainmail chestplate" name="`aPermanent Armor Upgrade `7(Lv. 0 -> 1)"/>
+            <item action="armor-2" price="12" currency="emerald" filter="armor=1" material="iron chestplate" name="`aPermanent Armor Upgrade `7(Lv. 1 -> 2)"/>
+            <item action="armor-3" price="16" currency="emerald" filter="armor=2" material="diamond chestplate" name="`aPermanent Armor Upgrade `7(Lv. 2 -> 3)"/>
+        </category>
+    </shop>
+</shops>
+<spawners max-entities="1" delay="3s">
+    <spawner spawn-region="spawner-east" player-region="spawner-east-detect">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="spawner-south" player-region="spawner-south-detect">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="spawner-west" player-region="spawner-west-detect">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="spawner-north" player-region="spawner-north-detect">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="spawner-center" player-region="spawner-center-detect" delay="1s">
+        <item material="emerald"/>
+    </spawner>
+</spawners>
 <toolrepair>
     <tool>stone sword</tool>
+    <tool>iron sword</tool>
+    <tool>diamond sword</tool>
     <tool>bow</tool>
     <tool>stone axe</tool>
 </toolrepair>
@@ -1419,13 +1804,25 @@
     <item>leather helmet</item>
     <item>leather chestplate</item>
     <item>chainmail leggings</item>
+    <item>iron helmet</item>
+    <item>iron chestplate</item>
+    <item>iron leggings</item>
     <item>iron boots</item>
 </itemremove>
 <itemkeep>
     <item>stone sword</item>
+    <item>iron sword</item>
+    <item>diamond sword</item>
     <item>bow</item>
     <item>golden apple</item>
     <item>arrow</item>
     <item>wood</item>
+    <item>emerald</item>
+    <item>tnt</item>
+    <item>fireball</item>
 </itemkeep>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<timelock>on</timelock>
 </map>
