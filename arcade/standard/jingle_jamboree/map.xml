@@ -1,0 +1,1201 @@
+<map proto="1.5.0" game="Score">
+<name>Jingle Jamboree</name>
+<version>1.0.0</version>
+<objective>Complete all of the games!</objective>
+<authors>
+    <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii_ -->
+    <author uuid="a9f11454-beac-4cc3-a138-1780802c8794"/> <!-- Crazy_ -->
+    <author uuid="7ab24d14-0801-48ba-8fea-147ddf400067" contribution="Chimney Sweepers map"/> <!-- samthecat43 -->
+    <author uuid="19388047-f04b-43ac-9546-22aa69aea75c" contribution="2014 Overcast Network lobby"/> <!-- Bleanny -->
+</authors>
+<contributors>
+    <contributor uuid="fe3608b7-d105-4029-8800-34b3147065b6" contribution="Trees"/> <!-- rockymine -->
+    <contributor uuid="62c41f0e-133d-4192-ad33-f0896f47d23a" contribution="Two Trees sample"/> <!-- nixter1029 -->
+    <contributor uuid="af9c1942-af66-42d1-89f9-9b677c281e03" contribution="Two Trees sample"/> <!-- _IQ -->
+    <contributor uuid="2ca8072f-74be-4798-85b8-bbce03aa91af" contribution="Two Trees sample"/> <!-- Tywnis -->
+    <contributor uuid="ba4a93aa-4935-4a71-bab2-a58f9a124e7b" contribution="St. Carrotfields sample"/> <!-- ItsMiiOlly -->
+    <contributor uuid="75fd93dd-8e48-4698-81a2-97dae2ec5b5f" contribution="St. Carrotfields sample"/> <!-- Pugzy -->
+    <contributor uuid="af9c1942-af66-42d1-89f9-9b677c281e03" contribution="St. Carrotfields sample"/> <!-- _IQ -->
+</contributors>
+<players max="24"/>
+<time>1h</time>
+<constants>
+    <constant id="state_idle">0</constant>
+    <constant id="state_running">1</constant>
+    <constant id="state_overtime">2</constant>
+    <constant id="state_finished">3</constant>
+    <constant id="scoreboard_games">0</constant>
+    <constant id="scoreboard_players">1</constant>
+</constants>
+<variables scope="match" default="0">
+    <variable id="scoreboard" default="${scoreboard_games}"/>
+    <variable id="game" default="1"/>
+    <variable id="state" default="${state_running}"/>
+    <variable id="game_global_score"/>
+    <variable id="players_completed"/>
+    <variable id="player_count"/>
+    <variable id="tmp_match"/>
+</variables>
+<variables scope="player" default="0">
+    <score id="score"/>
+    <variable id="game_personal_score"/>
+    <variable id="match_personal_score"/>
+    <variable id="completed_game"/>
+    <variable id="callout" exclusive="1"/>
+    <variable id="allow_capture" exclusive="1"/>
+    <variable id="tmp_player"/>
+</variables>
+<kits>
+    <kit id="obs-kit">
+        <effect>night vision</effect>
+    </kit>
+    <kit id="clear-kit" force="true">
+        <clear effects="true"/>
+        <game-mode>adventure</game-mode>
+        <fly can-fly="false" flying="false"/>
+        <double-jump enabled="false"/>
+        <effect>night vision</effect>
+    </kit>
+    <kit id="game-end-kit">
+        <clear effects="true"/>
+        <game-mode>adventure</game-mode>
+        <double-jump enabled="false"/>
+        <effect>night vision</effect>
+    </kit>
+</kits>
+<regions>
+    <below id="in-void" y="0"/>
+    <apply use="never"/>
+</regions>
+<filters>
+    <not id="not-player">
+        <cause id="only-player">player</cause>
+    </not>
+    <rank id="1st-place">1</rank>
+    <rank id="2nd-place">2</rank>
+    <rank id="3rd-place">3</rank>
+    <players id="gt-1-player" min="1" filter="participating"/>
+    <players id="gt-2-players" min="2" filter="participating"/>
+    <players id="gt-3-players" min="3" filter="participating"/>
+    <all id="g1-running"><filter id="all(match-running, state=${state_running}, game=1)"/></all>
+    <all id="g2-running"><filter id="all(match-running, state=${state_running}, game=2)"/></all>
+    <all id="g3-running"><filter id="all(match-running, state=${state_running}, game=3)"/></all>
+    <all id="g4-running"><filter id="all(match-running, state=${state_running}, game=4)"/></all>
+    <all id="g5-running"><filter id="all(match-running, state=${state_running}, game=5)"/></all>
+    <all id="g6-running"><filter id="all(match-running, state=${state_running}, game=6)"/></all>
+    <all id="g7-running"><filter id="all(match-running, state=${state_running}, game=7)"/></all>
+    <after id="delayed-alive" duration="1" filter="all(match-running, alive)"/>
+    <after id="delayed-running" duration="1" filter="all(match-running, state=${state_running})"/>
+    <after id="switch-to-game-summary-game-specific" duration="2s" filter="all(match-running, state=${state_finished})"/>
+    <after id="switch-to-game-summary" duration="2.1s" filter="all(match-running, state=${state_finished})"/>
+    <after id="switch-to-idle" duration="8s" filter="all(match-running, state=${state_finished})"/>
+    <after id="switch-to-next-game-cd3" duration="9s" filter="all(match-running, any(state=${state_finished}, state=${state_idle}))"/>
+    <after id="switch-to-next-game-cd2" duration="10s" filter="all(match-running, any(state=${state_finished}, state=${state_idle}))"/>
+    <after id="switch-to-next-game-cd1" duration="11s" filter="all(match-running, any(state=${state_finished}, state=${state_idle}))"/>
+    <after id="switch-to-next-game" duration="12s" filter="all(match-running, any(state=${state_finished}, state=${state_idle}))"/>
+</filters>
+<damage>
+    <not>
+        <any>
+            <!-- GAME 1 -->
+            <variable var="game">1</variable>
+            <!-- GAME 2 -->
+            <variable var="game">2</variable>
+            <!-- GAME 3 -->
+            <all>
+                <variable var="game">3</variable>
+                <any>
+                    <region id="g3-spawn-prot"/>
+                    <not>
+                        <all>
+                            <variable var="state">${state_running}</variable>
+                            <cause>fall</cause>
+                        </all>
+                    </not>
+                </any>
+            </all>
+            <!-- GAME 4 -->
+            <variable var="game">4</variable>
+            <!-- GAME 5 -->
+            <variable var="game">5</variable>
+            <!-- GAME 6 -->
+            <variable var="game">6</variable>
+            <!-- GAME 7 -->
+            <all>
+                <variable var="game">7</variable>
+                <cause>player</cause>
+            </all>
+        </any>
+    </not>
+</damage>
+<score scoreboard-filter="scoreboard=1"/>
+<control-points required="false" points="0" capture-time="0s" permanent="true" show-messages="false" show-info="false" scoreboard-filter="scoreboard=0" player-filter="all(state=${state_finished}, callout=1)">
+    <control-point id="g1-cp" capture="g1-region" name="[1] Hungry Reindeer"/>
+    <control-point id="g2-cp" capture="g2-region" name="[2] Present Hunt"/>
+    <control-point id="g3-cp" capture="g3-region" name="[3] Winter Speedway"/>
+    <control-point id="g4-cp" capture="g4-region" name="[4] Parkour"/>
+    <control-point id="g5-cp" capture="g5-region" name="[5] Chimney Sweepers"/>
+    <control-point id="g6-cp" capture="g6-region" name="[6] Frosted Corridors"/>
+    <control-point id="g7-cp" capture="g7-region" name="[7] Express Delivery"/>
+</control-points>
+<actions>
+    <trigger scope="match" filter="match-started">
+        <action>
+            <set var="timelimit" value="-1"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(match-running, state=${state_running})">
+        <action>
+            <set var="player_count" value="0"/>
+            <switch-scope inner="player">
+                <set var="player_count" value="player_count + 1"/>
+                <set var="match_personal_score" value="score"/>
+                <set var="score" value="0"/>
+            </switch-scope>
+            <set var="scoreboard" value="${scoreboard_players}"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(match-running, state=${state_overtime})">
+        <action>
+            <message text="`aThe game has been completed by {0} and will end in `c30 seconds">
+                <replacements>
+                    <player id="0" var="callout"/>
+                </replacements>
+            </message>
+            <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="30s" filter="all(match-running, state=${state_overtime})" message="The game will end in {0}"/>
+        </filter>
+        <action>
+            <set var="state" value="${state_finished}"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(match-running, state=${state_finished})">
+        <action>
+            <message title="`aFinish!" text="`aFinish!"/>
+            <sound preset="OBJECTIVE_GOOD"/>
+            <switch-scope inner="player">
+                <kit id="game-end-kit"/>
+                <set var="game_personal_score" value="score"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="switch-to-game-summary">
+        <action>
+            <action filter="gt-1-player">
+                <switch-scope inner="player" filter="1st-place">
+                    <set var="callout" value="1"/>
+                    <set var="match_personal_score" value="match_personal_score + 5"/>
+                </switch-scope>
+                <message text="1st Place: {0} `7(`a+5 points`7)">
+                    <replacements>
+                        <player id="0" var="callout"/>
+                    </replacements>
+                </message>
+            </action>
+            <action filter="gt-2-players">
+                <switch-scope inner="player" filter="2nd-place">
+                    <set var="callout" value="1"/>
+                    <set var="match_personal_score" value="match_personal_score + 3"/>
+                </switch-scope>
+                <message text="2nd Place: {0} `7(`a+3 points`7)">
+                    <replacements>
+                        <player id="0" var="callout"/>
+                    </replacements>
+                </message>
+            </action>
+            <action filter="gt-3-players">
+                <switch-scope inner="player" filter="3rd-place">
+                    <set var="callout" value="1"/>
+                    <set var="match_personal_score" value="match_personal_score + 2"/>
+                </switch-scope>
+                <message text="3rd Place: {0} `7(`a+2 points`7)">
+                    <replacements>
+                        <player id="0" var="callout"/>
+                    </replacements>
+                </message>
+            </action>
+            <switch-scope inner="player">
+                <set var="tmp_player" value="max(min(ceil(game_personal_score / 10), 10), 0)"/>
+                <action filter="tmp_player=1..">
+                    <action filter="tmp_player=1">
+                        <message text="Contribution: `a+1 point"/>
+                    </action>
+                    <action filter="tmp_player=2..">
+                        <message text="Contribution: `a+{1} points">
+                            <replacements>
+                                <decimal id="1" value="tmp_player"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <set var="match_personal_score" value="match_personal_score + tmp_player"/>
+                    <sound preset="SCORE"/>
+                </action>
+                <set var="score" value="match_personal_score"/>
+                <set var="game_personal_score" value="0"/>
+                <set var="completed_game" value="0"/>
+                <set var="tmp_player" value="0"/>
+            </switch-scope>
+            <action filter="game=7">
+                <set var="timelimit" value="3"/>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(match-running, switch-to-idle)">
+        <action>
+            <set var="scoreboard" value="${scoreboard_games}"/>
+            <set var="state" value="${state_idle}"/>
+            <set var="game_global_score" value="0"/>
+            <set var="players_completed" value="0"/>
+            <set var="tmp_match" value="0"/>
+            <set var="game" value="game + 1"/>
+            <action filter="game=1"><message text="`3Up Next: `b[1] Hungry Riendeer"/></action>
+            <action filter="game=2"><message text="`3Up Next: `b[2] Present Hunt"/></action>
+            <action filter="game=3"><message text="`3Up Next: `b[3] Winter Speedway"/></action>
+            <action filter="game=4"><message text="`3Up Next: `b[4] Pakour"/></action>
+            <action filter="game=5"><message text="`3Up Next: `b[5] Chimney Sweepers"/></action>
+            <action filter="game=6"><message text="`3Up Next: `b[6] Frosted Corridors"/></action>
+            <action filter="game=7"><message text="`3Up Next: `b[7] Express Delivery"/></action>
+        </action>
+    </trigger>
+    <message id="start-countdown-3" text="{ translate: 'countdown.matchStart', color: 'green', with: [{ translate: 'misc.seconds', with: [{ text: '3', color: 'dark_red' }] }] }"/>
+    <message id="start-countdown-2" text="{ translate: 'countdown.matchStart', color: 'green', with: [{ translate: 'misc.seconds', with: [{ text: '2', color: 'dark_red' }] }] }"/>
+    <message id="start-countdown-1" text="{ translate: 'countdown.matchStart', color: 'green', with: [{ translate: 'misc.seconds', with: [{ text: '1', color: 'dark_red' }] }] }"/>
+    <trigger scope="match" filter="all(match-running, switch-to-next-game-cd3)" action="start-countdown-3"/>
+    <trigger scope="match" filter="all(match-running, switch-to-next-game-cd2)" action="start-countdown-2"/>
+    <trigger scope="match" filter="all(match-running, switch-to-next-game-cd1)" action="start-countdown-1"/>
+    <trigger scope="match" filter="all(match-running, switch-to-next-game)">
+        <action>
+            <set var="state" value="${state_running}"/>
+        </action>
+    </trigger>
+</actions>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<timelock>on</timelock>
+<!--
+  GAME 1 - Hungry Reindeer
+-->
+<spawns>
+    <default region="g1-spawn" angle="0.5,5,0.5" kit="obs-kit"/>
+    <spawn region="g1-spawn" angle="0.5,5,0.5" safe="true" filter="game=1" kit="g1-kit"/>
+</spawns>
+<kits>
+    <kit id="g1-kit">
+        <game-mode>adventure</game-mode>
+        <effect>night vision</effect>
+        <item material="iron hoe" unbreakable="true" locked="true">
+            <can-destroy>
+                <material>carrot</material>
+            </can-destroy>
+        </item>
+    </kit>
+    <kit id="carrot-points" deduct-items="false">
+        <item material="carrot item"/>
+        <action>
+            <set var="score" value="score + 1"/>
+            <switch-scope inner="match">
+                <set var="game_global_score" value="max(game_global_score - 1, 0)"/>
+            </switch-scope>
+        </action>
+    </kit>
+</kits>
+<filters>
+    <material id="only-carrot">carrot</material>
+</filters>
+<regions>
+    <cylinder id="g1-spawn" base="0.5,4,0.5" radius="7" height="1"/>
+    <cylinder id="g1-region" base="0.5,0,0.5" radius="35" height="30"/>
+</regions>
+<block-drops>
+    <rule filter="all(only-carrot, state=${state_running})" region="g1-region" kit="carrot-points"/>
+</block-drops>
+<actions>
+    <trigger scope="match" filter="g1-running">
+        <action>
+            <message>
+                <title>`6`lHungry Reindeer</title>
+                <subtitle>`bCollect all `e135 `bcarrots!</subtitle>
+            </message>
+            <message text=" "/>
+            <message text="`6`lHungry Reindeer"/>
+            <message text="`bCollect all `e135 `bcarrots!"/>
+            <message text=" "/>
+            <set var="game_global_score" value="135"/> <!-- 135 -->
+            <switch-scope inner="player">
+                <kit id="g1-kit"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <pulse period="1s" duration="0.5s" filter="all(g1-running, game_global_score=1..)"/>
+        </filter>
+        <action>
+            <message actionbar="`bCollect `e{0} `bremaining carrots!">
+                <replacements>
+                    <decimal id="0" value="game_global_score"/>
+                </replacements>
+            </message>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(delayed-running, g1-running, game_global_score=0)">
+        <action>
+            <set var="state" value="${state_finished}"/>
+        </action>
+    </trigger>
+</actions>
+<portals>
+    <portal forward="g1-running" destination="g1-spawn"/>
+    <portal forward="all(game=1, in-void)" destination="g1-spawn"/>
+</portals>
+<damage>
+    <not>
+        <variable var="game">1</variable>
+    </not>
+</damage>
+<itemremove>
+    <item>carrot item</item>
+    <item>iron hoe</item>
+</itemremove>
+<!--
+  GAME 2 - Present Hunt
+-->
+<spawns>
+    <spawn region="g2-spawn" angle="0.5,5,-118.5" kit="g2-kit" filter="game=2"/>
+</spawns>
+<kits>
+    <kit id="g2-kit">
+        <clear/>
+        <game-mode>adventure</game-mode>
+        <effect>night vision</effect>
+        <item material="shears" unbreakable="true" locked="true">
+            <can-destroy>
+                <material>wool</material>
+            </can-destroy>
+        </item>
+    </kit>
+    <kit id="g2-found-kit">
+        <clear/>
+        <action filter="completed_game=0">
+            <set var="completed_game" value="1"/>
+            <set var="callout" value="1"/>
+            <teleport x="3.5" y="8" z="-118.5"/>
+            <switch-scope inner="match">
+                <fill region="g2-barrier" filter="g2-plate" material="spruce fence"/>
+                <set var="players_completed" value="players_completed + 1"/>
+                <message text="{0} `bfound the present!">
+                    <replacements>
+                        <player id="0" var="callout"/>
+                    </replacements>
+                </message>
+                <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+            </switch-scope>
+            <action filter="players_completed=1"><set var="score" value="score + 5"/></action>
+            <action filter="players_completed=2"><set var="score" value="score + 4"/></action>
+            <action filter="players_completed=3"><set var="score" value="score + 3"/></action>
+            <action filter="players_completed=4"><set var="score" value="score + 2"/></action>
+            <action filter="players_completed=5.."><set var="score" value="score + 1"/></action>
+            <sound preset="SCORE"/>
+        </action>
+    </kit>
+</kits>
+<filters>
+    <material id="only-wool">wool</material>
+    <all id="g2-blocks">
+        <filter id="g2-running"/>
+        <any>
+            <all><variable var="g2_target">0</variable><material>emerald block</material></all>
+            <all><variable var="g2_target">1</variable><material>melon block</material></all>
+            <all><variable var="g2_target">2</variable><material>lapis block</material></all>
+            <all><variable var="g2_target">3</variable><material>redstone block</material></all>
+            <all><variable var="g2_target">4</variable><material>note block</material></all>
+            <all><variable var="g2_target">5</variable><material>tnt</material></all>
+            <all><variable var="g2_target">6</variable><material>obsidian</material></all>
+            <all><variable var="g2_target">7</variable><material>workbench</material></all>
+            <all><variable var="g2_target">8</variable><material>gold block</material></all>
+            <all><variable var="g2_target">9</variable><material>iron block</material></all>
+            <all><variable var="g2_target">10</variable><material>sponge</material></all>
+            <all><variable var="g2_target">11</variable><material>ender stone</material></all>
+            <all><variable var="g2_target">12</variable><material>pumpkin</material></all>
+            <all><variable var="g2_target">13</variable><material>hay block</material></all>
+            <all><variable var="g2_target">14</variable><material>log</material></all>
+            <all><variable var="g2_target">15</variable><material>glowstone</material></all>
+            <all><variable var="g2_target">16</variable><material>diamond block</material></all>
+            <all><variable var="g2_target">17</variable><material>sandstone</material></all>
+            <all><variable var="g2_target">18</variable><material>sand</material></all>
+            <all><variable var="g2_target">19</variable><material>huge mushroom 2</material></all>
+            <all><variable var="g2_target">20</variable><material>bookshelf</material></all>
+            <all><variable var="g2_target">21</variable><material>soul sand</material></all>
+            <all><variable var="g2_target">22</variable><material>bedrock</material></all>
+            <all><variable var="g2_target">23</variable><material>clay</material></all>
+            <all><variable var="g2_target">24</variable><material>cobblestone</material></all>
+        </any>
+    </all>
+    <material id="g2-fence">spruce fence</material>
+    <material id="g2-plate">carpet</material>
+</filters>
+<regions>
+    <block id="g2-spawn" location="0.5,4,-94.5"/>
+    <cuboid id="g2-region" min="-26,0,-145" size="53,20,53"/>
+    <cylinder id="g2-barrier" base="2.5,8,-120.5" radius="10" height="3"/>
+</regions>
+<variables>
+    <variable id="g2_target" scope="match" default="-1"/>
+</variables>
+<actions>
+    <trigger scope="match" filter="g2-running">
+        <action>
+            <message>
+                <title>`6`lPresent Hunt</title>
+                <subtitle>`bFind Santa's missing block!</subtitle>
+            </message>
+            <message text=" "/>
+            <message text="`6`lPresent Hunt"/>
+            <message text="`bFind Santa's missing block!"/>
+            <message text=" "/>
+            <action id="g2-next-target"/>
+            <switch-scope inner="player">
+                <kit id="g2-kit"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after message="Time Remaining: {0}" duration="20s" filter="all(g2-running, players_completed=1..)"/>
+        </filter>
+        <action>
+            <action id="g2-next-target"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(g2-running, game_global_score=4)">
+        <action>
+            <set var="state" value="${state_finished}"/>
+        </action>
+    </trigger>
+    <action id="g2-next-target" scope="match">
+        <set var="players_completed" value="0"/>
+        <set var="game_global_score" value="game_global_score + 1"/>
+        <action filter="not(game_global_score=4..)">
+            <fill region="g2-barrier" filter="g2-fence" material="carpet:14"/>
+            <switch-scope inner="player">
+                <set var="completed_game" value="0"/>
+                <kit id="g2-kit"/>
+            </switch-scope>
+            <set var="g2_target" value="floor(random() * 25)"/>
+            <message text=" "/>
+            <action filter="g2_target=0"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `2`lEmeralds`r!"/></action>
+            <action filter="g2_target=1"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `2`lMelons`r!"/></action>
+            <action filter="g2_target=2"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `1`lLapis Lazuli`r!"/></action>
+            <action filter="g2_target=3"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `4`lRedstone`r!"/></action>
+            <action filter="g2_target=4"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `8`lNote Blocks`r!"/></action>
+            <action filter="g2_target=5"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `4`lTNT`r!"/></action>
+            <action filter="g2_target=6"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `5`lObsidian`r!"/></action>
+            <action filter="g2_target=7"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `8`lCrafting Tables`r!"/></action>
+            <action filter="g2_target=8"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `6`lGold`r!"/></action>
+            <action filter="g2_target=9"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `3`lIron`r!"/></action>
+            <action filter="g2_target=10"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `e`lSponges`r!"/></action>
+            <action filter="g2_target=11"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `e`lEnd Stone`r!"/></action>
+            <action filter="g2_target=12"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `6`lPumpkins`r!"/></action>
+            <action filter="g2_target=13"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `2`lHay Bale`r!"/></action>
+            <action filter="g2_target=14"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `2`lOak Logs`r!"/></action>
+            <action filter="g2_target=15"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `6`lGlowstone`r!"/></action>
+            <action filter="g2_target=16"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `3`lDiamonds`r!"/></action>
+            <action filter="g2_target=17"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `e`lSandstone`r!"/></action>
+            <action filter="g2_target=18"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `e`lSand`r!"/></action>
+            <action filter="g2_target=19"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `4`lRed Mushroom`r!"/></action>
+            <action filter="g2_target=20"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `3`lBookshelves`r!"/></action>
+            <action filter="g2_target=21"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `8`lSoul Sand`r!"/></action>
+            <action filter="g2_target=22"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `8`lBedrock`r!"/></action>
+            <action filter="g2_target=23"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `3`lClay`r!"/></action>
+            <action filter="g2_target=24"><message text="&lt;`cSanta`r&gt;: Help me find the present containing `3`lCobblestone`r!"/></action>
+            <message text=" "/>
+        </action>
+    </action>
+    <trigger scope="match">
+        <filter>
+            <pulse duration="0.5s" period="1s" filter="all(g2-running, g2_target=0..)"/>
+        </filter>
+        <action id="g2-announce-target-actionbar" scope="match">
+            <action filter="g2_target=0"><message actionbar="Find the `2`lEmeralds`r!"/></action>
+            <action filter="g2_target=1"><message actionbar="Find the `2`lMelons`r!"/></action>
+            <action filter="g2_target=2"><message actionbar="Find the `1`lLapis Lazuli`r!"/></action>
+            <action filter="g2_target=3"><message actionbar="Find the `4`lRedstone`r!"/></action>
+            <action filter="g2_target=4"><message actionbar="Find the `8`lNote Blocks`r!"/></action>
+            <action filter="g2_target=5"><message actionbar="Find the `4`lTNT`r!"/></action>
+            <action filter="g2_target=6"><message actionbar="Find the `5`lObsidian`r!"/></action>
+            <action filter="g2_target=7"><message actionbar="Find the `8`lCrafting Tables`r!"/></action>
+            <action filter="g2_target=8"><message actionbar="Find the `6`lGold`r!"/></action>
+            <action filter="g2_target=9"><message actionbar="Find the `3`lIron`r!"/></action>
+            <action filter="g2_target=10"><message actionbar="Find the `e`lSponges`r!"/></action>
+            <action filter="g2_target=11"><message actionbar="Find the `e`lEnd Stone`r!"/></action>
+            <action filter="g2_target=12"><message actionbar="Find the `6`lPumpkins`r!"/></action>
+            <action filter="g2_target=13"><message actionbar="Find the `2`lHay Bale`r!"/></action>
+            <action filter="g2_target=14"><message actionbar="Find the `2`lOak Logs`r!"/></action>
+            <action filter="g2_target=15"><message actionbar="Find the `6`lGlowstone`r!"/></action>
+            <action filter="g2_target=16"><message actionbar="Find the `3`lDiamonds`r!"/></action>
+            <action filter="g2_target=17"><message actionbar="Find the `e`lSandstone`r!"/></action>
+            <action filter="g2_target=18"><message actionbar="Find the `e`lSand`r!"/></action>
+            <action filter="g2_target=19"><message actionbar="Find the `4`lRed Mushroom`r!"/></action>
+            <action filter="g2_target=20"><message actionbar="Find the `3`lBookshelves`r!"/></action>
+            <action filter="g2_target=21"><message actionbar="Find the `8`lSoul Sand`r!"/></action>
+            <action filter="g2_target=22"><message actionbar="Find the `8`lBedrock`r!"/></action>
+            <action filter="g2_target=23"><message actionbar="Find the `3`lClay`r!"/></action>
+            <action filter="g2_target=24"><message actionbar="Find the `3`lCobblestone`r!"/></action>
+        </action>
+    </trigger>
+</actions>
+<renewables>
+    <renewable interval="1" particles="true" sound="true" avoid-players="2" region="g2-region" renew-filter="only-wool"/>
+</renewables>
+<block-drops>
+    <rule filter="g2-blocks" region="g2-region" kit="g2-found-kit" punch="true" wrong-tool="true"/>
+</block-drops>
+<portals>
+    <portal forward="g2-running" destination="g2-spawn" yaw="@180" pitch="@0"/>
+</portals>
+<damage>
+    <not>
+        <variable var="game">2</variable>
+    </not>
+</damage>
+<itemremove>
+    <item>wool</item>
+    <item>shears</item>
+</itemremove>
+<!--
+  GAME 3 - Winter Swppedway
+-->
+<spawns>
+    <spawn region="g3-spawn" yaw="90" kit="g3-kit" filter="game=3"/>
+</spawns>
+<kits>
+    <kit id="g3-kit">
+        <clear/>
+        <game-mode>survival</game-mode>
+        <item slot="0" locked="true" name="`a`lWater-Drop Area!" material="water bucket"/>
+        <item slot="1" locked="true" name="`a`lWater-Drop Area!" material="water bucket"/>
+        <item slot="2" locked="true" name="`a`lWater-Drop Area!" material="water bucket"/>
+        <boots color="7fcc19" locked="true" unbreakable="true" enchantment="protection environmental:5">leather boots</boots>
+        <effect duration="3s" amplifier="5">resistance</effect>
+        <effect amplifier="-2">health boost</effect>
+        <effect>night vision</effect>
+    </kit>
+</kits>
+<filters>
+    <all id="only-water">
+        <any>
+            <material>water</material>
+            <material>stationary water</material>
+        </any>
+        <not>
+            <cause>world</cause>
+        </not>
+    </all>
+</filters>
+<regions>
+    <cylinder id="g3-spawn" base="284,178,0.5" radius="3" height="1"/>
+    <cylinder id="g3-spawn-prot" base="284,176,0.5" radius="12" height="12"/>
+    <cylinder id="g3-end-region" base="88.5,0,0.5" radius="6" height="8"/>
+    <cuboid id="g3-region" min="70,0,60" max="307,203,-64"/>
+    <apply region="g3-spawn-prot" block="never"/>
+    <apply region="g3-region" block-place="only-water" block-break="only-water" block-physics="never"/>
+</regions>
+<actions>
+    <trigger scope="match" filter="g3-running">
+        <action>
+            <message>
+                <title>`6`lWinter Speedway</title>
+                <subtitle>`bWater drop to the bottom!</subtitle>
+            </message>
+            <message text=" "/>
+            <message text="`6`lWinter Speedway"/>
+            <message text="`bWater drop to the bottom!"/>
+            <message text=" "/>
+            <switch-scope inner="player">
+                <kit id="g3-kit"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(g3-running, g3-end-region)">
+        <action>
+            <set var="callout" value="1"/>
+            <switch-scope inner="match">
+                <set var="players_completed" value="players_completed + 1"/>
+                <message text="{0} `bhas finished!">
+                    <replacements>
+                        <player id="0" var="callout"/>
+                    </replacements>
+                </message>
+                <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+            </switch-scope>
+            <action filter="players_completed=1"><set var="score" value="score + 5"/></action>
+            <action filter="players_completed=2"><set var="score" value="score + 4"/></action>
+            <action filter="players_completed=3"><set var="score" value="score + 3"/></action>
+            <action filter="players_completed=4"><set var="score" value="score + 2"/></action>
+            <action filter="players_completed=5.."><set var="score" value="score + 1"/></action>
+            <message text="`7`oReach the bottom again for bonus points!"/>
+            <sound preset="SCORE"/>
+            <teleport x="284" y="178" z="0.5" yaw="90"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after message="Time Remaining: {0}" duration="1m30s" filter="all(g3-running, players_completed=1..)"/>
+        </filter>
+        <action>
+            <set var="state" value="${state_finished}"/>
+        </action>
+    </trigger>
+</actions>
+<portals>
+    <portal forward="g3-running" destination="g3-spawn" yaw="@90" pitch="@0"/>
+    <portal forward="all(game=3, in-void)" destination="g3-spawn" yaw="@90" pitch="@0"/>
+</portals>
+<itemremove>
+    <item>water bucket</item>
+    <item>bucket</item>
+    <item>seeds</item>
+    <item>snow ball</item>
+</itemremove>
+<!--
+  GAME 4 - Parkour
+-->
+<spawns>
+    <spawn region="g4-spawn" yaw="90" kit="g4-kit" filter="game=4"/>
+</spawns>
+<kits>
+    <kit id="g4-kit">
+        <game-mode>adventure</game-mode>
+        <effect>night vision</effect>
+    </kit>
+    <give filter="all(g4-running, game_global_score=1)">
+        <kit id="g4-checkpoint1-item">
+            <item material="feather" name="`r`bJump to `aCheckpoint 1 `7(right-click)" locked="true" consumable="g4-checkpoint1-go"/>
+        </kit>
+    </give>
+    <give filter="all(g4-running, game_global_score=2)">
+        <kit id="g4-checkpoint2-item">
+            <item material="feather" name="`r`bJump to `eCheckpoint 2 `7(right-click)" locked="true" consumable="g4-checkpoint2-go"/>
+        </kit>
+    </give>
+    <give filter="all(g4-running, game_global_score=3)">
+        <kit id="g4-checkpoint3-item">
+            <item material="feather" name="`r`bJump to `6Checkpoint 3 `7(right-click)" locked="true" consumable="g4-checkpoint3-go"/>
+        </kit>
+    </give>
+    <give filter="all(g4-running, game_global_score=4)">
+        <kit id="g4-checkpoint4-item">
+            <item material="feather" name="`r`bJump to `cCheckpoint 4 `7(right-click)" locked="true" consumable="g4-checkpoint4-go"/>
+        </kit>
+    </give>
+    <give filter="all(g4-running, game_global_score=5)">
+        <kit id="g4-checkpoint5-item">
+            <item material="feather" name="`r`bJump to `4Checkpoint 5 `7(right-click)" locked="true" consumable="g4-checkpoint5-go"/>
+        </kit>
+    </give>
+</kits>
+<consumables>
+    <consumable id="g4-checkpoint1-go" action="g4-tp-checkpoint1" on="right click" override="true" consume="false"/>
+    <consumable id="g4-checkpoint2-go" action="g4-tp-checkpoint2" on="right click" override="true" consume="false"/>
+    <consumable id="g4-checkpoint3-go" action="g4-tp-checkpoint3" on="right click" override="true" consume="false"/>
+    <consumable id="g4-checkpoint4-go" action="g4-tp-checkpoint4" on="right click" override="true" consume="false"/>
+    <consumable id="g4-checkpoint5-go" action="g4-tp-checkpoint5" on="right click" override="true" consume="false"/>
+</consumables>
+<regions>
+    <cylinder id="g4-spawn" base="-84.5,15,0.5" radius="2" height="1"/>
+    <cuboid id="g4-region" min="-81,0,-20" max="-120,40,21"/>
+    <cuboid id="g4-checkpoint1" min="-90,19,-11" size="3,3,3"/>
+    <cuboid id="g4-checkpoint2" min="-104,19,-1" size="3,3,3"/>
+    <cuboid id="g4-checkpoint3" min="-108,28,7" size="3,3,3"/>
+    <cuboid id="g4-checkpoint4" min="-115,27,-10" size="3,3,3"/>
+    <cuboid id="g4-checkpoint5" min="-99,32,2" size="3,3,3"/>
+    <cuboid id="g4-end" min="-99,33,-9" size="3,3,3"/>
+</regions>
+<actions>
+    <action id="g4-tp-checkpoint1" scope="player"><teleport x="-88.5" y="20" z="-9.5" yaw="90"/></action>
+    <action id="g4-tp-checkpoint2" scope="player"><teleport x="-102.5" y="20" z="-0.5" yaw="-70"/></action>
+    <action id="g4-tp-checkpoint3" scope="player"><teleport x="-106.5" y="29" z="8.5" yaw="-55"/></action>
+    <action id="g4-tp-checkpoint4" scope="player"><teleport x="-113.5" y="28" z="-8.5" yaw="-20"/></action>
+    <action id="g4-tp-checkpoint5" scope="player"><teleport x="-97.5" y="33" z="3.5" yaw="180"/></action>
+    <trigger scope="match" filter="g4-running">
+        <action>
+            <message>
+                <title>`6`lParkour</title>
+                <subtitle>`bParkour to the end!</subtitle>
+            </message>
+            <message text=" "/>
+            <message text="`6`lParkour"/>
+            <message text="`bParkour to the end!"/>
+            <message text=" "/>
+            <switch-scope inner="player">
+                <kit id="g4-kit"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(g4-running, g4-checkpoint1)">
+        <action filter="not(game_personal_score=1..)">
+            <set var="game_personal_score" value="1"/>
+            <set var="score" value="score + 1"/>
+            <action filter="not(game_global_score=1..)">
+              <set var="score" value="score + 2"/>
+                <set var="callout" value="1"/>
+                <switch-scope inner="match">
+                    <set var="game_global_score" value="1"/>
+                    <message text="{0} `bunlocked `aCheckpoint 1`b!">
+                        <replacements>
+                            <player id="0" var="callout"/>
+                        </replacements>
+                    </message>
+                    <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+                </switch-scope>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(g4-running, g4-checkpoint2)">
+        <action filter="not(game_personal_score=2..)">
+            <set var="game_personal_score" value="2"/>
+            <set var="score" value="score + 1"/>
+            <action filter="not(game_global_score=2..)">
+                <set var="score" value="score + 2"/>
+                <set var="callout" value="1"/>
+                <switch-scope inner="match">
+                    <set var="game_global_score" value="2"/>
+                    <message text="{0} `bunlocked `eCheckpoint 2`b!">
+                        <replacements>
+                            <player id="0" var="callout"/>
+                        </replacements>
+                    </message>
+                    <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+                </switch-scope>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(g4-running, g4-checkpoint3)">
+        <action filter="not(game_personal_score=3..)">
+            <set var="game_personal_score" value="3"/>
+            <set var="score" value="score + 1"/>
+            <action filter="not(game_global_score=3..)">
+                <set var="score" value="score + 2"/>
+                <set var="callout" value="1"/>
+                <switch-scope inner="match">
+                    <set var="game_global_score" value="3"/>
+                    <message text="{0} `bunlocked `6Checkpoint 3`b!">
+                        <replacements>
+                            <player id="0" var="callout"/>
+                        </replacements>
+                    </message>
+                    <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+                </switch-scope>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(g4-running, g4-checkpoint4)">
+        <action filter="not(game_personal_score=4..)">
+            <set var="game_personal_score" value="4"/>
+            <set var="score" value="score + 1"/>
+            <action filter="not(game_global_score=4..)">
+                <set var="score" value="score + 2"/>
+                <set var="callout" value="1"/>
+                <switch-scope inner="match">
+                    <set var="game_global_score" value="4"/>
+                    <message text="{0} `bunlocked `cCheckpoint 4`b!">
+                        <replacements>
+                            <player id="0" var="callout"/>
+                        </replacements>
+                    </message>
+                    <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+                </switch-scope>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(g4-running, g4-checkpoint5)">
+        <action filter="not(game_personal_score=5..)">
+            <set var="game_personal_score" value="5"/>
+            <set var="score" value="score + 1"/>
+            <action filter="not(game_global_score=5..)">
+                <set var="score" value="score + 2"/>
+                <set var="callout" value="1"/>
+                <switch-scope inner="match">
+                    <set var="game_global_score" value="5"/>
+                    <message text="{0} `bunlocked `4Checkpoint 5`b!">
+                        <replacements>
+                            <player id="0" var="callout"/>
+                        </replacements>
+                    </message>
+                    <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+                </switch-scope>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(g4-running, g4-end)">
+        <action>
+            <action filter="completed_game=0">
+                <set var="callout" value="1"/>
+                <set var="completed_game" value="1"/>
+                <switch-scope inner="match">
+                    <set var="players_completed" value="players_completed + 1"/>
+                    <message text="{0} `bhas finished!">
+                        <replacements>
+                            <player id="0" var="callout"/>
+                        </replacements>
+                    </message>
+                    <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+                </switch-scope>
+                <action filter="players_completed=1"><set var="score" value="score + 25"/></action>
+                <action filter="players_completed=2"><set var="score" value="score + 20"/></action>
+                <action filter="players_completed=3"><set var="score" value="score + 15"/></action>
+                <action filter="players_completed=4"><set var="score" value="score + 10"/></action>
+                <action filter="players_completed=5.."><set var="score" value="score + 5"/></action>
+                <sound preset="SCORE"/>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after message="Time Remaining: {0}" duration="1m30s" filter="all(g4-running, players_completed=1..)"/>
+        </filter>
+        <action>
+            <set var="state" value="${state_finished}"/>
+        </action>
+    </trigger>
+</actions>
+<portals>
+    <portal forward="g4-running" destination="g4-spawn" yaw="@90" pitch="@0"/>
+</portals>
+<!--
+  GAME 5 - Chimney Sweepers
+-->
+<spawns>
+    <spawn region="g5-spawn" yaw="0" kit="g5-kit" safe="true" filter="game=5"/>
+</spawns>
+<kits>
+    <kit id="g5-kit">
+        <game-mode>adventure</game-mode>
+        <effect>night vision</effect>
+        <effect amplifier="8">jump</effect>
+        <double-jump recharge-before-landing="true" power="4" recharge-time="1.5s" />
+        <item material="diamond spade" locked="true" unbreakable="true">
+            <enchantment level="5">dig speed</enchantment>
+            <can-destroy>
+                <material>snow block</material>
+            </can-destroy>
+        </item>
+    </kit>
+    <kit id="g5-found-kit">
+        <action>
+            <set var="score" value="score + (1 / 6)"/>
+            <set var="callout" value="1"/>
+            <switch-scope inner="match">
+                <set var="game_global_score" value="max(game_global_score - (1 / 6), 0)"/>
+            </switch-scope>
+        </action>
+    </kit>
+</kits>
+<itemremove>
+    <item>diamond spade</item>
+    <item>snow block</item>
+</itemremove>
+<filters>
+    <material id="only-snow">snow block</material>
+    <material id="only-coal">coal block</material>
+</filters>
+<regions>
+    <cuboid id="g5-spawn" min="-60,4,81" max="61,5,145"/>
+    <cuboid id="g5-chimneys" min="-60,10,-81" max="61,30,145"/>
+    <intersect id="g5-deny-block">
+        <cuboid id="g5-region" min="-60,0,81" max="61,30,145"/>
+        <below y="10"/>
+    </intersect>
+    <apply region="g5-deny-block" block="never"/>
+</regions>
+<actions>
+    <trigger scope="match" filter="g5-running">
+        <action>
+            <set var="player_count" value="0"/>
+            <switch-scope inner="player">
+                <set var="player_count" value="player_count + 1"/>
+            </switch-scope>
+            <set var="game_global_score" value="max(player_count * 8, 16)"/>
+            <message>
+                <title>`6`lChimney Sweepers</title>
+                <subtitle>`bClear {0} chimneys of snow!</subtitle>
+                <replacements>
+                    <decimal id="0" value="game_global_score"/>
+                </replacements>
+            </message>
+            <message text=" "/>
+            <message text="`6`lChimney Sweepers"/>
+            <message text="`bClear {0} chimneys of snow!">
+                <replacements>
+                    <decimal id="0" value="game_global_score"/>
+                </replacements>
+            </message>
+            <message text=" "/>
+            <switch-scope inner="player">
+                <kit id="g5-kit"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <pulse period="1s" duration="0.5s" filter="all(g5-running, game_global_score=1..)"/>
+        </filter>
+        <action>
+            <message actionbar="`bClear `e{0} `bmore chimenys!">
+                <replacements>
+                    <decimal id="0" value="game_global_score"/>
+                </replacements>
+            </message>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(delayed-running, g5-running, game_global_score=0)">
+        <action>
+            <set var="state" value="${state_finished}"/>
+        </action>
+    </trigger>
+</actions>
+<renewables>
+    <renewable interval="8" particles="true" sound="true" avoid-players="4" region="g5-region" renew-filter="only-snow"/>
+</renewables>
+<block-drops>
+    <rule filter="only-snow" region="g5-chimneys" kit="g5-found-kit" punch="true" wrong-tool="true"/>
+</block-drops>
+<falling-blocks>
+    <rule filter="all(g5-chimneys, only-snow)"/>
+</falling-blocks>
+<portals>
+    <portal forward="g5-running" destination="g5-spawn" yaw="@0" pitch="@0"/>
+</portals>
+<!--
+  GAME 6 - Frosted Corridors
+-->
+<spawns>
+    <spawn region="g6-spawn" yaw="-45" kit="g6-kit" filter="game=6"/>
+</spawns>
+<kits>
+    <kit id="g6-kit">
+        <game-mode>adventure</game-mode>
+        <effect>night vision</effect>
+    </kit>
+</kits>
+<regions>
+    <cylinder id="g6-spawn" base="124.5,14,-205.5" radius="2" height="1"/>
+    <cylinder id="g6-end-region" base="132.5,3,-197.5" radius="2" height="4"/>
+    <cylinder id="g6-region" base="165,29,-163" radius="15" height="5"/>
+</regions>
+<actions>
+    <trigger scope="match" filter="g6-running">
+        <action>
+            <message>
+                <title>`6`lFrosted Corridors</title>
+                <subtitle>`bReach the end of the maze!</subtitle>
+            </message>
+            <message text=" "/>
+            <message text="`6`lFrosted Corridors"/>
+            <message text="`bReach the end of the maze!"/>
+            <message text=" "/>
+            <switch-scope inner="player">
+                <kit id="g6-kit"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(g6-running, g6-end-region)">
+        <action>
+            <action filter="completed_game=0">
+                <set var="callout" value="1"/>
+                <set var="completed_game" value="1"/>
+                <switch-scope inner="match">
+                    <set var="players_completed" value="players_completed + 1"/>
+                    <message text="{0} `bhas finished!">
+                        <replacements>
+                            <player id="0" var="callout"/>
+                        </replacements>
+                    </message>
+                    <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+                </switch-scope>
+                <action filter="players_completed=1"><set var="score" value="score + 5"/></action>
+                <action filter="players_completed=2"><set var="score" value="score + 4"/></action>
+                <action filter="players_completed=3"><set var="score" value="score + 3"/></action>
+                <action filter="players_completed=4"><set var="score" value="score + 2"/></action>
+                <action filter="players_completed=5.."><set var="score" value="score + 1"/></action>
+                <sound preset="SCORE"/>
+            </action>
+            <teleport x="164.5" y="29" z="-164.5" yaw="135"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after message="Time Remaining: {0}" duration="1m30s" filter="all(g6-running, players_completed=1..)"/>
+        </filter>
+        <action>
+            <set var="state" value="${state_finished}"/>
+        </action>
+    </trigger>
+</actions>
+<portals>
+    <portal forward="g6-running" destination="g6-spawn" yaw="@-45" pitch="@0"/>
+</portals>
+<!--
+  GAME 7 - Hungry Reindeer
+-->
+<spawns>
+    <spawn region="g7-spawn" yaw="0" filter="game=7" kit="g7-kit"/>
+</spawns>
+<kits>
+    <kit id="g7-kit">
+        <clear/>
+        <game-mode>adventure</game-mode>
+        <item material="iron sword" unbreakable="true" locked="true">
+            <can-destroy>
+                <material>web</material>
+            </can-destroy>
+        </item>
+        <item material="bow" unbreakable="true" locked="true">
+            <enchantment>arrow infinite</enchantment>
+        </item>
+        <item material="iron pickaxe" unbreakable="true" locked="true">
+            <can-destroy>
+                <material>mob spawner</material>
+            </can-destroy>
+        </item>
+        <item material="golden apple" slot="8"/>
+        <item material="arrow" slot="9"/>
+        <helmet material="leather helmet" unbreakable="true" locked="true"/>
+        <chestplate material="iron chestplate" unbreakable="true" locked="true"/>
+        <leggings material="iron leggings" unbreakable="true" locked="true">
+            <enchantment level="3">protection projectile</enchantment>
+        </leggings>
+        <boots material="iron boots" unbreakable="true" locked="true"/>
+    </kit>
+    <kit id="g7-points" deduct-items="false">
+        <item material="snow ball" amount="3" name="`4Grenade" grenade="true" grenade-power="3"/>
+        <action>
+            <set var="score" value="score + 1"/>
+            <action id="enchant-items"/>
+        </action>
+    </kit>
+</kits>
+<disabledamage>
+    <damage ally="true" self="true" enemy="true" other="false">block explosion</damage>
+</disabledamage>
+<filters>
+    <material id="only-spawner">mob spawner</material>
+    <completed id="g7-completed">g7-payload</completed>
+</filters>
+<regions>
+    <cylinder id="g7-spawn" base="-190.5,1,-158.5" radius="1" height="1"/>
+    <cuboid id="g7-region" min="-230,0,-225" max="-95,70,-91"/>
+    <apply region="g7-region" block="only-player"/>
+</regions>
+<payloads>
+    <payload id="g7-payload" name="Payload" location="-191,1,-155" radius="6" scoreboard-filter="g7-running" capture-time="6m" decay-rate="0.25" required="false"/>
+</payloads>
+<block-drops>
+    <rule filter="all(only-spawner, g7-running, state=${state_running})" region="g7-region" kit="g7-points"/>
+</block-drops>
+<mobs>
+    <filter>
+        <all>
+            <region id="g7-region"/>
+            <spawn>spawner</spawn>
+        </all>
+    </filter>
+</mobs>
+<actions>
+    <trigger scope="match" filter="g7-running">
+        <action>
+            <message>
+                <title>`6`lExpress Delivery</title>
+                <subtitle>`bGet the payload to the mountain top!</subtitle>
+            </message>
+            <message text=" "/>
+            <message text="`6`lExpress Delivery"/>
+            <message text="`bGet the payload to the mountain top!"/>
+            <message text=" "/>
+            <switch-scope inner="player">
+                <kit id="g7-kit"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(g7-running, g7-completed)">
+        <action>
+            <set var="state" value="${state_finished}"/>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(g7-running, delayed-alive)" action="enchant-items"/>
+    <action id="enchant-items" scope="player">
+        <action filter="score=2..">
+            <enchant-item enchantment="damage all" level="1" ignore-metadata="true">
+                <find material="iron sword"/>
+            </enchant-item>
+        </action>
+        <action filter="score=4..">
+            <enchant-item enchantment="arrow damage" level="1" ignore-metadata="true">
+                <find material="bow"/>
+            </enchant-item>
+        </action>
+        <action filter="score=6..">
+            <enchant-item enchantment="damage all" level="2" ignore-metadata="true">
+                <find material="iron sword"/>
+            </enchant-item>
+            <enchant-item enchantment="protection environmental" level="2" ignore-metadata="true">
+                <find material="iron chestplate"/>
+            </enchant-item>
+        </action>
+        <action filter="score=8..">
+            <enchant-item enchantment="arrow fire" level="1" ignore-metadata="true">
+                <find material="bow"/>
+            </enchant-item>
+            <enchant-item enchantment="dig speed" level="1" ignore-metadata="true">
+                <find material="iron pickaxe"/>
+            </enchant-item>
+        </action>
+        <action filter="score=10..">
+            <enchant-item enchantment="damage all" level="3" ignore-metadata="true">
+                <find material="iron sword"/>
+            </enchant-item>
+            <enchant-item enchantment="arrow damage" level="2" ignore-metadata="true">
+                <find material="bow"/>
+            </enchant-item>
+        </action>
+        <action filter="score=12..">
+            <enchant-item enchantment="damage all" level="4" ignore-metadata="true">
+                <find material="iron sword"/>
+            </enchant-item>
+            <enchant-item enchantment="protection environmental" level="4" ignore-metadata="true">
+                <find material="iron chestplate"/>
+            </enchant-item>
+            <enchant-item enchantment="dig speed" level="2" ignore-metadata="true">
+                <find material="iron pickaxe"/>
+            </enchant-item>
+        </action>
+        <action filter="score=16..">
+            <enchant-item enchantment="damage all" level="5" ignore-metadata="true">
+                <find material="iron sword"/>
+            </enchant-item>
+            <enchant-item enchantment="arrow damage" level="3" ignore-metadata="true">
+                <find material="bow"/>
+            </enchant-item>
+        </action>
+    </action>
+</actions>
+<portals>
+    <portal forward="g7-running" destination="g7-spawn" yaw="@0" pitch="@0"/>
+    <portal forward="all(game=7, in-void)" destination="g7-spawn" yaw="@0" pitch="@0"/>
+</portals>
+<itemremove>
+    <item>iron sword</item>
+    <item>bow</item>
+    <item>iron pickaxe</item>
+    <item>leather helmet</item>
+    <item>iron chestplate</item>
+    <item>iron leggings</item>
+    <item>iron boots</item>
+    <item>arrow</item>
+</itemremove>
+</map>
