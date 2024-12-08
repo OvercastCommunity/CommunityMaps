@@ -1,141 +1,74 @@
-<map proto="1.4.2">
-<name>Flag Football: Ice Rift</name>
-<version>1.0.0</version>
+<map proto="1.5.0">
+<name>Ice Rift</name>
+<version>1.0.1</version>
+<slug>flag_football_ice_rift</slug>
+<constants>
+    <constant id="team-1-spawn-yaw">0</constant>
+    <constant id="team-2-spawn-yaw">180</constant>
+    <constant id="team-1-spawn-pitch">-10</constant>
+    <constant id="team-2-spawn-pitch">-10</constant>
+    <constant id="flag-color">purple</constant>
+    <constant id="flag-post">0.5,5,1.5</constant>
+    <constant id="team-size">8</constant>
+    <constant id="max-overfill" delete="true"/>
+    <constant id="respawn-timer">2s</constant>
+</constants>
+<include id="ffb"/>
 <objective>Capture the flag as many times as possible in eight minutes!</objective>
-<gamemode>ffb</gamemode>
-<time result="score" overtime="45s" max-overtime="3m15s">8m</time>
-<score>
-    <mercy>5</mercy>
-</score>
-<edition>standard</edition>
-<!-- Map authors & contributors. -->
 <authors>
     <author uuid="b03360db-b8cd-49de-8ba1-b7920c2238a9" contribution="Map design, aesthetics and XML"/> <!-- Obelistics -->
 </authors>
-<!-- Map modules, i.e. objectives, regions, spawns. -->
 <teams>
-    <team id="red-team" color="dark red" max="8">Red</team>
-    <team id="blue-team" color="blue" max="8">Blue</team>
+    <team id="team-1" color="blue" max="${team-size}" max-overfill="${max-overfill}">Blue</team>
+    <team id="team-2" color="dark red" max="${team-size}" max-overfill="${max-overfill}">Red</team>
 </teams>
-<kits>
-    <kit id="spawn-kit">
-        <item slot="0" material="stone sword" unbreakable="true"/>
-        <item slot="1" material="bow" unbreakable="true"/>
-        <item slot="2" material="golden apple"/>
-        <item slot="8" material="arrow" amount="12"/>
-        <leggings material="chainmail leggings" enchantment="protection projectile:2" unbreakable="true"/>
-        <boots material="iron boots" unbreakable="true"/>
-        <game-mode>adventure</game-mode>
-        <helmet team-color="true" unbreakable="true" material="leather helmet"/>
-        <chestplate team-color="true" unbreakable="true" material="leather chestplate"/>
-    </kit>
-</kits>
 <spawns>
-    <spawn team="red-team" kit="spawn-kit" yaw="180" pitch="-10">
-        <region>
-            <point>0.5,7,24.5</point>
-        </region>
-    </spawn>
-    <spawn team="blue-team" kit="spawn-kit" yaw="0" pitch="-10">
-        <region>
-            <point>0.5,7,-21.5</point>
-        </region>
-    </spawn>
     <default>
         <regions>
             <region id="obs-spawn-180" yaw="180"/>
             <region id="obs-spawn-0" yaw="0"/>
         </regions>
     </default>
+    <spawn team="team-1" kit="spawn-kit">
+        <region pitch="${team-1-spawn-pitch}">
+            <point>0.5,7,-21.5</point>
+        </region>
+    </spawn>
+    <spawn team="team-2" kit="spawn-kit">
+        <region yaw="${team-2-spawn-yaw}" pitch="${team-2-spawn-pitch}">
+            <point>0.5,7,24.5</point>
+        </region>
+    </spawn>
 </spawns>
-<flags flag-proximity-metric="none" net-proximity-metric="none" required="false">
-    <flag id="flag" name="Flag" color="purple" shared="true" pickup-filter="above-or-below">
-        <post id="center-post" recover-time="8s" respawn-time="4">
-            <block>0.5,5,1.5</block>
-        </post>
-        <pickup-kit force="true">
-            <potion duration="oo">speed</potion>
-        </pickup-kit>
-        <drop-kit force="true">
-            <potion duration="0">speed</potion>
-        </drop-kit>
-        <net points="1" region="blue-spawn" capture-filter="only-blue"/>
-        <net points="1" region="red-spawn" capture-filter="only-red"/>
-    </flag>
-</flags>
 <filters>
-    <team id="only-red">red-team</team>
-    <team id="only-blue">blue-team</team>
-    <all id="red-team-carrying-flag">
-        <team>red-team</team>
-        <carrying-flag>flag</carrying-flag>
-    </all>
-    <all id="blue-team-carrying-flag">
-        <team>blue-team</team>
-        <carrying-flag>flag</carrying-flag>
-    </all>
-    <any id="above-or-below">
-        <not>
-            <cuboid min="-1,2,0" max="2,5,3"/>
-        </not>
-    </any>
+    <not id="not-above-nor-below">
+        <cuboid min="-1,2,0" max="2,5,3"/>
+    </not>
 </filters>
 <regions>
     <cuboid id="obs-spawn-180" min="2,19,26" max="-1,19,23"/>
     <cuboid id="obs-spawn-0" min="-1,19,-23" max="2,19,-20" />
     <union id="spawn-points">
-        <point id="red-spawn-point">0.5,7,24.5</point>
-        <point id="blue-spawn-point">0.5,7,-21.5</point>
+        <point id="team-1-spawn-point">0.5,7.25,-21.5</point>
+        <point id="team-2-spawn-point">0.5,7.25,24.5</point>
     </union>
     <union id="sides">
-        <rectangle id="red-side" min="-27,-5" max="-54,8"/>
-        <rectangle id="blue-side" min="28,8" max="55,-5"/>
+        <rectangle id="team-1-side" min="28,8" max="55,-5"/>
+        <rectangle id="team-2-side" min="-27,-5" max="-54,8"/>
     </union>
     <union id="flag-nets">
-        <union id="red-net">
-            <cuboid min="-47,4,3" max="-53,7,0"/>
-            <cuboid min="-48,4,5" max="-52,7,-2"/>
-        </union>
-        <union id="blue-net">
+        <union id="team-1-net">
             <cuboid min="48,4,0" max="54,7,3"/>
             <cuboid min="49,4,-2" max="53,7,5"/>
         </union>
+        <union id="team-2-net">
+            <cuboid min="-47,4,3" max="-53,7,0"/>
+            <cuboid min="-48,4,5" max="-52,7,-2"/>
+        </union>
     </union>
     <union id="spawns">
-        <cuboid id="red-spawn" min="-2,10,17" max="3,7,26"/>
-        <cuboid id="blue-spawn" min="3,10,-14" max="-2,7,-23"/>
+        <cuboid id="team-1-spawn" min="3,10,-14" max="-2,7,-23"/>
+        <cuboid id="team-2-spawn" min="-2,10,17" max="3,7,26"/>
     </union>
-    <apply block="never" region="everywhere" message="You may not edit the map!"/>
 </regions>
-<proximity-alarms>
-    <proximity-alarm message="You are running to the wrong goal!" flare-radius="0" region="blue-side" detect="red-team-carrying-flag" notify="red-team-carrying-flag"/>
-    <proximity-alarm message="You are running to the wrong goal!" flare-radius="0" region="red-side" detect="blue-team-carrying-flag" notify="blue-team-carrying-flag"/>
-</proximity-alarms>
-<portals>
-    <portal observers="never" filter="red-team-carrying-flag" region="red-net" destination="red-spawn-point" yaw="@180" pitch="@-10"/>
-    <portal observers="never" filter="blue-team-carrying-flag" region="blue-net" destination="blue-spawn-point" yaw="@0" pitch="@-10"/>
-</portals>
-<toolrepair>
-    <tool>stone sword</tool>
-    <tool>bow</tool>
-</toolrepair>
-<itemremove>
-    <item>leather helmet</item>
-    <item>leather chestplate</item>
-    <item>chainmail leggings</item>
-    <item>iron boots</item>
-</itemremove>
-<kill-rewards>
-    <kill-reward>
-        <item material="golden apple"/>
-        <item material="arrow" amount="3"/>
-    </kill-reward>
-</kill-rewards>
-<disabledamage>
-    <damage>fall</damage>
-</disabledamage>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
-<timelock>on</timelock>
 </map>
