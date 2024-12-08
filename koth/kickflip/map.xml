@@ -1,9 +1,10 @@
 <map proto="1.5.0">
 <name>Kickflip</name>
-<version>1.0.7</version>
-<include id="conquest"/>
+<version>1.0.8</version>
 <constant id="damage-resistance">2s</constant>
 <constant id="respawn-timer">2s</constant>
+<include id="conquest"/>
+<include id="velocity-no-fall-damage"/>
 <objective>Be the first team to reach 750 points!</objective>
 <created>2023-01-14</created>
 <gamemode>koth</gamemode>
@@ -61,8 +62,8 @@
         <cuboid id="jump-pad-1" min="-14,11,-23" size="2,1,2"/>
         <cuboid id="jump-pad-2" min="13,11,20" size="2,1,2"/>
     </union>
-    <apply velocity="7,2.5,2" kit="yeeted" region="jump-pad-1"/>
-    <apply velocity="-7,2.5,-2" kit="yeeted" region="jump-pad-2"/>
+    <apply velocity="7,2.5,2" kit="velocity-applied" region="jump-pad-1"/>
+    <apply velocity="-7,2.5,-2" kit="velocity-applied" region="jump-pad-2"/>
 </regions>
 <spawners>
     <spawner spawn-region="gapple-point" player-region="everywhere" max-entities="1" delay="8s">
@@ -77,43 +78,4 @@
 <score>
     <limit>750</limit>
 </score>
-<!-- Disables fall damage when using jump pads, reenables it after landing -->
-<kits>
-    <kit id="yeeted">
-        <action scope="player">
-            <set var="fall_variable" value="1"/>
-        </action>
-    </kit>
-    <give>
-        <!-- Reset the variable to 0 only after a player is definitely not on the jump pad, and is more certainly grounded. If we do not time this, the variable can reset before the player has velocity applied in the jump pad region. -->
-        <filter>
-            <all>
-                <after duration="1s">
-                    <not>
-                        <region id="jump-pads"/>
-                    </not>
-                </after>
-                <after duration="0.2s">
-                    <grounded/>
-                </after>
-            </all>
-        </filter>
-        <kit>
-            <action scope="player">
-                <set var="fall_variable" value="0"/>
-            </action>
-        </kit>
-    </give>
-</kits>
-<variables>
-    <variable id="fall_variable" scope="player" default="0"/>
-</variables>
-<damage>
-    <deny>
-        <all>
-            <cause>fall</cause>
-            <variable var="fall_variable">1</variable>
-        </all>
-    </deny>
-</damage>
 </map>
