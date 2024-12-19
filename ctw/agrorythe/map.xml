@@ -1,10 +1,11 @@
 <!-- built in; Original: August 2014, Rework: April 2016, Re-Rework: November 2021 -->
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Agrorythe</name>
-<version>1.3.4</version>
+<version>1.3.5</version>
 <objective>Capture both wools!</objective>
-<include id="gapple-kill-reward"/>
 <created>2014-08-01</created>
+<include id="gapple-kill-reward"/>
+<include id="iron-bulkcrafting"/>
 <authors>
     <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
     <author uuid="dff980ed-9f69-491e-b79c-30c21350baf2"/> <!-- DoomyBoy -->
@@ -13,8 +14,8 @@
     <contributor uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30" contribution="XML"/> <!-- Ruediger_LP -->
 </contributors>
 <teams>
-    <team id="blue-team" color="blue" max="36" max-overfill="40">Blue</team>
-    <team id="red-team" color="red" max="36" max-overfill="40">Red</team>
+    <team id="blue-team" color="blue" max="36">Blue</team>
+    <team id="red-team" color="red" max="36">Red</team>
 </teams>
 <kits>
     <kit id="spawn-kit">
@@ -85,15 +86,23 @@
         <team id="only-red">red-team</team>
         <filter id="woolrooms-filter"/>
     </all>
-    <any id="woolrooms-filter">
-        <material>web</material>
-        <material>wood:1</material>
-        <material>stained clay:14</material>
-        <material>stained clay:11</material>
-        <material>workbench</material>
-    </any>
+    <blocks id="woolrooms-filter" region="woolrooms">
+        <not>
+            <any>
+                <material>wool</material>
+                <material>chest</material>
+                <material>carpet</material>
+                <all>
+                    <material>stained glass</material>
+                    <below y="15"/>
+                </all>
+                <material id="beacon">beacon</material>
+                <material id="only-iron">iron block</material>
+            </any>
+        </not>
+    </blocks>
     <all id="only-iron-cause-world">
-        <material id="only-iron">iron block</material>
+        <filter id="only-iron"/>
         <cause>world</cause>
     </all>
     <material id="only-air">air</material>
@@ -116,13 +125,15 @@
             <rectangle id="red-spawn" min="14,102" max="-14,136"/>
         </union>
     </negative>
-    <union id="blues-woolrooms"> <!-- blue defends / red attacks -->
-        <rectangle id="cyan-woolroom" min="58,-147" max="41,-162"/>
-        <rectangle id="light-blue-woolroom" min="-58,-147" max="-41,-162"/>
-    </union>
-    <union id="reds-woolrooms"> <!-- red defends / blue attacks -->
-        <rectangle id="purple-woolroom" min="-58,147" max="-41,162"/>
-        <rectangle id="pink-woolroom" min="58,147" max="41,162"/>
+    <union id="woolrooms">
+        <union id="blues-woolrooms"> <!-- blue defends / red attacks -->
+            <cuboid id="cyan-woolroom" min="58,0,-147" max="41,100,-162"/>
+            <cuboid id="light-blue-woolroom" min="-58,0,-147" max="-41,100,-162"/>
+        </union>
+        <union id="reds-woolrooms"> <!-- red defends / blue attacks -->
+            <cuboid id="purple-woolroom" min="-58,0,147" max="-41,100,162"/>
+            <cuboid id="pink-woolroom" min="58,0,147" max="41,100,162"/>
+        </union>
     </union>
     <negative id="not-build-area">
         <union id="build-area">
@@ -143,6 +154,7 @@
         <cuboid min="-4,9,75" max="4,14,83"/> <!-- red iron -->
     </union>
     <!-- applicators -->
+    <apply use="deny(beacon)"/>
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-red" region="blues-woolrooms" message="You may not enter your own wool room!"/>
@@ -205,69 +217,6 @@
     <tool>shears</tool>
     <tool>diamond spade</tool>
 </toolrepair>
-<item-mods>
-    <rule>
-        <match>
-            <material>iron helmet</material>
-            <material>iron chestplate</material>
-            <material>iron leggings</material>
-            <material>iron boots</material>
-            <material>iron sword</material>
-            <material>iron pickaxe</material>
-            <material>diamond axe</material>
-            <material>diamond spade</material>
-            <material>shears</material>
-            <material>diamond chestplate</material>
-            <material>bow</material>
-        </match>
-        <modify unbreakable="true"/>
-    </rule>
-</item-mods>
-<crafting>
-    <!-- bulkcrafting -->
-    <shaped override="false">
-        <result material="iron helmet" amount="9"/>
-        <shape>
-            <row>III</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron chestplate" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>III</row>
-            <row>III</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron leggings" amount="9"/>
-        <shape>
-            <row>III</row>
-            <row>I.I</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron boots" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="bucket" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>.I.</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-</crafting>
 <renewables>
     <renewable rate="0.5" sound="false" region="iron-regen" renew-filter="only-iron" replace-filter="only-air" avoid-players="5"/>
 </renewables>

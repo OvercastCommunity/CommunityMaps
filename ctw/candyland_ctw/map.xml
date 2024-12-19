@@ -1,0 +1,223 @@
+<map proto="1.5.0">
+<name>CandyLand CTW</name>
+<version>1.0.0</version>
+<objective>Steal the enemy team's wools and bring them back to your base</objective>
+<created>2024-12-05</created>
+<gamemode>ctw</gamemode>
+<include id="gapple-kill-reward"/>
+<include id="iron-bulkcrafting"/>
+<phase>staging</phase>
+<authors>
+    <author uuid="5ff7bfa3-12e8-4c3b-9a14-ca7c540bd90d" contribution="Main map idea, layout, building" /> <!-- Valoryie -->
+    <author uuid="2fd57dff-4cff-4b60-96a4-d26e37759c03" contribution="XML, WE, ideas, tweaks, building"/> <!-- PeakDominance -->
+</authors>
+<contributors>
+    <contributor uuid="124e6b2c-6fac-43c1-8903-8f58665d0cd9" contribution="Layout, WE, ideas, tweaks" /> <!-- Clay2A -->
+    <contributor uuid="660a9502-4872-43ba-b7f7-1f49ab588526" contribution="Layout, ideas" /> <!-- FbprZ7 -->
+    <contributor uuid="38c80783-7689-41a9-90fe-1845779a59bc" contribution="Inspiration" /> <!-- Moustafa74 -->
+    <contributor uuid="685bd023-7a04-42d2-9074-ca37e4e0ba60" contribution="Inspiration" /> <!-- MrBatou; granted permission via PlanetMinecraft -->
+    <contributor uuid="6f41e352-d597-44c8-982a-6adbc8aa719d" contribution="Inspiration" /> <!-- Rastammole -->
+    <contributor uuid="63ddf58a-ba2c-4d39-8481-6358bb46c63a" contribution="Feedback, cookie pattern" /> <!-- samschaap -->
+</contributors>
+<teams>
+    <team id="red_team" color="dark red" max="24">Red</team>
+    <team id="blue_team" color="blue" max="24">Blue</team>
+</teams>
+<wools>
+    <!-- Red wools -->
+    <wool team="red_team" color="light blue" location="37,9,131" craftable="false">
+        <monument>
+            <block>1.5,11,-117.5</block>
+        </monument>
+    </wool>
+    <wool team="red_team" color="cyan" location="-37,9,131" craftable="false">
+        <monument>
+            <block>3.5,11,-117.5</block>
+        </monument>
+    </wool>
+    <!-- Blue wools -->
+    <wool team="blue_team" color="yellow" location="-37,9,-131" craftable="false">
+        <monument>
+            <block>-2.5,11,118.5</block>
+        </monument>
+    </wool>
+    <wool team="blue_team" color="orange" location="37,9,-131" craftable="false">
+        <monument>
+            <block>-0.5,11,118.5</block>
+        </monument>
+    </wool>
+</wools>
+<filters>
+    <team id="only_red">red_team</team>
+    <team id="only_blue">blue_team</team>
+    <deny id="deny_web_and_stone_button">
+        <any>
+            <material id="only_web">web</material>
+            <material>stone button</material>
+        </any>
+    </deny>
+    <material id="only_iron_block">iron block</material>
+    <not id="not_by_player">
+        <cause>player</cause>
+    </not>
+    <kill-streak id="every_two_killstreak" count="2" repeat="true"/>
+</filters>
+<regions>
+    <union id="spawn_rectangles">
+        <rectangle id="red_spawn_rectangle" min="-14.5,-127.5" max="19.5,-101.5" />
+        <rectangle id="blue_spawn_rectangle" min="-18.5,102.5" max="15.5,128.5" />
+    </union>
+
+    <union id="red_woolrooms">
+        <rectangle id="orange_woolroom_rectangle" min="22.5,-144.5" max="51.5,-115.5" />
+        <rectangle id="yellow_woolroom_rectangle" min="-50.5,-144.5" max="-21.5,-115.5" />
+    </union>
+    <union id="blue_woolrooms">
+        <rectangle id="cyan_woolroom_rectangle" min="-50.5,116.5" max="-21.5,145.5" />
+        <rectangle id="light_blue_woolroom_rectangle" min="22.5,116.5" max="51.5,145.5" />
+    </union>
+    <negative id="not_buildable_area">
+        <complement>
+            <union>
+                <rectangle min="-43.5,-136.5" max="-29.5,-114.5" />
+                <rectangle min="-42.5,-113.5" max="43.5,114.5" />
+                <rectangle min="30.5,115.5" max="44.5,137.5" />
+                <rectangle min="-43.5,115.5" max="-29.5,137.5" />
+                <rectangle min="30.5,-136.5" max="44.5,-114.5" />
+            </union>
+            <!-- Areas between spawns and woolrooms -->
+            <union>
+                <union id="between_blue_wools_and_spawn">
+                    <union id="between_light_blue_and_spawn">
+                        <rectangle min="7.5,96.5" max="30.5,114.5" />
+                        <rectangle min="8.5,94.5" max="29.5,95.5" />
+                        <rectangle min="9.5,93.5" max="28.5,93.5" />
+                        <rectangle min="11.5,92.5" max="26.5,92.5" />
+                    </union>
+                    <mirror origin="1.5,0,0.5" normal="0,0,1">
+                        <region id="between_light_blue_and_spawn"/>
+                    </mirror>
+                </union>
+                <!-- Between red wools and spawn -->
+                <mirror origin="0.5,0,0.5" normal="1,0,0">
+                    <region id="between_blue_wools_and_spawn"/>
+                </mirror>
+            </union>
+        </complement>
+    </negative>
+    <apply region="red_woolrooms" enter="only_blue" message="You cannot enter your own woolroom"/>
+    <apply region="blue_woolrooms" enter="only_red" message="You cannot enter your own woolroom"/>
+    <apply region="red_spawn_rectangle" enter="only_red" message="You cannot enter your enemy's spawn!"/>
+    <apply region="blue_spawn_rectangle" enter="only_blue" message="You cannot enter your enemy's spawn!"/>
+    <apply region="red_woolrooms" block="only_blue" message="You cannot break/place blocks here"/>
+    <apply region="blue_woolrooms" block="only_red" message="You cannot break/place blocks here"/>
+    <apply region="spawn_rectangles" block-break="only_iron_block" block-place="not_by_player" block-physics="never" message="You cannot modify the spawn area!" />
+    <apply region="not_buildable_area" block-place="never" block-break="deny_web_and_stone_button" message="You cannot build outside of the map"/>
+</regions>
+<spawns>
+    <spawn team="red_team" kit="red_spawn_kit">
+        <regions yaw="-90">
+            <point>-3.5,11,-112.5</point>
+        </regions>
+    </spawn>
+    <spawn team="blue_team" kit="blue_spawn_kit">
+        <regions yaw="90">
+            <point>4.5,11,113.5</point>
+        </regions>
+    </spawn>
+    <default>
+        <regions yaw="90" pitch="-18">
+            <point>0.5,59,0.5</point>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="spawn_kit">
+        <clear/>
+        <helmet material="chainmail helmet">
+            <enchantment level="5">fortune</enchantment>
+        </helmet>
+        <chestplate material="leather chestplate" team-color="true">
+            <enchantment level="2">projectile_protection</enchantment>
+        </chestplate>
+        <leggings material="chainmail leggings">
+            <enchantment level="5">fortune</enchantment>
+        </leggings>
+        <boots material="gold boots">
+            <enchantment>feather_falling</enchantment>
+        </boots>
+        <item material="iron sword" slot="0" unbreakable="true" />
+        <item material="bow" slot="1" unbreakable="true">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item material="iron pickaxe" slot="2" unbreakable="true">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item material="iron axe" slot="3" unbreakable="true">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item material="shears" slot="4" unbreakable="true" />
+        <item material="wood" slot="6" amount="64" damage="1" />
+        <item material="golden apple" slot="7" amount="1" />
+        <item material="cookie" slot="8" amount="32" consumable="super_cookie"/>
+        <item material="arrow" slot="28" amount="1" />
+    </kit>
+    <kit id="red_spawn_kit" parents="spawn_kit">
+        <item material="nether brick" slot="5" amount="48" />
+    </kit>
+    <kit id="blue_spawn_kit" parents="spawn_kit">
+        <item material="brick" slot="5" amount="48" />
+    </kit>
+    <kit id="satisfy_hunger">
+        <saturation>2</saturation>
+        <foodlevel>20</foodlevel>
+    </kit>
+</kits>
+<renewables>
+    <renewable region="spawn_rectangles" renew-filter="only_iron_block"/>
+</renewables>
+<spawners>
+<!-- Gapples spawner at middle -->
+    <spawner max-entities="5" min-delay="5s" max-delay="10s">
+        <spawn-region>
+            <point>0.5,10,0.5</point>
+        </spawn-region>
+        <player-region>
+            <cuboid min="-5.5,9,-5.5" max="5.5,15,5.5"/>
+        </player-region>
+        <item material="golden apple" amount="1" />
+    </spawner>
+</spawners>
+<consumables>
+    <consumable id="super_cookie" on="eat" action="satisfy_hunger"/>
+</consumables>
+<kill-rewards>
+    <kill-reward filter="every_two_killstreak">
+        <item material="wood" amount="16" damage="1"/>
+    </kill-reward>
+    <kill-reward>
+        <item amount="8" consumable="super_cookie" material="cookie"/>
+    </kill-reward>
+</kill-rewards>
+<itemremove>
+    <item>chainmail helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>gold boots</item>
+</itemremove>
+<itemkeep>
+<!-- These items get cleared in the spawn kit, they're here to prevent them from dropping on the ground after dying -->
+    <item>bucket</item>
+    <item>water bucket</item>
+    <item>arrow</item>
+    <item>cookie</item>
+    <item>iron sword</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>shears</item>
+</itemkeep>
+<hunger>
+    <depletion>on</depletion>
+</hunger>
+<maxbuildheight>27</maxbuildheight>
+</map>
