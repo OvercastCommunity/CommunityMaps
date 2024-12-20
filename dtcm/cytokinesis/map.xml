@@ -1,0 +1,2057 @@
+<map proto="1.5.0">
+<name>Cytokinesis</name>
+<version>1.0.0</version>
+<include id="gapple-kill-reward"/>
+<objective>Destroy the enemy's Nuclei</objective>
+<gamemode>dtm</gamemode>
+<created>2024-12-01</created>
+<authors>
+    <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb"/> <!-- arcadeboss -->
+</authors>
+<world>
+    <timeset>13920</timeset>
+    <timelock>on</timelock>
+</world>
+<constants>
+    <!-- Beacon grouping check states -->
+    <constant id="done">0</constant>
+    <constant id="outer">1</constant>
+    <constant id="inner1">2</constant>
+    <constant id="inner2">3</constant>
+    <constant id="middle">4</constant>
+</constants>
+<teams>
+    <team id="blue-team" color="blue" max="20">Gram-Positive</team>
+    <team id="red-team" color="red" max="20">Gram-Negative</team>
+</teams>
+<kits>
+    <kit id="spawn-kit" force="true">
+        <clear/>
+        <effect duration="3s" amplifier="2">regeneration</effect>
+        <effect duration="3s" amplifier="255">damage resistance</effect>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true" enchantment="arrow infinite"/>
+        <item slot="2" material="iron pickaxe" enchantment="efficiency:1" unbreakable="true"/>
+        <item slot="3" material="iron axe" unbreakable="true"/>
+        <item slot="4" material="iron spade" unbreakable="true"/>
+        <item slot="5" material="wood" damage="5" amount="64"/>
+        <item slot="6" material="cobblestone" amount="16"/>
+        <item slot="7" material="vine" amount="16"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow" amount="1"/>
+        <item slot="33" material="wool" amount="16" team-color="true"/>
+        <helmet unbreakable="true" locked="false" material="leather helmet" team-color="true"/>
+        <chestplate unbreakable="true" locked="false" material="leather chestplate" enchantment="protection:1" team-color="true"/>
+        <leggings material="leather leggings" locked="false" unbreakable="true" team-color="true"/>
+        <boots unbreakable="true" locked="true" material="leather boots" team-color="true"/>
+    </kit>
+    <!-- Team Upgrades -->
+    <lend filter="apply-regen">
+        <kit>
+            <effect amplifier="1">regeneration</effect>
+        </kit>
+    </lend>
+    <lend filter="apply-fatigue">
+        <kit>
+            <effect amplifier="1">slow digging</effect>
+        </kit>
+    </lend>
+    <lend filter="apply-speed">
+        <kit>
+            <effect amplifier="1">speed</effect>
+        </kit>
+    </lend>
+    <give filter="apply-haste">
+        <kit>
+            <effect amplifier="1">haste</effect>
+        </kit>
+    </give>
+    <!-- Vanity Helmet -->
+    <kit id="obby-breaker-kit" force="true">
+        <action>
+            <set var="obby_breaker" value="1"/>
+        </action>
+    </kit>
+    <!-- Projectiles -->
+    <kit id="fireball-kit" deduct-items="false">
+        <item projectile="throwable-fireball" material="fireball" name="`rFireball"/>
+    </kit>
+    <kit id="fireball-pack-kit" deduct-items="false">
+        <item projectile="throwable-fireball" amount="5" material="fireball" name="`rFireball"/>
+    </kit>
+    <kit id="snowball-kit" deduct-items="false">
+        <item projectile="throwable-snowball" material="snowball" name="`rSlowball"/>
+    </kit>
+    <!-- Store Items -->
+    <kit id="diamond-shovel-kit" force="true" deduct-items="false">
+        <item unbreakable="false" locked="false" material="diamond spade"/>
+    </kit>
+    <kit id="gold-pickaxe-kit" force="true" deduct-items="false">
+        <item unbreakable="false" locked="false" material="gold pickaxe" enchantment="unbreaking:5"/>
+    </kit>
+    <kit id="flint-kit" force="true" filter="always" deduct-items="false">
+        <item material="flint and steel" amount="1"/>
+    </kit>
+    <kit id="tnt-kit" force="true" filter="always" deduct-items="false">
+        <item material="tnt" amount="1"/>
+    </kit>
+    <kit id="tnt-pack-kit" force="true" filter="always" deduct-items="false">
+        <item material="tnt" amount="5"/>
+    </kit>
+    <kit id="tnt-pack2-kit" force="true" filter="always" deduct-items="false">
+        <item material="tnt" amount="15"/>
+    </kit>
+    <kit id="tnt-pack3" force="true" filter="always" deduct-items="false">
+        <item material="tnt" amount="3"/>
+    </kit>
+    <kit id="knockback-stick-kit" force="true" filter="always" deduct-items="false">
+        <item material="stick" name="Knockback Stick" enchantment="knockback:2" amount="1"/>
+    </kit>
+    <kit id="log-kit" force="true" filter="always" deduct-items="false">
+        <item material="log 2" amount="64" damage="1"/>
+    </kit>
+    <kit id="web-kit" force="true" filter="always" deduct-items="false">
+        <item material="web" amount="16"/>
+    </kit>
+    <kit id="cytoskeleton-kit" force="true" filter="always" deduct-items="false">
+        <item material="stained_glass" name="`aCytoskeleton" lore="`2TNT and Fireball Resistant" damage="5" amount="64"/>
+    </kit>
+    <kit id="dirt-16" force="true" filter="always" deduct-items="false">
+        <item material="dirt" amount="16"/>
+    </kit>
+    <kit id="redstone-1" force="true" filter="always" deduct-items="false">
+        <item material="redstone" amount="2" name="`4`l[ATP]`r Attacker Upgrade" lore="`cUse this currency in the|`cAttacker Upgrade shop.||`oTo keep across lives|`ostore in Enderchest.|"/>
+    </kit>
+</kits>
+<spawns>
+    <spawn team="blue-team" kit="spawn-kit" yaw="90" region="blue-spawn-point"/>
+    <spawn team="red-team" kit="spawn-kit" yaw="-90" region="red-spawn-point"/>
+    <default>
+        <regions>
+            <point yaw="90">0.5,51,0.5</point>
+            <point yaw="-90">0.5,51,0.5</point>
+        </regions>
+    </default>
+</spawns>
+<broadcasts>
+    <alert filter="only-blue" after="3s">`r`f`lDestroy the Red Team's two obsidian Nuclei to win!`r</alert>
+    <alert filter="only-red" after="3s">`r`f`lDestroy the Blue Team's two obsidian Nuclei to win!`r</alert>
+    <tip after="20s" every="10m">`r`e`lCollect `6`lGlowstone `r`e`lfrom spawners for the Team Upgrade shop.`r</tip>
+    <tip after="80s" every="10m">`r`c`lEarn `4`lRedstone`r`c`l from kills for Attacker Upgrade shop purchases.`r</tip>
+    <tip after="120s" every="10m">`r`9`lDig `2`lDirt`r`9`l to buy gear in the underground Defender Upgrade shop.`r</tip>
+    <tip after="320s" every="10m">`r`b`lDiamond helmet upgrade awarded for destroying part of enemy monument.`r</tip>
+</broadcasts>
+<actions>
+    <!-- Upgrade Variables -->
+    <set id="sharpness-set-1" var="sharpness_variable" value="1" scope="player"/>
+    <set id="sharpness-set-2" var="sharpness_variable" value="2" scope="player"/>
+    <set id="protection-set-1" var="protection_variable" value="1" scope="player"/>
+    <set id="protection-set-2" var="protection_variable" value="2" scope="player"/>
+    <set id="protection-set-3" var="protection_variable" value="3" scope="player"/>
+    <set id="protection-set-4" var="protection_variable" value="4" scope="player"/>
+    <set id="axe-shovel-set-2" var="axe_shovel_variable" value="2" scope="player"/>
+    <set id="axe-shovel-set-3" var="axe_shovel_variable" value="3" scope="player"/>
+    <!-- Beacons displaying "Mitosis" level of team's pickaxe upgrade -->
+    <trigger filter="red-beacon-outer-set" scope="match">
+        <action>
+            <fill region="red-beacon-outer" material="air"/>
+            <set var="red_beacon_check_state" value="${inner1}"/>
+            <sound key="block.beacon.activate" volume=".6" pitch="1"/>
+        </action>
+    </trigger>
+    <trigger filter="red-beacon-outer-not-set" scope="match">
+        <action>
+            <set var="red_beacon_check_state" value="${inner1}"/>
+        </action>
+    </trigger>
+    <trigger filter="red-beacon-inner1-set" scope="match">
+        <action>
+            <fill region="red-beacon-inner1" material="air"/>
+            <set var="red_beacon_check_state" value="${inner2}"/>
+            <sound key="block.beacon.activate" volume=".6" pitch=".9"/>
+        </action>
+    </trigger>
+    <trigger filter="red-beacon-inner1-not-set" scope="match">
+        <action>
+            <fill region="red-beacon-inner1" material="smooth brick:3"/>
+            <set var="red_beacon_check_state" value="${inner2}"/>
+        </action>
+    </trigger>
+    <trigger filter="red-beacon-inner2-set" scope="match">
+        <action>
+            <fill region="red-beacon-inner2" material="air"/>
+            <set var="red_beacon_check_state" value="${middle}"/>
+            <sound key="block.beacon.activate" volume=".6" pitch=".8"/>
+        </action>
+    </trigger>
+    <trigger filter="red-beacon-inner2-not-set" scope="match">
+        <action>
+            <fill region="red-beacon-inner2" material="smooth brick:3"/>
+            <set var="red_beacon_check_state" value="${middle}"/>
+        </action>
+    </trigger>
+    <trigger filter="red-beacon-middle-set" scope="match">
+        <action>
+            <fill region="red-beacon-middle" material="air"/>
+            <set var="red_beacon_check_state" value="${done}"/>
+            <sound key="block.beacon.activate" volume=".6" pitch="1.1"/>
+        </action>
+    </trigger>
+    <trigger filter="red-beacon-middle-not-set" scope="match">
+        <action>
+            <fill region="red-beacon-middle" material="smooth brick:3"/>
+            <set var="red_beacon_check_state" value="${done}"/>
+        </action>
+    </trigger>
+    <trigger filter="blue-beacon-outer-set" scope="match">
+        <action>
+            <fill region="blue-beacon-outer" material="air"/>
+            <set var="blue_beacon_check_state" value="${inner1}"/>
+            <sound key="block.beacon.activate" volume=".6" pitch="1"/>
+        </action>
+    </trigger>
+    <trigger filter="blue-beacon-outer-not-set" scope="match">
+        <action>
+            <set var="blue_beacon_check_state" value="${inner1}"/>
+        </action>
+    </trigger>
+    <trigger filter="blue-beacon-inner1-set" scope="match">
+        <action>
+            <fill region="blue-beacon-inner1" material="air"/>
+            <set var="blue_beacon_check_state" value="${inner2}"/>
+            <sound key="block.beacon.activate" volume=".6" pitch=".9"/>
+        </action>
+    </trigger>
+    <trigger filter="blue-beacon-inner1-not-set" scope="match">
+        <action>
+            <fill region="blue-beacon-inner1" material="smooth brick:3"/>
+            <set var="blue_beacon_check_state" value="${inner2}"/>
+        </action>
+    </trigger>
+    <trigger filter="blue-beacon-inner2-set" scope="match">
+        <action>
+            <fill region="blue-beacon-inner2" material="air"/>
+            <set var="blue_beacon_check_state" value="${middle}"/>
+            <sound key="block.beacon.activate" volume=".6" pitch=".8"/>
+        </action>
+    </trigger>
+    <trigger filter="blue-beacon-inner2-not-set" scope="match">
+        <action>
+            <fill region="blue-beacon-inner2" material="smooth brick:3"/>
+            <set var="blue_beacon_check_state" value="${middle}"/>
+        </action>
+    </trigger>
+    <trigger filter="blue-beacon-middle-set" scope="match">
+        <action>
+            <fill region="blue-beacon-middle" material="air"/>
+            <set var="blue_beacon_check_state" value="${done}"/>
+            <sound key="block.beacon.activate" volume=".6" pitch="1.1"/>
+        </action>
+    </trigger>
+    <trigger filter="blue-beacon-middle-not-set" scope="match">
+        <action>
+            <fill region="blue-beacon-middle" material="smooth brick:3"/>
+            <set var="blue_beacon_check_state" value="${done}"/>
+        </action>
+    </trigger>
+    <!-- Team Upgrade Sounds -->
+    <trigger filter="upgrade-team-1" scope="player">
+        <action>
+            <sound key="random.orb" volume="1" pitch="1"/>
+        </action>
+    </trigger>
+    <trigger filter="upgrade-team-2" scope="player">
+        <action>
+            <sound key="random.levelup" volume="1" pitch=".7"/>
+            <sound key="random.anvil_use" volume=".2" pitch="1.2"/>
+            <set var="team_upgrade_sounds" value="0"/>
+        </action>
+    </trigger>
+    <!-- Team upgrade: Shears -->
+    <action id="regen-action" scope="player">
+        <message text="`e`l▲ `6Your team now has `e`lRegeneration`6 around your monuments`r"/>
+        <set var="regen_variable" value="1"/>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <action id="shears-action" scope="player">
+        <message text="`e`l▲ `6Team kit upgraded to include `e`lShears`r"/>
+        <set var="shears_variable" value="1"/>
+        <kit force="true" filter="always">
+            <item material="shears" enchantment="efficiency:1" unbreakable="true"/>
+        </kit>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <!-- Team upgrade: Iron Leggings -->
+    <action id="iron-leggings-action-0-armor" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="leather leggings"/>
+            <replace material="iron leggings" enchantment="projectile_protection" unbreakable="true"/>
+        </replace-item>
+    </action>
+    <trigger filter="iron-leggings-1-prot1" scope="player">
+        <action id="iron-leggings-action-1-armor">
+            <replace-item ignore-metadata="true">
+                <find material="leather leggings"/>
+                <replace material="iron leggings" enchantment="projectile_protection;protection:1" unbreakable="true"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="iron leggings"/>
+                <replace material="iron leggings" enchantment="projectile_protection;protection:1" unbreakable="true"/>
+            </replace-item>
+        </action>
+    </trigger>
+    <trigger filter="iron-leggings-1-prot2" scope="player">
+        <action id="iron-leggings-action-2-armor">
+            <replace-item ignore-metadata="true">
+                <find material="leather leggings"/>
+                <replace material="iron leggings" enchantment="projectile_protection;protection:2" unbreakable="true"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="iron leggings"/>
+                <replace material="iron leggings" enchantment="projectile_protection;protection:2" unbreakable="true"/>
+            </replace-item>
+        </action>
+    </trigger>
+    <trigger filter="iron-leggings-1-prot3" scope="player">
+        <action id="iron-leggings-action-3-armor">
+            <replace-item ignore-metadata="true">
+                <find material="leather leggings"/>
+                <replace material="iron leggings" enchantment="projectile_protection;protection:3" unbreakable="true"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="iron leggings"/>
+                <replace material="iron leggings" enchantment="projectile_protection;protection:3" unbreakable="true"/>
+            </replace-item>
+        </action>
+    </trigger>
+    <trigger filter="iron-leggings-1-prot4" scope="player">
+        <action id="iron-leggings-action-4-armor">
+            <replace-item ignore-metadata="true">
+                <find material="leather leggings"/>
+                <replace material="iron leggings" enchantment="projectile_protection;protection:4" unbreakable="true"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="iron leggings"/>
+                <replace material="iron leggings" enchantment="projectile_protection;protection:4" unbreakable="true"/>
+            </replace-item>
+        </action>
+    </trigger>
+    <!-- Iron Leggings - Single Action Init -->
+    <action id="iron-leggings-action" scope="player">
+        <set var="team_upgrade_sounds" value="1"/>
+        <set var="iron_leggings_store" value="1"/>
+    </action>
+    <trigger filter="all(iron_leggings_store=1,protection-0)" scope="player">
+		<action id="iron-leggings-action-0" scope="player">
+			<message text="`e`l▲ `6Your team now has `e`lIron Leggings `r`6(Projectile Protection)"/>
+			<set var="iron_leggings_variable" value="1"/>
+			<set var="iron_leggings_store" value="0"/>
+			<action id="iron-leggings-action-0-armor"/>
+		</action>
+    </trigger>
+    <trigger filter="all(iron_leggings_store=1,protection-1)" scope="player">
+		<action id="iron-leggings-action-1" scope="player">
+			<message text="`e`l▲ `6Your team now has `e`lIron Leggings `r`6(Projectile Protection, Protection I)"/>
+			<set var="iron_leggings_variable" value="1"/>
+			<set var="iron_leggings_store" value="0"/>
+			<action id="iron-leggings-action-1-armor"/>
+		</action>
+    </trigger>
+    <trigger filter="all(iron_leggings_store=1,protection-2)" scope="player">
+		<action id="iron-leggings-action-2" scope="player">
+			<message text="`e`l▲ `6Your team now has `e`lIron Leggings `r`6(Projectile Protection, Protection II)"/>
+			<set var="iron_leggings_variable" value="1"/>
+			<set var="iron_leggings_store" value="0"/>
+			<action id="iron-leggings-action-2-armor"/>
+		</action>
+    </trigger>
+    <trigger filter="all(iron_leggings_store=1,protection-3)" scope="player">
+		<action id="iron-leggings-action-3" scope="player">
+			<message text="`e`l▲ `6Your team now has `e`lIron Leggings `r`6(Projectile Protection, Protection III)"/>
+			<set var="iron_leggings_variable" value="1"/>
+			<set var="iron_leggings_store" value="0"/>
+			<action id="iron-leggings-action-3-armor"/>
+		</action>
+    </trigger>
+    <trigger filter="all(iron_leggings_store=1,protection-4)" scope="player">
+		<action id="iron-leggings-action-4" scope="player">
+			<message text="`e`l▲ `6Your team now has `e`lIron Leggings `r`6(Projectile Protection, Protection IV)"/>
+			<set var="iron_leggings_variable" value="1"/>
+			<set var="iron_leggings_store" value="0"/>
+			<action id="iron-leggings-action-4-armor"/>
+		</action>
+    </trigger>
+    <!-- Iron Sword - Single Action Init -->
+    <action id="iron-sword-action" scope="player">
+        <set var="iron_sword_store" value="1"/>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <trigger filter="all(iron_sword_store=1,sharpness-0)" scope="player">
+        <action>
+            <message text="`e`l▲ `6Your team now has an `e`lIron Sword`r"/>
+            <replace-item ignore-metadata="true">
+                <find material="stone sword"/>
+                <replace material="iron sword" unbreakable="true"/>
+            </replace-item>
+            <set var="iron_sword_variable" value="1"/>
+            <set var="iron_sword_store" value="0"/>
+        </action>
+    </trigger>
+    <trigger filter="all(iron_sword_store=1,sharpness-1)" scope="player">
+        <action>
+            <message text="`e`l▲ `6Your team now has an `e`lIron Sword`r`6 (Sharp I)`r"/>
+            <replace-item ignore-metadata="true">
+                <find material="stone sword"/>
+                <replace material="iron sword" enchantment="sharpness" unbreakable="true"/>
+            </replace-item>
+            <set var="iron_sword_variable" value="1"/>
+            <set var="iron_sword_store" value="0"/>
+        </action>
+    </trigger>
+    <trigger filter="all(iron_sword_store=1,sharpness-2)" scope="player">
+        <action>
+            <message text="`e`l▲ `6Your team now has an `e`lIron Sword`r`6 (Sharp II)`r"/>
+            <replace-item ignore-metadata="true">
+                <find material="stone sword"/>
+                <replace material="iron sword" enchantment="sharpness:2" unbreakable="true"/>
+            </replace-item>
+            <set var="iron_sword_variable" value="1"/>
+            <set var="iron_sword_store" value="0"/>
+        </action>
+    </trigger>
+    <!-- Team upgrade: Sharpness replacements -->
+    <trigger filter="apply-sharpness-1" scope="player">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="stone sword"/>
+                <replace material="stone sword" unbreakable="true" enchantment="sharpness"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="iron sword"/>
+                <replace material="iron sword" unbreakable="true" enchantment="sharpness"/>
+            </replace-item>
+        </action>
+    </trigger>
+    <!-- Team upgrade: Sharpness 2 replacements -->
+    <trigger filter="apply-sharpness-2" scope="player">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="stone sword"/>
+                <replace material="stone sword" unbreakable="true" enchantment="sharpness:2"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="iron sword"/>
+                <replace material="iron sword" unbreakable="true" enchantment="sharpness:2"/>
+            </replace-item>
+        </action>
+    </trigger>
+    <!-- Team upgrade: Protection replacements -->
+    <trigger filter="apply-protection-1" scope="player">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="leather boots"/>
+                <replace material="leather boots" team-color="true" unbreakable="true" enchantment="protection:1"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="leather leggings"/>
+                <replace material="leather leggings" team-color="true" unbreakable="true" enchantment="protection:1"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="iron boots"/>
+                <replace material="iron boots" unbreakable="true" enchantment="protection:1"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="diamond boots"/>
+                <replace material="diamond boots" locked="true" unbreakable="true" enchantment="feather_falling;protection:1"/>
+            </replace-item>
+        </action>
+    </trigger>
+    <trigger filter="apply-protection-2" scope="player">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="leather boots"/>
+                <replace material="leather boots" unbreakable="true" team-color="true" enchantment="protection:2"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="leather leggings"/>
+                <replace material="leather leggings" unbreakable="true" team-color="true" enchantment="protection:2"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="iron boots"/>
+                <replace material="iron boots" unbreakable="true" enchantment="protection:2"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="diamond boots"/>
+                <replace material="diamond boots" locked="true" unbreakable="true" enchantment="feather_falling;protection:2"/>
+            </replace-item>
+        </action>
+    </trigger>
+    <trigger filter="apply-protection-3" scope="player">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="leather boots"/>
+                <replace material="leather boots" unbreakable="true" team-color="true" enchantment="protection:3"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="leather leggings"/>
+                <replace material="leather leggings" unbreakable="true" team-color="true" enchantment="protection:3"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="iron boots"/>
+                <replace material="iron boots" unbreakable="true" enchantment="protection:3"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="diamond boots"/>
+                <replace material="diamond boots" locked="true" unbreakable="true" enchantment="feather_falling;protection:3"/>
+            </replace-item>
+        </action>
+    </trigger>
+    <trigger filter="apply-protection-4" scope="player">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="leather boots"/>
+                <replace material="leather boots" unbreakable="true" team-color="true" enchantment="protection:4"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="leather leggings"/>
+                <replace material="leather leggings" unbreakable="true" team-color="true" enchantment="protection:4"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="iron boots"/>
+                <replace material="iron boots" unbreakable="true" enchantment="protection:4"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="diamond boots"/>
+                <replace material="diamond boots" locked="true" unbreakable="true" enchantment="feather_falling;protection:4"/>
+            </replace-item>
+        </action>
+    </trigger>
+    <!-- Team Upgrade Alerts -->
+    <trigger filter="sharpness-1" scope="player">
+        <action>
+            <message text="`e`l▲ `r`6Team sword upgraded to `e`lSharpness I`r"/>
+            <set var="team_upgrade_sounds" value="1"/>
+        </action>
+    </trigger>
+    <trigger filter="sharpness-2" scope="player">
+        <action>
+            <message text="`e`l▲ `r`6Team sword upgraded to `e`lSharpness II`r"/>
+            <set var="team_upgrade_sounds" value="1"/>
+        </action>
+    </trigger>
+    <trigger filter="protection-1" scope="player">
+        <action>
+            <message text="`e`l▲ `6Team armor upgraded to `e`lProtection I`r"/>
+            <set var="team_upgrade_sounds" value="1"/>
+        </action>
+    </trigger>
+    <trigger filter="protection-2" scope="player">
+        <action>
+            <message text="`e`l▲ `6Team armor upgraded to `e`lProtection II`r"/>
+            <set var="team_upgrade_sounds" value="1"/>
+        </action>
+    </trigger>
+    <trigger filter="protection-3" scope="player">
+        <action>
+            <message text="`e`l▲ `6Team armor upgraded to `e`lProtection III`r"/>
+            <set var="team_upgrade_sounds" value="1"/>
+        </action>
+    </trigger>
+    <trigger filter="protection-4" scope="player">
+        <action>
+            <message text="`e`l▲ `6Team armor upgraded to `e`lProtection IV`r"/>
+            <set var="team_upgrade_sounds" value="1"/>
+        </action>
+    </trigger>
+    <!-- Team upgrades - Water Bucket -->
+    <action id="water-bucket-action" scope="player">
+        <set var="water_bucket_variable" value="1"/>
+        <message text="`e`l▲ `6Team kit upgraded with a `e`lWater Bucket`r"/>
+        <replace-item>
+            <find material="bucket"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true">
+            <item material="water bucket"/>
+        </kit>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <!-- Team upgrades - Gapple and Vines -->
+    <action id="organics-action" scope="player">
+        <set var="organics_variable" value="1"/>
+        <message text="`e`l▲ `6Team kit upgraded with double `e`lGapples and Vines`r"/>
+        <kit force="true">
+            <item material="golden apple"/>
+            <item material="vine" amount="16"/>
+        </kit>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <!-- Team upgrades - Blocks -->
+    <action id="block-boost-action" scope="player">
+        <set var="block_boost_variable" value="1"/>
+        <message text="`e`l▲ `6Team kit upgraded to `e`lBlock Boost`r"/>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="wood" damage="5" amount="64"/>
+            <item material="cobblestone" amount="16"/>
+            <item material="wool" amount="16" team-color="true"/>
+        </kit>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <action id="cytoskeleton-action" scope="player">
+        <set var="cytoskeleton_variable" value="1"/>
+        <message text="`e`l▲ `6Team kit upgraded to include `e`lCytoskeleton`r"/>
+        <kit force="true" filter="always" deduct-items="false">
+            <item material="stained_glass" name="`aCytoskeleton" lore="`2TNT and Fireball Resistant" damage="5" amount="20"/>
+        </kit>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <!-- Team Upgrade - Axe/Shovel -->
+    <action id="axe-shovel-action-2" scope="player">
+        <set var="axe_shovel_variable" value="2"/>
+        <message text="`e`l▲ `6Team Axe and Shovel upgraded to `e`lDiamond`r"/>
+        <set var="team_upgrade_sounds" value="1"/>
+        <replace-item ignore-metadata="true">
+            <find material="iron axe"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="diamond axe" unbreakable="true"/>
+        </kit>
+        <replace-item ignore-metadata="true">
+            <find material="stone spade"/>
+            <replace material="air"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="iron spade"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="diamond spade" unbreakable="true"/>
+        </kit>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <action id="axe-shovel-action-3" scope="player">
+        <set var="axe_shovel_variable" value="3"/>
+        <message text="`e`l▲ `6Team Axe and Shovel upgraded to `e`lDiamond Efficiency I`r"/>
+        <set var="team_upgrade_sounds" value="1"/>
+        <replace-item ignore-metadata="true">
+            <find material="diamond axe"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="diamond axe" enchantment="efficiency:1" unbreakable="true"/>
+        </kit>
+        <replace-item ignore-metadata="true">
+            <find material="diamond spade"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="diamond spade" enchantment="efficiency:1" unbreakable="true"/>
+        </kit>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <!-- Team - Pickaxe upgrades -->
+    <action id="pickaxe-common" scope="player">
+        <action id="personal-upgrade-sounds"/>
+        <replace-item ignore-metadata="true">
+            <find material="iron pickaxe"/>
+            <replace material="air"/>
+        </replace-item>
+        <switch-scope inner="player" filter="only-red">
+            <set var="red_beacon_check_state" value="${outer}"/>
+        </switch-scope>
+        <switch-scope inner="player" filter="only-blue">
+            <set var="blue_beacon_check_state" value="${outer}"/>
+        </switch-scope>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <action id="pickaxe-2-action" scope="player">
+        <set var="pickaxe_variable" value="2"/>
+        <message text="`e`l▲ `6Pickaxe upgraded to `e`lIron Efficiency II`6 (Preprophase)`r"/>
+        <action id="pickaxe-common"/>
+        <kit force="true" filter="always">
+            <item material="iron pickaxe" enchantment="efficiency:2" unbreakable="true" lore="`eUpgrade [`a1`r`e of 7]"/>
+        </kit>
+    </action>
+    <action id="pickaxe-3-action" scope="player">
+        <set var="pickaxe_variable" value="3"/>
+        <message text="`e`l▲ `6Pickaxe upgraded to `e`lIron Efficiency III`6 (Prophase)"/>
+        <action id="pickaxe-common"/>
+        <kit force="true" filter="always">
+            <item material="iron pickaxe" enchantment="efficiency:3" unbreakable="true" lore="`eUpgrade [`a2`r`e of 7]"/>
+        </kit>
+    </action>
+    <action id="pickaxe-4-action" scope="player">
+        <set var="pickaxe_variable" value="4"/>
+        <message text="`e`l▲ `6Pickaxe upgraded to `e`lIron Efficiency IV`6 (Prometaphase)"/>
+        <action id="pickaxe-common"/>
+        <kit force="true" filter="always">
+            <item material="iron pickaxe" enchantment="efficiency:4" unbreakable="true" lore="`eUpgrade [`a3`r`e of 7]"/>
+        </kit>
+    </action>
+    <action id="pickaxe-5-action" scope="player">
+        <set var="pickaxe_variable" value="5"/>
+        <message text="`e`l▲ `6Pickaxe upgraded to `e`lDiamond`6 (Metaphase)"/>
+        <action id="pickaxe-common"/>
+        <kit force="true" filter="always">
+            <item material="diamond pickaxe" unbreakable="true" lore="`eUpgrade [`a4`r`e of 7]"/>
+        </kit>
+    </action>
+    <action id="pickaxe-6-action" scope="player">
+        <set var="pickaxe_variable" value="6"/>
+        <message text="`e`l▲ `6Pickaxe upgraded to `e`lDiamond Efficiency I`6 (Anaphase)"/>
+        <action id="pickaxe-common"/>
+        <kit force="true" filter="always">
+            <item material="diamond pickaxe" enchantment="efficiency:1" unbreakable="true" lore="`eUpgrade [`a5`r`e of 7]"/>
+        </kit>
+    </action>
+    <action id="pickaxe-7-action" scope="player">
+        <set var="pickaxe_variable" value="7"/>
+        <message text="`e`l▲ `6Pickaxe upgraded to `e`lDiamond Efficiency II`6 (Telophase)"/>
+        <action id="pickaxe-common"/>
+        <kit force="true" filter="always">
+            <item material="diamond pickaxe" enchantment="efficiency:2" unbreakable="true" lore="`eUpgrade [`a6`r`e of 7]"/>
+        </kit>
+    </action>
+    <action id="pickaxe-8-action" scope="player">
+        <set var="pickaxe_variable" value="8"/>
+        <message text="`e`l▲ `6Pickaxe upgraded to `e`lDiamond Efficiency III`6 (Cytokinesis)"/>
+        <action id="pickaxe-common"/>
+        <kit force="true" filter="always">
+            <item material="diamond pickaxe" enchantment="efficiency:3" unbreakable="true" lore="`eUpgrade [`a7`r`e of 7]"/>
+        </kit>
+    </action>
+    <!-- More team upgrades -->
+    <action id="haste-action" scope="player">
+        <set var="haste_variable" value="1"/>
+        <message text="`e`l▲ `6Your team now has `e`lHaste I`r"/>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <action id="speed-action" scope="player">
+        <set var="speed_variable" value="1"/>
+        <message text="`e`l▲ `6Your team now has `e`lSpeed I`r`6 at Home`r"/>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <action id="generator-action" scope="player">
+        <set var="generator_variable" value="1"/>
+        <message text="`e`l▲ `6Team generators are now `e`l50% Faster`r"/>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <action id="fatigue-action" scope="player">
+        <set var="fatigue_trap_variable" value="1"/>
+        <message text="`e`l▲ `6Your team now has a `e`lMining Fatigue Trap`r"/>
+        <set var="team_upgrade_sounds" value="1"/>
+    </action>
+    <!-- Personal upgrades -->
+    <action id="personal-upgrade-sounds" scope="player">
+        <sound key="random.orb" volume="1" pitch="1"/>
+        <sound key="block.enchantment_table.use" volume="1" pitch="1"/>
+    </action>
+    <!-- Attacker - Armor upgrades -->
+    <action id="diamond-boots-action-0-armor" scope="player">
+        <kit force="true" filter="always">
+            <boots unbreakable="true" locked="true" material="diamond boots" enchantment="feather_falling"/>
+        </kit>
+    </action>
+    <action id="diamond-boots-action-1-armor" scope="player">
+        <kit force="true" filter="always">
+            <boots unbreakable="true" locked="true" material="diamond boots" enchantment="feather_falling;protection:1"/>
+        </kit>
+    </action>
+    <action id="diamond-boots-action-2-armor" scope="player">
+        <kit force="true" filter="always">
+            <boots unbreakable="true" locked="true" material="diamond boots" enchantment="feather_falling;protection:2"/>
+        </kit>
+    </action>
+    <action id="diamond-boots-action-3-armor" scope="player">
+        <kit force="true" filter="always">
+            <boots unbreakable="true" locked="true" material="diamond boots" enchantment="feather_falling;protection:3"/>
+        </kit>
+    </action>
+    <action id="diamond-boots-action-4-armor" scope="player">
+        <kit force="true" filter="always">
+            <boots unbreakable="true" locked="true" material="diamond boots" enchantment="feather_falling;protection:4"/>
+        </kit>
+    </action>
+    <action id="diamond-boots-action-0" scope="player">
+        <message text="`e`l▲ `6Boots upgraded to `e`lDiamond`r"/>
+        <set var="diamond_boots_variable" value="1"/>
+        <action id="personal-upgrade-sounds"/>
+        <action id="diamond-boots-action-0-armor"/>
+    </action>
+    <action id="diamond-boots-action-1" scope="player">
+        <message text="`e`l▲ `6Boots upgraded to `e`lDiamond`r`6 (Protection I)"/>
+        <set var="diamond_boots_variable" value="1"/>
+        <action id="personal-upgrade-sounds"/>
+        <action id="diamond-boots-action-1-armor"/>
+    </action>
+    <action id="diamond-boots-action-2" scope="player">
+        <message text="`e`l▲ `6Boots upgraded to `e`lDiamond`r`6 (Protection II)"/>
+        <set var="diamond_boots_variable" value="1"/>
+        <action id="personal-upgrade-sounds"/>
+        <action id="diamond-boots-action-2-armor"/>
+    </action>
+    <action id="diamond-boots-action-3" scope="player">
+        <message text="`e`l▲ `6Boots upgraded to `e`lDiamond`r`6 (Protection III)"/>
+        <set var="diamond_boots_variable" value="1"/>
+        <action id="personal-upgrade-sounds"/>
+        <action id="diamond-boots-action-3-armor"/>
+    </action>
+    <action id="diamond-boots-action-4" scope="player">
+        <message text="`e`l▲ `6Boots upgraded to `e`lDiamond`r`6 (Protection IV)"/>
+        <set var="diamond_boots_variable" value="1"/>
+        <action id="personal-upgrade-sounds"/>
+        <action id="diamond-boots-action-4-armor"/>
+    </action>
+    <!-- Attacker/Defender - Bow upgrade -->
+    <action id="bow-action" scope="player">
+        <set var="bow_variable" value="1"/>
+        <message text="`e`l▲ `6Bow upgraded to `e`lPower I`r"/>
+        <action id="personal-upgrade-sounds"/>
+        <replace-item ignore-metadata="true">
+            <find material="bow"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true" filter="always">
+            <item material="bow" enchantment="power:1;infinity" unbreakable="true"/>
+        </kit>
+    </action>
+    <!-- Reset Kit after Respawn -->
+    <trigger filter="alive" scope="player">
+        <action>
+            <!-- Team - Reset: Shears Upgrades -->
+            <kit force="true" filter="shears-1">
+                <item material="shears" unbreakable="true"/>
+            </kit>
+            <kit force="true" filter="axe-shovel-2">
+                <item material="diamond axe" unbreakable="true"/>
+                <item material="diamond spade" unbreakable="true"/>
+                <action>
+                    <replace-item ignore-metadata="true">
+                        <find material="stone axe"/>
+                        <replace material="air"/>
+                    </replace-item>
+                    <replace-item ignore-metadata="true">
+                        <find material="stone spade"/>
+                        <replace material="air"/>
+                    </replace-item>
+                </action>
+            </kit>
+            <kit force="true" filter="axe-shovel-3">
+                <item material="diamond axe" enchantment="efficiency:1" unbreakable="true"/>
+                <item material="diamond spade" enchantment="efficiency:1" unbreakable="true"/>
+                <action>
+                    <replace-item ignore-metadata="true">
+                        <find material="stone axe"/>
+                        <replace material="air"/>
+                    </replace-item>
+                    <replace-item ignore-metadata="true">
+                        <find material="stone spade"/>
+                        <replace material="air"/>
+                    </replace-item>
+                </action>
+            </kit>
+            <!-- Team - Reset: Sword Upgrades -->
+            <kit force="true" filter="iron-sword-0-sharp">
+                <action>
+                    <replace-item ignore-metadata="true">
+                        <find material="stone sword"/>
+                        <replace material="air"/>
+                    </replace-item>
+                </action>
+                <item material="iron sword" unbreakable="true"/>
+            </kit>
+            <kit force="true" filter="iron-sword-1-sharp">
+                <action>
+                    <replace-item ignore-metadata="true">
+                        <find material="stone sword"/>
+                        <replace material="air"/>
+                    </replace-item>
+                </action>
+                <item material="iron sword" unbreakable="true" enchantment="sharpness"/>
+            </kit>
+            <kit force="true" filter="iron-sword-2-sharp">
+                <action>
+                    <replace-item ignore-metadata="true">
+                        <find material="stone sword"/>
+                        <replace material="air"/>
+                    </replace-item>
+                </action>
+                <item material="iron sword" unbreakable="true" enchantment="sharpness:2"/>
+            </kit>
+			<!-- Team - Reset: Water Bucket Upgrade -->
+			<action filter="water-bucket-1">
+				<replace-item>
+					<find material="bucket"/>
+					<replace material="air"/>
+				</replace-item>
+				<kit force="true">
+					<item material="water bucket"/>
+				</kit>
+			</action>
+			<!-- Team - Reset: Gapples and Vines Upgrade -->
+			<action filter="organics-1">
+				<kit force="true">
+					<item material="golden apple"/>
+					<item material="vine" amount="16"/>
+				</kit>
+			</action>
+			<!-- Team - Reset: Block Boost Upgrade -->
+			<kit force="true" filter="block-boost-1" deduct-items="true">
+				<item material="wood" damage="5" amount="64"/>
+				<item material="cobblestone" amount="16"/>
+				<item material="wool" amount="16" team-color="true"/>
+			</kit>
+			<!-- Team - Reset: Cytoskeleton Upgrade -->
+			<kit force="true" filter="cytoskeleton-1" deduct-items="true">
+				<item material="stained_glass" name="`aCytoskeleton" lore="`2TNT and Fireball Resistant" damage="5" amount="20"/>
+			</kit>
+			<!-- Attacker/Defender - Reset: Bow Upgrades -->
+			<kit force="true" filter="bow-1">
+				<action>
+					<replace-item ignore-metadata="true">
+						<find material="bow"/>
+						<replace material="air"/>
+					</replace-item>
+				</action>
+				<item material="bow" enchantment="power:1;infinity" unbreakable="true"/>
+			</kit>
+			<!-- Team - Reset: Pickaxe Upgrades -->
+			<kit force="true" filter="team-pickaxe-1">
+				<action>
+					<replace-item ignore-metadata="true">
+						<find material="iron pickaxe"/>
+						<replace material="air"/>
+					</replace-item>
+				</action>
+				<item material="iron pickaxe" unbreakable="true" enchantment="efficiency:1"/>
+			</kit>
+			<kit force="true" filter="team-pickaxe-2">
+				<action>
+					<replace-item ignore-metadata="true">
+						<find material="iron pickaxe"/>
+						<replace material="air"/>
+					</replace-item>
+				</action>
+				<item material="iron pickaxe" unbreakable="true" enchantment="efficiency:2"/>
+			</kit>
+			<kit force="true" filter="team-pickaxe-3">
+				<action>
+					<replace-item ignore-metadata="true">
+						<find material="iron pickaxe"/>
+						<replace material="air"/>
+					</replace-item>
+				</action>
+				<item material="iron pickaxe" unbreakable="true" enchantment="efficiency:3"/>
+			</kit>
+			<kit force="true" filter="team-pickaxe-4">
+				<action>
+					<replace-item ignore-metadata="true">
+						<find material="iron pickaxe"/>
+						<replace material="air"/>
+					</replace-item>
+				</action>
+				<item material="iron pickaxe" unbreakable="true" enchantment="efficiency:4"/>
+			</kit>
+			<kit force="true" filter="team-pickaxe-5">
+				<action>
+					<replace-item ignore-metadata="true">
+						<find material="iron pickaxe"/>
+						<replace material="air"/>
+					</replace-item>
+				</action>
+				<item material="diamond pickaxe" unbreakable="true"/>
+			</kit>
+			<kit force="true" filter="team-pickaxe-6">
+				<action>
+					<replace-item ignore-metadata="true">
+						<find material="iron pickaxe"/>
+						<replace material="air"/>
+					</replace-item>
+				</action>
+				<item material="diamond pickaxe" unbreakable="true" enchantment="efficiency:1"/>
+			</kit>
+			<kit force="true" filter="team-pickaxe-7">
+				<action>
+					<replace-item ignore-metadata="true">
+						<find material="iron pickaxe"/>
+						<replace material="air"/>
+					</replace-item>
+				</action>
+				<item material="diamond pickaxe" unbreakable="true" enchantment="efficiency:2"/>
+			</kit>
+			<kit force="true" filter="team-pickaxe-8">
+				<action>
+					<replace-item ignore-metadata="true">
+						<find material="iron pickaxe"/>
+						<replace material="air"/>
+					</replace-item>
+				</action>
+				<item material="diamond pickaxe" unbreakable="true" enchantment="efficiency:3"/>
+			</kit>
+			<!-- Team - Reset: Iron Leggings Upgrades -->
+			<kit force="true" filter="iron-leggings-1-prot0">
+				<leggings material="iron leggings" enchantment="projectile_protection" unbreakable="true"/>
+			</kit>
+			<kit force="true" filter="iron-leggings-1-prot1">
+				<leggings material="iron leggings" enchantment="protection;projectile_protection" unbreakable="true"/>
+			</kit>
+			<kit force="true" filter="iron-leggings-1-prot2">
+				<leggings material="iron leggings" enchantment="protection:2;projectile_protection" unbreakable="true"/>
+			</kit>
+			<kit force="true" filter="iron-leggings-1-prot3">
+				<leggings material="iron leggings" enchantment="protection:3;projectile_protection" unbreakable="true"/>
+			</kit>
+			<kit force="true" filter="iron-leggings-1-prot4">
+				<leggings material="iron leggings" enchantment="protection:4;projectile_protection" unbreakable="true"/>
+			</kit>
+			<!-- Player - Reset: Player Diamond Helmet Award -->
+			<kit force="true" filter="vanity-hat-1">
+				<helmet material="diamond helmet" locked="true" unbreakable="true" name="`4The Catalyst" lore="`6`oIncreased the rate of chemical reaction|☣ ☣ ☣|"/>
+			</kit>
+			<!-- Player - Reset: Player Diamond Boots Upgrade -->
+			<kit force="true" filter="all(diamond-boots-1,protection-0)">
+				<boots material="diamond boots" locked="true" enchantment="feather_falling" unbreakable="true"/>
+			</kit>
+			<kit force="true" filter="all(diamond-boots-1,protection-1)">
+				<boots material="diamond boots" locked="true" enchantment="feather_falling;protection:1" unbreakable="true"/>
+			</kit>
+			<kit force="true" filter="all(diamond-boots-1,protection-2)">
+				<boots material="diamond boots" locked="true" enchantment="feather_falling;protection:2" unbreakable="true"/>
+			</kit>
+			<kit force="true" filter="all(diamond-boots-1,protection-3)">
+				<boots material="diamond boots" locked="true" enchantment="feather_falling;protection:3" unbreakable="true"/>
+			</kit>
+			<kit force="true" filter="all(diamond-boots-1,protection-4)">
+				<boots material="diamond boots" locked="true" enchantment="feather_falling;protection:4" unbreakable="true"/>
+			</kit>
+        </action>
+    </trigger>
+    <!-- Personal - Vanity Helmet -->
+    <trigger filter="obby-broke" scope="player">
+        <action>
+            <switch-scope inner="player" filter="obby_breaker=1">
+                <kit force="true" id="diamond-vanity-hat">
+                    <helmet material="diamond helmet" locked="true" unbreakable="true" name="`4The Catalyst" lore="`6`oIncreased the rate of chemical reaction|☣ ☣ ☣|"/>
+                    <!-- One-time bonus blocks -->
+                    <item material="stained_glass" name="`aCytoskeleton" lore="`2TNT and Fireball Resistant" damage="5" amount="32"/>
+                    <item material="tnt" amount="10"/>
+                </kit>
+                <set var="vanity_hat_variable" value="1"/>
+                <message text="`e`l▲ `aMonument-breaker helmet and bonus items awarded!"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <!-- Emulate the Monuments in the "Signal" copy above it -->
+    <trigger filter="red-obby-left-up-broke" scope="match">
+        <action>
+            <fill region="red-monument-left-top-signal" material="stained_glass:5"/>
+        </action>
+    </trigger>
+    <trigger filter="red-obby-left-down-broke" scope="match">
+        <action>
+            <fill region="red-monument-left-bottom-signal" material="stained_glass:5"/>
+        </action>
+    </trigger>
+    <trigger filter="red-obby-right-up-broke" scope="match">
+        <action>
+            <fill region="red-monument-right-top-signal" material="stained_glass:5"/>
+        </action>
+    </trigger>
+    <trigger filter="red-obby-right-down-broke" scope="match">
+        <action>
+            <fill region="red-monument-right-bottom-signal" material="stained_glass:5"/>
+        </action>
+    </trigger>
+    <trigger filter="blue-obby-left-up-broke" scope="match">
+        <action>
+            <fill region="blue-monument-left-top-signal" material="stained_glass:5"/>
+        </action>
+    </trigger>
+    <trigger filter="blue-obby-left-down-broke" scope="match">
+        <action>
+            <fill region="blue-monument-left-bottom-signal" material="stained_glass:5"/>
+        </action>
+    </trigger>
+    <trigger filter="blue-obby-right-up-broke" scope="match">
+        <action>
+            <fill region="blue-monument-right-top-signal" material="stained_glass:5"/>
+        </action>
+    </trigger>
+    <trigger filter="blue-obby-right-down-broke" scope="match">
+        <action>
+            <fill region="blue-monument-right-bottom-signal" material="stained_glass:5"/>
+        </action>
+    </trigger>
+</actions>
+<variables>
+    <variable id="team_upgrade_sounds" default="0" scope="player"/>
+    <!-- Player vanity upgrade -->
+    <variable id="vanity_hat_variable" default="0" scope="player"/>
+    <variable id="obby_breaker" scope="player" exclusive="1"/>
+    <!-- Player shop upgrade variables -->
+    <variable id="diamond_boots_variable" default="0" scope="player"/>
+    <variable id="pickaxe_variable" default="1" scope="team"/>
+    <with-team id="red_pickaxe_variable" var="pickaxe_variable" team="red-team"/>
+    <variable id="red_beacon_check_state" default="0" scope="match"/>
+    <with-team id="blue_pickaxe_variable" var="pickaxe_variable" team="blue-team"/>
+    <variable id="blue_beacon_check_state" default="0" scope="match"/>
+    <variable id="bow_variable" default="0" scope="player"/>
+    <!-- Team shop upgrade variables -->
+    <variable id="iron_leggings_variable" default="0" scope="team"/>
+    <variable id="iron_leggings_store" default="0" scope="team"/>
+    <variable id="iron_sword_variable" default="0" scope="team"/>
+    <variable id="iron_sword_store" default="0" scope="team"/>
+    <variable id="fatigue_trap_variable" default="0" scope="team"/>
+    <variable id="generator_variable" default="0" scope="team"/>
+    <variable id="regen_variable" default="0" scope="team"/>
+    <variable id="shears_variable" default="0" scope="team"/>
+    <variable id="axe_shovel_variable" default="1" scope="team"/>
+    <variable id="protection_variable" default="0" scope="team"/>
+    <variable id="sharpness_variable" default="0" scope="team"/>
+    <variable id="block_boost_variable" default="0" scope="team"/>
+    <variable id="cytoskeleton_variable" default="0" scope="team"/>
+    <variable id="water_bucket_variable" default="0" scope="team"/>
+    <variable id="organics_variable" default="0" scope="team"/>
+    <variable id="speed_variable" default="0" scope="team"/>
+    <variable id="haste_variable" default="0" scope="team"/>
+</variables>
+<block-drops>
+    <rule kit="obby-breaker-kit">
+        <filter>
+            <material>obsidian</material>
+        </filter>
+    </rule>
+    <rule>
+        <filter>
+            <any>
+                <material>glowstone</material>
+            </any>
+        </filter>
+        <drops>
+            <item chance="2" material="glowstone dust" name="`e`l[DNA]`r Team Upgrade" lore="`6Use this currency in the|`6Team Upgrade shop."/>
+        </drops>
+    </rule>
+</block-drops>
+<filters>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <alive id="alive"/>
+    <match-running id="match-running"/>
+    <all id="upgrade-team-1">
+        <variable var="team_upgrade_sounds">1</variable>
+    </all>
+    <after id="upgrade-team-2" duration="0.4">
+        <variable var="team_upgrade_sounds">1</variable>
+    </after>
+    <!-- Respawn Reset filters -->
+    <all id="team-pickaxe-1">
+        <variable var="pickaxe_variable">1</variable>
+    </all>
+    <all id="team-pickaxe-2">
+        <variable var="pickaxe_variable">2</variable>
+    </all>
+    <all id="team-pickaxe-3">
+        <variable var="pickaxe_variable">3</variable>
+    </all>
+    <all id="team-pickaxe-4">
+        <variable var="pickaxe_variable">4</variable>
+    </all>
+    <all id="team-pickaxe-5">
+        <variable var="pickaxe_variable">5</variable>
+    </all>
+    <all id="team-pickaxe-6">
+        <variable var="pickaxe_variable">6</variable>
+    </all>
+    <all id="team-pickaxe-7">
+        <variable var="pickaxe_variable">7</variable>
+    </all>
+    <all id="team-pickaxe-8">
+        <variable var="pickaxe_variable">8</variable>
+    </all>
+    <all id="iron-sword-0-sharp">
+        <variable var="iron_sword_variable">1</variable>
+        <variable var="sharpness_variable">0</variable>
+    </all>
+    <all id="iron-sword-1-sharp">
+        <variable var="iron_sword_variable">1</variable>
+        <variable var="sharpness_variable">1</variable>
+    </all>
+    <all id="iron-sword-2-sharp">
+        <variable var="iron_sword_variable">1</variable>
+        <variable var="sharpness_variable">2</variable>
+    </all>
+    <!-- Vanity Diamond Helmet -->
+    <all id="helmet-replacement-filter">
+        <alive/>
+        <variable var="vanity_hat_variable">1</variable>
+    </all>
+    <!-- Team Upgrade Systems -->
+    <all id="apply-sharpness-1">
+        <variable var="sharpness_variable">1</variable>
+        <alive/>
+    </all>
+    <all id="apply-sharpness-2">
+        <variable var="sharpness_variable">2</variable>
+        <alive/>
+    </all>
+    <all id="apply-protection-1">
+        <variable var="protection_variable">1</variable>
+        <alive/>
+    </all>
+    <all id="apply-protection-2">
+        <variable var="protection_variable">2</variable>
+        <alive/>
+    </all>
+    <all id="apply-protection-3">
+        <variable var="protection_variable">3</variable>
+        <alive/>
+    </all>
+    <all id="apply-protection-4">
+        <variable var="protection_variable">4</variable>
+        <alive/>
+    </all>
+    <all id="apply-fatigue">
+        <alive/>
+        <any>
+            <all>
+                <team>red-team</team>
+                <region id="blue-effect-region"/>
+                <variable var="fatigue_trap_variable" team="blue-team">1</variable>
+            </all>
+            <all>
+                <team>blue-team</team>
+                <region id="red-effect-region"/>
+                <variable var="fatigue_trap_variable" team="red-team">1</variable>
+            </all>
+        </any>
+    </all>
+    <all id="apply-speed">
+        <alive/>
+        <any>
+            <all>
+                <team>blue-team</team>
+                <region id="blue-effect-region"/>
+                <variable var="speed_variable" team="blue-team">1</variable>
+            </all>
+            <all>
+                <team>red-team</team>
+                <region id="red-effect-region"/>
+                <variable var="speed_variable" team="red-team">1</variable>
+            </all>
+        </any>
+    </all>
+    <all id="apply-haste">
+        <alive/>
+        <any>
+            <all>
+                <team>blue-team</team>
+                <variable var="haste_variable" team="blue-team">1</variable>
+            </all>
+            <all>
+                <team>red-team</team>
+                <variable var="haste_variable" team="red-team">1</variable>
+            </all>
+        </any>
+    </all>
+    <all id="apply-regen">
+        <alive/>
+        <variable var="regen_variable">1</variable>
+        <any>
+            <all>
+                <team>blue-team</team>
+                <any>
+                    <region id="regen-blue-left"/>
+                    <region id="regen-blue-right"/>
+                </any>
+            </all>
+            <all>
+                <team>red-team</team>
+                <any>
+                    <region id="regen-red-left"/>
+                    <region id="regen-red-right"/>
+                </any>
+            </all>
+        </any>
+    </all>
+    <deny id="deny-water-flow">
+        <all>
+            <any>
+                <material>stationary water</material>
+                <material>water</material>
+            </any>
+            <cause>world</cause>
+        </all>
+    </deny>
+    <deny id="tnt-immune">
+        <all>
+            <cause>explosion</cause>
+            <any>
+                <!-- List of blocks that will be protected against TNT explosions -->
+                <material>stained glass</material>
+            </any>
+        </all>
+    </deny>
+    <deny id="original-block-protection-filter">
+        <any>
+            <!-- Blocks that players can't modify (mainly due to breaking time differences) -->
+            <material>1:2</material>
+            <material>prismarine:2</material>
+            <material>prismarine:1</material>
+            <material>lapis block</material>
+            <material>redstone block</material>
+            <material>stained clay:11</material>
+            <material>stained clay:14</material>
+            <material>ender chest</material>
+        </any>
+    </deny>
+    <!-- Track monument breakage for player upgrade -->
+    <all id="obby-broke">
+        <variable var="obby_breaker">1</variable>
+    </all>
+    <any id="red-obby-left-up-broke">
+        <offset vector="-65,47,-20">
+            <material>air</material>
+        </offset>
+    </any>
+    <any id="red-obby-left-down-broke">
+        <offset vector="-65,46,-20">
+            <material>air</material>
+        </offset>
+    </any>
+    <any id="red-obby-right-up-broke">
+        <offset vector="-65,47,20">
+            <material>air</material>
+        </offset>
+    </any>
+    <any id="red-obby-right-down-broke">
+        <offset vector="-65,46,20">
+            <material>air</material>
+        </offset>
+    </any>
+    <any id="blue-obby-left-up-broke">
+        <offset vector="65,47,20">
+            <material>air</material>
+        </offset>
+    </any>
+    <any id="blue-obby-left-down-broke">
+        <offset vector="65,46,20">
+            <material>air</material>
+        </offset>
+    </any>
+    <any id="blue-obby-right-up-broke">
+        <offset vector="65,47,-20">
+            <material>air</material>
+        </offset>
+    </any>
+    <any id="blue-obby-right-down-broke">
+        <offset vector="65,46,-20">
+            <material>air</material>
+        </offset>
+    </any>
+    <!-- Upgrade visibility filters -->
+    <variable id="axe-shovel-1" var="axe_shovel_variable">1</variable>
+    <variable id="axe-shovel-2" var="axe_shovel_variable">2</variable>
+    <variable id="axe-shovel-3" var="axe_shovel_variable">3</variable>
+    <variable id="bow-0" var="bow_variable">0</variable>
+    <variable id="bow-1" var="bow_variable">1</variable>
+    <variable id="pickaxe-1" var="pickaxe_variable">1</variable>
+    <variable id="pickaxe-2" var="pickaxe_variable">2</variable>
+    <variable id="pickaxe-3" var="pickaxe_variable">3</variable>
+    <variable id="pickaxe-4" var="pickaxe_variable">4</variable>
+    <variable id="pickaxe-5" var="pickaxe_variable">5</variable>
+    <variable id="pickaxe-6" var="pickaxe_variable">6</variable>
+    <variable id="pickaxe-7" var="pickaxe_variable">7</variable>
+    <variable id="pickaxe-8" var="pickaxe_variable">8</variable>
+    <variable id="fatigue-trap-0" var="fatigue_trap_variable">0</variable>
+    <variable id="generator-0" var="generator_variable">0</variable>
+    <variable id="generator-1" var="generator_variable">1</variable>
+    <variable id="protection-0" var="protection_variable">0</variable>
+    <variable id="protection-1" var="protection_variable">1</variable>
+    <variable id="protection-2" var="protection_variable">2</variable>
+    <variable id="protection-3" var="protection_variable">3</variable>
+    <variable id="protection-4" var="protection_variable">4</variable>
+    <variable id="sharpness-0" var="sharpness_variable">0</variable>
+    <variable id="sharpness-1" var="sharpness_variable">1</variable>
+    <variable id="sharpness-2" var="sharpness_variable">2</variable>
+    <variable id="regen-0" var="regen_variable">0</variable>
+    <variable id="regen-1" var="regen_variable">1</variable>
+    <variable id="shears-0" var="shears_variable">0</variable>
+    <variable id="iron-leggings-0" var="iron_leggings_variable">0</variable>
+    <variable id="iron-sword-0" var="iron_sword_variable">0</variable>
+    <variable id="vanity-hat-1" var="vanity_hat_variable">1</variable>
+    <variable id="block-boost-0" var="block_boost_variable">0</variable>
+    <variable id="cytoskeleton-0" var="cytoskeleton_variable">0</variable>
+    <variable id="water-bucket-0" var="water_bucket_variable">0</variable>
+    <variable id="organics-0" var="organics_variable">0</variable>
+    <variable id="speed-0" var="speed_variable">0</variable>
+    <variable id="haste-0" var="haste_variable">0</variable>
+    <all id="water-bucket-1">
+        <alive/>
+        <variable var="water_bucket_variable">1</variable>
+    </all>
+    <all id="organics-1">
+        <alive/>
+        <variable var="organics_variable">1</variable>
+    </all>
+    <all id="block-boost-1">
+        <alive/>
+        <variable var="block_boost_variable">1</variable>
+    </all>
+    <all id="cytoskeleton-1">
+        <alive/>
+        <variable var="cytoskeleton_variable">1</variable>
+    </all>
+    <all id="shears-1">
+        <alive/>
+        <variable var="shears_variable">1</variable>
+    </all>
+    <all id="iron-leggings-1-prot0">
+        <alive/>
+        <variable var="iron_leggings_variable">1</variable>
+        <variable var="protection_variable">0</variable>
+    </all>
+    <all id="iron-leggings-1-prot1">
+        <alive/>
+        <variable var="iron_leggings_variable">1</variable>
+        <variable var="protection_variable">1</variable>
+    </all>
+    <all id="iron-leggings-1-prot2">
+        <alive/>
+        <variable var="iron_leggings_variable">1</variable>
+        <variable var="protection_variable">2</variable>
+    </all>
+    <all id="iron-leggings-1-prot3">
+        <alive/>
+        <variable var="iron_leggings_variable">1</variable>
+        <variable var="protection_variable">3</variable>
+    </all>
+    <all id="iron-leggings-1-prot4">
+        <alive/>
+        <variable var="iron_leggings_variable">1</variable>
+        <variable var="protection_variable">4</variable>
+    </all>
+    <all id="iron-sword-1">
+        <alive/>
+        <variable var="iron_sword_variable">1</variable>
+    </all>
+    <all id="diamond-boots-0">
+        <alive/>
+        <variable var="diamond_boots_variable">0</variable>
+    </all>
+    <all id="diamond-boots-1">
+        <alive/>
+        <variable var="diamond_boots_variable">1</variable>
+    </all>
+    <all id="only-iron-cause-world">
+        <any>
+            <material id="only-iron">iron block</material>
+            <material>stationary water</material>
+            <material>water</material>
+        </any>
+        <cause>world</cause>
+    </all>
+    <material id="only-air">air</material>
+    <any id="only-iron-stuff">
+        <material>iron block</material>
+    </any>
+    <not id="not-sea-lantern">
+        <material>sea lantern</material>
+    </not>
+    <time id="late-game-stage">45m</time>
+    <!-- Beacon processing filters -->
+    <all id="red-beacon-outer-set">
+        <match-running/>
+        <variable var="red_beacon_check_state">${outer}</variable>
+        <variable var="red_pickaxe_variable">[5,8]</variable>
+    </all>
+    <all id="red-beacon-outer-not-set">
+        <match-running/>
+        <variable var="red_beacon_check_state">${outer}</variable>
+        <not>
+            <variable var="red_pickaxe_variable">[5,8]</variable>
+        </not>
+    </all>
+    <all id="red-beacon-inner1-set">
+        <match-running/>
+        <variable var="red_beacon_check_state">${inner1}</variable>
+        <any>
+			<variable var="red_pickaxe_variable">4</variable>
+			<variable var="red_pickaxe_variable">[6,8]</variable>
+        </any>
+    </all>
+    <all id="red-beacon-inner1-not-set">
+        <match-running/>
+        <variable var="red_beacon_check_state">${inner1}</variable>
+        <not>
+			<any>
+				<variable var="red_pickaxe_variable">4</variable>
+				<variable var="red_pickaxe_variable">[6,8]</variable>
+			</any>
+        </not>
+    </all>
+    <all id="red-beacon-inner2-set">
+        <match-running/>
+        <variable var="red_beacon_check_state">${inner2}</variable>
+        <any>
+			<variable var="red_pickaxe_variable">3</variable>
+			<variable var="red_pickaxe_variable">5</variable>
+			<variable var="red_pickaxe_variable">[7,8]</variable>
+        </any>
+    </all>
+    <all id="red-beacon-inner2-not-set">
+        <match-running/>
+        <variable var="red_beacon_check_state">${inner2}</variable>
+        <not>
+			<any>
+				<variable var="red_pickaxe_variable">3</variable>
+				<variable var="red_pickaxe_variable">5</variable>
+				<variable var="red_pickaxe_variable">[7,8]</variable>
+			</any>
+        </not>
+    </all>
+    <all id="red-beacon-middle-set">
+        <match-running/>
+        <variable var="red_beacon_check_state">${middle}</variable>
+        <any>
+			<variable var="red_pickaxe_variable">2</variable>
+			<variable var="red_pickaxe_variable">4</variable>
+			<variable var="red_pickaxe_variable">6</variable>
+			<variable var="red_pickaxe_variable">8</variable>
+        </any>
+    </all>
+    <all id="red-beacon-middle-not-set">
+        <match-running/>
+        <variable var="red_beacon_check_state">${middle}</variable>
+        <not>
+        <any>
+			<variable var="red_pickaxe_variable">2</variable>
+			<variable var="red_pickaxe_variable">4</variable>
+			<variable var="red_pickaxe_variable">6</variable>
+			<variable var="red_pickaxe_variable">8</variable>
+        </any>
+        </not>
+    </all>
+    <all id="blue-beacon-outer-set">
+        <match-running/>
+        <variable var="blue_beacon_check_state">${outer}</variable>
+        <variable var="blue_pickaxe_variable">[5,8]</variable>
+    </all>
+    <all id="blue-beacon-outer-not-set">
+        <match-running/>
+        <variable var="blue_beacon_check_state">${outer}</variable>
+        <not>
+            <variable var="blue_pickaxe_variable">[5,8]</variable>
+        </not>
+    </all>
+    <all id="blue-beacon-inner1-set">
+        <match-running/>
+        <variable var="blue_beacon_check_state">${inner1}</variable>
+        <any>
+			<variable var="blue_pickaxe_variable">4</variable>
+			<variable var="blue_pickaxe_variable">[6,8]</variable>
+        </any>
+    </all>
+    <all id="blue-beacon-inner1-not-set">
+        <match-running/>
+        <variable var="blue_beacon_check_state">${inner1}</variable>
+        <not>
+			<any>
+				<variable var="blue_pickaxe_variable">4</variable>
+				<variable var="blue_pickaxe_variable">[6,8]</variable>
+			</any>
+        </not>
+    </all>
+    <all id="blue-beacon-inner2-set">
+        <match-running/>
+        <variable var="blue_beacon_check_state">${inner2}</variable>
+        <any>
+			<variable var="blue_pickaxe_variable">3</variable>
+			<variable var="blue_pickaxe_variable">5</variable>
+			<variable var="blue_pickaxe_variable">[7,8]</variable>
+        </any>
+    </all>
+    <all id="blue-beacon-inner2-not-set">
+        <match-running/>
+        <variable var="blue_beacon_check_state">${inner2}</variable>
+        <not>
+			<any>
+				<variable var="blue_pickaxe_variable">3</variable>
+				<variable var="blue_pickaxe_variable">5</variable>
+				<variable var="blue_pickaxe_variable">[7,8]</variable>
+			</any>
+        </not>
+    </all>
+    <all id="blue-beacon-middle-set">
+        <match-running/>
+        <variable var="blue_beacon_check_state">${middle}</variable>
+        <any>
+			<variable var="blue_pickaxe_variable">2</variable>
+			<variable var="blue_pickaxe_variable">4</variable>
+			<variable var="blue_pickaxe_variable">6</variable>
+			<variable var="blue_pickaxe_variable">8</variable>
+        </any>
+    </all>
+    <all id="blue-beacon-middle-not-set">
+        <match-running/>
+        <variable var="blue_beacon_check_state">${middle}</variable>
+        <not>
+        <any>
+			<variable var="blue_pickaxe_variable">2</variable>
+			<variable var="blue_pickaxe_variable">4</variable>
+			<variable var="blue_pickaxe_variable">6</variable>
+			<variable var="blue_pickaxe_variable">8</variable>
+        </any>
+        </not>
+    </all>
+</filters>
+<projectiles>
+    <projectile id="throwable-fireball" name="Fireball" projectile="Fireball" velocity=".6" click="right" power="3" damage="1" cooldown="1s"/>
+    <projectile id="throwable-snowball" name="Slowball" projectile="Snowball" velocity="1.6" click="right" damage="2" cooldown="1s">
+        <effect duration="9s" amplifier="1">slowness</effect>
+        <effect duration="3s" amplifier="1">confusion</effect>
+    </projectile>
+</projectiles>
+<shopkeepers name="`4`lAttacker Upgrades" shop="attacker-shop">
+    <shopkeeper mob="Witch" yaw="90">106,57,-7.5</shopkeeper>
+</shopkeepers>
+<shopkeepers name="`4`lAttacker Upgrades" shop="attacker-shop">
+    <shopkeeper mob="Witch" yaw="270">-105,57,8.5</shopkeeper>
+</shopkeepers>
+<shopkeepers name="`e`lTeam Upgrades" shop="team-shop">
+    <shopkeeper mob="Blaze" yaw="90">106,57,8.5</shopkeeper>
+</shopkeepers>
+<shopkeepers name="`e`lTeam Upgrades" shop="team-shop">
+    <shopkeeper mob="Blaze" yaw="270">-105,57,-7.5</shopkeeper>
+</shopkeepers>
+<shopkeepers name="`9`lDefender Upgrades" shop="defender-shop">
+    <shopkeeper mob="Snowman" yaw="90">97,46,0.5</shopkeeper>
+</shopkeepers>
+<shopkeepers name="`9`lDefender Upgrades" shop="defender-shop">
+    <shopkeeper mob="Snowman" yaw="270">-96,46,0.5</shopkeeper>
+</shopkeepers>
+<shops>
+    <!-- Defender Store -->
+    <shop id="defender-shop" name="`9`l[Antibodies] Defender Shop">
+        <category id="defensive-upgrades" name="`9`lUpgrades and Items" material="dirt">
+            <item material="bow" unbreakable="true" enchantment="power:1;infinity" name="`9Power Bow" price="700" currency="dirt" color="blue" action="bow-action" filter="bow-0" lore="`7You permanently gain a|`7Power I, Infinity bow.|"/>
+            <!-- Tools and Projectiles -->
+            <item material="diamond spade" name="`9Diamond Shovel" price="100" currency="dirt" filter="axe-shovel-1" kit="diamond-shovel-kit" color="blue" lore="`7Diamond Shovel|"/>
+            <item material="gold pickaxe" name="`9Gold Pickaxe" enchantment="unbreaking:5" price="100" currency="dirt" kit="gold-pickaxe-kit" color="blue" lore="`7Gold Pickaxe with|`7Unbreaking V|"/>
+            <item material="tnt" name="`9TNT" price="150" amount="3" currency="dirt" color="blue" kit="tnt-pack3" lore="`73 Auto TNT|"/>
+            <item material="snowball" kit="snowball-kit" name="`9Slowball" lore="`7Gives Slowness for 9 seconds|`7and brief Confusion to enemies.|Right-click to launch|Cooldown: 1s|" amount="1" price="90" currency="dirt" color="blue"/>
+            <item material="fireball" kit="fireball-kit" name="`9Fireball" lore="Right-click to launch|Cooldown: 1s|" price="120" currency="dirt" color="blue"/>
+            <item material="fireball" kit="fireball-pack-kit" amount="5" name="`9Fireball Pack" lore="`7Pack of 5|Right-click to launch|Cooldown: 1s|" price="350" currency="dirt" color="blue"/>
+            <item material="flint and steel" name="`9Oxidizer" price="80" currency="dirt" color="blue" kit="flint-kit" lore="`71 Flint and Steel|Start a chain-reaction|"/>
+            <!-- Potions -->
+            <item material="potion" name="`9Regeneration (20s)" damage="1" price="150" currency="dirt" color="blue" lore="`3Biological activator:|`bStem Cell Time-Release|">
+                <effect duration="20s">regeneration</effect>
+            </item>
+            <item material="potion" name="`9Instant Healing" damage="5" price="200" currency="dirt" color="blue" lore="`3Biological activator:|`bStem Cell Concentrate|">
+                <effect duration="2s">instant_health</effect>
+            </item>
+            <item material="potion" name="`9Swiftness (70s)" damage="2" price="200" currency="dirt" color="blue" lore="`3Biological activator:|`bGlucose|">
+                <effect duration="70s">speed</effect>
+            </item>
+            <item material="potion" name="`9Leaping V (60s)" damage="11" price="200" currency="dirt" color="blue" lore="`3Biological activator:|`bAdrenaline|">
+                <effect duration="60s" amplifier="5">jump_boost</effect>
+            </item>
+            <item material="potion" name="`9Strength (22s)" damage="9" price="300" currency="dirt" color="blue" lore="`3Biological activator:|`bAdenosine Triphosphate|">
+                <effect duration="22s">strength</effect>
+            </item>
+            <item material="potion" name="`9Night Vision (20m)" damage="6" price="20" currency="dirt" color="blue" lore="`3Biological activator:|`bRhodopsin|">
+                <effect duration="1200s">night_vision</effect>
+            </item>
+            <!-- Spash Potions -->
+            <item material="potion" name="`9Regeneration (12s)" damage="16385" price="100" currency="dirt" color="blue" lore="`3Send a chemical message:|`bOxytocin|">
+                <effect duration="12s">regeneration</effect>
+            </item>
+            <item material="potion" name="`9Regeneration II (8s)" damage="16385" price="150" currency="dirt" color="blue" lore="`3Send a chemical message:|`bOxytocin plus Dopamine|">
+                <effect duration="8s" amplifier="2">regeneration</effect>
+            </item>
+            <item material="potion" name="`9Slowness (15s)" damage="16394" price="200" currency="dirt" color="blue" lore="`3Send a chemical message:|`bBeta Blocker|">
+                <effect duration="15s">slowness</effect>
+            </item>
+            <!-- Blocks -->
+            <item material="web" name="`9Webs" price="70" amount="16" currency="dirt" kit="web-kit" color="blue" lore="`7Defensive webs|"/>
+            <item material="log 2" damage="1" name="`9Logs" price="40" amount="64" currency="dirt" kit="log-kit" color="blue" lore="`7Stack of Logs|"/>
+            <!-- Conversions -->
+            <item material="dirt" name="`9Convert Clay" amount="16" price="16" currency="stained clay" kit="dirt-16" color="dark green" lore="`7Convert Stained Clay to equivalent amount|`7of Dirt currency|"/>
+            <item material="dirt" name="`9Convert Polished Stone" amount="16" price="16" currency="stone" kit="dirt-16" color="gray" lore="`7Convert Polished Stone to equivalent amount|`7of Dirt currency|"/>
+        </category>
+    </shop>
+    <!-- Attacker Store -->
+    <shop id="attacker-shop" name="`4`l[ATP]`0 Attacker Upgrades">
+        <category id="upgrades" name="`4`lUpgrades and Items" material="redstone">
+            <item material="diamond boots" name="`4Diamond Boots" price="20" enchantment="feather_falling" currency="redstone" filter="all(diamond-boots-0,protection-0)" action="diamond-boots-action-0" color="red" lore="`5You permanently gain|`5Diamond boots with|`5Feather Falling I.|"/>
+            <item material="diamond boots" name="`4Diamond Boots" price="20" enchantment="feather_falling" currency="redstone" filter="all(diamond-boots-0,protection-1)" action="diamond-boots-action-1" color="red" lore="`5You permanently gain|`5Diamond boots with|`5Feather Falling I (Protection I).|"/>
+            <item material="diamond boots" name="`4Diamond Boots" price="20" enchantment="feather_falling" currency="redstone" filter="all(diamond-boots-0,protection-2)" action="diamond-boots-action-2" color="red" lore="`5You permanently gain|`5Diamond boots with|`5Feather Falling I (Protection II).|"/>
+            <item material="diamond boots" name="`4Diamond Boots" price="20" enchantment="feather_falling" currency="redstone" filter="all(diamond-boots-0,protection-3)" action="diamond-boots-action-3" color="red" lore="`5You permanently gain|`5Diamond boots with|`5Feather Falling I (Protection III).|"/>
+            <item material="diamond boots" name="`4Diamond Boots" price="20" enchantment="feather_falling" currency="redstone" filter="all(diamond-boots-0,protection-4)" action="diamond-boots-action-4" color="red" lore="`5You permanently gain|`5Diamond boots with|`5Feather Falling I (Protection IV).|"/>
+            <item material="bow" unbreakable="true" enchantment="power:1;infinity" name="`4Power Bow" amount="1" price="25" currency="redstone" color="red" filter="bow-0" action="bow-action" lore="`5You permanently gain a|`5Power I, Infinity bow.|"/>
+            <!-- One-time Items -->
+            <item material="tnt" damage="1" name="`4TNT" price="2" currency="redstone" color="red" kit="tnt-kit" lore="`51 Auto TNT|"/>
+            <item material="tnt" damage="1" name="`4TNT Pack" amount="5" price="5" currency="redstone" color="red" kit="tnt-pack-kit" lore="`55 Auto TNTs|"/>
+            <item material="tnt" damage="1" name="`4TNT Mega Pack" amount="15" price="10" currency="redstone" color="red" kit="tnt-pack2-kit" lore="`515 Auto TNTs|"/>
+            <item material="stick" name="`4Knockback Stick" enchantment="knockback:2" price="5" currency="redstone" color="red" kit="knockback-stick-kit" lore="`5Stick with Knockback II|"/>
+            <item material="stained_glass" damage="5" name="`4Cytoskeleton" amount="64" price="2" currency="redstone" color="red" kit="cytoskeleton-kit" lore="`aA stack of protective Stained Glass|`2that is immune to TNT and Fireballs|"/>
+            <item material="potion" name="`4Regeneration (20s)" damage="1" price="2" currency="redstone" color="red" lore="`dBiological activator:|`5Stem Cell Time-Release|">
+                <effect duration="20s">regeneration</effect>
+            </item>
+            <item material="potion" name="`4Instant Healing" damage="5" price="2" currency="redstone" color="red" lore="`dBiological activator:|`5Stem Cell Concentrate|">
+                <effect duration="2s">instant_health</effect>
+            </item>
+            <item material="potion" name="`4Swiftness (80s)" damage="2" price="2" currency="redstone" color="red" lore="`dBiological activator:|`5Glucose|">
+                <effect duration="80s">speed</effect>
+            </item>
+            <item material="potion" name="`4Swiftness II (45s)" damage="2" price="2" currency="redstone" color="red" lore="`dBiological activator:|`5Glucose Concentrate|">
+                <effect duration="45s" amplifier="2">speed</effect>
+            </item>
+            <item material="potion" name="`4Leaping IV (60s)" damage="11" price="2" currency="redstone" color="red" lore="`dBiological activator:|`5Adrenaline|">
+                <effect duration="60s" amplifier="4">jump_boost</effect>
+            </item>
+            <item material="potion" name="`4Strength (21s)" damage="9" price="3" currency="redstone" color="red" lore="`dBiological activator:|`5Adenosine Triphosphate|">
+                <effect duration="21s">strength</effect>
+            </item>
+            <item material="potion" name="`4Night Vision (20m)" damage="6" price="1" currency="redstone" color="red" lore="`dBiological activator:|`5Rhodopsin|">
+                <effect duration="1200s">night_vision</effect>
+            </item>
+            <!-- Potions -->
+            <item material="potion" name="`4Regeneration (12s)" damage="16385" price="2" currency="redstone" color="red" lore="`dSend a chemical message:|`5Oxytocin|">
+                <effect duration="12s">regeneration</effect>
+            </item>
+            <item material="potion" name="`4Slowness (15s)" damage="16394" price="3" currency="redstone" color="red" lore="`dSend a chemical message:|`5Beta Blocker|">
+                <effect duration="15s">slowness</effect>
+            </item>
+            <item material="potion" name="`4Weakness (15s)" damage="16392" price="3" currency="redstone" color="red" lore="`dSend a chemical message:|`5Cytotoxin|">
+                <effect duration="15s">weakness</effect>
+            </item>
+            <item material="potion" name="`4Poison (6s)" damage="16388" price="4" currency="redstone" color="red" lore="`dSend a chemical message:|`5Endotoxin|">
+                <effect duration="6s">poison</effect>
+            </item>
+            <!-- Splash Potions -->
+            <item material="potion" name="`4Blindness (6s)" damage="16397" price="4" currency="redstone" color="red" lore="`dSend a chemical message:|`5Formic Acid|">
+                <effect duration="6s" amplifier="255">blindness</effect>
+            </item>
+            <item material="potion" name="`4Confusion (9s)" damage="16390" price="4" currency="redstone" color="red" lore="`dSend a chemical message:|`5Hormone Disruptor|">
+                <effect duration="9s" amplifier="255">confusion</effect>
+            </item>
+            <item material="potion" name="`4Instant Damage" damage="16396" price="4" currency="redstone" color="red" lore="`dSend a chemical message:|`5Benzene|">
+                <effect duration="2s">instant_damage</effect>
+            </item>
+        </category>
+    </shop>
+    <!-- Team Store -->
+    <shop id="team-shop" name="`e`l[DNA]`0 Team Upgrades">
+        <category id="team" name="`e`lTeam Upgrades" material="glowstone dust">
+            <!-- Pickaxe -->
+            <item material="iron pickaxe" name="`eIron Pickaxe Efficiency II" unbreakable="true" enchantment="efficiency:2" filter="pickaxe-1" action="pickaxe-2-action" lore="`7Your team permanently gains|`7an upgraded Pickaxe.||`7Tier 0: `8Iron Pickaxe, Efficiency 1      `e'Interphase'|`7Tier 1: `aIron Pickaxe, Efficiency 2   `e'Preprophase'|`7Tier 2: `8Iron Pickaxe, Efficiency 3        `e'Prophase'|`7Tier 3: `8Iron Pickaxe, Efficiency 4  `e'Prometaphase'|`7Tier 4: `8Diamond Pickaxe                   `e'Metaphase'|`7Tier 5: `8Diamond Pickaxe, Efficiency 1    `e'Anaphase'|`7Tier 6: `8Diamond Pickaxe, Efficiency 2   `e'Telophase'|`7Tier 7: `8Diamond Pickaxe, Efficiency 3  `e'Cytokinesis'|">
+                <payment price="20" currency="glowstone dust" color="yellow"/>
+            </item>
+            <item material="iron pickaxe" name="`eIron Pickaxe Efficiency III" unbreakable="true" enchantment="efficiency:3" filter="pickaxe-2" action="pickaxe-3-action" lore="`7Your team permanently gains|`7an upgraded Pickaxe.||`7Tier 0: `8Iron Pickaxe, Efficiency 1      `e'Interphase'|`7Tier 1: `8Iron Pickaxe, Efficiency 2   `e'Preprophase'|`7Tier 2: `aIron Pickaxe, Efficiency 3        `e'Prophase'|`7Tier 3: `8Iron Pickaxe, Efficiency 4  `e'Prometaphase'|`7Tier 4: `8Diamond Pickaxe                   `e'Metaphase'|`7Tier 5: `8Diamond Pickaxe, Efficiency 1    `e'Anaphase'|`7Tier 6: `8Diamond Pickaxe, Efficiency 2   `e'Telophase'|`7Tier 7: `8Diamond Pickaxe, Efficiency 3  `e'Cytokinesis'|">
+                <payment price="25" currency="glowstone dust" color="yellow"/>
+            </item>
+            <item material="iron pickaxe" name="`eIron Pickaxe Efficiency IV" unbreakable="true" enchantment="efficiency:3" filter="pickaxe-3" action="pickaxe-4-action" lore="`7Your team permanently gains|`7an upgraded Pickaxe.||`7Tier 0: `8Iron Pickaxe, Efficiency 1      `e'Interphase'|`7Tier 1: `8Iron Pickaxe, Efficiency 2   `e'Preprophase'|`7Tier 2: `8Iron Pickaxe, Efficiency 3        `e'Prophase'|`7Tier 3: `aIron Pickaxe, Efficiency 4  `e'Prometaphase'|`7Tier 4: `8Diamond Pickaxe                   `e'Metaphase'|`7Tier 5: `8Diamond Pickaxe, Efficiency 1    `e'Anaphase'|`7Tier 6: `8Diamond Pickaxe, Efficiency 2   `e'Telophase'|`7Tier 7: `8Diamond Pickaxe, Efficiency 3  `e'Cytokinesis'|">
+                <payment price="50" currency="glowstone dust" color="yellow"/>
+            </item>
+            <item material="diamond pickaxe" name="`eDiamond Pickaxe" unbreakable="true" filter="pickaxe-4" action="pickaxe-5-action" lore="`7Your team permanently gains|`7an upgraded Pickaxe.||`7Tier 0: `8Iron Pickaxe, Efficiency 1      `e'Interphase'|`7Tier 1: `8Iron Pickaxe, Efficiency 2   `e'Preprophase'|`7Tier 2: `8Iron Pickaxe, Efficiency 3        `e'Prophase'|`7Tier 3: `8Iron Pickaxe, Efficiency 4  `e'Prometaphase'|`7Tier 4: `aDiamond Pickaxe                   `e'Metaphase'|`7Tier 5: `8Diamond Pickaxe, Efficiency 1    `e'Anaphase'|`7Tier 7: `8Diamond Pickaxe, Efficiency 2   `e'Telophase'|`7Tier 6: `8Diamond Pickaxe, Efficiency 3  `e'Cytokinesis'|">
+                <payment price="85" currency="glowstone dust" color="yellow"/>
+            </item>
+            <item material="diamond pickaxe" name="`eDiamond Pickaxe Efficiency I" unbreakable="true" enchantment="efficiency:1" filter="pickaxe-5" action="pickaxe-6-action" lore="`7Your team permanently gains|`7an upgraded Pickaxe.||`7Tier 0: `8Iron Pickaxe, Efficiency 1      `e'Interphase'|`7Tier 1: `8Iron Pickaxe, Efficiency 2   `e'Preprophase'|`7Tier 2: `8Iron Pickaxe, Efficiency 3        `e'Prophase'|`7Tier 3: `8Iron Pickaxe, Efficiency 4  `e'Prometaphase'|`7Tier 4: `8Diamond Pickaxe                   `e'Metaphase'|`7Tier 5: `aDiamond Pickaxe, Efficiency 1    `e'Anaphase'|`7Tier 6: `8Diamond Pickaxe, Efficiency 2   `e'Telophase'|`7Tier 7: `8Diamond Pickaxe, Efficiency 3  `e'Cytokinesis'|">
+                <payment price="150" currency="glowstone dust" color="yellow"/>
+            </item>
+            <item material="diamond pickaxe" name="`eDiamond Pickaxe Efficiency II" unbreakable="true" enchantment="efficiency:2" filter="pickaxe-6" action="pickaxe-7-action" lore="`7Your team permanently gains|`7an upgraded Pickaxe.||`7Tier 0: `8Iron Pickaxe, Efficiency 1      `e'Interphase'|`7Tier 1: `8Iron Pickaxe, Efficiency 2   `e'Preprophase'|`7Tier 2: `8Iron Pickaxe, Efficiency 3        `e'Prophase'|`7Tier 3: `8Iron Pickaxe, Efficiency 4  `e'Prometaphase'|`7Tier 4: `8Diamond Pickaxe                   `e'Metaphase'|`7Tier 5: `8Diamond Pickaxe, Efficiency 1    `e'Anaphase'|`7Tier 6: `aDiamond Pickaxe, Efficiency 2   `e'Telophase'|`7Tier 7: `8Diamond Pickaxe, Efficiency 3  `e'Cytokinesis'|">
+                <payment price="175" currency="glowstone dust" color="yellow"/>
+            </item>
+            <item material="diamond pickaxe" name="`eDiamond Pickaxe Efficiency III" unbreakable="true" enchantment="efficiency:3" filter="pickaxe-7" action="pickaxe-8-action" lore="`7Your team permanently gains|`7an upgraded Pickaxe.||`7Tier 0: `8Iron Pickaxe, Efficiency 1      `e'Interphase'|`7Tier 1: `8Iron Pickaxe, Efficiency 2   `e'Preprophase'|`7Tier 2: `8Iron Pickaxe, Efficiency 3        `e'Prophase'|`7Tier 3: `8Iron Pickaxe, Efficiency 4  `e'Prometaphase'|`7Tier 4: `8Diamond Pickaxe                   `e'Metaphase'|`7Tier 5: `8Diamond Pickaxe, Efficiency 1    `e'Anaphase'|`7Tier 6: `8Diamond Pickaxe, Efficiency 2   `e'Telophase'|`7Tier 7: `aDiamond Pickaxe, Efficiency 3  `e'Cytokinesis'|">
+                <payment price="250" currency="glowstone dust" color="yellow"/>
+            </item>
+            <!-- Protection -->
+            <item material="leather leggings" amount="1" name="`eImmunity Armor I" lore="`7Your team permanently gains|`7Protection I on leggings/boots.||`7Tier 1: `aProtection I`7, `e50 Glowstone Dust|`7Tier 2: Protection II`7, `e100 Glowstone Dust|`7Tier 3: Protection III`7, `e200 Glowstone Dust|`7Tier 4: Protection IV`7, `e300 Glowstone Dust|" action="protection-set-1" filter="protection-0">
+                <!-- payment broken out, otherwise pgm error on in-line color yellow -->
+                <payment price="50" currency="glowstone dust" color="yellow"/>
+            </item>
+            <item material="chainmail leggings" amount="2" name="`eImmunity Armor II" lore="`7Your team permanently gains|`7Protection II on leggings/boots.||`7Tier 1: Protection I`7, `e50 Glowstone Dust|`7Tier 2: `aProtection II`7, `e100 Glowstone Dust|`7Tier 3: Protection III`7, `e200 Glowstone Dust|`7Tier 4: Protection IV`7, `e300 Glowstone Dust|" price="100" currency="glowstone dust" action="protection-set-2" filter="protection-1" color="yellow"/>
+            <item material="gold leggings" amount="3" name="`eImmunity Armor III" lore="`7Your team permanently gains|`7Protection III on leggings/boots.||`7Tier 1: Protection I`7, `e50 Glowstone Dust|`7Tier 2: Protection II`7, `e100 Glowstone Dust|`7Tier 3: `aProtection III`7, `e200 Glowstone Dust|`7Tier 4: Protection IV`7, `e300 Glowstone Dust|" price="200" currency="glowstone dust" action="protection-set-3" filter="protection-2" color="yellow"/>
+            <item material="diamond leggings" amount="4" name="`eImmunity Armor IV" lore="`7Your team permanently gains|`7Protection IV on leggings/boots.||`7Tier 1: Protection I`7, `e50 Glowstone Dust|`7Tier 2: Protection II`7, `e100 Glowstone Dust|`7Tier 3: Protection III`7, `e200 Glowstone Dust|`7Tier 4: `aProtection IV`7, `e300 Glowstone Dust|" price="300" currency="glowstone dust" action="protection-set-4" filter="protection-3" color="yellow"/>
+            <!-- Iron Leggings -->
+            <!-- Typically 5 store slots used to deal with 5 prot levels, but store is full, so only using 1 -->
+            <!-- this limits display flexibility, but good strat to save slots when item has no tiers, but affected by external tiers -->
+            <item material="iron leggings" name="`eIron Leggings" enchantment="projectile_protection" lore="`7Your team permanently gains|`7Iron Leggings with|`7Projectile Protection I.||`8`oIncludes any Protection upgrades.|" price="60" currency="glowstone dust" filter="iron-leggings-0" action="iron-leggings-action" color="yellow"/>
+            <!-- Iron Sword -->
+            <item material="iron sword" name="`eIron Sword" lore="`7Your team permanently gains|`7an Iron Sword.||`8`oIncludes any Sharpness upgrades.|" price="70" currency="glowstone dust" filter="iron-sword-0" action="iron-sword-action" color="yellow"/>
+            <!-- Sharpness -->
+            <item material="stone sword" enchantment="sharpness:1" name="`eSharpened Swords" lore="`7Your team permanently gains|`7Sharpness I on all swords.||`7Tier 1: `aSharpness I`7`7, `e90 Glowstone Dust|`7Tier 2: Sharpness II, `e200 Glowstone Dust|" price="90" currency="glowstone dust" action="sharpness-set-1" filter="sharpness-0" color="yellow"/>
+            <item material="stone sword" enchantment="sharpness:2" name="`eSharpened Swords 2" lore="`7Your team permanently gains|`7Sharpness II on all swords.||`7Tier 1: Sharpness I`7, `e90 Glowstone Dust|`7Tier 2: `aSharpness II`7, `e200 Glowstone Dust|" price="200" currency="glowstone dust" action="sharpness-set-2" filter="sharpness-1" color="yellow"/>
+            <!-- Axe/Shovel - Hide the single item when team has upgraded shovel already -->
+            <item material="diamond axe" name="`eDiamond Axe and Shovel" filter="axe-shovel-1" action="axe-shovel-action-2" lore="`7Your team permanently gains|`7Diamond Axe &#38; Shovel.||`7Tier 1: `aDiamond Axe &#38; Shovel`7, `e50 Glowstone Dust|`7Tier 2: Diamond Axe &#38; Shovel Efficiency I`7, `e120 Glowstone Dust|">
+                <payment price="50" currency="glowstone dust" color="yellow"/>
+            </item>
+            <item material="diamond axe" enchantment="efficiency:1" name="`eDiamond Axe and Shovel - Efficiency I" filter="axe-shovel-2" action="axe-shovel-action-3" lore="`7Your team permanently gains|`7Diamond Axe &#38; Shovel Efficiency I.||`7Tier 1: Diamond Axe &#38; Shovel`7, `e50 Glowstone Dust|`7Tier 2: `aDiamond Axe &#38; Shovel Efficiency I`7, `e120 Glowstone Dust|">
+                <payment price="120" currency="glowstone dust" color="yellow"/>
+            </item>
+            <!-- Block Boost -->
+            <item material="smooth brick" name="`eBlock Boost" amount="32" price="50" currency="glowstone dust" color="yellow" filter="block-boost-0" action="block-boost-action" lore="`7Your team permanently gains|`7Twice as many blocks in kit.|"/>
+            <!-- Cytoskeleton -->
+            <item material="stained glass" damage="5" name="`eCytoskeleton" amount="20" price="85" currency="glowstone dust" color="yellow" filter="cytoskeleton-0" action="cytoskeleton-action" lore="`7Your team permanently gains|`7A supply of protective Stained Glass|`7that is immune to TNT and Fireballs|"/>
+            <!-- Water Bucket -->
+            <item material="water bucket" name="`eWater Bucket" price="25" currency="glowstone dust" color="yellow" filter="water-bucket-0" action="water-bucket-action" lore="`7Your team permanently gains|`7Water Bucket in kit.|"/>
+            <!-- Vines & Gapple -->
+            <item material="golden apple" name="`eOrganelle Organics" price="30" currency="glowstone dust" color="yellow" filter="organics-0" action="organics-action" lore="`7Your team permanently gains|`7Double Golden Apples and Vines in kit.|"/>
+            <!-- Shears -->
+            <item material="shears" enchantment="efficiency:1" name="`ePermanent Shears" lore="`7Your team permanently gains|`7Shears Efficiency I.|" unbreakable="true" price="15" currency="glowstone dust" filter="shears-0" action="shears-action" color="yellow"/>
+            <!-- Generator Upgrade -->
+            <item material="glowstone dust" name="`eGenerator Upgrade" lore="`7Your team permanently gains|`750% Faster Glowstone spawners.|" price="100" currency="glowstone dust" filter="generator-0" action="generator-action" color="yellow"/>
+            <!-- Regen Field -->
+            <item material="beacon" name="`eRegen" lore="`7Creates a Regeneration field|`7around your monuments.|" price="170" currency="glowstone dust" action="regen-action" filter="regen-0" color="yellow"/>
+            <!-- Speed -->
+            <item material="potion" name="`eMighty Mitochondria" lore="`7Your team permanently gains|`7Speed I at Home.|" damage="2" price="270" currency="glowstone dust" action="speed-action" filter="speed-0" color="yellow"/>
+            <!-- Haste -->
+            <item material="diamond pickaxe" name="`eHigh Metabolism" lore="`7Your team permanently gains|`7Haste I.|" enchantment="efficiency" price="300" currency="glowstone dust" action="haste-action" filter="haste-0" color="yellow"/>
+            <!-- Fatigue Trap -->
+            <item material="wood pickaxe" name="`eMining Fatigue Trap" lore="`7Your team permanently gains|`7Mining Fatigue for enemy invaders.|" price="350" currency="glowstone dust" action="fatigue-action" filter="fatigue-trap-0" color="yellow"/>
+            <!-- Conversion (to keep Glowstone relevant in long matches, hidden for first 40 minutes) -->
+            <item material="redstone" name="`4Convert Glowstone" amount="2" price="64" currency="glowstone dust" kit="redstone-1" filter="late-game-stage" color="yellow" lore="`7Convert Stack of Glowstone Dust to|`72 Redstone currency|`7for Attacker Upgrade shop|"/>
+        </category>
+    </shop>
+</shops>
+<destroyables materials="obsidian" mode-changes="false" sparks="near" repairable="false" show-progress="true" required="true" completion="100%">
+    <destroyable id="red-monument-1" name="Nucleus Left" region="red-monument-left" owner="red-team"/>
+    <destroyable id="red-monument-2" name="Nucleus Right" region="red-monument-right" owner="red-team"/>
+    <destroyable id="blue-monument-1" name="Nucleus Left" region="blue-monument-left" owner="blue-team"/>
+    <destroyable id="blue-monument-2" name="Nucleus Right" region="blue-monument-right" owner="blue-team"/>
+</destroyables>
+<renewables>
+    <renewable rate="2" sound="true" region="iron-regen" renew-filter="only-iron" replace-filter="only-air" avoid-players="1"/>
+</renewables>
+<spawners player-region="everywhere">
+    <spawner spawn-region="blue-glowstone-1" max-entities="5" delay="4s">
+        <item amount="1" material="glowstone dust" name="`e`l[DNA]`r Team Upgrade" lore="`6Use this currency in the|`6Team Upgrade shop."/>
+    </spawner>
+    <spawner spawn-region="blue-glowstone-2" max-entities="5" delay="4s">
+        <item amount="1" material="glowstone dust" name="`e`l[DNA]`r Team Upgrade" lore="`6Use this currency in the|`6Team Upgrade shop."/>
+    </spawner>
+    <spawner spawn-region="red-glowstone-1" max-entities="5" delay="4s">
+        <item amount="1" material="glowstone dust" name="`e`l[DNA]`r Team Upgrade" lore="`6Use this currency in the|`6Team Upgrade shop."/>
+    </spawner>
+    <spawner spawn-region="red-glowstone-2" max-entities="5" delay="4s">
+        <item amount="1" material="glowstone dust" name="`e`l[DNA]`r Team Upgrade" lore="`6Use this currency in the|`6Team Upgrade shop."/>
+    </spawner>
+    <spawner spawn-region="blue-glowstone-1" max-entities="5" delay="8s" filter="generator-1">
+        <item amount="1" material="glowstone dust" name="`e`l[DNA]`r Team Upgrade" lore="`6Use this currency in the|`6Team Upgrade shop."/>
+    </spawner>
+    <spawner spawn-region="blue-glowstone-2" max-entities="5" delay="8s" filter="generator-1">
+        <item amount="1" material="glowstone dust" name="`e`l[DNA]`r Team Upgrade" lore="`6Use this currency in the|`6Team Upgrade shop."/>
+    </spawner>
+    <spawner spawn-region="red-glowstone-1" max-entities="5" delay="8s" filter="generator-1">
+        <item amount="1" material="glowstone dust" name="`e`l[DNA]`r Team Upgrade" lore="`6Use this currency in the|`6Team Upgrade shop."/>
+    </spawner>
+    <spawner spawn-region="red-glowstone-2" max-entities="5" delay="8s" filter="generator-1">
+        <item amount="1" material="glowstone dust" name="`e`l[DNA]`r Team Upgrade" lore="`6Use this currency in the|`6Team Upgrade shop."/>
+    </spawner>
+    <spawner spawn-region="center-glowstone" max-entities="5" delay="3s">
+        <item amount="1" material="glowstone dust" name="`e`l[DNA]`r Team Upgrade" lore="`6Use this currency in the|`6Team Upgrade shop."/>
+    </spawner>
+    <spawner spawn-region="center-glowstone" max-entities="1" delay="90s">
+        <item amount="1" material="golden apple"/>
+    </spawner>
+</spawners>
+<regions>
+    <!-- Spawns -->
+    <union id="obs-spawn-point">
+        <cylinder base="135.5,66.1,0.5" radius="2" height="0"/>
+        <cylinder base="-134.5,66.1,0.5" radius="2" height="0"/>
+    </union>
+    <cylinder id="blue-spawn-point" base="113,57,0.5" radius=".2" height="0"/>
+    <cylinder id="red-spawn-point" base="-112,57,0.5" radius=".2" height="0"/>
+    <!-- Monuments -->
+    <union id="red-monument-left">
+        <block>-65,47,-20</block>
+        <block>-65,46,-20</block>
+    </union>
+    <union id="red-monument-right">
+        <block>-65,47,20</block>
+        <block>-65,46,20</block>
+    </union>
+    <union id="blue-monument-left">
+        <block>65,47,20</block>
+        <block>65,46,20</block>
+    </union>
+    <union id="blue-monument-right">
+        <block>65,47,-20</block>
+        <block>65,46,-20</block>
+    </union>
+    <block id="red-monument-left-top-signal">-65,81,-20</block>
+    <block id="red-monument-left-bottom-signal">-65,80,-20</block>
+    <block id="red-monument-right-top-signal">-65,81,20</block>
+    <block id="red-monument-right-bottom-signal">-65,80,20</block>
+    <block id="blue-monument-left-top-signal">65,81,20</block>
+    <block id="blue-monument-left-bottom-signal">65,80,20</block>
+    <block id="blue-monument-right-top-signal">65,81,-20</block>
+    <block id="blue-monument-right-bottom-signal">65,80,-20</block>
+    <!-- Dynamic Beacons -->
+    <union id="blue-beacon-outer">
+        <block id="blue-beacon-a">121,61,9</block>
+        <block id="blue-beacon-g">121,61,-9</block>
+    </union>
+    <union id="blue-beacon-inner1">
+        <block id="blue-beacon-b">121,61,6</block>
+        <block id="blue-beacon-f">121,61,-6</block>
+    </union>
+    <union id="blue-beacon-inner2">
+        <block id="blue-beacon-c">121,61,3</block>
+        <block id="blue-beacon-e">121,61,-3</block>
+    </union>
+    <block id="blue-beacon-middle">121,61,0</block>
+    <union id="red-beacon-outer">
+        <block id="red-beacon-a">-121,61,9</block>
+        <block id="red-beacon-g">-121,61,-9</block>
+    </union>
+    <union id="red-beacon-inner1">
+        <block id="red-beacon-b">-121,61,6</block>
+        <block id="red-beacon-f">-121,61,-6</block>
+    </union>
+    <union id="red-beacon-inner2">
+        <block id="red-beacon-c">-121,61,3</block>
+        <block id="red-beacon-e">-121,61,-3</block>
+    </union>
+    <block id="red-beacon-middle">-121,61,0</block>
+    <!-- Protect/Restrict -->
+    <cuboid id="blue-spawn-restrict" min="87,0,-51" max="131,150,51"/>
+    <cuboid id="red-spawn-restrict" min="-87,0,-51" max="-131,150,51"/>
+    <union id="not-build-area">
+        <negative>
+            <union>
+                <cuboid id="build-area" min="-86,36,-44" max="87,70,44"/>
+                <cuboid id="build-area-2" min="-53,36,-46" max="54,70,46"/>
+            </union>
+        </negative>
+        <cylinder id="center-spawner-protect" base="0.5,45,0.5" radius="6" height="10"/>
+    </union>
+    <complement id="waterflow-restrict">
+        <cuboid id="waterflow-restrict-main" min="-27,38,-41" max="27,39,42"/>
+        <cuboid id="waterflow-restrict-exclusion" min="-16,38,-22" max="16,39,23"/>
+    </complement>
+    <union id="light-protect-region">
+        <cuboid min="-37,38,-48" max="-120,40,48"/>
+        <cuboid min="37,38,-48" max="120,40,48"/>
+    </union>
+    <!-- Spawners -->
+    <union id="iron-regen">
+        <cuboid min="100,57,-21" max="103,59,-19"/> <!-- blue iron right -->
+        <cuboid min="100,57,22" max="103,59,20"/> <!-- blue iron left -->
+        <cuboid min="-99,57,-21" max="-102,59,-19"/> <!-- red iron left -->
+        <cuboid min="-99,57,22" max="-102,59,20"/> <!-- red iron right -->
+    </union>
+    <point id="blue-glowstone-1">65.5,50,-50.5</point>
+    <point id="blue-glowstone-2">65.5,50,51.5</point>
+    <point id="red-glowstone-1">-64.5,50,-50.5</point>
+    <point id="red-glowstone-2">-64.5,50,51.5</point>
+    <point id="center-glowstone">0.5,51,0.5</point>
+    <!-- Status Effect Zones -->
+    <cylinder id="regen-red-left" base="-65,37,-20" radius="11" height="26"/>
+    <cylinder id="regen-red-right" base="-65,37,20" radius="11" height="26"/>
+    <cylinder id="regen-blue-left" base="65,37,20" radius="11" height="26"/>
+    <cylinder id="regen-blue-right" base="65,37,-20" radius="11" height="26"/>
+    <rectangle id="red-effect-region" min="-37,-48" max="-120,48"/>
+    <rectangle id="blue-effect-region" min="37,-48" max="120,48"/>
+    <!-- Applicators -->
+    <apply block-break="not-sea-lantern" region="light-protect-region"/>
+    <apply block-break="tnt-immune"/>
+    <apply block="original-block-protection-filter" message="You can't modify that block!"/>
+    <apply block-place="deny-water-flow" region="waterflow-restrict"/>
+    <apply block-break="only-iron" block-place="only-iron-cause-world" region="not-build-area" message="You may not edit this area!"/>
+    <apply enter="only-red" region="red-spawn-restrict" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-blue" region="blue-spawn-restrict" message="You may not enter the enemy's spawn!"/>
+</regions>
+<itemkeep>
+    <item>redstone</item>
+    <item>smooth brick</item>
+    <item>wool</item>
+    <item>log</item>
+    <item>wood:5</item>
+    <item>golden apple</item>
+    <item>arrow</item>
+    <item>bucket</item>
+</itemkeep>
+<itemremove>
+    <item>redstone block</item>
+    <item>lapis block</item>
+    <item>prismarine_crystals</item>
+    <item>prismarine_shard</item>
+    <item>vine</item>
+    <item>stained glass</item>
+    <!-- Weapons -->
+    <item>stone sword</item>
+    <item>iron sword</item>
+    <item>bow</item>
+    <!-- Tools -->
+    <item>iron pickaxe</item>
+    <item>diamond pickaxe</item>
+    <item>stone axe</item>
+    <item>iron axe</item>
+    <item>diamond axe</item>
+    <item>iron spade</item>
+    <item>stone spade</item>
+    <item>diamond spade</item>
+    <item>shears</item>
+    <item>water bucket</item>
+    <!-- Armor -->
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>chainmail leggings</item>
+    <item>chainmail boots</item>
+    <item>iron helmet</item>
+    <item>iron leggings</item>
+    <item>iron boots</item>
+    <item>diamond leggings</item>
+    <item>diamond boots</item>
+    <item>diamond helmet</item>
+</itemremove>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>66</maxbuildheight>
+<tnt>
+    <instantignite>true</instantignite>
+    <blockdamage>true</blockdamage>
+    <friendly-defuse>off</friendly-defuse>
+    <fuse>2.5s</fuse>
+    <yield>0.45</yield> <!-- tax man -->
+    <power>3.1</power>
+</tnt>
+<crafting>
+    <disable>glowstone</disable>
+    <disable>redstone block</disable>
+</crafting>
+<!--
+These accent blocks can't be mined due to breaking differences but don't
+look good hanging in air when mined out, so let them fall and disappear
+-->
+<falling-blocks>
+    <rule>
+        <filter>
+            <any>
+                <material>1:2</material>
+                <material>redstone block</material>
+                <material>lapis block</material>
+                <material>stained clay:11</material>
+                <material>stained clay:14</material>
+                <material>prismarine:2</material>
+                <material>prismarine:1</material>
+            </any>
+        </filter>
+    </rule>
+</falling-blocks>
+<disabledamage>
+    <damage ally="true" self="false" enemy="false" other="false">block explosion</damage>
+</disabledamage>
+<kill-rewards>
+    <kill-reward>
+        <item material="smooth brick" amount="16"/>
+        <item material="redstone" amount="1" name="`4`l[ATP]`r Attacker Upgrade" lore="`cUse this currency in the|`cAttacker Upgrade shop.||`oTo keep across lives|`ostore in Enderchest.|"/>
+    </kill-reward>
+</kill-rewards>
+</map>
