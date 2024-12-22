@@ -1,113 +1,101 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Pyramid Scheme</name>
-<version>1.0.3</version>
+<version>1.3</version>
+<variant id="5v5" world="5v5">5v5</variant>
 <objective>Be the first team to reach 750 points!</objective>
 <created>2022-04-15</created>
-<edition>standard</edition> <!-- very different than competitive/ranked edition -->
+<constant id="damage-resistance">3s</constant>
+<constant id="feather-falling-level">2</constant>
+<unless variant="5v5">
+    <constant id="team-size">12</constant>
+    <constant id="max-overfill" delete="true"/>
+    <constant id="blue-yaw">-90</constant>
+    <constant id="red-yaw" delete="true"/>
+    <constant id="respawn-timer">2s</constant>
+    <include id="conquest"/>
+</unless>
+<if variant="5v5">
+    <constant id="team-size">5</constant>
+    <constant id="max-overfill">5</constant>
+    <constant id="blue-yaw">-135</constant>
+    <constant id="red-yaw">45</constant>
+    <constant id="respawn-timer">4s</constant>
+    <constant id="velocity-apply-region">jump-pad</constant>
+    <include id="conquest-comp"/>
+    <include id="velocity-no-fall-damage"/>
+</if>
 <authors>
     <author uuid="2ca8072f-74be-4798-85b8-bbce03aa91af"/> <!-- Tywnis -->
 </authors>
 <teams>
-    <team id="blue-team" color="blue" max="12">Blue</team>
-    <team id="red-team" color="dark red" max="12">Red</team>
+    <team id="blue-team" color="blue" max="${team-size}" max-overfill="${max-overfill}">Blue</team>
+    <team id="red-team" color="dark red" max="${team-size}" max-overfill="${max-overfill}">Red</team>
 </teams>
-<kits>
-    <kit id="main-kit">
-        <clear/>
-        <item slot="0" unbreakable="true" material="stone sword"/>
-        <item slot="1" unbreakable="true" material="bow"/>
-        <item slot="2" material="golden apple"/>
-        <item slot="8" amount="16" material="arrow"/>
-        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
-        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
-        <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="2">projectile_protection</enchantment>
-        </leggings>
-        <boots unbreakable="true" material="iron boots"/>
-        <effect duration="3s" amplifier="255">resistance</effect>
-        <effect duration="3s" amplifier="255">regeneration</effect>
-    </kit>
-</kits>
 <spawns>
-    <default>
-        <regions>
-            <point yaw="135">13.5,33,13.5</point>
-        </regions>
-    </default>
-    <spawn team="blue-team" kit="main-kit">
-        <regions>
-            <point yaw="-90">-70.5,30,-18.5</point>
-        </regions>
-    </spawn>
-    <spawn team="red-team" kit="main-kit">
-        <regions>
-            <point yaw="0">-18.5,30,-70.5</point>
-        </regions>
-    </spawn>
+    <default region="obs-spawn" yaw="135"/>
+    <spawn team="blue-team" kit="base-kit" region="blue-spawn" yaw="${blue-yaw}"/>
+    <spawn team="red-team" kit="base-kit" region="red-spawn" yaw="${red-yaw}"/>
 </spawns>
 <regions>
-    <apply block="never"/>
+    <unless variant="5v5">
+        <union id="spawns">
+            <point id="obs-spawn">13.5,33,13.5</point>
+            <point id="blue-spawn">-70.5,30,-18.5</point>
+            <point id="red-spawn">-18.5,30,-70.5</point>
+        </union>
+        <union id="hills">
+            <cylinder id="summit-capture" base="-48.5,35,-48.5" radius="6.5" height="2"/>
+            <cylinder id="summit-progress" base="-48.5,34,-48.5" radius="6.5" height="1"/>
+            <cylinder id="village-capture" base="-4.5,21,-4.5" radius="6.5" height="2"/>
+            <cylinder id="village-progress" base="-4.5,20,-4.5" radius="6.5" height="1"/>
+            <cylinder id="cave-capture" base="-41.5,13,-41.5" radius="6.5" height="2"/>
+            <cylinder id="cave-progress" base="-41.5,12,-41.5" radius="6.5" height="1"/>
+        </union>
+    </unless>
+    <if variant="5v5">
+        <union id="spawns">
+            <point id="obs-spawn">-6.5,32,-6.5</point>
+            <point id="blue-spawn">-79.5,27,-9.5</point>
+            <point id="red-spawn">-9.5,27,-79.5</point>
+        </union>
+        <union id="hills">
+            <union id="summit-capture">
+                <union id="summit-progress">
+                    <cuboid min="-52,32,-51" size="7,4,5"/>
+                    <cuboid min="-51,32,-52" size="5,4,7"/>
+                </union>
+            </union>
+            <union id="balcony-capture">
+                <cuboid min="-30,20,-29" size="7,4,5"/>
+                <cuboid min="-29,20,-30" size="5,4,7"/>
+            </union>
+            <union id="cave-capture">
+                <union id="cave-progress">
+                    <cuboid min="-45,11,-44" size="7,4,5"/>
+                    <cuboid min="-44,11,-45" size="5,4,7"/>
+                </union>
+            </union>
+        </union>
+        <cuboid id="jump-pad" min="-57.5,17,-57.5" max="-58.5,19,-58.5"/>
+        <apply velocity="-0.75,1.45,-0.75" kit="velocity-applied" region="jump-pad"/>
+    </if>
+    <apply block="never" use="never"/>
 </regions>
 <king>
     <hills required="false" capture-time="5s" points="1" time-multiplier="0" show-progress="true" neutral-state="true" recovery="1" decay="0" permanent="false">
-        <hill name="Village">
-            <capture>
-                <cylinder base="-4.5,21,-4.5" radius="6.5" height="2"/>
-            </capture>
-            <progress>
-                <cylinder base="-4.5,20,-4.5" radius="6.5" height="1"/>
-            </progress>
-            <captured>
-                <cylinder base="-4.5,20,-4.5" radius="6.5" height="1"/>
-            </captured>
-        </hill>
-        <hill name="Summit">
-            <capture>
-                <cylinder base="-48.5,35,-48.5" radius="6.5" height="2"/>
-            </capture>
-            <progress>
-                <cylinder base="-48.5,34,-48.5" radius="6.5" height="1"/>
-            </progress>
-            <captured>
-                <cylinder base="-48.5,34,-48.5" radius="6.5" height="1"/>
-            </captured>
-        </hill>
-        <hill name="Tomb">
-            <capture>
-                <cylinder base="-41.5,13,-41.5" radius="6.5" height="2"/>
-            </capture>
-            <progress>
-                <cylinder base="-41.5,12,-41.5" radius="6.5" height="1"/>
-            </progress>
-            <captured>
-                <cylinder base="-41.5,12,-41.5" radius="6.5" height="1"/>
-            </captured>
-        </hill>
+        <hill name="Summit" capture="summit-capture" progress="summit-progress"/>
+        <unless variant="5v5">
+            <hill name="Village" capture="village-capture" progress="village-progress"/>
+        </unless>
+        <if variant="5v5">
+            <hill name="Balcony" capture="balcony-capture" progress="balcony-capture"/>
+        </if>
+        <hill name="Cave" capture="cave-capture" progress="cave-progress"/>
     </hills>
 </king>
 <score>
     <limit>750</limit>
 </score>
-<toolrepair>
-    <tool>stone sword</tool>
-    <tool>bow</tool>
-</toolrepair>
-<itemremove>
-    <item>leather helmet</item>
-    <item>leather chestplate</item>
-    <item>chainmail leggings</item>
-    <item>iron boots</item>
-</itemremove>
-<itemkeep>
-    <item>golden apple</item>
-    <item>arrow</item>
-</itemkeep>
-<kill-rewards>
-    <kill-reward>
-        <item amount="8" material="arrow"/>
-        <item material="golden apple"/>
-    </kill-reward>
-</kill-rewards>
 <hunger>
     <depletion>off</depletion>
 </hunger>
