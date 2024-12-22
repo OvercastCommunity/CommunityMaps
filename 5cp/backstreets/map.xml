@@ -3,6 +3,9 @@
 <version>1.1.6</version>
 <variant id="5v5">5v5</variant>
 <objective>Capture all five control points.</objective>
+<include id="5cp"/>
+<constant id="team-1-name">Blue</constant>
+<constant id="team-2-name">Red</constant>
 <constant id="damage-resistance">3s</constant>
 <unless variant="5v5">
     <constant id="respawn-timer">4s</constant>
@@ -16,8 +19,8 @@
     <author uuid="2ca8072f-74be-4798-85b8-bbce03aa91af"/> <!-- Tywnis -->
 </authors>
 <teams>
-    <team id="blue" color="blue" max="5" max-overfill="5">Blue</team>
-    <team id="red" color="dark red" max="5" max-overfill="5">Red</team>
+    <team id="team-1" color="blue" max="5" max-overfill="5">${team-1-name}</team>
+    <team id="team-2" color="dark red" max="5" max-overfill="5">${team-2-name}</team>
 </teams>
 <spawns>
     <default>
@@ -25,122 +28,25 @@
             <point>-187.5,80,18.5</point>
         </region>
     </default>
-    <spawn team="blue" kit="base-kit">
+    <spawn team="team-1" kit="base-kit">
         <region yaw="90">
             <point>-145.5,39,-31.5</point>
         </region>
     </spawn>
-    <spawn team="red" kit="base-kit">
+    <spawn team="team-2" kit="base-kit">
         <region yaw="-90">
             <point>-229.5,39,-31.5</point>
         </region>
     </spawn>
 </spawns>
-<filters>
-    <!-- Capture rules for visual control points, which must be captured sequentially -->
-    <any id="filter-blue-last">
-        <team id="only-blue">blue</team>
-        <objective id="capped-blue-2nd">blue-2nd</objective>
-    </any>
-    <any id="filter-blue-2nd">
-        <objective id="capped-mid">mid</objective>
-        <objective id="capped-blue-last">blue-last</objective>
-    </any>
-    <any id="filter-red-2nd">
-        <filter id="capped-mid"/>
-        <objective id="capped-red-last">red-last</objective>
-    </any>
-    <any id="filter-red-last">
-        <team id="only-red">red</team>
-        <objective id="capped-red-2nd">red-2nd</objective>
-    </any>
-    <!-- To capture mid, a team must control their second point -->
-    <any id="filter-mid">
-        <filter id="capped-blue-2nd"/>
-        <filter id="capped-red-2nd"/>
-    </any>
-    <!-- Filters for the point-giving control points -->
-    <!--
-        A team can capture a point-giving control point when they capture the enemy's associated
-        visual point. However, if the enemy uncaptures the point, they will return the point-giving
-        point to a neutral state and points will no longer be scored from it by the team who lost
-        control.
-    -->
-    <any id="filter-last-point-blue">
-        <filter id="capped-red-last"/>
-        <all>
-            <filter id="only-red"/>
-            <not>
-                <any>
-                    <objective team="blue">red-last</objective>
-                    <objective team="red">red-last</objective>
-                </any>
-            </not>
-        </all>
-    </any>
-    <any id="filter-2nd-point-blue">
-        <filter id="capped-red-2nd"/>
-        <all>
-            <filter id="only-red"/>
-            <not>
-                <any>
-                    <objective team="blue">red-2nd</objective>
-                    <objective team="red">red-2nd</objective>
-                </any>
-            </not>
-        </all>
-    </any>
-    <any id="filter-2nd-point-red">
-        <filter id="capped-blue-2nd"/>
-        <all>
-            <filter id="only-blue"/>
-            <not>
-                <any>
-                    <objective team="blue">blue-2nd</objective>
-                    <objective team="red">blue-2nd</objective>
-                </any>
-            </not>
-        </all>
-    </any>
-    <any id="filter-last-point-red">
-        <filter id="capped-blue-last"/>
-        <all>
-            <filter id="only-blue"/>
-            <not>
-                <any>
-                    <objective team="blue">blue-last</objective>
-                    <objective team="red">blue-last</objective>
-                </any>
-            </not>
-        </all>
-    </any>
-</filters>
 <regions>
-    <cuboid id="cp-blue-last" min="-147,45,-29" max="-152,49,-34"/>
-    <cuboid id="cp-blue-2nd" min="-190,32,-67" max="-185,36,-62"/>
+    <cuboid id="cp-team-1-last" min="-147,45,-29" max="-152,49,-34"/>
+    <cuboid id="cp-team-1-2nd" min="-190,32,-67" max="-185,36,-62"/>
     <cuboid id="cp-mid" min="-190,36,-34" max="-185,40,-29"/>
-    <cuboid id="cp-red-2nd" min="-190,32,-1" max="-185,36,4"/>
-    <cuboid id="cp-red-last" min="-228,45,-29" max="-223,49,-34"/>
+    <cuboid id="cp-team-2-2nd" min="-190,32,-1" max="-185,36,4"/>
+    <cuboid id="cp-team-2-last" min="-228,45,-29" max="-223,49,-34"/>
     <apply block="never" use="never"/>
 </regions>
-<control-points neutral-state="true" show-progress="true">
-    <!-- Blue visual control points -->
-    <control-point initial-owner="blue" id="blue-last" required="false" name="Blue Last" capture-time="6s" time-multiplier="0.35" points="0" incremental="true" capture="cp-blue-last" progress="cp-blue-last" player-filter="filter-blue-last"/>
-    <control-point initial-owner="blue" id="blue-2nd" required="false" name="Blue 2nd" capture-time="6s" time-multiplier="0.35" points="0" incremental="true" capture="cp-blue-2nd" progress="cp-blue-2nd" player-filter="filter-blue-2nd"/>
-    <!-- Mid -->
-    <control-point id="mid" required="false" name="Mid" capture-time="6s" time-multiplier="0.35" points="2" incremental="true" capture="cp-mid" progress="cp-mid" player-filter="filter-mid"/>
-    <!-- Red visual control points -->
-    <control-point initial-owner="red" id="red-2nd" required="false" name="Red 2nd" capture-time="6s" time-multiplier="0.35" points="0" incremental="true" capture="cp-red-2nd" progress="cp-red-2nd" player-filter="filter-red-2nd"/>
-    <control-point initial-owner="red" id="red-last" required="false" name="Red Last" capture-time="6s" time-multiplier="0.35" points="0" incremental="true" capture="cp-red-last" progress="cp-red-last" player-filter="filter-red-last"/>
-    <!-- Point-giving control points -->
-    <control-point id="red-last-point" required="false" show="false" points="1" name="RL Point" capture-time="0s" capture="everywhere" player-filter="filter-last-point-blue" capture-filter="only-blue"/>
-    <control-point id="red-2nd-point" required="false" show="false" points="1" name="R2 Point" capture-time="0s" capture="everywhere" player-filter="filter-2nd-point-blue" capture-filter="only-blue"/>
-    <control-point id="blue-2nd-point" required="false" show="false" points="1" name="B2 Point" capture-time="0s" capture="everywhere" player-filter="filter-2nd-point-red" capture-filter="only-red"/>
-    <control-point id="blue-last-point" required="false" show="false" points="1" name="BL Point" capture-time="0s" capture="everywhere" player-filter="filter-last-point-red" capture-filter="only-red"/>
-</control-points>
-<score>
-    <limit>800</limit>
-</score>
 <spawners>
     <spawner max-entities="2" min-delay="3s" max-delay="10s">
         <spawn-region>
