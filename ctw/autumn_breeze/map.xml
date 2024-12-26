@@ -1,19 +1,20 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Autumn Breeze</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Capture both of the enemy team's wools!</objective>
 <created>2022-08-20</created>
 <gamemode>ctw</gamemode>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="b9cdcd8e-bfd0-4d9f-8219-3758b5c30abc"/> <!-- BowArrowLauncher -->
 </authors>
 <contributors>
     <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="XML"/> <!-- Cazadorian -->
-    <contributor uuid="654a9fe7-c75c-4b45-91df-8d48c4a5e072" contribution="Decoration help"/> <!--Flamiix-->
-    <contributor uuid="924c4e61-57b6-4931-afdb-6525b2ed34c0" contribution="Terrain decor"/> <!--OAF6-->
-    <contributor uuid="f7a1ea64-d102-40cf-ab9f-f2627a65bb2c" contribution="Ideas and tips"/> <!--R1IY2N-->
-    <contributor uuid="fe3608b7-d105-4029-8800-34b3147065b6" contribution="Worldedit help"/> <!--Rockymine-->
-    <contributor uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Spawn and wool rooms"/> <!--Tundren-->
+    <contributor uuid="654a9fe7-c75c-4b45-91df-8d48c4a5e072" contribution="Decoration help"/> <!-- Flamiix -->
+    <contributor uuid="924c4e61-57b6-4931-afdb-6525b2ed34c0" contribution="Terrain decor"/> <!-- OAF6 -->
+    <contributor uuid="f7a1ea64-d102-40cf-ab9f-f2627a65bb2c" contribution="Ideas and tips"/> <!-- R1IY2N -->
+    <contributor uuid="fe3608b7-d105-4029-8800-34b3147065b6" contribution="WorldEdit help"/> <!-- Rockymine -->
+    <contributor uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Spawn and wool rooms"/> <!-- Tundren -->
 </contributors>
 <teams>
     <team id="blue" color="blue" max="20">Blue</team>
@@ -43,19 +44,19 @@
 </kits>
 <spawns>
     <default yaw="180">
-        <regions>
+        <region>
             <point>-42.5,66,-96.5</point>
-        </regions>
+        </region>
     </default>
     <spawn team="red" kit="spawn-kit" yaw="180">
-        <regions>
+        <region>
             <point>-42.5,12,25.5</point>
-        </regions>
+        </region>
     </spawn>
-    <spawn team="blue" kit="spawn-kit" yaw="0">
-        <regions>
+    <spawn team="blue" kit="spawn-kit">
+        <region>
             <point>-42.5,12,-218.5</point>
-        </regions>
+        </region>
     </spawn>
 </spawns>
 <wools craftable="false">
@@ -95,38 +96,32 @@
             <material>beacon</material>
         </any>
     </not>
-    <not id="deny-void">
-       <void/>
-    </not>
     <deny id="deny-players">
-          <participating/>
+        <participating/>
     </deny>
     <material id="only-iron">iron block</material>
 </filters>
 <regions>
-    <union id="spawn-protection">
-        <rectangle id="blue-prot" min="-30,-207" max="-55,-237"/>
-        <rectangle id="red-prot" min="-30,14" max="-55,44"/>
-    </union>
-    <union id="wool-rooms">
-        <union id="blue-wool-rooms">  <!-- blue defends -->
-            <rectangle id="lime-wool-room" min="-2,-243" max="17,-259"/>
-            <rectangle id="light-blue-wool-room" min="-83,-243" max="-102,-259"/>
-        </union>
-        <union id="red-wool-rooms">  <!-- red defends -->
-            <rectangle id="magenta-wool-room" min="-2,51" max="17,66"/>
-            <rectangle id="pink-wool-room" min="-83,51" max="-102,66"/>
-        </union>
-    </union>
-    <union id="lanes">
-        <rectangle id="middle" min="12,-44" max="-97,-149"/>
-        <rectangle id="blue-islands" min="12,-179" max="-97,-162"/>
-        <rectangle id="red-islands" min="12,-14" max="-97,-31"/>
-    </union>
     <negative id="void-area">
-        <region id="spawn-protection"/>
-        <region id="wool-rooms"/>
-        <region id="lanes"/>
+        <union id="spawn-protection">
+            <rectangle id="blue-prot" min="-30,-207" max="-55,-237"/>
+            <rectangle id="red-prot" min="-30,14" max="-55,44"/>
+        </union>
+        <union id="wool-rooms">
+            <union id="blue-wool-rooms"> <!-- blue defends -->
+                <rectangle id="lime-wool-room" min="-2,-243" max="17,-259"/>
+                <rectangle id="light-blue-wool-room" min="-83,-243" max="-102,-259"/>
+            </union>
+            <union id="red-wool-rooms"> <!-- red defends -->
+                <rectangle id="magenta-wool-room" min="-2,51" max="17,66"/>
+                <rectangle id="pink-wool-room" min="-83,51" max="-102,66"/>
+            </union>
+        </union>
+        <union id="lanes">
+            <rectangle id="middle" min="12,-44" max="-97,-149"/>
+            <rectangle id="blue-islands" min="12,-179" max="-97,-162"/>
+            <rectangle id="red-islands" min="12,-14" max="-97,-31"/>
+        </union>
     </negative>
     <apply enter="only-blue" region="blue-prot" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-red" region="red-prot" message="You may not enter the opponent's spawn!"/>
@@ -134,8 +129,8 @@
     <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool room!"/>
     <apply block="blue-in-wr" use="only-blue" region="red-wool-rooms" message="You may not interact with this block!"/>
     <apply block="red-in-wr" use="only-red" region="blue-wool-rooms" message="You may not interact with this block!"/>
-    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
     <apply block-break="only-iron" block-place="deny-players" region="spawn-protection" message="You may not modify the spawns!"/>
+    <apply block-place="deny(void)" region="void-area" message="You may not build in the void area!"/>
 </regions>
 <toolrepair>
     <tool>iron sword</tool>
@@ -183,7 +178,6 @@
 <maxbuildheight>30</maxbuildheight>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple" amount="1"/>
         <item material="wood" damage="2" amount="32"/>
         <item material="glass" amount="16"/>
     </kill-reward>
