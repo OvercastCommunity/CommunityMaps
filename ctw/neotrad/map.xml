@@ -1,8 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>NeoTrad</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Capture the other team's wools.</objective>
 <created>2021-11-09</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="834704b6-94d2-4f4f-abc6-fe2e1f085837" /> <!-- Alternqtive -->
     <author uuid="d845eb0b-1ae4-40b7-9287-ec65c22b6e91" /> <!-- Anarquista -->
@@ -22,7 +23,7 @@
     <tip after="4m">Check out the spawners on the edges to get a new armor set!</tip>
 </broadcasts>
 <teams>
-    <team id="cyan" color="dark aqua" max="16">Cyan</team>
+    <team id="cyan" color="dark aqua" dye-color="light blue" max="16">Cyan</team>
     <team id="lime" color="green" max="16">Lime</team>
     <team id="magenta" color="light purple" max="16">Magenta</team>
     <team id="orange" color="gold" max="16">Orange</team>
@@ -39,11 +40,9 @@
             <enchantment>unbreaking</enchantment>
             <enchantment level="5">efficiency</enchantment>
         </item>
-        <!--
-        <item slot="4" amount="32" team-color="true" material="stained clay"/>
-        <item slot="5" amount="8" team-color="true" material="stained glass"/>
-        -->
+        <item slot="4" amount="12" team-color="true" material="stained glass"/>
         <item slot="5" material="golden apple"/>
+        <item slot="8" amount="36" team-color="true" material="stained clay"/>
         <helmet unbreakable="true" team-color="true" locked="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate">
             <enchantment>protection_projectile</enchantment>
@@ -55,48 +54,34 @@
         <effect duration="oo">fast digging</effect>
         <game-mode>adventure</game-mode>
     </kit>
-    <kit id="cyan-kit" parents="spawn-kit">
-        <item slot="8" amount="36" damage="3" material="stained clay"/>
-        <item slot="4" amount="12" damage="3" material="stained glass"/>
-    </kit>
-    <kit id="lime-kit" parents="spawn-kit">
-        <item slot="8" amount="36" damage="5" material="stained clay"/>
-        <item slot="4" amount="12" damage="5" material="stained glass"/>
-    </kit>
-    <kit id="magenta-kit" parents="spawn-kit">
-        <item slot="8" amount="36" damage="2" material="stained clay"/>
-        <item slot="4" amount="12" damage="2" material="stained glass"/>
-    </kit>
-    <kit id="orange-kit" parents="spawn-kit">
-        <item slot="8" amount="36" damage="1" material="stained clay"/>
-        <item slot="4" amount="12" damage="1" material="stained glass"/>
-    </kit>
     <kit id="wool-gear" force="true">
         <chestplate unbreakable="true" locked="true" material="iron chestplate">
             <enchantment>protection_projectile</enchantment>
         </chestplate>
-        <effect duration="oo">speed</effect>
-        <effect duration="oo">regeneration</effect>
+        <effect>speed</effect>
+        <effect>regeneration</effect>
     </kit>
 </kits>
+<spawns>
+    <default region="observers-sp" yaw="45"/>
+    <spawn team="cyan" kit="spawn-kit" region="cyan-sp" yaw="135"/>
+    <spawn team="lime" kit="spawn-kit" region="lime-sp" yaw="-135"/>
+    <spawn team="magenta" kit="spawn-kit" region="magenta-sp" yaw="-45"/>
+    <spawn team="orange" kit="spawn-kit" region="orange-sp" yaw="45"/>
+</spawns>
 <filters>
-    <!--  Inclusive filters for each team for the spawns -->
-    <team id="only-cyan">cyan</team>
-    <team id="only-lime">lime</team>
-    <team id="only-magenta">magenta</team>
-    <team id="only-orange">orange</team>
-    <!--  Negated filters for each team for the wool rooms  -->
-        <not id="not-cyan">
-        <team>cyan</team>
+    <!-- Filters for each team for the wool rooms  -->
+    <not id="not-cyan">
+        <team id="only-cyan">cyan</team>
     </not>
     <not id="not-lime">
-        <team>lime</team>
+        <team id="only-lime">lime</team>
     </not>
     <not id="not-magenta">
-        <team>magenta</team>
+        <team id="only-magenta">magenta</team>
     </not>
     <not id="not-orange">
-        <team>orange</team>
+        <team id="only-orange">orange</team>
     </not>
     <!--  Renewables filter for replacing blocks  -->
     <material id="only-air">air</material>
@@ -121,8 +106,6 @@
 </filters>
 <regions>
     <!--  Definitions  -->
-    <!--  All map  -->
-    <rectangle id="all-map" min="-oo,-oo" max="oo,oo"/>
     <!-- Spawn points -->
     <union id="points">
         <block id="observers-sp" location="0.5,60,-0.5"/>
@@ -177,64 +160,73 @@
     <apply enter="only-magenta" region="magenta-spawn" message="You may not enter the other team's spawn!"/>
     <apply enter="only-orange" region="orange-spawn" message="You may not enter the other team's spawn!"/>
     <!--  Usage Applications  -->
-    <apply use="blacklisted-blocks" region="all-map" message="You are not allowed to use this block"/>
+    <apply use="blacklisted-blocks" message="You are not allowed to use this block"/>
     <!--  Kit Applications  -->
     <apply kit="wool-gear" region="rooms"/>
 </regions>
-<spawns>
-    <default region="observers-sp" yaw="45"/>
-    <spawn team="cyan" kit="cyan-kit" region="cyan-sp" yaw="135"/>
-    <spawn team="lime" kit="lime-kit" region="lime-sp" yaw="-135"/>
-    <spawn team="magenta" kit="magenta-kit" region="magenta-sp" yaw="-45"/>
-    <spawn team="orange" kit="orange-kit" region="orange-sp" yaw="45"/>
-</spawns>
-<wools team="cyan">
-    <wool color="lime" location="-97,13,96">
-        <monument><block>72,7,74</block></monument>
+<wools>
+    <wool team="cyan" color="lime" location="-97,13,96">
+        <monument>
+            <block>72,7,74</block>
+        </monument>
     </wool>
-    <wool color="magenta" location="-97,12,-98">
-        <monument><block>74,7,73</block></monument>
+    <wool team="cyan" color="magenta" location="-97,12,-98">
+        <monument>
+            <block>74,7,73</block>
+        </monument>
     </wool>
-    <wool color="orange" location="97,13,-97">
-        <monument><block>75,7,71</block></monument>
+    <wool team="cyan" color="orange" location="97,13,-97">
+        <monument>
+            <block>75,7,71</block>
+        </monument>
+    </wool>
+    <wool team="lime" color="cyan" location="97,13,96">
+        <monument>
+            <block>-72,7,74</block>
+        </monument>
+    </wool>
+    <wool team="lime" color="orange" location="97,13,-97">
+        <monument>
+            <block>-74,7,73</block>
+        </monument>
+    </wool>
+    <wool team="lime" color="magenta" location="-97,12,-98">
+        <monument>
+            <block>-75,7,71</block>
+        </monument>
+    </wool>
+    <wool team="magenta" color="lime" location="-97,13,96">
+        <monument>
+            <block>-75,7,-73</block>
+        </monument>
+    </wool>
+    <wool team="magenta" color="cyan" location="97,13,96">
+        <monument>
+            <block>-74,7,-75</block>
+        </monument>
+    </wool>
+    <wool team="magenta" color="orange" location="97,13,-97">
+        <monument>
+            <block>-72,7,-76</block>
+        </monument>
+    </wool>
+    <wool team="orange" color="magenta" location="-97,12,-98">
+        <monument>
+            <block>72,7,-76</block>
+        </monument>
+    </wool>
+    <wool team="orange" color="lime" location="-97,13,96">
+        <monument>
+            <block>74,7,-75</block>
+        </monument>
+    </wool>
+    <wool team="orange" color="cyan" location="97,13,96">
+        <monument>
+            <block>75,7,-73</block>
+        </monument>
     </wool>
 </wools>
-<wools team="lime">
-    <wool color="cyan" location="97,13,96">
-        <monument><block>-72,7,74</block></monument>
-    </wool>
-    <wool color="orange" location="97,13,-97">
-        <monument><block>-74,7,73</block></monument>
-    </wool>
-    <wool color="magenta" location="-97,12,-98">
-        <monument><block>-75,7,71</block></monument>
-    </wool>
-</wools>
-<wools team="magenta">
-    <wool color="lime" location="-97,13,96">
-        <monument><block>-75,7,-73</block></monument>
-    </wool>
-    <wool color="cyan" location="97,13,96">
-        <monument><block>-74,7,-75</block></monument>
-    </wool>
-    <wool color="orange" location="97,13,-97">
-        <monument><block>-72,7,-76</block></monument>
-    </wool>
-</wools>
-<wools team="orange">
-    <wool color="magenta" location="-97,12,-98">
-        <monument><block>72,7,-76</block></monument>
-    </wool>
-    <wool color="lime" location="-97,13,96">
-        <monument><block>74,7,-75</block></monument>
-    </wool>
-    <wool color="cyan" location="97,13,96">
-        <monument><block>75,7,-73</block></monument>
-    </wool>
-</wools>
-<!--
-Slowly regenerates the map, but allows player blocks to NOT be overriden
--->
+<!-- Slowly regenerates the map, but allows player blocks to NOT be overriden -->
 <renewables interval="35s" grow="true" particles="false" sound="false" avoid-entities="true" replace-filter="only-air">
     <renewable region="cyan-regen"/>
     <renewable region="lime-regen"/>
@@ -252,7 +244,7 @@ Slowly regenerates the map, but allows player blocks to NOT be overriden
         </player-region>
         <item material="golden apple"/>
     </spawner>
- <spawner id="chestplate-north" delay="20s">
+    <spawner id="chestplate-north" delay="20s">
         <spawn-region>
             <point>0.5,5.1,-65.5</point>
         </spawn-region>
@@ -260,10 +252,10 @@ Slowly regenerates the map, but allows player blocks to NOT be overriden
             <cylinder base="0.5,5,-65.5" radius="8" height="6"/>
         </player-region>
         <item material="gold chestplate">
-             <enchantment>protection_projectile</enchantment>
+            <enchantment>protection_projectile</enchantment>
         </item>
     </spawner>
- <spawner id="chestplate-south" delay="20s">
+    <spawner id="chestplate-south" delay="20s">
         <spawn-region>
             <point>0.5,5.1,64.5</point>
         </spawn-region>
@@ -271,10 +263,10 @@ Slowly regenerates the map, but allows player blocks to NOT be overriden
             <cylinder base="0.5,5,64.5" radius="8" height="6"/>
         </player-region>
         <item material="gold chestplate">
-             <enchantment>protection_projectile</enchantment>
+            <enchantment>protection_projectile</enchantment>
         </item>
     </spawner>
- <spawner id="chestplate-west" delay="20s">
+    <spawner id="chestplate-west" delay="20s">
         <spawn-region>
             <point>-64.5,5.1,-0.5</point>
         </spawn-region>
@@ -282,10 +274,10 @@ Slowly regenerates the map, but allows player blocks to NOT be overriden
             <cylinder base="-64.5,5,-0.5" radius="8" height="6"/>
         </player-region>
         <item material="gold chestplate">
-             <enchantment>protection_projectile</enchantment>
+            <enchantment>protection_projectile</enchantment>
         </item>
     </spawner>
- <spawner id="chestplate-east" delay="20s">
+    <spawner id="chestplate-east" delay="20s">
         <spawn-region>
             <point>65.5,5.1,-0.5</point>
         </spawn-region>
@@ -293,10 +285,10 @@ Slowly regenerates the map, but allows player blocks to NOT be overriden
             <cylinder base="65.5,5,-0.5" radius="8" height="6"/>
         </player-region>
         <item material="gold chestplate">
-             <enchantment>protection_projectile</enchantment>
+            <enchantment>protection_projectile</enchantment>
         </item>
     </spawner>
- <spawner id="cyan-wool" delay="5s">
+    <spawner id="cyan-wool" delay="5s">
         <spawn-region>
             <point>97.5,12.1,96.5</point>
         </spawn-region>
@@ -305,7 +297,7 @@ Slowly regenerates the map, but allows player blocks to NOT be overriden
         </player-region>
         <item material="wool" amount="3" damage="9"/>
     </spawner>
- <spawner id="lime-wool" delay="5s">
+    <spawner id="lime-wool" delay="5s">
         <spawn-region>
             <point>-96.5,12.1,96.5</point>
         </spawn-region>
@@ -314,7 +306,7 @@ Slowly regenerates the map, but allows player blocks to NOT be overriden
         </player-region>
         <item material="wool" amount="3" damage="5"/>
     </spawner>
- <spawner id="magenta-wool" delay="5s">
+    <spawner id="magenta-wool" delay="5s">
         <spawn-region>
             <point>-96.5,12.1,-97.5</point>
         </spawn-region>
@@ -323,7 +315,7 @@ Slowly regenerates the map, but allows player blocks to NOT be overriden
         </player-region>
         <item material="wool" amount="3" damage="2"/>
     </spawner>
- <spawner id="orange-wool" delay="5s">
+    <spawner id="orange-wool" delay="5s">
         <spawn-region>
             <point>97.5,12.1,-97.5</point>
         </spawn-region>
@@ -418,35 +410,8 @@ Slowly regenerates the map, but allows player blocks to NOT be overriden
 </itemremove>
 <kill-rewards>
     <kill-reward>
-        <item>golden apple</item>
-    </kill-reward>
-    <kill-reward>
-        <filter>
-            <team>cyan</team>
-        </filter>
-        <item amount="12" damage="3">stained clay</item>
-        <item amount="6" damage="3">stained glass</item>
-    </kill-reward>
-    <kill-reward>
-        <filter>
-            <team>lime</team>
-        </filter>
-        <item amount="12" damage="5">stained clay</item>
-        <item amount="6" damage="5">stained glass</item>
-    </kill-reward>
-    <kill-reward>
-        <filter>
-            <team>magenta</team>
-        </filter>
-        <item amount="12" damage="2">stained clay</item>
-        <item amount="6" damage="2">stained glass</item>
-    </kill-reward>
-    <kill-reward>
-        <filter>
-            <team>orange</team>
-        </filter>
-        <item amount="12" damage="1">stained clay</item>
-        <item amount="6" damage="1">stained glass</item>
+        <item amount="12" team-color="true" material="stained clay"/>
+        <item amount="6" team-color="true" material="stained glass"/>
     </kill-reward>
 </kill-rewards>
 </map>

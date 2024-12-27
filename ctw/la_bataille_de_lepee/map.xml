@@ -1,8 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>La Bataille de l'épée</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Take the enemy's wool located above their base and place it back at your spawn!</objective>
 <created>2022-11-07</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="654a9fe7-c75c-4b45-91df-8d48c4a5e072"/> <!-- Flamiix -->
     <author uuid="0dcb9fb5-bd18-4cd9-a265-0c24eb41e086"/> <!-- Aaewe -->
@@ -13,23 +14,6 @@
     <team id="red-team" color="dark red" dye-color="red" max="5">Red</team>
     <team id="blue-team" color="blue" dye-color="blue" max="5">Blue</team>
 </teams>
-<spawns>
-    <spawn team="blue-team" kit="spawn-kit" yaw="0">
-        <regions>
-            <point yaw="180">0.5,12,41.5</point>
-        </regions>
-    </spawn>
-    <spawn team="red-team" kit="spawn-kit" yaw="180">
-        <regions>
-            <point yaw="0">0.5,12,-40.5</point>
-        </regions>
-    </spawn>
-    <default>
-        <regions>
-            <point yaw="90">0.5,47,0.5</point>
-        </regions>
-    </default>
-</spawns>
 <kits>
     <kit id="spawn-kit">
         <clear/>
@@ -57,10 +41,24 @@
         <game-mode>survival</game-mode>
     </kit>
 </kits>
+<spawns>
+    <spawn team="blue-team" kit="spawn-kit" yaw="180">
+        <region>
+            <point>0.5,12,41.5</point>
+        </region>
+    </spawn>
+    <spawn team="red-team" kit="spawn-kit" yaw="180">
+        <region>
+            <point>0.5,12,-40.5</point>
+        </region>
+    </spawn>
+    <default yaw="90">
+        <region>
+            <point>0.5,47,0.5</point>
+        </region>
+    </default>
+</spawns>
 <filters>
-    <deny id="deny-void">
-        <void/>
-    </deny>
     <deny id="deny-players">
         <participating/>
     </deny>
@@ -117,8 +115,6 @@
     <negative id="void-area">
         <cuboid id="middle" min="17,7,-21" max="-16,oo,23"/> <!-- middle -->
     </negative>
-    <apply block-place="deny-void" region="void-area" message="You may not build in the void."/>
-    <apply block-break="deny-void" region="void-area" message="You may not break this block."/>
     <negative id="playing-area">
         <below y="7" id="floor"/>
         <cuboid min="-20,0,28" max="20,10,50"/> <!-- below blue spawn -->
@@ -129,20 +125,18 @@
     <apply kit="survival-kit" region="playing-area"/>
     <cuboid id="sword-in-bedrock" min="-4,7,-1" max="5,8,2"/> <!-- not part of floor so adventure mode doesn't get set when breaking while standing on quartz-->
     <apply block-break="never" region="sword-in-bedrock" message="You may not break this block."/>
-    <block id="red-team-victory-monument">0,13,-44</block> <!-- place blue wool -->
-    <block id="blue-team-victory-monument">0,13,44</block> <!-- place red wool -->
     <union id="spawn-areas">
         <complement id="blue-spawn-area">
             <union>
                 <cuboid min="8,0,34" max="-7,17,46"/>
             </union>
-            <region id="blue-team-victory-monument"/>
+            <block id="blue-team-victory-monument">0,13,44</block> <!-- place red wool -->
         </complement>
         <complement id="red-spawn-area">
             <union>
                 <cuboid min="-7,0,-33" max="8,17,-45"/>
             </union>
-            <region id="red-team-victory-monument"/>
+            <block id="red-team-victory-monument">0,13,-44</block> <!-- place blue wool -->
         </complement>
     </union>
     <apply block="never" region="spawn-areas" message="You may not edit spawn areas!"/>
@@ -167,12 +161,11 @@
         <cuboid min="3,12,-24" max="-2,14,-27"/> <!-- red side -->
     </union>
     <apply block-place="deny-players" block-break="allow-in-iron-regen" region="iron-areas" message="You may only break iron blocks here"/>
+    <apply block="deny(void)" region="void-area" message="You may not build in the void."/>
 </regions>
-<wools team="red-team" craftable="false">
-    <wool color="blue" location="0.5,28,36.5" monument="red-team-victory-monument"/>
-</wools>
-<wools team="blue-team" craftable="false">
-    <wool color="red" location="0.5,28,-35.5" monument="blue-team-victory-monument"/>
+<wools craftable="false">
+    <wool team="red-team" color="blue" location="0.5,28,36.5" monument="red-team-victory-monument"/>
+    <wool team="blue-team" color="red" location="0.5,28,-35.5" monument="blue-team-victory-monument"/>
 </wools>
 <toolrepair>
     <tool>stone sword</tool>
@@ -199,7 +192,6 @@
 </itemremove>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
         <item material="wood" amount="8"/>
     </kill-reward>
 </kill-rewards>
