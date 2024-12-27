@@ -1,19 +1,19 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Celestial Islands</name>
-<version>1.1.3</version>
+<version>1.1.4</version>
 <phase>staging</phase>
 <objective>Take the enemy's wools located near their base and place them back at your spawn!</objective>
 <created>2022-10-20</created>
+<include id="gapple-kill-reward"/>
 <constants>
     <constant id="height-limit">27</constant>
 </constants>
-<maxbuildheight>${height-limit}</maxbuildheight>
 <authors>
     <author uuid="654a9fe7-c75c-4b45-91df-8d48c4a5e072" contribution="Map Builder"/> <!-- Flamiix -->
     <author uuid="0dcb9fb5-bd18-4cd9-a265-0c24eb41e086" contribution="Map Builder"/> <!-- Aaewe -->
 </authors>
 <contributors> 
-    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="Map Packaging, Minor Fixes and XML"/> <!-- zzuf -->
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="Map Packaging, Minor Fixes, and XML"/> <!-- zzuf -->
 </contributors>
 <broadcasts>
     <tip after="2s" every="4m">For each kill, along with a golden apple and some blocks, you also get 3 iron ingots!</tip>
@@ -24,19 +24,19 @@
 </teams>
 <spawns>
     <spawn team="red-team" kit="spawn-kit" yaw="-90">
-        <regions>
+        <region>
             <point>-109.5,16,-139.5</point>
-        </regions>
+        </region>
     </spawn>
     <spawn team="blue-team" kit="spawn-kit" yaw="90">
-        <regions>
+        <region>
             <point>70.5,16,-67.5</point>
-        </regions>
+        </region>
     </spawn>
-    <default>
-        <regions>
-            <point yaw="90">-18.5,98,-103.5</point>
-        </regions>
+    <default yaw="90">
+        <region>
+            <point>-18.5,98,-103.5</point>
+        </region>
     </default>
 </spawns>
 <kits>
@@ -51,7 +51,7 @@
         <item slot="7" material="water bucket"/>
         <item slot="8" material="golden apple"/>
         <item slot="28" material="arrow" amount="48"/>
-        <item slot="29" material="shears" enchantment="dig speed:1" unbreakable="true"/>
+        <item slot="29" material="shears" enchantment="dig speed" unbreakable="true"/>
         <item slot="30" material="stone spade" unbreakable="true"/>
         <item slot="31" material="wood" damage="2" amount="64"/>
         <item slot="32" material="workbench" amount="16"/>
@@ -67,18 +67,12 @@
         <participating/>
     </deny>
     <material id="only-gold">gold block</material>
-    <deny id="deny-red">
-        <team id="only-red">red-team</team>
-    </deny>
-    <deny id="deny-blue">
-        <team id="only-blue">blue-team</team>
-    </deny>
     <all id="blue-in-wr">
-        <team>blue-team</team>
+        <team id="only-blue">blue-team</team>
         <filter id="woolrooms-filter"/>
     </all>
     <all id="red-in-wr">
-        <team>red-team</team>
+        <team id="only-red">red-team</team>
         <filter id="woolrooms-filter"/>
     </all>
     <blocks id="woolrooms-filter" region="wool-room-blocks">
@@ -93,13 +87,12 @@
     </blocks>
 </filters>
 <regions>
-    <negative id="void">
+    <negative id="void-area">
         <region id="buildable-area"/>
         <region id="victory-monuments"/>
         <region id="spawn-areas"/>
         <region id="wool-room-blocks"/>
     </negative>
-    <apply block="never" region="void" message="You may not edit the void!"/>
     <union id="buildable-area">
         <!-- starts from blue south side -->
         <rectangle min="37,7" max="50,-39"/>
@@ -157,8 +150,8 @@
     <apply block="red-in-wr" region="blue-wool-room-blocks" message="You may not edit the wool room!"/>
     <apply block="blue-in-wr" region="red-wool-room-blocks" message="You may not edit the wool room!"/>
     <apply block="never" region="wool-rooms" message="You may not edit the wool room!"/>
-    <apply block="deny-blue" enter="deny-blue" region="blue-wool-rooms" message="You may not modify nor enter your team's wool rooms!"/>
-    <apply block="deny-red" enter="deny-red" region="red-wool-rooms" message="You may not modify nor enter your team's wool rooms!"/>
+    <apply block="only-red" enter="only-red" region="blue-wool-rooms" message="You may not modify nor enter your team's wool rooms!"/>
+    <apply block="only-blue" enter="only-blue" region="red-wool-rooms" message="You may not modify nor enter your team's wool rooms!"/>
     <union id="spawn-areas">
         <complement id="red-spawn-area">
             <rectangle min="-60,-188" max="-143,-106"/>
@@ -174,14 +167,13 @@
     <apply block-place="deny-players" block-break="only-gold" region="spawn-areas" message="You may only break gold blocks in spawn areas."/>
     <apply enter="only-blue" region="blue-spawn-area" message="You may not enter your enemies' spawn!"/>
     <apply enter="only-red" region="red-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply block="never" region="void-area" message="You may not edit the void!"/>
 </regions>
-<wools team="red-team" craftable="false">
-    <wool color="blue" location="59.5,19,-1.5" monument="blue-victory-monument"/>
-    <wool color="cyan" location="83.5,13,-120.5" monument="cyan-victory-monument"/>
-</wools>
-<wools team="blue-team" craftable="false">
-    <wool color="yellow" location="-98.5,19,-205.5" monument="yellow-victory-monument"/>
-    <wool color="orange" location="-122.5,13,-86.5" monument="orange-victory-monument"/>
+<wools craftable="false">
+    <wool team="red-team" color="blue" location="59.5,19,-1.5" monument="blue-victory-monument"/>
+    <wool team="red-team" color="cyan" location="83.5,13,-120.5" monument="cyan-victory-monument"/>
+    <wool team="blue-team" color="yellow" location="-98.5,19,-205.5" monument="yellow-victory-monument"/>
+    <wool team="blue-team" color="orange" location="-122.5,13,-86.5" monument="orange-victory-monument"/>
 </wools>
 <renewables>
     <renewable region="spawn-areas" renew-filter="only-gold" rate="1" avoid-players="1"/>
@@ -220,7 +212,6 @@
 </toolrepair>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
         <item material="iron ingot" amount="3"/>
         <item material="wood" damage="2" amount="16"/>
     </kill-reward>
@@ -228,4 +219,5 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
+<maxbuildheight>${height-limit}</maxbuildheight>
 </map>

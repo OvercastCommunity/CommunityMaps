@@ -1,10 +1,10 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Catscratch</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Take the enemy's wool from the middle floor of their base and place it back at your spawn!</objective>
 <created>2023-02-06</created>
-<maxbuildheight>45</maxbuildheight>
 <gamemode>ctw</gamemode>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="86b8ea93-6936-4b28-9d0c-19004d0dcb51"/> <!-- Wyviryn -->
     <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e"/> <!-- Mewzzy -->
@@ -17,20 +17,20 @@
     <team id="blue-team" color="blue" max="12">Blue Bengals</team>
 </teams>
 <spawns>
-    <spawn team="red-team" kit="spawn-kit">
-        <regions>
-            <point yaw="-90">-29.5,42,36.5</point>
-        </regions>
+    <spawn team="red-team" kit="spawn-kit" yaw="-90">
+        <region>
+            <point>-29.5,42,36.5</point>
+        </region>
     </spawn>
-    <spawn team="blue-team" kit="spawn-kit">
-        <regions>
-            <point yaw="90">30.5,42,-35.5</point>
-        </regions>
+    <spawn team="blue-team" kit="spawn-kit" yaw="90">
+        <region>
+            <point>30.5,42,-35.5</point>
+        </region>
     </spawn>
-    <default kit="night-vision-kit">
-        <regions>
-            <point yaw="-90">-57.5,20,0.5</point>
-        </regions>
+    <default kit="night-vision-kit" yaw="-90">
+        <region>
+            <point>-57.5,20,0.5</point>
+        </region>
     </default>
 </spawns>
 <kits>
@@ -56,36 +56,19 @@
     </kit>
 </kits>
 <filters>
-    <deny id="deny-void">
-        <void/>
-    </deny>
     <deny id="deny-players">
         <participating/>
     </deny>
-    <deny id="deny-red">
-        <team id="only-red">red-team</team>
-    </deny>
-    <deny id="deny-blue">
-        <team id="only-blue">blue-team</team>
-    </deny>
+    <team id="only-red">red-team</team>
+    <team id="only-blue">blue-team</team>
     <material id="only-iron">iron block</material>
 </filters>
 <regions>
-    <!-- Void -->
     <rectangle id="middle" min="-18,41" max="19,-40"/>
     <union id="iron-floors">
         <cylinder base="16.5,23,-53.5" height="oo" radius="10.5"/> <!-- blue -->
         <cylinder base="-15.5,23,54.5" height="oo" radius="10.5"/> <!-- red -->
     </union>
-    <negative id="void-area">
-        <region id="middle"/>
-        <region id="cyan-wool-room"/>
-        <region id="yellow-wool-room"/>
-        <region id="spawn-areas"/>
-        <region id="portal-areas"/>
-        <region id="iron-floors"/>
-    </negative>
-    <apply block="deny-void" region="void-area" message="You may not edit the void!"/>
     <cuboid id="obs-spawn" min="-3,26,-3" size="7,4,7"/>
     <apply block="never" region="obs-spawn" message="You may not modify the observer's spawn!"/>
     <above y="45" id="ceiling"/>
@@ -111,8 +94,8 @@
         <circle center="-62.5,0.5" radius="9.5"/>
     </union>
     <apply block="never" region="spawn-areas" message="You may not modify spawn areas!"/>
-    <apply enter="deny-blue" region="red-spawn-area" message="You may not enter your enemies' spawn!"/>
-    <apply enter="deny-red" region="blue-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply enter="only-red" region="red-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply enter="only-blue" region="blue-spawn-area" message="You may not enter your enemies' spawn!"/>
     <!-- Portal areas -->
     <union id="portal-areas">
         <union id="blue-portal-area">
@@ -158,12 +141,20 @@
         <block id="cyan-victory-monument">33,43,-36</block>
         <block id="yellow-victory-monument">-33,43,36</block>
     </union>
+    <!-- Void -->
+    <negative id="void-area">
+        <region id="middle"/>
+        <region id="cyan-wool-room"/>
+        <region id="yellow-wool-room"/>
+        <region id="spawn-areas"/>
+        <region id="portal-areas"/>
+        <region id="iron-floors"/>
+    </negative>
+    <apply block="deny(void)" region="void-area" message="You may not edit the void!"/>
 </regions>
-<wools team="blue-team" craftable="false">
-    <wool color="cyan" location="11.5,25,56.5" monument="cyan-victory-monument"/>
-</wools>
-<wools team="red-team" craftable="false">
-    <wool color="yellow" location="-10.5,25,-55.4" monument="yellow-victory-monument"/>
+<wools craftable="false">
+    <wool team="blue-team" color="cyan" location="11.5,25,56.5" monument="cyan-victory-monument"/>
+    <wool team="red-team" color="yellow" location="-10.5,25,-55.4" monument="yellow-victory-monument"/>
 </wools>
 <spawners>
     <spawner spawn-region="cyan-wool-spawner" player-region="cyan-wool-room" delay="4" max-entities="5">
@@ -178,10 +169,14 @@
 </renewables>
 <portals>
     <portal x="0" y="-38" z="0" yaw="180" bidirectional="true">
-        <region><cuboid min="-29,42,-37" size="1,2,3"/></region> <!-- blue -->
+        <region>
+            <cuboid min="-29,42,-37" size="1,2,3"/> <!-- blue -->
+        </region> 
     </portal>
     <portal x="0" y="-38" z="0" yaw="180" bidirectional="true">
-        <region><cuboid min="29,42,35" size="1,2,3"/></region> <!-- red -->
+        <region>
+            <cuboid min="29,42,35" size="1,2,3"/> <!-- red -->
+        </region>
     </portal>
 </portals>
 <itemkeep>
@@ -224,7 +219,6 @@
 </toolrepair>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
         <item material="wood" damage="1" amount="16"/>
         <item material="glass" amount="8"/>
     </kill-reward>
@@ -232,4 +226,5 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
+<maxbuildheight>45</maxbuildheight>
 </map>
