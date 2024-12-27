@@ -1,6 +1,6 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Hobbit CTW</name>
-<version>1.0.9</version>
+<version>1.0.10</version>
 <include id="gapple-kill-reward"/>
 <variant id="christmas" world="christmas" override="true">Hobbitmas</variant>
 <objective>Take the enemy's wool located near their base and place it back at your spawn!</objective>
@@ -10,7 +10,6 @@
 <if variant="christmas">
     <created>2023-11-03</created>
 </if>
-<maxbuildheight>23</maxbuildheight>
 <gamemode>ctw</gamemode>
 <authors>
     <author uuid="f8753ae6-a7ed-4d88-8d6d-537a5b1687e4"/> <!-- guini2 -->
@@ -72,15 +71,8 @@
     </kit>
 </kits>
 <filters>
-    <deny id="deny-red">
-        <team id="only-red">red-team</team>
-    </deny>
-    <deny id="deny-blue">
-        <team id="only-blue">blue-team</team>
-    </deny>
-    <deny id="no-void">
-        <void/>
-    </deny>
+    <team id="only-red">red-team</team>
+    <team id="only-blue">blue-team</team>
     <material id="only-gold-block">gold block</material>
     <blocks id="only-wool-room" region="wool-room-blocks">
         <any>
@@ -90,17 +82,6 @@
     </blocks>
 </filters>
 <regions>
-    <!-- Void -->
-    <negative id="void-area">
-        <complement> <!-- Middle -->
-            <rectangle min="165,241" max="136,186"/>
-            <rectangle min="157,206" max="144,221"/>
-        </complement>
-        <region id="wool-room-blocks"/>
-        <region id="red-spawn-area"/>
-        <region id="blue-spawn-area"/>
-    </negative>
-    <apply block="no-void" region="void-area" message="You may not edit the void!"/>
     <!-- Spawns -->
     <point id="red-spawn">182.5,11,177.5</point>
     <point id="blue-spawn">118.5,11,249.5</point>
@@ -112,14 +93,14 @@
         <region id="victory-monuments"/>
     </complement>
     <apply block="never" use="only-red" region="red-spawn-area" message="You may not modify blocks here."/>
-    <apply enter="deny-blue" region="red-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply enter="only-red" region="red-spawn-area" message="You may not enter your enemies' spawn!"/>
     <!-- Blue -->
     <complement id="blue-spawn-area">
         <rectangle min="135,241" max="111,259"/>
         <region id="victory-monuments"/>
     </complement>
     <apply block="never" use="only-blue" region="blue-spawn-area" message="You may not modify blocks here."/>
-    <apply enter="deny-red" region="blue-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply enter="only-blue" region="blue-spawn-area" message="You may not enter your enemy's spawn!"/>
     <!-- Wool rooms -->
     <union id="wool-rooms">
         <rectangle id="blue-wool-room" min="163,275" max="176,290"/> <!-- Contains blue wool -->
@@ -134,8 +115,8 @@
         <cylinder id="red-gold" base="152,10,169" radius="5" height="6"/>
         <cylinder id="blue-gold" base="149,10,258" radius="5" height="6"/>
     </union>
-    <apply block="deny-red" region="red-wool-room" message="You may not modify the wool room!"/>
-    <apply block="deny-blue" region="blue-wool-room" message="You may not modify the wool room!"/>
+    <apply block="only-blue" region="red-wool-room" message="You may not modify the wool room!"/>
+    <apply block="only-red" region="blue-wool-room" message="You may not modify the wool room!"/>
     <apply block="only-wool-room" region="wool-room-blocks" message="You may not modify the wool room!"/>
     <apply enter="only-blue" region="red-wool-room" message="You may not enter your team's wool room!"/>
     <apply enter="only-red" region="blue-wool-room" message="You may not enter your team's wool room!"/>
@@ -148,12 +129,21 @@
         <block id="red-victory-monument">172,12,177</block>
         <block id="blue-victory-monument">128,12,249</block>
     </union>
+    <!-- Void -->
+    <negative id="void-area">
+        <complement> <!-- Middle -->
+            <rectangle min="165,241" max="136,186"/>
+            <rectangle min="157,206" max="144,221"/>
+        </complement>
+        <region id="wool-room-blocks"/>
+        <region id="red-spawn-area"/>
+        <region id="blue-spawn-area"/>
+    </negative>
+    <apply block="deny(void)" region="void-area" message="You may not edit the void!"/>
 </regions>
-<wools team="red-team" craftable="false">
-    <wool color="blue" location="-6.5,14.5,-76" monument="red-victory-monument"/>
-</wools>
-<wools team="blue-team" craftable="false">
-    <wool color="red" location="6.5,14.5,76" monument="blue-victory-monument"/>
+<wools craftable="false">
+    <wool team="red-team" color="blue" location="-6.5,14.5,-76" monument="red-victory-monument"/>
+    <wool team="blue-team" color="red" location="6.5,14.5,76" monument="blue-victory-monument"/>
 </wools>
 <spawners>
     <!-- Blue side -->
@@ -218,4 +208,5 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
+<maxbuildheight>23</maxbuildheight>
 </map>

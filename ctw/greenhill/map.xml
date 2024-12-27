@@ -1,8 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Greenhill</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <objective>Capture the other team's wools to win!</objective>
 <created>2023-01-13</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="a9f11454-beac-4cc3-a138-1780802c8794"/> <!-- Crazy_ -->
 </authors>
@@ -13,19 +14,19 @@
 <kits>
     <kit id="spawn">
         <clear/>
-        <item slot="0" unbreakable="true">iron sword</item>
-        <item slot="1" unbreakable="true" enchantment="infinity">bow</item>
-        <item slot="28">arrow</item>
-        <item slot="2" unbreakable="true">iron pickaxe</item>
-        <item slot="3" unbreakable="true">iron axe</item>
-        <item slot="30" unbreakable="true">stone spade</item>
-        <item slot="4" amount="64" damage="2">wood</item>
-        <item slot="5" amount="32">glass</item>
-        <item slot="8">golden apple</item>
-        <helmet unbreakable="true" team-color="true">leather helmet</helmet>
-        <chestplate unbreakable="true" team-color="true">leather chestplate</chestplate>
-        <leggings unbreakable="true">chainmail leggings</leggings>
-        <boots unbreakable="true">iron boots</boots>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" enchantment="infinity" material="bow"/>
+        <item slot="28" material="arrow"/>
+        <item slot="2" unbreakable="true" material="iron pickaxe"/>
+        <item slot="3" unbreakable="true" material="iron axe"/>
+        <item slot="30" unbreakable="true" material="stone spade"/>
+        <item slot="4" amount="64" damage="2" material="wood"/>
+        <item slot="5" amount="32" material="glass"/>
+        <item slot="8" material="golden apple"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+        <boots unbreakable="true" material="iron boots"/>
         <effect duration="4s" amplifier="20">damage resistance</effect>
     </kit>
 </kits>
@@ -35,9 +36,6 @@
     <default region="obs-spawn" yaw="-90"/>
 </spawns>
 <filters>
-    <deny id="not-void">
-        <void/>
-    </deny>
     <deny id="not-woolroom">
         <any>
             <material>chest</material>
@@ -45,12 +43,10 @@
         </any>
     </deny>
     <any id="only-iron">
-    	<material>iron block</material>
+        <material>iron block</material>
     </any>
     <team id="only-red">red</team>
     <team id="only-blue">blue</team>
-    <deny id="not-red"><team>red</team></deny>
-    <deny id="not-blue"><team>blue</team></deny>
 </filters>
 <regions>
     <union id="spawn-islands">
@@ -82,17 +78,13 @@
         <cuboid id="blue-spawn-point" min="-5,3,-147" max="-7,3,-149"/>
         <cuboid id="obs-spawn" min="13,38,59" max="16,39,56"/>
     </union>
-
-    <apply enter="only-red" region="red-spawn" message="You may not enter the other team's spawn!"/>
-    <apply enter="only-blue" region="blue-spawn" message="You may not enter the other team's spawn!"/>
-
+    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
     <apply block="not-woolroom" region="wool-rooms" message="You may not interact with these blocks here!"/> <!-- Denies chests and black glass panes -->
-    <apply enter="only-red" block="not-blue" region="wool-rooms-blue-side" message="You may not interact with these wool rooms!"/>
-    <apply enter="only-blue" block="not-red" region="wool-rooms-red-side" message="You may not interact with these wool rooms!"/>
-
+    <apply enter="only-red" block="only-red" region="wool-rooms-blue-side" message="You may not interact with these wool rooms!"/>
+    <apply enter="only-blue" block="only-blue" region="wool-rooms-red-side" message="You may not interact with these wool rooms!"/>
     <apply block="never" region="spawn-islands" message="You may not alter the spawn islands!"/>
-
-    <apply block-break="always" block-place="not-void" message="You may not place blocks here!"/>
+    <apply block-break="always" block-place="deny(void)" message="You may not place blocks here!"/>
 </regions>
 <spawners>
     <spawner spawn-region="yellow-wool" player-region="yellow-woolroom" max-entities="16" delay="2s">
@@ -108,32 +100,30 @@
         <item amount="1" material="wool" damage="6"/>
     </spawner>
 </spawners>
-<wools team="red" craftable="false">
-    <wool color="pink" location="15,19,-173">
+<wools craftable="false">
+    <wool team="red" color="pink" location="15,19,-173">
         <monument>
             <block>-6,4,35</block>
         </monument>
     </wool>
-    <wool color="light blue" location="-28,19,-173">
+    <wool team="red" color="light blue" location="-28,19,-173">
         <monument>
             <block>-7,4,35</block>
         </monument>
     </wool>
-</wools>
-<wools team="blue" craftable="false">
-    <wool color="yellow" location="15,19,57">
+    <wool team="blue" color="yellow" location="15,19,57">
         <monument>
             <block>-6,4,-151</block>
         </monument>
     </wool>
-    <wool color="lime" location="-28,19,57">
+    <wool team="blue" color="lime" location="-28,19,57">
         <monument>
             <block>-7,4,-151</block>
         </monument>
     </wool>
 </wools>
 <renewables>
-	<renewable region="iron-deposits" renew-filter="only-iron"/>
+    <renewable region="iron-deposits" renew-filter="only-iron"/>
 </renewables>
 <toolrepair>
     <tool>iron sword</tool>
@@ -168,9 +158,8 @@
 </itemkeep>
 <kill-rewards>
     <kill-reward>
-        <item>golden apple</item>
-        <item amount="16" damage="2">wood</item>
-        <item amount="8">glass</item>
+        <item amount="16" damage="2" material="wood"/>
+        <item amount="8" material="glass"/>
     </kill-reward>
 </kill-rewards>
 <hunger>
