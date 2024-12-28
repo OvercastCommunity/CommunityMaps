@@ -1,10 +1,11 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Outlyne</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Capture and place the wool at your monument</objective>
+<include id="gapple-kill-reward"/>
 <!-- Map authors & contributors. -->
 <authors>
-    <author uuid="b03360db-b8cd-49de-8ba1-b7920c2238a9" contribution="Map design, aesthetics and XML"/> <!-- Obelistics -->
+    <author uuid="b03360db-b8cd-49de-8ba1-b7920c2238a9" contribution="Map design, aesthetics, and XML"/> <!-- Obelistics -->
     <author uuid="fe3608b7-d105-4029-8800-34b3147065b6" contribution="Map design and aesthetics"/> <!-- rockymine -->
 </authors>
 <!-- Map modules, i.e. objectives, regions, spawns. -->
@@ -12,33 +13,6 @@
     <team id="red-team" color="red" max="8">Red</team>
     <team id="blue-team" color="blue" max="8">Blue</team>
 </teams>
-<!-- Wools -->
-<wools craftable="false">
-    <wool team="red-team" color="pink" location="5,9,-43">
-        <monument><block>-17.5,21,39.5</block></monument>
-    </wool>
-    <wool team="blue-team" color="light blue" location="-18,9,35">
-        <monument><block>5.5,21,-46.5</block></monument>
-    </wool>
-</wools>
-<!-- Spawns -->
-<spawns>
-    <spawn team="red-team" kit="spawn-kit">
-        <regions yaw="90">
-            <cuboid min="-10.5,20,37.5" max="-14.5,20,33.5"/>
-        </regions>
-    </spawn>
-    <spawn team="blue-team" kit="spawn-kit">
-        <regions yaw="-90">
-            <cuboid min="-1.5,20,-44.5" max="2.5,20,-40.5"/>
-        </regions>
-    </spawn>
-    <default>
-        <region>
-            <cuboid min="-7.5,30,-2.5" max="-4.5,30,-4.5"/>
-        </region>
-    </default>
-</spawns>
 <!-- Kits -->
 <kits>
     <kit id="spawn-kit">
@@ -49,12 +23,12 @@
         <item slot="3" unbreakable="true" material="stone axe"/>
         <item slot="4" amount="16" material="stained clay" team-color="true"/>
         <item slot="5" amount="24" damage="1" material="wood"/>
-        <item slot="6" material="golden apple" amount="1"/>
+        <item slot="6" material="golden apple"/>
         <item slot="8" material="arrow" amount="32"/>
-        <helmet team-color="true">leather helmet</helmet>
-        <chestplate team-color="true">leather chestplate</chestplate>
-        <leggings>chainmail leggings</leggings>
-        <boots team-color="true">leather boots</boots>
+        <helmet team-color="true" material="leather helmet"/>
+        <chestplate team-color="true" material="leather chestplate"/>
+        <leggings material="chainmail leggings"/>
+        <boots team-color="true" material="leather boots"/>
     </kit>
     <kit id="wool-gear" parent="wool-leggings">
         <action>
@@ -63,32 +37,44 @@
                 <replace material="bow" unbreakable="true" enchantment="power" name="`c`lPower Bow"/>
             </replace-item>
         </action>
-        <item material="golden apple" amount="16" />
+        <item material="golden apple" amount="16"/>
     </kit>
     <kit id="wool-leggings" force="true">
         <leggings unbreakable="true" material="diamond leggings"/>
     </kit>
 </kits>
+<!-- Spawns -->
+<spawns>
+    <spawn team="red-team" kit="spawn-kit" yaw="90">
+        <region>
+            <cuboid min="-10.5,20,37.5" max="-14.5,20,33.5"/>
+        </region>
+    </spawn>
+    <spawn team="blue-team" kit="spawn-kit" yaw="-90">
+        <region>
+            <cuboid min="-1.5,20,-44.5" max="2.5,20,-40.5"/>
+        </region>
+    </spawn>
+    <default>
+        <region>
+            <cuboid min="-7.5,30,-2.5" max="-4.5,30,-4.5"/>
+        </region>
+    </default>
+</spawns>
 <!-- Filters -->
 <filters>
-    <!--No Void-->
-    <deny id="no-void"><void/></deny>
-    <!-- Team filters -->
-    <team id="filter-red-team">red-team</team>
-    <team id="filter-blue-team">blue-team</team>
     <!-- Block filters -->
-    <material id="web-filter">web</material>
+    <material id="only-iron">iron block</material>
     <material id="stained-glass-filter">stained glass</material>
     <!-- Wool room filters -->
     <all id="red-wool-room-break">
-        <filter id="filter-red-team"/>
-        <filter id="web-filter"/>
+        <team id="filter-red-team">red-team</team>
+        <material id="web-filter">web</material>
     </all>
     <all id="blue-wool-room-break">
-        <filter id="filter-blue-team"/>
+        <team id="filter-blue-team">blue-team</team>
         <filter id="web-filter"/>
     </all>
-    <material id="only-iron">iron block</material>
     <deny id="deny-players">
         <participating/>
     </deny>
@@ -122,12 +108,10 @@
     </union>
     <point id="pink-spawner">6,9,-42</point>
     <point id="light-blue-spawner">-18,9,35</point>
-    <!-- No void -->
-    <apply block="no-void" region="non-build-area" message="You may not edit the void!"/>
     <!-- Spawn protection -->
     <apply block-place="never" block-break="never" region="spawn-regions" message="You may not modify spawns!"/>
-    <apply enter="filter-red-team" region="red-spawn" message="You may not enter the Red spawn!"/>
-    <apply enter="filter-blue-team" region="blue-spawn" message="You may not enter the Blue spawn!"/>
+    <apply enter="filter-red-team" region="red-spawn" message="You may not enter Red's spawn!"/>
+    <apply enter="filter-blue-team" region="blue-spawn" message="You may not enter Blue's spawn!"/>
     <!-- Wool room protection-->
     <apply block-place="never" region="wool-room-regions" message="You may not modify wool rooms!"/>
     <apply block-break="red-wool-room-break" region="pink-wool-room" message="You may not break the wool rooms!"/>
@@ -135,8 +119,25 @@
     <apply block-break="blue-wool-room-break" region="light-blue-wool-room" message="You may not break the wool rooms!"/>
     <apply enter="filter-blue-team" region="light-blue-wool-room" message="You may not enter the Light Blue wool room!"/>
     <apply kit="wool-gear" region="wool-room-regions"/>
-    <apply block-place="deny-players" block-break="only-iron" region="build-limit" message="You have reached max build height!"/>
+    <apply block-place="deny-players" block-break="only-iron" region="build-limit">
+        <message>{"translate":"match.maxBuildHeight"}</message>
+    </apply>
+    <!-- No void -->
+    <apply block="deny(void)" region="non-build-area" message="You may not edit the void!"/>
 </regions>
+<!-- Wools -->
+<wools craftable="false">
+    <wool team="red-team" color="pink" location="5,9,-43">
+        <monument>
+            <block>-17.5,21,39.5</block>
+        </monument>
+    </wool>
+    <wool team="blue-team" color="light blue" location="-18,9,35">
+        <monument>
+            <block>5.5,21,-46.5</block>
+        </monument>
+    </wool>
+</wools>
 <!-- Show the build area and clear it on the game starting -->
 <actions>
     <trigger scope="match">
@@ -201,7 +202,6 @@
     <kill-reward>
         <item amount="8" damage="1" material="wood"/>
         <item amount="6" material="arrow"/>
-        <item material="golden apple"/>
     </kill-reward>
 </kill-rewards>
 <hunger>

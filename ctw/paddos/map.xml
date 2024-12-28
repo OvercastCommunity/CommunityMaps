@@ -1,8 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Paddo's</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Capture the two wools of the enemy team!</objective>
 <created>2023-01-09</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="744c1d83-486e-432d-b433-07553abbdd96"/> <!-- oseh -->
     <author uuid="20945afd-0a9b-4fe3-843e-5131eb036712"/> <!-- Sedum_Paul -->
@@ -45,17 +46,17 @@
 </kits>
 <spawns>
     <default>
-        <region yaw="0">
+        <region>
             <point>24,29,-58</point>
         </region>
     </default>
-    <spawn team="red-team" kit="spawn-kit">
-        <region yaw="-90">
+    <spawn team="red-team" kit="spawn-kit" yaw="-90">
+        <region>
             <point>-70,11,-3</point>
         </region>
     </spawn>
-    <spawn team="blue-team" kit="spawn-kit">
-        <region yaw="90">
+    <spawn team="blue-team" kit="spawn-kit" yaw="90">
+        <region>
             <point>117,11,-3</point>
         </region>
     </spawn>
@@ -67,12 +68,8 @@
             <material>web</material>
         </any>
     </blocks>
-    <deny id="deny-red">
-        <team id="only-red">red-team</team>
-    </deny>
-    <deny id="deny-blue">
-        <team id="only-blue">blue-team</team>
-    </deny>
+    <team id="only-red">red-team</team>
+    <team id="only-blue">blue-team</team>
     <deny id="deny-iron-trapdoor">
         <material>iron trapdoor</material>
     </deny>
@@ -80,9 +77,6 @@
         <material id="only-iron">iron block</material>
         <cause>world</cause>
     </all>
-    <deny id="deny-void">
-        <void/>
-    </deny>
 </filters>
 <regions>
     <union id="spawns">
@@ -90,7 +84,7 @@
         <rectangle id="blue-spawn" min="95,-10" max="122,4"/>
     </union>
     <union id="wool-rooms">
-        <union id="red-wool-rooms">  <!-- blue capture, red defend -->
+        <union id="red-wool-rooms"> <!-- blue capture, red defend -->
             <rectangle id="magenta-wool-room" min="-69,32" max="-59,22"/>
             <rectangle id="red-wool-room" min="-69,-28" max="-59,-38"/>
         </union>
@@ -119,20 +113,18 @@
         </union>
     </negative>
     <above id="build-limit" y="20"/>
-    <apply block="never" region="build-limit">
-        <message>
-            {"translate":"match.maxBuildHeight"}
-        </message>
-    </apply>
-    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy team's spawn!"/>
-    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool rooms!"/>
     <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool rooms!"/>
-    <apply block="deny-red" region="red-wool-rooms" message="You may not modify your own wool rooms!"/>
-    <apply block="deny-blue" region="blue-wool-rooms" message="You may not modify your own wool rooms!"/>
+    <apply block="never" region="build-limit">
+        <message>{"translate":"match.maxBuildHeight"}</message>
+    </apply>
+    <apply block="only-blue" region="red-wool-rooms" message="You may not modify your own wool rooms!"/>
+    <apply block="only-red" region="blue-wool-rooms" message="You may not modify your own wool rooms!"/>
     <apply block="wool-room-blocks" block-physics="deny-iron-trapdoor" region="wool-rooms-blocks-region" message="You may not modify the wool rooms!"/>
     <apply block-break="only-iron" block-place="only-iron-renew" region="spawns" message="You may only break iron blocks here!"/>
-    <apply block="deny-void" region="void-area" message="You may not modify the void area!"/>
+    <apply block="deny(void)" region="void-area" message="You may not modify the void area!"/>
 </regions>
 <wools craftable="false">
     <wool team="blue-team" color="magenta" location="-64,7,27">
@@ -208,7 +200,6 @@
     <item>bucket</item>
 </itemkeep>
 <kill-reward>
-    <item material="golden apple"/>
     <item amount="16" damage="2" material="wood"/>
     <item amount="16" damage="3" material="stone"/>
 </kill-reward>

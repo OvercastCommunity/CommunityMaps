@@ -1,9 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Raceway</name>
-<version>1.0.6</version>
+<version>1.0.7</version>
 <objective>Take the enemy's wools located to either side of their base and place them back at your spawn!</objective>
 <created>2022-12-06</created>
-<maxbuildheight>29</maxbuildheight>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
     <author uuid="621b2aa8-4e5f-4ed8-bd36-0ae2f8952a06"/> <!-- Strangey -->
@@ -13,15 +13,6 @@
     <team id="red-team" color="dark red" dye-color="red" max="14">Red</team>
     <team id="blue-team" color="blue" dye-color="blue" max="14">Blue</team>
 </teams>
-<spawns>
-    <spawn team="blue-team" kit="spawn-kit" yaw="180" region="blue-spawn"/>
-    <spawn team="red-team" kit="spawn-kit" yaw="0" region="red-spawn"/>
-    <default>
-        <regions>
-            <point yaw="0">-0.5,38,12.5</point>
-        </regions>
-    </default>
-</spawns>
 <kits>
     <kit id="spawn-kit">
         <clear/>
@@ -42,29 +33,28 @@
         <effect duration="4" amplifier="255">damage resistance</effect>
     </kit>
 </kits>
+<spawns>
+    <spawn team="blue-team" kit="spawn-kit" yaw="180" region="blue-spawn"/>
+    <spawn team="red-team" kit="spawn-kit" region="red-spawn"/>
+    <default>
+        <regions>
+            <point>-0.5,38,12.5</point>
+        </regions>
+    </default>
+</spawns>
 <filters>
-    <deny id="no-void">
-        <void/>
-    </deny>
     <deny id="deny-players">
         <participating/>
     </deny>
     <deny id="deny-iron-doors">
-        <material>71</material>
+        <material>iron door block</material>
     </deny>
-    <deny id="deny-blue">
-        <team id="only-blue">blue-team</team>
-    </deny>
-    <deny id="deny-red">
-        <team id="only-red">red-team</team>
-    </deny>
-    <material id="only-web">web</material>
     <all id="blue-in-wr">
-        <filter id="only-blue"/>
-        <filter id="only-web"/>
+        <team id="only-blue">blue-team</team>
+        <material id="only-web">web</material>
     </all>
     <all id="red-in-wr">
-        <filter id="only-red"/>
+        <team id="only-red">red-team</team>
         <filter id="only-web"/>
     </all>
     <material id="only-iron">iron block</material>
@@ -83,14 +73,8 @@
         </complement>
     </union>
     <apply block-place="deny-players" block-break="only-iron" block-physics="deny-iron-doors" region="spawn-areas" message="You may only break iron blocks in spawn areas."/>
-    <apply block="deny-blue" enter="deny-blue" region="red-spawn-area" message="You may not enter your enemies' spawn!"/>
-    <apply block="deny-red" enter="deny-red" region="blue-spawn-area" message="You may not enter your enemies' spawn!"/>
-    <!-- Void -->
-    <negative id="void-area">
-        <rectangle id="middle" min="-45,71" max="44,-46"/>
-        <region id="bedrock-walls"/>
-    </negative>
-    <apply block="no-void" region="void-area" message="You may not edit the void!"/>
+    <apply block="only-red" enter="only-red" region="red-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply block="only-blue" enter="only-blue" region="blue-spawn-area" message="You may not enter your enemies' spawn!"/>
     <!-- Build height limit -->
     <above y="29" id="ceiling"/>
     <apply block-break="never" region="ceiling" message="You may not break blocks here."/>
@@ -107,10 +91,10 @@
     </union>
     <apply block="red-in-wr" region="blue-wool-rooms" message="You may not modify the wool room!"/>
     <apply block="blue-in-wr" region="red-wool-rooms" message="You may not modify the wool room!"/>
-    <apply block="deny-blue" region="blue-wool-rooms" message="You may not modify your team's wool rooms!"/>
-    <apply block="deny-red" region="red-wool-rooms" message="You may not modify your team's wool rooms!"/>
-    <apply enter="deny-blue" region="blue-wool-rooms" message="You may not enter your team's wool rooms!"/>
-    <apply enter="deny-red" region="red-wool-rooms" message="You may not enter your team's wool rooms!"/>
+    <apply block="only-red" region="blue-wool-rooms" message="You may not modify your team's wool rooms!"/>
+    <apply block="only-blue" region="red-wool-rooms" message="You may not modify your team's wool rooms!"/>
+    <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your team's wool rooms!"/>
+    <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your team's wool rooms!"/>
     <point id="purple-wool-spawner">51.5,14.25,-93.5</point>
     <point id="pink-wool-spawner">-52.5,14.25,-93.5</point>
     <point id="lime-wool-spawner">51.5,14.25,118.5</point>
@@ -133,14 +117,18 @@
         <rectangle min="41,88" max="52,77"/> <!-- Lime wool -->
         <rectangle min="-53,77" max="-42,88"/> <!-- Orange wool -->
     </union>
+    <!-- Void -->
+    <negative id="void-area">
+        <rectangle id="middle" min="-45,71" max="44,-46"/>
+        <region id="bedrock-walls"/>
+    </negative>
+    <apply block="deny(void)" region="void-area" message="You may not edit the void!"/>
 </regions>
-<wools team="blue-team" craftable="false">
-    <wool color="pink" location="-52.5,14.25,-93.5" monument="pink-victory-monument"/>
-    <wool color="purple" location="51.5,14.25,-93.5" monument="purple-victory-monument"/>
-</wools>
-<wools team="red-team" craftable="false">
-    <wool color="lime" location="51.5,14.25,118.5" monument="lime-victory-monument"/>
-    <wool color="orange" location="-52.5,14.25,118.5" monument="orange-victory-monument"/>
+<wools craftable="false">
+    <wool team="blue-team" color="pink" location="-52.5,14.25,-93.5" monument="pink-victory-monument"/>
+    <wool team="blue-team" color="purple" location="51.5,14.25,-93.5" monument="purple-victory-monument"/>
+    <wool team="red-team" color="lime" location="51.5,14.25,118.5" monument="lime-victory-monument"/>
+    <wool team="red-team" color="orange" location="-52.5,14.25,118.5" monument="orange-victory-monument"/>
 </wools>
 <spawners>
     <!-- Blue side -->
@@ -185,7 +173,6 @@
 </itemkeep>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
         <item material="wood" amount="32" damage="2"/>
         <item material="stained glass" team-color="true" amount="16"/>
     </kill-reward>
@@ -193,4 +180,5 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
+<maxbuildheight>29</maxbuildheight>
 </map>

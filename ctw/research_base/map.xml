@@ -1,10 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Research Base</name>
-<version>1.0.7</version>
+<version>1.0.8</version>
 <include id="gapple-kill-reward"/>
 <objective>Take the enemy's wool located near their base and place it back at your spawn!</objective>
 <created>2022-10-18</created>
-<maxbuildheight>19</maxbuildheight>
 <authors>
     <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa" contribution="Map Builder"/> <!-- Eliminate -->
 </authors>
@@ -15,15 +14,6 @@
     <team id="red-team" color="dark red" dye-color="red" max="8">Red</team>
     <team id="blue-team" color="blue" dye-color="blue" max="8">Blue</team>
 </teams>
-<spawns>
-    <spawn team="red-team" kit="spawn-kit" yaw="180" region="red-spawn"/>
-    <spawn team="blue-team" kit="spawn-kit" yaw="0" region="blue-spawn"/>
-    <default kit="default-kit">
-        <regions>
-            <point yaw="0">0,23.5,1</point>
-        </regions>
-    </default>
-</spawns>
 <kits>
     <kit id="spawn-kit" parents="default-kit">
         <clear/>
@@ -43,22 +33,24 @@
         <effect duration="2s" amplifier="255">damage resistance</effect>
     </kit>
     <kit id="default-kit">
-        <effect duration="oo">night vision</effect>
+        <effect>night vision</effect>
     </kit>
 </kits>
+<spawns>
+    <spawn team="red-team" kit="spawn-kit" yaw="180" region="red-spawn"/>
+    <spawn team="blue-team" kit="spawn-kit" region="blue-spawn"/>
+    <default kit="default-kit">
+        <region>
+            <point>0,23.5,1</point>
+        </region>
+    </default>
+</spawns>
 <filters>
     <deny id="deny-players">
         <participating/>
     </deny>
-    <deny id="deny-red">
-        <team id="only-red">red-team</team>
-    </deny>
-    <deny id="deny-blue">
-        <team id="only-blue">blue-team</team>
-    </deny>
-    <deny id="no-void">
-        <void/>
-    </deny>
+    <team id="only-red">red-team</team>
+    <team id="only-blue">blue-team</team>
     <material id="only-web">web</material>
 </filters>
 <regions>
@@ -84,8 +76,7 @@
         <region id="red-spawn-area"/>
         <region id="blue-spawn-area"/>
     </negative>
-    <apply block-place="no-void" region="void-area" message="You may not build in the void."/>
-    <apply block-break="no-void" region="void-area" message="You may not break this block."/>
+    <apply block="deny(void)" region="void-area" message="You may not build in the void."/>
     <!-- Spawns -->
     <point id="red-spawn">22.5,10.5,56.5</point>
     <point id="blue-spawn">-22.5,10.5,-56.5</point>
@@ -99,7 +90,7 @@
         <cuboid min="17,17,49" max="28,oo,60"/>
     </union>
     <apply block="never" region="red-spawn-area" message="You may not modify blocks here."/>
-    <apply enter="deny-blue" region="red-spawn-interior" message="You may not enter your enemies' spawn!"/>
+    <apply enter="only-red" region="red-spawn-interior" message="You may not enter your enemy's spawn!"/>
     <!-- Green -->
     <complement id="blue-spawn-area">
         <rectangle min="-17,-46" max="-28,-60"/>
@@ -110,7 +101,7 @@
         <cuboid min="-17,17,-49" max="-28,oo,-60"/>
     </union>
     <apply block="never" region="blue-spawn-area" message="You may not modify blocks here."/>
-    <apply enter="deny-red" region="blue-spawn-interior" message="You may not enter your enemies' spawn!"/>
+    <apply enter="only-blue" region="blue-spawn-interior" message="You may not enter your enemy's spawn!"/>
     <!-- Wool rooms -->
     <below z="-60" id="green-wool-room"/>
     <above z="60" id="orange-wool-room"/>
@@ -124,11 +115,9 @@
         <block id="green-victory-monument">-26,11,-55</block>
     </union>
 </regions>
-<wools team="red-team" craftable="false">
-    <wool color="lime" location="-6.5,14.5,-76" monument="orange-victory-monument"/>
-</wools>
-<wools team="blue-team" craftable="false">
-    <wool color="orange" location="6.5,14.5,76" monument="green-victory-monument"/>
+<wools craftable="false">
+    <wool team="red-team" color="lime" location="-6.5,14.5,-76" monument="orange-victory-monument"/>
+    <wool team="blue-team" color="orange" location="6.5,14.5,76" monument="green-victory-monument"/>
 </wools>
 <itemkeep>
     <item>stone sword</item>
@@ -165,4 +154,5 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
+<maxbuildheight>19</maxbuildheight>
 </map>

@@ -1,8 +1,8 @@
-<?xml version="1.0"?>
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Prisma CTW</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Get the enemy's wool to win!</objective>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="924c4e61-57b6-4931-afdb-6525b2ed34c0"/> <!-- OAF6 -->
 </authors>
@@ -16,23 +16,6 @@
     <team id="red" color="dark red" max="6">Red</team>
     <team id="blue" color="blue" max="6">Blue</team>
 </teams>
-<spawns>
-    <spawn team="red" kit="spawn-kit">
-        <regions yaw="-90">
-            <point>36.5,6,-41</point>
-        </regions>
-    </spawn>
-    <spawn team="blue" kit="spawn-kit">
-        <regions yaw="90">
-            <point>-3.5,6,-120</point>
-        </regions>
-    </spawn>
-    <default>
-        <regions yaw="180">
-            <point>16.5,21,-117.5</point>
-        </regions>
-    </default>
-</spawns>
 <kits>
     <kit id="spawn-kit" force="true">
         <clear/>
@@ -55,19 +38,38 @@
         <boots team-color="true" material="leather boots">
             <enchantment>feather_falling</enchantment>
         </boots>
-        <effect duration="5" amplifier="1">instant_health</effect>
+        <effect duration="5">instant_health</effect>
     </kit>
 </kits>
-<wools>
-    <wool team="blue" color="pink" location="92.5,13,-81.5">
-        <monument><block>-28,7,-126</block></monument>
-    </wool>
-    <wool team="red" color="magenta" location="-59.5,13,-79.5">
-        <monument><block>60,7,-36</block></monument>
-    </wool>
-</wools>
+<spawns>
+    <spawn team="red" kit="spawn-kit" yaw="-90">
+        <region>
+            <point>36.5,6,-41</point>
+        </region>
+    </spawn>
+    <spawn team="blue" kit="spawn-kit" yaw="90">
+        <region>
+            <point>-3.5,6,-120</point>
+        </region>
+    </spawn>
+    <default yaw="180">
+        <region>
+            <point>16.5,21,-117.5</point>
+        </region>
+    </default>
+</spawns>
+<filters>
+    <all id="only-red-cobweb">
+        <team id="only-red">red</team>
+        <material>web</material>
+    </all>
+    <all id="only-blue-cobweb">
+        <team id="only-blue">blue</team>
+        <material>web</material>
+    </all>
+</filters>
 <regions>
-    <negative id="void">
+    <negative id="void-area">
         <union id="playable">
             <rectangle id="middle" min="72,-95" max="-39,-66"/>
             <rectangle id="blue-spawn-section" min="0,-95" max="-15,-113"/>
@@ -88,25 +90,24 @@
     </union>
     <apply region="pink-woolroom" enter="only-blue" use="only-blue" block="only-blue-cobweb"/>
     <apply region="magenta-woolroom" enter="only-red" use="only-red" block="only-red-cobweb"/>
-    <apply region="blue-spawn" enter="only-blue" message="You may not enter the enemy team's spawn area!"/>
-    <apply region="red-spawn" enter="only-red" message="You may not enter the enemy team's spawn area!"/>
+    <apply region="blue-spawn" enter="only-blue" message="You may not enter the enemy's spawn!"/>
+    <apply region="red-spawn" enter="only-red" message="You may not enter the enemy's spawn!"/>
     <apply region="spawn-areas" block="never" message="You may not modify spawn!"/>
     <apply region="wool-monuments" block="never" message="You may not obstruct the wool monuments!"/>
-    <apply region="void" block="deny-void" message="You can't build outside the playable area!"/>
+    <apply region="void-area" block="deny(void)" message="You can't build outside the playable area!"/>
 </regions>
-<filters>
-    <all id="only-red-cobweb">
-        <team id="only-red">red</team>
-        <material>web</material>
-    </all>
-    <all id="only-blue-cobweb">
-        <team id="only-blue">blue</team>
-        <material>web</material>
-    </all>
-    <deny id="deny-void">
-        <void/>
-    </deny>
-</filters>
+<wools>
+    <wool team="blue" color="pink" location="92.5,13,-81.5">
+        <monument>
+            <block>-28,7,-126</block>
+        </monument>
+    </wool>
+    <wool team="red" color="magenta" location="-59.5,13,-79.5">
+        <monument>
+            <block>60,7,-36</block>
+        </monument>
+    </wool>
+</wools>
 <toolrepair>
     <tool>stone sword</tool>
     <tool>bow</tool>
@@ -141,7 +142,6 @@
 </itemkeep>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
         <item amount="8" material="arrow"/>
         <item amount="16" team-color="true" material="stained clay"/>
     </kill-reward>

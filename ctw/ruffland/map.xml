@@ -1,8 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Ruffland</name>
-<version>1.0.6</version>
+<version>1.0.7</version>
 <objective>Capture each enemy team's wool!</objective>
 <created>2022-03-17</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="38ef938a-7020-4c04-9d12-4875ed0598ca"/> <!-- Kazoha -->
     <author uuid="f6f5dce8-a158-461d-b26d-dc8acfaeedd7"/> <!-- Shuliett -->
@@ -36,48 +37,33 @@
 </kits>
 <spawns>
     <default yaw="180" region="obs-spawn-point"/>
-    <spawn team="blue-team" kit="spawn-kit" yaw="0" region="blue-spawn-point"/>
+    <spawn team="blue-team" kit="spawn-kit" region="blue-spawn-point"/>
     <spawn team="green-team" kit="spawn-kit" yaw="90" region="green-spawn-point"/>
     <spawn team="red-team" kit="spawn-kit" yaw="180" region="red-spawn-point"/>
     <spawn team="yellow-team" kit="spawn-kit" yaw="-90" region="yellow-spawn-point"/>
 </spawns>
 <filters>
-    <deny id="deny-blue">
-        <team id="only-blue">blue-team</team>
-    </deny>
-    <deny id="deny-green">
-        <team id="only-green">green-team</team>
-    </deny>
-    <deny id="deny-red">
-        <team id="only-red">red-team</team>
-    </deny>
-    <deny id="deny-yellow">
-        <team id="only-yellow">yellow-team</team>
-    </deny>
-    <deny id="deny-void">
-        <void/>
-    </deny>
     <deny id="light-blue-woolroom-filter">
         <any>
-            <filter id="only-blue"/>
+            <team id="only-blue">blue-team</team>
             <material>chest</material>
         </any>
     </deny>
     <deny id="lime-woolroom-filter">
         <any>
-            <filter id="only-green"/>
+            <team id="only-green">green-team</team>
             <material>chest</material>
         </any>
     </deny>
     <deny id="pink-woolroom-filter">
         <any>
-            <filter id="only-red"/>
+            <team id="only-red">red-team</team>
             <material>chest</material>
         </any>
     </deny>
     <deny id="orange-woolroom-filter">
         <any>
-            <filter id="only-yellow"/>
+            <team id="only-yellow">yellow-team</team>
             <material>chest</material>
         </any>
     </deny>
@@ -147,15 +133,8 @@
         <rectangle id="red-spawn" min="120,-6" max="87,41"/>
         <rectangle id="yellow-spawn" min="7,120" max="-40,87"/>
     </union>
-    <!-- wool rooms -->
-    <union id="woolrooms">
-        <rectangle id="light-blue-woolroom" min="-120,16" max="-137,39"/>
-        <rectangle id="lime-woolroom" min="-15,-120" max="-38,-137"/>
-        <rectangle id="pink-woolroom" min="121,-15" max="138,-38"/>
-        <rectangle id="orange-woolroom" min="16,121" max="39,138"/>
-    </union>
     <!-- build area -->
-    <complement id="void">
+    <complement id="void-area">
         <everywhere/>
         <circle center="0.5,0.5" radius="70"/> <!-- mid -->
         <rectangle min="-112,54" max="-48,27"/> <!-- blue wool lane -->
@@ -168,23 +147,29 @@
             <rectangle min="99,-6" max="119,14"/> <!-- red iron -->
             <rectangle min="7,99" max="-13,119"/> <!-- yellow iron -->
         </union>
-        <region id="woolrooms"/>
+        <!-- wool rooms -->
+        <union id="woolrooms">
+            <rectangle id="light-blue-woolroom" min="-120,16" max="-137,39"/>
+            <rectangle id="lime-woolroom" min="-15,-120" max="-38,-137"/>
+            <rectangle id="pink-woolroom" min="121,-15" max="138,-38"/>
+            <rectangle id="orange-woolroom" min="16,121" max="39,138"/>
+        </union>
     </complement>
     <!-- applicators -->
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-green" region="green-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-yellow" region="yellow-spawn" message="You may not enter the enemy's spawn!"/>
-    <apply enter="deny-blue" region="light-blue-woolroom" message="You may not enter your own wool room!"/>
-    <apply enter="deny-green" region="lime-woolroom" message="You may not enter your own wool room!"/>
-    <apply enter="deny-red" region="pink-woolroom" message="You may not enter your own wool room!"/>
-    <apply enter="deny-yellow" region="orange-woolroom" message="You may not enter your own wool room!"/>
-    <apply block="light-blue-woolroom-filter" use="deny-blue" region="light-blue-woolroom" message="You may not edit the wool room!"/>
-    <apply block="lime-woolroom-filter" use="deny-green" region="lime-woolroom" message="You may not edit the wool room!"/>
-    <apply block="pink-woolroom-filter" use="deny-red" region="pink-woolroom" message="You may not edit the wool room!"/>
-    <apply block="orange-woolroom-filter" use="deny-yellow" region="orange-woolroom" message="You may not edit the wool room!"/>
+    <apply enter="deny(only-blue)" region="light-blue-woolroom" message="You may not enter your own wool room!"/>
+    <apply enter="deny(only-green)" region="lime-woolroom" message="You may not enter your own wool room!"/>
+    <apply enter="deny(only-red)" region="pink-woolroom" message="You may not enter your own wool room!"/>
+    <apply enter="deny(only-yellow)" region="orange-woolroom" message="You may not enter your own wool room!"/>
+    <apply block="light-blue-woolroom-filter" use="deny(only-blue)" region="light-blue-woolroom" message="You may not edit the wool room!"/>
+    <apply block="lime-woolroom-filter" use="deny(only-green)" region="lime-woolroom" message="You may not edit the wool room!"/>
+    <apply block="pink-woolroom-filter" use="deny(only-red)" region="pink-woolroom" message="You may not edit the wool room!"/>
+    <apply block="orange-woolroom-filter" use="deny(only-yellow)" region="orange-woolroom" message="You may not edit the wool room!"/>
     <apply block-break="only-iron" block-place="only-iron-cause-world" region="spawns" message="You may only break iron blocks in the spawn region!"/>
-    <apply block-place="deny-void" block-break="deny-void-webs" region="void" message="You may not build in the void!"/>
+    <apply block-place="deny(void)" block-break="deny-void-webs" region="void-area" message="You may not build in the void!"/>
     <apply block-place="deny-safeties" message="You may not place safeties!"/>
 </regions>
 <wools craftable="false">
@@ -282,7 +267,6 @@
     <item>golden apple</item>
 </itemkeep>
 <kill-reward>
-    <item material="golden apple"/>
     <item amount="16" material="wood"/>
     <item amount="12" material="stained glass"/>
 </kill-reward>
