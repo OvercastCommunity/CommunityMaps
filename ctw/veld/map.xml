@@ -1,12 +1,13 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Veld</name>
-<version>1.1.1</version>
+<version>1.1.2</version>
 <objective>Capture the enemy team's wools!</objective>
 <gamemode>ctw</gamemode>
 <created>2022-04-15</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="834704b6-94d2-4f4f-abc6-fe2e1f085837" contribution="Layout, concept, aesthetics"/> <!-- Alternqtive -->
-    <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Layout, aesthetics, xml"/> <!-- Cazadorian -->
+    <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Layout, aesthetics, XML"/> <!-- Cazadorian -->
     <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Layout, aesthetics"/> <!-- Tundren -->
 </authors>
 <contributors>
@@ -25,6 +26,7 @@
         <item slot="2" material="iron pickaxe" unbreakable="true"/>
         <item slot="3" material="iron axe" unbreakable="true"/>
         <item slot="4" material="wood" damage="1" amount="48"/>
+        <item slot="5" material="stained glass" team-color="true" amount="16"/>
         <item slot="8" material="golden apple"/>
         <item slot="28" material="arrow"/>
         <helmet material="leather helmet" team-color="true" unbreakable="true"/>
@@ -32,12 +34,6 @@
         <leggings material="chainmail leggings" unbreakable="true"/>
         <boots material="iron boots" unbreakable="true"/>
         <effect duration="4" amplifier="255">damage resistance</effect>
-    </kit>
-    <kit id="magenta-kit" parent="spawn-kit">
-        <item slot="5" material="stained glass" damage="2" amount="16"/>
-    </kit>
-    <kit id="cyan-kit" parent="spawn-kit">
-        <item slot="5" material="stained glass" damage="9" amount="16"/>
     </kit>
     <kit id="wool-gear" parent="wool-chestplate">
         <action>
@@ -56,21 +52,66 @@
 </kits>
 <spawns>
     <default yaw="90">
-        <regions>
+        <region>
             <point>0.5,43,0.5</point>
-        </regions>
+        </region>
     </default>
-    <spawn team="magenta" kit="magenta-kit" yaw="0">
-        <regions>
+    <spawn team="magenta" kit="spawn-kit">
+        <region>
             <point>0.5,12,-53.5</point>
-        </regions>
+        </region>
     </spawn>
-    <spawn team="cyan" kit="cyan-kit" yaw="180">
-        <regions>
+    <spawn team="cyan" kit="spawn-kit" yaw="180">
+        <region>
             <point>0.5,12,54.5</point>
-        </regions>
+        </region>
     </spawn>
 </spawns>
+<filters>
+    <team id="only-magenta">magenta</team>
+    <team id="only-cyan">cyan</team>
+</filters>
+<regions>
+    <union id="wool-spawners">
+        <point id="pink-point">-47.5,17,-55.5</point>
+        <point id="purple-point">48.5,17,-55.5</point>
+        <point id="blue-point">48.5,17,56.5</point>
+        <point id="light-blue-point">-47.5,17,56.5</point>
+    </union>
+    <negative id="void-area">
+        <union id="spawn-protection">
+            <rectangle id="magenta-prot" min="9,-38" max="-8,-62"/>
+            <rectangle id="cyan-prot" min="9,39" max="-8,63"/>
+        </union>
+        <union id="wool-rooms">
+            <union id="magenta-wool-rooms">
+                <rectangle id="pink-wool-room" min="-42,-47" max="-54,-60"/> <!-- magenta defends -->
+                <rectangle id="purple-wool-room" min="43,-47" max="55,-60"/> <!-- magenta defends -->
+            </union>
+            <union id="cyan-wool-rooms">
+                <rectangle id="blue-wool-room" min="43,48" max="55,61"/> <!-- cyan defends -->
+                <rectangle id="light-blue-wool-room" min="-42,48" max="-54,61"/> <!-- cyan defends -->
+            </union>
+        </union>
+        <union id="water-lanes">
+            <rectangle id="cyan-left" min="-34,32" max="-26,20"/>
+            <rectangle id="cyan-right" min="27,32" max="35,20"/>
+            <rectangle id="cyan-middle" min="12,25" max="-11,19"/>
+            <rectangle id="magenta-left" min="35,-19" max="27,-31"/>
+            <rectangle id="magenta-right" min="-34,-19" max="-26,-31"/>
+            <rectangle id="magenta-middle" min="12,-18" max="-11,-24"/>
+        </union>
+        <rectangle id="middle" min="35,12" max="-34,-11"/>
+    </negative>
+    <apply enter="only-magenta" region="magenta-prot" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-cyan" region="cyan-prot" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-magenta" region="cyan-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply enter="only-cyan" region="magenta-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply block="never" region="wool-rooms" message="You may not break the wool rooms!"/>
+    <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
+    <apply block="deny(void)" region="void-area" message="You may not build in the void area!"/>
+    <apply kit="wool-gear" region="wool-rooms"/>
+</regions>
 <wools craftable="false">
     <wool team="cyan" color="pink" location="-47.5,17,-55.5">
         <monument>
@@ -93,57 +134,6 @@
         </monument>
     </wool>
 </wools>
-<filters>
-    <team id="only-magenta">magenta</team>
-    <team id="only-cyan">cyan</team>
-    <not id="deny-void">
-       <void/>
-    </not>
-</filters>
-<regions>
-    <union id="spawn-protection">
-        <rectangle id="magenta-prot" min="9,-38" max="-8,-62"/>
-        <rectangle id="cyan-prot" min="9,39" max="-8,63"/>
-    </union>
-    <union id="wool-rooms">
-        <union id="magenta-wool-rooms">
-            <rectangle id="pink-wool-room" min="-42,-47" max="-54,-60"/> <!-- magenta defends -->
-            <rectangle id="purple-wool-room" min="43,-47" max="55,-60"/> <!-- magenta defends -->
-        </union>
-        <union id="cyan-wool-rooms">
-            <rectangle id="blue-wool-room" min="43,48" max="55,61"/> <!-- cyan defends -->
-            <rectangle id="light-blue-wool-room" min="-42,48" max="-54,61"/> <!-- cyan defends -->
-        </union>
-    </union>
-    <union id="water-lanes">
-        <rectangle id="cyan-left" min="-34,32" max="-26,20"/>
-        <rectangle id="cyan-right" min="27,32" max="35,20"/>
-        <rectangle id="cyan-middle" min="12,25" max="-11,19"/>
-        <rectangle id="magenta-left" min="35,-19" max="27,-31"/>
-        <rectangle id="magenta-right" min="-34,-19" max="-26,-31"/>
-        <rectangle id="magenta-middle" min="12,-18" max="-11,-24"/>
-    </union>
-    <union id="wool-spawners">
-      <point id="pink-point">-47.5,17,-55.5</point>
-      <point id="purple-point">48.5,17,-55.5</point>
-      <point id="blue-point">48.5,17,56.5</point>
-      <point id="light-blue-point">-47.5,17,56.5</point>
-    </union>
-    <negative id="void-area">
-        <region id="spawn-protection"/>
-        <region id="wool-rooms"/>
-        <region id="water-lanes"/>
-        <rectangle id="middle" min="35,12" max="-34,-11"/>
-    </negative>
-    <apply enter="only-magenta" region="magenta-prot" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-cyan" region="cyan-prot" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-magenta" region="cyan-wool-rooms" message="You may not enter your own wool room!"/>
-    <apply enter="only-cyan" region="magenta-wool-rooms" message="You may not enter your own wool room!"/>
-    <apply block="never" region="wool-rooms" message="You may not break the wool rooms!"/>
-    <apply block="deny-void" region="void-area" message="You may not build in the void area!"/>
-    <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
-    <apply kit="wool-gear" region="wool-rooms"/>
-</regions>
 <spawners>
     <spawner spawn-region="pink-point" player-region="pink-wool-room" delay="1s">
         <item material="wool" amount="1" damage="6"/>
@@ -192,14 +182,8 @@
 </block-drops>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple" amount="1"/>
         <item material="wood" damage="1" amount="16"/>
-    </kill-reward>
-    <kill-reward filter="only-magenta">
-        <item material="stained glass" damage="2" amount="8"/>
-    </kill-reward>
-    <kill-reward filter="only-cyan">
-        <item material="stained glass" damage="9" amount="8"/>
+        <item material="stained glass" team-color="true" amount="8"/>
     </kill-reward>
 </kill-rewards>
 <hunger>

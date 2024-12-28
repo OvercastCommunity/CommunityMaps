@@ -1,11 +1,10 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Surveillance</name>
-<version>1.0.4</version>
+<version>1.0.5</version>
 <objective>Take the enemy's wool located near their base and place it back at your spawn!</objective>
 <created>2023-01-28</created>
-<time result="objectives">30m</time>
+<include id="gapple-kill-reward"/>
 <phase>staging</phase>
-<maxbuildheight>30</maxbuildheight>
 <authors>
     <author uuid="3dc49f86-589a-4083-99bc-14212be515a0"/> <!-- Artdamensi0n -->
     <author uuid="30401f63-f5bb-4f24-9a5a-0ecd5f706115"/> <!-- dentmaged -->
@@ -20,23 +19,6 @@
     <team id="red-team" color="dark red" max="19">Red</team>
     <team id="blue-team" color="blue" max="19">Blue</team>
 </teams>
-<spawns>
-    <spawn team="blue-team" kit="reset-kit" yaw="-45">
-        <regions>
-            <point>8.5,88,-19.5</point>
-        </regions>
-    </spawn>
-    <spawn team="red-team" kit="reset-kit" yaw="135">
-        <regions>
-            <point>-7.5,88,420.5</point>
-        </regions>
-    </spawn>
-    <default>
-        <regions>
-            <point yaw="-90">-114.5,79,200.5</point>
-        </regions>
-    </default>
-</spawns>
 <kits>
     <kit id="reset-kit" force="true">
         <clear/>
@@ -110,10 +92,24 @@
         <effect duration="2s" amplifier="255">damage resistance</effect>
     </kit>
 </kits>
+<spawns>
+    <spawn team="blue-team" kit="reset-kit" yaw="-45">
+        <region>
+            <point>8.5,88,-19.5</point>
+        </region>
+    </spawn>
+    <spawn team="red-team" kit="reset-kit" yaw="135">
+        <region>
+            <point>-7.5,88,420.5</point>
+        </region>
+    </spawn>
+    <default>
+        <region>
+            <point yaw="-90">-114.5,79,200.5</point>
+        </region>
+    </default>
+</spawns>
 <filters>
-    <deny id="deny-void">
-        <void/>
-    </deny>
     <deny id="deny-players">
         <participating/>
     </deny>
@@ -121,19 +117,13 @@
         <material>beacon</material>
     </deny>
     <all id="red-in-wr">
-        <filter id="only-red"/>
+        <team id="only-red">red-team</team>
         <material>web</material>
     </all>
     <all id="blue-in-wr">
-        <filter id="only-blue"/>
+        <team id="only-blue">blue-team</team>
         <material>web</material>
     </all>
-    <deny id="deny-red">
-        <team id="only-red">red-team</team>
-    </deny>
-    <deny id="deny-blue">
-        <team id="only-blue">blue-team</team>
-    </deny>
     <variable id="is-defender" var="is_defender">1</variable>
     <variable id="is-attacker" var="is_defender">0</variable>
     <deny id="deny-defender">
@@ -141,12 +131,6 @@
     </deny>
 </filters>
 <regions>
-    <apply use="deny-beacon"/>
-    <!-- Void -->
-    <negative id="void-area">
-        <region id="build-area"/>
-    </negative>
-    <apply block="deny-void" region="void-area" message="You may not edit this area!"/>
     <complement id="build-area">
         <rectangle min="-31,370" max="32,31"/>
         <rectangle min="19,31" max="-18,108"/> <!-- blue side -->
@@ -163,8 +147,8 @@
             <region id="victory-monuments"/>
         </complement>
     </union>
-    <apply enter="deny-red" region="blue-spawn-area" message="You may not enter your enemies' spawn!"/>
-    <apply enter="deny-blue" region="red-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply enter="only-blue" region="blue-spawn-area" message="You may not enter your enemy's spawn!"/>
+    <apply enter="only-red" region="red-spawn-area" message="You may not enter your enemy's spawn!"/>
     <apply block="deny-players" region="spawn-areas" message="You may not modify spawn areas!"/>
     <union id="defender-areas">
         <above z="281" id="red-defender-area"/>
@@ -213,12 +197,17 @@
         <block id="red-victory-monument">0,18,385</block>
         <block id="blue-victory-monument">0,18,15</block>
     </union>
+    <apply use="deny-beacon"/>
+    <!-- Void -->
+    <negative id="void-area">
+        <region id="build-area"/>
+    </negative>
+    <apply block="deny(void)" region="void-area" message="You may not edit this area!"/>
 </regions>
-<wools team="red-team" craftable="false">
-    <wool color="blue" location="-6.5,14.5,-76" monument="red-victory-monument"/>
-</wools>
-<wools team="blue-team" craftable="false">
-    <wool color="red" location="0.5,3,351.5" monument="blue-victory-monument"/>
+<time result="objectives">30m</time>
+<wools craftable="false">
+    <wool team="red-team" color="blue" location="-6.5,14.5,-76" monument="red-victory-monument"/>
+    <wool team="blue-team" color="red" location="0.5,3,351.5" monument="blue-victory-monument"/>
 </wools>
 <variables>
     <variable id="is_defender" scope="player" default="0"/>
@@ -239,7 +228,6 @@
     <portal x="@-55.5" y="@9.5" z="@329" yaw="@180" filter="is-attacker" region="red-train-portals"/>
     <portal x="@56.5" y="@9.5" z="@72" yaw="@0" filter="is-attacker" region="blue-train-portals"/>
 </portals>
-
 <itemkeep>
     <item>bow</item>
     <item>arrow</item>
@@ -276,12 +264,8 @@
     <tool>bow</tool>
     <tool>arrow</tool>
 </toolrepair>
-<kill-rewards>
-    <kill-reward>
-        <item material="golden apple"/>
-    </kill-reward>
-</kill-rewards>
 <hunger>
     <depletion>off</depletion>
 </hunger>
+<maxbuildheight>30</maxbuildheight>
 </map>

@@ -1,14 +1,15 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Vesuvius</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Capture the enemy team's two wools!</objective>
 <gamemode>ctw</gamemode>
 <created>2021-08-29</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
-    <author uuid="6c5d7783-27fd-4ac5-8a1d-ba35206edf53"/> <!--  _nathy  -->
-    <author uuid="c24e6f53-33a6-4003-98fd-f6c10f7f2bc8"/> <!--  Ludavigi  -->
-    <author uuid="95763a18-eb88-44e7-8a10-780acffceae8"/> <!--  Creephunter  -->
+    <author uuid="6c5d7783-27fd-4ac5-8a1d-ba35206edf53"/> <!-- _nathy -->
+    <author uuid="c24e6f53-33a6-4003-98fd-f6c10f7f2bc8"/> <!-- Ludavigi -->
+    <author uuid="95763a18-eb88-44e7-8a10-780acffceae8"/> <!-- Creephunter -->
 </authors>
 <broadcasts>
     <tip after="1s">You are free to bridge anywhere in middle!</tip>
@@ -43,18 +44,18 @@
     </kit>
 </kits>
 <spawns>
-    <default>
-        <region yaw="-90">
+    <default yaw="-90">
+        <region>
             <cylinder base="4,82,-.5" height="1" radius="0.5"/>
         </region>
     </default>
-    <spawn team="blue" kit="spawn-kit">
-        <region yaw="45">
+    <spawn team="blue" kit="spawn-kit" yaw="45">
+        <region>
             <cylinder base="66,18,-64" height="0" radius="0.5"/>
         </region>
     </spawn>
-    <spawn team="red" kit="spawn-kit">
-        <region yaw="-135">
+    <spawn team="red" kit="spawn-kit" yaw="-135">
+        <region>
             <cylinder base="-61,18,63" height="0" radius="0.5"/>
         </region>
     </spawn>
@@ -63,13 +64,12 @@
     <deny id="deny-players">
         <participating/>
     </deny>
-    <material id="only-iron">iron block</material>
     <not id="blue-in-wr">
         <any>
             <team id="only-red">red</team>
             <material>chest</material>
             <material>beacon</material>
-            <material>iron block</material>
+            <material id="only-iron">iron block</material>
         </any>
     </not>
     <not id="red-in-wr">
@@ -91,9 +91,6 @@
             <filter id="only-blue"/>
             <material>beacon</material>
         </any>
-    </not>
-    <not id="deny-void">
-        <void/>
     </not>
 </filters>
 <regions>
@@ -122,7 +119,6 @@
         <rectangle id="blue-spawn" min="74,-49" max="50,-73"/>
         <rectangle id="blue-spawn-bridge" min="43.5,-41.5" max="56.5,-54.5"/>
     </union>
-    
     <union id="wool-rooms">
         <union id="blue-wool-rooms"> <!-- blue defends -->
             <rectangle min="29,-67" max="43,-79"/> <!-- Orange -->
@@ -154,42 +150,38 @@
     <apply block="blue-in-wr" use="only-blue-usage" region="red-wool-rooms"/>
     <apply block="red-in-wr" use="only-red-usage" region="blue-wool-rooms"/>
     <apply block-break="only-iron" block-place="deny-players" region="spawns" message="Only iron blocks may be broken in the spawns!"/>
-    <apply block="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block="deny(void)" region="void-area" message="You may not build in the void area!"/>
 </regions>
-<wools team="red" craftable="false">
-    <wool color="orange" location="39,6,-73">
+<wools craftable="false">
+    <wool team="red" color="orange" location="39,6,-73">
         <monument>
             <block>-63,9,66</block>
         </monument>
     </wool>
-    <wool color="lime" location="74,6,-38">
+    <wool team="red" color="lime" location="74,6,-38">
         <monument>
             <block>-65,9,64</block>
         </monument>
     </wool>
-</wools>
-<wools team="blue" craftable="false">
-    <wool color="yellow" location="-70,6,36">
+    <wool team="blue" color="yellow" location="-70,6,36">
         <monument>
             <block>67,9,-68</block>
         </monument>
     </wool>
-    <wool color="magenta" location="-35,6,71">
+    <wool team="blue" color="magenta" location="-35,6,71">
         <monument>
             <block>69,9,-66</block>
         </monument>
     </wool>
 </wools>
+<!-- TODO: replace fake destroyables with fill actions -->
 <!-- lanes open-->
 <modes>
     <mode id="side-lane" after="20m" name="`eFarlanes will become bridgeable" material="water" show-before="1m"/>
 </modes>
-<destroyables name="lanes" materials="air;water" completion="0%" required="false" show="false" modes="side-lane" repairable="false" id="lanes-blue">
-    <destroyable owner="blue" region="blue-lane-open"/>
-</destroyables>
-
-<destroyables name="lanes" materials="air;water" completion="0%" required="false" show="false" modes="side-lane" repairable="false" id="lanes-red">
-    <destroyable owner="red" region="red-lane-open"/>
+<destroyables name="lanes" materials="air;water" completion="0%" required="false" show="false" modes="side-lane" repairable="false">
+    <destroyable id="lanes-blue" owner="blue" region="blue-lane-open"/>
+    <destroyable id="lanes-red" owner="red" region="red-lane-open"/>
 </destroyables>
 <renewables>
     <renewable region="spawns" renew-filter="only-iron" rate="2" grow="false" particles="true" sound="true"/>
@@ -236,7 +228,6 @@
     <kill-reward>
         <item amount="32" material="wood"/>
         <item amount="16" material="glass"/>
-        <item material="golden apple"/>
     </kill-reward>
 </kill-rewards>
 <maxbuildheight>25</maxbuildheight>

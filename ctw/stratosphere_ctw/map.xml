@@ -1,38 +1,23 @@
-<?xml version="1.0"?>
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Stratosphere CTW</name>
-<version>1.2.1</version>
+<version>1.2.2</version>
 <objective>Collect dyes from each spawner, get string from kills and craft them together to make the wools for your victory monuments!</objective>
-<gamemode>ctw</gamemode>
 <created>2021-10-31</created>
+<gamemode>ctw</gamemode>
+<include id="gapple-kill-reward"/>
 <authors>
-    <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4"/>
-    <!-- Cazadorian -->
+    <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4"/> <!-- Cazadorian -->
 </authors>
 <contributors>
     <contributor uuid="5c79d2c9-a4f0-4343-a84b-e1720f13009b" contribution="Made my XML actually work"/> <!-- CoWinkKeyDinkInc -->
 </contributors>
+<broadcasts>
+    <tip after="1s" every="3m">String is awarded on kill, craft it into wool and combine it with the dyes!</tip>
+</broadcasts>
 <teams>
     <team id="red" color="red" max="20">Red</team>
     <team id="blue" color="blue" max="20">Blue</team>
 </teams>
-<spawns>
-    <spawn team="red" kit="spawn-kit" yaw="0">
-        <regions>
-            <region id="red-spawn"/>
-        </regions>
-    </spawn>
-    <spawn team="blue" kit="spawn-kit" yaw="180">
-        <regions>
-            <region id="blue-spawn"/>
-        </regions>
-    </spawn>
-    <default yaw="90">
-        <regions>
-            <point>0.5,130,0.5</point>
-        </regions>
-    </default>
-</spawns>
 <kits>
     <kit id="spawn-kit">
         <clear/>
@@ -47,19 +32,137 @@
             <enchantment>feather_falling</enchantment>
         </boots>
         <effect duration="2">instant_health</effect>
-        <effect duration="oo">speed</effect>
+        <effect>speed</effect>
     </kit>
 </kits>
-<broadcasts>
-    <tip after="1s" every="3m">String is awarded on kill, craft it into wool and combine it with the dyes!</tip>
-</broadcasts>
-<kill-rewards>
-    <kill-reward>
-        <item amount="8">arrow</item>
-        <item>golden apple</item>
-        <item>string</item>
-    </kill-reward>
-</kill-rewards>
+<spawns>
+    <spawn team="red" region="red-spawn" kit="spawn-kit"/>
+    <spawn team="blue" region="blue-spawn" kit="spawn-kit" yaw="180"/>
+    <default yaw="90">
+        <region>
+            <point>0.5,130,0.5</point>
+        </region>
+    </default>
+</spawns>
+<filters> <!-- Disables fall damage when using jump pads, reenables it after landing -->
+    <all id="reset-antifall">
+        <not>
+            <region id="jump-pads"/>
+        </not>
+        <variable var="fall_variable">1</variable>
+        <grounded/>
+    </all>
+</filters>
+<actions>
+    <set id="fall-var-0" var="fall_variable" value="0" scope="player"/>
+    <set id="fall-var-1" var="fall_variable" value="1" scope="player"/>
+    <trigger filter="jump-pads" trigger="fall-var-1" scope="player"/>
+    <trigger filter="reset-antifall" trigger="fall-var-0" scope="player"/>
+</actions>
+<variables>
+    <variable id="fall_variable" scope="player"/>
+</variables>
+<regions>
+    <point id="red-spawn">0,78,-71</point>
+    <point id="blue-spawn">0,78,74</point>
+    <cuboid id="gold-apple-west" min="-25.5,78,0.5" max="-27.5,79,2.5"/>
+    <cuboid id="gold-apple-east" min="28.5,78,0.5" max="26.5,79,2.5"/>
+    <cuboid id="arrow-north-east" min="25,78,-41" max="23,79,-39"/>
+    <cuboid id="arrow-north-west" min="-23,78,-41" max="-25,79,-39"/>
+    <cuboid id="arrow-south-west" min="-25,78,43" max="-23,79,41"/>
+    <cuboid id="arrow-south-east" min="23,78,43" max="25,79,41"/>
+    <cuboid id="yellow-dye" min="1,67,0" max="-1,68,2"/>
+    <cuboid id="pink-dye" min="1,89,0" max="-1,90,2"/>
+    <cuboid id="lime-dye" min="-46,92,0" max="-48,93,2"/>
+    <cuboid id="orange-dye" min="48,92,0" max="46,93,2"/>
+    <union id="jump-pads">
+        <union id="red-jump-pads">
+            <cuboid id="red-left-main" min="30,78,-33" max="31,80,-30"/> <!-- +x -->
+            <cuboid id="red-left-island" min="49,85,-25" max="46,87,-26"/> <!-- +z -->
+            <cuboid id="red-right-main" min="-30,78,-30" max="-29,80,-33"/> <!-- -x -->
+            <cuboid id="red-right-island" min="-45,85,-25" max="-48,87,-26"/> <!-- +z -->
+        </union>
+        <union id="blue-jump-pads">
+            <cuboid id="blue-left-main" min="-30,78,36" max="-29,80,33"/> <!-- -x -->
+            <cuboid id="blue-left-island" min="-48,85,28" max="-45,87,29"/> <!-- -z -->
+            <cuboid id="blue-right-main" min="31,78,33" max="30,80,36"/> <!-- +x -->
+            <cuboid id="blue-right-island" min="46,85,28" max="49,87,29"/> <!-- -z -->
+        </union>
+        <union id="middle-jump-pads">
+            <cuboid id="east-to-island" min="22,82,-1" max="23,84,2"/> <!-- +x -->
+            <cuboid id="west-to-island" min="-21,82,3" max="-22,84,0"/> <!-- -x -->
+            <cuboid id="west-bottom" min="6,67,0" max="5,68,3"/> <!-- -x +y -->
+            <cuboid id="east-bottom" min="-5,67,3" max="-4,68,0"/> <!-- +x +y -->
+        </union>
+    </union>
+    <apply velocity="@-1.5,1.3,0" region="blue-left-main"/>
+    <apply velocity="@-1.5,1.3,0" region="red-right-main"/>
+    <apply velocity="@1.5,1.3,0" region="blue-right-main"/>
+    <apply velocity="@1.5,1.3,0" region="red-left-main"/>
+    <apply velocity="@0,1.7,-2.4" region="blue-left-island"/>
+    <apply velocity="@0,1.7,2.4" region="red-right-island"/>
+    <apply velocity="@0,1.7,-2.4" region="blue-right-island"/>
+    <apply velocity="@0,1.7,2.4" region="red-left-island"/>
+    <apply velocity="@-3,1.5,0" region="west-to-island"/>
+    <apply velocity="@3,1.5,0" region="east-to-island"/>
+    <apply velocity="@-0.2,1.6,0" region="west-bottom"/>
+    <apply velocity="@0.2,1.6,0" region="east-bottom"/>
+    <apply block="never"/>
+</regions>
+<wools craftable="true" location="0,64,0"> <!-- Location set to 0,64,0, sicne wool isn't physically on the map and proximity isn't used in public matches -->
+    <wools team="red">
+        <wool color="yellow"> 
+            <monument>
+                <block>2,79,-65</block>
+            </monument>
+        </wool>
+        <wool color="pink">
+            <monument>
+                <block>-2,79,-65</block>
+            </monument>
+        </wool>
+        <wool color="lime">
+            <monument>
+                <block>-3,79,-66</block>
+            </monument>
+        </wool>
+        <wool color="orange">
+            <monument>
+                <block>3,79,-66</block>
+            </monument>
+        </wool>
+    </wools>
+    <wools team="blue">
+        <wool color="yellow"> 
+            <monument>
+                <block>-2,79,67</block>
+            </monument>
+        </wool>
+        <wool color="pink">
+            <monument>
+                <block>2,79,67</block>
+            </monument>
+        </wool>
+        <wool color="lime">
+            <monument>
+                <block>3,79,68</block>
+            </monument>
+        </wool>
+        <wool color="orange">
+            <monument>
+                <block>-3,79,68</block>
+            </monument>
+        </wool>
+    </wools>
+</wools>
+<damage>
+    <deny id="nofall">
+        <all>
+            <cause>fall</cause>
+            <variable var="fall_variable">1</variable>
+        </all>
+    </deny>
+</damage>
 <spawners>
     <spawner spawn-region="gold-apple-west" player-region="gold-apple-west" delay="6s">
         <item amount="1" material="golden apple"/>
@@ -108,124 +211,13 @@
     <item>arrow</item>
     <item>golden apple</item>
 </itemkeep>
+<kill-rewards>
+    <kill-reward>
+        <item amount="8" material="arrow"/>
+        <item material="string"/>
+    </kill-reward>
+</kill-rewards>
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<regions>
-    <point id="red-spawn">0,78,-71</point>
-    <point id="blue-spawn">0,78,74</point>
-    <cuboid id="gold-apple-west" min="-25.5,78,0.5" max="-27.5,79,2.5"/>
-    <cuboid id="gold-apple-east" min="28.5,78,0.5" max="26.5,79,2.5"/>
-    <cuboid id="arrow-north-east" min="25,78,-41" max="23,79,-39"/>
-    <cuboid id="arrow-north-west" min="-23,78,-41" max="-25,79,-39"/>
-    <cuboid id="arrow-south-west" min="-25,78,43" max="-23,79,41"/>
-    <cuboid id="arrow-south-east" min="23,78,43" max="25,79,41"/>
-    <cuboid id="yellow-dye" min="1,67,0" max="-1,68,2"/>
-    <cuboid id="pink-dye" min="1,89,0" max="-1,90,2"/>
-    <cuboid id="lime-dye" min="-46,92,0" max="-48,93,2"/>
-    <cuboid id="orange-dye" min="48,92,0" max="46,93,2"/>
-    <union id="jump-pads">
-        <union id="red-jump-pads">
-            <cuboid id="red-left-main" min="30,78,-33" max="31,80,-30"/> <!-- +x -->
-            <cuboid id="red-left-island" min="49,85,-25" max="46,87,-26"/> <!-- +z -->
-            <cuboid id="red-right-main" min="-30,78,-30" max="-29,80,-33"/> <!-- -x -->
-            <cuboid id="red-right-island" min="-45,85,-25" max="-48,87,-26"/> <!-- +z -->
-        </union>
-        <union id="blue-jump-pads">
-            <cuboid id="blue-left-main" min="-30,78,36" max="-29,80,33"/> <!-- -x -->
-            <cuboid id="blue-left-island" min="-48,85,28" max="-45,87,29"/> <!-- -z -->
-            <cuboid id="blue-right-main" min="31,78,33" max="30,80,36"/> <!-- +x -->
-            <cuboid id="blue-right-island" min="46,85,28" max="49,87,29"/> <!-- -z -->
-        </union>
-        <union id="middle-jump-pads">
-            <cuboid id="east-to-island" min="22,82,-1" max="23,84,2"/> <!-- +x -->
-            <cuboid id="west-to-island" min="-21,82,3" max="-22,84,0"/> <!-- -x -->
-            <cuboid id="west-bottom" min="6,67,0" max="5,68,3"/> <!-- -x +y -->
-            <cuboid id="east-bottom" min="-5,67,3" max="-4,68,0"/> <!-- +x +y -->
-        </union>
-    </union>
-    <apply velocity="@-1.5,1.3,0" region="blue-left-main"/>
-    <apply velocity="@-1.5,1.3,0" region="red-right-main"/>
-    <apply velocity="@1.5,1.3,0" region="blue-right-main"/>
-    <apply velocity="@1.5,1.3,0" region="red-left-main"/>
-    <apply velocity="@0,1.7,-2.4" region="blue-left-island"/>
-    <apply velocity="@0,1.7,2.4" region="red-right-island"/>
-    <apply velocity="@0,1.7,-2.4" region="blue-right-island"/>
-    <apply velocity="@0,1.7,2.4" region="red-left-island"/>
-    <apply velocity="@-3,1.5,0" region="west-to-island"/>
-    <apply velocity="@3,1.5,0" region="east-to-island"/>
-    <apply velocity="@-0.2,1.6,0" region="west-bottom"/>
-    <apply velocity="@0.2,1.6,0" region="east-bottom"/>
-    <apply block="never" region="everywhere"/>
-</regions>
-<wools craftable="true" team="red">
-    <wool color="yellow" location="0,64,0"> <!-- Location set to 0,64,0 on all of these as the wool isn't physically on the map and proximity isn't used in pubs -->
-        <monument>
-            <block>2,79,-65</block>
-        </monument>
-    </wool>
-    <wool color="pink" location="0,64,0">
-        <monument>
-            <block>-2,79,-65</block>
-        </monument>
-    </wool>
-    <wool color="lime" location="0,64,0">
-        <monument>
-            <block>-3,79,-66</block>
-        </monument>
-    </wool>
-    <wool color="orange" location="0,64,0">
-        <monument>
-            <block>3,79,-66</block>
-        </monument>
-    </wool>
-</wools>
-<wools craftable="true" team="blue">
-    <wool color="yellow" location="0,64,0"> 
-        <monument>
-            <block>-2,79,67</block>
-        </monument>
-    </wool>
-    <wool color="pink" location="0,64,0">
-        <monument>
-            <block>2,79,67</block>
-        </monument>
-    </wool>
-    <wool color="lime" location="0,64,0">
-        <monument>
-            <block>3,79,68</block>
-        </monument>
-    </wool>
-    <wool color="orange" location="0,64,0">
-        <monument>
-            <block>-3,79,68</block>
-        </monument>
-    </wool>
-</wools>
-<filters>  <!-- Disables fall damage when using jump pads, reenables it after landing -->
-    <all id="reset-antifall">
-        <not>
-            <region id="jump-pads"/>
-        </not>
-        <variable var="fall_variable">1</variable>
-        <grounded/>
-    </all>
-</filters>
-<actions>
-    <set id="fall-var-0" var="fall_variable" value="0" scope="player"/>
-    <set id="fall-var-1" var="fall_variable" value="1" scope="player"/>
-    <trigger filter="jump-pads" trigger="fall-var-1" scope="player"/>
-    <trigger filter="reset-antifall" trigger="fall-var-0" scope="player"/>
-</actions>
-<variables>
-    <variable id="fall_variable" scope="player"/>
-</variables>
-<damage>
-    <deny id="nofall">
-        <all>
-            <cause>fall</cause>
-            <variable var="fall_variable">1</variable>
-        </all>
-    </deny>
-</damage>
 </map>
