@@ -1,9 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Voodoo</name>
-<version>1.0.2</version>
-<objective>Leak lava from the enemy core and destroy the enemy monuments!</objective>
+<version>1.0.3</version>
+<objective>Leak lava from the enemy's core and destroy the enemy's monuments!</objective>
 <created>2023-01-29</created>
-<maxbuildheight>25</maxbuildheight>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
     <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
@@ -15,23 +15,6 @@
     <team id="purple-team" color="dark purple" max="20">Purple</team>
     <team id="cyan-team" color="dark aqua" max="20">Cyan</team>
 </teams>
-<spawns>
-    <spawn team="cyan-team" kit="spawn-kit" yaw="-90">
-        <regions>
-            <point>-87.5,15,0.5</point>
-        </regions>
-    </spawn>
-    <spawn team="purple-team" kit="spawn-kit" yaw="90">
-        <regions>
-            <point>89.5,15,0.5</point>
-        </regions>
-    </spawn>
-    <default>
-        <regions>
-            <point yaw="180">1,46,0.5</point>
-        </regions>
-    </default>
-</spawns>
 <kits>
     <kit id="spawn-kit">
         <clear/>
@@ -51,19 +34,29 @@
         <effect duration="2s" amplifier="255">damage resistance</effect>
     </kit>
 </kits>
+<spawns>
+    <spawn team="cyan-team" kit="spawn-kit" yaw="-90">
+        <region>
+            <point>-87.5,15,0.5</point>
+        </region>
+    </spawn>
+    <spawn team="purple-team" kit="spawn-kit" yaw="90">
+        <region>
+            <point>89.5,15,0.5</point>
+        </region>
+    </spawn>
+    <default yaw="180">
+        <region>
+            <point>1,46,0.5</point>
+        </region>
+    </default>
+</spawns>
 <filters>
-    <deny id="deny-void">
-        <void/>
-    </deny>
     <deny id="deny-players">
         <participating/>
     </deny>
-    <deny id="deny-purple">
-        <team id="only-purple">purple-team</team>
-    </deny>
-    <deny id="deny-cyan">
-        <team id="only-cyan">cyan-team</team>
-    </deny>
+    <team id="only-purple">purple-team</team>
+    <team id="only-cyan">cyan-team</team>
     <deny id="deny-web">
         <all>
             <material>web</material>
@@ -78,7 +71,7 @@
     <negative id="void-area">
         <region id="build-area"/>
     </negative>
-    <apply block-place="deny-void" block-break="deny-web" region="void-area" message="You may not build in the void."/>
+    <apply block-place="deny(void)" block-break="deny-web" region="void-area" message="You may not build in the void."/>
     <rectangle id="build-area" min="-70,-43" max="72,44"/>
     <!-- Spawns -->
     <union id="spawn-areas">
@@ -89,12 +82,12 @@
         </complement>
         <mirror id="cyan-spawn-area" region="purple-spawn-area" origin="1,0,0.5" normal="1,0,0"/>
     </union>
-    <apply enter="deny-cyan" region="purple-spawn-area" message="You may not enter your enemies' spawn!"/>
-    <apply enter="deny-purple" region="cyan-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply enter="only-purple" region="purple-spawn-area" message="You may not enter your enemy's spawn!"/>
+    <apply enter="only-cyan" region="cyan-spawn-area" message="You may not enter your enemy's spawn!"/>
     <apply block-place="deny-players" block-break="only-iron" region="spawn-areas" message="You may only break iron blocks here."/>
     <apply use="only-workbench" region="spawn-areas"/>
 </regions>
-<destroyables materials="emerald block" show-progress="true" completion="100%" required="true" modes="gold-mode clay-mode">
+<destroyables materials="emerald block" show-progress="true" required="true" modes="gold-mode clay-mode">
     <destroyable owner="purple-team" name="South Monument">
         <region>
             <cuboid id="south-mon" min="47,17,33" size="3,3,3"/>
@@ -162,7 +155,6 @@
 </toolrepair>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
         <item material="stained clay" team-color="true" amount="12"/>
         <item material="glass" amount="6"/>
     </kill-reward>
@@ -170,4 +162,5 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
+<maxbuildheight>25</maxbuildheight>
 </map>

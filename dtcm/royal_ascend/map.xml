@@ -1,8 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Royal Ascend</name>
 <variant id="halloween" world="halloween" override="true">BOOyal Ascend</variant>
-<version>1.1.4</version>
+<version>1.1.5</version>
 <objective>Leak lava from the enemy core and destroy the enemy monuments!</objective>
+<include id="gapple-kill-reward"/>
 <unless variant="halloween">
     <created>2023-01-30</created>
 </unless>
@@ -30,6 +31,26 @@
         <team id="blue-team" color="gold" max="20">Orange</team>
     </teams>
 </if>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" unbreakable="true" material="diamond pickaxe"/>
+        <item slot="3" unbreakable="true" material="iron axe"/>
+        <item slot="4" amount="64" material="smooth brick"/>
+        <item slot="5" amount="64" material="wood"/>
+        <item slot="6" amount="64" material="leaves"/>
+        <item slot="32" amount="64" material="wood"/>
+        <item slot="31" amount="64" material="smooth brick"/>
+        <item slot="8" amount="32" material="arrow"/>
+        <helmet material="leather helmet" team-color="true" enchantment="protection explosions:2" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" enchantment="protection projectile:2" unbreakable="true"/>
+        <leggings material="chainmail leggings" enchantment="protection explosions:2" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" enchantment="protection explosions:2" unbreakable="true"/>
+        <effect duration="2s" amplifier="255">damage resistance</effect>
+    </kit>
+</kits>
 <spawns>
     <spawn team="blue-team" kit="spawn-kit">
         <regions>
@@ -43,45 +64,18 @@
             <point yaw="90">57,16,46.5</point>
         </regions>
     </spawn>
-    <default>
-        <regions>
-            <point yaw="90">56,12,0</point>
-        </regions>
+    <default yaw="90">
+        <region>
+            <point>56,12,0</point>
+        </region>
     </default>
 </spawns>
-<kits>
-    <kit id="spawn-kit">
-        <clear/>
-        <item slot="0" unbreakable="true">iron sword</item>
-        <item slot="1" unbreakable="true">bow</item>
-        <item slot="2" unbreakable="true">diamond pickaxe</item>
-        <item slot="3" unbreakable="true">iron axe</item>
-        <item slot="4" amount="64">smooth brick</item>
-        <item slot="5" amount="64">wood</item>
-        <item slot="6" amount="64">leaves</item>
-        <item slot="32" amount="64">wood</item>
-        <item slot="31" amount="64">smooth brick</item>
-        <item slot="8" amount="32">arrow</item>
-        <helmet material="leather helmet" team-color="true" enchantment="protection explosions:2" unbreakable="true"/>
-        <chestplate material="leather chestplate" team-color="true" enchantment="protection projectile:2" unbreakable="true"/>
-        <leggings material="chainmail leggings" enchantment="protection explosions:2" unbreakable="true"/>
-        <boots material="leather boots" team-color="true" enchantment="protection explosions:2" unbreakable="true"/>
-        <effect duration="2s" amplifier="255">damage resistance</effect>
-    </kit>
-</kits>
 <filters>
-    <deny id="deny-void">
-        <void/>
-    </deny>
     <deny id="deny-players">
         <participating/>
     </deny>
-    <deny id="deny-red">
-        <team id="only-red">red-team</team>
-    </deny>
-    <deny id="deny-blue">
-        <team id="only-blue">blue-team</team>
-    </deny>
+    <team id="only-red">red-team</team>
+    <team id="only-blue">blue-team</team>
     <deny id="deny-web">
         <all>
             <material>web</material>
@@ -98,26 +92,23 @@
 <regions>
     <!-- Void -->
     <negative id="void-area">
-        <region id="build-area"/>
-        <region id="spawn-areas"/>
+        <rectangle id="build-area" min="40,-52" max="-40,52"/>
+        <union id="spawn-areas">
+            <union id="red-spawn-area">
+                <rectangle min="40,38" max="oo,oo"/>
+                <rectangle min="-40,38" max="-oo,oo"/>
+                <circle center="36.5,74.5" radius="9.5"/>
+                <circle center="-36.5,74.5" radius="9.5"/>
+            </union>
+            <mirror id="blue-spawn-area" region="red-spawn-area" origin="0,0,0" normal="0,0,1"/>
+            <rectangle id="obs-spawn-area" min="60,-4" max="52,4"/>
+        </union>
     </negative>
-    <apply block-place="deny-void" block-break="deny-web" region="void-area" message="You may not build in the void."/>
-    <rectangle id="build-area" min="40,-52" max="-40,52"/>
     <below y="1" id="void-filter-protection"/>
     <apply block-break="deny-wool" region="void-filter-protection"/>
     <!-- Spawns -->
-    <union id="spawn-areas">
-        <union id="red-spawn-area">
-            <rectangle min="40,38" max="oo,oo"/>
-            <rectangle min="-40,38" max="-oo,oo"/>
-            <circle center="36.5,74.5" radius="9.5"/>
-            <circle center="-36.5,74.5" radius="9.5"/>
-        </union>
-        <mirror id="blue-spawn-area" region="red-spawn-area" origin="0,0,0" normal="0,0,1"/>
-        <rectangle id="obs-spawn-area" min="60,-4" max="52,4"/>
-    </union>
-    <apply enter="deny-blue" region="red-spawn-area" message="You may not enter your enemies' spawn!"/>
-    <apply enter="deny-red" region="blue-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply enter="only-red" region="red-spawn-area" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-blue" region="blue-spawn-area" message="You may not enter the enemy's spawn!"/>
     <apply block="never" region="spawn-areas" message="You may not edit spawn areas!"/>
     <!-- Monument rules -->
     <union id="monuments">
@@ -133,8 +124,9 @@
 		<mirror id="blue-west-mon-center" region="red-west-mon-center" origin="0,0,0" normal="0,0,1"/>
 	</union>
     <apply block-break="deny-water" region="monument-centers" message="You may not remove the monument's water!"/>
+    <apply block-place="deny(void)" block-break="deny-web" region="void-area" message="You may not build in the void."/>
 </regions>
-<destroyables materials="ender stone" sparks="true" show-progress="true" completion="100%" required="true">
+<destroyables materials="ender stone" sparks="true" show-progress="true" required="true">
     <destroyable owner="red-team" name="East Monument" region="red-east-mon"/>
     <destroyable owner="red-team" name="West Monument" region="red-west-mon"/>
     <destroyable owner="blue-team" name="East Monument" region="blue-east-mon"/>
@@ -198,11 +190,10 @@
 </toolrepair>
 <kill-rewards>
     <kill-reward>
-        <item amount="16">arrow</item>
-        <item amount="16">smooth brick</item>
-        <item amount="16">wood</item>
-        <item amount="16">tnt</item>
-        <item>golden apple</item>
+        <item amount="16" material="arrow"/>
+        <item amount="16" material="smooth brick"/>
+        <item amount="16" material="wood"/>
+        <item amount="16" material="tnt"/>
     </kill-reward>
 </kill-rewards>
 <hunger>

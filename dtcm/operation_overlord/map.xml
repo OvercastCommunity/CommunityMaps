@@ -1,11 +1,12 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Operation Overlord</name>
-<version>1.0.5</version>
+<version>1.0.6</version>
 <objective>Break the Defenders' Core and Monument in 15 minutes, or prevent the Attackers from doing so!</objective>
 <created>2023-04-30</created>
 <gamemode>ad</gamemode>
 <gamemode>dtc</gamemode>
 <gamemode>dtm</gamemode>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="20945afd-0a9b-4fe3-843e-5131eb036712"/> <!-- Sedum_Paul -->
     <author uuid="63ddf58a-ba2c-4d39-8481-6358bb46c63a"/> <!-- samschaap -->
@@ -36,21 +37,21 @@
     </kit>
 </kits>
 <spawns>
-    <default>
-        <regions yaw="-90">
+    <default yaw="-90">
+        <region>
             <point>-27.5,56,5.5</point>
-        </regions>
+        </region>
     </default>
-    <spawn team="attackers" kit="spawn-kit">
-        <regions yaw="-90">
+    <spawn team="attackers" kit="spawn-kit" yaw="-90">
+        <regions>
             <region id="north-attacker-spawn"/>
             <region id="south-attacker-spawn"/>
         </regions>
     </spawn>
-    <spawn team="defenders" kit="spawn-kit">
-        <regions yaw="90">
+    <spawn team="defenders" kit="spawn-kit" yaw="90">
+        <region>
             <point>142.5,24,-9.5</point>
-        </regions>
+        </region>
     </spawn>
 </spawns>
 <filters>
@@ -60,9 +61,6 @@
         <material id="only-iron">iron block</material>
         <cause>world</cause>
     </all>
-    <deny id="deny-void">
-        <void/>
-    </deny>
 </filters>
 <regions>
     <point id="north-attacker-spawn">-13.5,10.5,-35.5</point>
@@ -79,24 +77,22 @@
     </union>
     <above id="build-limit" y="38"/>
     <apply block="never" region="build-limit">
-        <message>
-            {"translate":"match.maxBuildHeight"}
-        </message>
+        <message>{"translate":"match.maxBuildHeight"}</message>
     </apply>
-    <apply enter="only-attackers" region="attacker-spawn" message="You may not enter the enemy team's spawn!"/>
-    <apply enter="only-defenders" region="defender-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply enter="only-attackers" region="attacker-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-defenders" region="defender-spawn" message="You may not enter the enemy's spawn!"/>
     <apply block-break="only-iron" block-place="only-iron-renew" region="spawns" message="You may only break iron blocks in the spawns!"/>
-    <apply block="deny-void" message="You may not modify the void area!"/>
+    <apply block="deny(void)" message="You may not modify the void area!"/>
 </regions>
-<destroyables>
-    <destroyable name="Monument" material="emerald block" owner="defenders" show-progress="true" required="true">
+<destroyables name="Monument" material="emerald block" show-progress="true" required="true">
+    <destroyable owner="defenders">
         <region>
             <cuboid min="105,28,52" max="102,31,55"/>
          </region>
     </destroyable>
 </destroyables>
-<cores>
-    <core name="Core" material="obsidian" team="defenders" leak="2" required="true">
+<cores name="Core" material="obsidian" leak="2" required="true">
+    <core team="defenders">
         <region>
             <cuboid min="130,29,-62" max="123,36,-55"/>
          </region>
@@ -171,7 +167,6 @@
 </block-drops>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
         <item amount="16" material="arrow"/>
         <item amount="32" damage="1" material="wood"/>
         <item amount="16" damage="2" material="stone"/>

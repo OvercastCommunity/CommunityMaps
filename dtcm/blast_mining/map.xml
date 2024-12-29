@@ -1,67 +1,84 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Blast Mining</name>
-<version>1.2.7</version>
+<version>1.2.8</version>
 <objective>Blast your way through the map to destroy the enemy's monument!</objective>
 <created>2022-02-27</created>
+<gamemode>dtm</gamemode>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="a1e6faac-7bfa-4f5c-b5df-06942518d218"/> <!-- EpicPuppy613 -->
 </authors>
-<gamemode>dtm</gamemode>
+<broadcasts>
+    <alert after="2s">TNT explodes after 2 seconds (2x faster than normal)</alert>
+    <tip after="4s">The color of the terracotta in the blocks shows how close you are to the other side</tip>
+    <tip after="6s">You gain tnt on kill</tip>
+    <tip after="8s">A killstreak of 3 will upgrade your armor's blast protection</tip>
+    <tip after="10m" count="oo">The color of the stained clay indicates how close you are to the other side</tip>
+    <alert after="10m" count="oo">TNT explodes after 2 seconds (2x faster than normal)</alert>
+</broadcasts>
 <teams>
     <team id="blue-team" color="blue" max="20">Blue</team>
     <team id="red-team" color="red" max="20">Red</team>
 </teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true"/>
+        <item slot="2" material="wood pickaxe" unbreakable="true"/>
+        <item slot="3" material="arrow" amount="32"/>
+        <item slot="4" material="stained glass" team-color="true" amount="64"/>
+        <item slot="5" material="stained glass" team-color="true" amount="64"/>
+        <item slot="6" material="stained clay" team-color="true" amount="32"/>
+        <item slot="7" material="tnt" amount="32"/>
+        <item slot="8" material="golden apple"/>
+        <helmet material="leather helmet" team-color="true" locked="true" unbreakable="true"/>
+        <chestplate material="iron chestplate" locked="true" unbreakable="true">
+            <enchantment level="2">protection explosions</enchantment>
+        </chestplate>
+        <leggings material="chainmail leggings" locked="true" unbreakable="true">
+            <enchantment level="2">protection explosions</enchantment>
+        </leggings>
+        <boots material="leather boots" team-color="true" locked="true" unbreakable="true"/>
+        <effect duration="3">heal</effect>
+        <effect>night vision</effect>
+        <attribute operation="add" amount="20">generic.maxHealth</attribute>
+    </kit>
+</kits>
 <spawns>
     <default>
-        <regions>
+        <region>
             <cuboid min="0.5,74,0.5" max="0.5,74,0.5"/>
-        </regions>
+        </region>
     </default>
-    <spawn team="red-team" kit="red-kit">
-        <regions yaw="90">
+    <spawn team="red-team" kit="spawn-kit" yaw="90">
+        <region>
             <cuboid min="85.5,59,0.5" max="85.5,59,0.5"/>
-        </regions>
+        </region>
     </spawn>
-    <spawn team="blue-team" kit="blue-kit">
-        <regions yaw="-90">
+    <spawn team="blue-team" kit="spawn-kit" yaw="-90">
+        <region>
             <cuboid min="-84.5,59,0.5" max="-84.5,59,0.5"/>
-        </regions>
+        </region>
     </spawn>
 </spawns>
-<kits>
-<kit id="spawn-kit">
-    <clear/>
-    <item slot="0" material="iron sword" unbreakable="true"/>
-    <item slot="1" material="bow" unbreakable="true"/>
-    <item slot="2" material="wood pickaxe" unbreakable="true"/>
-    <item slot="3" material="arrow" amount="32"/>
-    <item slot="7" material="tnt" amount="32"/>
-    <item slot="8" material="golden apple"/>
-    <chestplate material="iron chestplate" locked="true" unbreakable="true">
-        <enchantment level="2">protection explosions</enchantment>
-    </chestplate>
-    <leggings material="chainmail leggings" locked="true" unbreakable="true">
-        <enchantment level="2">protection explosions</enchantment>
-    </leggings>
-    <effect duration="3" amplifier="1">heal</effect>
-    <effect duration="oo">night vision</effect>
-    <attribute operation="add" amount="20">generic.maxHealth</attribute>
-</kit>
-<kit id="blue-kit" parents="spawn-kit">
-    <item slot="4" material="stained glass" damage="11" amount="64"/>
-    <item slot="5" material="stained glass" damage="11" amount="64"/>
-    <item slot="6" material="stained clay" damage="11" amount="32"/>
-    <helmet material="leather helmet" color="0066cc" locked="true" unbreakable="true"/>
-    <boots material="leather boots" color="0066cc" locked="true" unbreakable="true"/>
-</kit>
-<kit id="red-kit" parents="spawn-kit">
-    <item slot="4" material="stained glass" damage="14" amount="64"/>
-    <item slot="5" material="stained glass" damage="14" amount="64"/>
-    <item slot="6" material="stained clay" damage="14" amount="32"/>
-    <helmet material="leather helmet" color="cd0000" locked="true" unbreakable="true"/>
-    <boots material="leather boots" color="cd0000" locked="true" unbreakable="true"/>
-</kit>
-</kits>
+<filters>
+    <material id="only-gold">gold block</material>
+    <material id="only-tnt">tnt</material>
+</filters>
+<regions>
+    <union id="corridor-protection">
+        <cuboid min="65,50,-32" max="89,72,33"/>
+        <cuboid min="-88,50,-32" max="-64,72,33"/>
+    </union>
+    <union id="front-protection">
+        <cuboid min="54,50,-32" max="66,72,33"/>
+        <cuboid min="-65,50,-32" max="-53,72,33"/>
+    </union>
+    <!-- applicators -->
+    <apply block-break="never" block-place="never" region="corridor-protection" message="You may not edit the corridors!"/>
+    <apply block-break="only-gold" block-place="only-tnt" region="front-protection" message="You may only place TNT at the frontlines!"/>
+</regions>
 <destroyables materials="gold block">
     <destroyable name="South Monument" owner="blue-team">
         <region>
@@ -84,23 +101,6 @@
         </region>
     </destroyable>
 </destroyables>
-<filters>
-    <material id="only-gold">gold block</material>
-    <material id="only-tnt">tnt</material>
-</filters>
-<regions>
-    <union id="corridor-protection">
-        <cuboid min="65,50,-32" max="89,72,33"/>
-        <cuboid min="-88,50,-32" max="-64,72,33"/>
-    </union>
-    <union id="front-protection">
-        <cuboid min="54,50,-32" max="66,72,33"/>
-        <cuboid min="-65,50,-32" max="-53,72,33"/>
-    </union>
-    <!-- applicators -->
-    <apply block-break="never" block-place="never" region="corridor-protection" message="You may not edit the corridors!"/>
-    <apply block-break="only-gold" block-place="only-tnt" region="front-protection" message="You may only place TNT at the fronlines!"/>
-</regions>
 <itemkeep>
     <item>iron sword</item>
     <item>bow</item>
@@ -138,22 +138,10 @@
     <fuse>2s</fuse>
     <yield>0</yield>
 </tnt>
-<broadcasts>
-    <alert after="2s">TNT explodes after 2 seconds (2x faster than normal)</alert>
-    <tip after="4s">The color of the terracotta in the blocks shows how close you are to the other side</tip>
-    <tip after="6s">You gain tnt on kill</tip>
-    <tip after="8s">A killstreak of 3 will upgrade your armor's blast protection</tip>
-    <tip after="10m" count="oo">The color of the stained clay indicates how close you are to the other side</tip>
-    <alert after="10m" count="oo">TNT explodes after 2 seconds (2x faster than normal)</alert>
-</broadcasts>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
 <kill-rewards>
     <kill-reward>
         <item material="tnt" amount="16"/>
         <item material="arrow" amount="8"/>
-        <item material="golden apple"/>
     </kill-reward>
     <kill-reward>
         <filter>
@@ -169,4 +157,7 @@
         </kit>
     </kill-reward>
 </kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
 </map>

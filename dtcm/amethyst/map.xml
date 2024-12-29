@@ -1,13 +1,13 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Amethyst</name> 
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Destroy the enemy team's emerald monument!</objective>
 <created>2023-08-05</created>
 <gamemode>dtm</gamemode>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="924c4e61-57b6-4931-afdb-6525b2ed34c0"/> <!-- OAF6 -->
 </authors>
-<respawn delay="3s"/>
 <teams>
     <team id="pink-team" color="light purple" max="6">Pink</team>
     <team id="red-team" color="dark red" max="6">Red</team>
@@ -33,21 +33,46 @@
 </kits>
 <spawns>
     <default yaw="90">
-        <regions>
+        <region>
             <point>50,30,29.5</point>
-        </regions>
+        </region>
     </default>
     <spawn team="pink-team" kit="spawn-kit" yaw="90">
-        <regions>
+        <region>
             <point>13,10,-44.5</point>
-        </regions>
+        </region>
     </spawn>
     <spawn team="red-team" kit="spawn-kit" yaw="-90">
-        <regions>
+        <region>
             <point>-21,10,104</point>
-        </regions>
+        </region>
     </spawn>
 </spawns>
+<filters>
+    <team id="only-pink">pink-team</team>
+    <team id="only-red">red-team</team>
+</filters>
+<regions>
+    <negative id="void-region">
+        <union>
+            <!-- Pink -->
+            <rectangle min="3,-31" max="-26,-10"/>
+            <rectangle min="-11,19" max="4,-5"/>
+            <rectangle min="-11,19" max="4,40"/>
+            <!-- red -->
+            <rectangle min="-12,90" max="17,69"/>
+            <rectangle min="4,66" max="-13,49"/>
+        </union>
+    </negative>
+    <union id="spawns">
+        <rectangle id="pink-spawn" min="6,-42" max="22,-55"/>
+        <rectangle id="red-spawn" min="-15,101" max="-32,115"/>
+    </union>
+    <apply enter="only-pink" region="pink-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply block="never" region="spawns" message="You may not modify the spawn area!"/>
+    <apply block="deny(void)" region="void-region" message="You may not modify the void!"/>
+</regions>
 <destroyables name="Monument" material="emerald block" mode-changes="true" show-progress="true">
     <destroyable owner="pink-team">
         <region>
@@ -63,34 +88,6 @@
 <modes>
     <mode id="gold-mode" after="20m" name="`6GOLD MONUMENT MODE" material="gold block"/>
 </modes>
-<filters>
-    <deny id="deny-void">
-        <void/>
-    </deny>
-    <team id="only-pink">pink-team</team>
-    <team id="only-red">red-team</team>
-</filters>
-<regions>
-    <negative id="void-region">
-        <union>
- <!-- Pink -->
-                <rectangle min="3,-31" max="-26,-10"/>
-                <rectangle min="-11,19" max="4,-5"/>
-                <rectangle min="-11,19" max="4,40"/>
-  <!-- red -->
-                <rectangle min="-12,90" max="17,69"/>
-                <rectangle min="4,66" max="-13,49"/>
-        </union>
-    </negative>
-    <union id="spawns">
-        <rectangle id="pink-spawn" min="6,-42" max="22,-55"/>
-        <rectangle id="red-spawn" min="-15,101" max="-32,115"/>
-    </union>
-    <apply enter="only-pink" region="pink-spawn" message="You may not enter the enemy team's spawn!"/>
-    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy team's spawn!"/>
-    <apply block="never" region="spawns" message="You may not modify the spawn area!"/>
-    <apply block="deny-void" region="void-region" message="You may not modify the void!"/>
-</regions>
 <toolrepair>
     <tool>iron sword</tool>
     <tool>bow</tool>
@@ -133,16 +130,16 @@
         </drops>
     </rule>
 </block-drops>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
-<maxbuildheight>23</maxbuildheight>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
         <item amount="8" material="quartz block"/>
         <item amount="4" material="log" damage="1"/>
         <item amount="12" material="arrow"/>
     </kill-reward>
 </kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>23</maxbuildheight>
+<respawn delay="3s"/>
 </map>

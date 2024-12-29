@@ -1,10 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>A Classy Night for a Fight</name>
-<version>1.0.6</version>
+<version>1.0.7</version>
 <include id="gapple-kill-reward"/>
 <objective>Destroy the opposite team's monument to win!</objective>
 <created>2023-02-21</created>
-<maxbuildheight>37</maxbuildheight>
 <authors>
     <author uuid="86b8ea93-6936-4b28-9d0c-19004d0dcb51"/> <!-- Wyviryn -->
 </authors>
@@ -16,30 +15,13 @@
     <team id="purple-team" color="dark_purple" max="28">Purple</team>
     <team id="orange-team" color="gold" max="28">Orange</team>
 </teams>
-<spawns>
-    <spawn team="purple-team" kit="spawn-kit" yaw="225">
-        <regions>
-            <point>-46.5,11,140.5</point>
-        </regions>
-    </spawn>
-    <spawn team="orange-team" kit="spawn-kit" yaw="45">
-        <regions>
-            <point>46.5,11,-140.5</point>
-        </regions>
-    </spawn>
-    <default>
-        <regions>
-            <cylinder base="0.5,65,0.5" radius="1.5" height="0" yaw="90"/>
-        </regions>
-    </default>
-</spawns>
 <kits>
     <kit id="spawn-kit">
         <clear/>
         <item slot="0" material="iron sword" unbreakable="true"/>
         <item slot="1" material="bow" enchantment="infinity" unbreakable="true"/>
         <item slot="2" material="diamond pickaxe" unbreakable="true"/>
-        <item slot="3" material="iron axe" enchantment="dig speed:1" unbreakable="true"/>
+        <item slot="3" material="iron axe" enchantment="dig speed" unbreakable="true"/>
         <item slot="4" material="shears" unbreakable="true"/>
         <item slot="5" amount="64" damage="4" material="wood"/>
         <item slot="6" amount="64" damage="3" material="leaves"/>
@@ -53,19 +35,29 @@
         <effect duration="5" amplifier="255">resistance</effect>
     </kit>
 </kits>
+<spawns>
+    <spawn team="purple-team" kit="spawn-kit" yaw="225">
+        <region>
+            <point>-46.5,11,140.5</point>
+        </region>
+    </spawn>
+    <spawn team="orange-team" kit="spawn-kit" yaw="45">
+        <region>
+            <point>46.5,11,-140.5</point>
+        </region>
+    </spawn>
+    <default yaw="90">
+        <region>
+            <cylinder base="0.5,65,0.5" radius="1.5" height="0"/>
+        </region>
+    </default>
+</spawns>
 <filters>
-    <deny id="deny-void">
-        <void/>
-    </deny>
     <deny id="deny-players">
         <participating/>
     </deny>
-    <deny id="deny-purple">
-        <team id="only-purple">purple-team</team>
-    </deny>
-    <deny id="deny-orange">
-        <team id="only-orange">orange-team</team>
-    </deny>
+    <team id="only-purple">purple-team</team>
+    <team id="only-orange">orange-team</team>
     <material id="only-iron">iron block</material>
     <deny id="deny-spawn">
         <any>
@@ -83,14 +75,6 @@
     </deny>
 </filters>
 <regions>
-    <apply use="deny-beacon"/>
-    <negative id="void-area">
-        <region id="spawn-areas"/>
-        <circle center="0.5,0.5" radius="56"/>
-        <rectangle min="-26,-77" max="27,78"/> <!-- N-S -->
-        <rectangle min="-56,43" max="57,-42"/> <!-- E-W -->
-    </negative>
-    <apply block-place="deny-void" region="void-area" message="You may not build in the void!"/>
     <apply block-break="never" region="extremity" message="You may not destroy blocks outside of the playing area!"/>
     <union id="extremity">
         <above y="37"/>
@@ -105,8 +89,16 @@
     <apply use="deny-spawn" region="spawn-areas"/>
     <apply enter="only-purple" region="purple-spawn-area" message="You may not enter the opposing team's spawn area!"/>
     <apply enter="only-orange" region="orange-spawn-area" message="You may not enter the opposing team's spawn area!"/>
+    <apply use="deny-beacon"/>
+    <negative id="void-area">
+        <region id="spawn-areas"/>
+        <circle center="0.5,0.5" radius="56"/>
+        <rectangle min="-26,-77" max="27,78"/> <!-- N-S -->
+        <rectangle min="-56,43" max="57,-42"/> <!-- E-W -->
+    </negative>
+    <apply block-place="deny(void)" region="void-area" message="You may not build in the void!"/>
 </regions>
-<destroyables material="obsidian" completion="100%" repairable="false" mode-changes="true">
+<destroyables material="obsidian" repairable="false" mode-changes="true">
     <destroyable owner="purple-team" name="Purple Monument">
         <region>
             <cuboid min="0,23,85" size="1,3,1"/>
@@ -165,4 +157,5 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
+<maxbuildheight>37</maxbuildheight>
 </map>

@@ -1,9 +1,10 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Mythica DTM</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Destroy the enemy team's monuments!</objective>
 <created>2022-10-15</created>
 <gamemode>dtm</gamemode>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="f1ff7ecc-2e79-4320-85de-adb392eb2822"/> <!-- DerStiv -->
 </authors>
@@ -40,54 +41,23 @@
             <point>-189.5,24,-72.5</point>
         </region>
     </default>
-    <spawn team="blue" kit="spawn-kit" yaw="0">
-        <regions>
+    <spawn team="blue" kit="spawn-kit">
+        <region>
             <point>-86.5,20,-170.5</point>
-        </regions>
+        </region>
     </spawn>
     <spawn team="red" kit="spawn-kit" yaw="180">
-        <regions>
+        <region>
             <point>-86.5,20,25.5</point>
-        </regions>
+        </region>
     </spawn>
 </spawns>
-<destroyables>
-    <destroyable name="East Monument" id="blue-east-monument" materials="obsidian" completion="100%" required="true" owner="blue" modes="beacon-mode coal-mode">
-        <region>
-           <cuboid min="-46,21,-122" max="-47,24,-123"/>
-        </region>
-    </destroyable>
-    <destroyable name="West Monument" id="blue-west-monument" materials="obsidian" completion="100%" required="true" owner="blue" modes="beacon-mode coal-mode">
-        <region>
-           <cuboid min="-126,21,-122" max="-127,24,-123"/>
-        </region>
-    </destroyable>
-    <destroyable name="East Monument" id="red-east-monument" materials="obsidian" completion="100%" required="true" owner="red" modes="beacon-mode coal-mode">
-        <region>
-           <cuboid min="-46,21,-22" max="-47,24,-23"/>
-        </region>
-    </destroyable>
-    <destroyable name="West Monument" id="red-west-monument" materials="obsidian" completion="100%" required="true" owner="red" modes="beacon-mode coal-mode">
-        <region>
-           <cuboid min="-126,21,-22" max="-127,24,-23"/>
-        </region>
-    </destroyable>
-</destroyables>
-<modes>
-    <mode after="15m" id="beacon-mode" material="beacon" name="`bBEACON MONUMENT MODE"/>
-    <mode after="30m" id="coal-mode" material="coal block" name="`8COAL MONUMENT MODE"/>
-</modes>
 <filters>
-    <team id="only-blue">blue</team>
-    <team id="only-red">red</team>
-    <not id="deny-void">
-        <void/>
-    </not>
     <deny id="no-beacons">
         <material>beacon</material>
     </deny>
     <deny id="deny-players">
-          <participating/>
+        <participating/>
     </deny>
     <material id="only-gold">gold block</material>
     <blocks region="spawn-lanes" id="original-block-protection">
@@ -97,29 +67,27 @@
         </any>
     </blocks>
     <all id="blue-spawn-block-protection">
-        <filter id="only-blue"/>
+        <team id="only-blue">blue</team>
         <filter id="original-block-protection"/>
     </all>
     <all id="red-spawn-block-protection">
-        <filter id="only-red"/>
+        <team id="only-red">red</team>
         <filter id="original-block-protection"/>
     </all>
 </filters>
 <regions>
-    <union id="spawn-protection">
-        <rectangle id="blue-spawn-protection" min="-75,-159" max="-99,-184"/>
-        <rectangle id="red-spawn-protection" min="-75,14" max="-99,39"/>
-    </union>
-    <union id="lanes">
-        <union id="spawn-lanes">
-            <cuboid id="blue-spawn-lanes" min="-37,0,-153" max="-136,35,-187"/>
-            <cuboid id="red-spawn-lanes" min="-37,0,8" max="-136,35,42"/>
-        </union>
-        <rectangle id="playable-area" min="-15,43" max="-158,-188"/>
-    </union>
     <negative id="void-area">
-        <region id="spawn-protection"/>
-        <region id="lanes"/>
+        <union id="spawn-protection">
+            <rectangle id="blue-spawn-protection" min="-75,-159" max="-99,-184"/>
+            <rectangle id="red-spawn-protection" min="-75,14" max="-99,39"/>
+        </union>
+        <union id="lanes">
+            <union id="spawn-lanes">
+                <cuboid id="blue-spawn-lanes" min="-37,0,-153" max="-136,35,-187"/>
+                <cuboid id="red-spawn-lanes" min="-37,0,8" max="-136,35,42"/>
+            </union>
+            <rectangle id="playable-area" min="-15,43" max="-158,-188"/>
+        </union>
     </negative>
     <union id="iron-spawner">
         <point id="iron-point">-86.5,14,-72.5</point>
@@ -133,9 +101,35 @@
     <apply block="blue-spawn-block-protection" region="blue-spawn-lanes" message="You may only break gold blocks in spawn"/>
     <apply block="red-spawn-block-protection" region="red-spawn-lanes" message="You may only break gold blocks in spawn"/>
     <apply block="never" region="iron-protection" message="You may not modify the spawner!"/>
-    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block-place="deny(void)" region="void-area" message="You may not build in the void area!"/>
     <apply use="no-beacons"/>
 </regions>
+<destroyables materials="obsidian" required="true" modes="beacon-mode coal-mode">
+    <destroyable name="East Monument" id="blue-east-monument" owner="blue">
+        <region>
+           <cuboid min="-46,21,-122" max="-47,24,-123"/>
+        </region>
+    </destroyable>
+    <destroyable name="West Monument" id="blue-west-monument" owner="blue">
+        <region>
+           <cuboid min="-126,21,-122" max="-127,24,-123"/>
+        </region>
+    </destroyable>
+    <destroyable name="East Monument" id="red-east-monument" owner="red">
+        <region>
+           <cuboid min="-46,21,-22" max="-47,24,-23"/>
+        </region>
+    </destroyable>
+    <destroyable name="West Monument" id="red-west-monument" owner="red">
+        <region>
+           <cuboid min="-126,21,-22" max="-127,24,-23"/>
+        </region>
+    </destroyable>
+</destroyables>
+<modes>
+    <mode after="15m" id="beacon-mode" material="beacon" name="`bBEACON MONUMENT MODE"/>
+    <mode after="30m" id="coal-mode" material="coal block" name="`8COAL MONUMENT MODE"/>
+</modes>
 <spawners>
     <spawner spawn-region="iron-point" player-region="iron-player" delay="10s">
         <item material="iron ingot" amount="1"/>
@@ -241,7 +235,6 @@
 <maxbuildheight>34</maxbuildheight>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
         <item amount="24" material="wood" damage="5"/>
         <item amount="16" material="glass"/>
     </kill-reward>

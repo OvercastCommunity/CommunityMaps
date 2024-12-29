@@ -1,10 +1,11 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Tulog</name>
-<version>1.0.7</version>
+<version>1.0.8</version>
 <objective>Destroy the emerald Monument and obsidian Core!</objective>
 <gamemode>dtc</gamemode>
 <gamemode>dtm</gamemode>
 <created>2022-01-06</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
     <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
@@ -41,17 +42,48 @@
             <cylinder base="4.5,9,1.5" height="1" radius="1"/>
         </region>
     </default>
-    <spawn team="blue-team" kit="spawn-kit">
-        <region yaw="-90">
+    <spawn team="blue-team" kit="spawn-kit" yaw="-90">
+        <region>
             <cylinder base="-78.5,15,-8.5" height="0" radius="0.5"/>
         </region>
     </spawn>
-    <spawn team="red-team" kit="spawn-kit">
-        <region yaw="90">
+    <spawn team="red-team" kit="spawn-kit" yaw="90">
+        <region>
             <cylinder base="87.5,15,11.5" height="0" radius="0.5"/>
         </region>
     </spawn>
 </spawns>
+<filters>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <deny id="deny-players">
+        <participating/>
+    </deny>
+    <material id="only-coal">coal block</material>
+    <material id="only-iron">iron block</material>
+</filters>
+<regions>
+    <negative id="void-area">
+        <rectangle min="-29.5,-24.5" max="50.5,-40.5"/> <!-- blue side -->
+        <rectangle min="38.5,27.5" max="-41.5,43.5"/> <!-- red side -->
+        <rectangle min="-3.5,25.5" max="12.5,-23.5"/> <!-- mid -->
+        <rectangle min="29.5,-8.5" max="-21.5,10.5"/>
+    </negative>
+    <union id="spawns">
+        <rectangle id="red-spawn" min="70.5,21.5" max="92.5,-3.5"/>
+        <rectangle id="blue-spawn" min="-61.5,-18.5" max="-84.5,6.5"/>
+    </union>
+    <union id="spawner">
+        <cuboid id="gapple" min="5.5,8,0.5" max="3.5,12,2.5"/>
+        <point id="goldblock">4,8,1</point>
+    </union>
+    <!-- applicators -->
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the opponent's spawn!"/>
+    <apply block-break="only-coal" block-place="deny-players" region="spawner" message="You may not place or break any blocks near the spawner!"/>
+    <apply block-break="only-iron" block-place="deny-players" region="spawns" message="You may not place or break blocks in spawn!"/>
+    <apply block="not(void)" region="void-area" message="You may not build in the void area!"/>
+</regions>
 <destroyables name="Monument" materials="emerald block" required="true">
     <destroyable owner="blue-team">
         <region>
@@ -80,40 +112,6 @@
     <mode id="gold-mode" after="15m" material="gold block" name="`6Gold Mode"/>
     <mode id="glass-mode" after="25m" material="glass" name="`fGlass Mode"/>
 </modes>
-<filters>
-    <team id="only-blue">blue-team</team>
-    <team id="only-red">red-team</team>
-    <not id="not-void">
-        <void/>
-    </not>
-    <deny id="deny-players">
-        <participating/>
-    </deny>
-    <material id="only-coal">coal block</material>
-    <material id="only-iron">iron block</material>
-</filters>
-<regions>
-    <negative id="void-area">
-        <rectangle min="-29.5,-24.5" max="50.5,-40.5"/> <!-- blue side -->
-        <rectangle min="38.5,27.5" max="-41.5,43.5"/> <!-- red side -->
-        <rectangle min="-3.5,25.5" max="12.5,-23.5"/> <!-- mid -->
-        <rectangle min="29.5,-8.5" max="-21.5,10.5"/>
-    </negative>
-    <union id="spawns">
-        <rectangle id="red-spawn" min="70.5,21.5" max="92.5,-3.5"/>
-        <rectangle id="blue-spawn" min="-61.5,-18.5" max="-84.5,6.5"/>
-    </union>
-    <union id="spawner">
-        <cuboid id="gapple" min="5.5,8,0.5" max="3.5,12,2.5"/>
-        <point id="goldblock">4,8,1</point>
-    </union>
-    <!-- applicators -->
-    <apply enter="only-blue" region="blue-spawn" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-red" region="red-spawn" message="You may not enter the opponent's spawn!"/>
-    <apply block-break="only-coal" block-place="deny-players" region="spawner" message="You may not place or break any blocks near the spawner!"/>
-    <apply block-break="only-iron" block-place="deny-players" region="spawns" message="You may not place or break blocks in spawn!"/>
-    <apply block="not-void" region="void-area" message="You may not build in the void area!"/>
-</regions>
 <spawners>
     <spawner player-region="spawner" spawn-region="goldblock" max-entities="50" min-delay="20s" max-delay="30s">
         <item material="golden apple"/>
@@ -169,15 +167,14 @@
 <renewables>
     <renewable region="spawns" renew-filter="only-iron" rate="2" grow="false" particles="true" sound="true"/>
 </renewables>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
-<maxbuildheight>32</maxbuildheight>
 <kill-rewards>
     <kill-reward>
         <item material="wood" amount="8"/>
         <item material="glass" amount="8"/>
-        <item material="golden apple"/>
     </kill-reward>
 </kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>32</maxbuildheight>
 </map>

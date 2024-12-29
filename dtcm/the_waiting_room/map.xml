@@ -1,23 +1,23 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>The Waiting Room</name>
 <variant id="halloween" world="halloween" override="true">The Carving Room</variant>
-<version>1.3.4</version>
-<include id="gapple-kill-reward"/>
+<version>1.3.5</version>
 <objective>Destroy the other team's side ladder monuments to win!</objective>
+<gamemode>dtm</gamemode>
 <if variant="default">
     <created>2023-06-18</created>
 </if>
 <if variant="halloween">
     <created>2023-09-29</created>
 </if>
-<gamemode>dtm</gamemode>
+<include id="gapple-kill-reward"/>
+<include id="void-death"/>
 <authors>
     <author uuid="2d1ed8d4-6346-4654-9cb7-19941c05820a"/> <!-- Lowie375 -->
 </authors>
 <contributors>
     <contributor uuid="59655bfd-1fda-4e15-b6f7-eb6b6f84b406" contribution="Original in-game reference build + map support"/> <!-- Digitalight -->
 </contributors>
-<include id="void-death"/>
 <constants>
     <constant id="void-plane">17.5</constant>
     <constant id="affect-obs">never</constant>
@@ -110,16 +110,26 @@
         </if>
     </kit>
 </kits>
-<tnt>
-    <dispenser-tnt-limit>0</dispenser-tnt-limit>
-    <yield>0</yield>
-</tnt>
-<disabledamage>
-    <damage ally="false" self="false" enemy="false" other="false">block explosion</damage>
-</disabledamage>
+<spawns>
+    <default kit="night-vision" yaw="180">
+        <region>
+            <cuboid min="10.4,27.5,183.4" max="12.6,27.5,185.6"/>
+        </region>
+    </default>
+    <spawn team="team-ladder" kit="kit-ladder" yaw="-90">
+        <regions>
+            <cuboid min="-46,33,98" max="-44,33,100"/>
+            <cuboid min="-46,33,108" max="-44,33,110"/>
+        </regions>
+    </spawn>
+    <spawn team="team-sign" kit="kit-sign" yaw="90">
+        <regions>
+            <cuboid min="60,33,108" max="62,33,110"/>
+            <cuboid min="60,33,98" max="62,33,100"/>
+        </regions>
+    </spawn>
+</spawns>
 <filters>
-    <team id="only-ladder">team-ladder</team>
-    <team id="only-sign">team-sign</team>
     <not id="player-explosion">
         <cause>explosion</cause>
     </not>
@@ -157,13 +167,13 @@
     <deny id="ladder-mon-explosion">
         <all>
             <filter id="mon-explosion"/>
-            <team>team-ladder</team>
+            <team id="only-ladder">team-ladder</team>
         </all>
     </deny>
     <deny id="sign-mon-explosion">
         <all>
             <filter id="mon-explosion"/>
-            <team>team-sign</team>
+            <team id="only-sign">team-sign</team>
         </all>
     </deny>
     <not id="all-but-iron">
@@ -298,8 +308,8 @@
             <region id="sign-monuments"/>
         </union>
     </negative>
-    <apply region="spawn-ladder" enter="only-ladder" message="You may not enter the enemy spawn!"/>
-    <apply region="spawn-sign" enter="only-sign" message="You may not enter the enemy spawn!"/>
+    <apply region="spawn-ladder" enter="only-ladder" message="You may not enter the enemy's spawn!"/>
+    <apply region="spawn-sign" enter="only-sign" message="You may not enter the enemy's spawn!"/>
     <apply region="spawns" block="never" message="You may not modify the spawn area!" early-warning="true"/>
     <apply region="unbreakable-wood" block-break="player-explosion" message="You may not destroy the unbreakable wood blocks!"/>
     <apply region="ladder-monuments" block-break="sign-mon-explosion" message="The monuments must be destroyed with TNT!" early-warning="true"/>
@@ -310,25 +320,6 @@
     <apply region="not-monuments" block-place="all-but-iron" message="Iron blocks may only be used to repair monuments!"/>
     <apply region="monuments" block-place="all-but-water" message="You may not place water inside the monument area!"/>
 </regions>
-<spawns>
-    <default kit="night-vision">
-        <region yaw="180">
-            <cuboid min="10.4,27.5,183.4" max="12.6,27.5,185.6"/>
-        </region>
-    </default>
-    <spawn team="team-ladder" kit="kit-ladder">
-        <regions yaw="-90">
-            <cuboid min="-46,33,98" max="-44,33,100"/>
-            <cuboid min="-46,33,108" max="-44,33,110"/>
-        </regions>
-    </spawn>
-    <spawn team="team-sign" kit="kit-sign">
-        <regions yaw="90">
-            <cuboid min="60,33,108" max="62,33,110"/>
-            <cuboid min="60,33,98" max="62,33,100"/>
-        </regions>
-    </spawn>
-</spawns>
 <destroyables required="true" show-progress="true" repairable="true">
     <destroyable name="Endstone Ladder" region="mon-ladder-endstone" owner="team-ladder" materials="ender stone;iron block"/>
     <destroyable name="Endstone Ladder" region="mon-sign-endstone" owner="team-sign" materials="ender stone;iron block"/>
@@ -483,6 +474,13 @@
     <!-- kit (indirect) -->
     <item>bucket</item>
 </itemremove>
+<tnt>
+    <dispenser-tnt-limit>0</dispenser-tnt-limit>
+    <yield>0</yield>
+</tnt>
+<disabledamage>
+    <damage ally="false" self="false" enemy="false" other="false">block explosion</damage>
+</disabledamage>
 <if variant="halloween">
     <gamerules>
         <doFireTick>false</doFireTick>

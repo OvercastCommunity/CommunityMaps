@@ -1,11 +1,11 @@
-<?xml version="1.0"?>
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Jotunheim</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Destroy the opponent's monument and leak their core!</objective>
 <gamemode>dtm</gamemode>
 <gamemode>dtc</gamemode>
 <created>2021-06-25</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="93a2f790-e430-4742-94ac-e513660bef37"/> <!-- adenines -->
     <author uuid="787c2738-70ba-4bfc-8faf-70ae9d87e5b9"/> <!-- uracils -->
@@ -13,6 +13,10 @@
     <author uuid="50f1adc9-2864-4b18-ab75-9fb1e3cc3446"/> <!-- TigerClaw456 -->
     <author uuid="f06272c8-7af1-424b-976a-a8d3e721e1d0"/> <!-- Terrowin94 -->
 </authors>
+<broadcasts>
+    <tip after="6s" every="3m">The core is located in front of spawn and the monument is behind the cabin</tip>
+    <tip after="7s" every="3m">The main entrance to the iron mine is under the rocking chair</tip>
+</broadcasts>
 <teams>
     <team id="orange-team" color="gold" max="50">Orange</team>
     <team id="blue-team" color="blue" max="50">Blue</team>
@@ -21,17 +25,19 @@
     <kit id="spawn-kit">
         <item slot="0" material="iron sword" unbreakable="true"/>
         <item slot="1" material="bow" unbreakable="true"> 
-            <enchantment level="1">infinity</enchantment>
+            <enchantment>infinity</enchantment>
         </item>
         <item slot="2" material="iron pickaxe" unbreakable="true">
             <enchantment level="2">efficiency</enchantment>
         </item>
         <item slot="3" material="iron axe" unbreakable="true">
-            <enchantment level="1">efficiency</enchantment>
+            <enchantment>efficiency</enchantment>
         </item>
         <item slot="4" material="log" damage="0" amount="64"/>
+        <item slot="5" material="stained clay" team-color="true" amount="64"/>
+        <item slot="6" material="stained clay" team-color="true" amount="64"/>
         <item slot="7" material="golden apple" amount="2"/>
-        <item slot="8" material="cooked_beef" amount="64"/>
+        <item slot="8" material="cooked beef" amount="64"/>
         <item slot="28" material="arrow" amount="1"/>
         <item slot="29" material="diamond pickaxe" unbreakable="true"/>
         <item slot="30" material="iron spade" unbreakable="true"/>
@@ -39,8 +45,6 @@
         <effect duration="10s" amplifier="100">damage resistance</effect>
     </kit>
     <kit id="orange-kit" parents="spawn-kit">
-        <item slot="5" material="stained_clay" damage="1" amount="64"/>
-        <item slot="6" material="stained_clay" damage="1" amount="64"/>
         <chestplate material="leather chestplate" color="D87F33" unbreakable="true">
             <enchantment level="2">projectile_protection</enchantment>
         </chestplate>
@@ -52,8 +56,6 @@
         </boots>
     </kit>
     <kit id="blue-kit" parents="spawn-kit">
-        <item slot="5" material="stained_clay" damage="11" amount="64"/>
-        <item slot="6" material="stained_clay" damage="11" amount="64"/>
         <chestplate material="leather chestplate" color="334CB2" unbreakable="true">
             <enchantment level="2">projectile_protection</enchantment>
         </chestplate>
@@ -74,7 +76,7 @@
             <cuboid id="orange-drop" min="-12,89,157" max="-9,89,156"/>
         </region>
     </spawn>
-     <spawn team="blue-team" kit="blue-kit" yaw="0">
+     <spawn team="blue-team" kit="blue-kit">
         <region>
             <cuboid id="blue-drop" min="-9,89,-156" max="-12,89,-155"/>
         </region>
@@ -85,6 +87,41 @@
         </region>
     </default>
 </spawns>
+<filters>
+    <team id="only-orange">orange-team</team>
+    <team id="only-blue">blue-team</team>
+    <deny id="deny-beacon">
+        <material>beacon</material>
+    </deny>
+</filters>
+<regions>
+    <union id="rear-island">
+        <rectangle id="orange-rear" min="-58,135" max="60,190"/>
+        <rectangle id="blue-rear" min="59,-134" max="-58,-189"/>
+    </union>
+    <union id="outer-no-build">
+        <rectangle id="west-side" min="-56,135" max="-oo,-134"/>
+        <rectangle id="east-side" min="57,-134" max="oo,135"/>
+    </union>
+    <negative id="not-spawns">
+        <union id="spawn-regions">
+            <rectangle id="orange-spawnregion" min="-2,147" max="-19,163"/> 
+            <rectangle id="blue-spawnregion" min="-2,-146" max="-19,-162"/> 
+        </union>
+    </negative> 
+    <point id="mid-spawner">0,13,0</point>
+    <cuboid id="player-region-spawner" min="-13,10,14" max="14,40,-13"/>
+    <cuboid id="no-block-spawner" min="3,11,3" max="-2,15,-2"/>
+    <!-- applicators -->
+    <apply use="deny-beacon"/>
+    <apply block="never" region="outer-no-build" message="You cannot edit the void!"/>
+    <apply block="never" region="spawn-regions" message="You cannot edit the spawns!"/>
+    <apply enter="only-orange" region="orange-spawnregion" message="You cannot enter `6Orange's `rspawn!"/>
+    <apply enter="only-blue" region="blue-spawnregion" message="You cannot enter `9Blue's `rspawn!"/>
+    <apply block="deny(void)" region="rear-island" message="You cannot edit the void!"/>
+    <apply block="never" region="no-block-spawner" message="You may not modify the spawner region!"/>
+    <apply kit="reset-resitance-kit" region="not-spawns"/>
+</regions>
 <modes>
     <mode id="gold-mode" after="30m" material="gold block" name="`6Gold Core"/>
     <mode id="beacon-mode" after="20m" material="beacon" name="`BBeacon Monument"/>
@@ -114,45 +151,6 @@
         </region>
     </core>
 </cores>
-<filters>
-    <team id="only-orange">orange-team</team>
-    <team id="only-blue">blue-team</team>
-    <deny id="deny-void">
-        <void/>
-    </deny>
-    <deny id="deny-beacon">
-        <material>beacon</material>
-    </deny>
-</filters>
-<regions>
-    <union id="spawn-regions">    
-        <rectangle id="orange-spawnregion" min="-2,147" max="-19,163"/> 
-        <rectangle id="blue-spawnregion" min="-2,-146" max="-19,-162"/> 
-    </union>
-    <union id="rear-island">
-        <rectangle id="orange-rear" min="-58,135" max="60,190"/>
-        <rectangle id="blue-rear" min="59,-134" max="-58,-189"/>
-    </union>
-    <union id="outer-no-build">
-        <rectangle id="west-side" min="-56,135" max="-oo,-134"/>
-        <rectangle id="east-side" min="57,-134" max="oo,135"/>
-    </union>
-    <negative id="not-spawns">
-        <region id="spawn-regions"/>
-    </negative> 
-    <point id="mid-spawner">0,13,0</point>
-    <cuboid id="player-region-spawner" min="-13,10,14" max="14,40,-13"/>
-    <cuboid id="no-block-spawner" min="3,11,3" max="-2,15,-2"/>
-    <!-- applicators -->
-    <apply use="deny-beacon"/>
-    <apply block="never" region="outer-no-build" message="You cannot edit the void!"/>
-    <apply block="never" region="spawn-regions" message="You cannot edit the spawns!"/>
-    <apply enter="only-orange" region="orange-spawnregion" message="You cannot enter `6Orange's `Cspawn!"/>
-    <apply enter="only-blue" region="blue-spawnregion" message="You cannot enter `9Blue's `Cspawn!"/>
-    <apply block="deny-void" region="rear-island" message="You cannot edit the void!"/>
-    <apply block="never" region="no-block-spawner" message="You may not modify the spawner region!"/>
-    <apply kit="reset-resitance-kit" region="not-spawns"/>
-</regions> 
 <spawners>
     <spawner spawn-region="mid-spawner" player-region="player-region-spawner" min-delay="20s" max-delay="30s">
         <item amount="1" material="golden apple"/>
@@ -164,34 +162,30 @@
     <item>leather boots</item>
     <item>stained clay</item> 
     <item>snowball</item> 
-    <item>164</item> 
-    <item>5:1</item> 
-    <item>126:1</item> 
-    <item>5:5</item> 
-    <item>134</item> 
-    <item>126:5</item> 
-    <item>18</item> 
-    <item>44</item> 
-    <item>1:6</item>
-    <item>1:5</item> 
-    <item>1:1</item> 
-    <item>98</item> 
-    <item>191</item> 
-    <item>188</item>
-    <item>1:4</item>
-    <item>126:13</item> 
-    <item>126:9</item> 
-    <item>106</item>
-    <item>17:1</item>
-    <item>364</item>
+    <item>dark oak stairs</item> 
+    <item>wood:1</item> 
+    <item>wood step:1</item> 
+    <item>wood:5</item> 
+    <item>spruce wood stairs</item> 
+    <item>wood step:5</item> 
+    <item>leaves</item> 
+    <item>step</item> 
+    <item>stone:6</item>
+    <item>stone:5</item> 
+    <item>stone:1</item> 
+    <item>smooth brick</item> 
+    <item>dark oak fence</item> 
+    <item>spruce fence</item>
+    <item>stone:4</item>
+    <item>wood step:13</item> 
+    <item>wood step:9</item> 
+    <item>vine</item>
+    <item>log:1</item>
+    <item>cooked beef</item>
     <item>arrow</item>
     <item>bucket</item>
-    <item>49</item>
+    <item>obsidian</item>
 </itemremove>
-<broadcasts>
-    <tip after="6s" every="3m">The core is located in front of spawn and the monument is behind the cabin</tip>
-    <tip after="7s" every="3m">The main entrance to the iron mine is under the rocking chair</tip>
-</broadcasts>
 <toolrepair>
     <tool>iron sword</tool>
     <tool>bow</tool>
@@ -201,9 +195,4 @@
     <tool>iron spade</tool>
 </toolrepair>
 <maxbuildheight>75</maxbuildheight>
-<kill-rewards>
-    <kill-reward>
-        <item material="golden apple" amount="1"/>
-    </kill-reward>
-</kill-rewards>
 </map> 

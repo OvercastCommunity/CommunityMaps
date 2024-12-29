@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Iti Mo'ai</name>
-<version>1.3.1</version>
+<version>1.3.2</version>
 <variant id="christmas" world="christmas" override="true">Iti Marshmallow Mo'ai</variant>
 <variant id="halloween" world="halloween" override="true">Iti Boo'ai</variant>
 <objective>Destroy the enemy's emerald monument!</objective>
@@ -68,16 +68,34 @@
         </region>
     </default>
     <spawn team="red" kit="spawn-kit" yaw="90">
-        <regions>
+        <region>
             <point>43.5,12,2.5</point>
-        </regions>
+        </region>
     </spawn>
     <spawn team="blue" kit="spawn-kit" yaw="-90">
-        <regions>
+        <region>
             <point>-150.5,12,2.5</point>
-        </regions>
+        </region>
     </spawn>
 </spawns>
+<filters>
+    <team id="only-blue">blue</team>
+    <team id="only-red">red</team>
+</filters>
+<regions>
+    <negative id="void-area">
+        <union id="spawn-protection">
+            <rectangle id="red-spawn-protection" min="38,7" max="48,-2"/>
+            <rectangle id="blue-spawn-protection" min="-145,7" max="-155,-2"/>
+        </union>
+        <rectangle id="middle" min="-93,-31" max="-14,36"/>
+    </negative>
+    <!-- filtering -->
+    <apply enter="only-blue" region="blue-spawn-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-red" region="red-spawn-protection" message="You may not enter the opponent's spawn!"/>
+    <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
+    <apply block-place="deny(void)" region="void-area" message="You may not build in the void area!"/>
+</regions>
 <destroyables show-progress="true" materials="emerald block" required="true" modes="gold-mode clay-mode">
     <unless variant="halloween">
         <destroyable name="Red Monument" id="red-monument" owner="red">
@@ -108,33 +126,6 @@
     <mode id="gold-mode" after="20m" name="`6GOLD MONUMENT MODE" material="gold block"/>
     <mode id="clay-mode" after="40m" name="`eCLAY MONUMENT MODE" material="stained clay:4"/>
 </modes>
-<filters>
-    <team id="only-blue">blue</team>
-    <team id="only-red">red</team>
-    <not id="deny-void">
-       <void/>
-    </not>
-</filters>
-<regions>
-    <union id="spawn-protection">
-        <union id="red-spawn-protection">
-            <rectangle id="red-protection" min="38,7" max="48,-2"/>
-        </union>
-        <union id="blue-spawn-protection">
-            <rectangle id="blue-protection" min="-145,7" max="-155,-2"/>
-        </union>
-    </union>
-    <rectangle id="middle" min="-93,-31" max="-14,36"/>
-    <negative id="void-area">
-        <region id="spawn-protection"/>
-        <region id="middle"/>
-    </negative>
-    <!-- filtering -->
-    <apply enter="only-blue" region="blue-spawn-protection" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-red" region="red-spawn-protection" message="You may not enter the opponent's spawn!"/>
-    <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
-    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
-</regions>
 <toolrepair>
     <tool>iron sword</tool>
     <tool>bow</tool>
@@ -193,14 +184,14 @@
         </drops>
     </rule>
 </block-drops>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
-<maxbuildheight>30</maxbuildheight>
 <kill-rewards>
     <kill-reward>
         <item amount="16" material="wood" damage="3"/>
         <item amount="16" material="stained glass" team-color="true"/>
     </kill-reward>
 </kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>30</maxbuildheight>
 </map>

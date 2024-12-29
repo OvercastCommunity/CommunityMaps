@@ -1,6 +1,6 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Armature</name>
-<version>1.0.8</version>
+<version>1.0.9</version>
 <include id="gapple-kill-reward"/>
 <objective>Destroy the enemy's monument and repair yours!</objective>
 <created>2022-11-19</created>
@@ -15,6 +15,26 @@
     <team id="red-team" color="dark red" max="12">Red</team>
     <team id="yellow-team" color="yellow" max="12">Yellow</team>
 </teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true" enchantment="infinity"/>
+        <item slot="2" material="iron pickaxe" unbreakable="true"/>
+        <item slot="3" material="shears" unbreakable="true"/>
+        <item slot="4" amount="64" material="wool" team-color="true"/>
+        <item slot="5" amount="32" material="glass"/>
+        <item slot="6" name="`rAuto-Igniting TNT" lore="`cDoes not damage nearby blocks" enchantment="thorns:5" material="tnt"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <item slot="30" material="stone spade" unbreakable="true"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+        <leggings material="chainmail leggings" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <effect duration="6" amplifier="255">resistance</effect>
+    </kit>
+</kits>
 <spawns>
     <spawn team="red-team" kit="spawn-kit">
         <regions>
@@ -35,39 +55,12 @@
         </regions>
     </default>
 </spawns>
-<kits>
-    <kit id="spawn-kit">
-        <clear/>
-        <item slot="0" material="stone sword" unbreakable="true"/>
-        <item slot="1" material="bow" unbreakable="true" enchantment="infinity"/>
-        <item slot="2" material="iron pickaxe" unbreakable="true"/>
-        <item slot="3" material="shears" unbreakable="true"/>
-        <item slot="4" amount="64" material="wool" team-color="true"/>
-        <item slot="5" amount="32" material="glass"/>
-        <item slot="6" name="`rAuto-Igniting TNT" lore="`cDoes not damage nearby blocks" enchantment="thorns:5" material="tnt"/>
-        <item slot="8" material="golden apple"/>
-        <item slot="28" amount="1" material="arrow"/>
-        <item slot="30" material="stone spade" unbreakable="true"/>
-        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
-        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
-        <leggings material="chainmail leggings" unbreakable="true"/>
-        <boots material="leather boots" team-color="true" unbreakable="true"/>
-        <effect duration="6" amplifier="255">resistance</effect>
-    </kit>
-</kits>
 <filters>
-    <deny id="deny-void">
-        <void/>
-    </deny>
     <deny id="deny-players">
         <participating/>
     </deny>
-    <deny id="deny-red">
-        <team id="only-red">red-team</team>
-    </deny>
-    <deny id="deny-yellow">
-        <team id="only-yellow">yellow-team</team>
-    </deny>
+    <team id="only-red">red-team</team>
+    <team id="only-yellow">yellow-team</team>
     <deny id="deny-beacon">
         <material>beacon</material>
     </deny>
@@ -80,14 +73,6 @@
     <apply block="never" region="ceiling"> <!-- intentionally prevent breaking past the build limit as well -->
         <message>{"translate":"match.maxBuildHeight"}</message>
     </apply>
-    <apply use="deny-beacon"/>
-    <negative id="void-area">
-        <rectangle min="-22,28" max="23,-27"/> <!-- Middle -->
-        <rectangle min="-45,9" max="-26,-8"/> <!-- Red pit area -->
-        <rectangle min="46,-8" max="27,9"/> <!-- Yellow pit area -->
-        <region id="spawn-areas"/>
-    </negative>
-    <apply block="deny-void" region="void-area" message="You may not edit the void!"/>
     <point id="middle-spawner-point">0.5,6.5,0.5</point>
     <block id="middle-spawner-area">0,6,0</block>
     <rectangle id="middle-spawner-greater-area" min="-2,-2" max="3,3"/>
@@ -103,14 +88,22 @@
         </union>
     </union>
     <apply block="never" region="spawn-areas" message="You may not modify the spawn areas!"/>
-    <apply enter="only-red" region="red-spawn-areas" message="You may not enter you enemy's spawn area!"/>
-    <apply enter="only-yellow" region="yellow-spawn-areas" message="You may not enter you enemy's spawn area!"/>
+    <apply enter="only-red" region="red-spawn-areas" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-yellow" region="yellow-spawn-areas" message="You may not enter the enemy's spawn!"/>
     <!-- Monuments -->
     <negative id="not-monuments">
         <cuboid id="red-monument" min="-77,18,-1" max="-80,15,2"/>
         <cuboid id="yellow-monument" min="78,18,2" max="81,15,-1"/>
     </negative>
     <apply block-place="deny-gold-block" region="not-monuments" message="You may only place `eGold Blocks`r in your damaged monument!"/>
+    <apply use="deny-beacon"/>
+    <negative id="void-area">
+        <rectangle min="-22,28" max="23,-27"/> <!-- Middle -->
+        <rectangle min="-45,9" max="-26,-8"/> <!-- Red pit area -->
+        <rectangle min="46,-8" max="27,9"/> <!-- Yellow pit area -->
+        <region id="spawn-areas"/>
+    </negative>
+    <apply block="deny(void)" region="void-area" message="You may not edit the void!"/>
 </regions>
 <destroyables materials="gold block" show-progress="true" required="true" repairable="true">
     <destroyable owner="red-team" name="Red Monument" region="red-monument"/>

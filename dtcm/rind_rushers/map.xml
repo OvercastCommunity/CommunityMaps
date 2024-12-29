@@ -60,36 +60,58 @@
         </region>
     </default>
     <spawn team="pink" kit="spawn-kit">
-        <regions>
+        <region>
             <point>-31.5,11,56.5</point>
-        </regions>
+        </region>
     </spawn>
     <spawn team="green" kit="spawn-kit" yaw="180">
-        <regions>
+        <region>
             <point>44.5,11,-13.5</point>
-        </regions>
+        </region>
     </spawn>
 </spawns>
-<destroyables show-progress="true" materials="emerald block;redstone block">
+<filters>
+    <team id="only-green">green</team>
+    <team id="only-pink">pink</team>
+</filters>
+<regions>
+    <negative id="void-area">
+        <union id="spawn-protection">
+            <rectangle id="pink-spawn-protection" min="-27,64" max="-36,49"/>
+            <rectangle id="green-spawn-protection" min="40,-6" max="49,-21"/>
+        </union>
+        <union id="lanes">
+            <rectangle id="pink-lane" min="15,52" max="-2,63"/>
+            <rectangle id="green-lane" min="-2,-9" max="15,-20"/>
+            <rectangle id="middle" min="-23,2" max="36,41"/>
+        </union>
+    </negative>
+    <!-- filtering -->
+    <apply enter="only-green" region="green-spawn-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="only-pink" region="pink-spawn-protection" message="You may not enter the opponent's spawn!"/>
+    <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
+    <apply block-place="deny(void)" region="void-area" message="You may not build in the void area!"/>
+</regions>
+<destroyables show-progress="true" materials="emerald block;redstone block" required="true" modes="gold-mode clay-mode">
     <unless variant="christmas">
-        <destroyable name="Pink Monument" id="pink-monument" required="true" owner="pink" modes="gold-mode clay-mode">
+        <destroyable name="Pink Monument" id="pink-monument" owner="pink" >
             <region>
                <cuboid min="10,19,69" max="13,22,72"/>
             </region>
         </destroyable>
-        <destroyable name="Green Monument" id="green-monument" required="true" owner="green" modes="gold-mode clay-mode">
+        <destroyable name="Green Monument" id="green-monument" owner="green">
             <region>
                <cuboid min="0,19,-26" max="3,22,-29"/>
             </region>
         </destroyable>
     </unless>
     <if variant="christmas">
-        <destroyable name="Red Monument" id="pink-monument" required="true" owner="pink" modes="gold-mode clay-mode">
+        <destroyable name="Red Monument" id="pink-monument" owner="pink">
         <region>
            <cuboid min="10,19,69" max="13,22,72"/>
         </region>
     </destroyable>
-    <destroyable name="White Monument" id="green-monument" required="true" owner="green" modes="gold-mode clay-mode">
+    <destroyable name="White Monument" id="green-monument" owner="green">
         <region>
            <cuboid min="0,19,-26" max="3,22,-29"/>
         </region>
@@ -100,33 +122,6 @@
     <mode id="gold-mode" after="20m" name="`6GOLD MONUMENT MODE" material="gold block"/>
     <mode id="clay-mode" after="40m" name="`eCLAY MONUMENT MODE" material="stained clay:4"/>
 </modes>
-<filters>
-    <team id="only-green">green</team>
-    <team id="only-pink">pink</team>
-    <not id="deny-void">
-       <void/>
-    </not>
-</filters>
-<regions>
-    <union id="spawn-protection">
-        <rectangle id="pink-spawn-protection" min="-27,64" max="-36,49"/>
-        <rectangle id="green-spawn-protection" min="40,-6" max="49,-21"/>
-    </union>
-    <union id="lanes">
-        <rectangle id="pink-lane" min="15,52" max="-2,63"/>
-        <rectangle id="green-lane" min="-2,-9" max="15,-20"/>
-        <rectangle id="middle" min="-23,2" max="36,41"/>
-    </union>
-    <negative id="void-area">
-        <region id="spawn-protection"/>
-        <region id="lanes"/>
-    </negative>
-    <!-- filtering -->
-    <apply enter="only-green" region="green-spawn-protection" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-pink" region="pink-spawn-protection" message="You may not enter the opponent's spawn!"/>
-    <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
-    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
-</regions>
 <toolrepair>
     <tool>iron sword</tool>
     <tool>bow</tool>
@@ -170,10 +165,6 @@
         </drops>
     </rule>
 </block-drops>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
-<maxbuildheight>28</maxbuildheight>
 <kill-rewards>
     <kill-reward>
         <item amount="16" material="stained glass" team-color="true"/>
@@ -185,4 +176,8 @@
         </if>
     </kill-reward>
 </kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>28</maxbuildheight>
 </map>

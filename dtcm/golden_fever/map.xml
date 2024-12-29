@@ -1,23 +1,24 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Golden Fever</name>
-<version>1.2.4</version>
+<version>1.2.5</version>
 <objective>Destroy enemy team's obsidian monuments!</objective>
 <created>2021-10-27</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="345e7c1e-2b0f-4b6e-be83-5494ec6d4e7d"/> <!-- ElDanii -->
 </authors>
 <contributors>
-      <contributor uuid="75fd93dd-8e48-4698-81a2-97dae2ec5b5f"/> <!-- Pugzy - XML Help -->
-      <contributor uuid="5c79d2c9-a4f0-4343-a84b-e1720f13009b"/> <!-- CoWinkKeyDinkInc - XML Help -->
-      <contributor uuid="621b2aa8-4e5f-4ed8-bd36-0ae2f8952a06"/> <!-- Strangey - Playstyle feedback -->
-      <contributor uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609" contribution="Map feedback"/> <!-- Technodono - Map feedback -->
+    <contributor uuid="75fd93dd-8e48-4698-81a2-97dae2ec5b5f" contribution="XML help"/> <!-- Pugzy -->
+    <contributor uuid="5c79d2c9-a4f0-4343-a84b-e1720f13009b" contribution="XML help"/> <!-- CoWinkKeyDinkInc -->
+    <contributor uuid="621b2aa8-4e5f-4ed8-bd36-0ae2f8952a06" contribution="Playstyle feedback"/> <!-- Strangey -->
+    <contributor uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609" contribution="Map feedback"/> <!-- Technodono -->
 </contributors>
 <teams>
     <team id="blue-team" color="blue" max="30">Blue</team>
     <team id="red-team" color="red" max="30">Red</team>
 </teams>
 <kits>
-    <kit id="spawn-kit"> <!-- Both teams kit -->
+    <kit id="spawn-kit">
         <clear/>
         <item slot="0" material="stone sword" attributes="generic.attackDamage:add:4" unbreakable="true"/>
         <item slot="1" material="bow" unbreakable="true">
@@ -31,36 +32,36 @@
         <item slot="5" material="wood" damage="2" amount="48"/>
         <item slot="7" material="paper" name="`F`lREAD ME" lore="`7Kill = `6Feverish Gold|`7Craft a `eglowstone `7block with nine (9) `6Feverish Gold`7.||`6⬛ ⬛ ⬛   `6⬛ `8= `6Feverish Gold|`6⬛ ⬛ ⬛|`6⬛ ⬛ ⬛"/>
         <item slot="8" material="golden apple"/>
-        <effect duration="5" amplifier="3">resistance</effect> <!-- Prevent spawnkill -->
-        <effect duration="5" amplifier="1">strength</effect> <!-- Prevent spawnkill -->
-        <effect duration="8" amplifier="3">haste</effect> <!-- Prevent spawn blocking-->
+        <!-- Prevent spawnkill -->
+        <effect duration="5" amplifier="3">resistance</effect> 
+        <effect duration="5">strength</effect>
+        <effect duration="8" amplifier="3">haste</effect>
     </kit>
-    <kit id="red-kit" parents="spawn-kit"> <!-- Specific red armor -->
+    <!-- Separate kits are intentional; custom armor colors -->
+    <kit id="red-kit" parents="spawn-kit">
         <helmet unbreakable="true" color="993333" material="leather helmet"/>
         <leggings unbreakable="true" color="993333" material="leather leggings"/>
     </kit>
-    <kit id="blue-kit" parents="spawn-kit"> <!-- Specific blue armor -->
+    <kit id="blue-kit" parents="spawn-kit">
         <helmet unbreakable="true" color="6699d8" material="leather helmet"/>
         <leggings unbreakable="true" color="6699d8" material="leather leggings"/>
     </kit>
 </kits>
-<timelock>on</timelock>
-<respawn delay="4s" blackout="false"/>
 <spawns>
     <default yaw="90"> <!-- Observer spawn -->
-      <region>
-          <cuboid min="70,40,1" max="70,40,-1"/>
-      </region>
+        <region>
+            <cuboid min="70,40,1" max="70,40,-1"/>
+        </region>
     </default>
-    <spawn team="red-team" kit="red-kit">  <!-- Red spawn -->
-      <region>
-          <point>0.5,43,-128.5</point>
-      </region>
+    <spawn team="red-team" kit="red-kit"> <!-- Red spawn -->
+        <region>
+            <point>0.5,43,-128.5</point>
+        </region>
     </spawn>
     <spawn team="blue-team" kit="blue-kit" yaw="180"> <!-- Blue spawn -->
-      <region>
-          <point>0.5,43,129.5</point>
-      </region>
+        <region>
+            <point>0.5,43,129.5</point>
+        </region>
     </spawn>
 </spawns>
 <filters>
@@ -68,15 +69,6 @@
     <team id="only-red">red-team</team>
 </filters>
 <regions>
-    <apply block="never" message="`7You may not build outside the playing area!">
-        <region>
-            <negative id="not-build-area">
-                <region id="playable"/>
-            </negative>
-        </region>
-    </apply>
-    <apply block="never" enter="only-blue" region="blue-spawn"/>
-    <apply block="never" enter="only-red" region="red-spawn"/>
     <union id="spawn-drop">
         <region id="blue-spawn"/>
         <region id="red-spawn"/>
@@ -89,44 +81,30 @@
     </union>
     <cuboid id="blue-spawn" min="11,0,112" max="-10,50,140"/>
     <cuboid id="red-spawn" min="-10,0,-111" max="11,50,-139"/>
-    <rectangle id="playable" min="-45,137" max="46,-136"/>
+    <negative id="not-build-area">
+        <rectangle id="playable" min="-45,137" max="46,-136"/>
+    </negative>
+    <apply block="never" enter="only-blue" region="blue-spawn"/>
+    <apply block="never" enter="only-red" region="red-spawn"/>
+    <apply region="not-build-area" block="never" message="You may not build outside the playing area!"/>
 </regions>
-<maxbuildheight>38</maxbuildheight>
-<damage>
-    <deny>
-        <all>
-            <cause>fall</cause>
-            <region id="spawn-drop"/>
-        </all>
-    </deny>
-</damage>
-<renewables>
-    <renewable grow="true" particles="true" sound="true" region="gold-blocks">
-        <renew-filter>
-            <material>gold block</material>
-        </renew-filter>
-        <replace-filter>
-            <material>air</material>
-        </replace-filter>
-    </renewable>
-</renewables>
-<destroyables materials="obsidian" completion="100%">
-    <destroyable owner="blue-team" name="Main Monument" mode-changes="true" show-progress="true">
+<destroyables materials="obsidian" mode-changes="true" show-progress="true">
+    <destroyable owner="blue-team" name="Main Monument">
         <region> <!-- Blue main monument -->
             <cuboid min="2,22,88" max="-1,26,92"/>
         </region>
     </destroyable>
-    <destroyable owner="blue-team" name="Front Monument" mode-changes="true" show-progress="true">
+    <destroyable owner="blue-team" name="Front Monument">
         <region> <!-- Blue front monument -->
             <cuboid min="2,18,47" max="-2,23,51"/>
         </region>
     </destroyable>
-    <destroyable owner="red-team" name="Main Monument" mode-changes="true" show-progress="true">
+    <destroyable owner="red-team" name="Main Monument">
         <region> <!-- Red main monument -->
             <cuboid min="2,22,-91" max="-1,26,-87"/>
         </region>
     </destroyable>
-    <destroyable owner="red-team" name="Front Monument" mode-changes="true" show-progress="true">
+    <destroyable owner="red-team" name="Front Monument">
         <region> <!-- Red front monument -->
             <cuboid min="2,18,-51" max="-2,23,-47"/>
         </region>
@@ -167,11 +145,28 @@
 </itemkeep>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
         <item amount="16" material="sandstone"/>
         <item name="`6`lFeverish Gold" lore="`7Craft a `eglowstone `7block with nine (9) Feverish Gold`7.||`6⬛ ⬛ ⬛   `6⬛ `8= `6Feverish Gold|`6⬛ ⬛ ⬛|`6⬛ ⬛ ⬛" material="blaze powder"/>
     </kill-reward>
 </kill-rewards>
+<damage>
+    <deny>
+        <all>
+            <cause>fall</cause>
+            <region id="spawn-drop"/>
+        </all>
+    </deny>
+</damage>
+<renewables>
+    <renewable grow="true" particles="true" sound="true" region="gold-blocks">
+        <renew-filter>
+            <material>gold block</material>
+        </renew-filter>
+        <replace-filter>
+            <material>air</material>
+        </replace-filter>
+    </renewable>
+</renewables>
 <crafting>
     <shapeless> <!-- FEVERISH PICKAXE -->
         <result material="gold pickaxe" unbreakable="false" name="`e`lFeverish Pickaxe" damage="32" lore="`7Efficiency XX|`7Knockback Resistance III||`o`8Anti-1hour match tool." show-enchantments="false">
@@ -197,4 +192,7 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
+<timelock>on</timelock>
+<respawn delay="4s" blackout="false"/>
+<maxbuildheight>38</maxbuildheight>
 </map>

@@ -1,6 +1,6 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Coreo</name>
-<version>1.1.3</version>
+<version>1.1.4</version>
 <objective>Destroy and leak the enemy's coreos!</objective>
 <created>2021-11-06</created>
 <authors>
@@ -21,7 +21,7 @@
     <tip after="2m" every="2m">`fCraft a `6Haste III`f potion by using `l2 oreos.</tip>
 </broadcasts>
 <teams>
-    <team id="cookie-team" color="dark gray" max="7">Cookies</team>
+    <team id="cookie-team" color="dark gray" dye-color="brown" max="7">Cookies</team>
     <team id="cream-team" color="white" max="7">Cream</team>
 </teams>
 <kits>
@@ -30,45 +30,43 @@
         <item slot="1" material="bow" unbreakable="true"/>
         <item slot="28" material="arrow" amount="16"/>
         <item slot="2" material="diamond pickaxe" attributes="generic.attackDamage:add:1" unbreakable="true"/>
+        <item slot="4" material="stained glass" team-color="true" amount="16"/>
         <head slot="6" name="AmericanOreo" uuid="971042f6-5efb-417c-8e0d-f76c3d80c0a4">
             <skin>ewogICJ0aW1lc3RhbXAiIDogMTYzNjE4NTUzOTUwMiwKICAicHJvZmlsZUlkIiA6ICI5NzEwNDJmNjVlZmI0MTdjOGUwZGY3NmMzZDgwYzBhNCIsCiAgInByb2ZpbGVOYW1lIiA6ICJBbWVyaWNhbk9yZW8iLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2NhNDIxY2RlMzdjYmNlOTk2YTlmMzNhODk3ODkzZTk3ZDcwN2Q5Yjc2M2Q1MmY1ZmFlNjA0M2E2MzEzYjBjYiIKICAgIH0KICB9Cn0=</skin>
         </head>
         <item slot="8" material="cookie" name="`6Cookie" lore="`7Not better than an oreo" amount="32"/>
-        <potion duration="oo">night vision</potion>
-        <potion duration="3" amplifier="2">resistance</potion> <!-- Prevent spawnkill -->
-        <potion duration="2" amplifier="1">strength</potion> <!-- Prevent spawnkill -->
-        <potion duration="3" amplifier="1">haste</potion> <!-- Prevent blockspawn -->
+        <effect>night vision</effect>
+        <!-- Prevent spawnkill -->
+        <effect duration="3" amplifier="2">resistance</effect> 
+        <effect duration="2">strength</effect>
+        <effect duration="3">haste</effect>
     </kit>
     <kit id="cookie-kit" parents="spawn-kit"> <!-- Specific cookies armor -->
         <item slot="3" material="stained clay" name="`8`lChoco" damage="7" amount="48"/>
-        <item slot="4" material="stained glass" damage="12" amount="16"/>
-        <helmet color="7f5539" unbreakable="true">leather helmet</helmet>
-        <leggings color="7f5539" unbreakable="true">leather leggings</leggings>
+        <helmet color="7f5539" unbreakable="true" material="leather helmet"/>
+        <leggings color="7f5539" unbreakable="true" material="leather leggings"/>
     </kit>
     <kit id="cream-kit" parents="spawn-kit"> <!-- Specific cream armor -->
         <item slot="3" material="stained clay" name="`f`lCream" damage="0" amount="48"/>
-        <item slot="4" material="stained glass" damage="0" amount="16"/>
-        <helmet color="e6ccb2" unbreakable="true">leather helmet</helmet>
-        <leggings color="e6ccb2" unbreakable="true">leather leggings</leggings>
+        <helmet color="e6ccb2" unbreakable="true" material="leather helmet"/>
+        <leggings color="e6ccb2" unbreakable="true" material="leather leggings"/>
     </kit>
 </kits>
-<timelock>on</timelock>
-<respawn delay="4s" blackout="true"/>
 <spawns>
-    <default yaw="-45" pitch="0"> <!-- Observer spawn -->
-      <region>
-          <cuboid min="1.5,56,-1.5" max="-0.5,56,0.5"/>
-      </region>
+    <default yaw="-45"> <!-- Observer spawn -->
+        <region>
+            <cuboid min="1.5,56,-1.5" max="-0.5,56,0.5"/>
+        </region>
     </default>
     <spawn team="cookie-team" kit="cookie-kit" yaw="-45">  <!-- Cookies spawn -->
-      <region>
-          <point>-25.5,21,-29.5</point>
-      </region>
+        <region>
+            <point>-25.5,21,-29.5</point>
+        </region>
     </spawn>
     <spawn team="cream-team" kit="cream-kit" yaw="135"> <!-- Cream spawn -->
-      <region>
-          <point>26.5,21,28.5</point>
-      </region>
+        <region>
+            <point>26.5,21,28.5</point>
+        </region>
     </spawn>
 </spawns>
 <filters>
@@ -76,29 +74,30 @@
     <team id="only-cream">cream-team</team>
 </filters>
 <regions>
-    <apply block="never" message="`7You may not build outside the playing area!">
-        <region>
-            <negative id="not-build-area">
-                <region id="playable"/>
-            </negative>
-        </region>
-    </apply>
-    <apply block="never" enter="only-cookie" message="`7You may not enter into the enemy spawn area!" region="cookie-spawn"/>
-    <apply block="never" enter="only-cream" message="`7You may not enter into the enemy spawn area!" region="cream-spawn"/>
+    <apply region="not-build-area" block="never" message="`7You may not build outside the playing area!"/>
+    <apply block="never" enter="only-cookie" message="`7You may not enter the enemy's spawn!" region="cookie-spawn"/>
+    <apply block="never" enter="only-cream" message="`7You may not enter the enemy's spawn!" region="cream-spawn"/>
     <union id="spawn-drop">
         <region id="cookie-spawn"/>
         <region id="cream-spawn"/>
     </union>
     <rectangle id="cookie-spawn" min="-21,-25," max="-31,-35"/>
     <rectangle id="cream-spawn" min="22,24" max="32,34"/>
-    <cuboid id="playable" min="-31,0,-35" max="32,28,34"/>
-     <!-- === OBJECTIVES === -->
+    <negative id="not-build-area">
+        <cuboid id="playable" min="-31,0,-35" max="32,28,34"/>
+    </negative>
+    <!-- === OBJECTIVES === -->
     <cuboid id="cookie-1" min="19,15,-23" max="24,18,-28"/>
     <cuboid id="cookie-2" min="-11,17,-23" max="-6,21,-28"/>
     <cuboid id="cream-1" min="-19,15,21" max="-24,18,26"/>
     <cuboid id="cream-2" min="11,17,21" max="6,21,26"/>
 </regions>
-<maxbuildheight>28</maxbuildheight>
+<cores material="obsidian" leak="5" mode-changes="true">
+    <core name="East Coreo" team="cookie-team" region="cookie-1"/>
+    <core name="West Coreo" team="cookie-team" region="cookie-2"/>
+    <core name="West Coreo" team="cream-team" region="cream-1"/>
+    <core name="East Coreo" team="cream-team" region="cream-2"/>
+</cores>
 <damage>
     <deny>
         <all>
@@ -107,12 +106,6 @@
         </all>
     </deny>
 </damage>
-<cores material="obsidian" leak="5" mode-changes="true">
-    <core name="East Coreo" team="cookie-team" region="cookie-1"/>
-    <core name="West Coreo" team="cookie-team" region="cookie-2"/>
-    <core name="West Coreo" team="cream-team" region="cream-1"/>
-    <core name="East Coreo" team="cream-team" region="cream-2"/>
-</cores>
 <toolrepair>
     <tool>stone sword</tool>
     <tool>bow</tool>
@@ -132,11 +125,11 @@
 </itemremove>
 <kill-rewards>
     <kill-reward>
-      <kit>
-        <potion duration="3" amplifier="2">regeneration</potion>
-        <potion duration="30">absorption</potion>
-        <potion duration="1">saturation</potion>
-      </kit>
+        <kit>
+            <effect duration="3" amplifier="2">regeneration</effect>
+            <effect duration="30">absorption</effect>
+            <effect duration="1">saturation</effect>
+        </kit>
     </kill-reward>
 </kill-rewards>
 <item-mods>
@@ -156,4 +149,7 @@
         <ingredient amount="2">skull item:3</ingredient>
     </shapeless>
 </crafting>
+<timelock>on</timelock>
+<respawn delay="4s" blackout="true"/>
+<maxbuildheight>28</maxbuildheight>
 </map>

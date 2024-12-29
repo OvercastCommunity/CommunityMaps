@@ -1,8 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Extraterrestrial</name>
 <include id="gapple-kill-reward"/>
 <variant id="christmas" world="christmas">Sub-Zero</variant>
-<version>1.1.6</version>
+<objective>Leak the enemy's core!</objective>
+<version>1.1.7</version>
 <gamemode>dtc</gamemode>
 <if variant="default">
     <created>2023-06-21</created>
@@ -10,7 +11,6 @@
 <if variant="christmas">
     <created>2023-11-11</created>
 </if>
-<objective>Leak the enemies core!</objective>
 <authors>
     <author uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609" contribution="Map author and creator"/> <!-- Technodono -->
 </authors>
@@ -22,23 +22,6 @@
     <tip after="0m" every="3m">`e⚠  `7Remember to use your gold nuggets and emeralds to purchase items in the shop!</tip>
     <tip after="1m" every="3m">`e⚠  `7Getting a killstreak of `63 `7will reward you with an `aemerald`7!</tip>
 </broadcasts>
-<spawns>
-    <spawn team="blue" kit="spawn-kit" yaw="-90">
-        <regions>
-            <point>-8.5,8,-155.5</point>
-        </regions>
-    </spawn>
-    <spawn team="red" kit="spawn-kit" yaw="90">
-        <regions>
-            <point>3.5,8,12.5</point>
-        </regions>
-    </spawn>
-    <default>
-        <regions>
-            <point>-2,40,-71</point>
-        </regions>
-    </default>
-</spawns>
 <kits>
     <kit id="spawn-kit">
         <item slot="0" name="`6Energy blade" unbreakable="true" material="iron sword"/>
@@ -92,6 +75,23 @@
         <item material="bow" enchantment="power:1;infinity" unbreakable="true"/>
     </kit>
 </kits>
+<spawns>
+    <spawn team="blue" kit="spawn-kit" yaw="-90">
+        <region>
+            <point>-8.5,8,-155.5</point>
+        </region>
+    </spawn>
+    <spawn team="red" kit="spawn-kit" yaw="90">
+        <region>
+            <point>3.5,8,12.5</point>
+        </region>
+    </spawn>
+    <default>
+        <region>
+            <point>-2,40,-71</point>
+        </region>
+    </default>
+</spawns>
 <actions>
     <!-- Upgrade variables -->
     <set id="haste-dummy-1" var="haste_variable" value="1" scope="player"/>
@@ -244,15 +244,8 @@
     <variable id="protection_variable" scope="team"/>
 </variables>
 <filters>
-    <deny id="deny-red">
-        <team id="only-red">red</team>
-    </deny>
-    <deny id="deny-blue">
-        <team id="only-blue">blue</team>
-    </deny>
-    <deny id="deny-void">
-        <void/>
-    </deny>
+    <team id="only-red">red</team>
+    <team id="only-blue">blue</team>
     <deny id="blast-proof">
         <all>
             <cause>explosion</cause>
@@ -406,13 +399,22 @@
     <block id="emerald-spawner-west">-28,5,-71</block>
     <!-- Rules Applied (order is important!) -->
     <apply block-break="blast-proof"/>
-    <apply block="never" region="spawn-areas" message="You may not modify spawn areas!"/>
+    <apply block="never" region="spawn-areas" message="You may not modify the spawn areas!"/>
     <apply block="never" region="emerald-areas" message="You may not modify the emerald generators!"/>
     <apply block-break="never" region="void-area"/>
-    <apply enter="only-blue" region="blue-spawn-area" message="You may not enter your enemy's spawn area!"/>
-    <apply enter="only-red" region="red-spawn-area" message="You may not enter your enemy's spawn area!"/>
-    <apply block="deny-void" region="void-area" message="You may not modify the void area!"/>
+    <apply enter="only-blue" region="blue-spawn-area" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-red" region="red-spawn-area" message="You may not enter the enemy's spawn!"/>
+    <apply block="deny(void)" region="void-area" message="You may not modify the void area!"/>
 </regions>
+<!-- Cores & modes -->
+<cores material="obsidian" leak="4" mode-changes="true">
+    <core team="red" region="red-core"/>
+    <core team="blue" region="blue-core"/>
+</cores>
+<modes>
+    <mode after="20m" material="gold block" id="gold-mode" name="`eGOLD CORE MODE"/>
+    <mode after="60m" material="coal block" id="coal-mode" name="`dCOAL CORE MODE"/>
+</modes>
 <!--  Spawners (drop in sets of 2 so more players can pickup stuff)  -->
 <spawners>
     <spawner spawn-region="blue-generator" player-region="blue-spawn-area" max-entities="128" delay="1s">
@@ -488,8 +490,6 @@
             <if variant="christmas">
                 <item material="nether brick" name="`rHardened Scales" lore="`7Immune to blast damage" amount="16" price="6" currency="emerald"/>
             </if>
-            
-           
         </category>
     </shop>
     <shop id="upgrade-shop" name="Team Upgrades">
@@ -571,11 +571,6 @@
     <disable>emerald block</disable>
     <disable>emerald</disable>
 </crafting>
-<timelock>on</timelock>
-<maxbuildheight>27</maxbuildheight>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
 <kill-rewards>
     <kill-reward>
         <item amount="16" damage="2" material="sandstone"/>
@@ -605,13 +600,9 @@
         </replace-filter>
     </renewable>
 </renewables>
-<!-- Cores & modes -->
-<cores material="obsidian" leak="4" mode-changes="true">
-    <core team="red" region="red-core"/>
-    <core team="blue" region="blue-core"/>
-</cores>
-<modes>
-    <mode after="20m" material="gold block" id="gold-mode" name="`eGOLD CORE MODE"/>
-    <mode after="60m" material="coal block" id="coal-mode" name="`dCOAL CORE MODE"/>
-</modes>
+<timelock>on</timelock>
+<maxbuildheight>27</maxbuildheight>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
 </map>
