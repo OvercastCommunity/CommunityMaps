@@ -1,6 +1,6 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Arachnea</name>
-<version>1.4.1</version>
+<version>1.4.2</version>
 <created>2013-06-07</created>
 <objective>Get the most kills in 10 minutes or be the first team to score 400!</objective>
 <authors>
@@ -14,29 +14,23 @@
     <team id="red" color="dark red" max="20">Red</team>
 </teams>
 <kits>
-    <kit id="spawn">
-        <item slot="0" damage="-3000" name="Sting">iron sword</item>
-        <item slot="1" damage="-3000" enchantment="arrow infinite:1">bow</item>
-        <item slot="28" amount="1">arrow</item>
-        <item slot="2" name="Baked Spider Flesh" amount="32">baked potato</item>
-        <item slot="3" amount="2">web</item>
-        <item slot="4" name="Spider Blood" damage="16373">potion</item>
-        <item slot="5" name="Spider Milk">milk bucket</item>
-        <potion duration="2" amplifier="1">heal</potion>
-        <potion duration="5">damage resistance</potion>
-        <chestplate>iron chestplate</chestplate>
-        <boots>iron boots</boots>
-    </kit>
-    <kit id="redkit" parents="spawn">
-        <helmet color="993333" damage="-3000">leather helmet</helmet>
-        <leggings color="993333" damage="-3000">leather leggings</leggings>
-    </kit>
-    <kit id="bluekit" parents="spawn">
-        <helmet color="334CB2" damage="-3000">leather helmet</helmet>
-        <leggings color="334CB2" damage="-3000">leather leggings</leggings>
+    <kit id="spawn-kit">
+        <item slot="0" unbreakable="true" name="Sting" material="iron sword"/>
+        <item slot="1" unbreakable="true" enchantment="arrow infinite" material="bow"/>
+        <item slot="28" material="arrow"/>
+        <item slot="2" name="Baked Spider Flesh" amount="32" material="baked potato"/>
+        <item slot="3" amount="2" material="web"/>
+        <item slot="4" name="Spider Blood" damage="16373" material="potion"/>
+        <item slot="5" name="Spider Milk" material="milk bucket"/>
+        <helmet team-color="true" unbreakable="true" material="leather helmet"/>
+        <chestplate material="iron chestplate"/>
+        <leggings team-color="true" unbreakable="true" material="leather leggings"/>
+        <boots material="iron boots"/>
+        <effect duration="2">heal</effect>
+        <effect duration="5">damage resistance</effect>
     </kit>
     <kit id="flag-kit" force="true">
-        <effect amplifier="1">slowness</effect>
+        <effect>slowness</effect>
         <effect amplifier="-3">health boost</effect>
         <effect duration="3" amplifier="2">absorption</effect>
     </kit>
@@ -47,32 +41,9 @@
 </kits>
 <spawns>
     <default region="default-spawn"/>
-    <spawn team="blue" kit="bluekit" yaw="135" filter="has-flag">
-        <regions>
-            <region id="blue-spawn-room"/>
-        </regions>
-    </spawn>
-    <spawn team="red" kit="redkit" yaw="45" filter="has-flag">
-        <regions>
-            <region id="red-spawn-room"/>
-        </regions>
-    </spawn>
+    <spawn team="blue" kit="spawn-kit" region="blue-spawn-room" yaw="135" filter="has-flag"/>
+    <spawn team="red" kit="spawn-kit" region="red-spawn-room" yaw="45" filter="has-flag"/>
 </spawns>
-<regions>
-    <cuboid id="default-spawn" min="2059,106,-992" max="2061,106,-990"/>
-    <cuboid id="blue-spawn-room" min="2135,32,-987" max="2138,32,-984"/>
-    <cuboid id="red-spawn-room" min="2052,32,-1070" max="2055,32,-1067"/>
-    <cuboid id="spider-portal" min="2096,7,-1026" max="2095,8,-1027"/>
-    <cuboid id="spider-arrival" min="2096,14,-1026" max="2095,15,-1027"/>
-    <apply block="allow-webs"/>
-</regions>
-<portals>
-    <portal yaw="@0" region="spider-portal" destination="spider-arrival"/>
-</portals>
-<time>10m</time>
-<score>
-    <limit>400</limit>
-</score>
 <filters>
     <material id="allow-webs">web</material>
     <any id="has-flag">
@@ -84,6 +55,28 @@
         </not>
     </any>
 </filters>
+<regions>
+    <cuboid id="default-spawn" min="2059,106,-992" max="2061,106,-990"/>
+    <cuboid id="blue-spawn-room" min="2135,32,-987" max="2138,32,-984"/>
+    <cuboid id="red-spawn-room" min="2052,32,-1070" max="2055,32,-1067"/>
+    <cuboid id="spider-portal" min="2096,7,-1026" max="2095,8,-1027"/>
+    <cuboid id="spider-arrival" min="2096,14,-1026" max="2095,15,-1027"/>
+    <apply block="allow-webs"/>
+</regions>
+<flags>
+    <flag id="flag" name="Spider Egg" shared="true" points-rate="1" pickup-kit="flag-kit" drop-kit="reset-health" flag-proximity-metric="none" show-respawn-on-pickup="true">
+        <post return-time="0s" respawn-time="10s">
+            <post name="Central Pit">2095.5,14,-1026.5</post>
+        </post>
+    </flag>
+</flags>
+<time>10m</time>
+<score>
+    <limit>400</limit>
+</score>
+<portals>
+    <portal yaw="@0" region="spider-portal" destination="spider-arrival"/>
+</portals>
 <toolrepair>
     <tool>bow</tool>
     <tool>iron sword</tool>
@@ -108,14 +101,6 @@
     </filter>
 </mobs>
 <respawn spectate="true">
-    <!-- "You will respawn when the flag is dropped..." -->
     <message>{ translate: "death.respawn.confirmed.waiting.flagDropped" }</message>
 </respawn>
-<flags>
-    <flag id="flag" name="Spider Egg" shared="true" points-rate="1" pickup-kit="flag-kit" drop-kit="reset-health" flag-proximity-metric="none" show-respawn-on-pickup="true">
-        <post return-time="0s" respawn-time="10s">
-            <post name="Central Pit">2095.5,14,-1026.5</post>
-        </post>
-    </flag>
-</flags>
 </map>
