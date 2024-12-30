@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<map proto="1.5.0" game="TNT Spleef">
+<name>TNT Spleef: Shogun</name>
+<version>1.0</version>
+<phase>development</phase>
+<objective>Spleef your opponents with fire and be the last player alive!</objective>
+<gamemode>arcade</gamemode>
+<created>2024-12-28</created>
+<authors>
+    <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb"/> <!-- arcadeboss -->
+</authors>
+<players colors="true" max="45"/>
+<world>
+    <timeset>13000</timeset>
+    <timelock>on</timelock>
+</world>
+<kits>
+    <kit id="spawn-kit" force="true">
+        <clear/>
+        <item slot="0" material="bow" unbreakable="true" enchantment="flame" name="`6Hama Yumi `4Fire Bow"/>
+        <item slot="1" material="flint and steel" damage="20" name="`6Hiuchigama `4Fire Kit"/> <!-- about 45 uses -->
+        <item slot="2" projectile="throwable-fireball" material="fireball" name="`6Hadouken `4Fireball" amount="2"/>
+        <item slot="3" material="potion" damage="2" name="Ninja Speed (30s)">
+            <effect duration="30s" amplifier="1">speed</effect>
+        </item>
+        <item slot="4" material="potion" damage="11" name="Ninja Jump (15s)">
+            <effect duration="15" amplifier="6">jump_boost</effect>
+        </item>
+        <item slot="5" material="potion" damage="11" name="Ninja Jump (15s)">
+            <effect duration="15" amplifier="6">jump_boost</effect>
+        </item>
+        <item slot="6" material="potion" damage="11" name="Ninja Jump (15s)">
+            <effect duration="15" amplifier="6">jump_boost</effect>
+        </item>
+        <item slot="8" amount="64" material="arrow"/>
+        <item slot="9" material="potion" damage="6">
+             <effect duration="1200s">night_vision</effect>
+        </item>
+        <double-jump power="3.8" recharge-before-landing="true"/>
+        <helmet unbreakable="true" locked="true" material="gold helmet"/>
+        <chestplate unbreakable="true" locked="true" material="chainmail chestplate"/>
+        <leggings unbreakable="true" locked="true" material="leather leggings" team-color="true"/>
+        <boots unbreakable="true" locked="true" material="leather boots" color="333333"/>
+    </kit>
+    <give filter="all(alive,not-carrying-bow)" kit="spawn-kit"/>
+</kits>
+<broadcasts>
+    <tip after="2s">Spleef your opponents with Fire Bow, Flint and Steel and Fireballs.</tip>
+    <tip after="15s" every="2m">Double Jump at the top of a Ninja Jump to get back to higher levels.</tip>
+</broadcasts>
+<spawns>
+    <spawn kit="spawn-kit">
+        <regions>
+			<union id="spawn-region">
+				<cylinder id="spawn-1" base="19,163,0" radius="8" height="0"/>
+				<cylinder id="spawn-2" base="0,163,19" radius="8" height="0"/>
+				<cylinder id="spawn-3" base="-19,163,0" radius="8" height="0"/>
+				<cylinder id="spawn-4" base="0,163,-19" radius="8" height="0"/>
+				<cylinder id="spawn-5" base="14,163,14" radius="8" height="0"/>
+				<cylinder id="spawn-6" base="14,163,-14" radius="8" height="0"/>
+				<cylinder id="spawn-7" base="-14,163,14" radius="8" height="0"/>
+				<cylinder id="spawn-8" base="-14,163,-14" radius="8" height="0"/>
+			</union>
+        </regions>
+    </spawn>
+    <default yaw="180" region="obs-spawn-point"/>
+</spawns>
+<blitz/>
+<filters>
+    <not id="not-carrying-bow">
+        <carrying>
+            <item material="bow"/>
+        </carrying>
+    </not>
+    <deny id="tnt-block-protection-filter">
+        <all>
+            <!-- TNT gets special message -->
+            <material>tnt</material>
+            <any>
+                <cause>punch</cause> <!-- should be this, -->
+                <cause>mine</cause>  <!-- but is this -->
+			</any>
+        </all>
+    </deny>
+    <deny id="original-block-protection-filter">
+        <not>
+            <material>tnt</material>
+        </not>
+    </deny>
+</filters>
+<regions>
+    <cylinder id="obs-spawn-point" base="0,184,0" radius=".5" height="0"/>
+    <cylinder id="playable-area" base="0,145,0" radius="29" height="25"/>
+    <above y="172" id="ceiling"/>
+    <!-- applicators -->
+    <apply enter="never" region="ceiling"/>
+    <apply block="tnt-block-protection-filter" message="You must ignite the TNT to spleef!"/>
+    <apply block="original-block-protection-filter" message="You can't modify that block!"/>
+</regions>
+<spawners player-region="everywhere">
+    <spawner spawn-region="playable-area" max-entities="50" delay="1s">
+        <item amount="2" material="arrow"/>
+    </spawner>
+    <spawner spawn-region="playable-area" max-entities="8" delay="10s">
+        <item projectile="throwable-fireball" material="fireball" name="`6Hadouken `4Fireball"/>
+    </spawner>
+    <spawner spawn-region="playable-area" max-entities="3" delay="30s">
+        <item material="flint and steel" damage="35" name="`6Hiuchigama `4Fire Kit"/> <!-- about 30 uses -->
+    </spawner>
+</spawners>
+<projectiles>
+    <projectile id="throwable-fireball" name="Fireball" projectile="Fireball" velocity=".5" click="right" power="1.2" damage="0" cooldown="2.5s"/>
+</projectiles>
+<tnt>
+    <fuse>1.2</fuse>
+    <power>0</power>
+    <blockdamage>false</blockdamage>
+</tnt>
+<disabledamage>
+    <damage>fall</damage>
+    <damage>entity_attack</damage>
+    <damage>projectile</damage>
+</disabledamage>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
