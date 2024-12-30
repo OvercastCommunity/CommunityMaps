@@ -1,7 +1,6 @@
-<map proto="1.4.2">
+<map proto="1.5.0" game="Bed Rush">
 <name>Bed Rush: Anubis</name>
-<game>Bed Rush</game>
-<version>1.0.5</version>
+<version>1.0.6</version>
 <include id="gapple-kill-reward"/>
 <include id="void-death"/>
 <objective>Destroy the Bed to win the Round. First Team to 5 Wins!</objective>
@@ -14,26 +13,6 @@
     <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="Bridge Snippets"/> <!-- zzuf -->
     <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="XML Tips"/> <!-- Pablete1234 -->
 </contributors>
-<teams>
-    <team id="red-team" color="red" max="22">Red</team>
-    <team id="blue-team" color="blue" max="22">Blue</team>
-</teams>
-<!-- observer spawn -->
-<spawns>
-    <default>
-        <regions>
-            <point yaw="180" pitch="20">0.5,79,52.5</point>
-        </regions>
-    </default>
-</spawns>
-<world>
-    <timeset>18000</timeset>
-</world>
-<gamerules>
-    <doDaylightCycle>false</doDaylightCycle>
-</gamerules>
-<maxbuildheight>77</maxbuildheight>
-<respawn auto="true" delay="2.5s"/>
 <constants>
     <constant id="score-limit">5</constant>
     <constant id="red-team-spawn">-70,77,0.5</constant>
@@ -44,6 +23,10 @@
     <constant id="void-plane">50</constant>
     <constant id="health">1</constant>
 </constants>
+<teams>
+    <team id="red-team" color="red" max="22">Red</team>
+    <team id="blue-team" color="blue" max="22">Blue</team>
+</teams>
 <broadcasts>
     <alert after="1s" filter="red-only">`6`lRound `e1`7`l — Destroy the Blue Team's Bed!</alert>
     <alert after="1s" filter="blue-only">`6`lRound `e1`7`l — Destroy the Red Team's Bed!</alert>
@@ -51,10 +34,6 @@
     <tip after="70s">`7`lThe pyramid has sword and splash potion spawners.</tip>
     <alert after="17m">`7If neither team wins 5 rounds the match will end in `c`l3 minutes`7!</alert>
 </broadcasts>
-<spawns>
-    <spawn team="red-team" kit="spawn-kit" yaw="270" pitch="0" region="red-team-spawn-point"/>
-    <spawn team="blue-team" kit="spawn-kit" yaw="90" pitch="0" region="blue-team-spawn-point"/>
-</spawns>
 <kits>
     <kit id="spawn-kit">
         <clear/>
@@ -90,42 +69,20 @@
         </action>
     </kit>
 </kits>
-<damage>
-    <deny>
-        <all>
-            <variable var="fall_damage">0</variable>
-            <cause>fall</cause>
-            <alive/>
-        </all>
-    </deny>
-</damage>
-<block-drops>
-    <rule kit="bed-breaker-kit">
-        <filter>
-            <material>bed block</material>
-        </filter>
-    </rule>
-    <rule>
-        <filter>
-            <any>
-                <material>redstone block</material>
-                <material>lapis block</material>
-            </any>
-        </filter>
-        <drops>
-            <item chance="1" amount="1" material="ender stone"/>
-        </drops>
-    </rule>
-</block-drops>
+<spawns>
+    <spawn team="red-team" kit="spawn-kit" yaw="270" region="red-team-spawn-point"/>
+    <spawn team="blue-team" kit="spawn-kit" yaw="90" region="blue-team-spawn-point"/>
+    <default>
+        <regions>
+            <point yaw="180" pitch="20">0.5,79,52.5</point>
+        </regions>
+    </default>
+</spawns>
 <filters>
     <alive id="alive"/>
     <match-running id="match-running"/>
-    <deny id="deny-red">
-        <team id="red-only">red-team</team>
-    </deny>
-    <deny id="deny-blue">
-        <team id="blue-only">blue-team</team>
-    </deny>
+    <team id="red-only">red-team</team>
+    <team id="blue-only">blue-team</team>
     <all id="naked">
         <alive/>
         <match-running/>
@@ -235,6 +192,33 @@
         <entity>boat</entity>
     </any>
 </filters>
+<damage>
+    <deny>
+        <all>
+            <variable var="fall_damage">0</variable>
+            <cause>fall</cause>
+            <alive/>
+        </all>
+    </deny>
+</damage>
+<block-drops>
+    <rule kit="bed-breaker-kit">
+        <filter>
+            <material>bed block</material>
+        </filter>
+    </rule>
+    <rule>
+        <filter>
+            <any>
+                <material>redstone block</material>
+                <material>lapis block</material>
+            </any>
+        </filter>
+        <drops>
+            <item chance="1" amount="1" material="ender stone"/>
+        </drops>
+    </rule>
+</block-drops>
 <variables>
     <timelimit id="timelimit"/>
     <variable id="round_number" scope="match" default="1"/>
@@ -484,8 +468,8 @@
     <apply block-place="never" region="not-buildable" message="You may not build in this area!"/>
     <apply block-place="never" region="bed-red"/>
     <apply block-place="never" region="bed-blue"/>
-    <apply block-break="deny-red" region="bed-red" message="You may not break your own bed!"/>
-    <apply block-break="deny-blue" region="bed-blue" message="You may not break your own bed!"/>
+    <apply block-break="blue-only" region="bed-red" message="You may not break your own bed!"/>
+    <apply block-break="red-only" region="bed-blue" message="You may not break your own bed!"/>
 </regions>
 <spawners>
     <spawner spawn-region="regen-center-point" player-region="everywhere" max-entities="2" delay="35s">
@@ -567,4 +551,12 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
+<world>
+    <timeset>18000</timeset>
+</world>
+<gamerules>
+    <doDaylightCycle>false</doDaylightCycle>
+</gamerules>
+<maxbuildheight>77</maxbuildheight>
+<respawn auto="true" delay="2.5s"/>
 </map>
