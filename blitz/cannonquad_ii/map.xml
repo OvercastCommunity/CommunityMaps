@@ -1,7 +1,7 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>CannonQuad II</name>
 <variant id="blitz-only" world="blitz">Blitz</variant>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <objective>Destroy your opponents within 20 minutes.</objective>
 <created>2023-11-19</created>
 <phase>staging</phase>
@@ -67,9 +67,9 @@
 </teams>
 <spawns>
     <spawn team="red" kit="initial-kit" yaw="-90" filter="initial-spawn">
-        <regions>
+        <region>
             <cuboid min="-101,61,9" max="-93,61,-9"/>
-        </regions>
+        </region>
     </spawn>
     <spawn team="red" kit="secondary-spawn-kit" yaw="-90" filter="secondary-spawn">
         <regions>
@@ -77,21 +77,21 @@
             <cuboid min="-107,21,9" max="-109,21,14"/>
         </regions>
     </spawn>
-    <spawn team="blue" kit="initial-kit" yaw="0" filter="initial-spawn">
-        <regions>
+    <spawn team="blue" kit="initial-kit" filter="initial-spawn">
+        <region>
             <cuboid min="-69,61,-41" max="-51,61,-33"/>
-        </regions>
+        </region>
     </spawn>
-    <spawn team="blue" kit="secondary-spawn-kit" yaw="0" filter="secondary-spawn">
+    <spawn team="blue" kit="secondary-spawn-kit" filter="secondary-spawn">
         <regions>
             <cuboid min="-51,21,-49" max="-46,21,-47"/>
             <cuboid min="-74,21,-49" max="-69,21,-47"/>
         </regions>
     </spawn>
     <spawn team="green" kit="initial-kit" yaw="-180" filter="initial-spawn">
-        <regions>
+        <region>
             <cuboid min="-51,61,41" max="-69,61,33"/>
-        </regions>
+        </region>
     </spawn>
     <spawn team="green" kit="secondary-spawn-kit" yaw="-180" filter="secondary-spawn">
         <regions>
@@ -100,9 +100,9 @@
         </regions>
     </spawn>
     <spawn team="yellow" kit="initial-kit" yaw="90" filter="initial-spawn">
-        <regions>
+        <region>
             <cuboid min="-19,61,-9" max="-27,61,9"/>
-        </regions>
+        </region>
     </spawn>
     <spawn team="yellow" kit="secondary-spawn-kit" yaw="90" filter="secondary-spawn">
         <regions>
@@ -110,15 +110,15 @@
             <cuboid min="-13,21,14" max="-11,21,9"/>
         </regions>
     </spawn>
-    <default yaw="0" pitch="0">
-        <regions>
+    <default>
+        <region>
             <cylinder base="-59,60,0" radius="1" height="0"/>
-        </regions>
+        </region>
     </default>
 </spawns>
 <kits>
     <kit id="spawn-kit">
-        <item amount="1" attributes="generic.attackDamage:add:2" enchantment="knockback:1" name="`fBlunt Diamond Pickaxe" slot="0" material="diamond pickaxe" unbreakable="true"/>
+        <item amount="1" attributes="generic.attackDamage:add:2" enchantment="knockback" name="`fBlunt Diamond Pickaxe" slot="0" material="diamond pickaxe" unbreakable="true"/>
         <item amount="64" slot="1" material="snow ball"/>
         <item amount="64" damage="3" name="Bridge Builder" slot="8" material="leaves"/>
         <item slot="28" name="`a`oiCarus Blade" material="wood sword"/>
@@ -164,22 +164,18 @@
     </kit>
 </kits>
 <filters>
-    <team id="only-red">red</team>
     <team id="only-blue">blue</team>
+    <team id="only-red">red</team>
     <team id="only-green">green</team>
     <team id="only-yellow">yellow</team>
     <deny id="deny-break">
         <any>
-            <material>160</material>
-            <material>95</material>
+            <material>stained glass pane</material>
+            <material id="only-stained-glass">stained glass</material>
             <material>chest</material>
             <material>obsidian</material>
         </any>
     </deny>
-    <not id="no-build-void">
-        <void/>
-    </not>
-    <material id="only-stained-glass">stained glass</material>
     <material id="only-end-stone">ender stone</material>
     <material id="only-air">air</material>
     <after id="open-spawn-platforms" duration="20s" message="`7Fight begins in {0}">
@@ -244,15 +240,11 @@
     <above id="top" y="32"/>
     <below id="bottom" y="9"/>
     <cuboid id="center-area" min="-84,9,-24" max="-36,33,24"/>
-    <cuboid id="blue-monument" min="-62,27,-54" max="-58,22,-58"/>
-    <cuboid id="yellow-monument" min="-6,27,-2" max="-2,22,2"/>
-    <cuboid id="red-monument" min="-114,27,2" max="-118,22,-2"/>
-    <cuboid id="green-monument" min="-58,27,54" max="-62,22,58"/>
     <union id="monuments">
-        <region id="blue-monument"/>
-        <region id="yellow-monument"/>
-        <region id="red-monument"/>
-        <region id="green-monument"/>
+        <cuboid id="blue-monument" min="-62,27,-54" max="-58,22,-58"/>
+        <cuboid id="yellow-monument" min="-6,27,-2" max="-2,22,2"/>
+        <cuboid id="red-monument" min="-114,27,2" max="-118,22,-2"/>
+        <cuboid id="green-monument" min="-58,27,54" max="-62,22,58"/>
     </union>
     <cuboid id="center-ground" min="-32,0,-28" max="-87,1,28"/>
     <union id="spawn-platforms">
@@ -265,7 +257,7 @@
     <apply block-break="deny-break" message="You may not break this block."/>
     <apply block="never" region="top" message="You may not build here."/>
     <apply block="never" region="bottom" message="You may not build here."/>
-    <apply block="no-build-void" region="playable-region" message="You may not build in the void."/>
+    <apply block="deny(void)" region="playable-region" message="You may not build in the void."/>
 </regions>
 <actions>
     <trigger scope="match" filter="open-spawn-platforms">
@@ -298,11 +290,11 @@
     </trigger>
 </actions>
 <unless variant="blitz-only">
-    <destroyables>
-        <destroyable name="§9Blue §9Monument" id="blue-monument-destroyable" materials="ender stone" show-progress="true" completion="100%" show="true" owner="blue" region="blue-monument" required="false"/>
-        <destroyable name="§4Red §4Monument" id="red-monument-destroyable" materials="ender stone" show-progress="true" completion="100%" show="true" owner="red" region="red-monument" required="false"/>
-        <destroyable name="§eYellow §eMonument" id="yellow-monument-destroyable" materials="ender stone" show-progress="true" completion="100%" show="true" owner="yellow" region="yellow-monument" required="false"/>
-        <destroyable name="§aGreen §aMonument" id="green-monument-destroyable" materials="ender stone" show-progress="true" completion="100%" show="true" owner="green" region="green-monument" required="false"/>
+    <destroyables materials="ender stone" show-progress="true" show="true" required="false">
+        <destroyable name="§9Blue §9Monument" id="blue-monument-destroyable" owner="blue" region="blue-monument"/>
+        <destroyable name="§4Red §4Monument" id="red-monument-destroyable" owner="red" region="red-monument"/>
+        <destroyable name="§eYellow §eMonument" id="yellow-monument-destroyable" owner="yellow" region="yellow-monument"/>
+        <destroyable name="§aGreen §aMonument" id="green-monument-destroyable" owner="green" region="green-monument"/>
     </destroyables>
 </unless>
 <disabledamage>

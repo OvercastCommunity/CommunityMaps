@@ -1,12 +1,19 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Procedural: Cliff Maze</name>
-<version>2.0.0</version>
+<version>2.0.1</version>
 <created>2023-09-05</created>
 <objective>Kill all player's on the enemy team to win!</objective>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="cc2292de-fcb3-412d-9319-f3177f73b605"/> <!-- cs_ -->
     <author uuid="2ca8072f-74be-4798-85b8-bbce03aa91af"/> <!-- Tywnis -->
 </authors>
+<broadcasts>
+    <tip after="5s">Check out /classes</tip>
+    <tip after="6s">Change class with /class "name"</tip>
+    <tip after="2m" count="5">Check out /classes</tip>
+    <tip after="2m" count="5">Change class with /class "name"</tip>
+</broadcasts>
 <teams>
     <team id="blue-team" color="blue" max="12">Blue</team>
     <team id="red-team" color="dark red" max="12">Red</team>
@@ -14,7 +21,7 @@
 <kits>
     <kit id="spawn-kit">
         <game-mode>adventure</game-mode>
-        <potion duration="oo">night vision</potion>
+        <effect>night vision</effect>
     </kit>
 </kits>
 <classes family="ghost" sticky="false">
@@ -24,7 +31,7 @@
             <item slot="1" material="bow" unbreakable="true"/>
             <item slot="2" material="golden apple"/>
             <item slot="8" material="arrow" amount="16"/>
-            <potion duration="oo" amplifier="1" ambient="true">damage resistance</potion>
+            <effect ambient="true">damage resistance</effect>
             <helmet team-color="true" unbreakable="true" material="leather helmet"/>
             <chestplate team-color="true" unbreakable="true" material="leather chestplate"/>
             <leggings team-color="true" unbreakable="true" enchantment="protection projectile:1" material="leather leggings"/>
@@ -35,8 +42,8 @@
         <kit>
             <item slot="0" material="iron sword" unbreakable="true"/>
             <item slot="1" material="golden apple"/>
-            <effect duration="oo" amplifier="-1">health boost</effect>
-            <potion duration="oo" amplifier="1" ambient="true">damage resistance</potion>
+            <effect amplifier="-1">health boost</effect>
+            <effect ambient="true">damage resistance</effect>
             <helmet team-color="true" unbreakable="true" material="leather helmet"/>
             <chestplate team-color="true" unbreakable="true" material="leather chestplate"/>
             <leggings material="gold leggings" enchantment="protection projectile:2" unbreakable="true"/>
@@ -47,9 +54,9 @@
         <kit>
             <item slot="0" material="stone sword" unbreakable="true"/>
             <item slot="1" amount="3" material="golden apple"/>
-            <effect duration="oo" amplifier="1">health boost</effect>
-            <potion duration="oo" amplifier="2" ambient="true">damage resistance</potion>
-            <potion duration="oo" amplifier="2" ambient="true">slow</potion>
+            <effect>health boost</effect>
+            <effect amplifier="2" ambient="true">damage resistance</effect>
+            <effect amplifier="2" ambient="true">slow</effect>
             <helmet unbreakable="true" material="iron helmet"/>
             <chestplate team-color="true" unbreakable="true" material="leather chestplate"/>
             <leggings unbreakable="true" enchantment="protection projectile:3" material="iron leggings"/>
@@ -58,12 +65,12 @@
     </class>
     <class name="Ranger" default="false" description="Agile and quick!" longdescription="A whistle, a feather, it's gone..." icon="bow">
         <kit>
-            <item slot="0" enchantment="power:1" material="bow" unbreakable="true"/>
+            <item slot="0" enchantment="power" material="bow" unbreakable="true"/>
             <item slot="1" amount="2" material="golden apple"/>
             <item slot="8" material="arrow" amount="64"/>
-            <effect duration="oo" amplifier="-3">health boost</effect>
-            <potion duration="oo" amplifier="1" ambient="true">damage resistance</potion>
-            <potion duration="oo" amplifier="1" ambient="true">speed</potion>
+            <effect amplifier="-3">health boost</effect>
+            <effect ambient="true">damage resistance</effect>
+            <effect ambient="true">speed</effect>
             <helmet team-color="true" unbreakable="true" material="leather helmet"/>
             <chestplate team-color="true" unbreakable="true" material="leather chestplate"/>
             <leggings material="chainmail leggings" enchantment="protection projectile:3" unbreakable="true"/>
@@ -72,25 +79,25 @@
     </class>
 </classes>
 <spawns>
-    <default>
-        <region yaw="-90">
+    <default yaw="-90">
+        <region>
             <point>2,32,2</point>
         </region>
     </default>
     <spawn team="blue-team" kit="spawn-kit">
-        <region yaw="0">
+        <region>
             <cuboid min="24,2,-6" max="26,2,-4"/>
         </region>
     </spawn>
-    <spawn team="red-team" kit="spawn-kit">
-        <region yaw="180">
+    <spawn team="red-team" kit="spawn-kit" yaw="180">
+        <region>
             <cuboid min="24,2,54" max="22,6,56"/>
         </region>
     </spawn>
 </spawns>
 <regions>
     <cuboid id="fill-cuboid" min="5,11,15" size="5,2,5"/>
-    <apply block="participating"/>
+    <apply block="not(participating)"/>
     <apply block-physics="physics-filter"/>
 </regions>
 <time result="score" overtime="45s" max-overtime="3m15s">10m</time>
@@ -123,13 +130,9 @@
 </actions>
 <filters>
     <!-- Allows when the t_score variable is greater than or equal to 100 -->
-    <always id="always"/>
     <after id="physics-filter" duration="5s">
         <match-started id="structure-filter"/>
     </after>
-    <not id="participating">
-        <participating/>
-    </not>
 </filters>
 <variables>
     <variable id="structure_choice" scope="match" default="-1"/>
@@ -559,7 +562,6 @@
 </itemremove>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
         <item material="arrow" amount="3"/>
     </kill-reward>
 </kill-rewards>
@@ -570,10 +572,4 @@
     <depletion>off</depletion>
 </hunger>
 <timelock>on</timelock>
-<broadcasts>
-    <tip after="5s">Check out /classes</tip>
-    <tip after="6s">Change class with /class "name"</tip>
-    <tip after="2m" count="5">Check out /classes</tip>
-    <tip after="2m" count="5">Change class with /class "name"</tip>
-</broadcasts>
 </map>
