@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <map proto="1.5.0" game="Bow Spleef">
 <name>Bow Spleef: Shogun</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <phase>development</phase>
 <objective>Spleef your opponents with fire and be the last player alive!</objective>
 <gamemode>arcade</gamemode>
@@ -14,6 +14,13 @@
     <timeset>13000</timeset>
     <timelock>on</timelock>
 </world>
+<world-borders>
+    <world-border size="9000" center="0.5,0.5"/>
+    <world-border size="68" after="2m" center="0.5,0.5"/>
+    <world-border size="7" after="2m" duration="3m" center="0.5,0.5"/>
+    <world-border size="5" after="5m" duration="15s" center="0.5,0.5"/>
+</world-borders>
+<time>5m</time>
 <kits>
     <kit id="spawn-kit" force="true">
         <clear/>
@@ -45,21 +52,19 @@
     <give filter="all(alive,not-carrying-bow)" kit="spawn-kit"/>
 </kits>
 <broadcasts>
-    <tip after="2s">Spleef your opponents with Fire Bow, Flint and Steel and Fireballs.</tip>
-    <tip after="15s" every="2m">Double Jump at the top of a Ninja Jump to get back to higher levels.</tip>
+    <tip after="2s">You have 1 life.  Don't fall and stay inside the border.</tip>
+    <tip after="15s">Spleef your opponents with Fire Bow, Flint and Steel and Fireballs.</tip>
+    <tip after="30s" every="2m">Double Jump at the top of a Ninja Jump to get back to higher levels.</tip>
+    <tip after="30s">Burn the TNT by "sneaking" to create a chain-reaction.</tip>
 </broadcasts>
 <spawns>
     <spawn kit="spawn-kit">
         <regions>
             <union id="spawn-region">
-                <cylinder id="spawn-1" base="19,163,0" radius="8" height="0"/>
-                <cylinder id="spawn-2" base="0,163,19" radius="8" height="0"/>
-                <cylinder id="spawn-3" base="-19,163,0" radius="8" height="0"/>
-                <cylinder id="spawn-4" base="0,163,-19" radius="8" height="0"/>
-                <cylinder id="spawn-5" base="14,163,14" radius="8" height="0"/>
-                <cylinder id="spawn-6" base="14,163,-14" radius="8" height="0"/>
-                <cylinder id="spawn-7" base="-14,163,14" radius="8" height="0"/>
-                <cylinder id="spawn-8" base="-14,163,-14" radius="8" height="0"/>
+                <cylinder id="spawn-1" base="14,163,14" radius="8" height="0"/>
+                <cylinder id="spawn-2" base="14,163,-14" radius="8" height="0"/>
+                <cylinder id="spawn-3" base="-14,163,14" radius="8" height="0"/>
+                <cylinder id="spawn-4" base="-14,163,-14" radius="8" height="0"/>
             </union>
         </regions>
     </spawn>
@@ -67,6 +72,11 @@
 </spawns>
 <blitz/>
 <actions>
+    <trigger filter="match-running" scope="match">
+        <action>
+            <fill region="obby-region" material="air" filter="obsidian"/>
+        </action>
+    </trigger>
     <trigger filter="arrow-pulse" scope="player">
         <action>
             <kit force="false" filter="always" deduct-items="true">
@@ -98,9 +108,15 @@
             </any>
         </all>
     </deny>
+    <all id="obsidian">
+        <material>obsidian</material>
+    </all>
     <deny id="original-block-protection-filter">
         <not>
-            <material>tnt</material>
+            <any>
+                <material>tnt</material>
+                <material>fire</material>
+            </any>
         </not>
     </deny>
     <pulse id="arrow-pulse" period="5s" duration="1s">
@@ -114,6 +130,10 @@
     <cylinder id="obs-spawn-point" base="0.5,184.1,0.5" radius=".5" height="0"/>
     <cylinder id="playable-area" base="0,145,0" radius="29" height="25"/>
     <above y="172" id="ceiling"/>
+    <union id="obby-region">
+        <cuboid min="-24,161,-4" max="25,164,5"/>
+        <cuboid min="5,161,-24" max="-4,164,25"/>
+    </union>
     <!-- applicators -->
     <apply enter="never" region="ceiling"/>
     <apply block="tnt-block-protection-filter" message="You must ignite the TNT to spleef!"/>
