@@ -1,6 +1,6 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Thunderrush</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <include id="gapple-kill-reward"/>
 <objective>Capture the most flags in 12 minutes or gain a 3 point lead to win!</objective>
 <time result="score" overtime="1m" max-overtime="2m">12m</time>
@@ -62,29 +62,29 @@
 </kits>
 <spawns>
     <spawn team="red" kit="red-kit">
-        <regions>
+        <region>
             <point>24.5,7,-48.5</point>
-        </regions>
+        </region>
     </spawn>
     <spawn team="blue" kit="blue-kit" yaw="180">
-        <regions>
+        <region>
             <point>-24.5,7,48</point>
-        </regions>
+        </region>
     </spawn>
     <spawn team="green" kit="green-kit" yaw="-90">
-        <regions>
+        <region>
             <point>-48.5,7,-24.5</point>
-        </regions>
+        </region>
     </spawn>
     <spawn team="yellow" kit="yellow-kit" yaw="90">
-        <regions>
+        <region>
             <point>48.5,7,24.5</point>
-        </regions>
+        </region>
     </spawn>
     <default>
-        <regions>
+        <region>
             <point>0.5,7,0.5</point>
-        </regions>
+        </region>
     </default>
 </spawns>
 <filters>
@@ -100,13 +100,6 @@
     <not id="not-yellow">
         <team id="only-yellow">yellow</team>
     </not>
-    <team id="only-blue-team">blue</team>
-    <team id="only-red-team">red</team>
-    <team id="only-green-team">green</team>
-    <team id="only-yellow-team">yellow</team>
-    <not id="deny-void">
-        <void/>
-    </not>
 </filters>
 <regions>
     <complement id="void-area">
@@ -118,19 +111,23 @@
         <rectangle min="-30, 24" max="-38,19"/> <!-- Blue -->
         <rectangle min="24,30" max="19,38"/> <!-- Yellow -->
         <rectangle min="-24,-30" max="-19,-38"/> <!-- Green -->
-        <region id="spawn-platforms"/>
-        <region id="flag-platforms"/>
+        <union id="spawn-platforms">
+            <rectangle id="red-spawn-protection" min="18,-42" max="33,-52"/>
+            <rectangle id="blue-spawn-protection" min="-18,42" max="-33,52"/>
+            <rectangle id="green-spawn-protection" min="-42,-18" max="-52,-33"/>
+            <rectangle id="yellow-spawn-protection" min="42,18" max="52,33"/>
+        </union>
+        <union id="flag-platforms">
+            <cylinder id="red-platform" radius="2.5" base="49.5,9,-27.5" height="4"/>
+            <cylinder id="blue-platform" radius="2.5" base="-49.5,9,27.5" height="4"/>
+            <cylinder id="green-platform" radius="2.5" base="-27.5,9,-49.5" height="4"/>
+            <cylinder id="yellow-platform" radius="2.5" base="27.5,9,49.5" height="4"/>
+        </union>
     </complement>
-    <apply block-place="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block-place="deny(void)" region="void-area" message="You may not build in the void area!"/>
     <apply block="never" region="glass" message="You may not break the spawners!"/>
     <cuboid id="glass" min="-1,5,-1" max="1,8,1"/>
     <cuboid id="glass-point" min="0,7.1,0" max="0,7.5,0"/>
-    <union id="spawn-platforms">
-		<rectangle id="red-spawn-protection" min="18,-42" max="33,-52"/>
-        <rectangle id="blue-spawn-protection" min="-18,42" max="-33,52"/>
-        <rectangle id="green-spawn-protection" min="-42,-18" max="-52,-33"/>
-        <rectangle id="yellow-spawn-protection" min="42,18" max="52,33"/>
-    </union>
     <apply block="never" region="spawn-platforms" message="You may not break spawn!"/>
     <apply block="never" region="flag-platforms" message="You may not edit the flag platforms"/>
     <union id="nets">
@@ -138,12 +135,6 @@
         <cylinder id="blue-net" radius="4" base="-24.5,7,48" height="10"/>
         <cylinder id="green-net" radius="4" base="-48.5,7,-24.5" height="10"/>
         <cylinder id="yellow-net" radius="4" base="48.5,7,24.5" height="10"/>
-    </union>
-    <union id="flag-platforms">
-        <cylinder id="red-platform" radius="2.5" base="49.5,9,-27.5" height="4"/>
-        <cylinder id="blue-platform" radius="2.5" base="-49.5,9,27.5" height="4"/>
-        <cylinder id="green-platform" radius="2.5" base="-27.5,9,-49.5" height="4"/>
-        <cylinder id="yellow-platform" radius="2.5" base="27.5,9,49.5" height="4"/>
     </union>
 </regions>
 <spawners>
@@ -203,24 +194,24 @@
 </score>
 <flags flag-proximity-metric="none" net-proximity-metric="none">
     <flag id="green-flag" name="Green Flag" carry-message="Take the `a`lenemy flag`r to your spawn!" color="green" pickup-filter="not-green" post="green-post" shared="true">
-        <net points="1" owner="yellow" region="yellow-net" capture-filter="only-yellow-team"/>
-        <net points="1" owner="blue" region="blue-net" capture-filter="only-blue-team"/>
-        <net points="1" owner="red" region="red-net" capture-filter="only-red-team"/>
+        <net points="1" owner="yellow" region="yellow-net" capture-filter="only-yellow"/>
+        <net points="1" owner="blue" region="blue-net" capture-filter="only-blue"/>
+        <net points="1" owner="red" region="red-net" capture-filter="only-red"/>
     </flag>
     <flag id="yellow-flag" name="Yellow Flag" carry-message="Take the `e`lenemy flag`r to your spawn!" color="yellow" pickup-filter="not-yellow" post="yellow-post" shared="true">
-        <net points="1" owner="blue" region="blue-net" capture-filter="only-blue-team"/>
-        <net points="1" owner="red" region="red-net" capture-filter="only-red-team"/>
-        <net points="1" owner="green" region="green-net" capture-filter="only-green-team"/>
+        <net points="1" owner="blue" region="blue-net" capture-filter="only-blue"/>
+        <net points="1" owner="red" region="red-net" capture-filter="only-red"/>
+        <net points="1" owner="green" region="green-net" capture-filter="only-green"/>
     </flag>
     <flag id="red-flag" name="Red Flag" carry-message="Take the `c`lenemy flag`r to your spawn!" pickup-filter="not-red" color="red" post="red-post" shared="true">
-        <net points="1" owner="yellow" region="yellow-net" capture-filter="only-yellow-team"/>
-        <net points="1" owner="blue" region="blue-net" capture-filter="only-blue-team"/>
-        <net points="1" owner="green" region="green-net" capture-filter="only-green-team"/>
+        <net points="1" owner="yellow" region="yellow-net" capture-filter="only-yellow"/>
+        <net points="1" owner="blue" region="blue-net" capture-filter="only-blue"/>
+        <net points="1" owner="green" region="green-net" capture-filter="only-green"/>
     </flag>
     <flag id="blue-flag" name="Blue Flag" carry-message="Take the `9`lenemy flag`r to your spawn!" color="blue" pickup-filter="not-blue" post="blue-post" shared="true">
-        <net points="1" owner="yellow" region="yellow-net" capture-filter="only-yellow-team"/>
-        <net points="1" owner="red" region="red-net" capture-filter="only-red-team"/>
-        <net points="1" owner="green" region="green-net" capture-filter="only-green-team"/>
+        <net points="1" owner="yellow" region="yellow-net" capture-filter="only-yellow"/>
+        <net points="1" owner="red" region="red-net" capture-filter="only-red"/>
+        <net points="1" owner="green" region="green-net" capture-filter="only-green"/>
     </flag>
     <post id="red-post" owner="red" recover-time="10" respawn-time="10" pickup-filter="not-red" yaw="90">49.5,9,-27.5</post>
     <post id="blue-post" owner="blue" recover-time="10" respawn-time="10" pickup-filter="not-blue" yaw="-90">-49.5,9,27.5</post>

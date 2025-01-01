@@ -1,8 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Ciudad Costera</name>
-<version>1.1.5</version>
+<version>1.1.6</version>
 <objective>Capture the most flags possible!</objective>
 <created>2021-12-29</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609" contribution="Map builder + XML"/> <!-- Technodono -->
     <author uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="Map builder"/> <!-- Cazadorian -->
@@ -18,7 +19,6 @@
     <team id="blue" color="blue" max="16">Blue</team>
     <team id="red" color="red" max="16">Red</team>
 </teams>
-<time>8m</time>
 <kits>
     <kit id="spawn-kit" force="true">
         <item slot="0" unbreakable="true" name="`6`l`oEstoque" material="stone sword"/>
@@ -26,8 +26,8 @@
         <item slot="2" amount="6" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
         <item slot="3" material="golden apple"/>
         <item slot="8" amount="10" material="arrow"/>
-        <potion duration="2" amplifier="25">heal</potion>
-        <potion duration="2" amplifier="25">damage resistance</potion>
+        <effect duration="2" amplifier="25">heal</effect>
+        <effect duration="2" amplifier="25">damage resistance</effect>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
         <leggings unbreakable="true" material="iron leggings">
@@ -46,37 +46,56 @@
         </regions>
     </default>
     <spawn team="blue" kit="spawn-kit" yaw="90">
-        <regions>
+        <region>
             <block id="blue-spawns">51,10,51</block>
-        </regions>
+        </region>
     </spawn>
     <spawn team="red" kit="spawn-kit" yaw="-90">
-        <regions>
+        <region>
             <block id="red-spawns">-83,10,51</block>
-        </regions>
+        </region>
     </spawn>
 </spawns>
-<projectiles>
-    <projectile id="arrow" name="crossbow bolt" velocity="4" damage="7" throwable="true" cooldown="3s"/>
-</projectiles>
 <filters>
-    <participating id="playing"/>
-    <not id="not-red-only">
-        <team id="red-only">red</team>
-    </not>
-    <not id="not-blue-only">
-        <team id="blue-only">blue</team>
-    </not>
+    <team id="red-only">red</team>
+    <team id="blue-only">blue</team>
 </filters>
 <regions>
     <rectangle id="red-base" min="-90,48" max="-80,55"/>
     <rectangle id="blue-base" min="49,48" max="59,55"/>
     <cuboid id="red-net" min="-85,9,54" max="-90,12,49"/>
     <cuboid id="blue-net" min="54,9,49" max="59,12,54"/>
+    <apply enter="red-only" region="red-base" message="You may not enter the enemy's spawn!"/>
+    <apply enter="blue-only" region="blue-base" message="You may not enter the enemy's spawn!"/>
     <apply block="never" block-physics="never" use="never"/>
-    <apply enter="red-only" region="red-base" message="You cannot enter the enemies spawn!"/>
-    <apply enter="blue-only" region="blue-base" message="You cannot enter the enemies spawn!"/>
 </regions>
+<time>8m</time>
+<score>
+    <mercy>4</mercy>
+</score>
+<flags>
+    <flag id="blue-flag" name="Blue Flag" owner="blue" color="light_blue" carry-message="`f`lYou are carrying the `9`lBlue Flag`f`l, return it to your `c`lspawn`r`l!">
+        <post pickup-filter="red-only" recover-time="20">55,7,10</post>
+    </flag>
+        <flag id="lime-flag" name="Lime Flag" owner="blue" color="lime" carry-message="`f`lYou are carrying the `a`lLime Flag`f`l, return it to your `c`lspawn`r`l!">
+        <post pickup-filter="red-only" recover-time="20">55,13,79</post>
+    </flag>
+    <flag id="orange-flag" name="Orange Flag" owner="red" color="orange" carry-message="`f`lYou are carrying the `6`lOrange Flag`f`l, return it to your `9`lspawn`r`l!">
+        <post pickup-filter="blue-only" recover-time="20">-87,13,79</post>
+    </flag>
+    <flag id="pink-flag" name="Pink Flag" owner="red" color="pink" carry-message="`f`lYou are carrying the `d`lPink Flag`f`l, return it to your `9`lspawn`r`l!">
+        <post pickup-filter="blue-only" recover-time="20">-87,7,10</post>
+    </flag>
+    <flags points="1">
+        <net region="red-net" flag="blue-flag"/>
+        <net region="red-net" flag="lime-flag"/>
+        <net region="blue-net" flag="orange-flag"/>
+        <net region="blue-net" flag="pink-flag"/>
+    </flags>
+</flags>
+<projectiles>
+    <projectile id="arrow" name="crossbow bolt" velocity="4" damage="7" throwable="true" cooldown="3s"/>
+</projectiles>
 <toolrepair>
     <tool>stone sword</tool>
     <tool>bow</tool>
@@ -90,6 +109,12 @@
     <item>firework charge</item>
     <item>golden apple</item>
 </itemremove>
+<kill-rewards>
+    <kill-reward>
+        <item amount="6" material="arrow"/>
+        <item amount="3" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
+    </kill-reward>
+</kill-rewards>
 <disabledamage>
     <damage>fall</damage>
 </disabledamage>
@@ -100,34 +125,4 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<kill-rewards>
-    <kill-reward>
-        <item material="golden apple"/>
-        <item amount="6" material="arrow"/>
-        <item amount="3" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
-    </kill-reward>
-</kill-rewards>
-<score>
-    <mercy>4</mercy>
-</score>
-<flags>
-    <flag id="blue-flag" name="Blue Flag" owner="blue" color="light_blue" carry-message="`f`lYou are carrying the `9`lblue flag`f`l, return it to your `c`lspawn`r`l!">
-        <post pickup-filter="red-only" recover-time="20">55,7,10</post>
-    </flag>
-        <flag id="lime-flag" name="Lime Flag" owner="blue" color="lime" carry-message="`f`lYou are carrying the `a`llime flag`f`l, return it to your `c`lspawn`r`l!">
-        <post pickup-filter="red-only" recover-time="20">55,13,79</post>
-    </flag>
-    <flag id="orange-flag" name="Orange Flag" owner="red" color="orange" carry-message="`f`lYou are carrying the `6`lorange flag`f`l, return it to your `9`lspawn`r`l!">
-        <post pickup-filter="blue-only" recover-time="20">-87,13,79</post>
-    </flag>
-    <flag id="pink-flag" name="Pink Flag" owner="red" color="pink" carry-message="`f`lYou are carrying the `d`lpink flag`f`l, return it to your `9`lspawn`r`l!">
-        <post pickup-filter="blue-only" recover-time="20">-87,7,10</post>
-    </flag>
-    <flags points="1">
-        <net region="red-net" flag="blue-flag"/>
-        <net region="red-net" flag="lime-flag"/>
-        <net region="blue-net" flag="orange-flag"/>
-        <net region="blue-net" flag="pink-flag"/>
-    </flags>
-</flags>
 </map>

@@ -1,17 +1,16 @@
-<map proto="1.4.2" game="Flag Assault">
+<map proto="1.5.0" game="Flag Assault">
 <name>The Big Dig</name>
-<version>1.0.7</version>
+<version>1.0.8</version>
 <objective>Score your flag in the enemy goals, most points wins!</objective>
 <created>2022-05-06</created>
-<time overtime="1s" max-overtime="2m">8m</time>
+<gamemode>ctf</gamemode>
+<include id="gapple-kill-reward"/>
 <authors>
-    <author uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609"/> <!--  Technodono  -->
+    <author uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609"/> <!-- Technodono -->
 </authors>
 <rules>
     <rule>Fall damage is disabled!</rule>
 </rules>
-<gamemode>ctf</gamemode>
-<!-- Tips -->
 <broadcasts>
     <tip after="1s" every="2m">Remember to defend your teams goals from the enemy flag carrier!</tip>
 </broadcasts>
@@ -21,13 +20,15 @@
     <team id="blue-team" color="blue" max="20">Blue</team>
 </teams>
 <kits>
-    <kit id="spawn">
+    <kit id="spawn-kit">
         <clear/>
         <item slot="0" unbreakable="true" material="stone sword"/>
         <item slot="1" unbreakable="true" material="bow"/>
         <item slot="2" amount="6" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
         <item slot="3" material="golden apple"/>
         <item slot="8" amount="12" material="arrow"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
         <leggings unbreakable="true" material="chainmail leggings">
             <enchantment level="2">projectile_protection</enchantment>
         </leggings>
@@ -35,14 +36,6 @@
         <effect duration="2s" amplifier="255">regeneration</effect>
         <effect duration="2s" amplifier="255">damage resistance</effect>
         <game-mode>adventure</game-mode>
-    </kit>
-    <kit id="red-kit" parents="spawn">
-        <helmet color="ff0000" unbreakable="true" material="leather helmet"/>
-        <chestplate color="ff0000" unbreakable="true" material="leather chestplate"/>
-    </kit>
-    <kit id="blue-kit" parents="spawn">
-        <helmet color="004aff" unbreakable="true" material="leather helmet"/>
-        <chestplate color="004aff" unbreakable="true" material="leather chestplate"/>
     </kit>
     <kit id="flag-pickup" force="true">
         <max-health>10</max-health>
@@ -56,67 +49,22 @@
 </projectiles>
 <!-- Spawns and respawns -->
 <spawns>
-    <spawn team="red-team" kit="red-kit" yaw="-90">
+    <spawn team="red-team" kit="spawn-kit" yaw="-90">
         <region>
             <block id="red-spawnpoint">-75,4,1</block>
         </region>
     </spawn>
-    <spawn team="blue-team" kit="blue-kit" yaw="90">
+    <spawn team="blue-team" kit="spawn-kit" yaw="90">
         <region>
             <block id="blue-spawnpoint">79,4,1</block>
         </region>
     </spawn>
-    <default yaw="0">
+    <default>
         <region>
             <block id="obs-spawnpoint">0,10,30</block>
         </region>
     </default>
 </spawns>
-<!-- spawn region stuff -->
-<regions>
-    <apply block="never"/>
-    <!-- Enter -->
-    <apply enter="blue-not-flag" region="blue-spawn" message="You may not enter the opposing team's spawn!"/>
-    <apply enter="red-not-flag" region="red-spawn" message="You may not enter the opposing team's spawn!"/>
-    <!-- Apply Kits -->
-    <apply kit="red-kit" region="blue-goals" filter="only-red"/>
-    <apply kit="blue-kit" region="red-goals" filter="only-blue"/>
-    <!-- Apply vel -->
-    <apply velocity="-0.1,1.3,0.0" region="blue-pads"/>
-    <apply velocity="0.1,1.3,0.0" region="red-pads"/>
-    <apply velocity="0.0,1.4,0.7" region="mid-pad-south"/>
-    <apply velocity="0.0,1.4,-0.7" region="mid-pad-north"/>
-    <!--  Goal regions  -->
-    <union id="red-goals">
-        <cuboid id="red-goal-left" min="-63,10,-19" max="-62,14,-15"/>
-        <cuboid id="red-goal-center" min="-59,9,-1" max="-58,13,4"/>
-        <cuboid id="red-goal-right" min="-63,10,18" max="-62,14,22"/>
-    </union>
-    <union id="blue-goals">
-        <cuboid id="blue-goal-left" min="64,10,-19" max="63,14,-15"/>
-        <cuboid id="blue-goal-center" min="60,9,-1" max="59,13,4"/>
-        <cuboid id="blue-goal-right" min="64,10,18" max="63,14,22"/>
-    </union>
-    <!--  Spawns regions  -->
-    <rectangle id="blue-spawn" min="72,-9" max="oo,12"/>
-    <rectangle id="red-spawn" min="-71,-9" max="-oo,12"/>
-    <!--  Jumpads and Boost lanes  -->
-    <union id="blue-pads">
-        <cuboid id="blue-pad-left" min="47,4,13" max="44,4.5,10"/>
-        <cuboid id="blue-pad-right" min="47,4,-7" max="44,4.5,-10"/>
-    </union>
-    <union id="red-pads">
-        <cuboid id="red-pad-left" min="-46,4,-7" max="-43,4.5,-10"/>
-        <cuboid id="red-pad-right" min="-46,4,13" max="-43,4.5,10"/>
-    </union>
-    <cuboid id="mid-pad-south" min="2,4,7" max="-1,4.5,10"/>
-    <cuboid id="mid-pad-north" min="-1,4,-4" max="2,4.5,-7"/>
-</regions>
-<portals>
-    <!-- portals to ref chairs -->
-    <portal region="red-goals" destination="blue-spawnpoint" filter="only-blue"/>
-    <portal region="blue-goals" destination="red-spawnpoint" filter="only-red"/>
-</portals>
 <!--  Filters  -->
 <filters>
     <all id="blue-not-flag">
@@ -138,7 +86,53 @@
         </not>
     </all>
 </filters>
+<!-- spawn region stuff -->
+<regions>
+    <apply block="never"/>
+    <!-- Enter -->
+    <apply enter="blue-not-flag" region="blue-spawn" message="You may not enter the opposing team's spawn!"/>
+    <apply enter="red-not-flag" region="red-spawn" message="You may not enter the opposing team's spawn!"/>
+    <!-- Apply Kits -->
+    <apply kit="spawn-kit" region="blue-goals" filter="only-red"/>
+    <apply kit="spawn-kit" region="red-goals" filter="only-blue"/>
+    <!-- Apply vel -->
+    <apply velocity="-0.1,1.3,0.0" region="blue-pads"/>
+    <apply velocity="0.1,1.3,0.0" region="red-pads"/>
+    <apply velocity="0.0,1.4,0.7" region="mid-pad-south"/>
+    <apply velocity="0.0,1.4,-0.7" region="mid-pad-north"/>
+    <!-- Goal regions -->
+    <union id="red-goals">
+        <cuboid id="red-goal-left" min="-63,10,-19" max="-62,14,-15"/>
+        <cuboid id="red-goal-center" min="-59,9,-1" max="-58,13,4"/>
+        <cuboid id="red-goal-right" min="-63,10,18" max="-62,14,22"/>
+    </union>
+    <union id="blue-goals">
+        <cuboid id="blue-goal-left" min="64,10,-19" max="63,14,-15"/>
+        <cuboid id="blue-goal-center" min="60,9,-1" max="59,13,4"/>
+        <cuboid id="blue-goal-right" min="64,10,18" max="63,14,22"/>
+    </union>
+    <!-- Spawns regions -->
+    <rectangle id="blue-spawn" min="72,-9" max="oo,12"/>
+    <rectangle id="red-spawn" min="-71,-9" max="-oo,12"/>
+    <!-- Jumpads and Boost lanes -->
+    <union id="blue-pads">
+        <cuboid id="blue-pad-left" min="47,4,13" max="44,4.5,10"/>
+        <cuboid id="blue-pad-right" min="47,4,-7" max="44,4.5,-10"/>
+    </union>
+    <union id="red-pads">
+        <cuboid id="red-pad-left" min="-46,4,-7" max="-43,4.5,-10"/>
+        <cuboid id="red-pad-right" min="-46,4,13" max="-43,4.5,10"/>
+    </union>
+    <cuboid id="mid-pad-south" min="2,4,7" max="-1,4.5,10"/>
+    <cuboid id="mid-pad-north" min="-1,4,-4" max="2,4.5,-7"/>
+</regions>
+<portals>
+    <!-- portals to ref chairs -->
+    <portal region="red-goals" destination="blue-spawnpoint" filter="only-blue"/>
+    <portal region="blue-goals" destination="red-spawnpoint" filter="only-red"/>
+</portals>
 <!-- Scogoal and Flag settings  -->
+<time overtime="1s" max-overtime="2m">8m</time>
 <flags>
     <flag id="red-flag-north" name="Red Flag North" color="red" pickup-filter="only-red" required="false" carry-message="Score this in the enemy's goals!" pickup-kit="flag-pickup" drop-kit="reset-health">
         <post id="red-post-north" recover-time="15s" respawn-time="10s">-69,4,-7</post>
@@ -178,7 +172,6 @@
 </itemkeep>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
         <item amount="3" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
         <item amount="4" material="arrow"/>
     </kill-reward>

@@ -1,7 +1,8 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Tuscany Hills</name>
-<version>1.0.8</version>
+<version>1.0.9</version>
 <objective>Capture the enemy's flag 3 times to win!</objective>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="1fd982ab-8941-474b-b51e-6ce2346f4cd5"/> <!-- Zynnphony -->
 </authors>
@@ -12,24 +13,15 @@
     <rule>Players may not take fall damage.</rule>
     <rule>Players who carry a flag get Slowness I and their Projectile Protection is removed.</rule>
 </rules>
-<teams>
-    <team id="red-team" color="dark red" max="20">Red</team>
-    <team id="blue-team" color="blue" max="20">Blue</team>
-</teams>
 <broadcasts>
     <tip after="5s" every="4m">Flags can be captured both at your `f`lmonastery`r or at `f`lyour spawn`r!</tip>
     <alert after="7s" every="4m">When you're carrying a flag, you get Slowness I and your Projectile Projection is removed.</alert>
     <alert after="8m" every="2m">If both teams' scores are tied after the timer reaches zero, the first team to capture a flag wins!</alert>
 </broadcasts>
-<spawns>
-    <spawn team="blue-team" kit="blue-kit" yaw="90" region="blue-spawn"/>
-    <spawn team="red-team" kit="red-kit" yaw="-90" region="red-spawn"/>
-    <default>
-        <regions yaw="0">
-            <cuboid min="1267.5,204.5,722.5" max="1263.5,204.5,720.5"/>
-        </regions>
-    </default>
-</spawns>
+<teams>
+    <team id="red-team" color="dark red" max="20">Red</team>
+    <team id="blue-team" color="blue" max="20">Blue</team>
+</teams>
 <kits>
     <kit id="spawn-kit">
         <game-mode>adventure</game-mode>
@@ -40,18 +32,12 @@
             <enchantment>power</enchantment>
         </item>
         <item slot="28" material="arrow"/>
+        <helmet team-color="true" unbreakable="true">leather helmet</helmet>
+        <chestplate team-color="true" unbreakable="true">leather chestplate</chestplate>
         <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="1">protection projectile</enchantment>
+            <enchantment>protection projectile</enchantment>
         </leggings>
         <boots unbreakable="true">iron boots</boots>
-    </kit>
-    <kit id="red-kit" parents="spawn-kit">
-        <helmet color="aa0000" unbreakable="true">leather helmet</helmet>
-        <chestplate color="aa0000" unbreakable="true">leather chestplate</chestplate>
-    </kit>
-    <kit id="blue-kit" parents="spawn-kit">
-        <helmet color="5555ff" unbreakable="true">leather helmet</helmet>
-        <chestplate color="5555ff" unbreakable="true">leather chestplate</chestplate>
     </kit>
     <kit id="drop-kit" force="true">
         <action id="give-prot"/>
@@ -62,16 +48,22 @@
         <effect duration="oo">slowness</effect>
     </kit>
 </kits>
-<flags flag-proximity-metric="none" net-proximity-metric="none" required="false">
-    <!-- Blue flag -->
-    <flag id="blue-flag" name="Blue Flag" color="blue" post="blue-flag-post" carry-message="You are carrying the flag, bring it to your spawn or to your monastery!" pickup-kit="flag-kit" drop-kit="drop-kit"/>
-    <post id="blue-flag-post" owner="blue-team" pickup-filter="only-red" respawn-time="2s" recover-time="10s">1387.5,207,768.5</post>
-    <net post="blue-flag-post" points="1" region="red-nets" capture-filter="only-red" flag="blue-flag"/>
-    <!-- Red flag -->
-    <flag id="red-flag" name="Red Flag" color="red" post="red-flag-post" carry-message="You are carrying the flag, bring it to your spawn or to your monastery!" pickup-kit="flag-kit" drop-kit="drop-kit"/>
-    <post id="red-flag-post" owner="red-team" pickup-filter="only-blue" respawn-time="2s" recover-time="10s">1135.5,207,768.5</post>
-    <net post="red-flag-post" points="1" region="blue-nets" capture-filter="only-blue" flag="red-flag"/>
-</flags>
+<spawns>
+    <spawn team="blue-team" kit="spawn-kit" yaw="90" region="blue-spawn"/>
+    <spawn team="red-team" kit="spawn-kit" yaw="-90" region="red-spawn"/>
+    <default>
+        <region>
+            <cuboid min="1267.5,204.5,722.5" max="1263.5,204.5,720.5"/>
+        </region>
+    </default>
+</spawns>
+<filters>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <deny id="no-beacons">
+        <material>beacon</material>
+    </deny>
+</filters>
 <regions>
     <cuboid id="blue-spawn" min="1380.5,202.5,816.5" max="1382.5,202.5,814.5"/>
     <cuboid id="red-spawn" min="1142.5,202.5,814.5" max="1140.5,202.5,816.5"/>
@@ -85,13 +77,20 @@
     </union>
     <apply block="never" use="no-beacons"/>
 </regions>
-<filters>
-    <team id="only-blue">blue-team</team>
-    <team id="only-red">red-team</team>
-    <deny id="no-beacons">
-        <material>beacon</material>
-    </deny>
-</filters>
+<flags flag-proximity-metric="none" net-proximity-metric="none" required="false">
+    <!-- Blue flag -->
+    <flag id="blue-flag" name="Blue Flag" color="blue" post="blue-flag-post" carry-message="You are carrying the flag, bring it to your spawn or to your monastery!" pickup-kit="flag-kit" drop-kit="drop-kit"/>
+    <post id="blue-flag-post" owner="blue-team" pickup-filter="only-red" respawn-time="2s" recover-time="10s">1387.5,207,768.5</post>
+    <net post="blue-flag-post" points="1" region="red-nets" capture-filter="only-red" flag="blue-flag"/>
+    <!-- Red flag -->
+    <flag id="red-flag" name="Red Flag" color="red" post="red-flag-post" carry-message="You are carrying the flag, bring it to your spawn or to your monastery!" pickup-kit="flag-kit" drop-kit="drop-kit"/>
+    <post id="red-flag-post" owner="red-team" pickup-filter="only-blue" respawn-time="2s" recover-time="10s">1135.5,207,768.5</post>
+    <net post="red-flag-post" points="1" region="blue-nets" capture-filter="only-blue" flag="red-flag"/>
+</flags>
+<score>
+    <limit>3</limit>
+</score>
+<time result="score" overtime="1s" max-overtime="2m">10m</time>
 <actions>
     <action id="take-prot" scope="player">
         <message text="`e⚠ `cYou have Slowness I and no Projectile Protection while carrying the flag!"/>
@@ -108,10 +107,6 @@
         </replace-item>
     </action>
 </actions>
-<score>
-    <limit>3</limit>
-</score>
-<time result="score" overtime="1s" max-overtime="2m">10m</time>
 <toolrepair>
     <tool>stone sword</tool>
     <tool>bow</tool>
@@ -129,11 +124,6 @@
     <item>chainmail leggings</item>
     <item>iron boots</item>
 </itemremove>
-<kill-rewards>
-    <kill-reward>
-        <item material="golden apple"/>
-    </kill-reward>
-</kill-rewards>
 <disabledamage>
     <damage>fall</damage>
 </disabledamage>

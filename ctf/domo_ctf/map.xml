@@ -1,8 +1,9 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Domo CTF</name>
-<version>1.2.3</version>
+<version>1.2.4</version>
 <created>2016-01-28</created>
 <objective>Score points by delivering flags to the score box on the enemy's side!</objective>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="2ca8072f-74be-4798-85b8-bbce03aa91af"/> <!-- Tywnis -->
 </authors>
@@ -27,7 +28,7 @@
         <item slot="8" amount="40" material="arrow"/>
         <helmet team-color="true" unbreakable="true" material="leather helmet"/>
         <chestplate team-color="true" unbreakable="true" material="leather chestplate"/>
-        <leggings color="FFFFFF" unbreakable="true" material="leather leggings"/>
+        <leggings color="ffffff" unbreakable="true" material="leather leggings"/>
         <boots team-color="true" unbreakable="true" material="leather boots"/>
         <effect duration="6" amplifier="3">heal</effect>
         <effect duration="6">speed</effect>
@@ -38,35 +39,27 @@
     </kit>
 </kits>
 <spawns>
-    <spawn team="blue" kit="spawn-kit">
-        <regions>
-            <point yaw="90">88.5,6,-104.5</point>
-        </regions>
+    <spawn team="blue" kit="spawn-kit" yaw="90">
+        <region>
+            <point>88.5,6,-104.5</point>
+        </region>
     </spawn>
-    <spawn team="red" kit="spawn-kit">
-        <regions>
-            <point yaw="-90">-87.5,6,105.5</point>
-        </regions>
+    <spawn team="red" kit="spawn-kit" yaw="-90">
+        <region>
+            <point>-87.5,6,105.5</point>
+        </region>
     </spawn>
-    <default>
-        <regions>
-            <point yaw="90">100.5,71,0.5</point>
-        </regions>
+    <default yaw="90">
+        <region>
+            <point>100.5,71,0.5</point>
+        </region>
     </default>
 </spawns>
 <filters>
-    <not id="not-red">
-        <team id="only-red">red</team>
-    </not>
-    <not id="not-blue">
-        <team id="only-blue">blue</team>
-    </not>
+    <team id="only-red">red</team>
+    <team id="only-blue">blue</team>
     <!-- Renewables filter for replacing blocks -->
     <material id="only-air">air</material>
-    <!-- Negated filter to stop all edits over void -->
-    <not id="no-void">
-        <void/>
-    </not>
     <!-- Various blocks that should never be broken -->
     <deny id="blacklisted-blocks">
         <any>
@@ -101,22 +94,22 @@
         <cylinder id="entire zone" base="0.5,0,0.5" radius="80" height="25"/>
         <cylinder id="inside substraction" base="0.5,0,0.5" radius="20" height="25"/>
     </complement>
+    <!-- Kit Applications -->
+    <apply kit="scoring" region="score boxes"/>
+    <!-- Entry Applications -->
+    <apply enter="only-blue" region="blue box" message="You may not enter your own score box!"/>
+    <apply enter="only-red" region="red box" message="You may not enter your own score box!"/>
+    <apply enter="only-blue" region="blue spawn" message="You may not enter the enemy spawn!"/>
+    <apply enter="only-red" region="red spawn" message="You may not enter the enemy spawn!"/>
+    <!-- Usage Applications -->
+    <apply use="blacklisted-blocks" message="You are not allowed to use this block!"/>
     <!-- Block Applications -->
     <apply block="never" region="spawn proximity" message="You may not interact with blocks at spawn!"/>
     <apply block="never" region="dome protection"/> <!-- Dome Protections -->
     <apply block="never" region="score boxes" message="You may not interact with blocks in the score area!"/>
     <apply block-break="blacklisted-blocks" message="You are not allowed to break this block!"/>
     <apply region="exempt-void"/>
-    <apply block="no-void" message="You may not place blocks here."/>
-    <!-- Kit Applications -->
-    <apply kit="scoring" region="score boxes"/>
-    <!-- Entry Applications -->
-    <apply enter="not-red" region="blue box" message="You may not enter your own score box!"/>
-    <apply enter="not-blue" region="red box" message="You may not enter your own score box!"/>
-    <apply enter="not-red" region="blue spawn" message="You may not enter the enemy spawn!"/>
-    <apply enter="not-blue" region="red spawn" message="You may not enter the enemy spawn!"/>
-    <!-- Usage Applications -->
-    <apply use="blacklisted-blocks" message="You are not allowed to use this block!"/>
+    <apply block="deny(void)" message="You may not place blocks here."/>
 </regions>
 <score>
     <limit>8</limit>
@@ -159,11 +152,6 @@
     <item>leather leggings</item>
     <item>grilled pork</item>
 </itemremove>
-<kill-rewards>
-    <kill-reward>
-        <item material="golden apple"/>
-    </kill-reward>
-</kill-rewards>
 <timelock>on</timelock>
 <maxbuildheight>20</maxbuildheight>
 </map>
