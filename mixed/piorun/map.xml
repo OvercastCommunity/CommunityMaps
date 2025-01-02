@@ -1,10 +1,11 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Piorun</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Capture the enemy team's wool and destroy their monument!</objective>
 <gamemode>ctw</gamemode>
 <gamemode>dtm</gamemode>
 <created>2021-08-29</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="97d1cc45-0f69-482b-9974-09351aef9dfa"/> <!-- lunaceee -->
     <author uuid="6c5d7783-27fd-4ac5-8a1d-ba35206edf53"/> <!-- _Nathy -->
@@ -31,6 +32,8 @@
         <item slot="28" material="arrow"/>
         <item slot="2" unbreakable="true" material="diamond pickaxe"/>
         <item slot="3" unbreakable="true" material="iron axe"/>
+        <item slot="4" team-color="true" amount="32" material="stained glass"/>
+        <item slot="5" team-color="true" amount="64" material="stained clay"/>
         <item slot="30" unbreakable="true" material="iron spade"/>
         <item slot="6" amount="32" material="wood"/>
         <item slot="7" material="golden apple"/>
@@ -41,28 +44,20 @@
         </chestplate>
         <effect duration="5" amplifier="5">damage resistance</effect>
     </kit>
-    <kit id="blue-kit" parents="spawn-kit">
-        <item slot="5" damage="11" amount="64" material="stained clay"/>
-        <item slot="4" damage="11" amount="32" material="stained glass"/>
-    </kit>
-    <kit id="red-kit" parents="spawn-kit">
-        <item slot="5" damage="14" amount="64" material="stained clay"/>
-        <item slot="4" damage="14" amount="32" material="stained glass"/>
-    </kit>
 </kits>
 <spawns>
-    <default>
-        <region yaw="180">
+    <default yaw="180">
+        <region>
             <cylinder base="-1.5,41,62.5" height="1" radius="1"/>
         </region>
     </default>
-    <spawn team="blue" kit="blue-kit">
-        <region yaw="-90">
+    <spawn team="blue" kit="spawn-kit" yaw="-90">
+        <region>
             <cylinder base="-98.5,37,1.5" height="0" radius="0.5"/>
         </region>
     </spawn>
-    <spawn team="red" kit="red-kit">
-        <region yaw="90">
+    <spawn team="red" kit="spawn-kit" yaw="90">
+        <region>
             <cylinder base="99.5,37,1.5" height="0" radius="0.5"/>
         </region>
     </spawn>
@@ -100,12 +95,6 @@
         <cause>world</cause>
         <material id="only-iron">iron block</material>
     </all>
-    <deny id="deny-players">
-        <participating/>
-    </deny>
-    <not id="deny-void">
-        <void/>
-    </not>
     <material id="only-diamond">diamond block</material>
     <material id="only-coal">coal block</material>
 </filters>
@@ -144,12 +133,12 @@
     <apply enter="only-red" region="red-spawn" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-blue" region="red-wool-room" message="You may not enter your own wool room!"/>
     <apply enter="only-red" region="blue-wool-room" message="You may not enter your own wool room!"/>
-    <apply block-break="only-coal" block-place="deny-players" region="spawner" message="You may not break or place any blocks near the spawner!"/>
+    <apply block-break="only-coal" block-place="deny(participating)" region="spawner" message="You may not break or place any blocks near the spawner!"/>
     <apply block-break="only-iron" block-place="only-iron-regen" region="spawns" message="Only iron blocks may be broken in the spawn!"/>
-    <apply block-break="only-diamond" block-place="deny-players" region="parkour" message="You may not break or place any blocks here!"/>
+    <apply block-break="only-diamond" block-place="deny(participating)" region="parkour" message="You may not break or place any blocks here!"/>
     <apply block="blue-in-wr" use="only-blue-usage" region="red-wool-room"/>
     <apply block="red-in-wr" use="only-red-usage" region="blue-wool-room"/>
-    <apply block="deny-void" region="void-area" message="You may not build in the void area!"/>
+    <apply block="deny(void)" region="void-area" message="You may not build in the void area!"/>
 </regions>
 <wools craftable="false">
     <wool team="blue" color="yellow" location="77,14,33">
@@ -164,6 +153,7 @@
     </wool>
 </wools>
 <!-- middle lane is buildable at 5m -->
+<!-- TODO: replace fake destroyable lanes with fill actions -->
 <modes>
     <mode id="lane-mid" after="5m" name="`eMiddle lane will become bridgeable" material="water" show-before="2m"/>
 </modes>
@@ -250,13 +240,7 @@
 </itemkeep>
 <kill-rewards>
     <kill-reward>
-        <item material="golden apple"/>
-    </kill-reward>
-    <kill-reward filter="only-blue">
-        <item amount="16" damage="11" material="stained clay"/>
-    </kill-reward>
-    <kill-reward filter="only-red">
-        <item amount="16" damage="14" material="stained clay"/>
+        <item amount="16" team-color="true" material="stained clay"/>
     </kill-reward>
 </kill-rewards>
 <maxbuildheight>21</maxbuildheight>
