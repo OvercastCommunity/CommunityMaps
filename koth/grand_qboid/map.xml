@@ -1,11 +1,21 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Grand Q*Boid</name>
-<version>1.1.5</version>
+<version>1.1.6</version>
 <objective>Capture as many hills as you can in 8 minutes.</objective>
 <created>2020-10-12</created>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="5c79d2c9-a4f0-4343-a84b-e1720f13009b"/> <!-- CoWinkKeyDinkInc -->
 </authors>
+<rules>
+    <rule>TNT does not damage yourself or your teammates.</rule>
+    <rule>All hills give out one point per two seconds.</rule>
+</rules>
+<broadcasts>
+    <alert after="1s" every="3m">To gain points, the top surface of the cube must be completely covered!</alert>
+    <tip after="2s" every="3m">You can get powerful TNT for every two kills.</tip>
+    <tip after="1m" every="1m">All cubes give out one point per two seconds.</tip>
+</broadcasts>
 <teams>
     <team id="yellow" color="yellow" max="24">Yellow</team>
     <team id="lime" color="green" max="24">Lime</team>
@@ -37,13 +47,6 @@
         <boots enchantment="protection fall:2" color="33c633" material="leather boots"/>
     </kit>
 </kits>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
-<rules>
-    <rule>TNT does not damage yourself or your teammates.</rule>
-    <rule>All hills give out one point per two seconds.</rule>
-</rules>
 <spawns>
     <!-- x-21,y+21 -->
     <spawn team="yellow" kit="yellow-kit">
@@ -62,69 +65,25 @@
         </regions>
     </spawn>
     <default yaw="135">
-        <regions>
+        <region>
             <point>43.5,40,69.5</point>
-        </regions>
+        </region>
     </default>
 </spawns>
-<broadcasts>
-    <alert after="1s" every="3m">To gain points, the top surface of the cube must be completely covered!</alert>
-    <tip after="2s" every="3m">You can get powerful TNT for every two kills.</tip>
-    <tip after="1m" every="1m">All cubes give out one point per two seconds.</tip>
-</broadcasts>
-<kill-rewards>
-    <kill-reward>
-        <item amount="10" team-color="true" material="stained glass"/>
-        <item amount="5" team-color="true" material="wool"/>
-        <item amount="12" material="vine"/>
-        <item amount="8" material="arrow"/>
-        <item material="golden apple"/>
-        <!-- damage 43 gives potion the jump boost colour, neon green -->
-        <item material="potion" damage="43" name="Super Jump">
-            <effect duration="15" amplifier="5">jump_boost</effect>
-        </item>
-    </kill-reward>
-    <!-- give TNT to the player every two kills -->
-    <kill-reward>
-        <filter>
-            <kill-streak count="2" repeat="true"/>
-        </filter>
-        <item material="tnt"/>
-    </kill-reward>
-</kill-rewards>
-<toolrepair>
-    <tool>stone sword</tool>
-    <tool>bow</tool>
-</toolrepair>
-<itemremove>
-    <item>arrow</item>
-    <item>leather boots</item>
-    <item>leather chestplate</item>
-    <item>leather helmet</item>
-    <item>iron leggings</item>
-    <item>wool</item>
-    <item>stained glass</item>
-    <item>vine</item>
-    <item>potion</item>
-    <item>golden apple</item>
-</itemremove>
-<tnt>
-    <fuse>2s</fuse>
-    <instantignite>on</instantignite>
-    <power>5</power>
-    <friendly-defuse>false</friendly-defuse>
-</tnt>
-<disabledamage>
-    <damage ally="true" self="true" enemy="false" other="false">block explosion</damage>
-</disabledamage>
+<filters>
+    <deny id="no-break">
+        <any>
+            <material>stained clay</material>
+            <material>quartz block</material>
+            <material>stained glass:11</material>
+            <material>stained glass:14</material>
+            <material>stained glass:15</material>
+        </any>
+    </deny>
+    <team id="only-lime">lime</team>
+    <team id="only-yellow">yellow</team>
+</filters>
 <regions>
-    <apply block="no-break"/>
-    <apply block="never" region="spawns" message="You can't interact with spawn platforms!"/>
-    <apply block="never" region="build-area-inverse" message="You can't build outside of the map!"/>
-    <apply block="only-lime" region="spawn-gap-lime" message="You can't place blocks here."/>
-    <apply block="only-yellow" region="spawn-gap-yellow" message="You can't place blocks here."/>
-    <apply enter="only-lime" region="lime-spawn" message="You can't enter the enemy spawn!"/>
-    <apply enter="only-yellow" region="yellow-spawn" message="You can't enter the enemy spawn!"/>
     <union id="spawns">
         <union id="lime-spawn">
             <rectangle min="-45,55" max="-28,50"/>
@@ -137,34 +96,29 @@
             <rectangle min="38,-19" max="43,-2"/>
         </union>
     </union>
-    <union id="build-area">
-        <!-- listed right to left -->
-        <cuboid id="bottom-1-2" min="44,19,14" max="-26,83,0"/>
-        <cuboid id="bottom-3" min="37,19,21" max="-25,83,14"/>
-        <cuboid id="bottom-4" min="30,19,28" max="-26,83,21"/>
-        <cuboid id="bottom-5" min="23,19,35" max="-26,83,28"/>
-        <cuboid id="bottom-6" min="16,19,42" max="-26,83,35"/>
-        <cuboid id="bottom-7" min="9,19,49" max="-26,83,42"/>
-        <cuboid id="bottom-8" min="2,19,56" max="-26,83,49"/>
-        <cuboid id="bottom-9-10" min="-12,19,70" max="-26,83,0"/>
-        <cuboid id="spawn-gap-lime" min="-26,40,49" max="-28,62,28"/>
-        <cuboid id="spawn-gap-yellow" min="23,40,0" max="1,62,-2"/>
-    </union>
-    <negative id="build-area-inverse"><region id="build-area"/></negative>
+    <negative id="build-area-inverse">
+        <union id="build-area">
+            <!-- listed right to left -->
+            <cuboid id="bottom-1-2" min="44,19,14" max="-26,83,0"/>
+            <cuboid id="bottom-3" min="37,19,21" max="-25,83,14"/>
+            <cuboid id="bottom-4" min="30,19,28" max="-26,83,21"/>
+            <cuboid id="bottom-5" min="23,19,35" max="-26,83,28"/>
+            <cuboid id="bottom-6" min="16,19,42" max="-26,83,35"/>
+            <cuboid id="bottom-7" min="9,19,49" max="-26,83,42"/>
+            <cuboid id="bottom-8" min="2,19,56" max="-26,83,49"/>
+            <cuboid id="bottom-9-10" min="-12,19,70" max="-26,83,0"/>
+            <cuboid id="spawn-gap-lime" min="-26,40,49" max="-28,62,28"/>
+            <cuboid id="spawn-gap-yellow" min="23,40,0" max="1,62,-2"/>
+        </union>
+    </negative>
+    <apply enter="only-lime" region="lime-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-yellow" region="yellow-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply block="never" region="spawns" message="You can't interact with spawn platforms!"/>
+    <apply block="never" region="build-area-inverse" message="You may not build outside of the map!"/>
+    <apply block="only-lime" region="spawn-gap-lime" message="You may not place blocks here."/>
+    <apply block="only-yellow" region="spawn-gap-yellow" message="You may not place blocks here."/>
+    <apply block="no-break"/>
 </regions>
-<filters>
-    <deny id="no-break">
-        <any>
-            <material>stained clay</material>
-            <material>quartz block</material>
-            <material>stained_glass:11</material>
-            <material>stained_glass:14</material>
-            <material>stained_glass:15</material>
-        </any>
-    </deny>
-    <team id="only-lime">lime</team>
-    <team id="only-yellow">yellow</team>
-</filters>
 <score>
     <!-- placeholder so the score module will show up -->
     <kills>0</kills>
@@ -460,5 +414,52 @@
         <captured><cuboid min="37,14,0" max="44,21,7"/></captured>
     </control-point>
 </control-points>
+<kill-rewards>
+    <kill-reward>
+        <item amount="10" team-color="true" material="stained glass"/>
+        <item amount="5" team-color="true" material="wool"/>
+        <item amount="12" material="vine"/>
+        <item amount="8" material="arrow"/>
+        <!-- damage 43 gives potion the jump boost colour, neon green -->
+        <item material="potion" damage="43" name="Super Jump">
+            <effect duration="15" amplifier="5">jump_boost</effect>
+        </item>
+    </kill-reward>
+    <!-- give TNT to the player every two kills -->
+    <kill-reward>
+        <filter>
+            <kill-streak count="2" repeat="true"/>
+        </filter>
+        <item material="tnt"/>
+    </kill-reward>
+</kill-rewards>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>arrow</item>
+    <item>leather boots</item>
+    <item>leather chestplate</item>
+    <item>leather helmet</item>
+    <item>iron leggings</item>
+    <item>wool</item>
+    <item>stained glass</item>
+    <item>vine</item>
+    <item>potion</item>
+    <item>golden apple</item>
+</itemremove>
+<tnt>
+    <fuse>2s</fuse>
+    <instantignite>on</instantignite>
+    <power>5</power>
+    <friendly-defuse>false</friendly-defuse>
+</tnt>
+<disabledamage>
+    <damage ally="true" self="true" enemy="false" other="false">block explosion</damage>
+</disabledamage>
 <timelock>on</timelock>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
 </map>

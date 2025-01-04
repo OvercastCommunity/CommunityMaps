@@ -1,6 +1,6 @@
-<map proto="1.4.2">
+<map proto="1.5.0">
 <name>Dirt &#38; Glory: Guardian of the Hill</name>
-<version>1.0.7</version>
+<version>1.0.8</version>
 <objective>Be the first team to reach 500 points under 10 minutes, or the Guardians will win.</objective>
 <created>2024-09-18</created>
 <gamemode>koth</gamemode>
@@ -12,34 +12,12 @@
     <team id="red" color="dark red" max="9">Red</team>
     <team id="green" color="green" max="1" max-overfill="2">Guardian</team>
 </teams>
-<spawns>
-    <default>
-        <region yaw="45">
-            <block>54.5,50,-120.5</block>
-        </region>
-    </default>
-    <spawn team="blue" kit="spawn-kit">
-        <region yaw="180">
-            <block>4.5,16,-14.5</block>
-        </region>
-    </spawn>
-    <spawn team="red" kit="spawn-kit">
-        <region yaw="-90">
-            <block>-51.5,16,-70.5</block>
-        </region>
-    </spawn>
-    <spawn team="green" kit="guardian-kit">
-        <region yaw="45">
-            <block>41.5,44,-107.5</block>
-        </region>
-    </spawn>
-</spawns>
 <kits>
     <kit id="spawn-kit">
         <clear/>
         <item slot="0" unbreakable="true" material="stone sword"/>
         <item slot="1" unbreakable="true" material="bow"/>
-        <item slot="2" unbreakable="true" enchantment="dig speed:1">iron pickaxe</item>
+        <item slot="2" unbreakable="true" enchantment="dig speed" material="iron pickaxe"/>
         <item slot="3" amount="5" team-color="true" material="stained clay"/>
         <item slot="4" material="golden apple"/>
         <item slot="8" amount="8" material="arrow"/>
@@ -57,7 +35,7 @@
         <item slot="1" unbreakable="true" material="bow">
             <enchantment level="2">power</enchantment>
         </item>        
-        <item slot="2" unbreakable="true" enchantment="dig speed:1">iron pickaxe</item>
+        <item slot="2" unbreakable="true" enchantment="dig speed" material="iron pickaxe"/>
         <item slot="3" material="golden apple"/>
         <item slot="8" amount="8" material="arrow"/>
         <helmet unbreakable="true" material="iron helmet"/>
@@ -68,31 +46,48 @@
         <walk-speed>0.6</walk-speed>
         <knockback-reduction>0.7</knockback-reduction>
         <shield health="10" delay="3s"/>
-        <potion duration="oo" amplifier="1" ambient="true">slow</potion>
+        <effect ambient="true">slow</effect>
     </kit>
 </kits>
+<spawns>
+    <default yaw="45">
+        <region>
+            <block>54.5,50,-120.5</block>
+        </region>
+    </default>
+    <spawn team="blue" kit="spawn-kit" yaw="180">
+        <region>
+            <block>4.5,16,-14.5</block>
+        </region>
+    </spawn>
+    <spawn team="red" kit="spawn-kit" yaw="-90">
+        <region>
+            <block>-51.5,16,-70.5</block>
+        </region>
+    </spawn>
+    <spawn team="green" kit="guardian-kit" yaw="45">
+        <region>
+            <block>41.5,44,-107.5</block>
+        </region>
+    </spawn>
+</spawns>
 <disabledamage>
     <damage>fall</damage>
 </disabledamage>
 <filters>
-    <deny id="deny-void">
-        <void/>
-    </deny>
-    <team id="only-blue">blue</team>
-    <team id="only-red">red</team>
     <team id="only-green">green</team>
     <any id="both-teams">
-        <team>blue</team>
-        <team>red</team>
+        <team id="only-blue">blue</team>
+        <team id="only-red">red</team>
     </any>
     <any id="blocks">
-        <material>159:11</material>
-        <material>159:14</material>
-        <material>31</material>
-        <material>32</material>
-        <material>111</material>
-        <material>9</material>
-        <material>8</material>
+        <material>stained clay:11</material>
+        <material>stained clay:14</material>
+        <material>long grass</material>
+        <material>dead bush</material>
+        <material>water lily</material>
+        <material>stationary water</material>
+        <material>water</material>
         <material>leaves</material>
     </any>
 </filters>
@@ -108,23 +103,17 @@
         <rectangle id="first-rectangle" min="13,-87" max="63,-129"/>
         <rectangle id="second-rectangle" min="21,-79" max="63,-129"/>
     </union>
-    <rectangle id="game-area" min="-65,0" max="55,-120"/>
     <negative id="outside-game-area">
-        <region id="game-area"/>
+        <rectangle id="game-area" min="-65,0" max="55,-120"/>
     </negative>
     <apply block-break="never" block-place="never" message="You may not modify this area." region="spawns"/>
-    <apply block="deny-void" message="You may not build here." region="everywhere"/>>
+    <apply block="deny(void)" message="You may not build here."/>
     <apply block-place="blocks" block-break="blocks" region="game-area"/>
-    <apply enter="only-red" message="You may not enter the enemy base">
-        <region region="red-spawn-protection"/>
-    </apply>
-    <apply enter="only-blue" message="You may not enter the enemy base">
-        <region region="blue-spawn-protection"/>
-    </apply>
-    <apply leave="both-teams" message="You may not leave the Hill area">
-        <region region="larger-hill"/>
-    </apply>
+    <apply region="red-spawn-protection" enter="only-red" message="You may not enter the enemy's base"/>
+    <apply region="blue-spawn-protection" enter="only-blue" message="You may not enter the enemy's base"/>
+    <apply region="larger-hill" leave="both-teams" message="You may not leave the Hill area"/>
 </regions>
+<!-- TODO: convert this to control points module with similar settings -->
 <king>
     <hills required="false" capture-time="0.2s" points="2" time-multiplier="1" show-progress="true" neutral-state="false" recovery="1" decay="1" permanent="false">
         <hill name="Hill">
@@ -157,11 +146,11 @@
     <item>leather leggings</item>
     <item>leather boots</item>
     <item>iron boots</item>
-    <item>stained_clay</item>
+    <item>stained clay</item>
     <item>iron pickaxe</item>
-    <item>31</item>
-    <item>32</item>
-    <item>111</item>
+    <item>long grass</item>
+    <item>dead bush</item>
+    <item>water lily</item>
     <item>stone sword</item>
     <item>bow</item>
 </itemremove>
@@ -170,30 +159,11 @@
     <item>arrow</item>
 </itemkeep>
 <kill-rewards>
-    <kill-reward>
-        <filter>
-            <all>
-                <team>red</team>
-            </all>
-        </filter>
+    <kill-reward filter="both-teams">
         <item amount="2" team-color="true" material="stained clay"/>
         <item amount="3" material="arrow"/>
     </kill-reward>
-    <kill-reward>
-        <filter>
-            <all>
-                <team>blue</team>
-            </all>
-        </filter>
-        <item amount="2" team-color="true" material="stained clay"/>
-        <item amount="3" material="arrow"/>
-    </kill-reward>
-    <kill-reward>
-        <filter>
-            <all>
-                <team>green</team>
-            </all>
-        </filter>
+    <kill-reward filter="only-green">
         <item amount="3" material="arrow"/>
     </kill-reward>
 </kill-rewards>
