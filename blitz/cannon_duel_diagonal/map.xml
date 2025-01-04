@@ -1,7 +1,7 @@
 <map proto="1.5.0">
 <name>Cannon Duel: Diagonal</name>
-<version>1.0.2</version>
-<objective>Kill them before they kill you</objective>
+<version>1.0.3</version>
+<objective>Kill them before they kill you!</objective>
 <gamemode>blitz</gamemode>
 <phase>staging</phase>
 <authors>
@@ -15,118 +15,120 @@
     <alert after="1s">`aYou have 15 seconds to sort your inventory!</alert>
 </broadcasts>
 <teams>
-    <team id="red-player" color="dark red" max="1" max-overfill="1">Red Player</team>
-    <team id="blue-player" color="blue" max="1" max-overfill="1">Blue Player</team>
+    <team id="blue-team" color="blue" max="1" max-overfill="1">Blue</team>
+    <team id="red-team" color="dark red" max="1" max-overfill="1">Red</team>
 </teams>
 <kits>
-    <kit id="all"> <!-- kit given to everyone, including observers -->
+    <kit id="default-kit">
         <effect>night vision</effect>
     </kit>
-    <kit id="gear" parents="all"> <!-- kit given to both teams -->
+    <kit id="spawn-kit" parent="default-kit">
+        <!-- Kit blocks separated by vertical rows-->
+        <!-- Row 1 -->
         <item slot="9" amount="64" material="tnt"/>
         <item slot="18" amount="64" material="tnt"/>
         <item slot="27" amount="64" material="tnt"/>
         <item slot="0" material="diamond pickaxe"/>
+        <!-- Row 2 -->
         <item slot="10" amount="64" material="tnt"/>
         <item slot="19" amount="64" material="tnt"/>
         <item slot="28" amount="64" material="tnt"/>
         <item slot="1" amount="16" material="dispenser"/>
+        <!-- Row 3 -->
         <item slot="11" amount="64" material="tnt"/>
         <item slot="20" amount="64" material="tnt"/>
         <item slot="29" amount="64" material="tnt"/>
         <item slot="2" amount="64" material="step"/>
+        <!-- Row 4 -->
         <item slot="12" team-color="true" amount="64" material="stained glass"/>
         <item slot="21" team-color="true" amount="64" material="stained clay"/>
         <item slot="30" team-color="true" amount="64" material="stained clay"/>
         <item slot="3" team-color="true" amount="64" material="stained clay"/>
+        <!-- Row 5 -->
         <item slot="13" amount="16" material="trap door"/>
         <item slot="22" amount="16" material="ladder"/>
         <item slot="31" material="workbench"/>
         <item slot="4" amount="64" material="nether fence"/>
+        <!-- Row 6 -->
         <item slot="14" amount="16" material="piston base"/>
         <item slot="23" amount="16" material="lever"/>
         <item slot="32" amount="16" material="stone plate"/>
         <item slot="5" amount="16" material="stone button"/>
+        <!-- Row 7-->
         <item slot="15" material="water bucket"/>
         <item slot="24" material="water bucket"/>
         <item slot="33" material="water bucket"/>
         <item slot="6" material="water bucket"/>
+        <!-- Row 8 -->
         <item slot="16" amount="16" material="diode"/>
         <item slot="25" amount="16" material="redstone torch on"/>
         <item slot="34" amount="16" material="redstone block"/>
         <item slot="7" amount="64" material="redstone"/>
+        <!-- Row 9 -->
         <item slot="17" amount="64" material="tnt"/>
         <item slot="26" amount="64" material="tnt"/>
         <item slot="35" amount="64" material="tnt"/>
         <item slot="8" amount="64" material="tnt"/>
-        <!-- Resistance to make it into the spawn drop -->
-        <effect duration="35" amplifier="10">damage resistance</effect>
-        <effect duration="35" amplifier="10">heal</effect>
-        <helmet locked="true" team-color="true" enchantment="water worker:3" unbreakable="true" material="leather helmet"/>
+        <!-- Armor -->
+        <helmet locked="true" team-color="true" unbreakable="true" material="leather helmet">
+            <enchantment level="3">aqua_affinity</enchantment>
+        </helmet>
         <chestplate locked="true" team-color="true" unbreakable="true" material="leather chestplate"/>
         <leggings locked="true" team-color="true" unbreakable="true" material="leather leggings"/>
         <boots locked="true" team-color="true" unbreakable="true" material="leather boots"/>
+        <!-- Resistance for spawn drop -->
+        <effect duration="35s" amplifier="5">damage resistance</effect>
     </kit>
 </kits>
 <spawns>
-    <default yaw="90" kit="all">
-        <region>
+    <default kit="default-kit">
+        <region yaw="90">
             <cylinder base="65.5,58,46.5" radius="4" height="0"/>
         </region>
     </default>
-    <spawn team="red-player" yaw="135" kit="gear">
-        <region>
-            <point>99.5,52,80.5</point>
+    <spawn team="blue-team" kit="spawn-kit">
+        <region yaw="-45">
+            <point>31.5,52,12.5</point>
         </region>
     </spawn>
-    <spawn team="blue-player" yaw="-45" kit="gear">
-        <region>
-            <point>31.5,52,12.5</point>
+    <spawn team="red-team" kit="spawn-kit">
+        <region yaw="135">
+            <point>99.5,52,80.5</point>
         </region>
     </spawn>
 </spawns>
 <filters>
-    <team id="red-only">red-player</team>
-    <team id="blue-only">blue-player</team>
+    <blocks id="bridge-glass" region="platform-bridge">
+        <material>stained glass:7</material>
+    </blocks>
 </filters>
 <regions>
-    <!--                    -->
-    <!-- Region Definitions -->
-    <!--                    -->
+    <!-- Platform bridge -->
+    <cuboid id="platform-bridge" min="36,25,17" max="95,46,76"/>
     <!-- Area where players drop to get dropped into the box -->
     <union id="drops">
-        <cuboid id="red-drop" min="96,51,77" max="103,55,84"/>
         <cuboid id="blue-drop" min="28,51,9" max="35,55,16"/>
+        <cuboid id="red-drop" min="96,51,77" max="103,55,84"/>
     </union>
-    <!-- The entire inside of the box -->
-    <cuboid id="box" min="26,0,7" max="105,51,86"/>
-    <!-- Neutral center region -->
-    <cuboid id="center" min="45,0,26" max="85,51,66"/>
-    <negative id="outside-zone">
-        <cuboid id="red-zone" min="96,16,77" max="103,35,84"/>
+    <!-- Void, per se -->
+    <complement id="outside-zone">
+        <everywere/>
         <cuboid id="blue-zone" min="28,16,9" max="35,35,16"/>
-    </negative>
-    <!--             -->
-    <!-- Block Rules -->
-    <!--             -->
+        <cuboid id="red-zone" min="96,16,77" max="103,35,84"/>
+    </complement>
     <apply region="outside-zone" block="never" message="You may not place or break blocks outside the build zone!"/>
 </regions>
-<blitz/>
-<!-- TODO: replace fake destroyables with fill actions or structures -->
-<!-- Destroyables are impossible to break as they are in a deny-all region -->
-<destroyables name="drop" materials="stained glass:7" completion="0%" show="false" mode-changes="true">
-    <destroyable owner="red-player" region="red-drop"/>
-    <destroyable owner="blue-player" region="blue-drop"/>
-    <destroyable id="bridge" owner="red-player">
-        <region>
-            <cuboid min="36,25,17" max="95,46,76"/>
-        </region>
-    </destroyable>
-</destroyables>
+<actions>
+    <fill id="spawn-drop" region="drops" material="air"/>
+    <fill id="platform-connect" region="platform-bridge" material="stained glass:7" filter="bridge-glass"/>
+    <fill id="platform-disconnect" region="platform-bridge" material="air" filter="bridge-glass"/>
+    <trigger scope="match" action="platform-disconnect" filter="match-running"/>
+</actions>
 <modes>
-    <mode after="15s" material="air" show-before="10s" name="`3Dropping you into the map"/>
-    <mode after="1m45s" material="stained glass:7" show-before="15s" name="`3Connecting the platforms"/>
+    <mode after="15s" show-before="10s" action="spawn-drop" name="`3Dropping you into the map"/>
+    <mode after="1m45s" show-before="15s" action="platform-connect" name="`3Connecting the platforms"/>
 </modes>
+<blitz/>
 <hunger>
     <depletion>off</depletion>
 </hunger>
