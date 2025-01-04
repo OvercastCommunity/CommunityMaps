@@ -1,6 +1,6 @@
 <map proto="1.5.0" game="Arcade">
 <name>Tic Tac K.O.</name>
-<version>1.1.0</version>
+<version>1.2.0</version>
 <phase>staging</phase>
 <created>2024-10-30</created>
 <objective>Claim 3 tiles in a row to win!</objective>
@@ -311,8 +311,6 @@
     <apply region="map" block-break="deny-player" block-place="deny-player" use="deny-player" block-physics="deny-lava"/>
 </regions>
 <filters>
-    <team id="only-x">x-team</team>
-    <team id="only-o">o-team</team>
     <not id="deny-player">
         <cause>player</cause>
     </not>
@@ -363,11 +361,13 @@
     </all>
     <effect id="has-absorption">absorption</effect>
     <carrying id="has-arrow" ignore-metadata="true"><item material="arrow"/></carrying>
+    <variable id="even-spaces-captured" scope="match" value="max(captured_count, 1) % 2">0</variable>
 </filters>
 <variables scope="match" default="0">
     <score id="score"/>
     <with-team id="x_score" var="score" team="x-team"/>
     <with-team id="o_score" var="score" team="o-team"/>
+    <variable id="captured_count"/>
     <array id="captured" size="9"/>
     <array id="votes" size="9"/>
     <array id="kits" size="${kit_count}"/>
@@ -387,6 +387,7 @@
     <variable id="tmp"/>
     <variable id="calc"/>
     <variable id="i"/>
+    <variable id="gamerule_alternate_vote"/>
 </variables>
 <actions>
     <!--
@@ -413,7 +414,12 @@
             <time>6s</time>
         </filter>
         <action>
-            <message text="`7[`6Arena Master`7] `6Tirion`r: The winning team will then `avote `ron which grid space to claim!"/>
+            <action filter="gamerule_alternate_vote=0">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The winning team will then `avote `ron which grid space to claim!"/>
+            </action>
+            <action filter="gamerule_alternate_vote=1">
+                <message text="`7[`6Arena Master`7] `6Tirion`r: The winning team will then `avote `ron which grid space to claim first, then the losing team will vote second!"/>
+            </action>
             <sound key="mob.villager.haggle"/>
         </action>
     </trigger>
@@ -479,10 +485,10 @@
             <set var="o_currently_voting" value="${team_none}"/>
             <action id="kit-applicator"/>
             <action id="clear-dropped-lobby-entities"/>
-            <switch-scope inner="player" filter="only-x">
+            <switch-scope inner="player" filter="x-team">
                 <teleport x="1.5" y="18.5" z="-9.5" yaw="-90"/>
             </switch-scope>
-            <switch-scope inner="player" filter="only-o">
+            <switch-scope inner="player" filter="o-team">
                 <teleport x="19.5" y="18.5" z="-9.5" yaw="90"/>
             </switch-scope>
             <set var="state" value="${state_duel}"/>
@@ -512,13 +518,13 @@
         <set var="overtime" value="0"/>
         <set var="x_currently_voting" value="${team_none}"/>
         <set var="o_currently_voting" value="${team_none}"/>
-        <switch-scope inner="player" observers="true" filter="any(observing, all(only-x, next_voter=${team_x}), all(only-o, next_voter=${team_o}))">
+        <switch-scope inner="player" observers="true" filter="any(observing, all(x-team, next_voter=${team_x}), all(o-team, next_voter=${team_o}))">
             <sound preset="OBJECTIVE_GOOD"/>
             <action filter="participating">
                 <message text="{ translate: 'broadcast.gameOver.teamWon', color: 'green' }"/>
             </action>
         </switch-scope>
-        <switch-scope inner="player" filter="any(all(only-x, next_voter=${team_o}), all(only-o, next_voter=${team_x}))">
+        <switch-scope inner="player" filter="any(all(x-team, next_voter=${team_o}), all(o-team, next_voter=${team_x}))">
             <sound preset="OBJECTIVE_BAD"/>
             <message text="{ translate: 'broadcast.gameOver.teamLost', color: 'red' }"/>
         </switch-scope>
@@ -550,12 +556,22 @@
             <action filter="calc=1..">
                 <!-- x has more alive players -->
                 <set var="next_voter" value="${team_x}"/>
-                <message text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhave the most players left alive so they win this round!"/>
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `9Crosses `rhave the most players left alive (`9{1} `rvs `4{0}`r) so they win this round!">
+                    <replacements>
+                        <decimal id="0" value="o_currently_voting"/>
+                        <decimal id="1" value="x_currently_voting"/>
+                    </replacements>
+                </message>
             </action>
             <action filter="calc=..-1">
                 <!-- o has more alive players -->
                 <set var="next_voter" value="${team_o}"/>
-                <message text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rhave the most players left alive so they win this round!"/>
+                <message text="`7[`6Arena Master`7] `6Tirion`r: `4Naughts `rhave the most players left alive (`4{0} `rvs `9{1}`r) so they win this round!">
+                    <replacements>
+                        <decimal id="0" value="o_currently_voting"/>
+                        <decimal id="1" value="x_currently_voting"/>
+                    </replacements>
+                </message>
             </action>
             <set var="overtime" value="2"/>
         </action>
@@ -578,6 +594,38 @@
         <filter>
             <after duration="30s" filter="all(match-running, state=${state_duel}, overtime=1)" message="{ translate: 'misc.overtime', with: ['{0}'] }"/>
         </filter>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <pulse duration="0.5s" period="1s" filter="all(match-running, state=${state_duel}, overtime=1)"/>
+        </filter>
+        <action>
+            <set var="calc" value="x_currently_voting - o_currently_voting"/>
+            <action filter="calc=0">
+                <message actionbar="`b{0} `4Naughts `r`bvs `b{1} `9Crosses">
+                    <replacements>
+                        <decimal id="0" value="o_currently_voting"/>
+                        <decimal id="1" value="x_currently_voting"/>
+                    </replacements>
+                </message>
+            </action>
+            <action filter="calc=1..">
+                <message actionbar="`a{1} `9Crosses `bvs `c{0} `4Naughts">
+                    <replacements>
+                        <decimal id="0" value="o_currently_voting"/>
+                        <decimal id="1" value="x_currently_voting"/>
+                    </replacements>
+                </message>
+            </action>
+            <action filter="calc=..-1">
+                <message actionbar="`a{0} `4Naughts `r`bvs `c{1} `9Crosses">
+                    <replacements>
+                        <decimal id="0" value="o_currently_voting"/>
+                        <decimal id="1" value="x_currently_voting"/>
+                    </replacements>
+                </message>
+            </action>
+        </action>
     </trigger>
     <trigger scope="match" filter="all(match-running, state=${state_vote_cd})">
         <action>
@@ -964,6 +1012,7 @@
             </action>
             <set var="i" value="i + 1"/>
         </repeat>
+        <set var="captured_count" value="captured_count + 1"/>
     </action>
     <trigger scope="match">
         <filter>
@@ -980,12 +1029,18 @@
             <action filter="next_voter=${team_x}">
                 <fill region="x-firework" material="redstone block"/>
             </action>
-            <set var="next_voter" value="${team_none}"/>
-            <set var="x_currently_voting" value="${team_none}"/>
-            <set var="o_currently_voting" value="${team_none}"/>
             <sound key="dig.cloth"/>
             <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
-            <set var="state" value="${state_duel_cd}"/>
+            <action filter="any(gamerule_alternate_vote=0, all(gamerule_alternate_vote=1, even-spaces-captured))">
+                <set var="next_voter" value="${team_none}"/>
+                <set var="x_currently_voting" value="${team_none}"/>
+                <set var="o_currently_voting" value="${team_none}"/>
+                <set var="state" value="${state_duel_cd}"/>
+            </action>
+            <action filter="all(gamerule_alternate_vote=1, not(even-spaces-captured))">
+                <action id="switch-voter"/>
+                <set var="state" value="${state_vote_cd}"/>
+            </action>
         </action>
     </trigger>
     <trigger scope="player" filter="all(match-running, alive, state=${state_duel}, not(fighting-zone))">
@@ -999,6 +1054,55 @@
             <teleport x="player.x" y="9" z="player.z"/>
         </action>
     </trigger>
+    <trigger scope="player" observers="true">
+        <filter>
+            <all>
+                <cylinder base="10.5,19.5,-32.5" radius="1.5" height="2"/>
+                <observing/>
+            </all>
+        </filter>
+        <action filter="not(match-started)">
+            <sound key="random.orb" volume="1" pitch="1.2"/>
+            <message>
+                <text>{"text": "`7`oFrom `6Tirion`r: Psst, have you heard about the super secret settings? ","extra":[{"text":" [Let me see] ","clickEvent":{"action":"run_command","value":"/action trigger console-intro"},"color":"blue"}],"color": "white"}</text>
+            </message>
+        </action>
+    </trigger>
+    <action id="console-intro" scope="player" expose="true" filter="not(match-started)">
+        <sound key="random.orb" volume="1" pitch="1.2"/>
+        <message text="`7`oFrom `6Tirion`r: Use the controls below to modify the gamerules for this match."/>
+        <action id="console"/>
+    </action>
+    <action id="console" scope="player" expose="true" filter="not(match-started)">
+        <action filter="gamerule_alternate_vote=0">
+            <message>
+                <text>{"text":"","extra":[{"text":"Voting format: ", "color":"dark_aqua"},{"text":"Winner Only","clickEvent":{"action":"run_command","value":"/action trigger set-gamerule-alternate-vote-0"},"hoverEvent":{"action":"show_text","contents":{"text":"[Selected] Only the duel winner votes on a space to claim.","color":"aqua"}},"color":"green","underlined":true},{"text":", Alternating ","clickEvent":{"action":"run_command","value":"/action trigger set-gamerule-alternate-vote-1"},"hoverEvent":{"action":"show_text","contents":{"text":"The duel winner will vote on a space to claim first, then the loser.","color":"aqua"}},"color":"aqua"}],"color":"white"}</text>
+            </message>
+        </action>
+        <action filter="gamerule_alternate_vote=1">
+            <message>
+                <text>{"text":"","extra":[{"text":"Voting format: ", "color":"dark_aqua"},{"text":"Winner Only, ","clickEvent":{"action":"run_command","value":"/action trigger set-gamerule-alternate-vote-0"},"hoverEvent":{"action":"show_text","contents":{"text":"Only the duel winner votes on a space to claim.","color":"aqua"}},"color":"aqua"},{"text":"Alternating","clickEvent":{"action":"run_command","value":"/action trigger set-gamerule-alternate-vote-1"},"hoverEvent":{"action":"show_text","contents":{"text":"[Selected] The duel winner will vote on a space to claim first, then the loser.","color":"aqua"}},"color":"green","underlined":true}],"color":"white"}</text>
+            </message>
+        </action>
+    </action>
+    <action id="set-gamerule-alternate-vote-0" scope="player" expose="true">
+        <switch-scope inner="match">
+            <set var="gamerule_alternate_vote" value="0"/>
+            <message>
+                <text>{"text":"`7[`6Arena Master`7] `6Tirion`r: The voting rules for this match have been set to ","extra":[{"text":"Winner Only","color":"green","hoverEvent":{"action":"show_text","contents":{"text":"Only the duel winner votes on a space to claim.","color":"aqua"}}},{"text":"!"}],"color":"white"}</text>
+            </message>
+        </switch-scope>
+        <action id="console"/>
+    </action>
+    <action id="set-gamerule-alternate-vote-1" scope="player" expose="true">
+        <switch-scope inner="match">
+            <set var="gamerule_alternate_vote" value="1"/>
+            <message>
+                <text>{"text":"`7[`6Arena Master`7] `6Tirion`r: The voting rules for this match have been set to ","extra":[{"text":"Alternating Votes","color":"green","hoverEvent":{"action":"show_text","contents":{"text":"The duel winner will vote on a space to claim first, then the loser.","color":"aqua"}}},{"text":"!"}],"color":"white"}</text>
+            </message>
+        </switch-scope>
+        <action id="console"/>
+    </action>
 </actions>
 <structures update="false">
     <structure id="str-x-symbol" region="reg-x-symbol" origin="0,10,-10"/>
@@ -1121,6 +1225,7 @@
     <item>potion</item>
     <item>golden apple</item>
     <item>tnt</item>
+    <item>mushroom soup</item>
 </itemremove>
 <toolrepair>
     <tool>stone sword</tool>
