@@ -1,92 +1,92 @@
 <map proto="1.5.0">
-  <name>Place the wool</name>
-  <version>1.0.0</version>
-  <phase>staging</phase>
-  <objective>Find the right pedestal for your wool</objective>
-  <authors>
-    <author uuid="e82603df-417d-4a95-bd1f-1720648be0b4"/> <!-- Pablete1234 -->
-  </authors>
-  <time>4m</time>
-  <teams>
-    <team color="yellow" min="1" max="100" id="participants">Players</team>
-  </teams>
-  <kits>
-    <kit id="default-kit">
-      <item material="wool" team-color="true" amount="64"/>
-    </kit>
-  </kits>
-  <spawns>
-    <spawn team="participants" kit="default-kit" region="spawn-point"/>
-    <default region="spawn-point"/>
-  </spawns>
-  <regions>
-    <block id="spawn-point">0,6.5,0</block>
-    <cuboid id="monuments" min="-20,7,-20" max="21,8,21"/>
-    <apply region="monuments" block="never" message="Wrong wool monument :(, try a different one"/>
-    <apply region="everywhere" block="never" message="You may only place blocks in the wool monuments!"/>
+<name>Place the wool</name>
+<version>1.0.0</version>
+<phase>staging</phase>
+<objective>Find the right pedestal for your wool</objective>
+<authors>
+  <author uuid="e82603df-417d-4a95-bd1f-1720648be0b4"/> <!-- Pablete1234 -->
+</authors>
+<time>4m</time>
+<teams>
+  <team color="yellow" min="1" max="100" id="participants">Players</team>
+</teams>
+<kits>
+  <kit id="default-kit">
+    <item material="wool" team-color="true" amount="64"/>
+  </kit>
+</kits>
+<spawns>
+  <spawn team="participants" kit="default-kit" region="spawn-point"/>
+  <default region="spawn-point"/>
+</spawns>
+<regions>
+  <block id="spawn-point">0,6.5,0</block>
+  <cuboid id="monuments" min="-20,7,-20" max="21,8,21"/>
+  <apply region="monuments" block="never" message="Wrong wool monument :(, try a different one"/>
+  <apply region="everywhere" block="never" message="You may only place blocks in the wool monuments!"/>
 
-    <cuboid id="quadrant-0" min=" 2,6, 2" max=" 21,9, 21"/>
-    <cuboid id="quadrant-1" min="-1,6, 2" max="-20,9, 21"/>
-    <cuboid id="quadrant-2" min=" 2,6,-1" max=" 21,9,-20"/>
-    <cuboid id="quadrant-3" min="-1,6,-1" max="-20,9,-20"/>
-  </regions>
-  <variables>
-    <variable id="i" scope="match"/>
-    <variable id="min_idx" scope="match"/>
-    <array id="order" size="4" scope="match"/>
-    <cuboid id="monument" min="0,7,0" max="1,8,1"/>
-  </variables>
-  <wools>
-    <wool team="participants" color="yellow" location="0,6,0" monument="monument"/>
-  </wools>
-  <filters>
-    <variable id="is-min" scope="match" value="order[min_idx]-order[i%4]">0..</variable>
-    <variable id="flip-x" scope="match" value="order[i] % 2">1</variable>
-    <variable id="flip-z" scope="match" value="order[i] - 1">1..</variable>
-  </filters>
-  <actions>
-    <trigger filter="always" scope="match">
-      <action>
-        <!-- Decide quadrant removal order -->
+  <cuboid id="quadrant-0" min=" 2,6, 2" max=" 21,9, 21"/>
+  <cuboid id="quadrant-1" min="-1,6, 2" max="-20,9, 21"/>
+  <cuboid id="quadrant-2" min=" 2,6,-1" max=" 21,9,-20"/>
+  <cuboid id="quadrant-3" min="-1,6,-1" max="-20,9,-20"/>
+</regions>
+<variables>
+  <variable id="i" scope="match"/>
+  <variable id="min_idx" scope="match"/>
+  <array id="order" size="4" scope="match"/>
+  <cuboid id="monument" min="0,7,0" max="1,8,1"/>
+</variables>
+<wools>
+  <wool team="participants" color="yellow" location="0,6,0" monument="monument"/>
+</wools>
+<filters>
+  <variable id="is-min" scope="match" value="order[min_idx]-order[i%4]">0..</variable>
+  <variable id="flip-x" scope="match" value="order[i] % 2">1</variable>
+  <variable id="flip-z" scope="match" value="order[i] - 1">1..</variable>
+</filters>
+<actions>
+  <trigger filter="always" scope="match">
+    <action>
+      <!-- Decide quadrant removal order -->
+      <repeat times="4">
+        <set var="order" index="i" value="random()"/>
+        <set var="i" value="i + 1"/>
+      </repeat>
+      <repeat times="4">
         <repeat times="4">
-          <set var="order" index="i" value="random()"/>
+          <action filter="is-min"><set var="min_idx" value="i % 4"/></action>
           <set var="i" value="i + 1"/>
         </repeat>
-        <repeat times="4">
-          <repeat times="4">
-            <action filter="is-min"><set var="min_idx" value="i % 4"/></action>
-            <set var="i" value="i + 1"/>
-          </repeat>
-          <set var="order" index="min_idx" value="floor(i / 4)"/>
-        </repeat>
-        <repeat times="4">
-          <set var="order" index="i%4" value="order[i%4] - 2"/>
-          <set var="i" value="(i + 1)%4"/>
-        </repeat>
+        <set var="order" index="min_idx" value="floor(i / 4)"/>
+      </repeat>
+      <repeat times="4">
+        <set var="order" index="i%4" value="order[i%4] - 2"/>
+        <set var="i" value="(i + 1)%4"/>
+      </repeat>
 
-        <!-- Decide wool monument location using curr quadrant -->
-        <set var="monument.min_x" value="2+floor(random()*10)*2"/>
-        <set var="monument.min_z" value="2+floor(random()*10)*2"/>
-        <action filter="flip-x"><set var="monument.min_x" value="monument.min_x * -1"/></action>
-        <action filter="flip-z"><set var="monument.min_z" value="monument.min_z * -1"/></action>
-        <set var="monument.max_x" value="monument.min_x + 1"/>
-        <set var="monument.max_z" value="monument.min_z + 1"/>
-      </action>
-    </trigger>
-    <action id="remove-quadrant" scope="match">
-      <set var="i" value="i+1"/>
-      <action filter="all(not(flip-x),not(flip-z))"><fill region="quadrant-0" material="air"/></action>
-      <action filter="all(flip-x,not(flip-z))"><fill region="quadrant-1" material="air"/></action>
-      <action filter="all(not(flip-x),flip-z)"><fill region="quadrant-2" material="air"/></action>
-      <action filter="all(flip-x,flip-z)"><fill region="quadrant-3" material="air"/></action>
+      <!-- Decide wool monument location using curr quadrant -->
+      <set var="monument.min_x" value="2+floor(random()*10)*2"/>
+      <set var="monument.min_z" value="2+floor(random()*10)*2"/>
+      <action filter="flip-x"><set var="monument.min_x" value="monument.min_x * -1"/></action>
+      <action filter="flip-z"><set var="monument.min_z" value="monument.min_z * -1"/></action>
+      <set var="monument.max_x" value="monument.min_x + 1"/>
+      <set var="monument.max_z" value="monument.min_z + 1"/>
     </action>
-  </actions>
-  <modes>
-    <mode name="Removing a quadrant" show-before="5s" action="remove-quadrant" after="1m"/>
-    <mode name="Removing a quadrant" show-before="5s" action="remove-quadrant" after="2m"/>
-    <mode name="Removing a quadrant" show-before="5s" action="remove-quadrant" after="3m"/>
-  </modes>
-  <hunger>
-    <depletion>off</depletion>
-  </hunger>
+  </trigger>
+  <action id="remove-quadrant" scope="match">
+    <set var="i" value="i+1"/>
+    <action filter="all(not(flip-x),not(flip-z))"><fill region="quadrant-0" material="air"/></action>
+    <action filter="all(flip-x,not(flip-z))"><fill region="quadrant-1" material="air"/></action>
+    <action filter="all(not(flip-x),flip-z)"><fill region="quadrant-2" material="air"/></action>
+    <action filter="all(flip-x,flip-z)"><fill region="quadrant-3" material="air"/></action>
+  </action>
+</actions>
+<modes>
+  <mode name="Removing a quadrant" show-before="5s" action="remove-quadrant" after="1m"/>
+  <mode name="Removing a quadrant" show-before="5s" action="remove-quadrant" after="2m"/>
+  <mode name="Removing a quadrant" show-before="5s" action="remove-quadrant" after="3m"/>
+</modes>
+<hunger>
+  <depletion>off</depletion>
+</hunger>
 </map>
