@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Annealing II</name>
-<version>1.0.8</version>
+<version>1.0.9</version>
 <objective>Capture the wool!</objective>
 <created>2022-01-30</created>
 <constant id="unbreakable-armor">true</constant>
@@ -12,8 +12,8 @@
     <author uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30" contribution="XML"/> <!-- Ruediger_LP -->
 </authors>
 <teams>
-    <team id="blue-team" color="blue" max="45">Blue</team>
-    <team id="red-team" color="red" max="45">Red</team>
+    <team id="blue-team" color="blue" max="30">Blue</team>
+    <team id="red-team" color="red" max="30">Red</team>
 </teams>
 <kits>
     <kit id="spawn-kit">
@@ -33,11 +33,11 @@
         <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
         <leggings material="chainmail leggings" unbreakable="true"/>
         <boots material="leather boots" team-color="true" unbreakable="true"/>
-        <effect amplifier="100">damage resistance</effect>
+        <kit id="resistance-kit">
+            <effect amplifier="5">damage resistance</effect>
+        </kit>
     </kit>
-    <kit force="true" id="reset-resistance-kit">
-        <effect duration="0" amplifier="0">damage resistance</effect>
-    </kit>
+    <take kit="resistance-kit" filter="not(spawns)"/>
 </kits>
 <spawns>
     <spawn team="blue-team" kit="spawn-kit" yaw="45" region="blue-spawn-point"/>
@@ -62,11 +62,11 @@
         </not>
     </any>
     <all id="blue-woolroom-filter">
-        <team id="only-blue">blue-team</team>
+        <filter id="blue-team"/>
         <filter id="woolrooms-filter"/>
     </all>
     <all id="red-woolroom-filter">
-        <team id="only-red">red-team</team>
+        <filter id="red-team"/>
         <filter id="woolrooms-filter"/>
     </all>
     <all id="woolrooms-filter">
@@ -97,35 +97,33 @@
 <regions>
     <cylinder id="blue-spawn-point" base="30,29,-107" radius="1" height="0"/>
     <cylinder id="red-spawn-point" base="-30,29,107" radius="1" height="0"/>
-    <cuboid id="obs-spawn-point" min="70,43.0625,12" max="72,44,17"/>
-    <block id="blue-team-blue-wool">24,26,-110</block>
-    <block id="red-team-red-wool">-25,26,109</block>
+    <cuboid id="obs-spawn-point" min="72,42,13" max="74,42,16"/>
+    <block id="blue-team-blue-wool">24,25,-110</block>
+    <block id="red-team-red-wool">-25,25,109</block>
     <point id="blue-wool-spawn">86,19.2,109</point>
     <point id="red-wool-spawn">-86,19.2,-109</point>
-    <negative id="not-spawns">
-        <union id="spawns">
-            <union id="blue-spawn">
-                <complement>
-                    <rectangle min="24,-77" max="-13,-139"/>
-                    <half origin="-2,0,-107" normal="-1,0,1"/>
-                </complement>
-                <complement>
-                    <rectangle min="61,-77" max="24,-139"/>
-                    <half origin="39,0,-80" normal="-1,0,1"/>
-                </complement>
-            </union>
-            <union id="red-spawn">
-                <complement>
-                    <rectangle min="-24,77" max="13,139"/>
-                    <half origin="2,0,107" normal="1,0,-1"/>
-                </complement>
-                <complement>
-                    <rectangle min="-61,77" max="-24,139"/>
-                    <half origin="-39,0,80" normal="1,0,-1"/>
-                </complement>
-            </union>
+    <union id="spawns">
+        <union id="blue-spawn">
+            <complement>
+                <rectangle min="24,-77" max="-13,-139"/>
+                <half origin="-2,0,-107" normal="-1,0,1"/>
+            </complement>
+            <complement>
+                <rectangle min="61,-77" max="24,-139"/>
+                <half origin="39,0,-80" normal="-1,0,1"/>
+            </complement>
         </union>
-    </negative>
+        <union id="red-spawn">
+            <complement>
+                <rectangle min="-24,77" max="13,139"/>
+                <half origin="2,0,107" normal="1,0,-1"/>
+            </complement>
+            <complement>
+                <rectangle min="-61,77" max="-24,139"/>
+                <half origin="-39,0,80" normal="1,0,-1"/>
+            </complement>
+        </union>
+    </union>
     <union id="woolrooms">
         <rectangle id="red-woolroom" min="-58,-79" max="-97,-122"/> <!-- blue defends / red attacks -->
         <rectangle id="blue-woolroom" min="58,79" max="97,122"/> <!-- red defends / blue attacks -->
@@ -134,18 +132,19 @@
         <union id="build-area">
             <rectangle min="-49,-31" max="-13,12"/>
             <rectangle min="49,31" max="13,-12"/>
+            <rectangle min="-58,-97" max="-45,-79"/>
+            <rectangle min="45,79" max="58,97"/>
         </union>
     </negative>
     <!-- applicators -->
-    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
-    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
-    <apply enter="only-red" region="red-woolroom" message="You may not enter your own wool room!"/>
-    <apply enter="only-blue" region="blue-woolroom" message="You may not enter your own wool room!"/>
+    <apply enter="blue-team" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="red-team" region="red-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="blue-team" region="blue-woolroom" message="You may not enter your own wool room!"/>
+    <apply enter="red-team" region="red-woolroom" message="You may not enter your own wool room!"/>
     <apply block-place="only-iron-cause-world" block-break="only-iron" region="spawns" message="You may not edit spawn!"/>
-    <apply block="red-woolroom-filter" region="red-woolroom" message="You may not edit the wool room!"/>
     <apply block="blue-woolroom-filter" region="blue-woolroom" message="You may not edit the wool room!"/>
+    <apply block="red-woolroom-filter" region="red-woolroom" message="You may not edit the wool room!"/>
     <apply block-place="block-place-void-filter" block-break="block-break-void-filter" region="not-build-area" message="You may not edit the void!"/>
-    <apply kit="reset-resistance-kit" region="not-spawns"/>
     <apply block-physics="deny-block-physics-woolrooms" region="woolrooms"/>
 </regions>
 <spawners>
@@ -186,21 +185,6 @@
     <tool>shears</tool>
     <tool>iron spade</tool>
 </toolrepair>
-<item-mods>
-    <rule>
-        <match>
-            <material>iron sword</material>
-            <material>iron pickaxe</material>
-            <material>iron axe</material>
-            <material>iron spade</material>
-            <material>shears</material>
-            <material>bow</material>
-            <material>diamond chestplate</material>
-            <material>gold boots</material>
-        </match>
-        <modify unbreakable="true"/>
-    </rule>
-</item-mods>
 <renewables>
     <renewable rate="5" sound="false" region="spawns" renew-filter="only-iron" replace-filter="only-air" avoid-players="5"/>
     <renewable rate="5" sound="false" region="woolrooms" renew-filter="only-iron" replace-filter="only-air" avoid-players="2"/>
