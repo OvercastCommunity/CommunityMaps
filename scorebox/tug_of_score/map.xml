@@ -1,0 +1,270 @@
+<map proto="1.5.0">
+<name>Tug of Score</name>
+<version>1.0.0</version>
+<created>2025-01-12</created>
+<include id="void-death"/>
+<objective>Capture all the points sequentially in the row to win!</objective>
+<phase>development</phase>
+<authors>
+    <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
+</authors>
+<contributors>
+    <contributor contribution="Map inspiration">MineMakers Team</contributor>
+    <contributor uuid="6ff4ade9-e968-4acd-80eb-1a6fa89629fb" contribution="XML"/> <!-- _Pear -->
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML"/> <!-- zzuf -->
+    <contributor uuid="63ddf58a-ba2c-4d39-8481-6358bb46c63a" contribution="XML"/> <!-- samschaap -->
+</contributors>
+<teams>
+    <team id="yellow-team" color="yellow" max="5">Yellow</team>
+    <team id="blue-team" color="blue" dye-color="light blue" max="5">Blue</team>
+</teams>
+<kits>
+    <kit id="night-vision">
+        <effect>night vision</effect>
+    </kit>
+    <kit id="default" parent="night-vision">
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" enchantment="efficiency:2" material="diamond pickaxe"/>
+        <item slot="2" amount="6" material="snowball"/>
+        <item slot="3" team-color="true" amount="64" material="stained clay"/>
+        <item slot="4" team-color="true" amount="64" material="stained clay"/>
+        <item slot="8" material="golden apple"/>
+    </kit>
+</kits>
+<spawns>
+    <default kit="night-vision" region="obs-spawn"/>
+    <spawn kit="default" team="yellow-team" region="point-a-spawn" yaw="-90" filter="progress-1"/>
+    <spawn kit="default" team="yellow-team" region="point-b-spawn" yaw="-90" filter="progress-2"/>
+    <spawn kit="default" team="yellow-team" region="point-c-spawn" yaw="-90" filter="progress-3"/>
+    <spawn kit="default" team="yellow-team" region="point-d-spawn" yaw="-90" filter="progress-4"/>
+    <spawn kit="default" team="blue-team" region="point-e-spawn" yaw="90" filter="progress-1"/>
+    <spawn kit="default" team="blue-team" region="point-d-spawn" yaw="90" filter="progress-2"/>
+    <spawn kit="default" team="blue-team" region="point-c-spawn" yaw="90" filter="progress-3"/>
+    <spawn kit="default" team="blue-team" region="point-b-spawn" yaw="90" filter="progress-4"/>
+</spawns>
+<variables>
+    <variable id="progress" scope="team" default="4"/>
+</variables>
+<actions>
+    <action id="increment-progress" scope="team">
+        <set var="progress" value="progress+1" scope="team"/>
+    </action>
+    <action id="decrement-progress" scope="team">
+        <set var="progress" value="progress-1" scope="team"/>
+    </action>
+    <action id="message-less-than-3-players" scope="match">
+        <message text=" `e⚠ `aThere are less than `e3 `aplayers in game."/>
+        <message text=" `e⚠ `aAfter scoring, you will respawn at the last point that you captured."/>
+        <sound key="${block.note_block.pling}" volume="1" pitch="1.59"/>
+    </action>
+    <action id="message-3-or-more-players" scope="match">
+        <message text=" `e⚠ `aThere are `e3 `aor more players in game."/>
+        <message text=" `e⚠ `aAfter scoring, you will respawn at the first point."/>
+        <sound key="${block.note_block.pling}" volume="1" pitch="1.59"/>
+    </action>
+    <trigger action="increment-progress" scope="team" filter="controls-a"/>
+    <trigger action="increment-progress" scope="team" filter="controls-b"/>
+    <trigger action="increment-progress" scope="team" filter="controls-c"/>
+    <trigger action="increment-progress" scope="team" filter="controls-d"/>
+    <trigger action="increment-progress" scope="team" filter="controls-e"/>
+    <trigger action="decrement-progress" scope="team" filter="doesnt-control-e"/>
+    <trigger action="decrement-progress" scope="team" filter="doesnt-control-d"/>
+    <trigger action="decrement-progress" scope="team" filter="doesnt-control-c"/>
+    <trigger action="decrement-progress" scope="team" filter="doesnt-control-b"/>
+    <trigger action="decrement-progress" scope="team" filter="doesnt-control-a"/>
+    <trigger action="message-less-than-3-players" scope="match" filter="all(match-running, less-than-3-players)"/>
+    <trigger action="message-3-or-more-players" scope="match" filter="all(match-running, 3-or-more-players)"/>
+</actions>
+<filters>
+    <any id="only-some">
+        <all>
+            <material>stained clay:0</material>
+            <deny>
+                <participating/>
+            </deny>
+        </all>
+        <material>stained clay:1</material>
+        <material>stained clay:3</material>
+        <material>stained clay:4</material>
+        <material>stained clay:11</material>
+        <material>quartz block</material>
+    </any>
+    <not id="doesnt-control-a">
+        <captured id="controls-a">controlling-point-a</captured>
+    </not>
+    <not id="doesnt-control-b">
+        <captured id="controls-b">controlling-point-b</captured>
+    </not>
+    <not id="doesnt-control-c">
+        <captured id="controls-c">controlling-point-c</captured>
+    </not>
+    <not id="doesnt-control-d">
+        <captured id="controls-d">controlling-point-d</captured>
+    </not>
+    <not id="doesnt-control-e">
+        <captured id="controls-e">controlling-point-e</captured>
+    </not>
+    <variable id="progress-0" var="progress">0</variable>
+    <variable id="progress-1" var="progress">1</variable>
+    <variable id="progress-2" var="progress">2</variable>
+    <variable id="progress-3" var="progress">3</variable>
+    <variable id="progress-4" var="progress">4</variable>
+</filters>
+<regions>
+    <union id="spawns">
+        <cylinder id="obs-spawn" base="0.5,11,-35.5" height="0" radius="3"/>
+        <point id="point-a-spawn">-59.5,13,0.5</point>
+        <point id="point-b-spawn">-29.5,13,0.5</point>
+        <point id="point-c-spawn">0.5,13,0.5</point>
+        <point id="point-d-spawn">30.5,13,0.5</point>
+        <point id="point-e-spawn">60.5,13,0.5</point>
+    </union>
+    <union id="portals">
+        <cuboid id="portal-a" min="-61,2,-1" size="3,1,3"/>
+        <cuboid id="portal-b" min="-31,2,-1" size="3,1,3"/>
+        <cuboid id="portal-c" min="-1,2,-1" size="3,1,3"/>
+        <cuboid id="portal-d" min="29,2,-1" size="3,1,3"/>
+        <cuboid id="portal-e" min="59,2,-1" size="3,1,3"/>
+    </union>
+    <union id="point-protections">
+        <cuboid id="point-a-prot" min="-61,2,-1" size="3,3,3"/>
+        <cuboid id="point-b-prot" min="-31,2,-1" size="3,3,3"/>
+        <cuboid id="point-c-prot" min="-1,2,-1" size="3,3,3"/>
+        <cuboid id="point-d-prot" min="29,2,-1" size="3,3,3"/>
+        <cuboid id="point-e-prot" min="59,2,-1" size="3,3,3"/>
+    </union>
+    <union id="hills">
+        <union id="point-a">
+            <cuboid id="point-a-hill" min="-61,2,-1" size="3,2,3"/>
+            <cuboid id="point-a-display" min="-61,22,-1" size="3,3,3"/>
+        </union>
+        <union id="point-b">
+            <cuboid id="point-b-hill" min="-31,2,-1" size="3,2,3"/>
+            <cuboid id="point-b-display" min="-31,22,-1" size="3,3,3"/>
+        </union>
+        <union id="point-c">
+            <cuboid id="point-c-hill" min="-1,2,-1" size="3,2,3"/>
+            <cuboid id="point-c-display" min="-1,22,-1" size="3,3,3"/>
+        </union>
+        <union id="point-d">
+            <cuboid id="point-d-hill" min="29,2,-1" size="3,2,3"/>
+            <cuboid id="point-d-display" min="29,22,-1" size="3,3,3"/>
+        </union>
+        <union id="point-e">
+            <cuboid id="point-e-hill" min="59,2,-1" size="3,2,3"/>
+            <cuboid id="point-e-display" min="59,22,-1" size="3,3,3"/>
+        </union>
+    </union>
+    <not id="less-than-3-players">
+        <players id="3-or-more-players" min="3" filter="always"/>
+    </not>
+    <negative id="not-map">
+        <rectangle min="-64,12" max="65,-11"/>
+    </negative>
+    <apply region="not-map" block="never" message="You may not build outside the map!"/>
+    <apply block="never" region="point-protections">
+        <message>{"translate":"map.protectPortal"}</message>
+    </apply>
+    <apply block="only-some"/>
+</regions>
+<control-points required="true" capture-time="0s" points="0">
+    <control-point id="controlling-point-a" name="Point A" capture="point-a-hill" captured="point-a" initial-owner="yellow-team">
+        <player-filter>
+            <all>
+                <filter id="blue-team"/>
+                <captured>controlling-point-b</captured>
+                <captured>controlling-point-c</captured>
+                <captured>controlling-point-d</captured>
+                <captured>controlling-point-e</captured>
+            </all>
+        </player-filter>
+    </control-point>
+    <control-point id="controlling-point-b" name="Point B" capture="point-b-hill" captured="point-b">
+        <player-filter>
+            <any>
+                <all>
+                    <captured>controlling-point-c</captured>
+                    <captured>controlling-point-d</captured>
+                    <captured>controlling-point-e</captured>
+                </all>
+                <captured>controlling-point-a</captured>
+            </any>
+        </player-filter>
+    </control-point>
+    <control-point id="controlling-point-c" name="Point C" capture="point-c-hill" captured="point-c">
+        <player-filter>
+            <any>
+                <all>
+                    <captured>controlling-point-e</captured>
+                    <captured>controlling-point-d</captured>
+                </all>
+                <all>
+                    <captured>controlling-point-b</captured>
+                    <captured>controlling-point-a</captured>
+                </all>
+            </any>
+        </player-filter>
+    </control-point>
+    <control-point id="controlling-point-d" name="Point D" capture="point-d-hill" captured="point-d">
+        <player-filter>
+            <any>
+                <captured>controlling-point-e</captured>
+                <all>
+                    <captured>controlling-point-b</captured>
+                    <captured>controlling-point-c</captured>
+                    <captured>controlling-point-a</captured>
+                </all>
+            </any>
+        </player-filter>
+    </control-point>
+    <control-point id="controlling-point-e" name="Point E" capture="point-e-hill" captured="point-e" initial-owner="blue-team">
+        <player-filter>
+            <all>
+                <filter id="yellow-team"/>
+                <captured>controlling-point-a</captured>
+                <captured>controlling-point-b</captured>
+                <captured>controlling-point-c</captured>
+                <captured>controlling-point-d</captured>
+            </all>
+        </player-filter>
+    </control-point>
+</control-points>
+<portals>
+    <!-- 3 or more players in game, respawn at spawn point-->
+    <portal region="portals" destination="point-a-spawn" yaw="@-90" pitch="@0" filter="all(yellow-team, 3-or-more-players)"/>
+    <portal region="portals" destination="point-e-spawn" yaw="@90" pitch="@0" filter="all(blue-team, 3-or-more-players)"/>
+    <!-- Less than 3 players in game, respawn at last captured point-->
+    <portal region="portals" destination="point-a-spawn" yaw="@-90" pitch="@0" filter="all(yellow-team, less-than-3-players, progress-1)"/>
+    <portal region="portals" destination="point-b-spawn" yaw="@-90" pitch="@0" filter="all(yellow-team, less-than-3-players, progress-2)"/>
+    <portal region="portals" destination="point-c-spawn" yaw="@-90" pitch="@0" filter="all(yellow-team, less-than-3-players, progress-3)"/>
+    <portal region="portals" destination="point-d-spawn" yaw="@-90" pitch="@0" filter="all(yellow-team, less-than-3-players, progress-4)"/>
+    <portal region="portals" destination="point-e-spawn" yaw="@90" pitch="@0" filter="all(blue-team, less-than-3-players, progress-1)"/>
+    <portal region="portals" destination="point-d-spawn" yaw="@90" pitch="@0" filter="all(blue-team, less-than-3-players, progress-2)"/>
+    <portal region="portals" destination="point-c-spawn" yaw="@90" pitch="@0" filter="all(blue-team, less-than-3-players, progress-3)"/>
+    <portal region="portals" destination="point-b-spawn" yaw="@90" pitch="@0" filter="all(blue-team, less-than-3-players, progress-4)"/>
+</portals>
+<kill-rewards>
+    <kill-reward>
+        <kit>
+            <item amount="2" material="snowball"/>
+            <effect duration="3s" amplifier="2">regeneration</effect>
+        </kit>
+    </kill-reward>
+</kill-rewards>
+<itemremove>
+    <item>stone sword</item>
+    <item>diamond pickaxe</item>
+    <item>snowball</item>
+    <item>stained clay</item>
+    <item>golden apple</item>
+    <item>quartz block</item>
+</itemremove>
+<maxbuildheight>10</maxbuildheight>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<disabledamage>
+    <damage>fall</damage>
+</disabledamage>
+<respawn auto="true"/>
+</map>
