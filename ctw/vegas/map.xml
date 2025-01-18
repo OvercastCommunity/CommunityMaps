@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Vegas</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <include id="gapple-kill-reward"/>
 <objective>Capture both of the enemy's wools, and upgrade your team at the Cocktail Club!</objective>
 <created>2025-01-14</created>
@@ -29,16 +29,10 @@
             <point>-111.5,17,15.5</point>
         </regions>
     </default>
-        <spawn team="blue" kit="spawn-kit" yaw="180">
-            <regions>
-                    <point>0.5,20,137.5</point>
-            </regions>
-        </spawn>
-    <spawn team="red" kit="spawn-kit" yaw="0">
-        <regions>
-                <point>0.5,20,-136.5</point>
-        </regions>
-    </spawn>
+    <spawn team="blue" kit="spawn-kit" yaw="180" filter="speed=2" region="blue-spawnpoint-forward"/>
+    <spawn team="blue" kit="spawn-kit" yaw="180" filter="speed=0..1" region="blue-spawnpoint"/>
+    <spawn team="red" kit="spawn-kit" yaw="0" filter="speed=2" region="red-spawnpoint-forward"/>
+    <spawn team="red" kit="spawn-kit" yaw="0" filter="speed=0..1" region="red-spawnpoint"/>
 </spawns>
 <kits>
     <kit id="default-kit">
@@ -61,7 +55,6 @@
         <leggings unbreakable="true" team-color="true" material="leather leggings" locked="true"/>
         <boots unbreakable="true" team-color="true" material="leather boots" locked="true"/>
         <effect duration="6" amplifier="255">damage resistance</effect>
-        <effect duration="5" amplifier="3">speed</effect>
     </kit>
     <!-- Upgrades -->
     <give filter="all(alive,haste=1)">
@@ -74,7 +67,7 @@
             <effect amplifier="2">fast digging</effect>
         </kit>
     </give>
-    <give filter="all(alive,speed=1)">
+    <give filter="all(alive,speed=1..)">
         <kit>
             <effect>speed</effect>
         </kit>
@@ -388,7 +381,9 @@
     <message id="haste-alert-2" text="`bYour team now has `e`lHaste II`r`b!"/>
     <trigger filter="haste=2" trigger="haste-alert-2" scope="player"/>
     <message id="speed-alert-1" text="`bYour team now has `9`lSpeed I`r`b!"/>
-    <trigger filter="speed=1" trigger="speed-alert-1" scope="player"/>
+    <trigger filter="speed=1.." trigger="speed-alert-1" scope="player"/>
+    <message id="speed-alert-2" text="`bYour team now has `9`lForward Spawn`r`b!"/>
+    <trigger filter="speed=2.." trigger="speed-alert-2" scope="player"/>
     <message id="fatigue-alert-1" text="`bYour team's base now has a `7`lMining Fatigue Trap`r`b!"/>
     <trigger filter="fatigue=1" trigger="fatigue-alert-1" scope="player"/>
     <message id="health-alert-1" text="`bYour team now has `7`lHealth Boost I`r`b when in the enemy's base!"/>
@@ -596,6 +591,12 @@
     <time id="after-90m">90m</time>
 </filters>
 <regions>
+    <point id="blue-spawnpoint">0.5,20,137.5</point>
+    <point id="blue-spawnpoint-forward">0.5,12,95.5</point>
+
+    <point id="red-spawnpoint">0.5,20,-136.5</point>
+    <point id="red-spawnpoint-forward">0.5,12,-94.5</point>
+
     <union id="spawn-protection">
         <cuboid id="blue-protection" min="57.5,19,118.5" max="-56.5,123,146.5"/>
         <cuboid id="blue-protection2" min="31.5,0,105.5" max="-31.5,123,118.5"/>
@@ -642,8 +643,8 @@
             <cylinder id="east-player" base="63.5,14,0.5" radius="5" height="3"/>
         </union>
         <union id="spawner-protection">
-            <cylinder id="west-protection" base="-63.5,0,0.5" radius="9" height="17"/>
-            <cylinder id="north-protection"  base="63.5,14,0.5" radius="9" height="17"/>
+            <cylinder id="west-protection" base="-63.5,0,0.5" radius="9" height="18"/>
+            <cylinder id="east-protection"  base="63.5,0,0.5" radius="9" height="18"/>
         </union>
     </union>
     <negative id="void-area">
@@ -694,10 +695,14 @@
     <shopkeepers name="`b`lItem Shop" shop="item-shop">
         <shopkeeper yaw="180">2.5,20,143.5</shopkeeper> <!-- Blue -->
         <shopkeeper yaw="0">-1.5,20,-142.5</shopkeeper> <!-- Red -->
+        <shopkeeper yaw="180">3.5,12,112.5</shopkeeper> <!-- Blue -->
+        <shopkeeper yaw="0">-2.5,12,-111.5</shopkeeper> <!-- Red -->
     </shopkeepers>
     <shopkeepers name="`b`lUpgrade Shop" shop="upgrade-shop">
         <shopkeeper yaw="180">-1.5,20,143.5</shopkeeper> <!-- Blue -->
         <shopkeeper yaw="0">2.5,20,-142.5</shopkeeper> <!-- Red -->
+        <shopkeeper yaw="180">-2.5,12,112.5</shopkeeper> <!-- Blue -->
+        <shopkeeper yaw="0">3.5,12,-111.5</shopkeeper> <!-- Red -->
     </shopkeepers>
     <shopkeepers name="`b`lRoulette" shop="roulette-table">
         <shopkeeper yaw="315">-5.5,20,125.5</shopkeeper> <!-- Blue -->
@@ -715,9 +720,9 @@
             <item material="stained clay" team-color="true" amount="16" price="1" currency="nether star"/>
         </category>
         <category id="defense" name="`aDefense Materials" material="iron fence">
-            <item material="log" amount="16" price="8" currency="nether star"/>
-            <item material="fence" amount="12" price ="2" currency="nether star"/>
-            <item material="fence gate" amount="10" price ="4" currency="nether star"/>
+            <item material="log" damage="2" amount="16" price="8" currency="nether star"/>
+            <item material="fence" damage="2" amount="12" price ="2" currency="nether star"/>
+            <item material="fence gate" damage="2" amount="10" price ="4" currency="nether star"/>
             <item material="iron fence" amount="16" price="4" currency="nether star"/>
             <item material="redstone block" amount="16" price="4" currency="nether star"/>
             <item material="piston_base" amount="12" price="4" currency="nether star"/>            
@@ -821,6 +826,7 @@
             <item material="gold pickaxe" name="`6`lHaste I" lore="`7All players on your team|`7permanently gain Haste I!." price="48" currency="nether star" action="add-haste" filter="haste=0"/>
             <item material="diamond pickaxe" name="`6`lHaste II" lore="`7All players on your team|`7permanently gain Haste II!." price="64" currency="nether star" action="add-haste" filter="haste=1"/>
             <item material="feather" name="`c`lSpeed I" lore="`7All players on your team|`7permanently gain Speed I!." price="64" currency="nether star" action="add-speed" filter="speed=0"/>
+            <item material="feather" damage="5" name="`c`lForward Spawn" lore="`7All players on your team will|`7spawn closer to the frontlines." price="64" currency="nether star" action="add-speed" filter="speed=1"/>
             <item material="poisonous potato" name="`7`lMining Fatigue Trap" lore="`7Enemies who enter your side will|`7receive Mining Fatigue I." price="48" currency="nether star" action="add-fatigue" filter="fatigue=0"/>
             <item material="potion" damage="5" name="`4`lOffensive Health boost I" lore="`7Entering enemy territory will|`7grant Health Boost I." price="256" currency="nether star" action="add-healthboost" filter="healthboost=0"/>
             <item material="potion" damage="5" name="`4`lOffensive Health boost II" lore="`7Entering enemy territory will|`7grant Health Boost II." price="512" currency="nether star" action="add-healthboost" filter="healthboost=1"/>
@@ -905,17 +911,23 @@
     <item>sugar cane</item>
     <item>red rose</item>
     <item>water bucket</item>
+    <item>redstone lamp off</item>
+    <item>redstone lamp on</item>
     <item>37</item>
     <item>38</item>
     <item>arrow</item>
     <item>gold block</item>
     <item>emerald block</item>
     <item>lapis block</item>
+    <item>coal block</item>
+    <item>quartz block</item>
     <item>dirt</item>
     <item>stone</item>
     <item>sandstone</item>
     <item>43:8</item>
     <item>44:8</item>
+    <item>iron fence</item>
+    <item>smooth brick</item>
     <item>brick</item>
     <item>brick stairs</item>
     <item>44</item>
