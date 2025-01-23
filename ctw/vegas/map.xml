@@ -1,16 +1,16 @@
 <map proto="1.5.0">
 <name>Vegas</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <include id="gapple-kill-reward"/>
 <objective>Capture both of the enemy's wools, and upgrade your team at the Cocktail Club!</objective>
 <created>2025-01-14</created>
 <gamemode>ctw</gamemode>
 <authors>
-    <author uuid="79581014-09b0-4fbf-a388-aa4ba42c0bc2"/> <!-- crazymc98 -->
+    <author uuid="79581014-09b0-4fbf-a388-aa4ba42c0bc2" contribution="Map Design"/> <!-- crazymc98 -->
+    <author uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="Roulette and XML Adjustments"/> <!-- Pablete1234 -->
 </authors>
 <contributors>
     <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4" contribution="XML Template"/> <!-- Cazadorian -->
-    <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="Roulette XML/Map Feedback"/> <!-- Pablete1234 -->
 </contributors>
 <constants>
     <constant id="observers-kit" delete="true"/>
@@ -20,8 +20,9 @@
     <team id="red" color="red" max="32">Red</team>
 </teams>
 <broadcasts>
-    <alert after="5s">Earn chips from kills, mining, spawners, or testing your luck at the Roulette tables. Use these chips to upgrade your gear!</alert>
-    <tip after="5m" every="5m">Earn chips from kills, mining, spawners, or testing your luck at the Roulette tables. Use these chips to upgrade your gear!</tip>
+    <alert after="5s">Earn chips from kills, mining, spawners, or testing your luck at the roulette tables. Use these chips to upgrade your gear!</alert>
+    <alert after="10s">The roulette tables will open once your team purchases the necessary team upgrades, so work together if you want to gamble...</alert>
+    <tip after="5m" every="5m">Earn chips from kills, mining, spawners, or testing your luck at the roulette tables. Use these chips to upgrade your gear!</tip>
 </broadcasts>
 <spawns>
     <default kit="${observers-kit}" yaw="-90">
@@ -49,7 +50,7 @@
         <item slot="8" material="golden apple"/>
         <item slot="28" material="arrow" amount="32"/>
         <item slot="29" unbreakable="true" material="stone spade"/>
-        <item slot="30" unbreakable="true" material="shears"/>
+        <item slot="30" unbreakable="true" material="shears" enchantment="efficiency:1"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet" locked="true"/>
         <chestplate unbreakable="true" team-color="true" material="leather chestplate" locked="true"/>
         <leggings unbreakable="true" team-color="true" material="leather leggings" locked="true"/>
@@ -119,7 +120,7 @@
     <!-- Roulette spins every 10s (pulse period) -->
     <pulse id="roulette-pulse" period="10s" duration="9.5s" filter="any(bet_black=1..,bet_red=1..,bet_green=1..)"/>
     <pulse id="roulette-spinning" period="0.2s" duration="0.1s">
-        <countdown filter="roulette-pulse" duration="8s" message="The wheel is spinning"/>
+        <countdown filter="roulette-pulse" duration="8s" message="The wheel is spinning..."/>
     </pulse>
     <not id="can-bet">
         <after id="no-more-bets" duration="7s" filter="roulette-pulse"/>
@@ -145,28 +146,28 @@
     <!--Roulette-->
     <trigger filter="roulette-pulse" scope="player">
         <action>
-            <message text="`7`l[`2`lRoulette`7`l] `aThe wheel is spinning..."/>
+            <message text="`7`l[`2`lRoulette`7`l] `aThe croupier has spun the wheel. Place as many bets as you wish."/>
         </action>
     </trigger>
     <trigger filter="roulette-spinning" scope="player">
         <action>
             <set var="roulette_slot" value="floor(random()*37)"/>
             <action filter="ended-green">
-                <message subtitle="`e`lThe wheel is spinning..." title="`2{number}" fade-in="0s" fade-out="3s">
+                <message subtitle="`e`lThe wheel is spinning..." title="`2{number}" fade-in="0s" fade-out="1s">
                     <replacements>
                         <decimal id="number" value="roulette_slot"/>
                     </replacements>
                 </message>
             </action>
             <action filter="ended-black">
-                <message subtitle="`e`lThe wheel is spinning..." title="`8{number}" fade-in="0s" fade-out="3s">
+                <message subtitle="`e`lThe wheel is spinning..." title="`8{number}" fade-in="0s" fade-out="1s">
                     <replacements>
                         <decimal id="number" value="roulette_slot"/>
                     </replacements>
                 </message>
             </action>
             <action filter="ended-red">
-                <message subtitle="`e`lThe wheel is spinning..." title="`4{number}" fade-in="0s" fade-out="3s">
+                <message subtitle="`e`lThe wheel is spinning..." title="`4{number}" fade-in="0s" fade-out="1s">
                     <replacements>
                         <decimal id="number" value="roulette_slot"/>
                     </replacements>
@@ -295,6 +296,15 @@
             <item material="bow" enchantment="flame:1" unbreakable="true"/>
         </kit>
     </action>
+    <action id="powerbow2" scope="player">
+        <replace-item>
+            <find material="bow" unbreakable="true"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit deduct-tools="false">
+            <item material="bow" enchantment="power:2" unbreakable="true"/>
+        </kit>
+    </action>
     <!-- Sharpness replacements -->
     <action id="ironsword-replacement" scope="player">
         <replace-item ignore-metadata="true">
@@ -396,6 +406,8 @@
     <trigger filter="armor=2" trigger="kit-alert-2" scope="player"/>
     <message id="kit-alert-3" text="`bYour team's kit has been upgraded to `b`lDiamond`r`b!"/>
     <trigger filter="armor=3" trigger="kit-alert-3" scope="player"/>
+    <message id="roulette-alert" text="`bYour team's `2`lRoulette Tables`r`b have opened!"/>
+    <trigger filter="all(armor=1,haste=1,speed=1)" trigger="roulette-alert" scope="player"/>
     <!-- Enchantment triggers -->
     <trigger filter="apply-ironsword" trigger="ironsword-replacement" scope="player"/>
     <trigger filter="upgraded-sword" trigger="stonesworddelete" scope="player"/>
@@ -584,6 +596,7 @@
         <material>sandstone</material>
         <material>stained clay:9</material>
         <material>gravel</material>
+        <material>wool:15</material>
     </any>
     <!-- Time-based filters -->
     <time id="after-30m">30m</time>
@@ -596,10 +609,10 @@
     <point id="red-spawnpoint">0.5,20,-136.5</point>
     <point id="red-spawnpoint-forward">0.5,12,-94.5</point>
     <union id="spawn-protection">
-    <cuboid id="blue-protection" min="57.5,19,118.5" max="-56.5,123,146.5"/>
-    <cuboid id="blue-protection2" min="31.5,0,105.5" max="-31.5,123,118.5"/>
-    <cuboid id="red-protection" min="-56.5,19,-118.5" max="57.5,123,-146"/>
-    <cuboid id="red-protection2" min="-31.5,0,-104.5" max="31.5,123,-118.5"/>
+        <cuboid id="blue-protection" min="57.5,19,118.5" max="-56.5,123,146.5"/>
+        <cuboid id="blue-protection2" min="31.5,0,105.5" max="-31.5,123,118.5"/>
+        <cuboid id="red-protection" min="-56.5,19,-118.5" max="57.5,123,-146"/>
+        <cuboid id="red-protection2" min="-31.5,0,-104.5" max="31.5,123,-118.5"/>
     </union>
     <union id="spawn-chest-dropoffs">
         <point id="red-dropoff">-4.5,21,-122</point>
@@ -634,11 +647,11 @@
     <union id="spawners">
         <union id="west-spawner">
             <point id="west-point">-63.5,14,0.5</point>
-            <cylinder id="west-player" base="-63.5,14,0.5" radius="5" height="3"/>
+            <cylinder id="west-player" base="-63.5,13,0.5" radius="5" height="3"/>
         </union>
         <union id="east-spawner">
             <point id="east-point">63.5,14,0.5</point>
-            <cylinder id="east-player" base="63.5,14,0.5" radius="5" height="3"/>
+            <cylinder id="east-player" base="63.5,13,0.5" radius="5" height="3"/>
         </union>
         <union id="spawner-protection">
             <cylinder id="west-protection" base="-63.5,0,0.5" radius="9" height="18"/>
@@ -718,9 +731,9 @@
             <item material="stained clay" team-color="true" amount="16" price="1" currency="nether star"/>
         </category>
         <category id="defense" name="`aDefense Materials" material="iron fence">
-            <item material="log" damage="2" amount="16" price="8" currency="nether star"/>
-            <item material="fence" damage="2" amount="12" price ="2" currency="nether star"/>
-            <item material="fence gate" damage="2" amount="10" price ="4" currency="nether star"/>
+            <item material="log" damage="2" amount="16" price="2" currency="nether star"/>
+            <item material="fence" damage="2" amount="10" price ="2" currency="nether star"/>
+            <item material="fence gate" damage="2" amount="16" price ="6" currency="nether star"/>
             <item material="iron fence" amount="16" price="4" currency="nether star"/>
             <item material="redstone block" amount="16" price="4" currency="nether star"/>
             <item material="piston_base" amount="12" price="4" currency="nether star"/>            
@@ -730,7 +743,8 @@
             <item material="arrow" amount="16" price="1" currency="nether star"/>
             <item material="bow" unbreakable="true" enchantment="power:1" name="`rPower Bow" amount="1" price="16" currency="nether star" kit="powerbow"/>
             <item material="bow" unbreakable="true" enchantment="flame:1" name="`rFlame Bow" amount="1" price="20" currency="nether star" kit="flamebow"/>
-            <item material= "blaze rod" amount="1" price="16" currency="nether star" enchantment="fire_aspect:1" name="Flaming Hot Stick"/>
+            <item material="bow" unbreakable="true" enchantment="power:2" name="`rPower II Bow" amount="1" price="32" currency="nether star" kit="powerbow2"/>
+            <item material= "blaze rod" amount="1" price="16" currency="nether star" enchantment="fire_aspect:1" name="Flaming Hot Stick" lore="Don't die or you'll lose me!"/>
             <item material= "stick" amount="1" price="8" currency="nether star" enchantment="knockback:1" name="Knockback Stick" lore="Don't die or you'll lose me!"/>
         </category>
         <category id="individualarmor" name="`aIndividual Armor" material="chainmail chestplate">
@@ -824,34 +838,39 @@
             <item material="gold pickaxe" name="`6`lHaste I" lore="`7All players on your team|`7permanently gain Haste I!." price="48" currency="nether star" action="add-haste" filter="haste=0"/>
             <item material="diamond pickaxe" name="`6`lHaste II" lore="`7All players on your team|`7permanently gain Haste II!." price="64" currency="nether star" action="add-haste" filter="haste=1"/>
             <item material="feather" name="`c`lSpeed I" lore="`7All players on your team|`7permanently gain Speed I!." price="64" currency="nether star" action="add-speed" filter="speed=0"/>
-            <item material="feather" damage="5" name="`c`lForward Spawn" lore="`7All players on your team will|`7spawn closer to the frontlines." price="64" currency="nether star" action="add-speed" filter="speed=1"/>
+            <item material="feather" name="`c`lForward Spawn" lore="`7All players on your team will|`7spawn closer to the frontlines." price="64" currency="nether star" action="add-speed" filter="speed=1"/>
             <item material="poisonous potato" name="`7`lMining Fatigue Trap" lore="`7Enemies who enter your side will|`7receive Mining Fatigue I." price="48" currency="nether star" action="add-fatigue" filter="fatigue=0"/>
             <item material="potion" damage="5" name="`4`lOffensive Health boost I" lore="`7Entering enemy territory will|`7grant Health Boost I." price="256" currency="nether star" action="add-healthboost" filter="healthboost=0"/>
             <item material="potion" damage="5" name="`4`lOffensive Health boost II" lore="`7Entering enemy territory will|`7grant Health Boost II." price="512" currency="nether star" action="add-healthboost" filter="healthboost=1"/>
         </category>
     </shop>
     <shop id="roulette-table" name="Roulette">
-        <category id="black" name="`aBet on Black - 2x Payout" material="wool" damage="15">
-            <item material="wool" damage="15" name="`7`lWager 4" lore="`7|Just for Fun" price="4" currency="nether star" action="bet-4_black" filter="can-bet"/>
-            <item material="wool" damage="15" name="`7`lWager 8" lore="`7|Lets push it a little" price="8" currency="nether star" action="bet-8_black" filter="can-bet"/>
-            <item material="wool" damage="15" name="`7`lWager 16" lore="`7|I'm feeling lucky" price="16" currency="nether star" action="bet-16_black" filter="can-bet"/>
-            <item material="wool" damage="15" name="`7`lWager 32" lore="`7|Now I just feel confident" price="32" currency="nether star" action="bet-32_black" filter="can-bet"/>
-            <item material="wool" damage="15" name="`7`lWager 64" lore="`7|This is not a good idea..." price="64" currency="nether star" action="bet-64_black" filter="can-bet"/>
-            <item material="wool" damage="15" name="`7`lWager 128" lore="`7|I hope your teammates know you're doing this!" price="128" currency="nether star" action="bet-128_black" filter="can-bet"/>
+        <category id="upgrades" name="`2Roulette `ais `clocked`a" lore="`7Purchase upgrades to unlock" material="beacon" filter="any(armor=0,haste=0,speed=0)">
+            <item material="chainmail boots" name="`7`lChainmail Kit" lore="`7Your team's spawn kit now|`7has chainmail leggings and boots" price="32" currency="nether star" kit="set-armor-chainmail" filter="armor=0"/>
+            <item material="gold pickaxe" name="`6`lHaste I" lore="`7All players on your team|`7permanently gain Haste I!." price="48" currency="nether star" action="add-haste" filter="haste=0"/>
+            <item material="feather" name="`c`lSpeed I" lore="`7All players on your team|`7permanently gain Speed I!." price="64" currency="nether star" action="add-speed" filter="speed=0"/>
         </category>
-        <category id="red" name="`aBet on Red - 2x Payout" material="wool" damage="14">
-            <item material="wool" damage="14" name="`7`lWager 4" lore="`7|Just for Fun" price="4" currency="nether star" action="bet-4_red" filter="can-bet"/>
-            <item material="wool" damage="14" name="`7`lWager 8" lore="`7|Lets push it a little" price="8" currency="nether star" action="bet-8_red" filter="can-bet"/>
-            <item material="wool" damage="14" name="`7`lWager 16" lore="`7|I'm feeling lucky" price="16" currency="nether star" action="bet-16_red" filter="can-bet"/>
-            <item material="wool" damage="14" name="`7`lWager 32" lore="`7|Now I just feel confident" price="32" currency="nether star" action="bet-32_red" filter="can-bet"/>
-            <item material="wool" damage="14" name="`7`lWager 64" lore="`7|This is not a good idea..." price="64" currency="nether star" action="bet-64_red" filter="can-bet"/>
-            <item material="wool" damage="14" name="`7`lWager 128" lore="`7|I hope your teammates know you're doing this!" price="128" currency="nether star" action="bet-128_red" filter="can-bet"/>
+        <category id="black" name="`aBet on Black - 2x Payout" material="wool" damage="15" filter="all(armor=1..,haste=1..,speed=1..,can-bet)">
+            <item material="wool" damage="15" name="`7`lWager 4" lore="`7|Just for Fun" price="4" currency="nether star" action="bet-4_black"/>
+            <item material="wool" damage="15" name="`7`lWager 8" lore="`7|Lets push it a little" price="8" currency="nether star" action="bet-8_black"/>
+            <item material="wool" damage="15" name="`7`lWager 16" lore="`7|I'm feeling lucky" price="16" currency="nether star" action="bet-16_black"/>
+            <item material="wool" damage="15" name="`7`lWager 32" lore="`7|Now I just feel confident" price="32" currency="nether star" action="bet-32_black"/>
+            <item material="wool" damage="15" name="`7`lWager 64" lore="`7|This is not a good idea..." price="64" currency="nether star" action="bet-64_black"/>
+            <item material="wool" damage="15" name="`7`lWager 128" lore="`7|I hope your teammates know you're doing this!" price="128" currency="nether star" action="bet-128_black"/>
         </category>
-        <category id="green" name="`aBet on Green - 35x Payout" material="wool" damage="13">
-            <item material="wool" damage="13" name="`7`lWager 4" lore="`7|Not a good idea..." price="4" currency="nether star" action="bet-4_green" filter="can-bet"/>
-            <item material="wool" damage="13" name="`7`lWager 8" lore="`7|I wouldn't wager past this..." price="8" currency="nether star" action="bet-8_green" filter="can-bet"/>
-            <item material="wool" damage="13" name="`7`lWager 16" lore="`7|You're not going to make up your debt" price="16" currency="nether star" action="bet-16_green" filter="can-bet"/>
-            <item material="wool" damage="13" name="`7`lWager 32" lore="`7|IF you win it will be legendary" price="32" currency="nether star" action="bet-32_green" filter="can-bet"/>
+        <category id="red" name="`aBet on Red - 2x Payout" material="wool" damage="14" filter="all(armor=1..,haste=1..,speed=1..,can-bet)">
+            <item material="wool" damage="14" name="`7`lWager 4" lore="`7|Just for Fun" price="4" currency="nether star" action="bet-4_red"/>
+            <item material="wool" damage="14" name="`7`lWager 8" lore="`7|Lets push it a little" price="8" currency="nether star" action="bet-8_red"/>
+            <item material="wool" damage="14" name="`7`lWager 16" lore="`7|I'm feeling lucky" price="16" currency="nether star" action="bet-16_red"/>
+            <item material="wool" damage="14" name="`7`lWager 32" lore="`7|Now I just feel confident" price="32" currency="nether star" action="bet-32_red"/>
+            <item material="wool" damage="14" name="`7`lWager 64" lore="`7|This is not a good idea..." price="64" currency="nether star" action="bet-64_red"/>
+            <item material="wool" damage="14" name="`7`lWager 128" lore="`7|I hope your teammates know you're doing this!" price="128" currency="nether star" action="bet-128_red"/>
+        </category>
+        <category id="green" name="`aBet on Green - 35x Payout" material="wool" damage="13" filter="all(armor=1..,haste=1..,speed=1..,can-bet)">
+            <item material="wool" damage="13" name="`7`lWager 4" lore="`7|Not a good idea..." price="4" currency="nether star" action="bet-4_green"/>
+            <item material="wool" damage="13" name="`7`lWager 8" lore="`7|I wouldn't wager past this..." price="8" currency="nether star" action="bet-8_green"/>
+            <item material="wool" damage="13" name="`7`lWager 16" lore="`7|You're not going to make up your debt" price="16" currency="nether star" action="bet-16_green"/>
+            <item material="wool" damage="13" name="`7`lWager 32" lore="`7|IF you win it will be legendary" price="32" currency="nether star" action="bet-32_green"/>
         </category>
     </shop>
 </shops>
@@ -949,6 +968,13 @@
     <item>gravel</item>
     <item>wood</item>
     <item>log</item>
+    <item>wool:1</item>    
+    <item>wool:4</item>
+    <item>wool:5</item>
+    <item>wool:11</item>   
+    <item>wool:13</item>    
+    <item>wool:14</item>
+    <item>wool:15</item>        
     <item>stained glass</item>
     <item>sponge</item>
     <item>clay ball</item>
@@ -984,7 +1010,7 @@
     <item>iron sword</item>
     <item>diamond sword</item>
     <item>shears</item>
-    <item>bow</item>
+    <item>blaze rod</item>
 </itemremove>
 <itemkeep>
     <item>gold pickaxe</item>
@@ -1000,7 +1026,6 @@
     <item>diamond sword</item>
     <item>shears</item>
     <item>bow</item>
-    <item>blaze rod</item>
 </itemkeep>
 <armorkeep>
     <item>leather helmet</item>
