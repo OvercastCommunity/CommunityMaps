@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Atomic II</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <unless variant="lifesteal">
     <objective>Get the highest amount of kills, or stand on the emerald blocks for 20 seconds to win!</objective>
 </unless>
@@ -54,14 +54,17 @@
 </spawns>
 <filters>
     <material id="lamp">124</material>
-    <countdown duration="${hill-capture-time}" message="`fA player is `ccapturing`f the `aB`f hill! `b{0} left">
+    <countdown duration="${hill-capture-message}" message="`fA player is `ccapturing`f the `aB`f hill! `b{0} left">
         <all>
-            <players min="1" max="1">
-                <region id="point-b-region"/>
-            </players>
             <not>
                 <completed>b-hill</completed>
             </not>
+            <filter id="hill_disabled=0"/>
+            <after duration="1s">
+                <players min="1" max="1">
+                    <region id="point-b-region"/>
+                </players>
+            </after>
         </all>
     </countdown>
     <not id="none-captured">
@@ -132,9 +135,19 @@
             <set var="time_limit" value="0"/>
         </action>
     </trigger>
+    <trigger scope="match" filter="hill_disabled=1">
+        <action>
+            <fill region="point-b-blocks" material="${hill-block-off}" filter="only-hill-block-on"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(hill_disabled=0,hill_previously_disabled=1)">
+        <action>
+            <fill region="point-b-blocks" material="${hill-block-on}" filter="only-hill-block-off"/>
+        </action>
+    </trigger>
 </actions>
 <control-points capture-rule="exclusive" show-progress="true" permanent="true" points="${hill-points}">
-    <control-point id="b-hill" name="B" capture-time="${hill-capture-time}">
+    <control-point id="b-hill" name="B" capture-time="${hill-capture-time}" player-filter="hill_disabled=0">
         <capture><region id="point-b-region"/></capture>
     </control-point>
 </control-points>
