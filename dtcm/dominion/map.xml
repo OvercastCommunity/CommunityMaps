@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Dominion</name>
-<version>1.0.10</version>
+<version>1.0.11</version>
 <include id="gapple-kill-reward"/>
 <objective>Destroy the enemy's two monuments!</objective>
 <created>2022-01-08</created>
@@ -19,8 +19,8 @@
     <tip after="180s" every="180s" count="oo">You are free to bridge anywhere in the map except the middle hole at frontlines!</tip>
 </broadcasts>
 <teams>
-    <team id="blue" color="blue" max="20">Eleanor</team>
-    <team id="red" color="dark red" max="20">Victoria</team>
+    <team id="blue-team" color="blue" max="20">Eleanor</team>
+    <team id="red-team" color="dark red" max="20">Victoria</team>
 </teams>
 <kits>
     <kit id="spawn-kit">
@@ -53,12 +53,12 @@
             <cylinder base="11.5,65,-81.5" height="0" radius="0.5"/>
         </region>
     </default>
-    <spawn team="blue" kit="spawn-kit" yaw="90">
+    <spawn team="blue-team" kit="spawn-kit" yaw="90">
         <region>
             <cylinder base="123.5,32,1.5" height="0" radius="0.5"/>
         </region>
     </spawn>
-    <spawn team="red" kit="spawn-kit" yaw="-90">
+    <spawn team="red-team" kit="spawn-kit" yaw="-90">
         <region>
             <cylinder base="-102.5,32,1.5" height="0" radius="0.5"/>
         </region>
@@ -66,25 +66,7 @@
 </spawns>
 <!-- FILTERS -->
 <filters>
-    <deny id="deny-players">
-        <participating/>
-    </deny>
-    <not id="blue-in-wr">
-        <any>
-            <team id="only-red">red</team>
-            <material>chest</material>
-            <material>beacon</material>
-            <material id="only-iron">iron block</material>
-        </any>
-    </not>
-    <not id="red-in-wr">
-        <any>
-            <team id="only-blue">blue</team>
-            <material>chest</material>
-            <material>beacon</material>
-            <material>iron block</material>
-        </any>
-    </not>
+    <material id="only-iron">iron block</material>
 </filters>
 <!-- REGIONS -->
 <regions>
@@ -120,37 +102,37 @@
         <cuboid min="-95.5,0,-5.5" max="-45.5,1,-39.5"/> <!-- Crescent Left A -->
         <cuboid min="-58,0,-39.5" max="-93,1,-50"/> <!--Crescent Left B -->
     </union>
-    <apply enter="only-blue" region="blue-spawn" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-red" region="red-spawn" message="You may not enter the opponent's spawn!"/>
-    <apply block-break="only-iron" block-place="deny-players" region="spawns" message="Only iron blocks may be broken in the spawns!"/>
-    <apply block="deny(void)" region="void-area" message="You may not build in the void area!"/>
+    <apply enter="blue-team" region="blue-spawn" message="You may not enter the opponent's spawn!"/>
+    <apply enter="red-team" region="red-spawn" message="You may not enter the opponent's spawn!"/>
+    <apply block-break="only-iron" block-place="deny(participating)" region="spawns" message="Only iron blocks may be broken in the spawns!"/>
+    <apply block-place="deny(void)" region="void-area" message="You may not build in the void area!"/>
 </regions>
 <!-- TODO: replace fake lanes destroyables with fill actions -->
 <modes>
     <mode id="side-lane" after="10m" name="Crescent Void gaps will be bridgeable in" material="water" show-before="10s"/>
 </modes>
 <destroyables name="lanes" materials="air;water" completion="0%" required="false" show="false" modes="side-lane" repairable="false">
-    <destroyable owner="blue" region="blue-void"/>
-    <destroyable owner="red" region="red-void"/>
+    <destroyable owner="blue-team" region="blue-void"/>
+    <destroyable owner="red-team" region="red-void"/>
 </destroyables>
 <!-- MONUMENTS -->
 <destroyables materials="emerald block" required="true">
-    <destroyable name="Left Monument" owner="blue">
+    <destroyable name="Left Monument" owner="blue-team">
         <region>
             <cuboid min="92.5,13,-38.5" max="105.5,35,-66.5"/>
         </region>
     </destroyable>
-    <destroyable name="Left Monument" owner="red">
+    <destroyable name="Left Monument" owner="red-team">
         <region>
             <cuboid min="-69.5,13,50.5" max="-101,35,72.5"/>
         </region>
     </destroyable>
-    <destroyable name="Right Monument" owner="blue">
+    <destroyable name="Right Monument" owner="blue-team">
         <region>
             <cuboid min="93.5,13,52.5" max="103.5,35,63.5"/>
         </region>
     </destroyable>
-    <destroyable name="Right Monument" owner="red">
+    <destroyable name="Right Monument" owner="red-team">
         <region>
             <cuboid min="-68.5,13,-47.5" max="-98.5,35,-72"/>
         </region>
@@ -158,7 +140,7 @@
 </destroyables>
 <!-- Misc -->
 <renewables>
-    <renewable region="spawns" renew-filter="only-iron" rate="2" grow="false" particles="true" sound="true"/>
+    <renewable region="spawns" renew-filter="only-iron" rate="2" grow="false"/>
 </renewables>
 <toolrepair>
     <tool>stone sword</tool>
@@ -174,16 +156,11 @@
     <item>leather leggings</item>
     <item>leather boots</item>
     <item>sapling</item>
-    <item>31</item>
-    <item>37</item>
-    <item>38</item>
-    <item>338</item>
-    <item>yellow flower</item>
+    <item>red rose</item>
     <item>string</item>
     <item>redstone</item>
     <item>redstone torch on</item>
     <item>seeds</item>
-    <item>147</item>
     <item>torch</item>
     <item>emerald block</item>
 </itemremove>
@@ -196,13 +173,10 @@
             <item chance="0" material="wood"/>
         </drops>
     </rule>
-    <rule wrong-tool="true">
-        <filter>
-            <material>iron block</material>
-        </filter>
+    <rule filter="only-iron" wrong-tool="true">
         <drops>
-            <item chance="100" material="chainmail chestplate"/>
-            <item chance="100" material="chainmail leggings"/>
+            <item chance="1" material="chainmail chestplate"/>
+            <item chance="1" material="chainmail leggings"/>
         </drops>
     </rule>
 </block-drops>
