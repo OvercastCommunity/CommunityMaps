@@ -1,164 +1,215 @@
 <map proto="1.5.0">
 <name>Constellation</name>
-<version>1.0.3</version>
+<variant id="christmas" world="christmas" override="true">Coldstellation</variant>
+<version>1.0.4</version>
 <objective>Capture the enemy team's wool!</objective>
+<gamemode>ctw</gamemode>
+<include id="gapple-kill-reward"/>
 <authors>
-    <author uuid="dc1d15f8-b460-4ae0-8093-f3e1361dca06" /> <!-- Gr3nDy -->
-    <author uuid="2fd57dff-4cff-4b60-96a4-d26e37759c03" /> <!-- Furrie -->
+    <author uuid="dc1d15f8-b460-4ae0-8093-f3e1361dca06" contribution="Main map idea, layout, building" /> <!-- Gr3nDy -->
+    <if variant="default">
+        <author uuid="2fd57dff-4cff-4b60-96a4-d26e37759c03" contribution="Building, XML" /> <!-- Furrie -->
+    </if>
+    <if variant="christmas">
+        <author uuid="2fd57dff-4cff-4b60-96a4-d26e37759c03" contribution="Winterification, building, XML, MCEdit" /> <!-- Furrie -->
+    </if>
 </authors>
 <contributors>
     <contributor uuid="bb33325c-e147-4620-8c3e-3da6a68f14d0" contribution="Tester"/> <!-- i_top_1 -->
+    <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="Feedback"/> <!-- Pablete1234 -->
+    <if variant="christmas">
+        <contributor uuid="d1e3251c-def5-4328-a7e9-09335934d316" contribution="Spawn and woolroom idea"/> <!-- byRobo -->
+        <contributor uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Beautiful trees"/> <!-- Tundren -->
+        <contributor uuid="5ff7bfa3-12e8-4c3b-9a14-ca7c540bd90d" contribution="Built observers spawn, snowballs as snow idea"/> <!-- Valoryie -->
+    </if>
 </contributors>
-<created>2024-05-25</created>
+<if variant="default">
+    <created>2024-05-25</created>
+    <constant id="team_one_name">Red</constant>
+    <constant id="team_one_colour">dark red</constant>
+    <constant id="team_two_name">Blue</constant>
+    <constant id="team_two_colour">blue</constant>
+    <constant id="teams_plural">false</constant>
+    <constant id="wood_damage">1</constant>
+</if>
+<if variant="christmas">
+    <created>2024-12-30</created>
+    <constant id="team_one_name">Santas</constant>
+    <constant id="team_one_colour">dark red</constant>
+    <constant id="team_two_name">Grinches</constant>
+    <constant id="team_two_colour">dark green</constant>
+    <constant id="teams_plural">true</constant>
+    <constant id="wood_damage">5</constant>
+</if>
 <teams>
-    <team id="team_red" color="DARK_RED" max="12">Red</team>
-    <team id="team_blue" color="BLUE" max="12">Blue</team>
+    <team id="team_one" color="${team_one_colour}" max="12" plural="${teams_plural}">${team_one_name}</team>
+    <team id="team_two" color="${team_two_colour}" max="12" plural="${teams_plural}">${team_two_name}</team>
 </teams>
-<wools>
-    <wool team="team_red" color="blue" location="28.5,12,-104.5" craftable="false">
-        <monument>
-            <block>30.5,8,72.5</block>
-        </monument>
-    </wool>
-    <wool team="team_blue" color="red" location="-27.5,12,105.5" craftable="false">
-        <monument>
-            <block>-29.5,8,-71.5</block>
-        </monument>
-    </wool>
-</wools>
-<filters>
-    <team id="only_red">team_red</team>
-    <team id="only_blue">team_blue</team>
-
-   <not id="team-red-in-wr">
-        <any>
-            <team id="only-team-blue">team_blue</team>
-            <material>chest</material>
-        </any>
-    </not>
-    <not id="team-blue-in-wr">
-        <any>
-            <team id="only-team-red">team_red</team>
-            <material>chest</material>
-        </any>
-    </not>
-    <deny id="deny_void">
-        <void />
-    </deny>
-    <deny id="deny-players">
-        <participating/>
-    </deny>
-    <material id="only_iron_block">iron block</material>
-	<material id="no_gravel">gravel</material>
-	<material id="no_wood">wood</material>
-	<material id="no_leaves">leaves</material>
-    <deny id="no-edit">
-        <any>
-            <material>chest</material>
-        </any>
-    </deny>
-</filters>
-<regions>
-    <point id="observers_spawn">0.5,51,0.5</point>
-    <point id="red_spawn">27.5,7,72.5</point>
-    <point id="blue_spawn">-26.5,7,-71.5</point>
-
-    <rectangle id="red_spawn_rectangle" min="6.5,65.5" max="34.5,79.5" />
-    <rectangle id="blue_spawn_rectangle" min="-5.5,-64.5" max="-33.5,-78.5" />
-
-    <rectangle id="red_woolroom" min="-23.5,92.5" max="-35.5,106.5" />
-    <rectangle id="blue_woolroom" min="24.5,-91.5" max="36.5,-105.5" />
-	
-	<rectangle id="main" min="18.5,52.5" max="-17.5,-51.5" />
-
-
-    <union id="irons">
-        <cuboid id="red_iron" min="10.5,8,73.5" max="12.5,11,71" />
-        <cuboid id="blue_iron" min="-11.5,8,-72.5" max="-9.5,11,-70.5" />
-    </union>
-	<negative id="void-area">
-		<region id="main"/>
-	</negative>
-	
-    <cuboid id="red_wool_chests" min="-32.5,9,103.5" max="-30.5,11,108.5"/>
-    <cuboid id="blue_wool_chests" min="31.5,9,-107.5" max="33.5,11,-102.5"/>
-
-	<apply region="red_spawn_rectangle" enter="only_red" message="You cannot enter your enemies' spawn!" />
-
-    <apply region="red_spawn_rectangle" enter="only_red" message="You cannot enter your enemies' spawn!" />
-    <apply region="blue_spawn_rectangle" enter="only_blue" message="You cannot enter your enemies' spawn!" />
-    
-	<apply region="red_spawn_rectangle" block-break="only_iron_block" block-place="deny-players" message="You cannot modify spawn area!" />
-	<apply region="blue_spawn_rectangle" block-break="only_iron_block" block-place="deny-players" message="You cannot modify spawn area!" />
-	
-	<apply block-break="no-edit" region="red_woolroom" message="You may not break the chest in woolroom!" />
-	<apply block-break="no-edit" region="blue_woolroom" message="You may not break the chest in woolroom! "/>
-
-    <apply region="red_woolroom" enter="only_blue" message="You cannot enter your own woolroom!" />
-    <apply region="blue_woolroom" enter="only_red" message="You cannot enter your own woolroom!" />
-	<apply region="red_woolroom" block="only_blue" message="You cannot modify your own woolroom!" />
-    <apply region="blue_woolroom" block="only_red" message="You cannot modify your own woolroom!" />
-	
-	<apply block="team-red-in-wr" use="only-team-red" region="blue_woolroom" message="You cannot open your own woolroom's chest!" />
-    <apply block="team-blue-in-wr" use="only-team-blue" region="red_woolroom" message="You cannot open your own woolroom's chest!" />
-	
-	
-    <apply region="void-area" block-place="deny_void" message="You cannot place blocks over void!" />
-</regions>
-<spawns>
-    <spawn team="team_red" kit="spawn_kit">
-        <regions>
-            <region id="red_spawn" yaw="90" />
-        </regions>
-    </spawn>
-    <spawn team="team_blue" kit="spawn_kit">
-        <regions>
-            <region id="blue_spawn" yaw="-90" />
-        </regions>
-    </spawn>
-    <default>
-        <regions>
-            <region id="observers_spawn" yaw="-90" pitch="-15" />
-        </regions>
-    </default>
-</spawns>
 <kits>
     <kit id="spawn_kit">
         <clear/>
-        <item slot="0" material="iron sword" unbreakable="true" />
-        <item slot="1" material="bow" unbreakable="true">
-            <enchantment level="1">infinity</enchantment>
-        </item>
-        <item slot="2" material="iron pickaxe" unbreakable="true">
-			<enchantment level="1">efficiency</enchantment>
-		</item>
-        <item slot="3" material="iron axe" unbreakable="true">
-			<enchantment level="1">efficiency</enchantment>
-		</item>
-        <item slot="4" material="wood" damage="1" amount="64" />
-        <item slot="5" material="stained glass" team-color="true" amount="32" />
-        <item slot="6" material="bucket" />
-        <item slot="7" material="golden apple" />
-        <item slot="28" material="arrow" />
-        <item slot="30" material="iron spade" unbreakable="true" />
-        <chestplate material="leather chestplate" team-color="true">
-			<enchantment level="1">protection</enchantment>
-		</chestplate>
-        <leggings material="chainmail leggings">
-			<enchantment level="1">projectile_protection</enchantment>
-		</leggings>
-        <boots material="iron boots" />
-		<effect duration="5s" amplifier="255">damage resistance</effect>
-        <effect duration="5s" amplifier="255">regeneration</effect>
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true" enchantment="infinity"/>
+        <item slot="2" material="iron pickaxe" unbreakable="true" enchantment="efficiency"/>
+        <item slot="3" material="iron axe" unbreakable="true" enchantment="efficiency"/>
+        <item slot="4" material="wood" damage="${wood_damage}" amount="64"/>
+        <item slot="7" material="bucket"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <effect duration="15s" amplifier="255">damage resistance</effect> <!-- Gets cleared when leaving spawn -->
+        <if variant="default">
+            <item slot="5" material="stained glass" team-color="true" amount="32"/>
+            <item slot="30" material="iron spade" unbreakable="true"/>
+            <chestplate material="leather chestplate" unbreakable="true" team-color="true" enchantment="protection"/>
+            <leggings material="chainmail leggings" unbreakable="true" enchantment="projectile protection"/>
+            <boots material="iron boots" unbreakable="true"/>
+        </if>
+        <if variant="christmas">
+            <kit filter="team_one">
+                <head name="Santa" slot="slot.armor.head" locked="true" uuid="dc1d15f8-b460-4ae0-8093-f3e1361dca06">
+                    <skin>ewogICJ0aW1lc3RhbXAiIDogMTczNzYxOTQyOTg0MiwKICAicHJvZmlsZUlkIiA6ICI5MjMzZDExZGMzZDQ0Nzc4ODVmOWFjM2ZlMzVlYTA3MCIsCiAgInByb2ZpbGVOYW1lIiA6ICJOb3RfR3V5X0ZpZXJpXyIsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS82MjQ2MWY2ZDc0NzAwNjQ1ZjE4Zjg5ODJmNWY4NDVmZmQyYzM5MWQ4OTI1MzVjODgwYmFjYjUxOGM5ZmYxYWU4IgogICAgfQogIH0KfQ==</skin>
+                </head>
+            </kit>
+            <kit filter="team_two">
+                <head name="Grinch" slot="slot.armor.head" locked="true" uuid="2fd57dff-4cff-4b60-96a4-d26e37759c03">
+                    <skin>ewogICJ0aW1lc3RhbXAiIDogMTczNzYxOTUwOTc1NywKICAicHJvZmlsZUlkIiA6ICJjMGNkMmQ3YTU2OWY0NDI1YWVlNDA2YTFkZjVhZmZmMiIsCiAgInByb2ZpbGVOYW1lIiA6ICJhbnRzeXAiLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjUwOGU0YTJmODg1MDJjMDE5NjUyYjI0MzdiNzZjODJmZWRmZjkwOTEzODlkODgxMThlY2M2NzNmNjI4YjU0NyIKICAgIH0KICB9Cn0=</skin>
+                </head>
+            </kit>
+            <item slot="5" material="packed ice" amount="32"/>
+            <item slot="29" material="shears" unbreakable="true"/>
+            <item slot="30" material="stone spade" unbreakable="true"/>
+            <chestplate material="leather chestplate" unbreakable="true" team-color="true" enchantment="protection"/>
+            <leggings material="iron leggings" unbreakable="true" enchantment="projectile protection"/>
+            <boots material="leather boots" unbreakable="true" team-color="true"/>
+        </if>
     </kit>
+    <take filter="not(spawn_regions)">
+        <kit>
+            <effect amplifier="255">damage resistance</effect>
+        </kit>
+    </take>
 </kits>
+<spawns>
+    <spawn team="team_one" kit="spawn_kit" yaw="90">
+        <region>
+            <if variant="default">
+                <point>27.5,7,72.5</point>
+            </if>
+            <if variant="christmas">
+                <point>28.5,10,72.5</point>
+            </if>
+        </region>
+    </spawn>
+    <spawn team="team_two" kit="spawn_kit" yaw="-90">
+        <region>
+            <if variant="default">
+                <point>-26.5,7,-71.5</point>
+            </if>
+            <if variant="christmas">
+                <point>-27.5,10,-71.5</point>
+            </if>
+        </region>
+    </spawn>
+    <default yaw="-90" pitch="-18">
+        <region>
+            <point>0.5,51,0.5</point>
+        </region>
+    </default>
+</spawns>
+<filters>
+    <material id="only_iron_block">iron block</material>
+    <material id="only_chest">chest</material>
+    <material id="only_wood">wood</material>
+    <if variant="christmas">
+        <material id="only_diamond_block">diamond block</material>
+        <any id="only_capable_wool">
+            <material>wool:13</material>
+            <material>wool:14</material>
+        </any>
+    </if>
+</filters>
+<regions>
+    <if variant="christmas">
+        <union id="areas_with_wool">
+            <rectangle min="0.5,46.5" max="18.5,59.5"/> <!-- Team one side -->
+            <rectangle min="-17.5,-58.5" max="0.5,-45.5"/> <!-- Team two side -->
+        </union>
+    </if>
+    <union id="spawn_regions">
+        <if variant="default">
+            <rectangle id="team_one_spawn_region" min="6.5,65.5" max="34.5,79.5"/>
+            <rectangle id="team_two_spawn_region" min="-5.5,-64.5" max="-33.5,-78.5"/>
+        </if>
+        <if variant="christmas">
+            <union id="team_one_spawn_region">
+                <rectangle min="22.5,61.5" max="36.5,83.5"/>
+                <rectangle min="6.5,65.5" max="21.5,79.5"/>
+            </union>
+            <union id="team_two_spawn_region">
+                <rectangle min="-35.5,-82.5" max="-21.5,-60.5"/>
+                <rectangle min="-20.5,-78.5" max="-5.5,-64.5"/>
+            </union>
+        </if>
+    </union>
+    <union id="woolrooms">
+        <rectangle id="team_one_woolroom" min="-35.5,92.5" max="-23.5,106.5"/>
+        <rectangle id="team_two_woolroom" min="24.5,-105.5" max="36.5,-91.5"/>
+    </union>
+    <negative id="void_area">
+        <rectangle min="18.5,52.5" max="-17.5,-51.5"/>
+    </negative>
+    <apply region="spawn_regions" block-break="only_iron_block" block-place="deny(participating)" message="You cannot modify the spawn area!"/>
+    <apply region="woolrooms" block-break="deny(only_chest)" message="You may not break the chests in woolrooms!"/>
+    <apply region="team_one_spawn_region" enter="team_one" message="You cannot enter your enemies' spawn!"/>
+    <apply region="team_two_spawn_region" enter="team_two" message="You cannot enter your enemies' spawn!"/>
+    <apply region="team_one_woolroom" enter="team_two" message="You cannot enter your own woolroom!"/>
+    <apply region="team_two_woolroom" enter="team_one" message="You cannot enter your own woolroom!"/>
+    <apply region="team_one_woolroom" block="team_two" message="You cannot modify your own woolroom!"/>
+    <apply region="team_two_woolroom" block="team_one" message="You cannot modify your own woolroom!"/>
+    <apply region="team_one_woolroom" use="deny(all(team_one,only_chest))" message="You cannot open your own woolroom's chest!"/>
+    <apply region="team_two_woolroom" use="deny(all(team_two,only_chest))" message="You cannot open your own woolroom's chest!"/>
+    <apply region="void_area" block-place="deny(void)" message="You cannot place blocks over void!"/>
+</regions>
+<wools craftable="false">
+    <if variant="default">
+        <wool team="team_one" color="blue" location="28.5,12,-104.5">
+            <monument>
+                <block>30.5,8,72.5</block>
+            </monument>
+        </wool>
+        <wool team="team_two" color="red" location="-27.5,12,105.5">
+            <monument>
+                <block>-29.5,8,-71.5</block>
+            </monument>
+        </wool>
+    </if>
+    <if variant="christmas">
+        <wool team="team_one" color="green" location="30.5,10,-99.5">
+            <monument>
+                <block>32.5,11,72.5</block>
+            </monument>
+        </wool>
+        <wool team="team_two" color="red" location="-29.5,10,100.5">
+            <monument>
+                <block>-31.5,11,-71.5</block>
+            </monument>
+        </wool>
+    </if>
+</wools>
 <renewables>
-    <renewable region="irons" renew-filter="only_iron_block" rate="1" grow="true" particles="true" sound="true"	/>
+    <!-- Avoid-players is 0, because I've seen people just stand where the iron supply is and because it is so small the iron would not spawn -->
+    <renewable region="spawn_regions" renew-filter="only_iron_block" rate="0.5" avoid-players="0" />
 </renewables>
 <block-drops>
-    <rule filter="no_gravel" region="everywhere" />
-	<rule filter="no_wood" region="everywhere" />
-	<rule filter="no_leaves" region="everywhere" />
+    <rule filter="only_wood"/>
+    <if variant="christmas">
+        <rule filter="only_diamond_block">
+            <drops>
+                <item chance="0.35" material="diamond"/>
+            </drops>
+        </rule>
+        <rule filter="only_capable_wool" region="areas_with_wool"/>
+    </if>
 </block-drops>
 <toolrepair>
     <tool>iron sword</tool>
@@ -166,46 +217,57 @@
     <tool>iron pickaxe</tool>
     <tool>iron axe</tool>
     <tool>iron spade</tool>
+    <tool>stone spade</tool>
+    <tool>shears</tool>
+    <tool>arrow</tool>
 </toolrepair>
 <itemremove>
+    <item>skull item</item>
     <item>leather chestplate</item>
     <item>chainmail leggings</item>
+    <item>iron leggings</item>
+    <item>leather boots</item>
     <item>iron boots</item>
     <item>redstone</item>
     <item>seeds</item>
-    <item>string</item>
-    <item>pork</item>
-    <item>saddle</item>
+    <item>gravel</item>
+    <item>leaves</item>
+    <item>dirt</item>
+    <item>quartz block</item>
+    <item>flint</item>
 </itemremove>
 <itemkeep>
     <item>wood</item>
     <item>stained glass</item>
+    <item>packed ice</item>
     <item>bucket</item>
     <item>water bucket</item>
-    <item>arrow</item>
     <item>golden apple</item>
 </itemkeep>
 <kill-rewards>
     <kill-reward>
-        <item amount="12" damage="1">wood</item>
-        <item amount="4" team-color="true">stained glass</item>
+        <item amount="12" damage="${wood_damage}">wood</item>
+        <if variant="default">
+            <item amount="4" team-color="true">stained glass</item>
+        </if>
+        <if variant="christmas">
+            <item amount="4">packed ice</item>
+        </if>
     </kill-reward>
 </kill-rewards>
-<lootables>
-    <loot id="red_wool">
-        <item material="wool" damage="14" amount="1"/>
-        <all/>
-    </loot>
-    <loot id="blue_wool">
-        <item material="wool" damage="11" amount="1"/>
-        <all/>
-    </loot>
-    <fill loot="red_wool" filter="red_wool_chests" refill-interval="1s" refill-clear="false"/>
-    <fill loot="blue_wool" filter="blue_wool_chests" refill-interval="1s" refill-clear="false"/>
-</lootables>
+<if variant="christmas">
+    <!-- Deny damage from snowballs that weren't thrown by a player -->
+    <damage>
+        <deny>
+            <all>
+                <cause>projectile</cause>
+                <relation>neutral</relation>
+            </all>
+        </deny>
+    </damage>
+</if>
 <hunger>
     <depletion>off</depletion>
 </hunger>
 <maxbuildheight>23</maxbuildheight>
-<include id="gapple-kill-reward"/>
 </map>
