@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Vegas</name>
-<version>1.1.2</version>
+<version>1.1.4</version>
 <include id="gapple-kill-reward"/>
 <include id="velocity-no-fall-damage"/>
 <objective>Capture both of the enemy's wools, and upgrade your team at the Cocktail Club!</objective>
@@ -268,6 +268,16 @@
     <set id="add-fatigue" var="fatigue" value="fatigue+1" scope="player"/>
     <set id="add-healthboost" var="healthboost" value="healthboost+1" scope="player"/>
     <!-- Weapon Upgrades -->
+    <action id="iron-sword-kit" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="stone sword"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit deduct-tools="false">
+            <item material="iron sword" unbreakable="true"/>
+        </kit>
+        <action id="sharpness-replacements"/>
+    </action>
     <action id="diamond-sword-kit" scope="player">
         <replace-item ignore-metadata="true">
             <find material="stone sword"/>
@@ -284,6 +294,10 @@
     </action>
     <action id="powerbow" scope="player">
         <replace-item>
+            <find material="bow" unbreakable="true" enchantment="power:2"/>
+            <replace material="air"/>
+        </replace-item>
+        <replace-item>
             <find material="bow" unbreakable="true"/>
             <replace material="air"/>
         </replace-item>
@@ -297,10 +311,14 @@
             <replace material="air"/>
         </replace-item>
         <kit deduct-tools="false">
-            <item material="bow" enchantment="flame:1" unbreakable="true"/>
+            <item material="bow" enchantment="flame" unbreakable="true"/>
         </kit>
     </action>
     <action id="powerbow2" scope="player">
+        <replace-item>
+            <find material="bow" unbreakable="true" enchantment="power:1"/>
+            <replace material="air"/>
+        </replace-item>
         <replace-item>
             <find material="bow" unbreakable="true"/>
             <replace material="air"/>
@@ -309,11 +327,20 @@
             <item material="bow" enchantment="power:2" unbreakable="true"/>
         </kit>
     </action>
+    <action id="infinitybow" scope="player">
+        <replace-item>
+            <find material="bow" unbreakable="true"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit deduct-tools="false">
+            <item material="bow" enchantment="infinity" unbreakable="true"/>
+        </kit>
+    </action>
     <!-- Sharpness replacements -->
     <action id="ironsword-replacement" scope="player">
         <replace-item ignore-metadata="true">
-            <find material="iron sword"/>
-            <replace material="diamond sword"/>
+            <find material="stone sword"/>
+            <replace material="iron sword"/>
         </replace-item>
         <action id="sharpness-replacements"/>
     </action>
@@ -367,6 +394,10 @@
         <enchant-item ignore-metadata="true" enchantment="protection" level="protection"><find material="diamond helmet"/></enchant-item>
     </action>
     <!-- Starting tool deletion replacements -->
+    <replace-item id="bowdelete">
+        <find material="bow" unbreakable="true"/>
+        <replace material="air"/>
+    </replace-item>
     <replace-item id="stonesworddelete" ignore-metadata="true">
         <find material="stone sword" unbreakable="true"/>
         <replace material="air"/>
@@ -418,6 +449,7 @@
     <!-- Enchantment triggers -->
     <trigger filter="apply-ironsword" trigger="ironsword-replacement" scope="player"/>
     <trigger filter="upgraded-sword" trigger="stonesworddelete" scope="player"/>
+    <trigger filter="upgraded-bow" trigger="bowdelete" scope="player"/>
     <trigger filter="upgraded-pick" trigger="stonepickdelete" scope="player"/>
     <trigger filter="upgraded-axe" trigger="stoneaxedelete" scope="player"/>
     <trigger filter="upgraded-spade" trigger="stonespadedelete" scope="player"/>
@@ -529,7 +561,6 @@
         <any>
             <material>web</material>
             <material>air</material>
-            <material>redstone wire</material>
         </any>
     </blocks>
     <deny id="no-enderchest">
@@ -602,6 +633,20 @@
             <item unbreakable="true" material="diamond sword"/>
         </carrying>
     </any>
+    <any id="upgraded-bow">
+        <carrying>
+            <item material="bow" unbreakable="true" enchantment="power"/>
+        </carrying>
+        <carrying>
+            <item material="bow" unbreakable="true" enchantment="power:2"/>
+        </carrying>
+        <carrying>
+            <item material="bow" unbreakable="true" enchantment="flame"/>
+        </carrying>
+        <carrying>
+            <item material="bow" unbreakable="true" enchantment="infinity"/>
+        </carrying>
+    </any>
     <any id="upgraded-pick">
         <carrying ignore-metadata="true">
             <item unbreakable="true" material="iron pickaxe"/>
@@ -624,7 +669,7 @@
             <item unbreakable="true" material="diamond axe"/>
         </carrying>
     </any>
-    <all id="upgraded-spade">
+    <any id="upgraded-spade">
         <carrying ignore-metadata="true">
             <item unbreakable="true" material="iron spade"/>
         </carrying>
@@ -634,7 +679,7 @@
         <carrying ignore-metadata="true">
             <item unbreakable="true" material="diamond spade"/>
         </carrying>
-    </all>
+    </any>
     <!-- Individual Armor visibility filters -->
     <wearing id="chainmail-helmet" ignore-metadata="true">
         <item material="leather helmet"/>
@@ -681,11 +726,12 @@
     <point id="red-spawnpoint">0.5,20,-136.5</point>
     <point id="red-spawnpoint-forward">0.5,20,-116.5</point>
     <union id="spawn-protection">
-        <cuboid id="blue-protection" min="57.5,19,118.5" max="-56.5,oo,146.5"/>
-        <cuboid id="blue-protection2" min="31.5,0,105.5" max="-30.5,oo,118.5"/>
-        <cuboid id="red-protection" min="-56.5,19,-117.5" max="57.5,oo,-147.5"/>
-        <cuboid id="red-protection2" min="-30.5,0,-104.5" max="31.5,oo,-117.5"/>
+        <cuboid id="blue-protection" min="58,19,118" max="-57,oo,147"/>
+        <cuboid id="blue-protection2" min="-31,0,105" max="32,oo,118"/>
+        <cuboid id="red-protection" min="58,19,-117" max="-57,oo,-146"/>
+        <cuboid id="red-protection2" min="-31,0,-104" max="32,oo,-117"/>
     </union>
+    <cuboid id="center-sky" min="-39,27,105" max="40,oo,-104"/>
     <union id="defense-shops">
         <cuboid id="blue-defense-east" min="68,12,79" size="1,1,1"/>
         <cuboid id="blue-defense-west" min="-70,12,74" size="1,1,1"/>
@@ -714,24 +760,24 @@
     </union>
     <union id="wool-rooms">
         <union id="blue-wool-rooms"> <!-- Blue defends -->
-            <cuboid id="lightblue-wool-room" min="69.5,0,119.5" max="45,20,136.5"/>
-            <cuboid id="lightblue-wool-room2" min="69.5,20,119.5" max="57.5,64,136.5"/>
-            <cuboid id="cyan-wool-room" min="-68.5,0,119.5" max="-45,20,136.5"/>
-            <cuboid id="cyan-wool-room2" min="-68.5,20,119.5" max="-57.5,64,136.5"/>
+            <cuboid id="lightblue-wool-room" min="70,0,119" max="44,20,137"/>
+            <cuboid id="lightblue-wool-room2" min="70,20,119" max="57,100,137"/>
+            <cuboid id="cyan-wool-room" min="-69,0,119" max="-43,20,137"/>
+            <cuboid id="cyan-wool-room2" min="-69,20,119" max="-56,100,137"/>
         </union>
         <union id="red-wool-rooms"> <!-- Red defends -->
-            <cuboid id="pink-wool-room" min="69.5,0,-118.5" max="45,20,-135.5"/>
-            <cuboid id="pink-wool-room2" min="69.5,20,-118.5" max="57.5,64,-135.5"/>
-            <cuboid id="magenta-wool-room" min="-68.5,0,-118.5" max="-45,20,-135.5"/>
-            <cuboid id="magenta-wool-room2" min="-68.5,20,-118.5" max="-57.5,64,-135.5"/>
+            <cuboid id="pink-wool-room" min="70,0,-118" max="44,20,-136"/>
+            <cuboid id="pink-wool-room2" min="70,20,-118" max="57,100,-136"/>
+            <cuboid id="magenta-wool-room" min="-69,0,-118" max="-43,20,-136"/>
+            <cuboid id="magenta-wool-room2" min="-69,20,-118" max="-56,100,-136"/>
         </union>
     </union>
     <union id="team-bases">
-        <rectangle id="blue-base-region" min="-74,41.5" max="81,142"/>
-        <rectangle id="red-base-region" min="-74,-40.5" max="81,-142"/>
+        <rectangle id="blue-base-region" min="-71,41" max="72,137"/>
+        <rectangle id="red-base-region" min="-71,-40" max="72,-136"/>
     </union>
     <union id="lanes">
-        <rectangle id="middle" min="-28.5,116" max="29.5,-116"/>
+        <rectangle id="middle" min="-29,116" max="30,-116"/>
         <rectangle id="midacross" min="54,-7" max="-54,7"/>
         <rectangle id="redacross" min="54,-69" max="-54,-79"/>
         <rectangle id="blueacross" min="54,69" max="-54,79"/>
@@ -766,29 +812,31 @@
     </union>
     <negative id="void-area">
         <region id="spawn-protection"/>
-        <region id="wool-rooms"/>
         <region id="lanes"/>
     </negative>
     <apply block="never" region="spawner-protection" message="You may not break or place around the spawner!"/>
+    <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
+    <apply block="deny(pink_unlocked=0)" region="pinklane" message="This lane has not been unlocked!"/>
+    <apply block="deny(magenta_unlocked=0)" region="magentalane" message="This lane has not been unlocked!"/>
+    <apply block="deny(cyan_unlocked=0)" region="cyanlane" message="This lane has not been unlocked!"/>
+    <apply block="deny(lightblue_unlocked=0)" region="lightbluelane" message="This lane has not been unlocked!"/>
     <apply block="no-enderchest" message="You may not break the ender chest!"/>
+    <apply block-break="blue-in-wr" region="red-wool-rooms" message="You may not interact with this block!"/>
+    <apply block-break="red-in-wr" region="blue-wool-rooms" message="You may not interact with this block!"/>
+    <apply block-place="deny(red)" region="red-wool-rooms" message="You may not interact with this block!"/>
+    <apply block-place="deny(blue)" region="blue-wool-rooms" message="You may not interact with this block!"/>
+    <apply block-place="never" region="center-sky" message="You may not build this high over the center!"/>
+    <apply block-place="deny(void)" region="void-area" message="You may not build in the void area!"/>
     <apply enter="only-blue" region="blue-protection" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-blue" region="blue-protection2" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-red" region="red-protection" message="You may not enter the opponent's spawn!"/>
     <apply enter="only-red" region="red-protection2" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool room!"/>
-    <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool room!"/>
-    <apply block="blue-in-wr" use="only-blue" region="red-wool-rooms" message="You may not interact with this block!"/>
-    <apply block="red-in-wr" use="only-red" region="blue-wool-rooms" message="You may not interact with this block!"/>
-    <apply block-place="deny(void)" region="void-area" message="You may not build in the void area!"/>
-    <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
+    <apply enter="deny(red)" region="red-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply enter="deny(blue)" region="blue-wool-rooms" message="You may not enter your own wool room!"/>
     <apply velocity="7,0.5,-1.5" kit="velocity-applied" region="jump-pad-blue-east" filter="not(blue-jumppad-disable)"/>
     <apply velocity="-7,0.5,-1.5" kit="velocity-applied" region="jump-pad-blue-west" filter="not(blue-jumppad-disable)"/>
     <apply velocity="7,0.5,1.5" kit="velocity-applied" region="jump-pad-red-east" filter="not(red-jumppad-disable)"/>
     <apply velocity="-7,0.5,1.5" kit="velocity-applied" region="jump-pad-red-west" filter="not(red-jumppad-disable)"/>
-    <apply region="pinklane" block="deny(pink_unlocked=0)" message="This lane has not been unlocked!"/>
-    <apply region="magentalane" block="deny(magenta_unlocked=0)" message="This lane has not been unlocked!"/>
-    <apply region="cyanlane" block="deny(cyan_unlocked=0)" message="This lane has not been unlocked!"/>
-    <apply region="lightbluelane" block="deny(lightblue_unlocked=0)" message="This lane has not been unlocked!"/>
 </regions>
 <spawners>
     <spawner spawn-region="east-point" player-region="east-player" delay="8s">
@@ -877,6 +925,7 @@
         <category id="weapons" name="`aWeapons" material="gold sword">
             <item material="diamond sword" unbreakable="true" amount="1" price="24" currency="nether star" kit="diamond-sword-kit"/>
             <item material="arrow" amount="16" price="1" currency="nether star"/>
+            <item material="bow" unbreakable="true" enchantment="infinity" name="`rInfinity Bow" amount="1" price="16" currency="nether star" kit="infinitybow"/>
             <item material="bow" unbreakable="true" enchantment="power:1" name="`rPower Bow" amount="1" price="16" currency="nether star" kit="powerbow"/>
             <item material="bow" unbreakable="true" enchantment="flame:1" name="`rFlame Bow" amount="1" price="20" currency="nether star" kit="flamebow"/>
             <item material="bow" unbreakable="true" enchantment="power:2" name="`rPower II Bow" amount="1" price="32" currency="nether star" kit="powerbow2"/>
@@ -1238,22 +1287,14 @@
     <item>diamond leggings</item>
     <item>diamond boots</item>
     <item>stone pickaxe</item>
-    <item>gold pickaxe</item>
-    <item>iron pickaxe</item>
-    <item>diamond pickaxe</item>
     <item>stone axe</item>
-    <item>gold axe</item>
-    <item>iron axe</item>
-    <item>diamond axe</item>
     <item>stone spade</item>
-    <item>gold spade</item>
-    <item>iron spade</item>
-    <item>diamond spade</item>
     <item>stone sword</item>
     <item>iron sword</item>
-    <item>diamond sword</item>
+    <item>bucket</item>
     <item>shears</item>
     <item>blaze rod</item>
+    <item>golden apple</item>
 </itemremove>
 <itemkeep>
     <item>gold pickaxe</item>
@@ -1265,7 +1306,6 @@
     <item>gold spade</item>
     <item>iron spade</item>
     <item>diamond spade</item>
-    <item>iron sword</item>
     <item>diamond sword</item>
     <item>shears</item>
     <item>bow</item>
@@ -1321,6 +1361,7 @@
     <kill-reward>
         <item amount="16" material="wood" damage="2"/>
         <item amount="8" material="stained glass" team-color="true"/>
+        <item amount="16" material="arrow"/>
         <action>
             <repeat times="bound(chips, 2, 32)">
                 <kit deduct-items="false">
