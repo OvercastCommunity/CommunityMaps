@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Rallypoint Alpha</name>
-<version>1.1.0</version>
+<version>1.2.0</version>
 <objective>Capture hills to connect your team's two bases together</objective>
 <gamemode>cp</gamemode>
 <created>2024-07-05</created>
@@ -10,8 +10,8 @@
 <authors>
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
 </authors>
-<score/>
-<time>12m</time>
+<score display="square" limit="10"/>
+<time>24m</time>
 <teams>
     <team id="purple-team" color="dark purple" max="18">Purple</team>
     <team id="orange-team" color="gold" max="18">Orange</team>
@@ -45,11 +45,11 @@
                 <page>
                     `c» `lHOW TO PLAY`0
 
-                    Each team has two bases located diagonally.
+                    Each team has two Outposts located diagonally.
 
                     Capture adjacent hills to connect them.
 
-                    Create a chain of connected hills between each of your bases to win.
+                    Create a chain of connected hills between each of your Outposts to claim the Rallypoint.
                 </page>
             </pages>
         </book>
@@ -66,7 +66,7 @@
         <item slot="8" material="golden apple"/>
         <action filter="bow=0">
             <kit>
-                <item slot="28" material="arrow" amount="36"/>
+                <item slot="7" material="arrow" amount="36"/>
             </kit>
         </action>
         <action filter="bow=1..">
@@ -101,6 +101,7 @@
 <filters>
     <team id="only-purple">purple-team</team>
     <team id="only-orange">orange-team</team>
+    <captured id="has-win">win</captured>
     <captured id="p-11" team="purple-team">11-hill</captured>
     <captured id="p-12" team="purple-team">12-hill</captured>
     <captured id="p-13" team="purple-team">13-hill</captured>
@@ -151,6 +152,8 @@
     <captured id="o-53" team="orange-team">53-hill</captured>
     <captured id="o-54" team="orange-team">54-hill</captured>
     <captured id="o-55" team="orange-team">55-hill</captured>
+    <captured id="p-rallypoint" team="purple-team">win</captured>
+    <captured id="o-rallypoint" team="orange-team">win</captured>
     <any id="allow-win">
         <all id="purple-win">
             <filter id="only-purple"/>
@@ -253,7 +256,7 @@
     <translate id="53-display" region="43-display" offset="0,0,21"/>
     <translate id="54-display" region="44-display" offset="0,0,21"/>
     <translate id="55-display" region="45-display" offset="0,0,21"/>
-    <sphere id="win-display" origin="0.5,80,0.5" radius="7"/>
+    <cylinder id="win-display" base="0.5,76,0.5" radius="7" height="18"/>
     <cuboid id="ew-decor-indicator-purple-r" min="-57,1,-45" size="10,7,7"/>
     <cuboid id="ns-decor-indicator-purple-r" min="-45,1,-57" size="7,7,10"/>
     <cuboid id="ew-decor-indicator-orange-r" min="48,1,-45" size="10,7,7"/>
@@ -355,7 +358,7 @@
     <portal region="orange-warp-to-a" destination="orange-a" yaw="@-135"/>
     <portal region="orange-warp-to-b" destination="orange-b" yaw="@45"/>
 </portals>
-<control-points points="0" owner-points="1" neutral-state="true" capture-rule="majority" required="false" visual-materials="visual-materials" decay-rate="0" owned-decay-rate=".1" show-sidebar="false" show-effects="false" show-info="false">
+<control-points points="0" neutral-state="true" capture-rule="majority" required="false" visual-materials="visual-materials" decay-rate="0" owned-decay-rate=".06" show-sidebar="false" show-effects="false" show-info="false">
     <control-point id="11-hill" name="A1" capture="11-capture" progress="11-display" captured="11-display" capture-time="06s"/>
     <control-point id="12-hill" name="A2" capture="12-capture" progress="12-display" captured="12-display" capture-time="06s"/>
     <control-point id="13-hill" name="A3" capture="13-capture" progress="13-display" captured="13-display" capture-time="06s"/>
@@ -381,7 +384,7 @@
     <control-point id="53-hill" name="E3" capture="53-capture" progress="53-display" captured="53-display" capture-time="06s"/>
     <control-point id="54-hill" name="E4" capture="54-capture" progress="54-display" captured="54-display" capture-time="06s"/>
     <control-point id="55-hill" name="E5" capture="55-capture" progress="55-display" captured="55-display" capture-time="06s"/>
-    <control-point id="win" name="Rallypoint" capture="everywhere" captured="win-display" player-filter="allow-win" required="true" capture-time="0s"/>
+    <control-point id="win" name="Rallypoint" capture="everywhere" captured="win-display" player-filter="allow-win" capture-time="0s" points="0.1" show-sidebar="true"/>
 </control-points>
 <structures>
     <!-- decorative connectors -->
@@ -627,7 +630,43 @@
     <dynamic structure="ew-cube-indicator-orange" location="21,0,42" trigger="o-54"/>
     <dynamic structure="ew-cube-indicator-orange" location="42,0,42" trigger="o-55"/>
 </structures>
+<broadcasts>
+    <tip after="15s" every="4m">Capture towers to connect your team's Outposts together</tip>
+    <tip after="45s" every="4m">Connecting your Outposts will give your team control of the Rallypoint increasing your score</tip>
+    <tip after="1m15s" every="4m">Steal enemy controlled towers to break the connection between their Outposts</tip>
+</broadcasts>
 <actions>
+    <trigger scope="match" filter="any(p-rallypoint, o-rallypoint)">
+        <action>
+            <sound key="${entity.lightning_bolt.thunder}"/>
+            <message text=" "/>
+            <action filter="p-rallypoint">
+                <message text="`c» » » `5`lPurple Outposts Charging `c« « «"/>
+                <switch-scope inner="team" filter="only-purple">
+                    <message text="`bDefend the connection between your Outposts to fully charge your power level to win."/>
+                </switch-scope>
+                <switch-scope inner="team" filter="only-orange">
+                    <message text="`bBreak the connection between `5Purple's `bOutposts to hault their power level from increasing."/>
+                </switch-scope>
+                <switch-scope inner="player" filter="observing">
+                    <message text="`5Purple `bmust defend the connection between their Outposts to fully charge their power level to win."/>
+                </switch-scope>
+            </action>
+            <action filter="o-rallypoint">
+                <message text="`c» » » `o`lOrange Outposts Charging `c« « «"/>
+                <switch-scope inner="team" filter="only-orange">
+                    <message text="`bDefend the connection between your Outposts to fully charge your power level to win."/>
+                </switch-scope>
+                <switch-scope inner="team" filter="only-purple">
+                    <message text="`bBreak the connection between `6Orange's `bOutposts to hault their power level from increasing."/>
+                </switch-scope>
+                <switch-scope inner="player" filter="observing">
+                    <message text="`6Orange `bmust defend the connection between their Outposts to fully charge their power level to win."/>
+                </switch-scope>
+            </action>
+            <message text=" "/>
+        </action>
+    </trigger>
     <trigger scope="match" filter="p-11">
         <action>
             <fill region="11-mini" material="wool:10"/>
