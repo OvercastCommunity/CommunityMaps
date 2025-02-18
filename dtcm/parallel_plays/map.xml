@@ -1,0 +1,177 @@
+<map proto="1.5.0">
+<name>Parallel Plays</name>
+<version>1.0</version>
+<objective>Destroy the opposite team's monument and core to win!</objective>
+<created>2024-07-28</created>
+<include id="gapple-kill-reward"/>
+<maxbuildheight>32</maxbuildheight>
+<authors>
+    <author uuid="38ef938a-7020-4c04-9d12-4875ed0598ca"/> <!-- Kazoha -->
+</authors>
+<teams>
+    <team id="blue-team" color="blue" max="14">Pioneers</team>
+    <team id="red-team" color="red" max="14">Elevate</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true"/>
+        <item slot="2" material="diamond pickaxe" unbreakable="true"/>
+        <item slot="3" material="iron axe" unbreakable="true"/>
+        <item slot="4" material="wood" amount="64"/>
+        <item slot="5" material="leaves" amount="64"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="27" material="wood" amount="64"/>
+        <item slot="28" material="arrow" amount="32"/>
+        <item slot="30" material="iron spade" unbreakable="true"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+        <leggings material="chainmail leggings" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <kit id="resistance-kit">
+            <effect amplifier="5">damage resistance</effect>
+        </kit>
+    </kit>
+    <take kit="resistance-kit" filter="not(spawn-protection)"/>
+</kits>
+<spawns>
+    <default>
+        <region yaw="180">
+            <cylinder base="0.5,61,0.5" radius="1" height="0"/>
+        </region>
+    </default>
+    <spawn team="blue-team" kit="spawn-kit">
+        <region yaw="-135">
+            <cylinder base="-8.5,10,84.5" radius="1" height="0"/>
+        </region>
+    </spawn>
+    <spawn team="red-team" kit="spawn-kit">
+        <region yaw="45">
+            <cylinder base="9.5,10,-83.5" radius="1" height="0"/>
+        </region>
+    </spawn>
+</spawns>
+<filters>
+    <all id="only-iron-cause-world">
+        <material id="only-iron">iron block</material>
+        <cause>world</cause>
+    </all>
+    <material id="only-air">air</material>
+</filters>
+<regions>
+    <negative id="void-area">
+        <union id="spawn-protection">
+            <rectangle id="blue-spawn-protection" min="-14,95" max="5,74"/>
+            <rectangle id="red-spawn-protection" min="15,-94" max="-4,-73"/>
+        </union>
+        <union id="build-area">
+            <rectangle min="63,-42" max="8,33"/> <!-- Mid NE -->
+            <rectangle min="8,-52" max="-7,53"/> <!-- Middle Zone -->
+            <rectangle min="-62,43" max="-7,-32"/> <!-- Mid SW -->
+        </union>
+    </negative>
+    <union id="spawners-areas">
+        <cuboid id="gapple-area" min="-0,9,-0" size="1,4,1"/>
+        <cuboid id="arrow-area-east" min="56,9,-0" size="1,4,1"/>
+        <cuboid id="arrow-area-west" min="-56,9,-0" size="1,4,1"/>
+    </union>
+    <apply block-place="only-iron-cause-world" block-break="only-iron" region="spawn-protection" message="You may not edit spawn!"/>
+    <apply enter="deny(blue-team)" region="red-spawn-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="deny(red-team)" region="blue-spawn-protection" message="You may not enter the opponent's spawn!"/>
+    <apply block="never" region="spawn-protection" message="You may not modify the spawns!"/>
+    <apply block="never" region="spawners-areas" message="You may not interfere with the spawners!"/>
+    <apply block-place="deny(void)" region="void-area" message="You may not build in the void area!"/>
+</regions>
+<destroyables material="emerald block" completion="100%" repairable="false" name="Monument" modes="gold-monument">
+    <destroyable owner="blue-team">
+        <region>
+            <cuboid min="-28,24,49" max="-25,17,52"/>
+        </region>
+    </destroyable>
+    <destroyable owner="red-team">
+        <region>
+            <cuboid min="29,24,-48" max="26,17,-51"/>
+        </region>
+    </destroyable>
+</destroyables>
+<cores material="obsidian" leak="4" name="Core" modes="gold-core">
+    <core team="blue-team">
+        <region>
+            <cuboid min="24,19,44" max="31,26,37"/>
+        </region>
+    </core>
+    <core team="red-team">
+        <region>
+            <cuboid min="-23,19,-43" max="-30,26,-36"/>
+        </region>
+    </core>
+</cores>
+<modes>
+    <mode id="gold-monument" after="15m" material="gold block" name="`6GOLD MONUMENT MODE"/>
+    <mode id="gold-core" after="20m" material="gold block" name="`6GOLD CORE MODE"/>
+</modes>
+<spawners>
+    <spawner id="gapple-mid" delay="10s">
+        <spawn-region>
+            <point>0.5,10.2,0.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="0.5,10,0.5" radius="5" height="6"/>
+        </player-region>
+        <item material="golden apple"/>
+    </spawner>
+    <spawner id="arrow-east" delay="3s">
+        <spawn-region>
+            <point>56.5,10.2,0.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="56.5,10,0.5" radius="5" height="6"/>
+        </player-region>
+        <item material="arrow"/>
+    </spawner>
+    <spawner id="arrow-west" delay="3s">
+        <spawn-region>
+            <point>-55.5,10.2,0.5</point>
+        </spawn-region>
+        <player-region>
+            <cylinder base="-55.5,10,0.5" radius="5" height="6"/>
+        </player-region>
+        <item material="arrow"/>
+    </spawner>
+</spawners>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>obsidian</item>
+    <item>emerald block</item>
+    <item>gold block</item>
+    <item>flint</item>
+</itemremove>
+<itemkeep>
+    <item>wood</item>
+    <item>leaves</item>
+    <item>golden apple</item>
+</itemkeep>
+<renewables>
+    <renewable rate="0.5" sound="false" region="spawn-protection" renew-filter="only-iron" replace-filter="only-air" avoid-players="1"/>
+</renewables>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<kill-rewards>
+    <kill-reward>
+        <item material="wood" amount="16"/>
+        <item material="leaves" amount="8"/>
+    </kill-reward>
+</kill-rewards>
+</map>
