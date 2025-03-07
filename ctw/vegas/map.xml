@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Vegas</name>
-<version>1.1.4</version>
+<version>1.1.5</version>
 <include id="gapple-kill-reward"/>
 <include id="velocity-no-fall-damage"/>
 <objective>Capture both of the enemy's wools, and upgrade your team at the Cocktail Club!</objective>
@@ -75,6 +75,11 @@
     <give filter="all(alive,speed=1..)">
         <kit>
             <effect>speed</effect>
+        </kit>
+    </give>
+    <give filter="all(alive,fire_res=1..)">
+        <kit>
+            <effect>fire_resistance</effect>
         </kit>
     </give>
     <lend filter="apply-fatigue">
@@ -267,6 +272,7 @@
     <set id="add-protection" var="protection" value="protection+1" scope="player"/>
     <set id="add-fatigue" var="fatigue" value="fatigue+1" scope="player"/>
     <set id="add-healthboost" var="healthboost" value="healthboost+1" scope="player"/>
+    <set id="add-fireresistance" var="fire_res" value="fire_res+1" scope="player"/>
     <!-- Weapon Upgrades -->
     <action id="iron-sword-kit" scope="player">
         <replace-item ignore-metadata="true">
@@ -441,6 +447,8 @@
     <trigger filter="armor=2" trigger="kit-alert-2" scope="player"/>
     <message id="kit-alert-3" text="`bYour team's kit has been upgraded to `b`lDiamond`r`b!"/>
     <trigger filter="armor=3" trigger="kit-alert-3" scope="player"/>
+    <message id="fire-alert-1" text="`bYour team now has `c`lFire Resistance`r`b!"/>
+    <trigger filter="fire_res=1" trigger="fire-alert-1" scope="player"/>
     <message id="roulette-alert" text="`bYour team's `2`lRoulette Tables`r`b have opened!"/>
     <trigger filter="haste=1" trigger="roulette-alert" scope="player"/>
     <message id="jumppad-alert" text="`bYour team's `2`ljump-pads`b have been disabled!"/>
@@ -536,6 +544,7 @@
     <variable id="protection" scope="team"/>
     <variable id="fatigue" scope="team"/>
     <variable id="healthboost" scope="team"/>
+    <variable id="fire_res" scope="team"/>
     <variable id="chips" scope="match" default="-1"/>
     <variable id="bet_green" default="0" scope="player"/>
     <variable id="bet_black" default="0" scope="player"/>
@@ -708,7 +717,6 @@
         <material>sandstone</material>
         <material>stained clay:9</material>
         <material>gravel</material>
-        <material>wool:15</material>
     </any>
     <!-- Mob Filters -->
     <mob id="villager">villager</mob>
@@ -770,6 +778,12 @@
             <cuboid id="pink-wool-room2" min="70,20,-118" max="57,100,-136"/>
             <cuboid id="magenta-wool-room" min="-69,0,-118" max="-43,20,-136"/>
             <cuboid id="magenta-wool-room2" min="-69,20,-118" max="-56,100,-136"/>
+        </union>
+        <union id="wool-monuments">
+            <cylinder id="pink-monument" base="4.5,20,120.5" radius="2" height="3"/>
+            <cylinder id="magenta-monument" base="-3.5,20,120.5" radius="2" height="3"/>
+            <cylinder id="cyan-monument" base="-3.5,20,-119.5" radius="2" height="3"/>
+            <cylinder id="lightblue-monument" base="4.5,20,-119.5" radius="2" height="3"/>
         </union>
     </union>
     <union id="team-bases">
@@ -833,6 +847,7 @@
     <apply enter="only-red" region="red-protection2" message="You may not enter the opponent's spawn!"/>
     <apply enter="deny(red)" region="red-wool-rooms" message="You may not enter your own wool room!"/>
     <apply enter="deny(blue)" region="blue-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply enter="never" region="wool-monuments" message="You may not obstruct the Victory Monuments!"/>
     <apply velocity="7,0.5,-1.5" kit="velocity-applied" region="jump-pad-blue-east" filter="not(blue-jumppad-disable)"/>
     <apply velocity="-7,0.5,-1.5" kit="velocity-applied" region="jump-pad-blue-west" filter="not(blue-jumppad-disable)"/>
     <apply velocity="7,0.5,1.5" kit="velocity-applied" region="jump-pad-red-east" filter="not(red-jumppad-disable)"/>
@@ -1016,11 +1031,12 @@
             <item material="chainmail boots" name="`7`lChainmail Kit" lore="`7Your team's spawn kit now|`7has chainmail leggings and boots" price="32" currency="nether star" kit="set-armor-chainmail" filter="armor=0"/>
             <item material="iron boots" name="`f`lIron Kit" lore="`7Your team's spawn kit now|`7has iron leggings, boots, and sword" price="64" currency="nether star" kit="set-armor-iron" filter="armor=1"/>
             <item material="diamond boots" name="`b`lDiamond Kit" lore="`7Your team's spawn kit now|`7has diamond leggings and boots" price="128" currency="nether star" kit="set-armor-diamond" filter="armor=2"/>
+            <item material="blaze powder" name="`c`lFire Resistance" lore="`7All players on your team|`7permanently gain Fire Resistance!" price="64" currency="nether star" action="add-fireresistance" filter="all(fire_res=0, armor=3)"/>
             <item material="iron sword" name="`4`lSharpness I" lore="`7Your team permanently gains|`7Sharpness I on all swords" price="128" currency="nether star" action="add-sharpness" filter="sharpness=0"/>
             <item material="iron sword" name="`4`lSharpness II" lore="`7Your team permanently gains|`7Sharpness II on all swords" price="256" currency="nether star" action="add-sharpness" filter="sharpness=1"/>
             <item material="anvil" name="`e`lProtection I" lore="`7Your team permanently gains|`7Protection I on all  pieces." price="64" currency="nether star" action="add-protection" filter="protection=0"/>
-            <item material="gold pickaxe" name="`6`lHaste I" lore="`7All players on your team|`7permanently gain Haste I!." price="48" currency="nether star" action="add-haste" filter="haste=0"/>
-            <item material="diamond pickaxe" name="`6`lHaste II" lore="`7All players on your team|`7permanently gain Haste II!." price="64" currency="nether star" action="add-haste" filter="haste=1"/>
+            <item material="gold pickaxe" name="`6`lHaste I" lore="`7All players on your team|`7permanently gain Haste I!" price="48" currency="nether star" action="add-haste" filter="haste=0"/>
+            <item material="diamond pickaxe" name="`6`lHaste II" lore="`7All players on your team|`7permanently gain Haste II!" price="64" currency="nether star" action="add-haste" filter="haste=1"/>
             <item material="feather" name="`c`lSpeed I" lore="`7All players on your team|`7permanently gain Speed I!." price="64" currency="nether star" action="add-speed" filter="speed=0"/>
             <item material="feather" name="`c`lForward Spawn" lore="`7All players on your team will|`7spawn closer to the frontlines.|`7Also disables the opposing team's |`7defensive jump pads." price="64" currency="nether star" action="add-speed" filter="speed=1"/>
             <item material="poisonous potato" name="`7`lMining Fatigue Trap" lore="`7Enemies who enter your side will|`7receive Mining Fatigue I." price="48" currency="nether star" action="add-fatigue" filter="fatigue=0"/>
@@ -1033,8 +1049,9 @@
             <item material="chainmail boots" name="`7`lChainmail Kit" lore="`7Your team's spawn kit now|`7has chainmail leggings and boots" price="32" currency="nether star" kit="set-armor-chainmail" filter="armor=0"/>
             <item material="iron boots" name="`f`lIron Kit" lore="`7Your team's spawn kit now|`7has iron leggings, boots, and sword" price="64" currency="nether star" kit="set-armor-iron" filter="armor=1"/>
             <item material="diamond boots" name="`b`lDiamond Kit" lore="`7Your team's spawn kit now|`7has diamond leggings and boots" price="128" currency="nether star" kit="set-armor-diamond" filter="armor=2"/>
-            <item material="gold pickaxe" name="`6`lHaste I" lore="`7All players on your team|`7permanently gain Haste I!." price="48" currency="nether star" action="add-haste" filter="haste=0"/>
-            <item material="diamond pickaxe" name="`6`lHaste II" lore="`7All players on your team|`7permanently gain Haste II!." price="64" currency="nether star" action="add-haste" filter="haste=1"/>
+            <item material="blaze powder" name="`c`lFire Resistance" lore="`7All players on your team|`7permanently gain Fire Resistance!" price="64" currency="nether star" action="add-fireresistance" filter="all(fire_res=0, armor=3)"/>
+            <item material="gold pickaxe" name="`6`lHaste I" lore="`7All players on your team|`7permanently gain Haste I!" price="48" currency="nether star" action="add-haste" filter="haste=0"/>
+            <item material="diamond pickaxe" name="`6`lHaste II" lore="`7All players on your team|`7permanently gain Haste II!" price="64" currency="nether star" action="add-haste" filter="haste=1"/>
             <item material="feather" name="`c`lSpeed I" lore="`7All players on your team|`7permanently gain Speed I!." price="64" currency="nether star" action="add-speed" filter="speed=0"/>
             <item material="feather" name="`c`lForward Spawn" lore="`7All players on your team will|`7spawn closer to the frontlines." price="64" currency="nether star" action="add-speed" filter="speed=1"/>
             <item material="poisonous potato" name="`7`lMining Fatigue Trap" lore="`7Enemies who enter your side will|`7receive Mining Fatigue I." price="48" currency="nether star" action="add-fatigue" filter="fatigue=0"/>
@@ -1222,8 +1239,8 @@
     <item>water bucket</item>
     <item>redstone lamp off</item>
     <item>redstone lamp on</item>
-    <item>37</item>
-    <item>38</item>
+    <item>yellow flower</item>
+    <item>red rose</item>
     <item>arrow</item>
     <item>gold block</item>
     <item>emerald block</item>
@@ -1233,25 +1250,23 @@
     <item>dirt</item>
     <item>stone</item>
     <item>sandstone</item>
-    <item>43:8</item>
-    <item>44:8</item>
-    <item>iron fence</item>
+    <item>sandstone stairs</item>
+    <item>double step</item>
+    <item>step</item>
     <item>smooth brick</item>
     <item>brick</item>
     <item>brick stairs</item>
-    <item>44</item>
     <item>nether brick</item>
-    <item>114</item>
-    <item>113</item>
+    <item>nether brick stairs</item>
+    <item>nether fence</item>
     <item>hopper</item>
-    <item>124</item>
-    <item>169</item>
-    <item>139</item>
+    <item>smooth stairs</item>
+    <item>cobble wall</item>
     <item>prismarine</item>
     <item>prismarine crystals</item>
     <item>carpet</item>
     <item>quartz</item>
-    <item>156</item>
+    <item>quartz stairs</item>
     <item>flower pot item</item>
     <item>iron trapdoor</item>
     <item>leaves</item>
@@ -1260,13 +1275,15 @@
     <item>gravel</item>
     <item>wood</item>
     <item>log</item>
-    <item>wool:1</item>
-    <item>wool:4</item>
-    <item>wool:5</item>
-    <item>wool:11</item>
-    <item>wool:13</item>
-    <item>wool:14</item>
-    <item>wool:15</item>
+    <item>jungle wood stairs</item>
+    <item>wool:1</item> <!--Orange-->
+    <item>wool:4</item> <!--Yellow-->
+    <item>wool:5</item> <!--Lime-->
+    <item>wool:8</item> <!--Light Gray-->
+    <item>wool:11</item> <!--Blue-->
+    <item>wool:13</item> <!--Green-->
+    <item>wool:14</item> <!--Red-->
+    <item>wool:15</item> <!--Black-->
     <item>stained glass</item>
     <item>sponge</item>
     <item>clay ball</item>
