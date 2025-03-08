@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Ad Astra</name>
-<version>2.0.6</version>
+<version>2.0.7</version>
 <include id="gapple-kill-reward"/>
 <objective>Take the enemy's wool located near their base and place it back at your spawn!</objective>
 <created>2023-02-11</created>
@@ -83,12 +83,6 @@
             <void/>
         </all>
     </deny>
-    <deny id="deny-red">
-        <team id="only-red">red-team</team>
-    </deny>
-    <deny id="deny-blue">
-        <team id="only-blue">blue-team</team>
-    </deny>
     <all id="only-wool-room">
         <blocks region="wool-room-blocks">
             <any>
@@ -158,8 +152,8 @@
         <circle id="obs-spawn" center="4.5,-49.5" radius="10.5"/>
     </union>
     <apply block-place="only-iron-renew" block-break="only-iron" region="spawn-areas" message="You may not modify spawn areas!"/>
-    <apply enter="deny-blue" region="red-spawn-area" message="You may not enter your enemies' spawn!"/>
-    <apply enter="deny-red" region="blue-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply enter="deny(blue-team)" region="red-spawn-area" message="You may not enter your enemies' spawn!"/>
+    <apply enter="deny(red-team)" region="blue-spawn-area" message="You may not enter your enemies' spawn!"/>
     <!-- Wool rooms -->
     <union id="wool-rooms">
         <union id="red-wool-rooms">
@@ -181,11 +175,11 @@
             <mirror id="pink-wool-room-blocks" region="yellow-wool-room-blocks" origin="-113.5,0,-49.5" normal="0,0,1"/>
         </union>
     </union>
-    <apply block="deny-red" region="red-wool-rooms" message="You may not modify the wool room!"/>
-    <apply block="deny-blue" region="blue-wool-rooms" message="You may not modify the wool room!"/>
+    <apply block="deny(red-team)" region="red-wool-rooms" message="You may not modify the wool room!"/>
+    <apply block="deny(blue-team)" region="blue-wool-rooms" message="You may not modify the wool room!"/>
     <apply block="only-wool-room" region="wool-room-blocks" message="You may not modify the wool room!"/>
-    <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your team's wool room!"/>
-    <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your team's wool room!"/>
+    <apply enter="blue-team" region="red-wool-rooms" message="You may not enter your team's wool room!"/>
+    <apply enter="red-team" region="blue-wool-rooms" message="You may not enter your team's wool room!"/>
     <point id="purple-wool-spawner">-210.5,21.2,78.5</point>
     <point id="pink-wool-spawner">-16.5,21.2,78.5</point>
     <point id="orange-wool-spawner">-210.5,21.2,-177.5</point>
@@ -199,13 +193,15 @@
     </union>
     <apply use="deny-beacon"/>
 </regions>
-<wools team="red-team" craftable="false">
-    <wool color="purple" location="-210.5,21.5,78.5" monument="purple-victory-monument"/>
-    <wool color="pink" location="-16.5,21.5,78.5" monument="pink-victory-monument"/>
-</wools>
-<wools team="blue-team" craftable="false">
-    <wool color="orange" location="-210.5,21.5,-177.5" monument="orange-victory-monument"/>
-    <wool color="yellow" location="16.5,21.2,-177.5" monument="yellow-victory-monument"/>
+<wools craftable="false">
+    <wools team="red-team">
+        <wool color="purple" location="-210.5,21.5,78.5" monument="purple-victory-monument"/>
+        <wool color="pink" location="-16.5,21.5,78.5" monument="pink-victory-monument"/>
+    </wools>
+    <wools team="blue-team">
+        <wool color="orange" location="-210.5,21.5,-177.5" monument="orange-victory-monument"/>
+        <wool color="yellow" location="-16.5,21.5,-177.5" monument="yellow-victory-monument"/>
+    </wools>
 </wools>
 <spawners>
     <!-- Red side -->
@@ -220,9 +216,10 @@
         <item material="wool" amount="1" damage="10"/>
     </spawner>
     <spawner spawn-region="pink-wool-spawner" player-region="pink-wool-room" delay="4" max-entities="8">
-        <item material="wool" amount="2" damage="6"/>
+        <item material="wool" amount="1" damage="6"/>
     </spawner>
 </spawners>
+<!-- TODO: change this into a custom mode -->
 <actions>
     <action id="create-water-lanes" scope="match" expose="true">
         <fill region="water-lanes-y0" material="water" filter="only-air"/>
