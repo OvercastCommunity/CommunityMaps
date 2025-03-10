@@ -1,7 +1,8 @@
 <map proto="1.5.0">
 <name>Ad Astra</name>
-<version>2.0.7</version>
+<version>2.0.8</version>
 <include id="gapple-kill-reward"/>
+<include id="water-lanes"/>
 <objective>Take the enemy's wool located near their base and place it back at your spawn!</objective>
 <created>2023-02-11</created>
 <maxbuildheight>34</maxbuildheight>
@@ -26,13 +27,13 @@
             <point>-113.5,20,-189.5</point>
         </region>
     </spawn>
-    <spawn team="blue-team" kit="spawn-kit" yaw="180">
-        <region>
+    <spawn team="blue-team" kit="spawn-kit">
+        <region yaw="180">
             <point>-113.5,20,90.5</point>
         </region>
     </spawn>
-    <default yaw="90">
-        <region>
+    <default>
+        <region yaw="90">
             <point>4.5,43,-49.5</point>
         </region>
     </default>
@@ -70,9 +71,6 @@
     </take>
 </kits>
 <filters>
-    <deny id="deny-void">
-        <void/>
-    </deny>
     <deny id="deny-web">
         <all>
             <any>
@@ -90,19 +88,15 @@
                 <material>web</material>
             </any>
         </blocks>
-        <filter id="deny-void"/>
+        <deny>
+            <void/>
+        </deny>
     </all>
     <all id="only-iron-renew">
         <material id="only-iron">iron block</material>
         <cause>world</cause>
     </all>
     <material id="only-air">air</material>
-    <all id="msg-waterlane">
-        <time>43m</time>
-        <filter id="no-water-lanes"/> <!-- If waterlanes were forced via commands before this, there won't be a bossbar -->
-    </all>
-    <after id="water-lane-time" message="`9Water `9Lanes `fwill `fappear `fin {0}" duration="2m" filter="msg-waterlane"/>
-    <variable id="no-water-lanes" var="water_lanes">0</variable>
     <deny id="deny-beacon">
         <material>beacon</material>
     </deny>
@@ -116,27 +110,18 @@
     </union>
     <union id="water-lanes">
         <!-- water lanes -->
-        <rectangle id="orange-water-lane" min="-185,-169" max="-171,-116"/>
+        <cuboid id="orange-water-lane" min="-185,0,-169" max="-171,1,-116"/>
         <mirror id="yellow-water-lane" region="orange-water-lane" origin="-113.5,0,-49.5" normal="1,0,0"/>
         <mirror region="orange-water-lane" origin="-113.5,0,-49.5" normal="0,0,1"/>
         <mirror region="yellow-water-lane" origin="-113.5,0,-49.5" normal="0,0,1"/>
-    </union>
-    <union id="water-lanes-y0">
-        <cuboid id="orange-water-lane-y0" min="-185,0,-169" max="-171,1,-116"/>
-        <mirror id="yellow-water-lane-y0" region="orange-water-lane-y0" origin="-113.5,0,-49.5" normal="1,0,0"/>
-        <mirror region="orange-water-lane-y0" origin="-113.5,0,-49.5" normal="0,0,1"/>
-        <mirror region="yellow-water-lane-y0" origin="-113.5,0,-49.5" normal="0,0,1"/>
     </union>
     <complement id="void-area">
         <everywhere/>
         <region id="middle"/>
         <region id="wool-room-blocks"/>
         <region id="spawn-areas"/>
-        <region id="water-lanes"/>
     </complement>
-    <apply block-place="deny-void" block-break="deny-web" region="void-area" message="You may not edit the void!"/>
-    <apply block="deny-void" region="water-lanes" message="You may not edit the void!" filter="no-water-lanes"/>
-    <apply block="never" region="obs-spawn" message="You may not modify the observer's spawn!"/>
+    <apply block-place="deny(void)" block-break="deny-web" region="void-area" message="You may not edit the void!"/>    <apply block="never" region="obs-spawn" message="You may not modify the observer's spawn!"/>
     <!-- Spawns -->
     <union id="spawn-areas">
         <complement>
@@ -219,18 +204,6 @@
         <item material="wool" amount="1" damage="6"/>
     </spawner>
 </spawners>
-<!-- TODO: change this into a custom mode -->
-<actions>
-    <action id="create-water-lanes" scope="match" expose="true">
-        <fill region="water-lanes-y0" material="water" filter="only-air"/>
-        <set var="water_lanes" value="1"/>
-        <message text=" `e⚠ `bWater lanes have appeared!"/>
-    </action>
-    <trigger filter="water-lane-time" action="create-water-lanes" scope="match"/>
-</actions>
-<variables>
-    <variable id="water_lanes" scope="match" default="0"/>
-</variables>
 <itemkeep>
     <item>iron sword</item>
     <item>bow</item>
