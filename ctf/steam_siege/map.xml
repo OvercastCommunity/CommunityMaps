@@ -1,6 +1,6 @@
 <map proto="1.5.0" game="Flag Assault">
 <name>Steam Siege</name>
-<version>1.0.1</version>
+<version>1.1.0</version>
 <objective>Score your flag in the enemy goals, most points wins!</objective>
 <created>2025-02-14</created>
 <gamemode>ctf</gamemode>
@@ -21,20 +21,23 @@
 </teams>
 <kits>
     <kit id="spawn-kit">
+        <clear/>
         <item slot="0" unbreakable="true" material="stone sword"/>
-        <item slot="1" unbreakable="true" enchantment="infinity" material="bow"/>
-        <item slot="2" amount="6" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="gold barding"/>
-        <item slot="3" material="golden apple"/>
+        <item slot="1" unbreakable="true" material="gold axe"/>
+        <item slot="2" unbreakable="true" enchantment="infinity" material="bow"/>
+        <item slot="3" amount="6" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="gold barding"/>
+        <item slot="4" amount="32" damage="3" material="leaves"/>
+        <item slot="5" material="golden apple"/>
         <item slot="27" material="arrow"/>
-        <leggings unbreakable="true" material="chainmail leggings">
+        <leggings unbreakable="true" locked="true" material="chainmail leggings">
             <enchantment level="2">projectile_protection</enchantment>
         </leggings>
-        <boots unbreakable="true" material="iron boots"/>
+        <boots unbreakable="true" locked="true" material="iron boots"/>
         <potion duration="2" amplifier="10">regeneration</potion>
         <potion duration="2" amplifier="10">damage_resistance</potion>
-        <game-mode>adventure</game-mode>
-        <helmet team-color="true" unbreakable="true" material="leather helmet"/>
-        <chestplate team-color="true" unbreakable="true" material="leather chestplate"/>
+        <game-mode>survival</game-mode>
+        <helmet team-color="true" locked="true" unbreakable="true" material="leather helmet"/>
+        <chestplate team-color="true" locked="true" unbreakable="true" material="leather chestplate"/>
     </kit>
     <kit id="flag-pickup" force="true">
         <max-health>10</max-health>
@@ -66,7 +69,12 @@
 </projectiles>
 <!-- spawn region stuff  -->
 <regions>
-    <apply block="never" block-physics="never" use="deny-use"/>
+    <apply block="never" region="blue-spawn"/>
+    <apply block="never" region="red-spawn"/>
+    <apply block="never" region="flag-posts" message="You may not modify the flag posts!"/>
+    <apply block="never" region="jump-pads-with-paths" message="You may not modify the jump pad areas!"/>
+    <apply block="deny(void)" message="You may not modify the void area!"/>
+    <apply block="legal-blocks" use="deny-use"/>
     <!-- Enter -->
     <apply enter="blue-not-flag" region="blue-spawn" message="You may not enter the opposing team's spawn!"/>
     <apply enter="red-not-flag" region="red-spawn" message="You may not enter the opposing team's spawn!"/>
@@ -80,7 +88,7 @@
         <mirror id="blue-goal-right" normal="1,0,0" origin="0.5,0,0.5" region="blue-goal-left"/>
     </union>
     <union id="red-goals">
-        <cuboid id="red-goal-left" min="42,19,44" max="43,25,48"/>
+        <cuboid id="red-goal-left" min="29,21,62" max="25,27,63"/>
         <mirror id="red-goal-right" normal="-1,0,0" origin="0.5,0,0.5" region="red-goal-left"/>
     </union>
     <!--  Spawns regions  -->
@@ -92,6 +100,17 @@
         <mirror id="west-jump-pad" normal="1,0,0" origin="0.5,0,0.5" region="east-jump-pad"/>
         <cuboid id="east-jump-pad" min="44,14,-2" max="39,15,3"/>
         <cuboid id="mid-jump-pad" min="3,14,-2" max="-2,15,3"/>
+    </union>
+    <union id="jump-pads-with-paths">
+        <mirror id="west-jump-pad-path" normal="1,0,0" origin="0.5,0,0.5" region="east-jump-pad"/>
+        <rectangle id="east-jump-pad-path" min="44,-2" max="39,3"/>
+        <rectangle id="mid-jump-pad-path" min="3,-2" max="-2,3"/>
+    </union>
+    <union id="flag-posts">
+        <mirror id="blue-west-flag-post" normal="-1,0,0" origin="0.5,0,0.5" region="blue-east-flag-post"/>
+        <mirror id="blue-east-flag-post" normal="0,0,1" origin="0.5,0,0.5" region="red-east-flag-post"/>
+        <mirror id="red-west-flag-post" normal="-1,0,0" origin="0.5,0,0.5" region="red-east-flag-post"/>
+        <cuboid id="red-east-flag-post" min="6,21,-49" max="3,24,-46"/>
     </union>
 </regions>
 <portals>
@@ -132,13 +151,21 @@
             <material>note_block</material>
         </any>
     </deny>
+    <any id="legal-blocks">
+        <material>fence</material>
+        <material>workbench</material>
+        <material>wood_button</material>
+        <material>leaves</material>
+    </any>
 </filters>
 <!-- Tools and Misc item stuff -->
 <toolrepair>
     <tool>stone sword</tool>
+    <tool>gold axe</tool>
     <tool>bow</tool>
 </toolrepair>
 <itemremove>
+    <item>sapling</item>
     <item>leather helmet</item>
     <item>chainmail leggings</item>
     <item>iron boots</item>
@@ -158,6 +185,7 @@
     <timelock>on</timelock>
     <timeset>1200</timeset>
 </world>
+<maxbuildheight>29</maxbuildheight>
 <!-- Goal and Flag settings -->
 <kill-rewards>
     <kill-reward>
