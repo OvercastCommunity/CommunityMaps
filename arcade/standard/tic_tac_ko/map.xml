@@ -1,6 +1,6 @@
 <map proto="1.5.0" game="Arcade">
 <name>Tic Tac K.O.</name>
-<version>1.3.1</version>
+<version>1.3.2</version>
 <phase>staging</phase>
 <created>2024-10-30</created>
 <objective>Claim 3 tiles in a row to win!</objective>
@@ -389,6 +389,8 @@
     <variable id="current_kit" default="-1"/>
     <variable id="current_platform" default="-1"/>
     <variable id="current_kill_reward" default="-1"/>
+    <variable id="previous_kit"/>
+    <variable id="previous_platform"/>
     <variable id="announce"/>
     <variable id="round"/>
     <variable id="state"/>
@@ -536,6 +538,8 @@
         <action filter="next_voter=${team_x}">
             <fill region="x-firework" material="redstone block"/>
         </action>
+        <set var="previous_platform" value="current_platform"/>
+        <set var="previous_kit" value="current_kit"/>
         <set var="current_platform" value="-1"/>
         <set var="current_kit" value="-1"/>
         <set var="state" value="${state_vote_cd}"/>
@@ -752,7 +756,16 @@
             </action>
             <set var="i" value="i + 1"/>
         </repeat>
-        <set var="current_platform" value="top"/>
+        <set var="tmp" value="previous_platform - top"/>
+        <action filter="round=1">
+            <set var="tmp" value="-1"/>
+        </action>
+        <action filter="not(tmp=0)">
+            <set var="current_platform" value="top"/>
+        </action>
+        <action filter="tmp=0">
+            <action id="platform-picker"/>
+        </action>
     </action>
     <action id="platform-announcer" scope="match">
         <action filter="current_platform=0"><message text="`7[`6Arena Master`7] `6Tirion`r: `cIncendiary`r!"/></action>
@@ -785,7 +798,16 @@
             </action>
             <set var="i" value="i + 1"/>
         </repeat>
-        <set var="current_kit" value="top"/>
+        <set var="tmp" value="previous_kit - top"/>
+        <action filter="round=1">
+            <set var="tmp" value="-1"/>
+        </action>
+        <action filter="not(tmp=0)">
+            <set var="current_kit" value="top"/>
+        </action>
+        <action filter="tmp=0">
+            <action id="kit-picker"/>
+        </action>
     </action>
     <action id="kit-applicator" scope="match">
         <action filter="current_kit=0">
