@@ -1,0 +1,214 @@
+<map proto="1.5.0">
+<name>Haven Tide</name>
+<version>1.0.0</version>
+<objective>Destroy the enemy team's obsidian monument!</objective>
+<created>2025-01-24</created>
+<gamemode>dtm</gamemode>
+<include id="gapple-kill-reward"/>
+<include id="iron-bulkcrafting"/>
+<include id="velocity-no-fall-damage"/>
+<authors>
+    <author uuid="dc1d15f8-b460-4ae0-8093-f3e1361dca06" contribution="Main map idea, building, XML"/> <!-- Gr3ndy -->
+    <author uuid="2fd57dff-4cff-4b60-96a4-d26e37759c03" contribution="XML, building"/> <!-- Furrie -->
+</authors>
+<contributors>
+    <contributor uuid="bb33325c-e147-4620-8c3e-3da6a68f14d0" contribution="Tester" /> <!-- i_top_1 -->
+</contributors>
+<constants>
+    <constant id="velocity-apply-region">jump_pads</constant>
+    <constant id="eff.team-1">orange_team</constant>
+    <constant id="eff.team-2">purple_team</constant>
+    <constant id="eff.t1-m1-region">purple_core_area</constant>
+    <constant id="eff.t2-m1-region">orange_core_area</constant>
+    <constant id="eff.modes-preset">every-10m</constant>
+</constants>
+<include id="efficiency-variables"/>
+<teams>
+    <team id="orange_team" color="gold" max="14">Orange</team>
+    <team id="purple_team" color="dark purple" max="14">Purple</team>
+</teams>
+<filters>
+    <material id="only_iron_block">iron block</material>
+    <material id="only_diamond_block">diamond block</material>
+	<deny id="deny-beacon">
+		<material>beacon</material>
+    </deny>
+	<deny id="deny-anvil">
+		<material>anvil</material>
+    </deny>
+</filters>
+<regions>
+    <union id="spawns_rectangles">
+        <rectangle id="orange_spawns_rectangle" min="-31.5,83.5" max="32.5,100.5"/>
+        <rectangle id="purple_spawns_rectangle" min="-31.5,-99.5" max="32.5,-82.5"/>
+    </union>
+    <cuboid id="orange_core_area" min="-4.5,13,40.5" max="5.5,25,50.5"/>
+    <cuboid id="purple_core_area" min="-4.5,13,-49.5" max="5.5,25,-39.5"/>
+    <negative id="non_buildable_area">
+        <rectangle min="-30.5,-99.5" max="-14.5,-69.5"/>
+        <rectangle min="15.5,-99.5" max="31.5,-69.5"/>
+        <rectangle min="15.5,70.5" max="31.5,100.5"/>
+        <rectangle min="-30.5,70.5" max="-14.5,100.5"/>
+        <rectangle min="31.5,70.5" max="-30.5,-69.5"/>
+        <rectangle min="32.5,-52.5" max="55.5,53.5"/>
+        <rectangle min="-31.5,53.5" max="-54.5,-52.5"/>
+    </negative>
+	<negative id="buildable_area">
+		<region id="non_buildable_area">
+		</region>
+	</negative>
+    <union id="iron_supplies">
+        <!-- Orange team -->
+        <cuboid min="21.5,9,95.5" max="25.5,11,95.5"/>
+        <cuboid min="-24.5,9,95.5" max="-20.5,11,95.5"/>
+        <!-- Purple team -->
+        <cuboid min="-24.5,9,-94.5" max="-20.5,11,-94.5"/>
+        <cuboid min="21.5,9,-94.5" max="25.5,11,-94.5"/>
+    </union>
+    <union id="spawn_kit_chests">
+        <block>-101.5,49,-5.5</block>
+        <block>-101.5,49,6.5</block>
+    </union>
+    <union id="around_jump_pads">
+        <cuboid min="-41.5,8,-1.5" max="-39.5,11,2.5"/>
+        <cuboid min="40.5,8,-1.5" max="42.5,11,2.5"/>
+    </union>
+    <union id="jump_pads">
+        <cuboid id="jump_pad_east" min="40.5,8,-0.5" max="41.5,11,1.5"/>
+        <cuboid id="jump_pad_west" min="-40.5,8,-0.5" max="-39.5,11,1.5"/>
+    </union>
+
+    <apply region="jump_pad_east" velocity="-2.5,2,0" kit="velocity-applied"/>
+    <apply region="jump_pad_west" velocity="2.5,2,0" kit="velocity-applied"/>
+    <apply region="around_jump_pads" block="never" message="You may not obstruct the jump pads"/>
+    <apply region="spawn_kit_chests" block="never" use="never"/>
+    <apply region="iron_supplies" block-break="always"/>
+    <apply region="spawns_rectangles" block-break="never" block-place="deny(participating)" message="You may not modify the spawn"/>
+    <apply region="orange_spawns_rectangle" enter="orange_team" message="You may not enter your enemies' spawn"/>
+    <apply region="purple_spawns_rectangle" enter="purple_team" message="You may not enter your enemies' spawn"/>
+    <apply region="non_buildable_area" block-place="never" message="You cannot build outside of the map"/>
+	<apply region="buildable_area" use="deny-anvil"/>
+	<apply region="buildable_area" use="deny-beacon"/>
+</regions>
+<spawns>
+    <spawn team="orange_team" kit="spawn_kit" yaw="180">
+        <regions>
+            <point>-22.5,8,92.5</point>
+            <point>23.5,8,92.5</point>
+        </regions>
+    </spawn>
+    <spawn team="purple_team" kit="spawn_kit">
+        <regions>
+            <point>23.5,8,-91.5</point>
+            <point>-22.5,8,-91.5</point>
+        </regions>
+    </spawn>
+    <default yaw="-90">
+        <region>
+            <point>-101.5,49,0.5</point>
+        </region>
+    </default>
+</spawns>
+<destroyables repairable="false" materials="obsidian">
+    <destroyable owner="orange_team" name="Monument">
+        <region>
+            <cuboid min="1.5, 22, 44.5" max="-0.5, 17, 46.5"/>
+        </region>
+    </destroyable>
+    <destroyable owner="purple_team" name="Monument">
+        <region>
+            <cuboid min="-0.5, 22, 43.5" max="1.5, 17, -45.5"/>
+        </region>
+    </destroyable>
+</destroyables>
+<kits>
+    <kit id="spawn_kit">
+        <clear/>
+        <chestplate material="leather chestplate" unbreakable="true" team-color="true" enchantment="protection"/>
+        <leggings material="iron leggings" unbreakable="true" enchantment="projectile protection"/>
+        <boots material="leather boots" unbreakable="true" team-color="true"/>
+        <item material="iron sword" slot="0" unbreakable="true"/>
+        <item material="bow" slot="1" unbreakable="true"/>
+        <item material="diamond pickaxe" slot="2" unbreakable="true"/>
+        <item material="iron axe" slot="3" unbreakable="true" enchantment="efficiency"/>
+        <item material="wood" slot="4" amount="64" damage="1"/>
+        <item material="nether brick" slot="5" amount="32"/>
+        <item material="water bucket" slot="6"/>
+        <item material="golden apple" slot="7" amount="1"/>
+        <item material="arrow" slot="28" amount="64"/>
+        <item material="iron spade" slot="30" unbreakable="true"/>
+    </kit>
+</kits>
+<renewables>
+    <renewable region="iron_supplies" renew-filter="only_iron_block" avoid-players="0"/>
+</renewables>
+<kill-rewards>
+    <kill-reward>
+        <item material="wood" amount="32" damage="1"/>
+        <item material="arrow" amount="8"/>
+    </kill-reward>
+</kill-rewards>
+<block-drops>
+    <rule filter="only_diamond_block">
+        <drops>
+            <item chance="1" material="diamond chestplate" enchantment="protection"/>
+        </drops>
+    </rule>
+</block-drops>
+<actions>
+    <trigger scope="player">
+        <filter>
+            <any>
+                <cuboid min="23.5,16,-91.5" max="23.5,17,-91.5"/>
+                <cuboid min="-22.5,16,92.5" max="-22.5,17,92.5"/>
+            </any>
+        </filter>
+        <action>
+            <teleport x="-96.5" y="43" z="0.5" yaw="90"/>
+            <kit>
+                <clear/>
+            </kit>
+        </action>
+    </trigger>
+</actions>
+<itemremove>
+    <item>leather chestplate</item>
+    <item>iron leggings</item>
+    <item>leather boots</item>
+    <item>quartz block</item>
+    <item>cobblestone</item>
+    <item>step</item>
+    <item>anvil</item>
+    <item>smooth brick</item> <!-- Stone brick -->
+    <item>smooth stairs</item> <!-- Stone brick stairs -->
+    <item>quartz stairs</item>
+    <item>log</item>
+    <item>leaves</item>
+    <item>stone</item>
+    <item>stained clay</item>
+    <item>iron trapdoor</item>
+    <item>stone button</item>
+    <item>cobble wall</item>
+    <item>dirt</item>
+    <item>obsidian</item>
+</itemremove>
+<itemkeep>
+<!-- These items get cleared in the spawn kit, they're here to prevent them from dropping on the ground after dying -->
+    <item>bucket</item>
+    <item>water bucket</item>
+    <item>arrow</item>
+    <item>iron sword</item>
+    <item>diamond pickaxe</item>
+    <item>iron axe</item>
+    <item>iron spade</item>
+    <item>bow</item>
+    <item>golden apple</item>
+</itemkeep>
+<gamerules>
+    <randomTickSpeed>0</randomTickSpeed> <!-- Prevents leaves decaying -->
+</gamerules>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>30</maxbuildheight>
+</map>
