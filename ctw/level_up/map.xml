@@ -1,0 +1,617 @@
+<map proto="1.5.0">
+<name>Level Up</name>
+<version>1.0.1</version>
+<objective>Capture the enemy's wool!</objective>
+<created>2025-02-02</created>
+<include id="gapple-kill-reward"/>
+<include id="iron-bulkcrafting"/>
+<authors>
+    <author uuid="55cb168a-e28f-49e5-a853-8268093926c8"/> <!-- 0uzi -->
+</authors>
+<contributors>
+    <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="Redstone"/> <!-- Pablete1234 -->
+</contributors>
+<teams>
+    <team id="red-team" color="dark red" max="24">Red</team>
+    <team id="blue-team" color="blue" max="24">Blue</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="iron sword"/>
+        <item slot="1" material="bow"/>
+        <item slot="2" material="iron pickaxe"/>
+        <item slot="3" material="iron axe"/>
+        <item slot="4" material="wood" amount="64"/>
+        <item slot="5" material="smooth brick" amount="64"/>
+        <item slot="6" material="iron spade"/>
+        <item slot="7" material="water bucket"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="9" material="ink sack" amount="1" damage="4"/>
+        <item slot="28" material="arrow" amount="64"/>
+        <item slot="31" material="wood" amount="64"/>
+        <helmet material="leather helmet" team-color="true"/>
+        <chestplate material="leather chestplate" team-color="true"/>
+        <leggings material="chainmail leggings"/>
+        <boots material="leather boots" team-color="true"/>
+        <effect duration="5s" amplifier="255">damage resistance</effect>
+        <action>
+            <set var="player.level" value="1"/>
+        </action>
+    </kit>
+</kits>
+<spawns>
+    <default region="obs-spawn-point" yaw="90"/>
+    <spawn region="blue-spawn-point" yaw="90" team="blue-team" kit="spawn-kit"/>
+    <spawn region="red-spawn-point" yaw="-90" team="red-team" kit="spawn-kit"/>
+</spawns>
+<wools craftable="false" wool-proximity-metric="none" monument-proximity-metric="closest block">
+    <wool team="red-team" color="blue" monument="blue-wool-mon" location="-22.5,3.2,191.5"/>
+    <wool team="blue-team" color="red" monument="red-wool-mon" location="23.5,3.2,-190.5"/>
+</wools>
+<filters>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <material id="only-iron">iron block</material>
+</filters>
+<regions>
+    <complement id="void-area">
+        <everywhere/>
+        <rectangle min="28,-44" max="-27,45"/> <!-- mid build region -->
+        <rectangle min="45,-133" max="19,-110"/> <!-- blue east water build region -->
+        <rectangle min="-6,-126" max="19,-110"/> <!-- blue west water build region -->
+        <rectangle min="-44,134" max="-18,111"/> <!-- red west water build region -->
+        <rectangle min="7,127" max="-18,111"/> <!-- red east water build region -->
+    </complement>
+    <union id="spawn-points">
+        <point id="obs-spawn-point">69.5,34.75,0.5</point>
+        <cylinder id="blue-spawn-point" base="82,14,-93.5" radius="1" height="0"/>
+        <cylinder id="red-spawn-point" base="-81,14,94.5" radius="1" height="0"/>
+    </union>
+    <union id="spawns">
+        <rectangle id="blue-spawn" min="45,-110" max="90,-77"/>
+        <rectangle id="red-spawn" min="-44,111" max="-89,78"/>
+    </union>
+    <union id="wool-rooms">
+        <rectangle id="blue-wool-room" min="14,-181" max="33,-200"/> <!-- blue defends / red attacks -->
+        <rectangle id="red-wool-room" min="-13,182" max="-32,201"/> <!-- red defends / blue attacks -->
+    </union>
+    <point id="blue-wool-spawn">23.5,3.2,-190.5</point>
+    <point id="red-wool-spawn">-22.5,3.2,191.5</point>
+    <block id="blue-wool-mon">-86,15,94</block>
+    <block id="red-wool-mon">86,15,-94</block>
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-blue" region="red-wool-room" message="You may not enter your own wool room!"/>
+    <apply enter="only-red" region="blue-wool-room" message="You may not enter your own wool room!"/>
+    <apply block="only-blue" region="red-wool-room" message="You may not edit your own wool room!"/>
+    <apply block="only-red" region="blue-wool-room" message="You may not edit your own wool room!"/>
+    <apply block-place="deny(void)" region="void-area" message="You may not build in the void."/>
+    <apply block-break="allow(only-iron)" region="spawns"/>
+    <apply block="deny(participating)" region="spawns" message="You may only break iron blocks in spawn"/>
+</regions>
+<spawners>
+    <spawner spawn-region="blue-wool-spawn" player-region="blue-wool-room" delay="2s">
+        <item material="wool" damage="11"/>
+    </spawner>
+    <spawner spawn-region="red-wool-spawn" player-region="red-wool-room" delay="2s">
+        <item material="wool" damage="14"/>
+    </spawner>
+</spawners>
+<renewables>
+    <renewable region="spawns" renew-filter="only-iron" interval="4"/>
+</renewables>
+<block-drops>
+    <rule wrong-tool="false">
+        <filter>
+            <material>1:0</material> <!--stone-->
+        </filter>
+        <drops>
+            <item material="cobblestone"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>1:6</material> <!--polished andesite-->
+        </filter>
+        <drops>
+            <item material="stone" damage="6"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>2</material> <!--grass-->
+        </filter>
+        <drops>
+            <item material="dirt"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>3:0</material> <!--dirt-->
+        </filter>
+        <drops>
+            <item material="dirt"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>3:1</material> <!--coarse dirt-->
+        </filter>
+        <drops>
+            <item material="dirt" damage="1"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>4</material> <!--cobblestone-->
+        </filter>
+        <drops>
+            <item material="cobblestone"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>5:0</material> <!--oak planks-->
+        </filter>
+        <drops>
+            <item material="wood"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>5:1</material> <!--spruce planks-->
+        </filter>
+        <drops>
+            <item material="wood" damage="1"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>13</material> <!--gravel-->
+        </filter>
+        <drops>
+            <item material="flint"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>17:0</material> <!--oak log-->
+        </filter>
+        <drops>
+            <item material="log"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>18</material> <!--leaves-->
+        </filter>
+        <drops>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>22</material> <!--lapis block-->
+        </filter>
+        <drops>
+            <item material="lapis block"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>35:11</material> <!--blue wool-->
+        </filter>
+        <drops>
+            <item material="wool" damage="11"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>35:14</material> <!--red wool-->
+        </filter>
+        <drops>
+            <item material="wool" damage="14"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>42</material> <!--iron block-->
+        </filter>
+        <drops>
+            <item material="iron block"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>43:8</material> <!--smooth stone-->
+        </filter>
+        <drops>
+            <item material="step" amount="2"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>44:0</material> <!--smooth stone slab-->
+        </filter>
+        <drops>
+            <item material="step"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>44:5</material> <!--stone brick slab-->
+        </filter>
+        <drops>
+            <item material="step" damage="5"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>47</material> <!--bookshelf-->
+        </filter>
+        <drops>
+            <item material="book" amount="3"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>53</material> <!--oak stairs-->
+        </filter>
+        <drops>
+            <item material="wood stairs"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>58</material> <!--crafting table-->
+        </filter>
+        <drops>
+            <item material="workbench"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>67</material> <!--cobblestone stairs-->
+        </filter>
+        <drops>
+            <item material="cobblestone stairs"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>72</material> <!--wooden pressure plate-->
+        </filter>
+        <drops>
+            <item material="wood plate"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>77</material> <!--stone button-->
+        </filter>
+        <drops>
+            <item material="stone button"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>84</material> <!--jukebox-->
+        </filter>
+        <drops>
+            <item material="jukebox"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>85</material> <!--fence-->
+        </filter>
+        <drops>
+            <item material="fence"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>96</material> <!--trapdoor-->
+        </filter>
+        <drops>
+            <item material="trap door"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>98:0</material> <!--stone bricks-->
+        </filter>
+        <drops>
+            <item material="smooth brick"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>98:3</material> <!--chiseled stone bricks-->
+        </filter>
+        <drops>
+            <item material="smooth brick" damage="3"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>99</material> <!--mushroom block-->
+        </filter>
+        <drops>
+            <item material="brown mushroom" chance="0.222"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>101</material> <!--iron bars-->
+        </filter>
+        <drops>
+            <item material="iron fence" chance="0.222"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>102</material> <!--glass pane-->
+        </filter>
+        <drops>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>107</material> <!--oak fence gate-->
+        </filter>
+        <drops>
+            <item material="fence gate"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>109</material> <!--stone brick stairs-->
+        </filter>
+        <drops>
+            <item material="smooth stairs"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>116</material> <!--enchantment table-->
+        </filter>
+        <drops>
+            <item material="enchantment table"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>118</material> <!--cauldron-->
+        </filter>
+        <drops>
+            <item material="380"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>126:0</material> <!--oak wood slab-->
+        </filter>
+        <drops>
+            <item material="wood step"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>126:1</material> <!--spruce wood slab-->
+        </filter>
+        <drops>
+            <item material="wood step" damage="1"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>134</material> <!--spruce stairs-->
+        </filter>
+        <drops>
+            <item material="spruce wood stairs"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>139:0</material> <!--cobblestone wall-->
+        </filter>
+        <drops>
+            <item material="cobble wall"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>158</material> <!--dropper-->
+        </filter>
+        <drops>
+            <item material="dropper"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>159:0</material> <!--white clay-->
+        </filter>
+        <drops>
+            <item material="stained clay" damage="0"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>159:9</material> <!--cyan clay-->
+        </filter>
+        <drops>
+            <item material="stained clay" damage="9"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>159:11</material> <!--blue clay-->
+        </filter>
+        <drops>
+            <item material="stained clay" damage="11"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule wrong-tool="false">
+        <filter>
+            <material>159:14</material> <!--red clay-->
+        </filter>
+        <drops>
+            <item material="stained clay" damage="14"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>161</material> <!--acacia leaves-->
+        </filter>
+        <drops>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>162</material> <!--acacia log-->
+        </filter>
+        <drops>
+            <item material="log 2"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+    <rule>
+        <filter>
+            <material>170</material> <!--hay bale-->
+        </filter>
+        <drops>
+            <item material="hay block"/>
+            <item material="ink sack" damage="4" chance="0.01"/>
+        </drops>
+        <experience>1</experience>
+    </rule>
+</block-drops>
+<gamerules>
+    <randomTickSpeed>0</randomTickSpeed>
+</gamerules>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>water bucket</tool>
+    <tool>bucket</tool>
+    <tool>arrow</tool>
+    <tool>leather helmet</tool>
+    <tool>leather chestplate</tool>
+    <tool>chainmail leggings</tool>
+    <tool>leather boots</tool>
+</toolrepair>
+<itemkeep>
+    <item>golden apple</item>
+</itemkeep>
+<kill-rewards>
+    <kill-reward>
+        <item material="wood" amount="16"/>
+        <item material="smooth brick" amount="16"/>
+        <item material="arrow" amount="16"/>
+        <action>
+            <set var="player.level" value="player.level+1"/>
+        </action>
+    </kill-reward>
+</kill-rewards>
+<maxbuildheight>28</maxbuildheight>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
