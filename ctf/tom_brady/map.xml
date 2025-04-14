@@ -1,7 +1,7 @@
 <map proto="1.5.0">
 <name>Tom Brady</name>
 <game>Flag Football</game>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <phase>staging</phase>
 <objective>Capture the flag at the end zone on the enemies side!</objective>
 <created>2024-09-22</created>
@@ -255,6 +255,7 @@
     <after id="match-start-delay" filter="match-start" duration="0.1s"/>
     <after id="pre-round-reset" filter="all(can_score=0,not(ended),pre_round=1)" duration="0.1s"/>
     <after id="5s-after-throw" duration="5s" filter="is_snowball_held=2" message="`b» `fFlag will respawn in {0} `b«"/>
+    <after id="4s-after-throw" duration="4.8s" filter="is_snowball_held=2"/>
     <all id="valid-receive">
         <cause id="got-shot">projectile</cause>
         <attacker>
@@ -442,11 +443,16 @@
         <sound key="${block.slime_block.break}" volume="1" pitch="0.9"/>
         <sound key="${block.slime_block.break}" volume="1" pitch="0.8"/>
         <sound key="${block.note_block.snare}" volume="0.5" pitch="1.2"/>
-        <sound key="${entity.experience_orb.pickup}" volume="0.3" pitch="1.5"/>
+        <sound key="${entity.experience_orb.pickup}" volume="1" pitch="1.5"/>
+        <sound key="${entity.experience_orb.pickup}" volume="1" pitch="1"/>
+        <sound key="portal.travel" volume="0.1" pitch="2.5"/>
     </action>
     <action id="flag-fire" scope="match">
         <fill region="flag-post" material="fire"/>
         <set var="do_fire" value="0"/>
+    </action>
+    <action id="reset-fire" scope="match">
+        <fill region="flag-post" material="air"/>
     </action>
     <action id="flag-pickup-event" scope="player" filter="is_snowball_held=0">
         <set var="has_snowball" value="1"/>
@@ -497,11 +503,15 @@
             <message text="`aThe Football has been succesfully passed or intercepted!" actionbar="`aFootball succesfully passed or intercepted!"/>
             <action id="pickup-sounds"/>
             <action id="catch-sounds"/>
+            <action id="flag-fire"/> <!-- Just in case -->
         </switch-scope>
     </action>
     <action id="flag-pass-event" scope="player" filter="valid-pass">
         <set var="has_snowball" value="3"/>
         <action id="give-keeper-kit"/>
+        <switch-scope inner="match" outer="player">
+            <action id="flag-fire"/> <!-- Just in case -->
+        </switch-scope>
     </action>
     <action id="flag-steal-event" scope="player">
         <set var="has_snowball" value="1"/>
@@ -532,6 +542,7 @@
     <trigger action="reset-has-variable" filter="has_snowball=4" scope="player"/>
     <trigger action="flag-pickup-event" filter="carrying-snowball" scope="player"/>
     <trigger action="flag-entity-pickup-event" filter="flag-pickup-via-entity" scope="player"/>
+    <trigger action="reset-fire" filter="4s-after-throw" scope="match"/>
     <trigger action="reset-kit-after-throw" filter="5s-after-throw" scope="player"/>
     <trigger action="reset-flag-with-messages" filter="5s-after-throw" scope="match"/>
     <trigger action="reset-flag-with-messages" filter="pre-round-reset" scope="match"/>
