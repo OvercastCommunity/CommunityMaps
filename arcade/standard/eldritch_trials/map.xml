@@ -1,9 +1,8 @@
 <map proto="1.5.0">
 <name>Eldritch Trials</name>
-<version>1.0.9</version>
+<version>1.0.10</version>
 <objective>Restore your humanity and survive the onslaught of beasts the longest!</objective>
 <created>2024-03-07</created>
-<phase>staging</phase>
 <gamemode>arcade</gamemode>
 <authors>
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
@@ -323,10 +322,6 @@
     <after id="delayed-alive" filter="alive" duration="0.1s"/>
     <time id="finalise-humans">0.2s</time>
     <time id="finalise-humans-timeout">1s</time>
-    <players id="count-sm" filter="participating" min="6"/>
-    <players id="count-md" filter="participating" min="12"/>
-    <players id="count-lg" filter="participating" min="25"/>
-    <players id="count-xl" filter="participating" min="35"/>
     <any id="allow-destruction">
         <material>torch</material>
         <material>dead bush</material>
@@ -358,6 +353,8 @@
 </regions>
 <variables scope="player" default="0">
     <score id="humanity"/>
+    <variable id="players" scope="match"/>
+    <variable id="target_players" scope="match"/>
     <variable id="min_tmp" scope="match"/>
     <variable id="tmp"/>
     <variable id="is_human"/>
@@ -385,36 +382,26 @@
     <!--
       Teams
     -->
-    <action id="random-humans" scope="match">
-        <action id="pick-player"/>
-        <action filter="count-sm">
-            <action id="pick-player"/>
-        </action>
-        <action filter="count-md">
-            <action id="pick-player"/>
-        </action>
-        <action filter="count-lg">
-            <action id="pick-player"/>
-            <action id="pick-player"/>
-        </action>
-        <action filter="count-xl">
-            <action id="pick-player"/>
-            <action id="pick-player"/>
-            <action id="pick-player"/>
-        </action>
-    </action>
-    <action id="pick-player" scope="match">
-        <set var="min_tmp" value="99"/>
+    <action id="random-humans" scope="match" untrigger-filter="never">
+        <set var="players" value="0"/>
         <switch-scope inner="player" filter="participating">
-            <set var="min_tmp" value="min(tmp, min_tmp)"/>
+            <set var="players" value="players + 1"/>
+            <set var="tmp" value="random()"/>
         </switch-scope>
-        <switch-scope inner="player" filter="participating">
-            <set var="tmp" value="tmp - min_tmp"/>
-            <action filter="tmp=0">
-                <set var="tmp" value="99"/>
-                <set var="is_human" value="1"/>
-            </action>
-        </switch-scope>
+        <set var="target_players" value="max(floor(players^0.6) - 2, 1)"/>
+        <repeat times="target_players">
+            <set var="min_tmp" value="99"/>
+            <switch-scope inner="player" filter="participating">
+                <set var="min_tmp" value="min(tmp, min_tmp)"/>
+            </switch-scope>
+            <switch-scope inner="player" filter="participating">
+                <set var="tmp" value="tmp - min_tmp"/>
+                <action filter="tmp=0">
+                    <set var="tmp" value="99"/>
+                    <set var="is_human" value="1"/>
+                </action>
+            </switch-scope>
+        </repeat>
     </action>
     <action id="distribute-humans" scope="player" filter="all(is_human=1, participating)">
         <action id="become-human"/>
