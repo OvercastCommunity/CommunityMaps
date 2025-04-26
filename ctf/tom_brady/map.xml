@@ -1,32 +1,39 @@
 <map proto="1.5.0">
 <name>Tom Brady</name>
 <game>Flag Football</game>
-<version>1.0.6</version>
+<version>1.0.7</version>
 <objective>Capture the flag at the end zone on the enemies side!</objective>
 <created>2024-09-22</created>
 <time result="score" overtime="1m" max-overtime="1m">8m</time>
 <constants>
-    <constant id="map-origin">0.5,0,0.5</constant>
+    <!-- game_state & player_state -->
+    <constant id="initial">0</constant>
+    <constant id="carry">1</constant>
+    <constant id="throw">2</constant>
+    <!-- additional player_state values -->
+    <constant id="catch">3</constant>
+    <constant id="died">4</constant>
+    <!-- general constants -->
+    <constant id="map-origin">55.5,0,144.5</constant>
     <constant id="overtime-default">1</constant>
     <constant id="score-limit">5</constant>
     <constant id="mercy-limit">-1</constant>
-    <constant id="map-origin">55.5,0,144.5</constant>
     <constant id="void-plane">-64</constant>
     <constant id="main-kit">keeper-kit</constant>
     <constant id="armor-kit">spawn-armor-kit</constant>
     <constant id="goal-scorer">1</constant>
-    <!-- Teams -->
-    <constant id="team-one-spawn">-23.5,35,-102.5</constant>
-    <constant id="team-one-yaw">0</constant>
-    <constant id="team-two-spawn">-23.5,35,13.5</constant>
-    <constant id="team-two-yaw">180</constant>
     <constant id="natural-regeneration">true</constant>
-    <constant id="team-one-pitch">0</constant>
-    <constant id="team-two-pitch">0</constant>
     <constant id="pre-round-enabled">1</constant>
     <constant id="pre-round-time">5s</constant>
     <constant id="max-health">20</constant>
     <constant id="show-tutorial">1</constant>
+    <!-- Teams -->
+    <constant id="team-one-spawn">-23.5,35,-102.5</constant>
+    <constant id="team-two-spawn">-23.5,35,13.5</constant>
+    <constant id="team-one-yaw">0</constant>
+    <constant id="team-two-yaw">180</constant>
+    <constant id="team-one-pitch">0</constant>
+    <constant id="team-two-pitch">0</constant>
 </constants>
 <authors>
     <author uuid="c31e94b2-7678-4551-847e-989c1423323a"/> <!-- TommyHillfigger -->
@@ -67,7 +74,7 @@
     <score id="team_score"/>
     <with-team id="team_one_score" var="team_score" team="team-one"/>
     <with-team id="team_two_score" var="team_score" team="team-two"/>
-    <variable id="is_snowball_held" scope="match" default="0"/>
+    <variable id="game_state" scope="match" default="${initial}"/>
     <variable id="can_score" scope="match" default="1"/>
     <variable id="round_status" scope="match" default="2"/>
     <variable id="buytime" scope="match" default="0"/>
@@ -77,7 +84,8 @@
     <variable id="pre_round" scope="match" default="${pre-round-enabled}"/>
     <variable id="goal_scorer_enabled" scope="match" default="${goal-scorer}"/>
     <variable id="show_tutorial" scope="match" default="${show-tutorial}"/>
-    <variable id="has_snowball" scope="player" default="0" exclusive="1"/>
+    <!-- 0=POST  1=CARRY  2=THROW  3=CATCH  4=DIED -->
+    <variable id="player_state" scope="player" default="${initial}" exclusive="1"/>
     <variable id="player_score" scope="player" default="0"/>
     <variable id="current_team" scope="player" default="0"/> <!-- 0: Observers, 1: team-one, 2: team-two -->
     <variable id="goal_scorer" scope="player" exclusive="1"/>
@@ -246,23 +254,23 @@
         </not>
     </all>
     <all id="died-carrying">
-        <variable var="has_snowball">1</variable>
+        <variable var="player_state">${carry}</variable>
         <dead/>
     </all>
     <after id="flag-fire-go" filter="do_fire=1" duration="0.51s"/>
     <!-- These two delays allow players to hear the sounds, otherwise gets cut-off when TP'd -->
     <after id="match-start-delay" filter="match-start" duration="0.1s"/>
     <after id="pre-round-reset" filter="all(can_score=0,not(ended),pre_round=1)" duration="0.1s"/>
-    <after id="5s-after-throw" duration="5s" filter="is_snowball_held=2" message="`b» `fFlag will respawn in {0} `b«"/>
-    <after id="just-before-reset" duration="4.8s" filter="is_snowball_held=2"/>
+    <after id="5s-after-throw" duration="5s" filter="game_state=${throw}" message="`b» `fFlag will respawn in {0} `b«"/>
+    <after id="just-before-reset" duration="4.8s" filter="game_state=${throw}"/>
     <all id="valid-receive">
         <cause id="got-shot">projectile</cause>
         <attacker>
-            <variable var="has_snowball">3</variable>
+            <variable var="player_state">${catch}</variable>
         </attacker>
     </all>
     <all id="valid-pass">
-        <variable var="has_snowball">2</variable>
+        <variable var="player_state">${throw}</variable>
         <victim>
             <cause>projectile</cause>
         </victim>
@@ -271,20 +279,20 @@
         </victim>
     </all>
     <victim id="victim-has-flag">
-        <variable var="has_snowball">1</variable>
+        <variable var="player_state">${carry}</variable>
     </victim>
     <victim id="victim-died-with-flag">
-        <variable var="has_snowball">4</variable>
+        <variable var="player_state">${died}</variable>
     </victim>
     <allow id="flag-carrier-alive">
         <all>
-            <variable var="has_snowball">1</variable>
+            <variable var="player_state">${carry}</variable>
             <alive/>
         </all>
     </allow>
     <all id="reset-observer-variables">
         <observing/>
-        <variable var="has_snowball">1</variable>
+        <variable var="player_state">${carry}</variable>
     </all>
     <!-- END TOM BRADY  START BRIDGE INCLUDE > -->
     <deny id="deny-participating">
@@ -416,15 +424,15 @@
         <kit id="keeper-kit"/>
     </action>
     <action id="snowball-thrown" scope="player">
-        <set var="has_snowball" value="2"/>
-        <set var="is_snowball_held" value="2"/>
+        <set var="player_state" value="${throw}"/>
+        <set var="game_state" value="${throw}"/>
         <switch-scope inner="match" outer="player">
-            <message text="`e⚠`6The `c`lFlag `6will `c`lrespawn `6in `c`l5 seconds `6if `o`lnobody `6catches the Football!`r" actionbar="`6`lThe Football has been `othrown`6`l!"/>
+            <message text="`e⚠`6The `c`lFootball `6has been `c`lthrown!`r" actionbar="`6`lThe Football has been `othrown`6`l!"/>
             <action id="throw-sounds"/>
         </switch-scope>
     </action>
-    <action id="reset-kit-after-throw" scope="player" filter="has_snowball=2">
-        <set var="has_snowball" value="0"/>
+    <action id="reset-kit-after-throw" scope="player" filter="player_state=${throw}">
+        <set var="player_state" value="${initial}"/>
     </action>
     <action id="throw-sounds" scope="match">
         <sound key="${entity.snowball.throw}" volume="1" pitch="0.5"/>
@@ -453,14 +461,14 @@
     <action id="reset-fire" scope="match">
         <fill region="flag-post" material="air"/>
     </action>
-    <action id="flag-pickup-event" scope="player" filter="is_snowball_held=0">
-        <set var="has_snowball" value="1"/>
+    <action id="flag-pickup-event" scope="player" filter="game_state=${initial}">
+        <set var="player_state" value="${carry}"/>
         <sound key="${entity.player.levelup}" volume="0.7" pitch="1.5"/>
         <message subtitle="`f`lYou are the `b`lFlag `f`lcarrier!" fade-in="0.2" stay="0.5" fade-out="0.2"/>
         <switch-scope inner="match" outer="player">
-            <message text="`fThe `b`lFlag and Football `fhave been picked up!" actionbar="`fThe `b`lFlag and Football `fhave been picked up!"/>
+            <message text="`fThe `b`lFlag `fhas been picked up!" actionbar="`fThe `b`lFlag `fhas been picked up!"/>
             <action id="pickup-sounds"/>
-            <set var="is_snowball_held" value="1"/>
+            <set var="game_state" value="${carry}"/>
             <set var="do_fire" value="1"/>
             <fill region="flag-post" material="air"/>
             <fill region="flag-indicator" material="air"/>
@@ -472,10 +480,10 @@
         <sound key="${entity.firework_rocket.twinkle}" volume="1" pitch="1"/>
     </action>
     <action id="carrier-died-event" scope="player" filter="died-carrying">
-        <set var="has_snowball" value="0"/>
-        <set var="is_snowball_held" value="0"/>
+        <set var="player_state" value="${initial}"/>
+        <set var="game_state" value="${initial}"/>
         <switch-scope inner="match" outer="player">
-            <message text="`aThe Football carrier died!" actionbar="`aFootball carrier died!"/>
+            <message text="`aThe Flag carrier died!" actionbar="`aFlag carrier died!"/>
             <action id="reset-flag-with-messages"/>
         </switch-scope>
     </action>
@@ -486,15 +494,15 @@
         <sound key="${entity.item.pickup}" volume="0.5" pitch="1.5"/>
     </action>
     <action id="reset-flag" scope="match">
-        <set var="is_snowball_held" value="0"/>
+        <set var="game_state" value="${initial}"/>
         <fill region="flag-post" material="standing banner"/>
         <fill region="flag-indicator" material="sea lantern"/>
         <fill region="flag-indicator2" material="sea lantern"/>
         <kill-entities filter="snowball-entity"/>
     </action>
     <action id="flag-receive-event" scope="player" filter="valid-receive">
-        <set var="has_snowball" value="1"/>
-        <set var="is_snowball_held" value="1"/>
+        <set var="player_state" value="${carry}"/>
+        <set var="game_state" value="${carry}"/>
         <kit id="flag-carrier"/>
         <message subtitle="`f`lYou are the `b`lFlag `f`lcarrier!" fade-in="0.5" stay="0.7" fade-out="0.5"/>
         <sound key="${entity.player.levelup}" volume="0.7" pitch="1.5"/>
@@ -506,39 +514,39 @@
         </switch-scope>
     </action>
     <action id="flag-pass-event" scope="player" filter="valid-pass">
-        <set var="has_snowball" value="3"/>
+        <set var="player_state" value="${catch}"/>
         <action id="give-keeper-kit"/>
         <switch-scope inner="match" outer="player">
             <action id="flag-fire"/> <!-- Just in case -->
         </switch-scope>
     </action>
     <action id="flag-steal-event" scope="player">
-        <set var="has_snowball" value="1"/>
-        <set var="is_snowball_held" value="1"/>
+        <set var="player_state" value="${carry}"/>
+        <set var="game_state" value="${carry}"/>
         <kit id="flag-carrier"/>
         <message subtitle="`f`lYou are the `b`lFlag `f`lcarrier!" fade-in="0.5" stay="1" fade-out="0.5"/>
         <switch-scope inner="match" outer="player">
-            <message text="`cThe Football has been stripped!" actionbar="`cSTRIPPED!"/>
+            <message text="`cThe Flag has been stripped!" actionbar="`cSTRIPPED!"/>
             <action id="pickup-sounds"/>
         </switch-scope>
     </action>
-    <action id="reset-has-variable" scope="player">
-        <set var="has_snowball" value="0"/>
+    <action id="reset-player-state" scope="player">
+        <set var="player_state" value="${initial}"/>
     </action>
-    <action id="set-has-variable-death-state" scope="player">
-        <set var="has_snowball" value="4"/>
+    <action id="death-player-state" scope="player">
+        <set var="player_state" value="${died}"/>
     </action>
     <action id="flag-entity-pickup-event" scope="player">
-        <set var="is_snowball_held" value="0"/>
+        <set var="game_state" value="${initial}"/>
         <kit id="flag-carrier"/>
         <action id="flag-pickup-event"/>
     </action>
     <action id="set-keeper-kit" scope="player">
         <action id="give-keeper-kit"/>
     </action>
-    <trigger action="reset-has-variable" filter="has_snowball=3" scope="player"/>
-    <trigger action="reset-has-variable" filter="reset-observer-variables" scope="player"/>
-    <trigger action="reset-has-variable" filter="has_snowball=4" scope="player"/>
+    <trigger action="reset-player-state" filter="player_state=${catch}" scope="player"/>
+    <trigger action="reset-player-state" filter="player_state=${died}" scope="player"/>
+    <trigger action="reset-player-state" filter="reset-observer-variables" scope="player"/>
     <trigger action="flag-pickup-event" filter="carrying-snowball" scope="player"/>
     <trigger action="flag-entity-pickup-event" filter="flag-pickup-via-entity" scope="player"/>
     <trigger action="reset-fire" filter="just-before-reset" scope="match"/>
@@ -549,7 +557,7 @@
     <trigger action="touchdown-sound" filter="all(can_score=0,not(ended),pre_round=1)" scope="match"/>
     <trigger action="reset-flag" filter="match-start" scope="match"/>
     <trigger action="go-sounds" filter="match-start-delay" scope="match"/>
-    <trigger action="give-keeper-kit" filter="has_snowball=2" scope="player"/>
+    <trigger action="give-keeper-kit" filter="player_state=${throw}" scope="player"/>
     <trigger action="flag-fire" filter="flag-fire-go" scope="match"/>
     <!-- END TOM BRADY  START BRIDGE INCLUDE > -->
     <action id="increment-round" scope="player">
@@ -787,7 +795,7 @@
     <apply enter="deny(only-blue)" region="team-one-portal" message="You may not enter your own goal!"/>
     <apply enter="deny(only-red)" region="team-two-portal" message="You may not enter your own goal!"/>
     <apply enter="carrying-snowball" region="nets" message="You may not enter the goal without the Flag!"/>
-    <apply filter="is_snowball_held=0" region="flag-post" kit="flag-carrier"/>
+    <apply filter="game_state=${initial}" region="flag-post" kit="flag-carrier"/>
     <!-- END TOM BRADY  START BRIDGE INCLUDE > -->
     <!-- Spawn points -->
     <point id="team-one-spawn-point">${team-one-spawn}</point>
@@ -823,7 +831,7 @@
     <kill-reward>
         <item locked="true" material="golden apple"/>
     </kill-reward>
-    <kill-reward filter="any(victim-has-flag,victim-died-with-flag)" action="flag-steal-event" victim-action="set-has-variable-death-state"/>
+    <kill-reward filter="any(victim-has-flag,victim-died-with-flag)" action="flag-steal-event" victim-action="death-player-state"/>
 </kill-rewards>
 <itemkeep>
     <item>golden apple</item>
@@ -836,11 +844,13 @@
 <itemremove>
     <item>leather helmet</item>
     <item>leather chestplate</item>
-    <item>chainmail chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
     <item>chainmail leggings</item>
     <item>iron boots</item>
     <item>stone sword</item>
     <item>banner</item>
+    <item>golden apple</item>
 </itemremove>
 <toolrepair>
     <tool>stone sword</tool>
