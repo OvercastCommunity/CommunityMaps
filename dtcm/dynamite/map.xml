@@ -1,5 +1,5 @@
 <map proto="1.5.0">
-<version>1.2.2</version>
+<version>1.2.3</version>
 <name>Dynamite</name>
 <created>2025-02-13</created>
 <phase>development</phase>
@@ -16,8 +16,8 @@
     <tip after="5s" every="4m" count="8">You may not place TNT on the opponent's side!</tip>
 </broadcasts>
 <teams>
-    <team id="light" max="20" max-overfill="25" color="white">Light</team>
-    <team id="shadow" max="20" max-overfill="25" color="dark gray">Shadow</team>
+    <team id="red-team" max="20" max-overfill="25" color="red">Red</team>
+    <team id="blue-team" max="20" max-overfill="25" color="dark aqua">Blue</team>
 </teams>
 <kits>
     <kit id="spawn-kit">
@@ -51,20 +51,18 @@
         </boots>
         <effect duration="4s" amplifier="255">damage resistance</effect>
     </kit>
-    <kit id="shadow-kit" parent="spawn-kit">
-        <item slot="4" material="wood" amount="64" damage="2"/>
-        <item slot="31" material="wood" amount="32" damage="2"/>
-        <item slot="13" material="wood step" amount="16" damage="2"/>
-    </kit>
-    <kit id="light-kit" parent="spawn-kit">
+    <kit id="blue-kit" parent="spawn-kit">
         <item slot="4" material="wood" amount="64" damage="5"/>
         <item slot="31" material="wood" amount="32" damage="5"/>
         <item slot="13" material="wood step" amount="16" damage="5"/>
     </kit>
+    <kit id="red-kit" parent="spawn-kit">
+        <item slot="4" material="wood" amount="64" damage="3"/>
+        <item slot="31" material="wood" amount="32" damage="3"/>
+        <item slot="13" material="wood step" amount="16" damage="3"/>
+    </kit>
 </kits>
 <filters>
-    <team id="only-light">light</team>
-    <team id="only-shadow">shadow</team>
     <material id="only-iron">iron block</material>
     <material id="tnt">tnt</material>
     <deny id="no-stone">
@@ -78,18 +76,18 @@
     </deny>
 </filters>
 <regions>
-    <cuboid id="iron-light-B" min="2,12,-50" max="-10,14,-43"/>
-    <cuboid id="iron-light-A" min="-50,12,2" max="-43,14,-10"/>
-    <cuboid id="iron-shadow-B" min="23,12,75" max="35,14,68"/>
-    <cuboid id="iron-shadow-A" min="75,12,23" max="68,14,35"/>
+    <cuboid id="iron-red-B" min="2,12,-50" max="-10,14,-43"/>
+    <cuboid id="iron-red-A" min="-50,12,2" max="-43,14,-10"/>
+    <cuboid id="iron-blue-B" min="23,12,75" max="35,14,68"/>
+    <cuboid id="iron-blue-A" min="75,12,23" max="68,14,35"/>
     <union id="spawns">
-        <complement id="light-spawn">
+        <complement id="red-spawn">
             <cuboid min="-42,12,-42" max="-59,26,-59"/>
             <half origin="-44.25,0,-44.25" normal="1,0,1"/>
             <half origin="-48.25,0,-52.75" normal="1,0,-1"/>
             <half origin="-52.75,0,-48.25" normal="-1,0,1"/>
         </complement>
-        <complement id="shadow-spawn">
+        <complement id="blue-spawn">
             <cuboid min="67,12,67" max="84,26,84"/>
             <half origin="69.25,0,69.25" normal="-1,0,-1"/>
             <half origin="77.75,0,73.25" normal="1,0,-1"/>
@@ -100,8 +98,8 @@
     <apply region="spawns" enter="never" message="You may not enter spawn"/>
     <negative id="outside-playable">
         <union>
-            <mirror id="light-playable" origin="12.5,0,12.5" normal="-1,0,-1">
-                <union id="shadow-playable">
+            <mirror id="red-playable" origin="12.5,0,12.5" normal="-1,0,-1">
+                <union id="blue-playable">
                     <complement>
                         <rectangle min="-1,-1" max="76,76"/>
                         <half origin="73.75,0,1.25" normal="1,0,-1"/>
@@ -109,7 +107,7 @@
                         <half origin="52.75,0,52.75" normal="1,0,1"/>
                         <half origin="-27.75,0,-27.75" normal="-1,0,-1"/>
                     </complement>
-                    <complement id="shadow-outside-spawn">
+                    <complement id="blue-outside-spawn">
                         <rectangle min="43,43" max="73,73"/>
                         <rectangle min="43,43" max="55,55"/>
                         <half origin="70.75,0,45.25" normal="1,0,-1"/>
@@ -119,25 +117,25 @@
                     <rectangle min="69,36" max="36,69"/>
                 </union>
             </mirror>
-            <region id="shadow-playable"/>
+            <region id="blue-playable"/>
             <complement id="middle">
                 <rectangle min="-28,-28" max="53,53"/>
                 <half id="middle-side-1" origin="39.75,0,-14.75" normal="1,0,-1"/>
                 <half id="middle-side-2" origin="-14.75,0,39.75" normal="-1,0,1"/>
-                <half id="light-side" origin="-1.25,0,-1.25" normal="-1,0,-1"/>
-                <half id="shadow-side" origin="26.25,0,26.25" normal="1,0,1"/>
+                <half id="red-side" origin="-1.25,0,-1.25" normal="-1,0,-1"/>
+                <half id="blue-side" origin="26.25,0,26.25" normal="1,0,1"/>
             </complement>
         </union>
     </negative>
     <apply region="outside-playable" block="never" message="You may not interact with blocks outside the playing field"/>
-    <apply region="light-side" block-place="deny(all(tnt,only-shadow))" message="You may not place TNT on the opponent's side"/>
-    <apply region="shadow-side" block-place="deny(all(tnt,only-light))" message="You may not place TNT on the opponent's side"/>
+    <apply region="red-side" block-place="deny(all(tnt,blue-team))" message="You may not place TNT on the opponent's side"/>
+    <apply region="blue-side" block-place="deny(all(tnt,red-team))" message="You may not place TNT on the opponent's side"/>
     <apply block-place="no-stone"/>
     <apply block-break="no-tnt-damage">
         <region>
             <union>
-                <region id="shadow-outside-spawn"/>
-                <mirror origin="12.5,0,12.5" normal="-1,0,-1"><region id="shadow-outside-spawn"/></mirror>
+                <region id="blue-outside-spawn"/>
+                <mirror origin="12.5,0,12.5" normal="-1,0,-1"><region id="blue-outside-spawn"/></mirror>
             </union>
         </region>
     </apply>
@@ -148,56 +146,56 @@
             <point>72.5,39,-47.5</point>
         </regions>
     </default>
-    <spawn team="light" kit="light-kit" yaw="-45">
+    <spawn team="red-team" kit="red-kit" yaw="-45">
         <regions>
             <cuboid min="-57,19,-57" max="-54,19,-54"/>
         </regions>
     </spawn>
-    <spawn team="shadow" kit="shadow-kit" yaw="135">
+    <spawn team="blue-team" kit="blue-kit" yaw="135">
         <regions>
             <cuboid min="79,19,79" max="82,19,82"/>
         </regions>
     </spawn>
 </spawns>
 <renewables>
-    <renewable region="iron-light-A" renew-filter="only-iron"/>
-    <renewable region="iron-light-B" renew-filter="only-iron"/>
-    <renewable region="iron-shadow-A" renew-filter="only-iron"/>
-    <renewable region="iron-shadow-B" renew-filter="only-iron"/>
+    <renewable region="iron-red-A" renew-filter="only-iron"/>
+    <renewable region="iron-red-B" renew-filter="only-iron"/>
+    <renewable region="iron-blue-A" renew-filter="only-iron"/>
+    <renewable region="iron-blue-B" renew-filter="only-iron"/>
 </renewables>
 <modes>
     <mode after="20m" material="ender stone" name="END STONE CORE MODE"/>
     <mode after="35m" material="glass" name="GLASS CORE MODE"/>
 </modes>
 <cores>
-    <core team="light" material="obsidian" leak="7" mode-changes="true">
+    <core team="red-team" material="obsidian" leak="7" mode-changes="true">
         <region>
             <cuboid min="-22,12,-22" max="-27,17,-27"/>
         </region>
     </core>
-    <core team="shadow" material="obsidian" leak="7" mode-changes="true">
+    <core team="blue-team" material="obsidian" leak="7" mode-changes="true">
         <region>
             <cuboid min="47,12,47" max="52,17,52"/>
         </region>
     </core>
 </cores>
 <destroyables show-progress="true" materials="ender stone" repairable="false">
-    <destroyable name="Monument B" owner="light">
+    <destroyable name="Monument B" owner="red-team">
         <region>
             <cuboid min="9,7,-31" max="6,10,-34"/>
         </region>
     </destroyable>
-    <destroyable name="Monument A" owner="light">
+    <destroyable name="Monument A" owner="red-team">
         <region>
             <cuboid min="-31,7,9" max="-34,10,6"/>
         </region>
     </destroyable>
-    <destroyable name="Monument B" owner="shadow">
+    <destroyable name="Monument B" owner="blue-team">
         <region>
             <cuboid min="16,7,56" max="19,10,59"/>
         </region>
     </destroyable>
-    <destroyable name="Monument A" owner="shadow">
+    <destroyable name="Monument A" owner="blue-team">
         <region>
             <cuboid min="56,7,16" max="59,10,19"/>
         </region>
@@ -264,11 +262,11 @@
         <item material="arrow" amount="6"/>
         <item material="tnt" amount="24"/>
     </kill-reward>
-    <kill-reward filter="only-shadow">
-        <item material="wood" amount="16" damage="2"/>
-    </kill-reward>
-    <kill-reward filter="only-light">
+    <kill-reward filter="blue-team">
         <item material="wood" amount="16" damage="5"/>
+    </kill-reward>
+    <kill-reward filter="red-team">
+        <item material="wood" amount="16" damage="3"/>
     </kill-reward>
 </kill-rewards>
 <itemremove>
@@ -297,7 +295,8 @@
     <item>log</item>
     <item>wood stairs</item>
     <item>spruce wood stairs</item>
-    <item>birch wood stairs</item>
+    <item>jungle wood stairs</item>
+    <item>acacia stairs</item>
     <item>dark oak stairs</item>
     <item>step</item>
     <item>piston base</item>
@@ -307,6 +306,7 @@
     <item>quartz block</item>
     <item>quartz stairs</item>
     <item>stained clay</item>
+    <item>hard clay</item>
     <item>ender stone</item>
     <item>obsidian</item>
 </itemremove>
