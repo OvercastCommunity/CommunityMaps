@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Chromatic Conquest</name>
-<version>2.0.0</version>
+<version>2.0.1</version>
 <objective>Paint the majority of enemy players with your team color to win!</objective>
 <created>2024-03-07</created>
 <phase>staging</phase>
@@ -49,17 +49,18 @@
                 <page>
                     `2» `lCHROMATIC CONQ.`0
 
-                    Receive a bounty for
-                    a specific color. Hunt
-                    and eliminate other
-                    players wearing that
-                    color to earn points.
+                    Kill enemy players to
+                    paint them in your
+                    team's color. The team
+                    with the most players
+                    painted their color
+                    wins.
 
-                    Earn bonus points for
-                    completing multiple
-                    bounties in a row.
-                    Wrong kills take
-                    away points.
+                    When an entire team
+                    has been painted,
+                    players are moved to
+                    the team that painted
+                    them.
                 </page>
             </pages>
         </book>
@@ -71,7 +72,7 @@
         <chestplate material="leather chestplate" team-color="true" unbreakable="true" locked="true"/>
         <action filter="any(owned_by=${none}, moving_team=1)">
             <kit force="true">
-                <effect duration="1" amplifier="5">instant health</effect>
+                <effect duration="6" amplifier="3">regeneration</effect>
                 <double-jump power="3"/>
                 <walk-speed>1.1</walk-speed>
                 <item slot="0" material="stone sword" unbreakable="true" locked="true"/>
@@ -150,11 +151,16 @@
 </kits>
 <kill-rewards>
     <kill-reward>
-        <kit deduct-items="false">
+        <kit deduct-items="false" force="true">
             <item slot="2" material="arrow" name="`rExplosive Arrow" grenade="true" grenade-power="2"/>
+            <effect duration="6">regeneration</effect>
+            <effect duration="24">absorption</effect>
         </kit>
     </kill-reward>
 </kill-rewards>
+<broadcasts>
+    <tip after="15s" every="1m">Punch frozen teammates to un-freeze them!</tip>
+</broadcasts>
 <regions>
     <union id="team-spawns">
         <cuboid id="blue-spawn" min="-1,6,-46" size="3,3,3"/>
@@ -220,7 +226,7 @@
         <filter id="all(orange, owned_by=${none})"/>
         <variable var="owned_by">${orange}</variable>
     </any>
-    <variable id="team-eliminated" scope="match" value="eliminated[target]">1</variable>
+    <variable id="team-eliminated" scope="match" value="eliminated[eliminated_index]">1</variable>
     <carrying id="carrying-firework" ignore-metadata="true">
         <item material="firework"/>
     </carrying>
@@ -253,6 +259,7 @@
     <variable id="splat_pos_y"/>
     <variable id="splat_pos_z"/>
     <variable id="target"/>
+    <variable id="eliminated_index"/>
     <variable id="tmp"/>
 </variables>
 <variables scope="team">
@@ -318,6 +325,9 @@
         <action filter="all(ally, owned_by=${any})">
             <action id="unfreeze-player" scope="player">
                 <set var="owned_by" value="${none}"/>
+                <kit force="true">
+                    <health>8</health>
+                </kit>
                 <kit id="main-kit"/>
                 <sound key="${entity.experience_orb.pickup}" volume="1" pitch="1.2"/>
             </action>
@@ -578,25 +588,25 @@
                         <kit force="true">
                             <team-switch team="blue"/>
                         </kit>
-                        <message text="{ translate: 'join.ok.team', with: ['`9Blue'] }"/>
+                        <message text="{ translate: 'join.ok.team', with: ['`9Blue'] }" title="{ translate: 'join.ok.team', with: ['`9Blue'] }"/>
                     </action>
                     <action filter="owned_by=${red}">
                         <kit force="true">
                             <team-switch team="red"/>
                         </kit>
-                        <message text="{ translate: 'join.ok.team', with: ['`4Red'] }"/>
+                        <message text="{ translate: 'join.ok.team', with: ['`4Red'] }" title="{ translate: 'join.ok.team', with: ['`4Red'] }"/>
                     </action>
                     <action filter="owned_by=${green}">
                         <kit force="true">
                             <team-switch team="green"/>
                         </kit>
-                        <message text="{ translate: 'join.ok.team', with: ['`aGreen'] }"/>
+                        <message text="{ translate: 'join.ok.team', with: ['`aGreen'] }" title="{ translate: 'join.ok.team', with: ['`aGreen'] }"/>
                     </action>
                     <action filter="owned_by=${orange}">
                         <kit force="true">
                             <team-switch team="orange"/>
                         </kit>
-                        <message text="{ translate: 'join.ok.team', with: ['`6Orange'] }"/>
+                        <message text="{ translate: 'join.ok.team', with: ['`6Orange'] }" title="{ translate: 'join.ok.team', with: ['`6Orange'] }"/>
                     </action>
                     <sound key="${block.wool.break}"/>
                 </action>
@@ -611,22 +621,22 @@
     </trigger>
     <trigger scope="player" filter="all(in-match, alive)">
         <action filter="team-eliminated">
-            <set var="target" value="floor(random() * 4)"/>
+            <set var="eliminated_index" value="floor(random() * 4)"/>
             <repeat times="4" filter="team-eliminated">
-                <action filter="target=4..">
-                    <set var="target" value="0"/>
+                <action filter="eliminated_index=4..">
+                    <set var="eliminated_index" value="0"/>
                 </action>
                 <action filter="team-eliminated">
-                    <!-- don't increment target var directly as it can get set out
+                    <!-- don't increment eliminated_index var directly as it can get set out
                          of array bounds and throw an error -->
-                    <set var="tmp" value="target + 1"/>
+                    <set var="tmp" value="eliminated_index + 1"/>
                     <action filter="tmp=4..">
                         <set var="tmp" value="0"/>
                     </action>
-                    <set var="target" value="tmp"/>
+                    <set var="eliminated_index" value="tmp"/>
                 </action>
                 <action filter="not(team-eliminated)">
-                    <set var="owned_by" value="target + 1"/>
+                    <set var="owned_by" value="eliminated_index + 1"/>
                     <action id="switch-team"/>
                     <action id="unfreeze-player"/>
                 </action>
@@ -701,6 +711,7 @@
 </damage>
 <itemremove>
     <item>stone sword</item>
+    <item>bow</item>
     <item>leather chestplate</item>
     <item>leather leggings</item>
     <item>leather boots</item>
@@ -708,8 +719,13 @@
     <item>stained glass</item>
     <item>firework</item>
     <item>potion</item>
+    <item>arrow</item>
 </itemremove>
 <hunger>
     <depletion>off</depletion>
 </hunger>
+<gamerules>
+    <doDaylightCycle>false</doDaylightCycle>
+    <naturalRegeneration>false</naturalRegeneration>
+</gamerules>
 </map>
