@@ -1,0 +1,339 @@
+<map proto="1.4.2">
+<name>Red Rover</name>
+<game>Red Rover</game>
+<version>1.0.0</version>
+<phase>development</phase>
+<objective>Prepare walls to slow the enemy, then race to the Scorebox.</objective>
+<gamemode>scorebox</gamemode>
+<created>2025-05-01</created>
+<authors>
+    <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb"/> <!-- arcadeboss -->
+</authors>
+<constants>
+    <!-- Match time = build + cage + rover -->
+    <constant id="build-minutes">6</constant> <!-- defensive phase -->
+    <constant id="warning-minutes">5</constant> <!-- 1 minute warning (build - 1) -->
+    <constant id="cage-seconds">10</constant> <!-- transition to rover -->
+    <constant id="rover-minutes">6</constant> <!-- rover/scoring phase -->
+    <!-- Game state -->
+    <constant id="build-state">0</constant>
+    <constant id="cage-state">1</constant>
+    <constant id="rover-state">2</constant>
+    <!-- Void death -->
+    <constant id="void-plane">0</constant>
+    <constant id="health">1</constant>
+    <constant id="score-limit">25</constant>
+</constants>
+<respawn auto="true" delay="5.0s"/>
+<gamerules>
+    <doDaylightCycle>false</doDaylightCycle>
+</gamerules>
+<maxbuildheight>8</maxbuildheight>
+<teams>
+    <team id="orange-team" color="gold" max="30">Orange</team>
+    <team id="yellow-team" color="yellow" max="30">Yellow</team>
+</teams>
+<spawns>
+    <default>
+        <regions>
+    	    <point yaw="180">0.5,34,32.5</point>
+        </regions>
+    </default>
+    <spawn team="orange-team" kit="build-kit" yaw="90" region="orange-build-spawn"/>
+    <spawn team="yellow-team" kit="build-kit" yaw="-90" region="yellow-build-spawn"/>
+</spawns>
+<kits>
+    <kit id="build-kit" force="false">
+        <clear effects="true"/>
+        <item slot="0" unbreakable="true" material="diamond pickaxe"/>
+        <item slot="1" unbreakable="true" material="diamond axe"/>
+        <item slot="2" unbreakable="true" material="diamond spade"/>
+        <item slot="3" material="wood" amount="64"/>
+        <item slot="4" material="cobblestone" amount="64"/>
+        <item slot="5" material="workbench" amount="64"/>
+        <item slot="6" material="nether fence" amount="64"/>
+        <chestplate material="leather chestplate" enchantment="protection:3" team-color="true" unbreakable="true" locked="true"/>
+        <health>20</health>
+        <effect>night vision</effect>
+        <effect>haste</effect>
+        <effect amplifier="2">speed</effect>
+        <effect amplifier="255">damage resistance</effect>
+        <effect amplifier="255">fire resistance</effect>
+    </kit>
+    <kit id="cage-kit" force="false">
+        <clear effects="true"/>
+        <item slot="0" unbreakable="true" locked="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" locked="true" material="diamond pickaxe"/>
+        <item slot="2" unbreakable="true" locked="true" material="diamond axe"/>
+        <item slot="3" unbreakable="true" locked="true" material="diamond spade"/>
+        <item slot="4" material="wood" locked="true" amount="32"/>
+        <chestplate material="leather chestplate" enchantment="protection:3" team-color="true" unbreakable="true" locked="true"/>
+        <health>20</health>
+        <effect>night vision</effect>
+        <effect amplifier="255" duration="${cage-seconds}s">mining fatigue</effect>
+        <effect amplifier="255" duration="${cage-seconds}s">damage resistance</effect>
+        <effect amplifier="255" duration="${cage-seconds}s">fire resistance</effect>
+    </kit>
+    <kit id="rover-kit" force="false">
+        <clear effects="true"/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="diamond pickaxe"/>
+        <item slot="2" unbreakable="true" material="diamond axe"/>
+        <item slot="3" unbreakable="true" material="diamond spade"/>
+        <item slot="4" material="wood" amount="32"/>
+        <chestplate material="leather chestplate" enchantment="protection:3" team-color="true" unbreakable="true" locked="true"/>
+        <health>20</health>
+        <effect>night vision</effect>
+        <effect amplifier="255" duration="8s">fire resistance</effect>
+    </kit>
+    <give filter="cage" kit="cage-kit"/>
+    <give filter="any(do-yellow-offense-spawn, do-orange-offense-spawn)" kit="rover-kit"/>
+</kits>
+<regions>
+    <cuboid id="no-go" min="-8,12,-20" max="9,200,20"/>
+    <cuboid id="orange-build-spawn" min="119.5,4,-3" max="18,4,3"/>
+    <cuboid id="yellow-build-spawn" min="-118.5,4,-3" max="-17,4,3"/>
+    <cuboid id="orange-offense-spawn-tp" min="-130.5,4,-4" max="-139.5,4,5"/>
+    <cuboid id="yellow-offense-spawn-tp" min="130.5,4,-4" max="139.5,4,5"/>
+    <cuboid id="orange-offense-spawn-kitzone" min="-130.5,3,-4" max="-139.6,5,5"/>
+    <cuboid id="yellow-offense-spawn-kitzone" min="130.5,3,-4" max="139.5,6,5"/>
+    <cuboid id="chest-protect" min="-130,8,-130" max="130,9,130"/>
+    <union id="ceiling">
+        <!-- ceiling -->
+        <cuboid min="-126,8,-7" max="-9,9,8"/>
+        <cuboid min="127,8,-7" max="10,9,8"/>
+        <!-- walls -->
+        <cuboid min="-126,4,-8" max="-9,6,-7"/>
+        <cuboid min="-126,4,8" max="-9,6,9"/>
+        <cuboid min="127,4,-8" max="10,6,-7"/>
+        <cuboid min="127,4,8" max="10,6,9"/>
+    </union>
+    <union id="glass-walls">
+        <cuboid min="127,4,-7" max="128,8,8"/>
+        <cuboid min="-126,4,-7" max="-127,8,8"/>
+        <cuboid min="9,4,-7" max="10,8,8"/>
+        <cuboid min="-8,4,-7" max="-9,8,8"/>
+    </union>
+    <negative id="not-buildable">
+        <union>
+            <cuboid min="-126,4,-7" max="-10,8,8"/>
+            <cuboid min="127,4,-7" max="11,8,8"/>
+        </union>
+    </negative>
+    <cuboid id="scorebox" min="-1,1,-1" max="2,4,2"/>
+    <cuboid id="orange-nope" min="9,1,-12" max="10,14,12"/>
+    <cuboid id="yellow-nope" min="-9,1,-12" max="-8,14,12"/>
+    <apply enter="never" region="no-go" message="You may not enter this area!"/>
+    <apply enter="orange-team" region="yellow-nope" message="You may not enter the Orange side!"/>
+    <apply enter="yellow-team" region="orange-nope" message="You may not enter the Yellow side!"/>
+    <apply block="original-block-protection-filter" message="You may not break this block!"/>
+    <apply block-place="never" region="not-buildable" message="You may not place blocks here!"/>
+</regions>
+<portals>
+    <portal destination="orange-offense-spawn-tp" forward="all(any(rover,cage),alive)" filter="orange-team" yaw="@-90" pitch="@0"/>
+    <portal destination="yellow-offense-spawn-tp" forward="all(any(rover,cage),alive)" filter="yellow-team" yaw="@90" pitch="@0"/>
+    <portal region="scorebox" destination="orange-offense-spawn-tp" filter="orange-team" yaw="@-90" pitch="@0"/>
+    <portal region="scorebox" destination="yellow-offense-spawn-tp" filter="yellow-team" yaw="@90" pitch="@0"/>
+</portals>
+<score>
+    <limit>${score-limit}</limit>
+    <box points="1" region="scorebox"/>
+</score>
+<actions>
+    <!-- Game state -->
+    <trigger scope="match">
+        <filter>
+            <time>${build-minutes}m</time>
+        </filter>
+        <action>
+            <set var="match_state" value="${cage-state}"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="${cage-seconds}s" filter="cage"/>
+        </filter>
+        <action>
+            <set var="match_state" value="${rover-state}"/>
+        </action>
+    </trigger>
+    <!-- Alert on Duration of Gearing-up Phase -->
+    <trigger filter="build" scope="match">
+        <action>
+            <message text="`7[`e`lAlert`7] `6`oYou have `r`e`l`o{amount} minutes`r`6`o to build walls to slow the enemy!">
+                <replacements>
+                    <decimal id="amount" value="${build-minutes}"/>
+                </replacements>
+            </message>
+            <sound preset="alert"/>
+        </action>
+    </trigger>
+    <!-- 1 Minute Warning -->
+    <trigger scope="match">
+        <filter>
+            <after duration="${warning-minutes}m" filter="build"/>
+        </filter>
+        <action>
+            <message text="`7[`e`lAlert`7] `e`l`o1 minute`r`6`o until build phase completes!"/>
+            <sound preset="alert"/>
+            <sound preset="portal"/>
+        </action>
+    </trigger>
+    <!-- Build Arena Cages -->
+    <trigger filter="cage" scope="match">
+        <action>
+	        <message text="`7[`e`lAlert`7] `6`oPrepare to race in `e`l`o{amount} seconds`r`6`o!">
+                <replacements>
+                    <decimal id="amount" value="${cage-seconds}"/>
+                </replacements>
+            </message>
+            <sound preset="alert"/>
+            <fill region="glass-walls" material="iron fence" events="false"/>
+            <fill region="ceiling" material="glass" events="false"/>
+        </action>
+    </trigger>
+    <!-- Prepare to Fight, plus preceeding Teleport Countdown -->
+    <trigger scope="match">
+        <filter>
+            <after message="`6Build phase ends`r in {0}" duration="${build-minutes}m" filter="build"/>
+        </filter>
+        <action>
+            <message fade-in="0.5s" stay="2s" fade-out="0.5s">
+                <title>`cROVING TIME!</title>
+                <subtitle>`fPrepare to break through!</subtitle>
+            </message>
+        </action>
+    </trigger>
+    <!-- Cages Removal Countdown and Release -->
+    <trigger scope="match">
+        <filter>
+            <after message="`6Race begins in {0}" duration="${cage-seconds}s" filter="cage"/>
+        </filter>
+        <action>
+            <message fade-in="0.5s" stay="2s" fade-out="0.5s">
+                <title>`cRED ROVER! RED ROVER!</title>
+                <subtitle>`fLet them come over!</subtitle>
+            </message>
+	        <message text="`7[`e`lAlert`7] `6`oBreak the iron bars`r`6`o!"/>
+            <sound preset="alert"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="1s" filter="rover"/>
+        </filter>
+        <action>
+            <kill-entities filter="always"/>
+        </action>
+    </trigger>
+    <!-- Timelimit Countdown -->
+    <trigger filter="rover" scope="match">
+        <action>
+            <set var="timelimit" value="${rover-minutes}*60"/>
+        </action>
+    </trigger>
+    <!-- Scoring Alert -->
+    <trigger scope="match">
+        <filter>
+            <after duration="10s" filter="rover"/>
+        </filter>
+        <action>
+            <message text="`7[`e`lAlert`7] `6`oJump in the `e`l`oscore box`r`6`o to gain points!"/>
+            <message text="`7[`e`lAlert`7] `6`oTeam that reaches `e`l`o{amount} points`r`6`o first wins!">
+                <replacements>
+                    <decimal id="amount" value="${score-limit}"/>
+                </replacements>
+            </message>
+            <sound preset="alert"/>
+        </action>
+    </trigger>
+</actions>
+<broadcasts>
+    <alert after="25s">`r`6`oBuild walls `r`e`l`o15 blocks wide`r`6`o and `r`e`l`o4 blocks tall`r`6`o.`r</alert>
+</broadcasts>
+<filters>
+    <alive id="alive"/>
+    <match-running id="match-running"/>
+    <all id="build">
+        <match-running/>
+        <variable var="match_state">${build-state}</variable>
+    </all>
+    <all id="cage">
+        <match-running/>
+        <variable var="match_state">${cage-state}</variable>
+    </all>
+    <all id="rover">
+        <match-running/>
+        <variable var="match_state">${rover-state}</variable>
+    </all>
+    <deny id="original-block-protection-filter">
+        <any>
+            <!-- List of blocks in the original map that players can not modify -->
+            <material>glass</material>
+            <material>stained_glass:14</material>
+            <material>stained_glass:15</material>
+            <material>skull</material>
+            <material>wall banner</material>
+            <material>nether brick</material>
+            <material>nether brick stairs</material>
+            <material>stone:2</material>
+            <material>double step:0</material>
+            <material>stained clay</material>
+            <material>smooth brick</material>
+            <material>smooth stairs</material>
+            <material>torch</material>
+            <material>chest</material>
+            <material>step</material>
+            <material>ladder</material>
+        </any>
+    </deny>
+    <material id="only-glass">glass</material>
+    <all id="do-yellow-offense-spawn">
+        <team>yellow-team</team>
+        <region id="yellow-offense-spawn-kitzone"/>
+        <variable var="match_state">${rover-state}</variable>
+    </all>
+    <all id="do-orange-offense-spawn">
+        <team>orange-team</team>
+        <region id="orange-offense-spawn-kitzone"/>
+        <variable var="match_state">${rover-state}</variable>
+    </all>
+</filters>
+<variables>
+    <timelimit id="timelimit"/>
+    <variable id="match_state" scope="match" default="${build-state}"/>
+    <score id="team_score"/>
+</variables>
+<crafting>
+    <disable>stone</disable>
+    <disable>step</disable>
+    <disable>smooth brick</disable>
+    <disable>smooth stairs</disable>
+    <disable>torch</disable>
+    <disable>chest</disable>
+    <disable>ladder</disable>
+    <disable>glass</disable>
+</crafting>
+<itemremove>
+    <item>leather chestplate</item>
+    <item>diamond axe</item>
+    <item>diamond pickaxe</item>
+    <item>diamond spade</item>
+    <item>stone sword</item>
+    <item>workbench</item>
+    <item>furnace</item>
+    <item>nether fence</item>
+    <item>cobblestone</item>
+    <item>string</item>
+</itemremove>
+<crafting>
+    <disable>boat</disable>
+</crafting>
+<world>
+    <timeset>16000</timeset>
+    <timelock>off</timelock>
+</world>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
