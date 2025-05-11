@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Avant Garde</name>
-<version>1.2.2</version>
+<version>1.2.3</version>
 <objective>Break the enemy's monument, then jump into the enemy team's portal located below their spawn point!</objective>
 <created>2023-06-04</created>
 <include id="bridge"/>
@@ -208,14 +208,12 @@
         <cuboid id="magenta-monument" min="38,67,13" size="3,3,3"/>
         <cuboid id="blue-monument" min="-40,67,-15" size="3,3,3"/>
     </union>
-    <!-- 
     <apply block="only-team-one" region="blue-monument">
-        <message>{"translate":"objective.damageOwn"}</message>
+        <message>{"translate":"objective.damageOwn","with":["`9Blue Monument"]}</message>
     </apply>
     <apply block="only-team-two" region="magenta-monument">
-        <message>{"translate":"objective.damageOwn"}</message>
+        <message>{"translate":"objective.damageOwn","with":["`dMagenta Monument"]}</message>
     </apply>
-    -->
     <block id="magenta-m-marker">39,95,14</block>
     <block id="magenta-p-marker">55,94,-24</block>
     <block id="blue-m-marker">-39,95,-14</block>
@@ -247,6 +245,8 @@
     </apply>
 </regions>
 <variables>
+    <variable id="has_broken" scope="player" default="0"/>
+    <variable id="breaker" scope="player" exclusive="1"/>
     <variable id="monument_blocks" scope="player" default="0"/>
 </variables>
 <actions>
@@ -308,6 +308,36 @@
     </action>
     <trigger action="magenta-doors-close" filter="all(cant-score,magenta-zzuf-monument)" scope="match"/>
     <trigger action="blue-doors-close" filter="all(cant-score,blue-zzuf-monument)" scope="match"/>
+    <action id="reset-broken" scope="match">
+        <switch-scope outer="match" inner="player">
+            <set var="has_broken" value="0"/>
+        </switch-scope>
+    </action>
+    <action id="broken-msg" scope="player" filter="has_broken=0">
+        <action filter="only-team-one">
+            <set var="breaker" value="1"/>
+            <switch-scope outer="player" inner="team">
+                <message>
+                    <text>{"text":"","extra":[{"text":"(Magenta) ","color":"light_purple"},{translate: 'destroyable.touch.player', with: ['{player}','`9Blue`f\'s Monument']}]}</text>
+                    <replacements>
+                        <player id="player" var="breaker" style="color"/>
+                    </replacements>
+                </message>
+            </switch-scope>
+        </action>
+        <action filter="only-team-two">
+            <set var="breaker" value="1"/>
+            <switch-scope outer="player" inner="team">
+                <message>
+                    <text>{"text":"","extra":[{"text":"(Blue) ","color":"blue"},{translate: 'destroyable.touch.player', with: ['{player}','`dMagenta`f\'s Monument']}]}</text>
+                    <replacements>
+                        <player id="player" var="breaker" style="color"/>
+                    </replacements>
+                </message>
+            </switch-scope>
+        </action>
+    </action>
+    <trigger action="reset-broken" filter="cant-score" scope="match"/>
 </actions>
 <block-drops>
     <rule>
@@ -319,6 +349,8 @@
         </filter>
         <kit>
             <action>
+                <action id="broken-msg"/>
+                <set var="has_broken" value="1"/>
                 <set var="monument_blocks" value="monument_blocks+1"/>
             </action>
         </kit>
@@ -326,6 +358,7 @@
 </block-drops>
 <stats>
     <stat value="monument_blocks" name="Monument blocks broken"/>
+    <!-- <stat value="monument_blocks" name="{translate: 'match.stats.broken.concise'}"/> -->
 </stats>
 <itemremove>
     <item>iron block</item>
