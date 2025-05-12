@@ -1,7 +1,7 @@
 <map proto="1.5" min-server-version="1.21">
 <name>Trial Chambers</name>
 <variant id="laser-tag" override="true">Laser Tag: Trial Chambers</variant>
-<version>1.0.5</version>
+<version>1.0.6</version>
 <created>2025-05-09</created>
 <objective>Eliminate your opponents!</objective>
 <authors>
@@ -31,12 +31,12 @@
         </default>
     </if>
     <if variant="laser-tag">
-        <spawn team="purple-team" kit="spawn-kit">
+        <spawn team="purple-team" kit="purple-kit">
             <regions yaw="0">
                 <cuboid min="-26,-13,-171" max="-35,-13,-174"/>
             </regions>
         </spawn>
-        <spawn team="yellow-team" kit="spawn-kit">
+        <spawn team="yellow-team" kit="yellow-kit">
             <regions yaw="180">
                 <cuboid min="-35,-13,-92" max="-26,-13,-89"/>
             </regions>
@@ -51,24 +51,38 @@
 </spawns>
 <kits>
     <kit id="spawn-kit">
+        <max-health>2</max-health>
         <item slot="0" unbreakable="true" name="`fSpecial Axe" lore="`8One Hit Kill" enchantment="sharpness:10" show-enchantments="false">netherite axe</item>
-        <if variant="default">
-            <item slot="1" unbreakable="true" name="`fSpecial Bow" enchantment="arrow damage:10;sharpness:10" lore="`8One Hit Kill">bow</item>
-            <effect duration="oo" amplifier="127">strength</effect>
-        </if>
+        <item slot="1" unbreakable="true" name="`fSpecial Crossbow" enchantment="arrow damage:10;quick charge:3;sharpness:10" lore="`8One Hit Kill">crossbow</item>
+        <effect duration="oo" amplifier="127">strength</effect>
         <if variant="laser-tag">
-            <item slot="1" unbreakable="true" name="`fSpecial Bow" enchantment="arrow damage:10;arrow infinite:1;sharpness:10" lore="`8One Hit Kill">bow</item>
             <item slot="2" unbreakable="true" amount="4">wind charge</item>
         </if>
-        <item slot="8">arrow</item>
         <effect duration="oo">glowing</effect>
         <effect duration="oo">darkness</effect>
+        <effect duration="oo">blindness</effect>
         <effect duration="4s" amplifier="10">resistance</effect>
         <helmet locked="true" team-color="true" unbreakable="true">leather helmet</helmet>
         <chestplate locked="true" team-color="true" unbreakable="true">leather chestplate</chestplate>
         <leggings locked="true" team-color="true" unbreakable="true">leather leggings</leggings>
         <boots locked="true" team-color="true" unbreakable="true">leather boots</boots>
         <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="purple-kit" parents="spawn-kit">
+        <firework name="`5`lSpecial Firework Rocket" power="3" slot="slot.weapon.offhand">
+            <explosion type="star" flicker="false" trail="false">
+                <color>AA00AA</color>
+                <fade>AA00AA</fade>
+            </explosion>
+        </firework>
+    </kit>
+    <kit id="yellow-kit" parents="spawn-kit">
+        <firework name="`e`lSpecial Firework Rocket" power="3" slot="slot.weapon.offhand">
+            <explosion type="star" flicker="false" trail="false">
+                <color>FFFF55</color>
+                <fade>FFFF55</fade>
+            </explosion>
+        </firework>
     </kit>
     <kit id="reward-kit">
         <effect duration="1s">night vision</effect>
@@ -91,19 +105,60 @@
 </if>
 <filters>
     <material id="only-doors">waxed oxidized copper door</material>
+    <not id="no-firework">
+        <carrying ignore-metadata="true">
+            <item material="firework rocket"/>
+        </carrying>
+    </not>
 </filters>
 <regions>
     <apply block="never" use="only-doors"/>
 </regions>
+<respawn auto="true"/>
 <rage/>
+<actions>
+    <trigger scope="player" filter="all(no-firework,purple-team)">
+        <action>
+            <kit>
+                <firework name="`5`lSpecial Firework Rocket" power="3" slot="slot.weapon.offhand">
+                    <explosion type="star" flicker="false" trail="false">
+                        <color>AA00AA</color>
+                        <fade>AA00AA</fade>
+                    </explosion>
+                </firework>
+            </kit>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(no-firework,yellow-team)">
+        <action>
+            <kit>
+                <firework name="`e`lSpecial Firework Rocket" power="3" slot="slot.weapon.offhand">
+                    <explosion type="star" flicker="false" trail="false">
+                        <color>FFFF55</color>
+                        <fade>FFFF55</fade>
+                    </explosion>
+                </firework>
+            </kit>
+        </action>
+    </trigger>
+</actions>
+<item-mods>
+    <rule>
+        <match>
+            <material>firework rocket</material>
+        </match>
+        <modify show-other="false"/>
+    </rule>
+</item-mods>
 <itemremove>
     <item>netherite axe</item>
-    <item>bow</item>
+    <item>crossbow</item>
     <item>leather helmet</item>
     <item>leather chestplate</item>
     <item>leather leggings</item>
     <item>leather boots</item>
-    <item>arrow</item>
+    <item>firework rocket</item>
+    <item>wind charge</item>
 </itemremove>
 <kill-rewards>
     <kill-reward>
