@@ -1,0 +1,413 @@
+<map proto="1.5.0">
+<name>Inkbloc Art Academy</name>
+<version>1.0</version>
+<include id="gapple-kill-reward"/>
+<constants>
+    <constant id="team-size">8</constant>
+    <constant id="team-1-spawn-yaw">225</constant>
+    <constant id="team-2-spawn-yaw">45</constant>
+    <constant id="max-overfill" delete="true"/>
+    <constant id="pickup-filter">not-above-nor-below</constant>
+    <constant id="team-1-net-region">team-1-spawn</constant>
+    <constant id="team-2-net-region">team-2-spawn</constant>
+    <constant id="team-1-net-portal-filter">team-1-carrying-flag</constant>
+    <constant id="team-2-net-portal-filter">team-2-carrying-flag</constant>
+    <if variant="comp">
+        <constant id="team-size">5</constant>
+        <constant id="max-overfill">5</constant>
+    </if>
+</constants>
+<objective>Capture the flag three times or most in eight minutes!</objective>
+<gamemode>ctf</gamemode>
+<time>8m</time>
+<authors>
+    <author uuid="8c82e83e-4d7e-40d4-9eb7-3b3eaf08c048" contribution="Building and XML"/> <!-- JacketJack_ -->
+    <author uuid="a538a00d-fdd6-401a-8ed6-190bc41717e6" contribution="Building and XML"/> <!-- Lucas_Slam -->
+</authors>
+<contributors>
+    <contributor uuid="62b6d081-8df8-4c09-aa15-71141ca7df76"/> <!-- Arzanex -->
+</contributors>
+<broadcasts>
+    <tip after="1s" every="1m">`3You can capture ink patches to gain short buffs or enemy debuffs!</tip>
+</broadcasts>
+<teams>
+    <team id="team-1" color="green" max="${team-size}" max-overfill="${max-overfill}">Green</team>
+    <team id="team-2" color="dark purple" max="${team-size}" max-overfill="${max-overfill}">Purple</team>
+</teams>
+<score display="circle">
+    <limit>3</limit>
+</score>
+<!-- Rainmaker Parameters -->
+<projectiles>
+    <projectile id="tnt" projectile="TNTPrimed" velocity="1.2" throwable="false" cooldown="2s"/>
+</projectiles>
+<tnt>
+    <blockdamage>false</blockdamage>
+</tnt>
+<kits>
+    <kit id="flag-kit">
+        <walk-speed>0.65</walk-speed>
+    </kit>
+    <kit id="drop-kit" force="true">
+        <walk-speed>1</walk-speed>
+    </kit>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="8" amount="12" material="arrow"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="2">projectile_protection</enchantment>
+            <enchantment level="1">blast_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" material="iron boots"/>
+        <game-mode>adventure</game-mode>
+    </kit>
+    <!-- Effect Pads-->
+    <kit id="speed-kit">
+        <effect amplifier="2" duration="3">speed</effect>
+    </kit>
+    <kit id="slowness-kit">
+        <effect amplifier="2" duration="3">slowness</effect>
+    </kit>
+    <kit id="jumpboost-kit">
+        <effect amplifier="2" duration="4.5">jump_boost</effect>
+    </kit>
+    <give kit="speed-kit" filter="speed"/>
+    <give kit="slowness-kit" filter="slowness"/>
+    <give kit="jumpboost-kit" filter="jumpboost"/>
+</kits>
+<spawns>
+    <default>
+        <region yaw="135">
+            <cuboid min="0.5,59,-23.5" max="-3.5,59,-27.5"/>
+        </region>
+    </default>
+    <spawn team="team-1" kit="spawn-kit">
+        <region yaw="${team-1-spawn-yaw}">
+            <cuboid min="-35.5,41,-21.5" max="-36.5,41,-23.5"/>
+        </region>
+    </spawn>
+    <spawn team="team-2" kit="spawn-kit">
+        <region yaw="${team-2-spawn-yaw}">
+            <cuboid min="17.5,41,-127.5" max="19.5,41,-129.5"/>
+        </region>
+    </spawn>
+</spawns>
+<!-- Flag capture when teleport from goal to spawn point -->
+<portals>
+    <portal observers="never" filter="${team-1-net-portal-filter}" region="team-1-net" destination="team-1-spawn-point" yaw="@${team-1-spawn-yaw}"/>
+    <portal observers="never" filter="${team-2-net-portal-filter}" region="team-2-net" destination="team-2-spawn-point" yaw="@${team-2-spawn-yaw}"/>
+</portals>
+<flags flag-proximity-metric="none" net-proximity-metric="none" required="false">
+    <flag id="flag"
+          name="Flag"
+          color="yellow"
+          shared="true"
+          pickup-kit="flag-kit"
+          drop-kit="drop-kit"
+          pickup-filter="${pickup-filter}">
+        <post recover-time="8s" respawn-time="12s">-8.5,29,-75.5</post>
+        <net points="1" region="${team-1-net-region}" capture-filter="only-team-1"/>
+        <net points="1" region="${team-2-net-region}" capture-filter="only-team-2"/>
+    </flag>
+</flags>
+<filters>
+    <not id="not-carrying-flag">
+        <carrying-flag id="carrying-flag">flag</carrying-flag>
+    </not>
+    <all id="team-1-carrying-flag">
+        <team id="only-team-1">team-1</team>
+        <carrying-flag>flag</carrying-flag>
+    </all>
+    <all id="team-2-carrying-flag">
+        <team id="only-team-2">team-2</team>
+        <carrying-flag>flag</carrying-flag>
+    </all>
+    <all id="team-1-speed-region">
+        <team id="only-team-1">team-1</team>
+        <any>
+            <region id="green_spawn_left"/>
+            <region id="green_spawn_right"/>
+            <all>
+                <region id="green_platform_right"/>
+                <captured>green_platform_right_cp</captured>
+            </all>
+            <all>
+                <region id="purple_platform_right"/>
+                <captured>purple_platform_right_cp</captured>
+            </all>
+        </any>
+    </all>
+    <all id="team-2-speed-region">
+        <team id="only-team-2">team-2</team>
+        <any>
+            <region id="purple_spawn_left"/>
+            <region id="purple_spawn_right"/>
+            <all>
+                <region id="green_platform_right"/>
+                <captured>green_platform_right_cp</captured>
+            </all>
+            <all>
+                <region id="purple_platform_right"/>
+                <captured>purple_platform_right_cp</captured>
+            </all>
+        </any>
+    </all>
+    <all id="team-1-slowness-region">
+        <team id="only-team-1">team-1</team>
+        <any>
+            <all>
+                <region id="green_plaza"/>
+                <captured team="team-2">green_plaza_cp</captured>
+            </all>
+            <all>
+                <region id="purple_plaza"/>
+                <captured team="team-2">purple_plaza_cp</captured>
+            </all>
+            <all>
+                <region id="green_mid"/>
+                <captured team="team-2">green_mid_cp</captured>
+            </all>
+            <all>
+                <region id="purple_mid"/>
+                <captured team="team-2">purple_mid_cp</captured>
+            </all>
+        </any>
+    </all>
+    <all id="team-2-slowness-region">
+        <team id="only-team-2">team-2</team>
+        <any>
+            <all>
+                <region id="green_plaza"/>
+                <captured team="team-1">green_plaza_cp</captured>
+            </all>
+            <all>
+                <region id="purple_plaza"/>
+                <captured team="team-1">purple_plaza_cp</captured>
+            </all>
+            <all>
+                <region id="green_mid"/>
+                <captured team="team-1">green_mid_cp</captured>
+            </all>
+            <all>
+                <region id="purple_mid"/>
+                <captured team="team-1">purple_mid_cp</captured>
+            </all>
+        </any>
+    </all>
+    <all id="team-1-jumpboost-region">
+        <team id="only-team-1">team-1</team>
+        <any>
+            <all>
+                <region id="green_park"/>
+                <captured>green_park_cp</captured>
+            </all>
+            <all>
+                <region id="purple_park"/>
+                <captured>purple_park_cp</captured>
+            </all>
+        </any>
+    </all>
+    <all id="team-2-jumpboost-region">
+        <team id="only-team-2">team-2</team>
+        <any>
+            <all>
+                <region id="green_park"/>
+                <captured>green_park_cp</captured>
+            </all>
+            <all>
+                <region id="purple_park"/>
+                <captured>purple_park_cp</captured>
+            </all>
+        </any>
+    </all>
+    <any id="speed">
+        <pulse id="team-1-speed" period="1s" duration="0.5s" filter="team-1-speed-region"/>
+        <pulse id="team-2-speed" period="1s" duration="0.5s" filter="team-2-speed-region"/>
+    </any>
+    <any id="slowness">
+        <pulse id="team-1-slowness" period="1s" duration="0.5s" filter="team-1-slowness-region"/>
+        <pulse id="team-2-slowness" period="1s" duration="0.5s" filter="team-2-slowness-region"/>
+    </any>
+    <any id="jumpboost">
+        <pulse id="team-1-jumpboost" period="1s" duration="0.5s" filter="team-1-jumpboost-region"/>
+        <pulse id="team-2-jumpboost" period="1s" duration="0.5s" filter="team-2-jumpboost-region"/>
+    </any>    
+    <not id="not-above-nor-below">
+        <cuboid min="2,6,2" max="-2,4,-2"/>
+    </not>
+    <material id="wool">wool</material>
+</filters>
+<!-- Give Raindropper on flag pickup -->
+<actions>
+    <action id="pickup-raindropper" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="bow"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true">
+            <item slot="1" projectile="tnt" unbreakable="true" name="`e`lRaindropper" material="gold_barding" lore="`rMake it rain!!"/>
+        </kit>
+    </action>
+    <trigger filter="carrying-flag" action="pickup-raindropper" scope="player"/>
+    <action id="drop-raindropper" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="gold_barding"/>
+            <replace material="air"/>
+        </replace-item>
+        <kit force="true">
+            <item slot="1" unbreakable="true" material="bow"/>
+        </kit>
+    </action>
+    <trigger filter="not-carrying-flag" action="drop-raindropper" scope="player"/>
+</actions>
+<regions>
+    <union id="spawn-points">
+        <cuboid id="team-1-spawn-point" min="-35.5,41.25,-21.5" max="-36.5,41.25,-23.5"/>
+        <cuboid id="team-2-spawn-point" min="17.5,41.25,-127.5" max="19.5,41.25,-129.5"/>
+    </union>
+    <union id="sides">
+        <rectangle id="team-1-side" min="-5,-8" max="6,-49"/>
+        <rectangle id="team-2-side" min="6,9" max="-5,50"/>
+    </union>
+    <union id="nets">
+        <cuboid id="team-1-net" min="16,37,-102" max="17,38,-103"/>
+        <cuboid id="team-2-net" min="-33,37,-48" max="-34,38,-49"/>
+    </union>
+    <union id="spawns">
+        <cuboid id="team-1-spawn" min="-35.5,40,-21.5" max="-36.5,43,-23.5"/>
+        <cuboid id="team-2-spawn" min="17.5,40,-127.5" max="19.5,43,-129.5"/>
+    </union>
+    <complement id="team-1-spawn-protection">
+        <union>
+            <cuboid min="-46.5,37,-27.5" max="-27.5,43,-17.5"/>
+            <cuboid min="-46.5,37,-42.5" max="-35.5,43,-26.5"/>
+        </union>
+        <cuboid min="-35.5,40,-21.5" max="-36.5,43,-23.5"/>
+    </complement>
+    <complement id="team-2-spawn-protection">
+        <union>
+            <cuboid min="10.5,37,-123.5" max="29.5,43,-133.5"/>
+            <cuboid min="18.5,37,-108.5" max="29.5,43,-124.5"/>
+        </union>
+        <cuboid min="17.5,40,-127.5" max="19.5,43,-129.5"/>
+    </complement>
+    <apply region="team-1-spawn-protection" enter="all(only-team-1,not-carrying-flag)" message="You may not enter this area."/>
+    <apply region="team-2-spawn-protection" enter="all(only-team-2,not-carrying-flag)" message="You may not enter this area."/>
+    <cuboid id="purple_spawn_left" min="21.5,37,-115.5" max="26.5,40,-110.5"/> <!-- Speed -->
+    <cuboid id="purple_spawn_right" min="0.5,37,-117.5" max="4.5,40,-122.5"/> <!-- Speed -->
+    <cuboid id="purple_platform_right" min="-26.5,33,-101.5" max="-22.5,36,-97.5"/> <!-- Speed -->
+    <cuboid id="purple_plaza" min="-0.5,29,-96.5" max="-5.5,33,-92.5"/> <!-- Enemy Slowness -->
+    <cuboid id="purple_park" min="-34.5,24,-74.5" max="-30.5,28,-78.5"/> <!-- Jump Boost -->
+    <cuboid id="purple_mid" min="-4.5,27,-79.5" max="-0.5,31,-75.5"/> <!-- Enemy Slowness -->
+    <cuboid id="green_spawn_left" min="-43.5,37,-35.5" max="-38.5,41,-40.5"/> <!-- Speed -->
+    <cuboid id="green_spawn_right" min="-21.5,37,-28.5" max="-17.5,41,-33.5"/> <!-- Speed -->
+    <cuboid id="green_platform_right" min="5.5,33,-49.5" max="9.5,37,-53.5"/> <!-- Speed -->
+    <cuboid id="green_plaza" min="-16.5,29,-54.5" max="-11.5,33,-58.5"/> <!-- Enemy Slowness -->
+    <cuboid id="green_park" min="13.5,24,-72.5" max="17.5,28,-76.5"/> <!-- Jump Boost -->
+    <cuboid id="green_mid" min="-16.5,27,-75.5" max="-12.5,31,-71.5"/> <!--  Enemy Slowness --> 
+</regions>
+<control-points capture-time="2s" points="0" required="false" show="false" visual-materials="wool">
+    <control-point id="green_platform_right_cp">
+        <capture>
+            <region id="green_platform_right"/>
+        </capture>
+        <progress>
+            <region id="green_platform_right"/>
+        </progress>
+    </control-point>
+    <control-point id="purple_platform_right_cp">
+        <capture>
+            <region id="purple_platform_right"/>
+        </capture>
+        <progress>
+            <region id="purple_platform_right"/>
+        </progress>
+    </control-point>
+    <control-point id="green_plaza_cp" capture-time="3s">
+        <capture>
+            <region id="green_plaza"/>
+        </capture>
+        <progress>
+            <region id="green_plaza"/>
+        </progress>
+    </control-point>
+    <control-point id="purple_plaza_cp" capture-time="3s">
+        <capture>
+            <region id="purple_plaza"/>
+        </capture>
+        <progress>
+            <region id="purple_plaza"/>
+        </progress>
+    </control-point>
+    <control-point id="green_park_cp">
+        <capture>
+            <region id="green_park"/>
+        </capture>
+        <progress>
+            <region id="green_park"/>
+        </progress>
+    </control-point>
+    <control-point id="purple_park_cp">
+        <capture>
+            <region id="purple_park"/>
+        </capture>
+        <progress>
+            <region id="purple_park"/>
+        </progress>
+    </control-point>
+    <control-point id="green_mid_cp" capture-time="3s">
+        <capture>
+            <region id="green_mid"/>
+        </capture>
+        <progress>
+            <region id="green_mid"/>
+        </progress>
+    </control-point>
+    <control-point id="purple_mid_cp" capture-time="3s">
+        <capture>
+            <region id="purple_mid"/>
+        </capture>
+        <progress>
+            <region id="purple_mid"/>
+        </progress>
+    </control-point>
+</control-points>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+    <item>banner</item>
+    <item>gold barding</item>
+    <item>bow</item>
+    <item>item frame</item>
+    <item>painting</item>
+    <item>wool</item>
+</itemremove>
+<itemkeep>
+    <item>stone sword</item>
+    <item>golden apple</item>
+    <item>arrow</item>
+</itemkeep>
+<kill-rewards>
+    <kill-reward>
+        <item amount="3" material="arrow"/>
+    </kill-reward>
+</kill-rewards>
+<respawn delay="3s" auto="true"/>
+<disabledamage>
+    <damage ally="true" self="true" enemy="false" other="false">block explosion</damage>
+    <damage>fall</damage>
+</disabledamage>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
