@@ -1,7 +1,12 @@
 <map proto="1.5.0">
+<!-- ======================================================================= -->
+<!-- |  "The Blizzard Bowl" feauring the "Brady GridIron" engine:            -->
+<!-- |    - Winner:    Highest Score at end of Time Limit                    -->
+<!-- |    - Gameplay:  Can enter any Endzone, game time marked by Quarter    -->
+<!-- ======================================================================= -->
 <name>The Blizzard Bowl</name>
 <game>Flag Football</game>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Capture the flag at the end zone on the enemies' side!</objective>
 <created>2024-09-22</created>
 <constants>
@@ -72,7 +77,7 @@
     <consumable id="bridge-apple" on="eat" override="true" action="bridge-apple-kit"/>
 </consumables>
 <broadcasts>
-    <tip after="10s" every="70s">You can `6pass`r to your teammates by throwing the Football!</tip>
+    <tip after="10s" every="70s">`6Pass`r to your teammates by throwing the Football!</tip>
     <tip after="25s" every="2m">Score by running into the end zone on the enemies' side!</tip>
 </broadcasts>
 <variables>
@@ -94,6 +99,7 @@
     <variable id="player_score" scope="player" default="0"/>
     <variable id="current_team" scope="player" default="0"/> <!-- 0: Observers, 1: team-one, 2: team-two -->
     <variable id="goal_scorer" scope="player" exclusive="1"/>
+    <variable id="flag_carrier" scope="player" exclusive="1"/>
 </variables>
 <kits>
     <kit id="initialize">
@@ -436,8 +442,13 @@
     <action id="snowball-thrown" scope="player">
         <set var="player_state" value="${throw}"/>
         <set var="game_state" value="${throw}"/>
+        <set var="flag_carrier" value="1"/>
         <switch-scope inner="match" outer="player">
-            <message text="`e⚠`6The `c`lFootball `6has been `c`lthrown!`r" actionbar="`6`lThe Football has been `othrown`6`l!"/>
+            <message text="`e⚠ {player} `6threw the `c`lFootball`6!`r" actionbar="`l{player} `6threw!">
+                <replacements>
+                    <player id="player" var="flag_carrier"/>
+                </replacements>
+            </message>
             <action id="throw-sounds"/>
         </switch-scope>
     </action>
@@ -473,10 +484,15 @@
     </action>
     <action id="flag-pickup-event" scope="player" filter="game_state=${initial}">
         <set var="player_state" value="${carry}"/>
+        <set var="flag_carrier" value="1"/>
         <sound key="${entity.player.levelup}" volume="0.7" pitch="1.5"/>
         <message subtitle="`f`lYou are the `b`lFlag `f`lcarrier!" fade-in="0.2" stay="0.5" fade-out="0.2"/>
         <switch-scope inner="match" outer="player">
-            <message text="`fThe `b`lFlag `fhas been picked up!" actionbar="`fThe `b`lFlag `fhas been picked up!"/>
+            <message text="`e⚠ {player} `6picked up the `c`lFlag`6!`r" actionbar="`l{player} `6picked up!">
+                <replacements>
+                    <player id="player" var="flag_carrier"/>
+                </replacements>
+            </message>
             <action id="pickup-sounds"/>
             <set var="game_state" value="${carry}"/>
             <set var="do_fire" value="1"/>
@@ -515,11 +531,16 @@
     <action id="flag-receive-event" scope="player" filter="valid-receive">
         <set var="player_state" value="${carry}"/>
         <set var="game_state" value="${carry}"/>
+        <set var="flag_carrier" value="1"/>
         <kit id="flag-carrier"/>
         <message subtitle="`f`lYou are the `b`lFlag `f`lcarrier!" fade-in="0.5" stay="0.7" fade-out="0.5"/>
         <sound key="${entity.player.levelup}" volume="0.7" pitch="1.5"/>
         <switch-scope inner="match" outer="player">
-            <message text="`aThe Football has been succesfully passed or intercepted!" actionbar="`aFootball succesfully passed or intercepted!"/>
+            <message text="`e⚠ {player} `6caught the `c`lFootball`6!`r" actionbar="`l{player} `6caught!">
+                <replacements>
+                    <player id="player" var="flag_carrier"/>
+                </replacements>
+            </message>
             <action id="pickup-sounds"/>
             <action id="catch-sounds"/>
             <action id="flag-fire"/> <!-- Just in case -->
@@ -538,7 +559,11 @@
         <kit id="flag-carrier"/>
         <message subtitle="`f`lYou are the `b`lFlag `f`lcarrier!" fade-in="0.5" stay="1" fade-out="0.5"/>
         <switch-scope inner="match" outer="player">
-            <message text="`cThe Flag has been stripped!" actionbar="`cSTRIPPED!"/>
+            <message text="`e⚠ {player} `6stripped the `c`lFlag`6!`r" actionbar="`l{player} `6stripped!">
+                <replacements>
+                    <player id="player" var="flag_carrier"/>
+                </replacements>
+            </message>
             <action id="pickup-sounds"/>
         </switch-scope>
     </action>
@@ -867,7 +892,9 @@
 </score>
 <kill-rewards>
     <kill-reward>
-        <item locked="true" material="golden apple"/>
+        <kit deduct-items="false">
+            <item material="golden apple" locked="true" slot="8"/>
+        </kit>
     </kill-reward>
     <kill-reward filter="any(victim-has-flag,victim-died-with-flag)" action="flag-steal-event" victim-action="death-player-state"/>
 </kill-rewards>
