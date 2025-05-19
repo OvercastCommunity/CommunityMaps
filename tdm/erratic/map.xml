@@ -2,7 +2,7 @@
 <name>Erratic</name>
 <variant id="blitz">Blitz</variant>
 <variant id="lifesteal">Lifesteal</variant>
-<version>1.0</version>
+<version>1.0.1</version>
 <created>2025-05-18</created>
 <if variant="default">
     <objective>Get the most kills in 4 minutes! Scoreboxes open when it's not raining!</objective>
@@ -36,14 +36,22 @@
 <kits>
     <kit id="spawn-kit">
         <item slot="0" unbreakable="true" name="`9`lPoseidon's Wrath" lore="`8One Hit Kill" enchantment="sharpness:10;impaling:255;riptide:3" show-enchantments="false" material="trident"/>
-        <item slot="1" unbreakable="true" lore="`8One Hit Kill" enchantment="sharpness:10" show-enchantments="false" material="mace"/>
+        <item slot="1" unbreakable="true" name="`b`lUkonvasara" material="mace" enchantment="breach:4;wind burst:2"/>
         <effect duration="oo" amplifier="127">strength</effect>
         <effect duration="2s" amplifier="127">resistance</effect>
+        <unless variant="default">
+            <effect>glowing</effect>
+        </unless>
+        <effect>speed</effect>
         <helmet locked="true" team-color="true" unbreakable="true" material="leather helmet"/>
         <chestplate locked="true" team-color="true" unbreakable="true" material="leather chestplate"/>
         <leggings locked="true" team-color="true" unbreakable="true" material="leather leggings"/>
         <boots locked="true" team-color="true" unbreakable="true" material="leather boots"/>
         <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="clear-kit">
+        <clear/>
+        <effect>glowing</effect>
     </kit>
 </kits>
 <if variant="default">
@@ -64,40 +72,43 @@
 </if>
 <if variant="lifesteal">
     <time>6m</time>
+    <blitz/>
 </if>
 <respawn auto="true"/>
 <rage/>
 <filters>
-    <after id="after-0" duration="5s">
-        <match-started/>
-    </after>
-    <after id="after-1" duration="0s">
-        <time id="1st-event">1m</time>
-    </after>
-    <after id="after-2" duration="3s">
-        <time id="2nd-event">2m</time>
-    </after>
-    <after id="after-3" duration="0s">
-        <time id="3rd-event">3m</time>
-    </after>
-    <countdown duration="3s" message="`f» `7The `9storm`7 will `cstop`7 in {0} `f«">
-        <match-started/>
-    </countdown>
-    <countdown duration="55s" message="`f» `7The `9storm`7 will `astart`7 in {0} `f«">
-        <filter id="after-0"/>
-    </countdown>
-    <countdown duration="1m" message="`f» `7The `9storm`7 will `cstop`7 in {0} `f«">
-        <filter id="1st-event"/>
-    </countdown>
-    <countdown duration="1m" message="`f» `7The `9storm`7 will `astart`7 in {0} `f«">
-        <filter id="2nd-event"/>
-    </countdown>
-    <any id="only-scorebox-blocks">
-        <material>yellow stained glass</material>
-        <material>purple stained glass</material>
-        <material>ochre froglight</material>
-        <material>pearlescent froglight</material>
-    </any>
+    <if variant="default">
+        <after id="after-0" duration="5s">
+            <match-started/>
+        </after>
+        <after id="after-1" duration="0s">
+            <time id="1st-event">1m</time>
+        </after>
+        <after id="after-2" duration="3s">
+            <time id="2nd-event">2m</time>
+        </after>
+        <after id="after-3" duration="0s">
+            <time id="3rd-event">3m</time>
+        </after>
+        <countdown duration="3s" message="`f» `7The `9storm`7 will `cstop`7 in {0} `f«">
+            <match-started/>
+        </countdown>
+        <countdown duration="55s" message="`f» `7The `9storm`7 will `astart`7 in {0} `f«">
+            <filter id="after-0"/>
+        </countdown>
+        <countdown duration="1m" message="`f» `7The `9storm`7 will `cstop`7 in {0} `f«">
+            <filter id="1st-event"/>
+        </countdown>
+        <countdown duration="1m" message="`f» `7The `9storm`7 will `astart`7 in {0} `f«">
+            <filter id="2nd-event"/>
+        </countdown>
+        <any id="only-scorebox-blocks">
+            <material>yellow stained glass</material>
+            <material>purple stained glass</material>
+            <material>ochre froglight</material>
+            <material>pearlescent froglight</material>
+        </any>
+    </if>
 </filters>
 <regions>
     <apply block="never" use="never"/>
@@ -119,6 +130,12 @@
     <apply velocity="0.8,1.6,0.8" region="yellow-se-jump-pad"/>
     <apply velocity="-0.8,1.6,-0.8" region="purple-nw-jump-pad"/>
     <apply velocity="0.8,1.6,-0.8" region="purple-ne-jump-pad"/>
+    <above id="ceiling" y="160"/>
+    <apply enter="never" region="ceiling"/>
+    <negative id="outside-area">
+        <circle center="0.5,0.5" radius="60.5"/>
+    </negative>
+    <apply kit="clear-kit" region="outside-area"/>
 </regions>
 <variables>
     <worldtime id="world_time"/>
@@ -136,6 +153,7 @@
             <action>
                 <weather state="thunder"/>
                 <set var="world_time" value="world_time+6000"/>
+                <sound key="block.end_portal.spawn" volume="0.2"/>
             </action>
         </trigger>
         <trigger scope="match" filter="2nd-event">
@@ -148,6 +166,7 @@
             <action>
                 <weather state="thunder"/>
                 <set var="world_time" value="world_time+6000"/>
+                <sound key="block.end_portal.spawn" volume="0.2"/>
             </action>
         </trigger>
         <trigger scope="match" filter="after-0">
@@ -189,11 +208,11 @@
 </actions>
 <portals>
     <!-- Falling on own team's portal -->
-    <portal destination="purple-spawn" filter="purple-team" region="purple-scorebox" yaw="0"/>
-    <portal destination="yellow-spawn" filter="yellow-team" region="yellow-scorebox" yaw="180"/>
+    <portal destination="purple-spawn" filter="purple-team" region="purple-scorebox" yaw="@0" pitch="@0"/>
+    <portal destination="yellow-spawn" filter="yellow-team" region="yellow-scorebox" yaw="@180" pitch="@0"/>
     <!-- Scoring -->
-    <portal destination="purple-spawn" filter="purple-team" region="yellow-scorebox" yaw="0"/>
-    <portal destination="yellow-spawn" filter="yellow-team" region="purple-scorebox" yaw="180"/>
+    <portal destination="purple-spawn" filter="purple-team" region="yellow-scorebox" yaw="@0" pitch="@0"/>
+    <portal destination="yellow-spawn" filter="yellow-team" region="purple-scorebox" yaw="@180" pitch="@0"/>
 </portals>
 <itemremove>
     <item>trident</item>
