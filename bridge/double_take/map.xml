@@ -1,7 +1,7 @@
 <map proto="1.5.0">
 <name>Double Take</name>
 <variant id="bridge-swap" override="true">Bridge Swap: Double Take</variant>
-<version>1.1.2</version>
+<version>1.2</version>
 <created>2023-03-31</created>
 <unless variant="bridge-swap">
     <objective>Jump into the enemy team's portals, located to either side of their spawn point!</objective>
@@ -66,25 +66,71 @@
         <game-mode>survival</game-mode>
     </kit>
     <if variant="bridge-swap">
-        <kit id="cleared-message-team-one">
+        <kit id="clear-shears">
             <action>
                 <replace-item ignore-metadata="true">
                     <find>shears</find>
                     <replace>air</replace>
                 </replace-item>
+            </action>
+        </kit>
+        <kit id="repaired-msg-north-red">
+            <kit id="clear-shears"/>
+            <action>
+                <set var="repairer" value="1"/>
+                <set var="repaired_blocks" value="repaired_blocks+1"/>
                 <switch-scope outer="player" inner="match">
-                    <message text=" `4Red `chave removed a wool block from their platforms!`r"/>
+                    <message text=" {player} removed a `eYellow Wool`f block at `4North Platform">
+                        <replacements>
+                            <player id="player" var="repairer" style="color"/>
+                        </replacements>
+                    </message>
+                    <set var="blocks_red_north" value="blocks_red_north-1"/>
                 </switch-scope>
             </action>
         </kit>
-        <kit id="cleared-message-team-two">
+        <kit id="repaired-msg-south-red">
+            <kit id="clear-shears"/>
             <action>
-                <replace-item ignore-metadata="true">
-                    <find>shears</find>
-                    <replace>air</replace>
-                </replace-item>
+                <set var="repairer" value="1"/>
+                <set var="repaired_blocks" value="repaired_blocks+1"/>
                 <switch-scope outer="player" inner="match">
-                    <message text=" `eYellow `chave removed a wool block from their platforms!`r"/>
+                    <message text=" {player} removed a `eYellow Wool`f block at `4South Platform">
+                        <replacements>
+                            <player id="player" var="repairer" style="color"/>
+                        </replacements>
+                    </message>
+                    <set var="blocks_red_south" value="blocks_red_south-1"/>
+                </switch-scope>
+            </action>
+        </kit>
+        <kit id="repaired-msg-north-yellow">
+            <kit id="clear-shears"/>
+            <action>
+                <set var="repairer" value="1"/>
+                <set var="repaired_blocks" value="repaired_blocks+1"/>
+                <switch-scope outer="player" inner="match">
+                    <message text=" {player} removed a `4Red Wool`f block at `eNorth Platform">
+                        <replacements>
+                            <player id="player" var="repairer" style="color"/>
+                        </replacements>
+                    </message>
+                    <set var="blocks_yellow_north" value="blocks_yellow_north-1"/>
+                </switch-scope>
+            </action>
+        </kit>
+        <kit id="repaired-msg-south-yellow">
+            <kit id="clear-shears"/>
+            <action>
+                <set var="repairer" value="1"/>
+                <set var="repaired_blocks" value="repaired_blocks+1"/>
+                <switch-scope outer="player" inner="match">
+                    <message text=" {player} removed a `4Red Wool`f block at `eSouth Platform">
+                        <replacements>
+                            <player id="player" var="repairer" style="color"/>
+                        </replacements>
+                    </message>
+                    <set var="blocks_yellow_south" value="blocks_yellow_south-1"/>
                 </switch-scope>
             </action>
         </kit>
@@ -169,6 +215,14 @@
                 <match-running/>
             </after>
         </pulse>
+        <pulse id="message-pulse" duration="0.25s" period="30s">
+            <after duration="30s">
+                <match-running/>
+            </after>
+        </pulse>
+        <pulse id="reset-break-pulse" duration="0.25s" period="30s">
+            <match-running/>
+        </pulse>
     </if>
 </filters>
 <regions>
@@ -216,6 +270,14 @@
                 <mirror id="team-two-south-point" region="team-one-south-point" origin="${map-origin}" normal="1,0,0"/>
                 <mirror id="team-two-north-point" region="team-one-north-point" origin="${map-origin}" normal="1,0,0"/>
             </union>
+        </union>
+        <union id="north-platforms">
+            <region id="team-one-north-point"/>
+            <region id="team-two-north-point"/>
+        </union>
+        <union id="south-platforms">
+            <region id="team-one-south-point"/>
+            <region id="team-two-south-point"/>
         </union>
         <cuboid id="middle-island" min="2,12,2" max="-1,15,-1"/>
         <union id="portal-arrows">
@@ -296,6 +358,18 @@
     <mirror id="team-two-south-defportal-point" region="team-one-south-defportal-point" origin="${map-origin}" normal="1,0,0"/>
     <mirror id="team-two-north-defportal-point" region="team-one-north-defportal-point" origin="${map-origin}" normal="1,0,0"/>
 </regions>
+<variables>
+    <variable id="breaker" scope="player" exclusive="1"/>
+    <variable id="has_broken_south" scope="player" default="0"/>
+    <variable id="has_broken_north" scope="player" default="0"/>
+    <variable id="repairer" scope="player" exclusive="1"/>
+    <variable id="blocks_red_north" scope="match" default="0"/>
+    <variable id="blocks_red_south" scope="match" default="0"/>
+    <variable id="blocks_yellow_north" scope="match" default="0"/>
+    <variable id="blocks_yellow_south" scope="match" default="0"/>
+    <variable id="captured_blocks" scope="player" default="0"/>
+    <variable id="repaired_blocks" scope="player" default="0"/>
+</variables>
 <actions>
     <trigger scope="match">
         <filter>
@@ -339,7 +413,8 @@
         </trigger>
         <trigger filter="team-one-controlling-south-point" scope="match">
             <action>
-                <message text=" `4Red `fhas captured `eSouth Platform`r"/>
+                <message text=" `l» `4Red `7has captured `eSouth Platform`r"/>
+                <sound preset="alert"/>
                 <fill material="obsidian">
                     <block>43,28,31</block>
                 </fill>
@@ -348,7 +423,8 @@
         </trigger>
         <trigger filter="team-one-controlling-north-point" scope="match">
             <action>
-                <message text=" `4Red `fhas captured `eNorth Platform`r"/>
+                <message text=" `l» `4Red `7has captured `eNorth Platform`r"/>
+                <sound preset="alert"/>
                 <fill material="obsidian">
                     <block>43,28,-31</block>
                 </fill>
@@ -357,7 +433,8 @@
         </trigger>
         <trigger filter="team-two-controlling-south-point" scope="match">
             <action>
-                <message text=" `eYellow `fhas captured `4South Platform`r"/>
+                <message text=" `l» `eYellow `7has captured `4South Platform`r"/>
+                <sound preset="alert"/>
                 <fill material="obsidian">
                     <block>-43,28,31</block>
                 </fill>
@@ -366,7 +443,8 @@
         </trigger>
         <trigger filter="team-two-controlling-north-point" scope="match">
             <action>
-                <message text=" `eYellow `fhas captured `4North Platform`r"/>
+                <message text="`l» `eYellow `7has captured `4North Platform`r"/>
+                <sound preset="alert"/>
                 <fill material="obsidian">
                     <block>-43,28,-31</block>
                 </fill>
@@ -401,6 +479,104 @@
                 </kit>
             </action>
         </trigger>
+        <!-- Break -->
+        <action id="reset-broken" scope="match">
+            <set var="blocks_red_north" value="0"/>
+            <set var="blocks_red_south" value="0"/>
+            <set var="blocks_yellow_north" value="0"/>
+            <set var="blocks_yellow_south" value="0"/>
+            <action id="reset-has-broken" scope="match">
+                <switch-scope outer="match" inner="player">
+                    <set var="has_broken_north" value="0"/>
+                    <set var="has_broken_south" value="0"/>
+                </switch-scope>
+            </action>
+        </action>
+        <action id="broken-msg-north" scope="player">
+            <action id="broken-msg-north-red" scope="player" filter="team-one">
+                <switch-scope outer="player" inner="match">
+                    <set var="blocks_yellow_north" value="blocks_yellow_north+1"/>
+                </switch-scope>
+                <action filter="has_broken_north=0">
+                    <set var="breaker" value="1"/>
+                    <switch-scope outer="player" inner="match">
+                        <message text=" {player} captured a wool block at `eNorth Platform`r (`a{bloxc}`r/`a9`r)">
+                            <replacements>
+                                <player id="player" var="breaker" style="color"/>
+                                <decimal id="bloxc" value="blocks_yellow_north"/>
+                            </replacements>
+                        </message>
+                    </switch-scope>
+                    <set var="has_broken_north" value="1"/>
+                </action>
+            </action>
+            <action id="broken-msg-north-yellow" scope="player" filter="team-two">
+                <switch-scope outer="player" inner="match">
+                    <set var="blocks_red_north" value="blocks_red_north+1"/>
+                </switch-scope>
+                <action filter="has_broken_north=0">
+                    <set var="breaker" value="1"/>
+                    <switch-scope outer="player" inner="match">
+                        <message text=" {player} captured a wool block at `4North Platform`r (`a{bloxc}`r/`a9`r)">
+                            <replacements>
+                                <player id="player" var="breaker" style="color"/>
+                                <decimal id="bloxc" value="blocks_red_north"/>
+                            </replacements>
+                        </message>
+                    </switch-scope>
+                    <set var="has_broken_north" value="1"/>
+                </action>
+            </action>
+        </action>
+        <action id="broken-msg-south" scope="player">
+            <action id="broken-msg-south-red" scope="player" filter="team-one">
+                <switch-scope outer="player" inner="match">
+                    <set var="blocks_yellow_south" value="blocks_yellow_south+1"/>
+                </switch-scope>
+                <action filter="has_broken_south=0">
+                    <set var="breaker" value="1"/>
+                    <switch-scope outer="player" inner="match">
+                        <message text=" {player} captured a wool block at `eSouth Platform`r (`a{bloxc}`r/`a9`r)">
+                            <replacements>
+                                <player id="player" var="breaker" style="color"/>
+                                <decimal id="bloxc" value="blocks_yellow_south"/>
+                            </replacements>
+                        </message>
+                    </switch-scope>
+                    <set var="has_broken_south" value="1"/>
+                </action>
+            </action>
+            <action id="broken-msg-south-yellow" scope="player" filter="team-two">
+                <switch-scope outer="player" inner="match">
+                    <set var="blocks_red_south" value="blocks_red_south+1"/>
+                </switch-scope>
+                <action filter="has_broken_south=0">
+                    <set var="breaker" value="1"/>
+                    <switch-scope outer="player" inner="match">
+                        <message text=" {player} captured a wool block at `4South Platform`r (`a{bloxc}`r/`a9`r)">
+                            <replacements>
+                                <player id="player" var="breaker" style="color"/>
+                                <decimal id="bloxc" value="blocks_red_south"/>
+                            </replacements>
+                        </message>
+                    </switch-scope>
+                    <set var="has_broken_south" value="1"/>
+                </action>
+            </action>
+        </action>
+        <trigger action="reset-broken" filter="cant-score" scope="match"/>
+        <trigger action="reset-has-broken" filter="reset-break-pulse" scope="match"/>
+        <action id="platform-status" scope="match">
+            <message text=" `4R North: `l{rn}`7/9 `b| `4R South: `l{rs}`7/9 `b| `eY North: `l{yn}`7/9 `b| `eY South: `l{ys}`7/9">
+                <replacements>
+                    <decimal id="rn" value="blocks_red_north"/>
+                    <decimal id="rs" value="blocks_red_south"/>
+                    <decimal id="yn" value="blocks_yellow_north"/>
+                    <decimal id="ys" value="blocks_yellow_south"/>
+                </replacements>
+            </message>
+        </action>
+        <trigger action="platform-status" filter="message-pulse" scope="match"/>
     </if>
 </actions>
 <if variant="bridge-swap">
@@ -456,7 +632,7 @@
                 </all>
             </filter>
             <replacement>quartz block:0</replacement>
-            <kit id="cleared-message-team-two"/>
+            <kit id="repaired-msg-south-yellow"/>
         </rule>
         <rule>
             <filter>
@@ -471,7 +647,7 @@
                 </all>
             </filter>
             <replacement>quartz block:0</replacement>
-            <kit id="cleared-message-team-one"/>
+            <kit id="repaired-msg-south-red"/>
         </rule>
         <rule>
             <filter>
@@ -486,7 +662,7 @@
                 </all>
             </filter>
             <replacement>quartz block:0</replacement>
-            <kit id="cleared-message-team-two"/>
+            <kit id="repaired-msg-north-yellow"/>
         </rule>
         <rule>
             <filter>
@@ -501,8 +677,45 @@
                 </all>
             </filter>
             <replacement>quartz block:0</replacement>
-            <kit id="cleared-message-team-one"/>
+            <kit id="repaired-msg-north-red"/>
+        </rule>
+        <!-- Break -->
+        <rule>
+            <filter>
+                <all>
+                    <material>quartz block:0</material>
+                    <region id="north-platforms"/>
+                </all>
+            </filter>
+            <!-- <region><region id="north-platforms"/></region> -->
+            <kit>
+                <action>
+                    <action id="broken-msg-north"/>
+                    <set var="has_broken_north" value="1"/>
+                    <set var="captured_blocks" value="captured_blocks+1"/>
+                </action>
+            </kit>
+        </rule>
+        <rule>
+            <filter>
+                <all>
+                    <material>quartz block:0</material>
+                    <region id="south-platforms"/>
+                </all>
+            </filter>
+            <!-- <region><region id="south-platforms"/></region> -->
+            <kit>
+                <action>
+                    <action id="broken-msg-south"/>
+                    <set var="has_broken_south" value="1"/>
+                    <set var="captured_blocks" value="captured_blocks+1"/>
+                </action>
+            </kit>
         </rule>
     </block-drops>
+    <stats>
+        <stat value="captured_blocks" name="Captured wool blocks"/>
+        <stat value="repaired_blocks" name="Recovered quartz blocks"/>
+    </stats>
 </if>
 </map>
