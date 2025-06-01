@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Brittlebush II</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <objective>Capture the wools!</objective>
 <include id="gapple-kill-reward"/>
 <created>2023-01-28</created>
@@ -14,24 +14,6 @@
     <team id="blue-team" color="blue" max="20">Blue</team>
     <team id="red-team" color="red" max="20">Red</team>
 </teams>
-<spawns>
-    <spawn team="blue-team" kit="spawn-kit" yaw="180">
-        <region>
-            <cuboid min="-2,20,79" size="4,0,3"/>
-        </region>
-    </spawn>
-    <spawn team="red-team" kit="spawn-kit">
-        <region>
-            <cuboid min="-2,20,-82" size="4,0,3"/>
-        </region>
-    </spawn>
-    <default>
-        <regions>
-            <point yaw="180">0,30,78.5</point>
-            <point>0,30,-78.5</point>
-        </regions>
-    </default>
-</spawns>
 <kits>
     <kit id="spawn-kit">
         <clear/>
@@ -55,6 +37,24 @@
         <effect duration="2s" amplifier="255">damage resistance</effect>
     </kit>
 </kits>
+<spawns>
+    <default>
+        <regions>
+            <point yaw="180">0,30,78.5</point>
+            <point>0,30,-78.5</point>
+        </regions>
+    </default>
+    <spawn team="blue-team" kit="spawn-kit">
+        <region yaw="180">
+            <cuboid min="-2,20,79" size="4,0,3"/>
+        </region>
+    </spawn>
+    <spawn team="red-team" kit="spawn-kit">
+        <region>
+            <cuboid min="-2,20,-82" size="4,0,3"/>
+        </region>
+    </spawn>
+</spawns>
 <wools craftable="false">
     <wool team="blue-team" color="orange" monument="blue-team-orange-wool" location="22.5,20,-80.5"/>
     <wool team="blue-team" color="yellow" monument="blue-team-yellow-wool" location="-22.5,20,-80.5"/>
@@ -71,20 +71,23 @@
             <void/>
         </all>
     </deny>
-    <team id="only-blue">blue-team</team>
-    <team id="only-red">red-team</team>
     <deny id="deny-beacon">
         <material>beacon</material>
     </deny>
-    <blocks id="only-wool-room" region="woolrooms">
-        <any>
-            <material>air</material>
-            <material>web</material>
-            <material>redstone wire</material>
-            <material>redstone torch on</material>
-            <material>redstone torch off</material>
-        </any>
-    </blocks>
+    <all id="only-wool-room">
+        <not>
+            <void/>
+        </not>
+        <blocks region="woolrooms">
+            <any>
+                <material>air</material>
+                <material>web</material>
+                <material>redstone wire</material>
+                <material>redstone torch on</material>
+                <material>redstone torch off</material>
+            </any>
+        </blocks>
+    </all>
 </filters>
 <regions>
     <!-- Void -->
@@ -141,17 +144,17 @@
     </union>
     <!-- applicators -->
     <apply use="deny-beacon"/>
-    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy team's spawn!"/>
-    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy team's spawn!"/>
-    <apply enter="only-blue" region="reds-woolrooms" message="You may not enter your own team's wool rooms!"/>
-    <apply use="only-blue" region="reds-woolrooms"/>
-    <apply enter="only-red" region="blues-woolrooms" message="You may not enter your own team's wool rooms!"/>
-    <apply use="only-red" region="blues-woolrooms"/>
+    <apply use="deny(blue-team)" region="blues-woolrooms"/>
+    <apply use="deny(red-team)" region="reds-woolrooms"/>
+    <apply enter="deny(blue-team)" region="red-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply enter="deny(red-team)" region="blue-spawn" message="You may not enter the enemy team's spawn!"/>
+    <apply enter="deny(blue-team)" region="blues-woolrooms" message="You may not enter your own team's wool rooms!"/>
+    <apply enter="deny(red-team)" region="reds-woolrooms" message="You may not enter your own team's wool rooms!"/>
     <apply block="never" region="spawns" message="You may not edit the spawns!"/>
     <apply block="never" region="golden-apple-spawner" message="You may not interfere with the golden apple spawner!"/>
-    <apply block="only-red" region="blues-woolrooms" message="You may not edit your team's own wool rooms!"/>
-    <apply block="only-blue" region="reds-woolrooms" message="You may not edit your team's own wool rooms!"/>
-    <apply block="only-wool-room" region="woolrooms" message="You may not modify the wool room!"/>
+    <apply block="deny(blue-team)" region="blues-woolrooms" message="You may not edit your team's own wool rooms!"/>
+    <apply block="deny(red-team)" region="reds-woolrooms" message="You may not edit your team's own wool rooms!"/>
+    <apply block="only-wool-room" region="woolrooms" message="You may not destroy the wool rooms!"/>
     <apply block-place="deny(void)" block-break="deny-void-break" region="void-area" message="You may not edit the void!"/>
 </regions>
 <spawners>
@@ -187,19 +190,6 @@
     <item>leather boots</item>
     <item>stone</item>
 </itemremove>
-<block-drops>
-    <rule>
-        <filter>
-            <any>
-                <material>wood</material>
-                <material>stained clay</material>
-            </any>
-        </filter>
-        <drops>
-            <item chance="0" material="glass"/>
-        </drops>
-    </rule>
-</block-drops>
 <itemkeep>
     <item>stone sword</item>
     <item>bow</item>
@@ -219,8 +209,8 @@
         <item amount="16" material="wood"/>
     </kill-reward>
 </kill-rewards>
+<maxbuildheight>30</maxbuildheight>
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<maxbuildheight>30</maxbuildheight>
 </map>
