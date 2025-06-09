@@ -1,8 +1,8 @@
 <map proto="1.5.0" min-server-version="1.21">
 <name>Fun House</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <created>2025-06-02</created>
-<objective>Be on the team with the highest amount of kills after 4 minutes! Change sizes at mid!</objective>
+<objective>Be on the team with the highest amount of kills after 4 minutes! Change size at middle!</objective>
 <gamemode>tdm</gamemode>
 <include id="gapple-kill-reward"/>
 <time result="score">4m</time>
@@ -42,10 +42,10 @@
         <item slot="1" unbreakable="true" material="bow"/>
         <item slot="7" material="arrow" amount="16"/>
         <item slot="8" material="golden apple"/>
-        <helmet material="leather helmet" team-color="true" locked="true"/>
-        <chestplate material="leather chestplate" team-color="true"/>
-        <leggings material="leather leggings" team-color="true"/>
-        <boots material="leather boots" team-color="true"/>
+        <helmet material="leather helmet" team-color="true" locked="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+        <leggings material="leather leggings" team-color="true" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
         <game-mode>adventure</game-mode>
     </kit>
     <kit id="maxi-size" force="true">
@@ -55,7 +55,7 @@
                 <attribute operation="add" amount="-0.02">generic.movementSpeed</attribute>
                 <attribute operation="add" amount="0.21">generic.jump_strength</attribute>
                 <attribute operation="add" amount="1.6">step_height</attribute>
-                <attribute operation="add" amount="1">entity_interaction_range</attribute>
+                <attribute operation="add" amount="1.5">entity_interaction_range</attribute>
                 <attribute operation="add" amount="0.01">gravity</attribute>
             </if>
             <if max-server-version="1.21.1">
@@ -63,7 +63,7 @@
                 <attribute operation="add" amount="-0.02">generic.movementSpeed</attribute>
                 <attribute operation="add" amount="0.21">generic.jump_strength</attribute>
                 <attribute operation="add" amount="1.6">generic.step_height</attribute>
-                <attribute operation="add" amount="1">player.entity_interaction_range</attribute>
+                <attribute operation="add" amount="1.5">player.entity_interaction_range</attribute>
                 <attribute operation="add" amount="0.01">generic.gravity</attribute>
             </if>
         </helmet>
@@ -90,8 +90,22 @@
         </helmet>
         <max-health>10</max-health>
     </kit>
+    <give kit="maxi-size" filter="all(current_size=1,spawn-areas,participating)"/>
+    <give kit="normal-size" filter="all(current_size=0,spawn-areas,participating)"/>
+    <give kit="mini-size" filter="all(current_size=-1,spawn-areas,participating)"/>
 </kits>
+<filters>
+    <all id="entities-at-spawns">
+        <region id="spawn-areas"/>
+        <entity>area effect cloud</entity>
+    </all>
+    <pulse id="delete-time" period="1s" duration="0.1" filter="match-started"/>
+</filters>
 <regions>
+    <union id="spawn-areas">
+        <cuboid id="purple-spawn-area" min="25,66,111" size="4,9,5"/>
+        <mirror id="orange-spawn-area" region="purple-spawn-area" origin="-10,6,113.5" normal="1,0,0"/>
+    </union>
     <negative id="outside">
         <union id="machines">
             <cuboid id="machine-1-b" min="-11,66,121" max="-10,70,125"/>
@@ -168,6 +182,10 @@
     <variable id="in_machine" scope="player" default="0"/> <!-- 0: no, 1: big side, 2: small side -->
 </variables>
 <actions>
+    <action id="delete-entities-at-spawns" scope="match">
+        <kill-entities filter="entities-at-spawns"/>
+    </action>
+    <trigger action="delete-entities-at-spawns" filter="delete-time" scope="match"/>
     <action id="decrease-size" scope="player">
         <action filter="all(current_size=1,change=1)">
             <kit id="normal-size"/>
