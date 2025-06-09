@@ -1,29 +1,53 @@
 <map proto="1.5.0" min-server-version="1.21">
 <name>Random Items</name>
-<version>1.1.5</version>
+<version>1.1.6</version>
 <variant id="void" world="void">Void</variant>
+<variant id="bfp" world="bfp">BFP</variant>
+<variant id="upside-down" world="void">Upside Down</variant>
 <objective>Get a new item every ${period} seconds and destroy your enemies!</objective>
-<created>2025-06-26</created>
+<if variant="default,void">
+    <created>2025-05-26</created>
+</if>
+<if variant="bfp,upside-down">
+    <created>2025-06-09</created>
+</if>
 <game>Random Items</game>
+<if variant="upside-down">
+    <constant id="void-plane">35</constant>
+    <constant id="void-upside-down">true</constant>
+</if>
 <include id="void-death"/>
-<constant id="period">6</constant>
-<constant id="period2">5.9</constant>
-<constant id="period3">3</constant>
+<constants>
+    <constant id="period">6</constant>
+    <constant id="period-less">5.9</constant>
+    <constant id="period-half">3</constant>
+    <unless variant="upside-down">
+        <constant id="spawn-y">30</constant>
+    </unless>
+    <if variant="upside-down">
+        <constant id="spawn-y">-2</constant>
+    </if>
+</constants>
 <authors>
     <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
 </authors>
 <players max="10" max-overfill="10" colors="true"/>
 <spawns>
-    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,31,0.5"><point>-3.5,30,-12.5</point></region></spawn>
-    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,31,0.5"><point>4.5,30,-12.5</point></region></spawn>
-    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,31,0.5"><point>11.5,30,-7.5</point></region></spawn>
-    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,31,0.5"><point>14.5,30,0.5</point></region></spawn>
-    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,31,0.5"><point>11.5,30,8.5</point></region></spawn>
-    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,31,0.5"><point>4.5,30,13.5</point></region></spawn>
-    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,31,0.5"><point>-3.5,30,13.5</point></region></spawn>
-    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,31,0.5"><point>-10.5,30,8.5</point></region></spawn>
-    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,31,0.5"><point>-13.5,30,0.5</point></region></spawn>
-    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,31,0.5"><point>-10.5,30,-7.5</point></region></spawn>
+    <if variant="upside-down">
+        <player-kit>
+            <attribute operation="add" amount="-0.12">generic.gravity</attribute>
+        </player-kit>
+    </if>
+    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,${spawn-y},0.5"><point>-3.5,${spawn-y},-12.5</point></region></spawn>
+    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,${spawn-y},0.5"><point>4.5,${spawn-y},-12.5</point></region></spawn>
+    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,${spawn-y},0.5"><point>11.5,${spawn-y},-7.5</point></region></spawn>
+    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,${spawn-y},0.5"><point>14.5,${spawn-y},0.5</point></region></spawn>
+    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,${spawn-y},0.5"><point>11.5,${spawn-y},8.5</point></region></spawn>
+    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,${spawn-y},0.5"><point>4.5,${spawn-y},13.5</point></region></spawn>
+    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,${spawn-y},0.5"><point>-3.5,${spawn-y},13.5</point></region></spawn>
+    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,${spawn-y},0.5"><point>-10.5,${spawn-y},8.5</point></region></spawn>
+    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,${spawn-y},0.5"><point>-13.5,${spawn-y},0.5</point></region></spawn>
+    <spawn spread="true" exclusive="true" kit="stop-falling-kit"><region angle="0.5,${spawn-y},0.5"><point>-10.5,${spawn-y},-7.5</point></region></spawn>
     <default>
         <regions angle="0.5,72,0.5">
             <cylinder base="-2,70,-2" height="0" radius="1"/>
@@ -41,7 +65,7 @@
         </boots>
     </kit>
     <kit id="remove-stop-falling-kit" force="true">
-        <clear armor="true"/>
+        <clear items="false" effects="false" armor="true"/>
     </kit>
     <give kit="remove-stop-falling-kit" filter="stop-falling"/>
 </kits>
@@ -49,7 +73,7 @@
 <time>8m</time>
 <respawn auto="true"/>
 <filters>
-    <after id="stop-falling" duration="2.5s">
+    <after id="stop-falling" duration="${period}">
         <alive/>
     </after>
     <pulse id="new-item-pulse" duration="0.25s" period="${period}s">
@@ -58,15 +82,14 @@
         </after>
     </pulse>
     <pulse id="new-item-pulse2" duration="0.25s" period="${period}s">
-        <after duration="${period3}s">
+        <after duration="${period-half}s">
             <match-running/>
         </after>
     </pulse>
-    <pulse id="message-pulse" duration="${period2}s" period="${period}s">
-        <match-running/>
-    </pulse>
     <countdown duration="${period}s" message="Next item in {0}">
-        <filter id="message-pulse"/>
+        <pulse duration="${period-less}s" period="${period}s">
+            <match-running/>
+        </pulse>
     </countdown>
 </filters>
 <regions>
