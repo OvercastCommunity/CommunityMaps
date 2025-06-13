@@ -1,18 +1,20 @@
 <map proto="1.5.0">
 <name>Zipline</name>
+<version>1.2</version>
 <variant id="halloween" world="halloween" override="true">Hollow Lines</variant>
 <variant id="christmas" world="christmas" override="true">Zipmas</variant>
 <variant id="gunz">Moar Gunz Edition</variant>
-<include id="gapple-kill-reward"/>
-<version>1.1.6</version>
-<objective>Hold the flag for 200 seconds to win!</objective>
-<gamemode>kotf</gamemode>
+<include id="kotf"/>
+<objective>Hold the flag for ${score} seconds to win!</objective>
+<constant id="damage-resistance">0s</constant>
+<constant id="flag-respawn-timer">15s</constant>
 <if variant="default">
     <created>2020-08-23</created>
 </if>
 <if variant="gunz">
     <gamemode>arcade</gamemode>
     <created>2021-03-18</created>
+    <constant id="override-kill-reward">true</constant>
 </if>
 <if variant="halloween">
     <created>2021-10-03</created>
@@ -53,75 +55,27 @@
             <effect>night vision</effect>
         </unless>
     </kit>
-    <kit id="spawn-kit" parents="default-kit">
-        <clear/>
-        <item slot="0" unbreakable="true" material="stone sword"/>
-        <unless variant="gunz">
-            <item slot="1" unbreakable="true" material="bow"/>
-            <item slot="2" material="golden apple"/>
-            <unless min-server-version="1.9">
-                <item slot="3" material="compass"/>
-            </unless>
-            <item slot="8" amount="12" material="arrow"/>
-        </unless>
+    <kit id="spawn-kit" parents="default-kit,base-kit-compass">
         <if variant="gunz">
+            <clear items="true" armor="false" effects="false"/>
+            <item slot="0" unbreakable="true" material="stone sword"/>
             <item slot="3" material="golden apple"/>
-            <unless min-server-version="1.9">
-                <item slot="4" material="compass"/>
-            </unless>
+            <item slot="4" material="compass"/>
         </if>
-        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
-        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
-        <leggings unbreakable="true" material="chainmail leggings">
-            <enchantment level="3">projectile_protection</enchantment>
-        </leggings>
-        <boots unbreakable="true" material="iron boots"/>
-        <game-mode>adventure</game-mode>
     </kit>
-    <kit id="guns">
-        <item slot="1" projectile="lazer" name="`6Lazer Blaster" material="gold barding"/>
-        <item slot="2" projectile="mob" name="`cTNT Cannon" material="iron barding"/>
-    </kit>
-    <kit id="flag-pickup" force="true">
-        <action>
-            <replace-item>
-                <find unbreakable="true" enchantment="projectile_protection:3" material="chainmail leggings"/>
-                <replace unbreakable="true" enchantment="projectile_protection:2" material="chainmail leggings"/>
-            </replace-item>
-        </action>
-        <max-health>8</max-health>
-        <effect>slowness</effect>
-        <if min-server-version="1.9">
-            <effect>glowing</effect>
-        </if>
-        <effect duration="3s" amplifier="2">absorption</effect>
-    </kit>
-    <kit id="reset-health" force="true">
-        <action>
-            <replace-item>
-                <find unbreakable="true" enchantment="projectile_protection:2" material="chainmail leggings"/>
-                <replace unbreakable="true" enchantment="projectile_protection:3" material="chainmail leggings"/>
-            </replace-item>
-        </action>
-        <max-health>20</max-health>
-        <if min-server-version="1.9">
-            <effect duration="0s" amplifier="0">glowing</effect>
-        </if>
-        <effect duration="0s" amplifier="0">slowness</effect>
-        <effect duration="2s" amplifier="10">regeneration</effect>
-        <action>
-            <switch-scope inner="match">
-                <switch-scope inner="player" filter="all(alive,not(flag-carrier))">
-                    <kit>
-                        <effect duration="4s" amplifier="3">regeneration</effect>
-                    </kit>
-                </switch-scope>
-            </switch-scope>
-        </action>
-    </kit>
-    <kit id="fly" force="true">
-        <fly/>
-    </kit>
+    <lend filter="all(participating,ziplines)">
+        <kit>
+            <fly/>
+        </kit>
+    </lend>
+    <if variant="gunz">
+        <give filter="all(participating,not(spawns))">
+            <kit>
+                <item slot="1" projectile="lazer" name="`6Lazer Blaster" material="gold barding"/>
+                <item slot="2" projectile="mob" name="`cTNT Cannon" material="iron barding"/>
+            </kit>
+        </give>
+    </if>
 </kits>
 <projectiles>
     <projectile id="lazer" name="lazer" projectile="SmallFireball" velocity="3.5" damage="4" throwable="false" cooldown="0.15s"/>
@@ -148,30 +102,20 @@
         </regions>
     </spawn>
 </spawns>
-<filters>
-    <team id="only-team-1">team-1</team>
-    <team id="only-team-2">team-2</team>
-    <any id="has-flag">
-        <carrying-flag id="flag-carrier">flag</carrying-flag>
-        <not>
-            <same-team>
-                <carrying-flag>flag</carrying-flag>
-            </same-team>
-        </not>
-    </any>
-</filters>
 <compass show-distance="true">
      <player filter="flag-carrier" show-player="true" name="Flag Carrier"/>
  </compass>
 <regions>
-    <cuboid id="spawner1" min="28,15.5,16" max="33,17,19"/>
-    <cylinder id="spawner1-radius" base="30.5,15,17.5" height="5" radius="2.5"/>
-    <cuboid id="spawner2" min="28,15.5,-18" max="33,17,-15"/>
-    <cylinder id="spawner2-radius" base="30.5,15,-16.5" height="5" radius="2.5"/>
-    <cuboid id="spawner3" min="-32,15.5,-18" max="-27,17,-15"/>
-    <cylinder id="spawner3-radius" base="-29.5,15,-16.5" height="5" radius="2.5"/>
-    <cuboid id="spawner4" min="-32,15.5,16" max="-27,17,19"/>
-    <cylinder id="spawner4-radius" base="-29.5,15,17.5" height="5" radius="2.5"/>
+    <union id="spawner-regions">
+        <cuboid id="spawner1" min="28,15.5,16" max="33,17,19"/>
+        <cylinder id="spawner1-radius" base="30.5,15,17.5" height="5" radius="2.5"/>
+        <cuboid id="spawner2" min="28,15.5,-18" max="33,17,-15"/>
+        <cylinder id="spawner2-radius" base="30.5,15,-16.5" height="5" radius="2.5"/>
+        <cuboid id="spawner3" min="-32,15.5,-18" max="-27,17,-15"/>
+        <cylinder id="spawner3-radius" base="-29.5,15,-16.5" height="5" radius="2.5"/>
+        <cuboid id="spawner4" min="-32,15.5,16" max="-27,17,19"/>
+        <cylinder id="spawner4-radius" base="-29.5,15,17.5" height="5" radius="2.5"/>
+    </union>
     <union id="ziplines">
         <cuboid min="11,16,49" max="14,18,45"/>
         <cuboid min="10,25,33" max="14,25.9,49"/>
@@ -190,30 +134,13 @@
         <cuboid min="-7,25,-33" max="-13,25.5,-30"/>
         <cuboid min="-4,25,-34" max="-7,25.5,-12"/>
     </union>
+    <union id="spawns">
+        <cuboid id="team-1-spawn" min="oo,16,51" max="-oo,oo,oo"/>
+        <cuboid id="team-2-spawn" min="-oo,16,-50" max="oo,oo,-oo"/>
+    </union>
+    <apply enter="deny(team-1)" region="team-2-spawn" message="You may not enter the opposing team's spawn!"/>
+    <apply enter="deny(team-2)" region="team-1-spawn" message="You may not enter the opposing team's spawn!"/>
     <apply block="never" use="never"/>
-    <apply enter="only-team-1" message="You may not enter the opposing team's spawn!">
-        <region>
-            <cuboid min="25,16,51" max="-25,29,56"/>
-        </region>
-    </apply>
-    <apply enter="only-team-2" message="You may not enter the opposing team's spawn!">
-        <region>
-            <cuboid min="-25,16,-51" max="25,29,-56"/>
-        </region>
-    </apply>
-    <apply lend-kit="fly" region="ziplines"/>
-    <if variant="gunz">
-        <apply kit="guns">
-            <region>
-                <negative>
-                    <union>
-                        <cuboid min="-oo,16,-50" max="oo,oo,-oo"/>
-                        <cuboid min="oo,16,51" max="-oo,oo,oo"/>
-                    </union>
-                </negative>
-            </region>
-        </apply>
-    </if>
     <!--  Jumpads and Boost lanes  -->
     <!--  Blue's middle lane  -->
     <apply velocity="@0.0,0.5,-50.0" >
@@ -472,8 +399,8 @@
     </spawner>
 </spawners>
 <flags>
-    <flag id="flag" name="Flag" color="orange" shared="true" points-rate="1" pickup-kit="flag-pickup" drop-kit="reset-health" flag-proximity-metric="none" show-respawn-on-pickup="false">
-        <post return-time="0s" respawn-time="15s">
+    <flag id="flag" name="Flag" color="orange" shared="true" points-rate="1" pickup-kit="flag-kit" drop-kit="reset-health" flag-proximity-metric="none" show-respawn-on-pickup="${announce-post-pickup}">
+        <post return-time="0s" respawn-time="${flag-respawn-timer}">
             <post name="Top Platform">0,26,0</post>
             <post name="Bottom Platform">0,13,0</post>
             <post name="Point A">30,19,0</post>
@@ -481,44 +408,11 @@
         </post>
     </flag>
 </flags>
-<score>
-    <limit>200</limit>
-</score>
 <toolrepair>
-    <tool>stone sword</tool>
-    <tool>bow</tool>
     <tool>gold barding</tool>
     <tool>iron barding</tool>
-    <tool>compass</tool>
 </toolrepair>
-<itemremove>
-    <item>leather helmet</item>
-    <item>leather chestplate</item>
-    <item>chainmail leggings</item>
-    <item>iron boots</item>
-    <item>banner</item>
-</itemremove>
-<itemkeep>
-    <item>golden apple</item>
-    <item>arrow</item>
-    <item>compass</item>
-</itemkeep>
-<kill-rewards>
-    <unless variant="gunz">
-        <kill-reward>
-            <item amount="6" material="arrow"/>
-        </kill-reward>
-    </unless>
-</kill-rewards>
-<respawn auto="true" spectate="true">
-    <message>
-        {"translate":"death.respawn.confirmed.waiting.flagDropped"}
-    </message>
-</respawn>
 <disabledamage>
     <damage>fall</damage>
 </disabledamage>
-<hunger>
-    <depletion>off</depletion>
-</hunger>
 </map>
