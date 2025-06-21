@@ -1,0 +1,113 @@
+<map proto="1.5.0">
+<name>TNT Tag: Incendiary</name>
+<version>1.0.0</version>
+<include id="tnt-tag"/>
+<constant id="block-filter">only-lava</constant>
+<authors>
+    <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
+</authors>
+<spawns>
+    <spawn region="center" kit="hider-kit" angle="0,10.5,0"/>
+    <default yaw="180">
+        <regions>
+            <cylinder base="0.5,55,0.5" radius="2" height="1"/>
+        </regions>
+    </default>
+</spawns>
+<regions>
+    <cylinder id="center" base="0.5,9,0.5" radius="3" height="1"/>
+    <apply enter="never">
+        <region>
+            <above y="29"/>
+        </region>
+    </apply>
+    <!-- north clockwise -->
+    <union id="lava-pools-lower">
+        <block id="lava-pool-lower-1">-2,4,-24</block>
+        <block id="lava-pool-lower-2">32,6,3</block>
+        <block id="lava-pool-lower-3">15,5,28</block>
+        <block id="lava-pool-lower-4">-23,4,29</block>
+        <block id="lava-pool-lower-5">-26,4,6</block>
+        <block id="lava-pool-lower-6">-21,4,-25</block>
+    </union>
+    <union id="lava-pools-upper">
+        <block id="lava-pool-upper-1">17,13,-36</block>
+        <block id="lava-pool-upper-2">32,10,-16</block>
+        <block id="lava-pool-upper-3">29,12,23</block>
+        <block id="lava-pool-upper-4">-5,10,37</block>
+        <block id="lava-pool-upper-5">-47,10,50</block>
+        <block id="lava-pool-upper-6">-43,7,19</block>
+        <block id="lava-pool-upper-7">-37,7,-18</block>
+    </union>
+    <cuboid id="lava-layer-1" min="-52,4,-52" max="52,5,52"/>
+    <cuboid id="lava-layer-2" min="-52,5,-52" max="52,6,52"/>
+    <cuboid id="lava-layer-3" min="-52,6,-52" max="52,7,52"/>
+    <cuboid id="lava-layer-4" min="-52,7,-52" max="52,8,52"/>
+</regions>
+<filters>
+    <any id="lava-replaceable">
+        <material>air</material>
+        <material>fire</material>
+        <material>red mushroom</material>
+        <any id="only-lava">
+            <material>lava</material>
+            <material>stationary lava</material>
+        </any>
+    </any>
+</filters>
+<variables scope="match" default="0">
+    <variable id="height"/>
+</variables>
+<actions>
+    <trigger scope="match" filter="all(match-running, round_state=${running}, height=0, not(round_deathmatch=1..))">
+        <action>
+            <set var="height" value="floor((random() * 2) - 0.5)"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="height=1..">
+        <action>
+            <message text="`6⚠ The ground begins to rumble..."/>
+            <sound key="${entity.lightning_bolt.thunder}" volume="1" pitch="0.2"/>
+            <fill region="lava-pools-lower" material="lava"/>
+            <action filter="round=6..">
+                <fill region="lava-pools-upper" material="lava"/>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="1m" filter="all(height=1, not(round_deathmatch=1..))"/>
+        </filter>
+        <action>
+            <message text="`6⚠ The rumbling subsides..."/>
+            <fill region="lava-pools-lower" material="air"/>
+            <fill region="lava-pools-upper" material="air"/>
+            <set var="height" value="0"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(round_state=${running}, round_deathmatch=1)">
+        <action>
+            <fill region="lava-layer-1" material="lava" filter="lava-replaceable"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(round_state=${running}, round_deathmatch=2)">
+        <action>
+            <fill region="lava-layer-2" material="lava" filter="lava-replaceable"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(round_state=${running}, round_deathmatch=3)">
+        <action>
+            <fill region="lava-layer-3" material="lava" filter="lava-replaceable"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(round_state=${running}, round_deathmatch=4)">
+        <action>
+            <fill region="lava-layer-4" material="lava" filter="lava-replaceable"/>
+        </action>
+    </trigger>
+</actions>
+<itemremove>
+    <item>red mushroom</item>
+    <item>magma cream</item>
+</itemremove>
+</map>
