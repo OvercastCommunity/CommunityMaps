@@ -1,0 +1,251 @@
+<map proto="1.5.0">
+<name>Zipline III: Chromatic Clash</name>
+<version>1.0.0</version>
+<phase>development</phase>
+<include id="kotf"/>
+<include id="sound-keys"/>
+<constant id="damage-resistance">0s</constant>
+<objective>Hold the flag for ${score} seconds to win!</objective>
+<created>2025-06-14</created>
+<authors>
+    <author uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609"/> <!-- Technodono -->
+</authors>
+<rules>
+    <rule>Fall damage is disabled!</rule>
+    <rule>You can only respawn when your team doesn't have the flag!</rule>
+    <rule>No camping inside any ziplines!</rule>
+</rules>
+<broadcasts>
+    <tip after="0m" every="3m">Ziplines transport you really fast in a direction as indicated by the arrows! Use them to get around.</tip>
+</broadcasts>
+<teams>
+    <team id="blue-team" color="blue" max="24">Blue</team>
+    <team id="red-team" color="red" max="24">Red</team>
+</teams>
+<kits>
+    <kit id="default-kit">
+        <effect>night vision</effect>
+    </kit>
+    <kit id="spawn-kit" parents="default-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" amount="6" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/> 
+        <item slot="3" material="golden apple"/>
+        <item slot="4" material="compass"/> <!-- Adding here since I need the compass son a diff slot to the one the include uses -->
+        <item slot="8" amount="8" material="arrow"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="3">projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" material="iron boots"/>
+        <effect duration="${damage-resistance}" amplifier="3">resistance</effect>
+        <game-mode>adventure</game-mode>
+    </kit>
+</kits>
+<projectiles> 
+    <projectile id="arrow" name="crossbow bolt" velocity="4" damage="7" throwable="true" cooldown="2.5s"/>
+</projectiles>
+<spawns>
+    <default kit="default-kit">
+        <region yaw="0">
+            <block id="Obs-spawn">0,51,93</block>
+        </region>
+    </default>
+    <spawn team="blue-team" kit="spawn-kit" filter="has-flag">
+        <regions yaw="0">
+            <block id="Blue-spawn">0,27,-81</block>
+        </regions>
+    </spawn>
+    <spawn team="red-team" kit="spawn-kit" filter="has-flag">
+        <regions yaw="180">
+            <block id="Red-spawn">0,27,83</block>
+        </regions>
+    </spawn>
+</spawns>
+<filters>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <flag-carried id="flag-carried">flag</flag-carried>
+    <variable id="next-post-top" var="next_post">0</variable>
+    <variable id="next-post-bottom" var="next_post">1</variable>
+    <variable id="next-post-east" var="next_post">2</variable>
+    <variable id="next-post-west" var="next_post">3</variable>
+</filters>
+<variables>
+    <variable id="next_post" scope="match" default="0"/> <!-- Stores the next position of the post -->
+</variables>
+<actions>
+    <trigger filter="flag-carried" scope="match">
+        <action> <!-- manually set a new flagpost position for cool dynamic structure tech -->
+            <set var="next_post" value="(next_post + floor(random() * 3) + 1) % 4"/>
+        </action>
+    </trigger>
+    <!-- MOVEMENT -->
+    <trigger scope="player" observers="true"> <!-- Move players inside levitators -->
+        <filter>
+            <pulse period="0.1s" duration="0.05s" filter="levitators"/>
+        </filter>
+        <action>
+            <velocity x="0" y="1.2" z="0"/>
+        </action>
+    </trigger>
+    <trigger scope="player" observers="true"> <!-- Move players inside ziplines (vert-comp) -->
+        <filter>
+            <pulse period="0.1s" duration="0.05s" filter="vertical-comp-ziplines"/>
+        </filter>
+        <action>
+            <velocity x="0" y="2" z="0"/>
+        </action>
+    </trigger>
+    <trigger scope="player" observers="true"> <!-- Move players inside red ziplines (horiz-comp) -->
+        <filter>
+            <pulse period="0.1s" duration="0.05s" filter="red-team-horizontal-comp-ziplines"/>
+        </filter>
+        <action>
+            <velocity x="0" y="0" z="-2"/>
+        </action>
+    </trigger>
+    <trigger scope="player" observers="true"> <!-- Move players inside blue ziplines (horiz-comp) -->
+        <filter>
+            <pulse period="0.1s" duration="0.05s" filter="blue-team-horizontal-comp-ziplines"/>
+        </filter>
+        <action>
+            <velocity x="0" y="0" z="2"/>
+        </action>
+    </trigger>
+    <!-- SOUNDS -->
+    <trigger scope="player" observers="true"> <!-- Generic wind sound (levitators) -->
+        <filter>
+             <pulse period="0.2s" duration="0.05s" filter="levitators"/>
+        </filter>
+        <action>
+            <sound key="mob.horse.zombie.idle" volume="0.7" pitch="0.8"/>
+        </action>
+    </trigger>
+    <trigger scope="player" observers="true"> <!-- Launch sound (jump-pads) -->
+        <filter>
+             <region id="pads"/>
+        </filter>
+        <action>
+            <sound key="mob.ghast.fireball" volume="0.3" pitch="1.2"/>
+        </action>
+    </trigger>
+    <trigger scope="player" observers="true"> <!-- Generic mechanical sound (ziplines) -->
+        <filter>
+            <pulse period="0.3s" duration="0.05s" filter="ziplines"/>
+        </filter>
+        <action>
+            <sound key="minecart.base" volume="0.15" pitch="0.85"/>
+        </action>
+    </trigger>
+</actions>
+<regions>
+    <cuboid id="blue-spawn" min="-62,-oo,-61" max="-50,oo,-49"/>
+    <cuboid id="red-spawn" min="63,-oo,64" max="51,oo,52"/>
+    <union id="pads">
+        <!-- Stair Pads -->
+        <union id="red-stair-pads">
+            <cuboid id="red-stair-east-pad" min="27,19,39" max="31,19.5,37"/>
+            <mirror id="red-stair-west-pad" normal="1,0,0" origin="0.5,0,1.5" region="red-stair-east-pad"/>
+        </union>
+        <mirror id="blue-stair-pads" normal="0,0,1" origin="0.5,0,1.5" region="red-stair-pads"/>
+        <!-- Bridge Pads -->
+        <union id="red-bridge-pads">
+            <cuboid id="red-bridge-east-pad" min="16,19,9" max="21,19.5,7"/>
+            <mirror id="red-bridge-west-pad" normal="1,0,0" origin="0.5,0,1.5" region="red-bridge-east-pad"/>
+        </union>
+        <mirror id="blue-bridge-pads" normal="0,0,1" origin="0.5,0,1.5" region="red-bridge-pads"/>
+        <!-- Fountain Pads -->
+        <union id="fountain-east-pads">
+            <cuboid id="red-fountain-east-pad" min="24,25,15" max="25,25.5,12"/> 
+            <mirror id="blue-fountain-east-pad" normal="0,0,1" origin="0.5,0,1.5" region="red-fountain-east-pad"/>
+        </union>
+        <mirror id="fountain-west-pads" normal="1,0,0" origin="0.5,0,1.5" region="fountain-east-pads"/>
+    </union>
+
+    <union id="levitators"> <!-- Regions for levitators extend far up to create the fan blower mechanic -->
+        <union id="red-levitators">
+            <cuboid id="red-central-levitator" min="-3,19.5,28" max="4,42,24"/> 
+            <cuboid id="red-far-east-levitator" min="43,29.5,35" max="50,41,31"/>
+            <mirror id="red-far-west-levitator" normal="1,0,0" origin="0.5,0,1.5" region="red-far-east-levitator"/>
+            <cuboid id="red-spawn-east-levitator" min="13,18.5,54" max="18,29,51"/>
+            <mirror id="red-spawn-west-levitator" normal="1,0,0" origin="0.5,0,1.5" region="red-spawn-east-levitator"/>
+        </union>
+        <mirror id="blue-levitators" normal="0,0,1" origin="0.5,0,1.5" region="red-levitators"/>
+    </union>
+
+    <union id="ziplines"> 
+        <union id="vertical-comp-ziplines"> <!-- the vertical tube for every zipline -->
+            <union id="red-team-vertical-comp-ziplines">
+                <cuboid id="red-zipline" min="-46,18,63" size="2,23,3"/>
+                <cuboid id="orange-zipline" min="-37,18,58" size="2,6,3"/> 
+                <mirror normal="1,0,0" origin="0.5,0,1.5" region="red-zipline"/> <!-- lime zipline -->
+                <mirror normal="1,0,0" origin="0.5,0,1.5" region="orange-zipline"/> <!-- green zipline -->
+            </union>
+            <mirror normal="0,0,1" origin="0.5,0,1.5" region="red-team-vertical-comp-ziplines"/> <!-- blue teams ziplines -->
+        </union>
+
+        <union id="red-team-horizontal-comp-ziplines"> <!-- the vertical tube for red side ziplines -->  
+            <cuboid id="red-zipline-2" min="-46,41,53" size="3,3,13"/>
+            <cuboid id="orange-zipline-2" min="-37,24,36" size="3,3,25"/> 
+            <mirror normal="1,0,0" origin="0.5,0,1.5" region="red-zipline-2"/> <!-- lime zipline -->
+            <mirror normal="1,0,0" origin="0.5,0,1.5" region="orange-zipline-2"/> <!-- green zipline -->
+        </union>
+        <mirror id="blue-team-horizontal-comp-ziplines" normal="0,0,1" origin="0.5,0,1.5" region="red-team-horizontal-comp-ziplines"/>
+    </union>
+
+    <!-- apply blocks -->
+    <apply block="never" use="never"/>
+
+    <!--apply veolcities-->
+    <apply velocity="0.0,1.4,-0.2" region="red-bridge-pads"/>
+    <apply velocity="0.0,1.4,0.2" region="blue-bridge-pads"/>
+    <apply velocity="0.0,1.4,-0.3" region="red-stair-pads"/>
+    <apply velocity="0.0,1.4,0.3" region="blue-stair-pads"/>
+    <apply velocity="-2.0,2.4,0.0" region="fountain-east-pads"/>
+    <apply velocity="2.0,2.4,0.0" region="fountain-west-pads"/>
+
+</regions>
+<itemkeep>
+        <item>firework charge</item>
+</itemkeep>
+<kill-rewards>
+    <kill-reward>
+        <item amount="3" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
+    </kill-reward>
+</kill-rewards>
+<flags>
+    <flag id="flag"
+          name="Flag"
+          color="magenta"
+          shared="true"
+          points-rate="1"
+          pickup-kit="flag-kit"
+          drop-kit="reset-health"
+          flag-proximity-metric="none"
+          show-respawn-on-pickup="${announce-post-pickup}">
+        <post return-time="0s" respawn-time="${flag-respawn-timer}">
+            <post name="Rainbow Fountain" respawn-filter="all(next-post-top,not(flag-carried))">0,47,1</post>
+            <post name="Lower Bridge" respawn-filter="all(next-post-bottom,not(flag-carried))">0,27,1</post>
+            <post name="East Post" respawn-filter="all(next-post-east,not(flag-carried))">35,31,1</post>
+            <post name="West Post" respawn-filter="all(next-post-west,not(flag-carried))">-35,31,1</post>
+        </post>
+    </flag>
+</flags>
+<structures>
+    <structure id="flag-post-indicator" origin="0.5,72,1.5">
+        <region>
+            <cuboid min="4,72,0" max="-3,82,3"/>
+        </region>
+    </structure>
+    <dynamic structure="flag-post-indicator" location="0.5,54,1.5" trigger="all(next-post-top,not(flag-carried))"/>
+    <dynamic structure="flag-post-indicator" location="0.5,32,1.5" trigger="all(next-post-bottom,not(flag-carried))"/>
+    <dynamic structure="flag-post-indicator" location="35.5,41,1.5" trigger="all(next-post-east,not(flag-carried))"/>
+    <dynamic structure="flag-post-indicator" location="-34.5,41,1.5" trigger="all(next-post-west,not(flag-carried))"/>
+</structures>
+<disabledamage>
+    <damage>fall</damage>
+</disabledamage>
+</map>
