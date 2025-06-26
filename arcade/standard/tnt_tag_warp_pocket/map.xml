@@ -1,0 +1,124 @@
+<map proto="1.5.0">
+<name>TNT Tag: Warp Pocket</name>
+<version>1.0.0</version>
+<include id="tnt-tag"/>
+<authors>
+    <author uuid="5986da63-a546-49c5-812d-d5c41a42510a" contribution="Original map design"/> <!-- Lyzak -->
+    <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c" contribution="TNT Tag redux"/> <!-- mitchiii -->
+</authors>
+<spawns>
+    <spawn region="center" kit="hider-kit" angle="0,27.5,0"/>
+    <default angle="0.5,58.5,0.5">
+        <regions>
+            <cylinder base="0.5,57,0.5" radius="3" height="0"/>
+        </regions>
+    </default>
+    <player-kit>
+        <knockback-reduction>0.25</knockback-reduction>
+    </player-kit>
+</spawns>
+<filters>
+    <players id="final" filter="participating" max="2"/>
+    <material id="air">air</material>
+    <material id="glass">stained glass</material>
+</filters>
+<regions>
+    <cylinder id="center" base="0.5,26,0.5" radius="3" height="1"/>
+    <below id="bottom" y="9"/>
+    <complement id="middle-box">
+        <cuboid min="-7,26,-7" size="15,5,15"/>
+        <cuboid min="-6,26,-6" size="13,4,13"/>
+    </complement>
+    <union id="jump-pads">
+        <block id="upper-outer-n" location="0,37,-42"/>
+        <mirror id="upper-outer-e" region="upper-outer-n" origin="0.5,0,0.5" normal="1,0,1"/>
+        <mirror id="upper-outer-s" region="upper-outer-e" origin="0.5,0,0.5" normal="-1,0,1"/>
+        <mirror id="upper-outer-w" region="upper-outer-s" origin="0.5,0,0.5" normal="-1,0,-1"/>
+        <block id="middle-centre-ne" location="7,26,-7"/>
+        <mirror id="middle-centre-se" region="middle-centre-ne" origin="0.5,0,0.5" normal="0,0,1"/>
+        <mirror id="middle-centre-sw" region="middle-centre-se" origin="0.5,0,0.5" normal="-1,0,0"/>
+        <mirror id="middle-centre-nw" region="middle-centre-sw" origin="0.5,0,0.5" normal="0,0,-1"/>
+        <block id="middle-outer-ne" location="34,26,-34"/>
+        <mirror id="middle-outer-se" region="middle-outer-ne" origin="0.5,0,0.5" normal="0,0,1"/>
+        <mirror id="middle-outer-sw" region="middle-outer-se" origin="0.5,0,0.5" normal="-1,0,0"/>
+        <mirror id="middle-outer-nw" region="middle-outer-sw" origin="0.5,0,0.5" normal="0,0,-1"/>
+        <block id="lower-right-ne" location="32,15,-23"/>
+        <mirror id="lower-right-sw" region="lower-right-ne" origin="0.5,0,0.5" normal="-1,0,1"/>
+        <block id="lower-left-ne" location="23,15,-32"/>
+        <mirror id="lower-left-sw" region="lower-left-ne" origin="0.5,0,0.5" normal="-1,0,1"/>
+        <block id="lower-outer-se" location="23,15,23"/>
+        <mirror id="lower-outer-nw" region="lower-outer-se" origin="0.5,0,0.5" normal="-1,0,-1"/>
+    </union>
+    <apply region="upper-outer-n" velocity="0,1.6,4"/>
+    <apply region="upper-outer-e" velocity="-4,1.6,0"/>
+    <apply region="upper-outer-s" velocity="0,1.6,-4"/>
+    <apply region="upper-outer-w" velocity="4,1.6,0"/>
+    <apply region="middle-centre-ne" velocity="1,1.6,-1"/>
+    <apply region="middle-centre-se" velocity="1,1.6,1"/>
+    <apply region="middle-centre-sw" velocity="-1,1.6,1"/>
+    <apply region="middle-centre-nw" velocity="-1,1.6,-1"/>
+    <apply region="middle-outer-ne" velocity="-1,1.8,1"/>
+    <apply region="middle-outer-se" velocity="-1,1.8,-1"/>
+    <apply region="middle-outer-sw" velocity="1,1.8,-1"/>
+    <apply region="middle-outer-nw" velocity="1,1.8,1"/>
+    <apply region="lower-left-ne" velocity="1.8,1.8,3"/>
+    <apply region="lower-right-ne" velocity="-3,1.8,-1.8"/>
+    <apply region="lower-left-sw" velocity="3,1.8,1.8"/>
+    <apply region="lower-right-sw" velocity="-1.8,1.8,-3"/>
+    <apply region="lower-outer-se" velocity="1.5,2,1.5"/>
+    <apply region="lower-outer-nw" velocity="-1.5,2,-1.5"/>
+</regions>
+<constants>
+    <constant id="warps_max">5</constant>
+    <constant id="warps_early_warning">2</constant>
+    <constant id="warps_percentage_per_warp">0.2</constant>
+</constants>
+<variables scope="player">
+    <variable id="vel_x"/>
+    <variable id="vel_y"/>
+    <variable id="vel_z"/>
+    <variable id="warps"/>
+</variables>
+<actions>
+    <trigger scope="player" filter="all(match-running, bottom)">
+        <action>
+            <action filter="warps=${warps_max}">
+                <teleport x="player.x" y="0" z="player.z"/>
+            </action>
+            <action filter="not(warps=${warps_max}..)">
+                <set var="vel_x" value="player.vel_x"/>
+                <set var="vel_y" value="player.vel_y"/>
+                <set var="vel_z" value="player.vel_z"/>
+                <teleport x="player.x" y="55" z="player.z" pitch="player.pitch" yaw="player.yaw"/>
+                <velocity x="vel_x" y="vel_y + 0.2" z="vel_z"/>
+                <set var="player.exp_progress" value="player.exp_progress - ${warps_percentage_per_warp}"/>
+                <set var="warps" value="warps + 1"/>
+                <sound preset="PORTAL"/>
+                <action filter="warps=${warps_early_warning}">
+                    <message text="`6⚠ `6Approaching terminal velocity! Pocket ejection imminent! `6⚠" actionbar="`6⚠ `6Approaching terminal velocity! Pocket ejection imminent! `6⚠"/>
+                </action>
+                <action filter="warps=${warps_max}">
+                    <message text="`6⚠ `cTerminal velocity reached! Brace for pocket ejection! `6⚠" actionbar="`6⚠ `cTerminal velocity reached! Brace for pocket ejection! `6⚠"/>
+                    <sound key="${entity.creeper.primed}"/>
+                </action>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(grounded, not(bottom))">
+        <action>
+            <set var="player.exp_progress" value="1"/>
+            <set var="warps" value="0"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(match-running, round-running, final)">
+        <action>
+            <fill region="middle-box" material="stained glass:15" filter="air"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="match-finished">
+        <action>
+            <fill region="middle-box" material="air" filter="glass"/>
+        </action>
+    </trigger>
+</actions>
+</map>
