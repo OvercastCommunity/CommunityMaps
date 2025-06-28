@@ -1,0 +1,586 @@
+<map proto="1.5.0">
+<name>Ad Infinitum</name>
+<include id="gapple-kill-reward"/>
+<phase>development</phase>
+<version>1.0.0</version>
+<objective>Capture the enemy team's wool!</objective>
+<created>2024-12-12</created>
+<authors>
+    <author uuid="f610e558-a3c8-44fb-8622-68cc49dbc18f"/> <!-- Julianswl -->
+    <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
+    <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e"/> <!-- Mewzzy -->
+    <author uuid="6ff4ade9-e968-4acd-80eb-1a6fa89629fb" contribution="XML"/> <!-- _Pear -->
+    <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb" contribution="XML"/> <!-- arcadeboss -->
+</authors>
+<contributors>
+    <contributor uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609" contribution="Inspiration"/> <!-- Technodono -->
+</contributors>
+<broadcasts>
+    <tip after="5s" every="5m">Collect `aEmeralds`r from the Emerald Spawners near spawn!</tip>
+    <tip after="15s" every="5m">`aEmeralds`r can buy items for building, cannoning and defense!</tip>
+    <alert after="35s" every="5m">Beware, you cannot Icarus into the woolroom area!</alert>
+    <tip after="55s" every="5m">Buy `dTeam Upgrades`r with `fNether Stars`r from kills or the spawner at mid!</tip>
+    <tip after="75s" every="5m">`dTeam Upgrades`r include access to the `7Iron`r and `3Diamond`r vaults and `aEmerald`r spawner upgrades!</tip>
+</broadcasts>
+<teams>
+    <team id="red-team" color="dark red" max="30">Red</team>
+    <team id="blue-team" color="blue" max="30">Blue</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" enchantment="arrow infinite" material="bow"/>
+        <item slot="28" material="arrow"/>
+        <item slot="2" unbreakable="true" enchantment="dig speed" material="iron pickaxe"/>
+        <item slot="29" unbreakable="true" enchantment="dig speed" material="shears"/>
+        <item slot="3" unbreakable="true" enchantment="dig speed:2" material="iron axe"/>
+        <item slot="30" unbreakable="true" enchantment="dig speed" material="iron spade"/>
+        <item slot="4" amount="64" material="wood"/>
+        <item slot="31" amount="32" material="wood"/>
+        <item slot="5" team-color="true" amount="32" material="stained glass"/>
+        <item slot="6" material="water bucket"/>
+        <item slot="7" material="golden apple"/>
+        <item slot="8" material="emerald"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings"/>
+        <boots unbreakable="true" team-color="true" material="leather boots" enchantment="feather_falling"/>
+    </kit>
+    <lend filter="blue-speed-boost">
+        <kit>
+            <effect amplifier="2">speed</effect>
+        </kit>
+    </lend>
+    <lend filter="red-speed-boost">
+        <kit>
+            <effect amplifier="2">speed</effect>
+        </kit>
+    </lend>
+</kits>
+<spawns>
+    <spawn team="red-team" kit="spawn-kit" yaw="-90">
+        <region>
+            <point>0.5,26,163.5</point>
+        </region>
+    </spawn>
+    <spawn team="blue-team" kit="spawn-kit">
+        <region yaw="90">
+            <point>130.5,26,-180.5</point>
+        </region>
+    </spawn>
+    <default>
+        <region yaw="90">
+            <point>155.5,23,-8.5</point>
+        </region>
+    </default>
+</spawns>
+<variables>
+    <variable id="spawner_upgrade_variable" default="0" scope="team"/>
+    <variable id="mine_upgrade_variable" default="0" scope="team"/>
+    <with-team id="red_mine_upgrade_variable" var="mine_upgrade_variable" team="red-team"/>
+    <with-team id="blue_mine_upgrade_variable" var="mine_upgrade_variable" team="blue-team"/>
+</variables>
+<filters>
+    <match-started id="match-start"/>
+    <material id="only-air">air</material>
+    <material id="only-glass">stained glass</material>
+    <all id="only-minerals-cause-world">
+        <any id="only-minerals">
+            <material id="only-gold">gold block</material>
+            <material id="only-diamond">diamond block</material>
+            <material id="only-iron">iron block</material>
+            <material>emerald block</material>
+        </any>
+        <cause>world</cause>
+    </all>
+    <deny id="blastproof-blocks">
+        <all>
+            <cause>explosion</cause>
+            <any>
+                <material>stained glass</material>
+                <material>redstone block</material>
+            </any>
+        </all>
+    </deny>
+    <all id="only-tnt-damage">
+        <cause>explosion</cause>
+    </all>
+    <deny id="original-block-protection-center-filter">
+        <blocks region="center-tnt-protect">
+            <not>
+                <any>
+                    <!-- List of blocks in the original map that players can modify -->
+                    <material>air</material>
+                    <material>long grass</material>
+                    <material>red rose</material>
+                </any>
+            </not>
+        </blocks>
+    </deny>
+    <deny id="original-block-protection-wool-filter">
+        <blocks region="woolroom-protect">
+            <any>
+                <not>
+                    <any>
+                        <!-- List of blocks in the original map that players can modify -->
+                        <material>air</material>
+                        <material>long grass</material>
+                        <material>water lily</material>
+                        <material>red rose</material>
+                        <material>wall sign</material>
+                    </any>
+                </not>
+            </any>
+        </blocks>
+    </deny>
+    <not id="tnt-immune"> <!-- TODO: no work -->
+        <all>
+            <any>
+                <material>tnt</material>
+            </any>
+            <cause>explosion</cause>
+        </all>
+    </not>
+    <all id="red-speed-boost">
+        <alive/>
+        <team>red-team</team>
+        <region id="red-speed-region"/>
+    </all>
+    <all id="blue-speed-boost">
+        <alive/>
+        <team>blue-team</team>
+        <region id="blue-speed-region"/>
+    </all>
+    <not id="no-water">
+        <any>
+            <material>water</material>
+            <material>stationary_water</material>
+        </any>
+    </not>
+    <variable id="spawner-0" var="spawner_upgrade_variable">0</variable>
+    <variable id="spawner-1" var="spawner_upgrade_variable">1</variable>
+    <variable id="spawner-2" var="spawner_upgrade_variable">2</variable>
+    <variable id="mine-0" var="mine_upgrade_variable">0</variable>
+    <variable id="mine-1" var="mine_upgrade_variable">1</variable>
+    <variable id="mine-2" var="mine_upgrade_variable">2</variable>
+</filters>
+<regions>
+    <!-- General regions -->
+    <complement id="ceiling">
+        <cuboid min="13,45,-251" max="138,255,238"/>
+        <rectangle min="67,201" max="105,223"/> <!-- red back -->
+        <rectangle min="25,-241" max="63,-219"/> <!-- blue back -->
+    </complement>
+    <cuboid id="center-tnt-protect" min="23,0,13" max="100,41,-24"/>
+    <cuboid id="void-glass" min="26,0,-239" max="104,1,221"/>
+    <cuboid id="above-void-glass" min="30,1,-239" max="108,2,221"/>
+    <cylinder id="center-spawner-protect" base="65,16,-9" radius="11" height="15"/>
+    <union id="spawn-protect">
+        <rectangle id="red-protect-1" min="-7,130" max="50,230"/>
+        <rectangle id="red-protect-2" min="-7,117" max="32,230"/>
+        <rectangle id="blue-protect-1" min="81,-146" max="143,-246"/>
+        <rectangle id="blue-protect-2" min="99,-134" max="143,-246"/>
+    </union>
+    <union id="island-protect">
+        <rectangle min="-3,93" max="21,116"/> <!-- red -->
+        <rectangle min="110,-133" max="133,-109"/> <!-- blue -->
+    </union>
+    <rectangle id="blue-speed-region" min="72,-243" max="140,-150"/>
+    <rectangle id="red-speed-region" min="0,133" max="58,221"/>
+    <complement id="woolroom-protect">
+        <union id="woolroom-protect-original">
+			<cylinder base="52.5,0,-180.5" radius="20" height="250"/> <!-- purple -->
+			<cylinder base="78.5,0,163.5" radius="20" height="250"/> <!-- yellow -->
+        </union>
+        <!-- Subtract out the web zones so they can be managed separately -->
+		<union id="yellow-webs">
+			<cuboid min="77,25,156" max="80,29,157"/>
+			<cuboid min="77,25,170" max="80,29,171"/>
+		</union>
+		<union id="purple-webs">
+			<cuboid min="51,25,-173" max="54,29,-174"/>
+			<cuboid min="51,25,-187" max="54,29,-188"/>
+		</union>
+    </complement>
+    <cylinder id="purple-woolroom" base="52.5,0,-180.5" radius="11" height="50"/>
+    <cylinder id="yellow-woolroom" base="78.5,0,163.5" radius="11" height="50"/>
+    <union id="victory-monuments">
+        <block id="purple-victory-monument">15,26,158</block>
+        <block id="yellow-victory-monument">115,26,-176</block>
+    </union>
+    <union id="destroyable-woolroom">
+        <cylinder base="52.5,50,-180.5" radius="5" height="9"/> <!-- blue -->
+        <cylinder base="78.5,50,163.5" radius="5" height="9"/> <!-- yellow -->
+    </union>
+    <union id="edit-areas">
+		<cuboid min="81,39,-156" max="88,61,-149"/> <!-- blue tower -->
+		<cuboid min="43,39,132" max="50,61,139"/> <!-- red tower -->
+		<cuboid min="81,39,-170" max="97,55,-151"/> <!-- blue platform -->
+		<cuboid min="33,39,132" max="50,55,153"/> <!-- red platform -->
+    </union>
+    <!-- Spawner regions -->
+    <union id="spawners">
+        <union id="middle-area-spawners">
+            <point id="nether-star-spawner">65.5,19,-8.5</point>
+            <cylinder id="nether-star-player-detection" base="65.5,19,-8.5" radius="2" height="4"/>
+        </union>
+        <union id="woolroom-spawners">
+            <union id="yellow-woolroom-spawners">
+                <point id="north-yellow-wool-spawner">78.5,15,157.0</point>
+                <cuboid id="north-yellow-wool-player-detection" min="76,15,158" max="80,18,155"/>
+                <point id="south-yellow-wool-spawner">78.5,15,170.0</point>
+                <cuboid id="south-yellow-wool-player-detection" min="80,15,168" max="76,18,171"/>
+            </union>
+            <union id="purple-woolroom-spawners">
+                <point id="north-purple-wool-spawner">52.5,15,-187.0</point>
+                <cuboid id="north-purple-wool-player-detection" min="50,15,-186" max="54,18,-189"/>
+                <point id="south-purple-wool-spawner">52.5,15,-174.0</point>
+                <cuboid id="south-purple-wool-player-detection" min="54,15,-176" max="50,18,-173"/>
+            </union>
+        </union>
+        <union id="emerald-spawners">
+            <union id="red-emerald-pit">
+                <point id="south-red-emerald-spawner">11.5,24,170.5</point>
+                <cuboid id="south-red-emerald-player-detection" min="9,24,168" max="13,27,172"/>
+                <point id="north-red-emerald-spawner">11.5,24,156.5</point>
+                <cuboid id="north-red-emerald-player-detection" min="9,24,154" max="13,27,158"/>
+            </union>
+            <union id="blue-emerald-pit">
+                <point id="north-blue-emerald-spawner">119.5,24,-187.5</point>
+                <cuboid id="north-blue-emerald-player-detection" min="121,24,-186" max="117,27,-190"/>
+                <point id="south-blue-emerald-spawner">119.5,24,-173.5</point>
+                <cuboid id="south-blue-emerald-player-detection" min="121,24,-172" max="117,27,-176"/>
+            </union>
+        </union>
+    </union>
+    <!-- Renewable regions -->
+    <union id="renewable-zones">
+        <union id="the-vaults">
+            <cuboid id="red-iron-vault" min="23,16,180" max="33,21,171"/>
+            <cuboid id="red-diamond-vault" min="34,16,181" max="43,21,171"/>
+            <cuboid id="blue-iron-vault" min="107,16,-198" max="97,21,-189"/>
+            <cuboid id="blue-diamond-vault" min="96,16,-199" max="87,21,-189"/>
+        </union>
+        <union id="gold-renewables">
+            <cuboid id="red-south-gold" min="8,25,172" max="2,29,176"/>
+            <cuboid id="red-north-gold" min="2,25,154" max="8,29,150"/>
+            <cuboid id="blue-north-gold" min="122,25,-190" max="128,29,-194"/>
+            <cuboid id="blue-south-gold" min="128,25,-172" max="122,29,-168"/>
+        </union>
+    </union>
+    <!-- Velocity zone regions -->
+    <union id="icarus-protection">
+        <cuboid id="red-icarus-plane" min="107,56,135" max="40,96,224"/>
+        <cuboid id="blue-icarus-plane" min="23,56,-153" max="90,96,-242"/>
+    </union>
+    <cuboid id="blue-lower-pad" min="100,28,-137" max="104,30,-135"/>
+    <cuboid id="blue-upper-pad" min="107,41,-150" max="109,44,-148"/>
+    <cuboid id="blue-upper-pad-2" min="109,40,-116" max="117,42,-111"/>
+    <cuboid id="red-lower-pad" min="30,28,119" max="26,30,117"/>
+    <cuboid id="red-upper-pad" min="23,41,133" max="21,44,129"/>
+    <cuboid id="red-upper-pad-2" min="20,40,99" max="13,42,94"/>
+    <!-- Vault door regions -->
+    <cuboid id="blue-iron-door" min="101,17,-201" max="104,20,-199"/>
+    <cuboid id="blue-diamond-door" min="91,17,-201" max="94,20,-199"/>
+    <cuboid id="red-iron-door" min="27,17,181" max="30,20,183"/>
+    <cuboid id="red-diamond-door" min="37,17,181" max="40,20,183"/>
+    <!-- Applications -->
+    <apply region="purple-woolroom" enter="red-team" message="You may not enter your team's wool room!"/>
+    <apply region="yellow-woolroom" enter="blue-team" message="You may not enter your team's wool room!"/>
+    <apply region="purple-woolroom" block-place="red-team" message="You may not edit the wool room!"/>
+    <apply region="yellow-woolroom" block-place="blue-team" message="You may not edit the wool room!"/>
+    <apply block-break="all(blue-team)" block-place="never" region="yellow-webs"/>
+    <apply block-break="all(red-team)" block-place="never" region="purple-webs"/>
+    <apply block-break="blastproof-blocks"/>
+    <apply velocity="0,0.5,50" filter="all(match-start,red-team)" region="blue-icarus-plane"/>
+    <apply velocity="0,0.5,-50" filter="all(match-start,blue-team)" region="red-icarus-plane"/>
+    <apply velocity="-0.85,0.8,2.3" region="blue-lower-pad"/>
+    <apply velocity="1.1875,1.25,1.91" region="blue-upper-pad"/>
+    <apply velocity="-3.08,1.1,3.08" region="blue-upper-pad-2"/>
+    <apply velocity="0.85,0.8,-2.3" region="red-lower-pad"/>
+    <apply velocity="-1.1875,1.25,-1.91" region="red-upper-pad"/>
+    <apply velocity="3.08,1.1,-3.08" region="red-upper-pad-2"/>
+    <apply block-place="no-water" region="above-void-glass"/>
+    <apply block-break="never" block-place="never" region="center-spawner-protect" message="You may not edit the spawner!"/>
+    <apply block-break="only-tnt-damage" region="destroyable-woolroom"/>
+    <apply block-break="always" block-place="always" region="edit-areas"/>
+    <apply block-break="only-minerals" block-place="only-minerals-cause-world" region="spawn-protect" message="You may not edit this area of spawn!"/>
+    <apply enter="red-team" region="red-protect-1" message="You may not enter the Red castle!"/>
+    <apply enter="blue-team" region="blue-protect-1" message="You may not enter the Blue castle!"/>
+    <apply block="original-block-protection-wool-filter" message="You can only modify blocks placed by a player in the woolroom area!"/>
+    <apply block-break="only-minerals" block-place="never" region="island-protect" message="You may not edit the island!"/>
+    <apply block-place="deny(void)" message="You may not build in areas above the void!"/>
+    <apply block="original-block-protection-center-filter" message="You can only modify blocks placed by a player in middle!"/>
+    <apply block-place="never" region="ceiling" message="You have reached the maximum build height in this area!"/>
+</regions>
+<damage>
+    <deny>
+        <all>
+            <!-- Jump pad landing zones -->
+            <union>
+                <cuboid min="90,20,-121" max="96,99,-105"/> <!-- blue lower -->
+                <cuboid min="115,40,-133" max="125,99,-116"/> <!-- blue upper -->
+                <cuboid min="78,36,-93" max="89,99,-79"/> <!-- blue upper 2 -->
+                <cuboid min="40,20,103" max="34,99,87"/> <!-- red lower -->
+                <cuboid min="15,40,115" max="5,99,98"/> <!-- red upper -->
+                <cuboid min="52,36,75" max="41,99,61"/> <!-- red upper 2 -->
+            </union>
+            <cause>fall</cause>
+        </all>
+    </deny>
+</damage>
+<wools craftable="false">
+    <wool team="red-team" color="purple" location="52.5,15,-180.5" monument="purple-victory-monument"/>
+    <wool team="blue-team" color="yellow" location="78.5,15,163.5" monument="yellow-victory-monument"/>
+</wools>
+<spawners>
+    <!-- Middle Area -->
+    <spawner spawn-region="nether-star-spawner" player-region="nether-star-player-detection" delay="20">
+        <item material="nether star"/>
+    </spawner>
+    <!-- Woolrooms -->
+    <spawner spawn-region="north-yellow-wool-spawner" player-region="north-yellow-wool-player-detection" delay="2">
+        <item damage="4" material="wool"/>
+    </spawner>
+    <spawner spawn-region="south-yellow-wool-spawner" player-region="south-yellow-wool-player-detection" delay="2">
+        <item damage="4" material="wool"/>
+    </spawner>
+    <spawner spawn-region="north-purple-wool-spawner" player-region="north-purple-wool-player-detection" delay="2">
+        <item damage="10" material="wool"/>
+    </spawner>
+    <spawner spawn-region="south-purple-wool-spawner" player-region="south-purple-wool-player-detection" delay="2">
+        <item damage="10" material="wool"/>
+    </spawner>
+    <!-- Team Emerald Pit: Normal -->
+    <spawner spawn-region="south-red-emerald-spawner" player-region="south-red-emerald-player-detection" delay="2">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="north-red-emerald-spawner" player-region="north-red-emerald-player-detection" delay="2">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="north-blue-emerald-spawner" player-region="north-blue-emerald-player-detection" delay="2">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="south-blue-emerald-spawner" player-region="south-blue-emerald-player-detection" delay="2">
+        <item material="emerald"/>
+    </spawner>
+    <!-- Team Emerald Pit: Upgrade 1 -->
+    <spawner spawn-region="south-red-emerald-spawner" player-region="south-red-emerald-player-detection" delay="8" filter="not(spawner-0)">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="north-red-emerald-spawner" player-region="north-red-emerald-player-detection" delay="8" filter="not(spawner-0)">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="north-blue-emerald-spawner" player-region="north-blue-emerald-player-detection" delay="8" filter="not(spawner-0)">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="south-blue-emerald-spawner" player-region="south-blue-emerald-player-detection" delay="8" filter="not(spawner-0)">
+        <item material="emerald"/>
+    </spawner>
+    <!-- Team Emerald Pit: Upgrade 2 -->
+    <spawner spawn-region="south-red-emerald-spawner" player-region="south-red-emerald-player-detection" delay="8" filter="spawner-2">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="north-red-emerald-spawner" player-region="north-red-emerald-player-detection" delay="8" filter="spawner-2">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="north-blue-emerald-spawner" player-region="north-blue-emerald-player-detection" delay="8" filter="spawner-2">
+        <item material="emerald"/>
+    </spawner>
+    <spawner spawn-region="south-blue-emerald-spawner" player-region="south-blue-emerald-player-detection" delay="8" filter="spawner-2">
+        <item material="emerald"/>
+    </spawner>
+</spawners>
+<shopkeepers name="`bShop" shop="item-shop">
+    <shopkeeper yaw="90">28.5,25,163.5</shopkeeper> <!-- Red -->
+    <shopkeeper yaw="-90">102.5,25,-180.5</shopkeeper> <!-- Blue -->
+</shopkeepers>
+<actions>
+    <trigger filter="match-start" scope="match">
+        <action>
+            <fill region="void-glass" material="36" filter="only-glass"/>
+        </action>
+    </trigger>
+    <action id="team-upgrade-sounds" scope="team">
+        <sound key="${entity.player.levelup}" volume="1" pitch=".75"/>
+    </action>
+    <action id="spawner-upgrade-1-action" scope="player">
+        <set var="spawner_upgrade_variable" value="1"/>
+        <message text="`e`l▲ `6Your team now has `e`lEmerald Spawner Upgrade I`r"/>
+        <switch-scope inner="team">
+            <action id="team-upgrade-sounds"/>
+        </switch-scope>
+    </action>
+    <action id="spawner-upgrade-2-action" scope="player">
+        <set var="spawner_upgrade_variable" value="2"/>
+        <message text="`e`l▲ `6Your team now has `e`lEmerald Spawner Upgrade II`r"/>
+        <switch-scope inner="team">
+            <action id="team-upgrade-sounds"/>
+        </switch-scope>
+    </action>
+    <action id="red-mine-upgrade-1-action" scope="player">
+        <set var="red_mine_upgrade_variable" value="1"/>
+        <message text="`e`l▲ `6Your team now has access to the `e`lIron Mine`r"/>
+        <switch-scope inner="team">
+            <action id="team-upgrade-sounds"/>
+            <sound key="${block.portal.travel}" volume="0.12" pitch="1.7"/>
+        </switch-scope>
+        <switch-scope inner="match">
+            <fill region="red-iron-door" material="air"/>
+        </switch-scope>
+    </action>
+    <action id="red-mine-upgrade-2-action" scope="player">
+        <set var="red_mine_upgrade_variable" value="2"/>
+        <message text="`e`l▲ `6Your team now has access to the `e`lDiamond Mine`r"/>
+        <switch-scope inner="team">
+            <action id="team-upgrade-sounds"/>
+            <sound key="${block.portal.travel}" volume="0.12" pitch="1.7"/>
+        </switch-scope>
+        <switch-scope inner="match">
+            <fill region="red-diamond-door" material="air"/>
+        </switch-scope>
+    </action>
+    <action id="blue-mine-upgrade-1-action" scope="player">
+        <set var="blue_mine_upgrade_variable" value="1"/>
+        <message text="`e`l▲ `6Your team now has access to the `e`lIron Mine`r"/>
+        <switch-scope inner="team">
+            <action id="team-upgrade-sounds"/>
+            <sound key="${block.portal.travel}" volume="0.12" pitch="1.7"/>
+        </switch-scope>
+        <switch-scope inner="match">
+            <fill region="blue-iron-door" material="air"/>
+        </switch-scope>
+    </action>
+    <action id="blue-mine-upgrade-2-action" scope="player">
+        <set var="blue_mine_upgrade_variable" value="2"/>
+        <message text="`e`l▲ `6Your team now has access to the `e`lDiamond Mine`r"/>
+        <switch-scope inner="team">
+            <action id="team-upgrade-sounds"/>
+            <sound key="${block.portal.travel}" volume="0.12" pitch="1.7"/>
+        </switch-scope>
+        <switch-scope inner="match">
+            <fill region="blue-diamond-door" material="air"/>
+        </switch-scope>
+    </action>
+</actions>
+<shops>
+    <shop id="item-shop" name="Shop">
+        <category id="building" name="`fBuilding Blocks" material="wood">
+            <item material="wood" amount="32" price="2" currency="emerald"/>
+            <item material="stained glass" team-color="true" amount="16" price="4" currency="emerald"/>
+            <item material="redstone block" amount="16" price="8" currency="emerald"/>
+        </category>
+        <category id="offense" name="`fOffense" material="tnt">
+            <item material="tnt" amount="16" price="3" currency="emerald"/>
+            <item material="redstone" amount="16" price="2" currency="emerald"/>
+            <item material="stone button" amount="16" price="1" currency="emerald"/>
+            <item material="water bucket" price="3" currency="emerald"/>
+            <item material="wood step" amount="16" price="1" currency="emerald"/>
+            <item material="ladder" amount="16" price="1" currency="emerald"/>
+            <item material="fence" amount="16" price="1" currency="emerald"/>
+            <item material="iron plate" amount="16" price="1" currency="emerald"/>
+            <item material="lever" amount="16" price="1" currency="emerald"/>
+            <item material="dispenser" price="5" currency="emerald"/>
+            <item material="sponge" price="5" currency="emerald"/>
+            <item material="redstone torch on" amount="16" price="2" currency="emerald"/>
+            <item material="diode" amount="16" price="2" currency="emerald"/>
+        </category>
+        <category id="defense" name="`fDefense" material="iron block">
+            <item material="iron fence" amount="16" price="3" currency="emerald"/>
+            <item material="water bucket" price="3" currency="emerald"/>
+            <item material="bucket" price="1" currency="emerald"/>
+            <item material="fence" amount="16" price="1" currency="emerald"/>
+            <item material="fence gate" amount="16" price="1" currency="emerald"/>
+            <item material="workbench" amount="16" price="2" currency="emerald"/>
+            <item material="wood stairs" amount="16" price="1" currency="emerald"/>
+        </category>
+        <category id="team-upgrades" name="`dTeam Upgrades" material="nether star">
+            <item material="tripwire hook" name="`r`fIron Vault Key" lore="`7Your team permanently gains|`7Regenerating Mine Access:||`aTier 1 Iron Mine, `f80 Nether Star|`8Tier 2 Diamond Mine, `f120 Nether Star|" amount="1" price="80" currency="nether star" action="red-mine-upgrade-1-action" filter="all(mine-0,red-team)" color="white"/>
+            <item material="tripwire hook" name="`r`bDiamond Vault Key" lore="`7Your team permanently gains|`7Regenerating Mine Access:||`8Tier 1 Iron Mine, `f64 Nether Star|`aTier 2 Diamond Mine, `f96 Nether Star|" amount="2" price="120" currency="nether star" action="red-mine-upgrade-2-action" filter="all(mine-1,red-team)" color="white"/>
+            <item material="tripwire hook" name="`r`fIron Vault Key" lore="`7Your team permanently gains|`7Regenerating Mine Access:||`aTier 1 Iron Mine, `f80 Nether Star|`8Tier 2 Diamond Mine, `f120 Nether Star|" amount="1" price="80" currency="nether star" action="blue-mine-upgrade-1-action" filter="all(mine-0,blue-team)" color="white"/>
+            <item material="tripwire hook" name="`r`bDiamond Vault Key" lore="`7Your team permanently gains|`7Regenerating Mine Access:||`8Tier 1 Iron Mine, `f64 Nether Star|`aTier 2 Diamond Mine, `f96 Nether Star|" amount="2" price="120" currency="nether star" action="blue-mine-upgrade-2-action" filter="all(mine-1,blue-team)" color="white"/>
+            <item material="emerald ore" name="`r`aEmerald Spawner Upgrade I" lore="`7Your team permanently gains an|`7Emerald Spawner Upgrade:||`aTier 1 +25% Upgrade, `f64 Nether Star|`8Tier 2 +50% Upgrade, `f96 Nether Star|" amount="1" price="64" currency="nether star" action="spawner-upgrade-1-action" filter="spawner-0" color="white"/>
+            <item material="emerald ore" name="`r`aEmerald Spawner Upgrade II" lore="`7Your team permanently gains an|`7Emerald Spawner Upgrade:||`8Tier 1 +25% Upgrade, `f64 Nether Star|`aTier 2 +50% Upgrade, `f96 Nether Star|" amount="2" price="96" currency="nether star" action="spawner-upgrade-2-action" filter="spawner-1" color="white"/>
+        </category>
+    </shop>
+</shops>
+<itemkeep>
+    <item>iron sword</item>
+    <item>bow</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>iron spade</item>
+    <item>arrow</item>
+    <item>wood</item>
+    <item>stained glass</item>
+    <item>golden apple</item>
+    <item>shears</item>
+    <item>bucket</item>
+</itemkeep>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>item frame</item>
+    <item>seeds</item>
+    <item>string</item>
+    <item>water bucket</item>
+</itemremove>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>shears</tool>
+</toolrepair>
+<crafting>
+    <disable>emerald block</disable>
+    <disable>redstone</disable>
+    <disable>redstone block</disable>
+</crafting>
+<renewables>
+    <renewable interval="10s" sound="true" region="renewable-zones" renew-filter="only-gold" replace-filter="only-air" avoid-players="1"/>
+    <renewable interval="10s" sound="true" region="renewable-zones" renew-filter="only-iron" replace-filter="only-air" avoid-players="1"/>
+    <renewable interval="10s" sound="true" region="renewable-zones" renew-filter="only-diamond" replace-filter="only-air" avoid-players="1"/>
+</renewables>
+<block-drops>
+    <rule>
+        <filter>
+            <material>diamond block</material>
+        </filter>
+        <drops>
+            <item unbreakable="true" enchantment="protection explosions:2" material="diamond chestplate"/>
+            <item unbreakable="true" enchantment="protection fall:2" material="diamond boots"/>
+        </drops>
+    </rule>
+    <rule>
+        <filter>
+            <material>emerald block</material>
+        </filter>
+        <drops>
+            <item chance="1" amount="35" material="emerald"/>
+        </drops>
+    </rule>
+</block-drops>
+<kill-rewards>
+    <kill-reward>
+        <item material="nether star"/>
+        <item amount="16" material="wood"/>
+        <item amount="8" team-color="true" material="stained glass"/>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="5"/>
+        </filter>
+        <item amount="3" material="nether star"/>
+        <item amount="32" material="wood"/>
+        <item amount="16" team-color="true" material="stained glass"/>
+    </kill-reward>
+</kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>54</maxbuildheight> <!-- TODO: add ceiling for rest of map -->
+</map>
