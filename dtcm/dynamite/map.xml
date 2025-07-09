@@ -1,5 +1,5 @@
 <map proto="1.5.0">
-<version>1.2.3</version>
+<version>1.2.4</version>
 <name>Dynamite</name>
 <created>2025-02-13</created>
 <phase>development</phase>
@@ -40,6 +40,7 @@
         <item slot="14" amount="16" material="ladder"/>
         <item slot="15" amount="64" material="redstone"/>
         <item slot="16" amount="16" material="diode"/>
+        <item slot="23" material="tnt" amount="64"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" material="chainmail chestplate">
             <enchantment level="2">projectile protection</enchantment>
@@ -73,6 +74,32 @@
     </deny>
     <deny id="no-tnt-damage">
         <cause>explosion</cause>
+    </deny>
+    <deny id="redstone-blocks-fixed">
+        <all>
+            <cause>player</cause>
+            <not>
+                <any>
+                    <!-- List blocks you wanna allow placing -->
+                    <material>tnt</material>
+                    <material>redstone wire</material>
+                    <material>redstone block</material>
+                    <material>redstone torch off</material>
+                    <material>redstone torch on</material>
+                    <material>redstone comparator off</material>
+                    <material>redstone comparator on</material>
+                    <material>diode</material>
+                    <material>diode block off</material>
+                    <material>diode block on</material>
+                    <material>wood button</material>
+                    <material>lever</material>
+                    <material>wood plate</material>
+                    <material>water</material>
+                    <material>stationary water</material>
+                    <material>dispenser</material>
+                </any>
+            </not>
+        </all>
     </deny>
 </filters>
 <regions>
@@ -137,6 +164,21 @@
                 <region id="blue-outside-spawn"/>
                 <mirror origin="12.5,0,12.5" normal="-1,0,-1"><region id="blue-outside-spawn"/></mirror>
             </union>
+        </region>
+    </apply>
+    <!-- Let TNT placables work on the height limit -->
+    <apply block-place="not-players">
+        <region>
+            <above y="28"/>
+        </region>
+        <message>{"translate":"match.maxBuildHeight"}</message>
+    </apply>
+    <apply block-place="redstone-blocks-fixed" message="You may only place redstone, water and TNT here!">
+        <region>
+            <intersect>
+                <above y="25"/>
+                <below y="26"/>
+            </intersect>
         </region>
     </apply>
 </regions>
@@ -256,7 +298,6 @@
         </modify>
     </rule>
 </item-mods>
-<maxbuildheight>25</maxbuildheight>
 <kill-rewards>
     <kill-reward>
         <item material="arrow" amount="6"/>
