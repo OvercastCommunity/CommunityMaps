@@ -1,0 +1,163 @@
+<map proto="1.5.0" min-server-version="1.21">
+<name>Thistle</name>
+<version>1.0</version>
+<objective>Jump into the enemy team's portal, located below their spawn point!</objective>
+<created>2025-07-16</created>
+<include id="bridge"/>
+<game>Tension</game>
+<constants>
+    <constant id="map-origin">0,0,-35.5</constant>
+    <constant id="void-plane">154</constant>
+    <!-- Teams -->
+    <constant id="team-one-spawn">38.5,170,-35.5</constant>
+    <constant id="team-one-yaw">90</constant>
+    <constant id="team-two-spawn">-38.5,170,-35.5</constant>
+    <constant id="team-two-yaw">-90</constant>
+    <!-- Misc -->
+    <constant id="main-kit">tension-kit</constant>
+</constants>
+<authors>
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
+</authors>
+<teams>
+    <team id="team-one" color="yellow" max="5">Yellow</team>
+    <team id="team-two" color="blue" max="5">Blue</team>
+</teams>
+<broadcasts>
+    <tip after="3s" every="3m">`3Get some `fReinforced Scaffolding`3 at middle, and get 3 kills for a `bWind Charge`3!'</tip>
+</broadcasts>
+<spawns>
+    <default>
+        <regions>
+             <point>0,187,-81.5</point>
+             <point yaw="180">0,187,10.5</point>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="tension-kit">
+        <item unbreakable="true" material="iron sword"/>
+        <item material="bow" unbreakable="true" lore="`e⚠ `cYou can only hold `f1`c arrow at a time!|`9ⓘ `7Get a new one `f3.5 seconds `7after shooting!"/>
+        <item unbreakable="true" material="diamond pickaxe"/>
+        <item material="scaffolding" amount="64" damage="2"/>
+        <item material="scaffolding" amount="64" damage="2"/>
+        <item material="golden apple" amount="3" consumable="bridge-apple" prevent-sharing="true" lore="`9ⓘ `7Instantly restores to `c${max-health} HP`7!|`9ⓘ `7Grants `eAbsorption`7 for `f1 minute`7!"/>
+        <effect duration="oo">invisibility</effect>
+        <effect duration="oo" amplifier="255">slow_digging</effect>
+        <effect duration="2s" amplifier="255">resistance</effect>
+    </kit>
+</kits>
+<filters>
+    <any id="block-list">
+        <material>scaffolding</material>
+        <material>iron block</material>
+        <material>short grass</material>
+        <material>large fern</material>
+    </any>
+    <deny id="deny-physics">
+        <any>
+            <material>long grass</material>
+            <material>large fern</material>
+            <material>sunflower</material>
+        </any>
+    </deny>
+</filters>
+<regions>
+    <negative id="not-buildable">
+        <complement>
+            <union>
+                <cuboid min="-26,155,-12" max="26,170,-59"/>
+                <cuboid id="extra-blue" min="-26,155,-56" max="-40,170,-15"/>
+                <mirror region="extra-blue" origin="${map-origin}" normal="1,0,0"/>
+                <!--
+                <union id="yellow-bridge-start">
+                    <union id="yellow-bridge-start-south">
+                        <block>31,170,-35</block>
+                        <block>38,170,-28</block>
+                    </union>
+                    <mirror region="yellow-bridge-start-south" origin="${map-origin}" normal="0,0,1"/>
+                </union>
+                <mirror region="yellow-bridge-start" origin="${map-origin}" normal="1,0,0"/>
+                -->
+            </union>
+            <block>0,156,-36</block>
+            <block>-1,156,-36</block>
+            <block>0,157,-36</block>
+            <block>-1,157,-36</block>
+            <rectangle id="blue-portal-area" min="-32,-28" max="-45,-43"/>
+            <mirror region="blue-portal-area" origin="${map-origin}" normal="1,0,0"/>
+        </complement>
+    </negative>
+    <!-- Portals -->
+    <cuboid id="team-one-portal" min="37,155,-37" size="3,1,3"/>
+    <mirror id="team-two-portal" region="team-one-portal" origin="${map-origin}" normal="1,0,0"/>
+    <!-- Round cages -->
+    <union id="cages">
+        <cylinder id="team-one-spawn-cage" base="${team-one-spawn}" height="3" radius="2"/>
+        <cylinder id="team-two-spawn-cage" base="${team-two-spawn}" height="3" radius="2"/>
+    </union>
+    <!-- Thistle -->
+    <point id="spawner">0,157.2,-35.5</point>
+    <apply block-physics="deny-physics"/>
+</regions>
+<actions>
+    <action id="clear-tension-kit" scope="player">
+        <replace-item ignore-metadata="true">
+            <find material="iron sword"/>
+            <replace material="air"/>
+        </replace-item>
+        <replace-item>
+            <find material="bow" unbreakable="true" lore="`e⚠ `cYou can only hold `f1`c arrow at a time!|`9ⓘ `7Get a new one `f3.5 seconds `7after shooting!"/>
+            <replace material="air"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="arrow"/>
+            <replace material="air"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="diamond pickaxe"/>
+            <replace material="air"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="scaffolding"/>
+            <replace material="air"/>
+        </replace-item>
+        <replace-item ignore-metadata="true">
+            <find material="golden apple"/>
+            <replace material="air"/>
+        </replace-item>
+    </action>
+</actions>
+<spawners>
+    <spawner spawn-region="spawner" player-region="everywhere" delay="10s" max-entities="2">
+        <item material="iron block"/>
+    </spawner>
+</spawners>
+<item-mods>
+    <rule>
+        <match>
+            <material>iron block</material>
+        </match>
+        <modify name="`fReinforced Scaffolding" enchantments="power:1" show-enchantments="false"/>
+    </rule>
+</item-mods>
+<kill-rewards>
+    <kill-reward>
+        <item material="scaffolding" amount="16"/>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="3" repeat="false"/>
+        </filter>
+        <item material="wind charge"/>
+    </kill-reward>
+</kill-rewards>
+<itemkeep>
+    <item>iron block</item>
+</itemkeep>
+<itemremove>
+    <item>scaffolding</item>
+    <item>seeds</item>
+    <item>wind charge</item>
+</itemremove>
+</map>
