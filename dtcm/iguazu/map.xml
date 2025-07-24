@@ -1,0 +1,158 @@
+<map proto="1.5.0" min-server-version="1.21.8">
+<name>Iguazú</name>
+<slug>iguazu</slug>
+<version>1.0</version>
+<objective>Destroy the enemy's monument!</objective>
+<created>2025-07-23</created>
+<maxbuildheight>51</maxbuildheight>
+<constant id="override-health">false</constant>
+<include id="void-death"/>
+<include id="gapple-kill-reward"/>
+<constant id="void-plane">-64</constant>
+<authors>
+    <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
+</authors>
+<teams>
+    <team id="orange-team" color="gold" max="8">Orange</team>
+    <team id="purple-team" color="dark purple" max="8">Purple</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <item slot="slot.weapon.offhand" material="shield" unbreakable="true"/>
+        <item slot="0" material="iron axe" enchantment="efficiency" unbreakable="true"/>
+        <item slot="1" material="crossbow" unbreakable="true" enchantment="infinity"/>
+        <item slot="2" material="iron pickaxe" unbreakable="true"/>
+        <item slot="3" material="stone spade" unbreakable="true"/>
+        <item slot="4" amount="64" material="mangrove planks"/>
+        <item slot="5" amount="32" material="scaffolding"/>
+        <item slot="7" material="shears" unbreakable="true"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+        <leggings material="chainmail leggings" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <effect duration="6" amplifier="255">resistance</effect>
+    </kit>
+</kits>
+<spawns>
+    <spawn team="orange-team" kit="spawn-kit">
+        <region yaw="-45">
+             <cylinder base="-20.5,9,-68.5" height="0" radius="1"/>
+        </region>
+    </spawn>
+    <spawn team="purple-team" kit="spawn-kit">
+        <region yaw="135">
+            <cylinder base="20.5,9,68.5" height="0" radius="1"/>
+        </region>
+    </spawn>
+    <default>
+        <regions>
+            <cylinder yaw="90" base="60,47,-3" height="0" radius="1"/>
+            <cylinder yaw="-90" base="-60,47,3" height="0" radius="1"/>
+        </regions>
+    </default>
+</spawns>
+<filters>
+    <deny id="deny-use">
+        <any>
+            <material>beacon</material>
+            <material>respawn anchor</material>
+        </any>
+    </deny>
+    <all id="only-iron-cause-world">
+        <material id="only-iron">iron block</material>
+        <cause>world</cause>
+    </all>
+    <any id="allow-break">
+        <material>jungle leaves</material>
+        <material>vine</material>
+    </any>
+</filters>
+<regions>
+    <point id="middle-spawner-point">0,19.25,0</point>
+    <cuboid id="middle-spawner-greater-area" min="1,19,1" max="-1,22,-1"/>
+    <apply block="never" region="middle-spawner-greater-area" message="You may not edit this area!"/>
+    <rectangle id="purple-spawn-area" min="7,48" max="25,76"/>
+    <mirror id="purple-spawn-area-mirror" region="purple-spawn-area" origin="0,0,0" normal="1,0,0"/>
+    <mirror id="orange-spawn-area" region="purple-spawn-area-mirror" origin="0,0,0" normal="0,0,1"/>
+    <apply block-break="only-iron" block-place="only-iron-cause-world" region="purple-spawn-area" message="You may only break `fIron`r at the spawn areas!"/>
+    <apply block-break="only-iron" block-place="only-iron-cause-world" region="orange-spawn-area" message="You may only break `fIron`r at the spawn areas!"/>
+    <apply enter="orange-team" region="orange-spawn-area" message="You may not enter the enemy's spawn!"/>
+    <apply enter="purple-team" region="purple-spawn-area" message="You may not enter the enemy's spawn!"/>
+    <!-- Monuments -->
+    <cuboid id="purple-monument" min="-31,14,47" max="-33,17,49"/>
+    <mirror id="purple-monument-mirror" region="purple-monument" origin="0,0,0" normal="1,0,0"/>
+    <mirror id="orange-monument" region="purple-monument-mirror" origin="0,0,0" normal="0,0,1"/>
+    <apply use="deny-use"/>
+    <negative id="void-area">
+        <rectangle min="40,-39" max="-40,39"/> <!-- Middle -->
+        <rectangle id="orange-area" min="11,-56" max="30,-38"/> <!-- orange area -->
+        <mirror id="orange-area-mirror" region="orange-area" origin="0,0,0" normal="1,0,0"/>
+        <mirror region="orange-area-mirror" origin="0,0,0" normal="0,0,1"/>
+        <region id="purple-spawn-area"/>
+        <region id="orange-spawn-area"/>
+    </negative>
+    <apply block-place="deny(void)" block-break="allow-break" region="void-area" message="You may not edit the void!"/>
+    <apply block="never">
+        <region>
+            <below y="0"/>
+        </region>
+    </apply>
+</regions>
+<destroyables materials="copper block;exposed copper;weathered copper;oxidized copper" show-progress="true" required="true">
+    <destroyable owner="orange-team" name="Monument" region="orange-monument"/>
+    <destroyable owner="purple-team" name="Monument" region="purple-monument"/>
+</destroyables>
+<spawners>
+    <spawner spawn-region="middle-spawner-point" player-region="everywhere" delay="25" max-entities="1">
+        <item material="golden apple" amount="1"/>
+    </spawner>
+</spawners>
+<itemkeep>
+    <item>stone sword</item>
+    <item>bow</item>
+    <item>iron pickaxe</item>
+    <item>stone spade</item>
+    <item>golden apple</item>
+    <item>wool</item>
+    <item>glass</item>
+    <item>tnt</item>
+    <item>arrow</item>
+    <item>gold block</item>
+    <item>shears</item>
+</itemkeep>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>seeds</item>
+    <item>copper block</item>
+    <item>exposed copper</item>
+    <item>weathered copper</item>
+    <item>oxidized copper</item>
+    <item>apple</item>
+</itemremove>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>arrow</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>stone spade</tool>
+    <tool>shears</tool>
+</toolrepair>
+<kill-rewards>
+    <kill-reward>
+        <item material="mangrove planks" amount="24"/>
+        <item material="scaffolding" team-color="true" amount="12"/>
+    </kill-reward>
+</kill-rewards>
+<renewables>
+    <renewable rate="0.5" sound="true" region="purple-spawn-area" renew-filter="only-iron" avoid-players="1"/>
+    <renewable rate="0.5" sound="true" region="orange-spawn-area" renew-filter="only-iron" avoid-players="1"/>
+</renewables>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
