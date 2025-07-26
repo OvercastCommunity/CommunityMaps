@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Twilight Citadel</name>
-<version>1.0.0</version>
+<version>1.1.0</version>
 <created>2025-06-24</created>
 <objective>Leak lava from both of your enemy's cores to win!</objective>
 <include id="gapple-kill-reward"/>
@@ -12,8 +12,8 @@
     <contributor uuid="64e840c8-4fb5-4659-a36b-ff93e2f6113a" contribution="XML design, submission handling, minor details" /> <!-- Javg_ -->
 </contributors>
 <teams>
-    <team id="blue-team" color="blue" max="26">Blue</team>
-    <team id="red-team" color="dark red" max="26">Red</team>
+    <team id="blue-team" color="blue" max="32">Blue</team>
+    <team id="red-team" color="dark red" max="32">Red</team>
 </teams>
 <kits>
     <kit id="spawn-kit">
@@ -27,11 +27,11 @@
         <item slot="3" unbreakable="true" material="iron axe" />
         <item slot="4" amount="64" material="log" />
         <item slot="29" material="iron spade" />
-        <item slot="5" amount="64" material="wool" team-color="true" />
-        <item slot="6" material="shears" />
-        <item slot="7" amount="64" material="glass" />
+        <item slot="5" amount="64" material="stained glass" team-color="true" />
         <item slot="8" amount="2" material="golden apple" />
-        <chestplate unbreakable="true" team-color="true" material="leather chestplate" />
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate">
+            <enchantment level="4">blast protection</enchantment>
+        </chestplate>
         <leggings unbreakable="true" material="chainmail leggings" />
         <boots unbreakable="true" team-color="true" material="leather boots" />
     </kit>
@@ -61,6 +61,19 @@
         </carrying>
         <filter id="spawns" />
     </all>
+     <deny id="tnt-immune">
+        <all>
+            <any>
+                <filter id="blue-flag" />
+                <filter id="red-flag" />
+            </any>
+            <cause>explosion</cause>
+            <any>
+                <material>stained clay</material>
+                <material>wool</material>
+            </any>
+        </all>
+    </deny>
 </filters>
 <regions>
     <union id="spawns">
@@ -118,19 +131,23 @@
     </union>
     <union id="objectives">
         <union id="blue-objectives">
-            <cuboid id="blue-core-north" min="-139,36,172" max="-132,43,179" />
-            <cuboid id="blue-core-south" min="-139,39,211" max="-132,46,218" />
+            <cuboid id="blue-core-north" min="-139,28,172" max="-132,35,179" />
+            <cuboid id="blue-core-south" min="-139,28,211" max="-132,35,218" />
+            <cuboid id="blue-flag" min="-135,54,264" max="-143,59,266" />
         </union>
         <union id="red-objectives">
-            <cuboid id="red-core-south" min="-139,43,-48" max="-132,36,-41" />
-            <cuboid id="red-core-north" min="-139,46,-87" max="-132,39,-80" />
+            <cuboid id="red-core-south" min="-139,28,-48" max="-132,35,-41" />
+            <cuboid id="red-core-north" min="-139,28,-87" max="-132,35,-80" />
+            <cuboid id="red-flag" min="-136,54,-133" max="-128,59,-135" />
         </union>
     </union>
+    <!-- PREVENT TNT USED ON FLAGS -->
+    <apply block-break="tnt-immune"/>
     <!-- ENTERING SPAWN AREAS (ONLY THE CORRECT TEAM) -->
-    <apply enter="red-team" region="red-spawn" message="You may not enter the enemy's spawn!" />
-    <apply enter="blue-team" region="blue-spawn" message="You may not enter the enemy's spawn!" />
-    <apply enter="red-team" region="red-spawn-ladders" message="You may not enter the enemy's spawn!" />
-    <apply enter="blue-team" region="blue-spawn-ladders" message="You may not enter the enemy's spawn!" />
+    <apply enter="red-team" region="red-spawn" message="You may not enter the enemy spawn!" />
+    <apply enter="blue-team" region="blue-spawn" message="You may not enter the enemy spawn!" />
+    <apply enter="red-team" region="red-spawn-ladders" message="You may not enter the enemy spawn!" />
+    <apply enter="blue-team" region="blue-spawn-ladders" message="You may not enter the enemy spawn!" />
     <!-- BLOCKING / MODIFYING SPAWN AREAS -->
     <apply block="only-iron" region="spawns" message="You may not edit spawns!" />
     <apply block="never" region="spawn-ladders" message="You may not break the ladders!" />
@@ -142,15 +159,19 @@
     <apply block="never" region="no-build" message="You may not build outside of the playable region!" />
 </regions>
 <cores material="obsidian" leak="5" modes="gold-core glass-core" proximity-metric="none">
-    <core name="North Core" team="blue-team" region="blue-core-north" />
-    <core name="South Core" team="blue-team" region="blue-core-south" />
-    <core name="South Core" team="red-team" region="red-core-south" />
-    <core name="North Core" team="red-team" region="red-core-north" />
+    <core name="Front Core" team="blue-team" region="blue-core-north" />
+    <core name="Back Core" team="blue-team" region="blue-core-south" />
+    <core name="Front Core" team="red-team" region="red-core-south" />
+    <core name="Back Core" team="red-team" region="red-core-north" />
 </cores>
 <modes>
     <mode id="gold-core" after="25m" material="gold block" name="`6GOLD CORE MODE" />
     <mode id="glass-core" after="90m" material="glass" name="`bGLASS CORE MODE" />
 </modes>
+<destroyables name="Flag" materials="wool;stained clay" required="true" show-progress="true" repairable="false">
+    <destroyable id="blue-flag-destroyable" owner="blue-team" region="blue-flag" />
+    <destroyable id="red-flag-destroyable" owner="red-team" region="red-flag" />
+</destroyables>
 <actions>
     <replace-item id="remove-boat">
         <find material="boat" />
@@ -172,17 +193,23 @@
     <item>gold block</item>
     <item>glowstone dust</item>
     <item>torch</item>
+    <item>wool</item>
+    <item>sapling</item>
+    <item>stained clay</item>
+    <item>prismarine crystals</item>
 </itemremove>
 <tnt>
     <dispenser-tnt-limit>0</dispenser-tnt-limit>
     <dispenser-tnt-multiplier>0</dispenser-tnt-multiplier>
+    <power>4</power>
 </tnt>
-<maxbuildheight>128</maxbuildheight>
+<maxbuildheight>59</maxbuildheight>
 <hunger>
     <depletion>off</depletion>
 </hunger>
 <broadcasts>
-    <tip after="15s">There are iron blocks above your spawn and diamond blocks hidden inside your towers!</tip>
-    <tip after="30s">You can climb on top of the enemy team's spawn tower - use it to your advantage!</tip>
+    <tip after="15s" every="7m">There are iron blocks above your spawn and diamond blocks hidden inside your towers!</tip>
+    <tip after="30s" every="7m">You can climb on top of the enemy team's spawn tower — use it to your advantage!</tip>
+    <tip after="1m" every="7m">You can find power bows hidden around the map!</tip>
 </broadcasts>
 </map>
