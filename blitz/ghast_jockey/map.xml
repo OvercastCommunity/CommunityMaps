@@ -1,6 +1,6 @@
 <map proto="1.5" min-server-version="1.21.8">
 <name>GHAST JOCKEY</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <created>2025-07-21</created>
 <objective>Eliminate your opponents! You only have one life!</objective>
 <include id="void-death"/>
@@ -70,6 +70,13 @@
     </negative>
     <apply enter="never" region="outside-area"/>
     <below id="arena" x="36"/>
+    <union id="playable"> <!-- Worldborder looks horrible -->
+        <negative>
+            <circle center="0.5,0.5" radius="45.5"/>
+        </negative>
+        <above y="145"/>
+        <below y="85"/>
+    </union>
 </regions>
 <actions>
     <trigger scope="match" filter="match-started">
@@ -77,10 +84,18 @@
             <fill material="hopper" region="hopper-place"/>
         </action>
     </trigger>
+    <trigger scope="player" filter="playable">
+        <action>
+            <message actionbar=" `e⚠ `cWarning! You're leaving the playable area!"/>
+            <sound/>
+        </action>
+    </trigger>
     <trigger scope="player" observers="true"> <!-- Remove when observer interactions with mobs are fixed -->
         <filter>
             <all>
-                <match-running/>
+                <not>
+                    <match-finished/>
+                </not>
                 <observing/>
                 <region id="arena"/>
             </all>
