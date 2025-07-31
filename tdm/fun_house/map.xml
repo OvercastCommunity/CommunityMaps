@@ -1,6 +1,6 @@
 <map proto="1.5.0" min-server-version="1.21.8">
 <name>Fun House</name>
-<version>1.0.4</version>
+<version>1.0.5</version>
 <created>2025-06-02</created>
 <objective>Be on the team with the highest amount of kills after 4 minutes! Change size at middle!</objective>
 <gamemode>tdm</gamemode>
@@ -58,6 +58,7 @@
             <attribute operation="add" amount="0.01">gravity</attribute>
         </helmet>
         <max-health>30</max-health>
+        <action id="give-max-health"/>
     </kit>
     <kit id="normal-size" force="true">
         <helmet material="leather helmet" team-color="true" locked="true" show-attributes="false"/>
@@ -82,12 +83,14 @@
         <entity>area effect cloud</entity>
     </all>
     <pulse id="delete-time" period="1s" duration="0.1" filter="match-started"/>
+    <variable var="current_size" id="valid-size">[-1,1]</variable>
 </filters>
 <regions>
     <union id="spawn-areas">
-        <cuboid id="purple-spawn-area" min="25,66,111" size="4,9,5"/>
+        <cuboid id="purple-spawn-area" min="26,68,112" size="3,6,3"/>
         <mirror id="orange-spawn-area" region="purple-spawn-area" origin="-10,6,113.5" normal="1,0,0"/>
     </union>
+    <apply enter="never" region="spawn-areas"/>
     <negative id="outside">
         <union id="machines">
             <cuboid id="machine-1-b" min="-11,66,121" max="-10,70,125"/>
@@ -168,6 +171,9 @@
         <kill-entities filter="entities-at-spawns"/>
     </action>
     <trigger action="delete-entities-at-spawns" filter="delete-time" scope="match"/>
+    <action id="give-max-health" scope="player" filter="spawn-areas">
+        <set var="player.health" value="player.max_health"/>
+    </action>
     <action id="decrease-size" scope="player">
         <action filter="all(current_size=1,change=1)">
             <kit id="normal-size"/>
