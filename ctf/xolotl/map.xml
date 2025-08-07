@@ -1,0 +1,307 @@
+<map proto="1.5.0">
+<name>Xolotl</name>
+<version>1.0.0</version>
+<objective>Get kills and use the scorebox at mid. Once your team has 20 points, your team's flag unlocks. Score your flag in the enemy portals, each flag scored counts as 50 points. First team to 200 points wins!</objective>
+<created>2025-07-31</created>
+<include id="gapple-kill-reward"/>
+<include id="void-death"/>
+<authors>
+    <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
+</authors>
+<contributors>
+    <contributor uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609" contribution="Inspiration "/> <!-- Technodono -->
+</contributors>
+<teams>
+    <team id="red-team" color="red" max="8">Red</team>
+    <team id="blue-team" color="blue" max="8">Blue</team>
+</teams>
+<spawns>
+    <spawn team="red-team" kit="spawn-kit" yaw="-90">
+        <region>
+            <point id="red-spawn-point">-55.5,10,0.5</point>
+        </region>
+    </spawn>
+    <spawn team="blue-team" kit="spawn-kit" yaw="90">
+        <region>
+            <point id="blue-spawn-point">56.5,10,0.5</point>
+        </region>
+    </spawn>
+    <default>
+        <regions>
+            <point yaw="180">0.5,14,41.5</point>            
+        </regions>
+    </default>
+</spawns>
+<regions>
+    <cuboid id="build-area" min="-48,2,-22" max="49,25,23"/>
+    <union id="spawns">
+        <cuboid id="red-spawn" min="-60,0,-7" max="-49,50,8"/>
+        <mirror id="blue-spawn" region="red-spawn" normal="1,0,0" origin="0.5,0,0.5"/>
+    </union>
+    <point id="red-chute">-55.5,66,0.5</point>
+    <mirror id="blue-chute" region="red-chute" normal="1,0,0" origin="0.5,0,0.5"/>
+    <cuboid id="red-anti-tg" min="-48,10,-3" max="-47,14,4"/>
+    <mirror id="blue-anti-tg" region="red-anti-tg" normal="1,0,0" origin="0.5,0,0.5"/>
+    <cuboid id="red-flag-post" min="-46,8,-2" max="-41,13,3"/>
+    <mirror id="blue-flag-post" region="red-flag-post" normal="1,0,0" origin="0.5,0,0.5"/>
+    <union id="red-portals">
+            <cuboid id="red-left-portal" min="-47,10,14" max="-46,14,17"/>
+            <cuboid id="red-right-portal" min="-47,10,-16" max="-46,14,-13"/>            
+    </union>
+    <mirror id="blue-portals" region="red-portals" normal="1,0,0" origin="0.5,0,0.5"/> 
+    <union id="red-portal-blockers">
+        <cuboid id="red-left-portal-blocker" min="-46,10,13" max="-44,13,18"/>
+        <cuboid id="red-right-portal-blocker" min="-46,10,-17" max="-44,13,-12"/>    
+    </union>
+    <mirror id="blue-portal-blockers" region="red-portal-blockers" normal="1,0,0" origin="0.5,0,0.5"/>
+    <cuboid id="red-flag-fill" min="-45,9,-1" max="-42,10,2"/>
+    <mirror id="blue-flag-fill" region="red-flag-fill" normal="1,0,0" origin="0.5,0,0.5"/>
+    <union id="middle">
+        <cuboid id="scorebox-flag-checker" min="-1,10.6,-1" max="2,11.6,2"/>   
+        <cuboid id="scorebox" min="-1,9.5,-1" max="2,10.5,2"/>         
+        <cuboid id="mid-platform" min="-4,11,-4" max="5,oo,5"/>        
+    </union>
+    <union id="not-buildable">
+        <region id="red-anti-tg"/>
+        <region id="blue-anti-tg"/>
+        <region id="red-flag-post"/>
+        <region id="blue-flag-post"/>
+        <region id="red-portals"/>
+        <region id="blue-portals"/>
+        <region id="red-portal-blockers"/>
+        <region id="blue-portal-blockers"/>
+        <region id="middle"/>
+    </union>
+    <cuboid id="void-realm" min="-oo,-100,-oo" max="oo,-oo,oo"/>
+    <point id="flag-killer">0,-3,0</point>
+    <apply enter="not-red-carrier" region="red-spawn" message="You may not enter your spawn while carrying a flag!"/>
+    <apply enter="not-blue-carrier" region="red-spawn" message="You may not enter your spawn while carrying a flag!"/>
+    <apply enter="red-team" region="red-spawn" message="You may not enter the opposing team's spawn!"/>
+    <apply enter="blue-team" region="blue-spawn" message="You may not enter the opposing team's spawn!"/>
+    <apply kit="spawn-kit" region="red-portals" filter="on-red"/>
+    <apply kit="spawn-kit" region="blue-portals" filter="on-blue"/>
+    <apply block="all(block-list,not(not-buildable))" region="build-area" message="You may not build here!"/>
+    <apply block="never" region="everywhere" filter="not(build-area)" message="You may not build here!"/>
+</regions>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="stone axe"/>
+        <item slot="2" unbreakable="true" enchantment="infinity" material="bow"/>
+        <item slot="3" amount="12" damage="3" material="leaves"/>
+        <item slot="4" material="golden apple"/>
+        <item slot="27" material="arrow"/>
+        <helmet team-color="true" locked="true" unbreakable="true" material="leather helmet"/>
+        <chestplate team-color="true" locked="true" unbreakable="true" material="leather chestplate"/>        
+        <leggings unbreakable="true" locked="true" material="chainmail leggings">
+            <enchantment level="2">projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" locked="true" material="iron boots"/>
+        <potion duration="2" amplifier="10">regeneration</potion>
+        <potion duration="2" amplifier="10">damage_resistance</potion>
+        <game-mode>survival</game-mode>
+    </kit>
+    <kit id="flag-pickup" force="true">
+        <max-health>10</max-health>
+    </kit>
+    <kit id="reset-health" force="true">
+        <max-health>20</max-health>
+    </kit>
+</kits>
+<kill-rewards>
+    <kill-reward>
+        <item amount="6" material="jungle leaves"/>
+        <item amount="1" material="sunflower" name="`6☀ `e`lSacrificial Token `6☀" lore="`5`oJump into the scorebox at mid! With enough points you will unlock your team's flag!"/>
+    </kill-reward>
+</kill-rewards>
+<filters>
+    <all id="on-red">
+        <team>red-team</team>
+    </all>
+    <all id="on-blue">
+        <team>blue-team</team>
+    </all>
+    <!--Scorebox flag unlock filters -->
+    <all id="red-score-reached">
+        <score team="red-team">[20,oo)</score>
+    </all>
+    <all id="blue-score-reached">
+        <score team="blue-team">[20,oo)</score>
+    </all>
+    <!--Block Filters -->
+    <any id="block-list">
+        <material>jungle leaves</material>
+        <material>scaffolding</material>
+        <material>cobweb</material>
+        <material>short grass</material>
+        <material>wood:3</material>
+        <material>candle</material>
+        <material>jungle_fence</material>
+    </any>
+    <after duration="0.1s" id="red-delay">
+        <all>
+            <score team="red-team">[20,oo)</score>
+            <team>red-team</team>
+        </all>
+    </after>
+    <after duration="0.1s" id="blue-delay">
+        <all>
+            <score team="blue-team">[20,oo)</score>
+            <team>blue-team</team>
+        </all>
+    </after>
+    <not id="not-red-carrier">
+        <carrying-flag>red-flag</carrying-flag>
+    </not>
+    <not id="not-blue-carrier">
+        <carrying-flag>red-flag</carrying-flag>
+    </not>|
+    <all id="flag-carrier-in-scorebox">
+        <region id="scorebox-flag-checker"/>
+        <any id="carrying-any-flag">
+            <carrying-flag>red-flag</carrying-flag>
+            <carrying-flag>blue-flag</carrying-flag>
+        </any>
+    </all>
+    <all id="void-realm-filter">
+        <region id="void-realm"/>
+    </all>
+</filters>
+<score display="numerical">
+    <limit>200</limit>
+    <box points="1" region="scorebox">
+        <redeemables>
+           <item points="1">sunflower</item>
+        </redeemables>
+    </box>
+</score>
+<portals>
+    <!--SCOREBOX-->
+    <portal filter="on-red" region="scorebox" destination="red-spawn-point" yaw="@-90"/>
+    <portal filter="on-blue" region="scorebox" destination="blue-spawn-point" yaw="@90"/>
+    <!--FLAG PORTALS-->
+    <portal region="blue-portals" destination="red-chute" filter="on-red" sound="false"/>
+    <portal region="red-portals" destination="blue-chute" filter="on-blue" sound="false"/>
+    <portal filter="flag-carrier-in-scorebox" region="scorebox-flag-checker" destination="flag-killer" sound="false"/>
+</portals>
+<variables>
+    <variable id="unlock_status" scope="match" default="0"/> <!--0=locked, 1=red, 2=blue-->
+</variables>
+<actions>
+    <action id="red-flag-unlock" scope="team" expose="true"> 
+        <message id="red-unlock-message" text="`2🐦 `6Huītzilōpōchtli `2🐦 `r is pleased! Your team has unlocked your `c⚑ `4`lflag `c⚑`r. Reach the portals on the other side with your flag to score!"/>
+        <sound key="entity.evoker.cast_spell" volume="0.8" pitch="0.5"/>
+        <sound key="entity.ghast.warn" volume="0.4" pitch="0.5"/>
+        <sound key="entity.wither.break_block" volume=".2" pitch="0.1"/>
+        <sound key="entity.wither.hurt" volume=".1" pitch="0.1"/> 
+        <switch-scope outer="team" inner="match">
+            <fill region="blue-portals" material="90:2"/>
+            <fill region="red-flag-fill" material="air"/>
+            <set var="unlock_status" value="1"/>   
+        </switch-scope>                        
+    </action>
+    <action id="blue-flag-unlock" scope="team" expose="true">
+        <message id="blue-unlock-message" text="`2🐦 `6Huītzilōpōchtli `2🐦 `r is pleased! Your team has unlocked your `9⚑ `1`lflag `9⚑`r. Reach the portals on the other side with your flag to score!"/>
+        <sound key="entity.evoker.cast_spell" volume="0.8" pitch="0.5"/>
+        <sound key="entity.ghast.warn" volume="0.4" pitch="0.5"/>
+        <sound key="entity.wither.break_block" volume=".2" pitch="0.1"/>
+        <sound key="entity.wither.hurt" volume=".1" pitch="0.1"/> 
+        <switch-scope outer="team" inner="match">
+            <fill region="red-portals" material="90:2"/>
+            <fill region="blue-flag-fill" material="air"/>
+            <set var="unlock_status" value="2"/>                         
+        </switch-scope>  
+    </action>
+    <action id="red-enemy-unlock" scope="team" expose="true">    
+        <message text="`9`lBlue Team `rhas unlocked their flag! Protect your side portals!"/>
+        <sound key="block.end_portal.spawn" volume="0.2" pitch="0.1"/>
+        <sound key="entity.skeleton_horse.death" volume="0.3" pitch="0.1"/>
+        <sound key="block.beacon.deactivate" volume="0.9" pitch="0.4"/>   
+        <sound key="entity.illusioner.mirror_move" volume="0.8" pitch="0.1"/>
+        <sound key="block.sculk_shrieker.shriek" volume="0.4" pitch="0.1"/>  
+    </action>
+    <action id="blue-enemy-unlock" scope="team" expose="true">
+        <message text="`c`lRed Team `rhas unlocked their flag! Protect your side portals!"/>
+        <sound key="block.end_portal.spawn" volume="0.2" pitch="0.1"/>
+        <sound key="entity.skeleton_horse.death" volume="0.3" pitch="0.1"/>
+        <sound key="block.beacon.deactivate" volume="0.9" pitch="0.4"/>   
+        <sound key="entity.illusioner.mirror_move" volume="0.8" pitch="0.1"/>
+        <sound key="block.sculk_shrieker.shriek" volume="0.4" pitch="0.1"/>      
+    </action>
+    <action id="pray" scope="player">
+        <message text="`oThe flayed one hears your prayers..."/>
+        <sound key="entity.ghast.hurt" volume="0.2" pitch="0.1"/>
+        <message text="`6`o`lYour blood feeds the earth. From it, you will rise again. `e☀"/>
+        <sound key="entity.warden.agitated" volume=".4" pitch="2"/>
+        <sound key="entity.husk.death" volume="0.7" pitch="0.1"/>       
+    </action>
+    <!--TRIGGERS-->
+    <trigger filter="all(red-delay,red-score-reached,on-red)" action="red-flag-unlock" scope="team"/>
+    <trigger filter="all(blue-delay,blue-score-reached,on-blue)" action="blue-flag-unlock" scope="team"/>
+    <trigger filter="all(unlock_status=1,on-blue)" action="blue-enemy-unlock" scope="team"/> 
+    <trigger filter="all(unlock_status=2,on-red)" action="red-enemy-unlock" scope="team"/>
+    <trigger filter="all(void-realm-filter,any(on-red,on-blue))" action="pray" scope="player"/>
+</actions>
+<flags>
+    <flag id="red-flag" name="Red Flag" pickup-filter="on-red" color="red" required="false" beam="false" carry-message="🌀 Score in the enemy's portals! 🌀" pickup-kit="flag-pickup" drop-kit="reset-health" drop-on-water="false">
+        <post id="red-post" recover-time="10s" respawn-time="5s">-44,8,0</post>
+        <net points="50" region="blue-portals" capture-filter="on-red"/>
+    </flag>
+    <flag id="blue-flag" name="Blue Flag" pickup-filter="on-blue" color="blue" required="false" beam="false" carry-message="🌀 Score in the enemy's portals! 🌀" pickup-kit="flag-pickup" drop-kit="reset-health" drop-on-water="false">
+        <post id="blue-post" recover-time="10s" respawn-time="5s">44,8,0</post>
+        <net points="50" region="red-portals" capture-filter="on-blue"/>
+    </flag>
+</flags>
+<shopkeepers>
+    <shopkeeper name="`a⚗`2`l Shaman `a⚗" mob="Villager" shop="shaman">
+        <point yaw="-180">-55.5,11,4.5</point>
+    </shopkeeper>
+    <shopkeeper name="`a⚗`2`l Shaman `a⚗" mob="Villager" shop="shaman">
+        <point yaw="0">56.5,11,-3.5</point>
+    </shopkeeper>
+</shopkeepers>
+<shops>
+    <shop id="shaman">
+        <category id="supplies" name="`7🗡 `7`lSupplies `7🗡" material="archer pottery sherd">
+            <item material="jungle leaves" amount="16" price="1" currency="`sunflower"/>
+            <item material="stone hoe" amount="1" price="1" currency="sunflower"/>
+            <item material="wood" damage="3" amount="16" price="3" currency="sunflower"/>
+            <item material="scaffolding" amount="8" price="2" currency="sunflower"/>
+        </category>
+    </shop>
+</shops>
+<respawn delay="4s" blackout="true"/>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+    <tool>stone axe</tool>
+</toolrepair>
+<itemremove>
+    <!--Kit items-->
+    <item>leather helmet</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+    <item>leather chestplate</item>
+    <item>arrow</item>
+    <item>golden apple</item>
+    <item>leaves</item>
+    <!--Map items-->
+    <item>seeds</item>        
+    <item>jungle sapling</item>
+    <item>string</item>
+    <item>stick</item>
+    <item>candle</item>
+    <item>jungle_fence</item>
+    <!--Shop items-->
+    <item>sunflower</item>
+    <item>stone hoe</item>
+</itemremove>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<maxbuildheight>14</maxbuildheight>
+<disabledamage>
+    <damage>fall</damage>
+</disabledamage>
+</map>
