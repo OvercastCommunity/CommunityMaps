@@ -1,0 +1,148 @@
+<map proto="1.5.0">
+<name>Cirrus park</name>
+<created>2025-08-04</created>
+<version>1.0.0</version>
+<objective>Control the flag and reach 300 points to win!</objective>
+<include id="gapple-kill-reward"/>
+<include id="void-death"/>
+<authors>
+    <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
+</authors>
+<teams>
+    <team id="red-team" color="dark red" max="7">Red</team>
+    <team id="blue-team" color="blue" max="7">Blue</team>
+</teams>
+<spawns>
+    <default>
+        <region yaw="-90">
+            <point>-52.5,25,0.5</point>
+        </region>
+    </default>
+    <spawn team="red-team" kit="spawn-kit">
+        <region yaw="135">
+            <point>0.5,6,61.5</point>
+        </region>
+    </spawn>
+    <spawn team="blue-team" kit="spawn-kit">
+        <region yaw="45">
+            <point>0.5,6,-60.5</point>
+        </region>
+    </spawn>
+</spawns>
+<regions>
+    <union id="spawns">
+        <cuboid id="red-spawn" min="-27,0,68" max="15,25,47"/>
+        <mirror id="blue-spawn" region="red-spawn" normal="0,0,1" origin="0.5,0,0.5"/>
+    </union>
+    <union id="tracks">
+        <union id="red-track">
+            <cuboid id="red-park-side" min="-19,7,18" max="-14,12,47"/>
+            <cuboid id="red-soccer-side" min="-15,7,47 " max="15,12,42"/>
+        </union>
+        <mirror id="blue-track" region="red-track" normal="0,0,1" origin="0.5,0,0.5"/>
+    </union>
+    <point id="soccer-spawner">34.5,6.25,0.5</point>
+    <point id="tennis-spawner">0.5,6,0.5</point>        
+    <!--Apply-->
+    <apply block="never" use="never"/>
+    <apply enter="red-team" region="red-spawn" message="You may not enter the opposing team's spawn!"/>
+    <apply enter="blue-team" region="blue-spawn" message="You may not enter the opposing team's spawn!"/>
+    <apply enter="not(carrying)" region="red-track" message="You may not enter the track while carrying a flag!"/>
+    <apply enter="not(carrying)" region="blue-track" message="You may not enter the track while carrying a flag!"/>
+    <apply enter="red-team" region="red-track" lend-kit="runner" message="You may not enter the opposing team's spawn!"/>
+    <apply enter="blue-team" region="blue-track" lend-kit="runner" message="You may not enter the opposing team's spawn!"/>
+</regions>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="weapon.offhand" unbreakable="true" material="shield"/>
+        <item slot="0" unbreakable="true" material="stone sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" material="golden apple"/>
+        <item slot="8" amount="12" material="arrow"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" material="chainmail leggings">
+            <enchantment level="3">projectile_protection</enchantment>
+        </leggings>
+        <boots unbreakable="true" material="iron boots"/>
+        <effect duration="3s" amplifier="5">resistance</effect>
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="flag-kit" force="true">
+        <max-health>14</max-health>
+        <effect>slowness</effect>
+        <effect>glowing</effect>
+    </kit>
+    <kit id="reset-health" force="true">
+        <max-health>20</max-health>
+    </kit>
+    <kit id="runner" force="true">
+        <effect>speed</effect>
+    </kit>
+</kits>
+<filters>
+    <all id="red-team">
+        <team>red-team</team>
+    </all>
+    <all id="blue-team">
+        <team>blue-team</team>
+    </all>
+    <any id="carrying">
+        <carrying-flag>red-flag</carrying-flag>
+        <carrying-flag>blue-flag</carrying-flag>
+    </any>
+</filters>
+<flags>
+    <flag id="red-flag" name="Red Flag" color="red" pickup-filter="blue-team" shared="false" points-rate="1" pickup-kit="flag-kit" drop-kit="reset-health" flag-proximity-metric="none">
+        <post return-time="0s" respawn-time="10s">
+            <post name="Red Post" yaw="180">0.5,7,26.5</post>
+        </post>
+    </flag>
+    <flag id="blue-flag" name="Blue Flag" color="blue" pickup-filter="red-team" shared="false" points-rate="1" pickup-kit="flag-kit" drop-kit="reset-health" flag-proximity-metric="none">
+        <post return-time="0s" respawn-time="10s">
+            <post name="Blue Post" yaw="0">0.5,7,-25.5</post>
+        </post>
+    </flag>
+</flags>
+<actions>
+    <action id="shield-remover" scope="player" expose="true">
+            <replace-item ignore-metadata="true">
+                <find material="shield"/>
+                <replace material="air"/>
+            </replace-item>      
+    </action>
+    <trigger filter="carrying" action="shield-remover" scope="player"/>
+</actions>
+<score>
+    <limit>300</limit>
+    <kills>1</kills>
+</score>
+<spawners>
+    <spawner spawn-region="soccer-spawner" player-region="everywhere" max-entities="1" delay="1s">
+        <item amount="1" material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="tennis-spawner" player-region="everywhere" max-entities="1" delay="1s">
+        <item amount="1" material="golden apple"/>
+    </spawner>
+</spawners>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>iron boots</item>
+    <item>banner</item>
+</itemremove>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<damage>
+    <deny>
+        <cause>fall</cause>
+    </deny>
+</damage>
+</map>
