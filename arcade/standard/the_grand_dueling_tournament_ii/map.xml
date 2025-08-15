@@ -17,7 +17,7 @@
                                         \/
 -->
 <name>The Grand Dueling Tournament II</name>
-<version>3.0.0</version>
+<version>3.0.1</version>
 <objective>Defeat opposing teams in The Grand ${tournament-type} Tournament!</objective>
 <phase>staging</phase>
 <variant id="default" world="duel"/>
@@ -193,7 +193,7 @@
     <constant id="arena-4-z-offset">0</constant>
     <constant id="arena-variants">8</constant>
     <constant id="arena-variant-0-origin">235,0,-147</constant>
-    <constant id="arena-variant-0-size">27,13,115</constant>
+    <constant id="arena-variant-0-size">27,15,115</constant>
     <constant id="arena-variant-offset">28,0,0</constant>
     <constant id="kit-noun">arena</constant>
     <constant id="arena-variants">12</constant>
@@ -224,14 +224,14 @@
     <if variant="spleef">
         <author uuid="75fd93dd-8e48-4698-81a2-97dae2ec5b5f"/> <!-- Pugzy -->
     </if>
+    <if variant="cannon">
+        <author uuid="a9f11454-beac-4cc3-a138-1780802c8794"/> <!-- Crazy_ -->
+    </if>
     <if variant="cacti">
         <author uuid="3a3dab52-a356-4eed-a506-a9a7e53a3f68"/> <!-- Pyrolith -->
     </if>
     <if variant="tug">
         <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
-    </if>
-    <if variant="cannon">
-        <author uuid="a9f11454-beac-4cc3-a138-1780802c8794"/> <!-- Crazy_ -->
     </if>
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
 </authors>
@@ -299,17 +299,15 @@
     </kit>
     <kit id="spectator-kit" parents="clear-kit" force="true">
         <effect>invisibility</effect>
+        <effect>night vision</effect>
         <if constant="enable-spectator-mode" constant-value="true">
             <item slot="0" material="feather" name="`r`bSpectator Mode" consumable="spectator-mode" locked="true"/>
         </if>
-        <action filter="not(final-arena)">
-            <kit>
-                <item slot="7" material="ink sack" damage="13" name="`r`dPrevious Arena" consumable="spectate-prev" locked="true"/>
-                <item slot="8" material="ink sack" damage="10" name="`r`aNext Arena" consumable="spectate-next" locked="true"/>
-            </kit>
-        </action>
+        <item slot="7" material="ink sack" damage="13" name="`r`dPrevious Arena" consumable="spectate-prev" locked="true"/>
+        <item slot="8" material="ink sack" damage="10" name="`r`aNext Arena" consumable="spectate-next" locked="true"/>
     </kit>
     <kit id="respawning-kit" force="true">
+        <effect duration="0">blindness</effect>
         <effect duration="0">invisibility</effect>
     </kit>
     <kit id="survival-kit" force="true">
@@ -776,7 +774,7 @@
             <item slot="3" material="stained clay" amount="64" team-color="true"/>
             <item slot="4" material="stained clay" amount="64" team-color="true"/>
             <item slot="5" material="golden apple"/>
-            <effect duration="0.1s">blindness</effect>
+            <effect>night vision</effect>
             <action>
                 <set var="current_kit_requires_survival" value="1"/>
                 <set var="current_kill_reward" value="1"/>
@@ -897,13 +895,7 @@
 </kill-rewards>
 <if variant="cacti">
     <block-drops>
-        <rule>
-            <filter>
-                <all>
-                    <material>cactus</material>
-                    <variable var="current_kit">5</variable>
-                </all>
-            </filter>
+        <rule filter="all(cactus, current_kit=5)">
             <drops>
                 <item material="cactus" name="`rThrowable Cactus" projectile="cacti-gun"/>
             </drops>
@@ -1489,6 +1481,7 @@
     <variable id="current_round"/>
     <variable id="current_variant"/>
     <variable id="current_kit"/>
+    <variable id="teleport"/>
     <if variant="cannon">
         <variable id="current_platform_size"/>
         <variable id="current_platform_bridge"/>
@@ -1579,7 +1572,8 @@
     <trigger scope="match" filter="state=${finished}"><action><message text="state=finished"/></action></trigger>
     <trigger scope="match" filter="current_round=1"><action><message text="current_round=1"/></action></trigger>
     <trigger scope="match" filter="current_round=2"><action><message text="current_round=2"/></action></trigger>
-    <trigger scope="match" filter="current_round=3"><action><message text="current_round=3"/></action></trigger> -->
+    <trigger scope="match" filter="current_round=3"><action><message text="current_round=3"/></action></trigger>
+    <trigger scope="player" filter="playing=1"><action><message text="playing=1"/></action></trigger> -->
     <trigger scope="match" filter="always">
         <action>
             <!-- kit setup - cheers, Pablo <3 -->
@@ -1652,6 +1646,7 @@
             <action id="goto-prev-arena"/>
         </action>
     </action>
+    <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=0, spectator_mode=0, lobby)" action="goto-next-arena"/>
     <action id="display-current-matchup" scope="player">
         <message actionbar="{0} `bvs {1}">
             <replacements>
@@ -1764,7 +1759,7 @@
                         <kit id="kit-13"/>
                     </action>
                 </if>
-                <action filter="teleport-to-arena">
+                <action filter="teleport=1">
                     <set var="playing" value="1"/>
                     <action filter="respawns=0">
                         <set var="respawns" value="current_kit_max_respawns"/>
@@ -1775,7 +1770,7 @@
                 </action>
             </action>
         </switch-scope>
-        <action filter="teleport-to-arena">
+        <action filter="teleport=1">
             <action id="display-current-kit-title"/>
         </action>
         <if variant="cannon">
@@ -1805,6 +1800,7 @@
             </action>
         </if>
     </action>
+    <trigger scope="player" filter="all(match-running, state=${starting}, lobby, playing=0)" action="apply-current-player-kit"/>
     <action id="display-current-kit-title" scope="match">
         <message actionbar="{kit}">
             <replacements>
@@ -1815,7 +1811,6 @@
     <trigger scope="player" filter="observing" observers="true" action="playing:=0"/>
     <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=1, current_kit_requires_survival=1, all-arenas)" action="survival-kit"/>
     <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=0)" action="spectator-kit"/>
-    <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=0, spectator_mode=0, final-arena)" action="spectator-kit"/>
     <trigger scope="player" observers="true" filter="all(observing, host-console, not(match-started))">
         <action>
             <sound key="${entity.experience_orb.pickup}" volume="1" pitch="1.2"/>
@@ -2269,8 +2264,9 @@
             </if>
         </action>
     </trigger>
+    <trigger scope="match" filter="teleport-to-arena" action="teleport:=1"/>
     <if constant="round-begin-rearrange-after-seconds">
-        <trigger scope="match" filter="all(match-running, teleport-to-arena)">
+        <trigger scope="match" filter="all(match-running, teleport=1)">
             <action>
                 <action id="apply-current-kit"/>
                 <fill region="all-arenas-spawn-boxes" filter="air" material="stained glass"/>
@@ -2322,6 +2318,7 @@
                     </switch>
                 </replacements>
             </message>
+            <set var="teleport" value="0"/>
         </action>
     </trigger>
     <trigger scope="player" filter="all(match-running, state=${running}, playing=1, arena-1)" action="goto:=1"/>
@@ -2662,6 +2659,16 @@
                 <set var="index" value="index - 1"/>
             </repeat>
         </action>
+        <trigger scope="player" filter="all(match-running, participating, state=${running}, all-arenas, playing=1, alive)">
+            <action>
+                <action filter="all(odd-placement, owns-progress-2, not(owns-progress-3))"     ><teleport x="player.x" y="player.y" z="player.z + 22"/></action>
+                <action filter="all(odd-placement, owns-progress-3, not(owns-progress-4))"     ><teleport x="player.x" y="player.y" z="player.z + 44"/></action>
+                <action filter="all(odd-placement, owns-progress-4)"                           ><teleport x="player.x" y="player.y" z="player.z + 66"/></action>
+                <action filter="all(not(odd-placement), owns-progress-4, not(owns-progress-3))"><teleport x="player.x" y="player.y" z="player.z - 22"/></action>
+                <action filter="all(not(odd-placement), owns-progress-3, not(owns-progress-2))"><teleport x="player.x" y="player.y" z="player.z - 44"/></action>
+                <action filter="all(not(odd-placement), owns-progress-2)"                      ><teleport x="player.x" y="player.y" z="player.z - 66"/></action>
+            </action>
+        </trigger>
         <trigger scope="match">
             <filter>
                 <after duration="10s" message="Sudden death in {0}">
@@ -2680,16 +2687,16 @@
     </if>
 </actions>
 <portals sound="false">
-    <portal destination="lobby-spawn" yaw="@${lobby-spawn-yaw}" forward="state=${finished}"/>
+    <portal destination="lobby-spawn" yaw="@${lobby-spawn-yaw}" forward="all(participating, state=${finished})"/>
     <!-- teleport to arena spawns -->
-    <portal destination="arena-1-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=1, any(teleport-to-arena, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-1-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=2, any(teleport-to-arena, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-2-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=3, any(teleport-to-arena, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-2-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=4, any(teleport-to-arena, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-3-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=5, any(teleport-to-arena, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-3-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=6, any(teleport-to-arena, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-4-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=7, any(teleport-to-arena, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-4-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=8, any(teleport-to-arena, all(alive, not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-1-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=1, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-1-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=2, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-2-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=3, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-2-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=4, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-3-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=5, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-3-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=6, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-4-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=7, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-4-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=8, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
     <!-- inter-arena teleportation -->
     <portal destination="arena-1-spectator-spawn" yaw="@${arena-spectator-yaw}" forward="all(match-running, participating, state=${running}, playing=0, goto=1, not(arena-1-finished))"/>
     <portal destination="arena-2-spectator-spawn" yaw="@${arena-spectator-yaw}" forward="all(match-running, participating, state=${running}, playing=0, goto=2, not(arena-2-finished))"/>
@@ -2699,14 +2706,6 @@
     <if variant="cannon">
         <portal x="9" z="1" y="0" forward="offset-teleport" filter="odd-placement"/>
         <portal x="-9" z="-1" y="0" forward="offset-teleport" filter="not(odd-placement)"/>
-    </if>
-    <if variant="tug">
-        <portal z="22"  forward="all(match-running, participating, state=${running}, all-arenas, playing=1, alive)" filter="all(odd-placement, owns-progress-2, not(owns-progress-3))"/>
-        <portal z="44"  forward="all(match-running, participating, state=${running}, all-arenas, playing=1, alive)" filter="all(odd-placement, owns-progress-3, not(owns-progress-4))"/>
-        <portal z="66"  forward="all(match-running, participating, state=${running}, all-arenas, playing=1, alive)" filter="all(odd-placement, owns-progress-4)"/>
-        <portal z="-22" forward="all(match-running, participating, state=${running}, all-arenas, playing=1, alive)" filter="all(not(odd-placement), owns-progress-4, not(owns-progress-3))"/>
-        <portal z="-44" forward="all(match-running, participating, state=${running}, all-arenas, playing=1, alive)" filter="all(not(odd-placement), owns-progress-3, not(owns-progress-2))"/>
-        <portal z="-66" forward="all(match-running, participating, state=${running}, all-arenas, playing=1, alive)" filter="all(not(odd-placement), owns-progress-2)"/>
     </if>
 </portals>
 <regions>
