@@ -1,0 +1,165 @@
+<map proto="1.5.0">
+<name>The High Seas</name>
+<version>1.0.0</version>
+<objective>Eliminate the other team before the time runs out!</objective>
+<created>2025-04-06</created>
+<gamemode>blitz</gamemode>
+<authors>
+    <author uuid="d1c4b70c-e4df-4ed6-999a-2e959bdfdac7"/> <!-- HUDV -->
+</authors>
+<contributors>
+    <contributor uuid="534470be-4122-4762-83e1-f45abb474cdc" contribution="XML"/> <!-- Necrozma -->
+</contributors>
+<blitz>
+    <broadcastLives>false</broadcastLives>
+</blitz>
+<teams>
+    <team id="pirates" color="dark red" max="16">Pirates</team>
+    <team id="royal-navy" color="blue" max="16">Royal Navy</team>
+    </teams>
+<spawns>
+    <spawn team="pirates" kit="base-kit" yaw="-180" safe="true">
+        <regions>
+            <cuboid min="-9,69,32" max="10,69,34"/>
+        </regions>
+    </spawn>
+    <spawn team="royal-navy" kit="base-kit" yaw="0" safe="true">
+        <regions>
+            <cuboid min="-9,69,-31" max="10,69,-33"/>
+        </regions>
+    </spawn>
+    <default yaw="-90">
+        <regions>
+            <cuboid min="-57,94,-1" max="-54,94,2"/>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="base-kit">
+        <item slot="00" amount="01" material="iron axe" unbreakable="true" show-unbreakable="false"/>
+        <item slot="01" amount="01" material="bow" name="`rFlintlock" unbreakable="true" show-unbreakable="false"/>
+        <item slot="02" amount="01" material="wood sword" unbreakable="true" show-unbreakable="false"/>
+        <item slot="03" amount="64" material="tnt"/>
+        <item slot="04" amount="32" material="spruce fence"/>
+        <item slot="05" amount="32" material="stone button"/>
+        <item slot="06" amount="64" material="redstone"/>
+        <item slot="07" amount="01" material="water bucket"/>
+        <item slot="08" amount="64" material="wood"/>
+        <item slot="09" amount="64" material="tnt"/>
+        <item slot="10" amount="64" material="tnt"/>
+        <item slot="11" amount="64" material="tnt"/>
+        <item slot="12" amount="16" material="snowball"/>
+        <item slot="13" amount="01" material="iron pickaxe" unbreakable="true" show-unbreakable="false"/>
+        <item slot="15" amount="16" material="redstone block"/>
+        <item slot="16" amount="01" material="compass" name="`rTracking Compass" lore="`7Points to the nearest enemy!"/>
+        <item slot="17" amount="64" material="wood"/>
+        <item slot="18" amount="64" material="tnt"/>
+        <item slot="19" amount="64" material="tnt"/>
+        <item slot="20" amount="64" material="tnt"/>
+        <item slot="21" amount="16" material="arrow"/>
+        <item slot="22" amount="12" material="trap door"/>
+        <item slot="23" amount="12" material="stone plate"/>
+        <item slot="24" amount="12" material="redstone torch on"/>
+        <item slot="25" amount="01" material="water bucket"/>
+        <item slot="26" amount="64" material="wood"/>
+        <item slot="27" amount="64" material="tnt"/>
+        <item slot="28" amount="64" material="tnt"/>
+        <item slot="29" amount="64" material="tnt"/>
+        <item slot="30" amount="32" material="ladder"/>
+        <item slot="31" amount="32" material="wood step" damage="1"/>
+        <item slot="32" amount="12" material="lever"/>
+        <item slot="33" amount="12" material="diode"/>
+        <item slot="34" amount="01" material="water bucket"/>
+        <item slot="35" amount="64" material="wood"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true" show-unbreakable="false" locked="true"/>
+        <leggings material="chainmail leggings" unbreakable="true" show-unbreakable="false" locked="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true" show-unbreakable="false" locked="true" enchantment="aqua_affinity"/>
+    </kit>
+    <kit id="kill" force="true">
+        <health>1</health>
+        <effect amplifier="10">wither</effect>
+    </kit>
+</kits>
+<filters>
+    <pulse id="general-pulse" period="0.1s" duration="0.05s">
+        <match-running/>
+    </pulse>
+    <offset id="on-water" vector="~0,~-0.1,~0">
+        <any>
+            <material>stained_glass:3</material>
+            <material>carpet:0</material>
+        </any>
+    </offset>   
+    <material id="air">air</material>
+    <any id="water-blocks">
+        <material>stained_glass:3</material>
+        <material>carpet:0</material>
+    </any>
+</filters>
+<actions>
+    <message id="intro" fade-in="0" stay="2.5s" fade-out="0.5s">
+        <title>`cYou have `b1 life</title>
+        <subtitle>`7Standing on the `9water `7will kill you!</subtitle>
+    </message>
+    <trigger action="intro" scope="player">
+        <filter>
+            <match-started/>
+        </filter>
+    </trigger>
+    <fill id="place-water" region="ship-hulls" material="stained_glass:3" filter="air"/>
+    <trigger action="place-water" filter="general-pulse" scope="match"/>
+    <kill-entities id="kill-water-entities" filter="on-water"/>
+    <trigger action="kill-water-entities" filter="general-pulse" scope="match"/>
+    <action id="kill-on-water" scope="player">
+        <action filter="on-water" scope="player">
+            <kit id="kill"/>
+            <sound key="game.player.swim" pitch="0.6"/>
+        </action>
+    </action>
+    <trigger action="kill-on-water" filter="general-pulse" scope="player"/>
+</actions>
+<regions>
+    <apply region="out-of-bounds" block="never" message="You can't build outside the map!"/>
+    <apply block-place-against="not(water-blocks)" message="You can't edit the water!"/>
+    <apply region="water-level" block-break="not(water-blocks)" block-place="water-blocks" message="You can't edit the water!"/>
+    <negative id="out-of-bounds">
+        <cuboid min="-70,58,-50" max="70,126,50"/>
+    </negative>
+    <below id="water-level" y="60"/>
+    <union id="ship-hulls">
+        <cuboid min="-19,58,21" max="33,59,36"/>
+        <cuboid min="-32,58,-35" max="20,59,-20"/>
+    </union>
+</regions>
+<disabledamage>
+    <damage ally="true" self="false" enemy="false" other="false">block explosion</damage>
+</disabledamage>
+<maxbuildheight>125</maxbuildheight>
+<compass show-distance="true">
+    <player holder-filter="pirates" filter="royal-navy" show-player="true"/>
+    <player holder-filter="royal-navy" filter="pirates" show-player="true"/>
+</compass>
+<kill-rewards>
+    <kill-reward>
+        <kit>
+            <effect duration="0.1" amplifier="10">regeneration</effect>
+            <effect duration="1.1" amplifier="1">night vision</effect>
+        </kit>
+    </kill-reward>
+</kill-rewards>
+<crafting>
+    <disable>carpet:0</disable>
+    <disable>iron ingot</disable>
+    <disable>gold ingot</disable>
+</crafting>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<gamerules>
+    <keepInventory>true</keepInventory>
+    <randomTickSpeed>0</randomTickSpeed>
+</gamerules>
+<world>
+    <timeset>6000</timeset>
+</world>
+</map>
