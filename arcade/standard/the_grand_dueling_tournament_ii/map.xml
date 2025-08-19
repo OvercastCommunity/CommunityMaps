@@ -17,7 +17,7 @@
                                         \/
 -->
 <name>The Grand Dueling Tournament II</name>
-<version>3.0.1</version>
+<version>3.0.2</version>
 <objective>Defeat opposing teams in The Grand ${tournament-type} Tournament!</objective>
 <phase>staging</phase>
 <variant id="default" world="duel"/>
@@ -292,6 +292,7 @@
             <set var="current_kit_max_respawns" value="0"/>
             <set var="playing" value="0"/>
             <set var="respawns" value="0"/>
+            <set var="player.exp_progress" value="0"/>
         </action>
         <if constant="enable-night-vision" constant-value="true">
             <effect>night vision</effect>
@@ -776,6 +777,7 @@
             <item slot="5" material="golden apple"/>
             <effect>night vision</effect>
             <action>
+                <action id="show-tug-progress"/>
                 <set var="current_kit_requires_survival" value="1"/>
                 <set var="current_kill_reward" value="1"/>
             </action>
@@ -980,10 +982,10 @@
         </unless>
     </all>
     <all id="all-arenas-finished">
-        <variable id="arena-1-finished" var="arena_finished" index="0">1</variable>
-        <variable id="arena-2-finished" var="arena_finished" index="1">1</variable>
-        <variable id="arena-3-finished" var="arena_finished" index="2">1</variable>
-        <variable id="arena-4-finished" var="arena_finished" index="3">1</variable>
+        <variable id="arena-1-finished" var="arena_finished" index="0">1..</variable>
+        <variable id="arena-2-finished" var="arena_finished" index="1">1..</variable>
+        <variable id="arena-3-finished" var="arena_finished" index="2">1..</variable>
+        <variable id="arena-4-finished" var="arena_finished" index="3">1..</variable>
     </all>
     <any id="final-arena">
         <filter id="all(not(arena-1-finished), arena-2-finished, arena-3-finished, arena-4-finished)"/>
@@ -1048,15 +1050,13 @@
             <region id="all-arenas"/>
             <any>
                 <material id="snow">snow block</material>
-                <material>tnt</material>
+                <filter id="tnt"/>
             </any>
         </all>
-        <all id="placeable-blocks">
-            <not>
-                <variable var="current_kit">5..6</variable> <!-- bow spleef, block runner -->
-            </not>
-            <filter id="snow"/>
-        </all>
+        <any id="placeable-blocks">
+            <filter id="tnt"/>
+            <filter id="all(snow, not(current_kit=5..6))"/> <!-- bow spleef, block runner -->
+        </any>
     </if>
     <if variant="cannon">
         <any id="arena-wall-material">
@@ -1459,12 +1459,14 @@
     <variable id="current_kit_requires_survival"/>
     <variable id="current_kit_max_respawns"/>
     <variable id="current_kill_reward"/>
+    <variable id="ptemp"/>
 </variables>
 <variables scope="team">
     <variable id="current_team"/>
     <variable id="current_arena"/>
     <variable id="placement"/>
     <variable id="won"/>
+    <variable id="ttemp"/>
 </variables>
 <variables scope="match">
     <score id="score"/>
@@ -1573,7 +1575,9 @@
     <trigger scope="match" filter="current_round=1"><action><message text="current_round=1"/></action></trigger>
     <trigger scope="match" filter="current_round=2"><action><message text="current_round=2"/></action></trigger>
     <trigger scope="match" filter="current_round=3"><action><message text="current_round=3"/></action></trigger>
-    <trigger scope="player" filter="playing=1"><action><message text="playing=1"/></action></trigger> -->
+    <trigger scope="player" filter="playing=1"><action><message text="playing=1"/></action></trigger>
+    <trigger scope="match" filter="teleport=0"><action><message text="teleport=0"/></action></trigger>
+    <trigger scope="match" filter="teleport=1"><action><message text="teleport=1"/></action></trigger> -->
     <trigger scope="match" filter="always">
         <action>
             <!-- kit setup - cheers, Pablo <3 -->
@@ -1635,20 +1639,18 @@
     <action id="goto-next-arena" scope="player" filter="all(participating, playing=0)">
         <set var="goto" value="goto + 1"/>
         <action filter="goto=5.."><set var="goto" value="1"/></action>
-        <action filter="any(all(goto=1, arena-1-finished), all(goto=2, arena-2-finished), all(goto=3, arena-3-finished), all(goto=4, arena-4-finished))">
-            <action id="goto-next-arena"/>
-        </action>
     </action>
     <action id="goto-prev-arena" scope="player" filter="all(participating, playing=0)">
         <set var="goto" value="goto - 1"/>
         <action filter="goto=..0"><set var="goto" value="4"/></action>
-        <action filter="any(all(goto=1, arena-1-finished), all(goto=2, arena-2-finished), all(goto=3, arena-3-finished), all(goto=4, arena-4-finished))">
-            <action id="goto-prev-arena"/>
-        </action>
     </action>
     <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=0, spectator_mode=0, lobby)" action="goto-next-arena"/>
+    <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=0, spectator_mode=0, arena-1-spectator, arena-1-finished, not(all-arenas-finished))" action="goto-next-arena"/>
+    <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=0, spectator_mode=0, arena-2-spectator, arena-2-finished, not(all-arenas-finished))" action="goto-next-arena"/>
+    <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=0, spectator_mode=0, arena-3-spectator, arena-3-finished, not(all-arenas-finished))" action="goto-next-arena"/>
+    <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=0, spectator_mode=0, arena-4-spectator, arena-4-finished, not(all-arenas-finished))" action="goto-next-arena"/>
     <action id="display-current-matchup" scope="player">
-        <message actionbar="{0} `bvs {1}">
+        <message actionbar="{0} `bvs {1} {2}">
             <replacements>
                 <switch id="0">
                     <case filter="any(all(all-arena-1, arena_matchups[0]=1), all(all-arena-2, arena_matchups[2]=1), all(all-arena-3, arena_matchups[4]=1), all(all-arena-4, arena_matchups[6]=1))" result="`4Red"/>
@@ -1669,6 +1671,16 @@
                     <case filter="any(all(all-arena-1, arena_matchups[1]=6), all(all-arena-2, arena_matchups[3]=6), all(all-arena-3, arena_matchups[5]=6), all(all-arena-4, arena_matchups[7]=6))" result="`5Purple"/>
                     <case filter="any(all(all-arena-1, arena_matchups[1]=7), all(all-arena-2, arena_matchups[3]=7), all(all-arena-3, arena_matchups[5]=7), all(all-arena-4, arena_matchups[7]=7))" result="`dPink"/>
                     <case filter="any(all(all-arena-1, arena_matchups[1]=8), all(all-arena-2, arena_matchups[3]=8), all(all-arena-3, arena_matchups[5]=8), all(all-arena-4, arena_matchups[7]=8))" result="`3Cyan"/>
+                </switch>
+                <switch id="2">
+                    <case filter="any(all(all-arena-1, arena_finished[0]=1), all(all-arena-2, arena_finished[1]=1), all(all-arena-3, arena_finished[2]=1), all(all-arena-4, arena_finished[3]=1))" result="`b(won by `4Red`b)"/>
+                    <case filter="any(all(all-arena-1, arena_finished[0]=2), all(all-arena-2, arena_finished[1]=2), all(all-arena-3, arena_finished[2]=2), all(all-arena-4, arena_finished[3]=2))" result="`b(won by `9Blue`b)"/>
+                    <case filter="any(all(all-arena-1, arena_finished[0]=3), all(all-arena-2, arena_finished[1]=3), all(all-arena-3, arena_finished[2]=3), all(all-arena-4, arena_finished[3]=3))" result="`b(won by `2Green`b)"/>
+                    <case filter="any(all(all-arena-1, arena_finished[0]=4), all(all-arena-2, arena_finished[1]=4), all(all-arena-3, arena_finished[2]=4), all(all-arena-4, arena_finished[3]=4))" result="`b(won by `6Orange`b)"/>
+                    <case filter="any(all(all-arena-1, arena_finished[0]=5), all(all-arena-2, arena_finished[1]=5), all(all-arena-3, arena_finished[2]=5), all(all-arena-4, arena_finished[3]=5))" result="`b(won by `eYellow`b)"/>
+                    <case filter="any(all(all-arena-1, arena_finished[0]=6), all(all-arena-2, arena_finished[1]=6), all(all-arena-3, arena_finished[2]=6), all(all-arena-4, arena_finished[3]=6))" result="`b(won by `5Purple`b)"/>
+                    <case filter="any(all(all-arena-1, arena_finished[0]=7), all(all-arena-2, arena_finished[1]=7), all(all-arena-3, arena_finished[2]=7), all(all-arena-4, arena_finished[3]=7))" result="`b(won by `dPink`b)"/>
+                    <case filter="any(all(all-arena-1, arena_finished[0]=8), all(all-arena-2, arena_finished[1]=8), all(all-arena-3, arena_finished[2]=8), all(all-arena-4, arena_finished[3]=8))" result="`b(won by `3Cyan`b)"/>
                 </switch>
             </replacements>
         </message>
@@ -1810,8 +1822,8 @@
     </action>
     <trigger scope="player" filter="observing" observers="true" action="playing:=0"/>
     <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=1, current_kit_requires_survival=1, all-arenas)" action="survival-kit"/>
-    <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=0)" action="spectator-kit"/>
-    <trigger scope="player" observers="true" filter="all(observing, host-console, not(match-started))">
+    <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=0, all-spectators)" action="spectator-kit"/>
+    <trigger scope="player" filter="all(observing, host-console, not(match-started))" observers="true">
         <action>
             <sound key="${entity.experience_orb.pickup}" volume="1" pitch="1.2"/>
             <message>
@@ -2327,26 +2339,23 @@
     <trigger scope="player" filter="all(match-running, state=${running}, playing=1, arena-4)" action="goto:=4"/>
     <trigger scope="team" filter="all(match-running, state=${running}, allow-round-win-delay, ${win-condition})">
         <action id="claim-arena-win">
+            <switch-scope inner="player" filter="playing=1">
+                <action id="spectate-next-arena"/>
+            </switch-scope>
             <message text="{ translate: 'broadcast.gameOver.teamWon', color: 'green' }" subtitle="{ translate: 'broadcast.gameOver.teamWon', color: 'green' }"/>
             <sound preset="OBJECTIVE_GOOD"/>
             <sound preset="OBJECTIVE_FIREWORKS_TWINKLE"/>
-            <switch-scope inner="player">
-                <kit id="spectator-kit"/>
-                <action id="goto-next-arena"/>
-            </switch-scope>
             <set var="won" value="1"/>
             <set var="index" value="floor((placement - 1) / 2)"/>
-            <set var="arena_finished" index="index" value="1"/>
             <set var="callout" index="0" value="current_team"/>
+            <set var="arena_finished" index="index" value="current_team"/>
             <switch-scope inner="match">
-                <set var="arena_finished" index="index" value="1"/>
                 <switch-scope inner="team" filter="all(won=0, any(all(index=0, arena-1-teams), all(index=1, arena-2-teams), all(index=2, arena-3-teams), all(index=3, arena-4-teams)))">
                     <message text="{ translate: 'broadcast.gameOver.teamLost', color: 'red' }" subtitle="{ translate: 'broadcast.gameOver.teamLost', color: 'red' }"/>
                     <sound preset="OBJECTIVE_BAD"/>
                     <set var="callout" index="1" value="current_team"/>
                     <switch-scope inner="player" filter="playing=1">
-                        <kit id="spectator-kit"/>
-                        <action id="goto-next-arena"/>
+                        <action id="spectate-next-arena"/>
                     </switch-scope>
                 </switch-scope>
                 <message text="`7[`6${host-title}`7] `6${host-name}`r: {winner} `rhas defeated {loser}`r!">
@@ -2356,6 +2365,12 @@
                     </replacements>
                 </message>
             </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=0, spectator_mode=0, any(lobby, all(arena-1, arena-1-finished), all(arena-2, arena-2-finished), all(arena-3, arena-3-finished), all(arena-4, arena-4-finished)))">
+        <action id="spectate-next-arena">
+            <kit id="spectator-kit"/>
+            <action id="goto-next-arena"/>
         </action>
     </trigger>
     <trigger scope="team" action="claim-arena-win" filter="all(match-running, state=${running}, allow-round-win-delay, not(arena-1-finished), placement-1-team, not(arena-1-has-players))"/>
@@ -2620,6 +2635,37 @@
                                 </switch>
                             </replacements>
                         </message>
+                        <set var="ptemp" value="temp - current_arena"/>
+                        <action filter="all(participating, ptemp=0)">
+                            <set var="ptemp" value="callout[0] - current_team"/>
+                            <action filter="not(ptemp=0)"> <!-- bad sound for scored against team -->
+                                <sound key="${entity.blaze.death}" volume="0.3" pitch="0.8"/>
+                                <set var="ptemp" value="999"/>
+                            </action>
+                        </action>
+                        <action filter="any(not(ptemp=999), observing)"> <!-- good sound for everyone else -->
+                            <sound key="${block.portal.travel}" volume="0.15" pitch="2"/>
+                            <sound key="${entity.firework_rocket.launch}"/>
+                        </action>
+                    </switch-scope>
+                    <switch-scope inner="player" filter="all(playing=1, any(all(temp=1, arena-1-teams), all(temp=2, arena-2-teams), all(temp=3, arena-3-teams), all(temp=4, arena-4-teams)))">
+                        <action id="show-tug-progress" filter="state=${running}">
+                            <action filter="odd-placement">
+                                  <action filter="owns-progress-1"><set var="ttemp" value="1"/></action>
+                                  <action filter="owns-progress-2"><set var="ttemp" value="2"/></action>
+                                  <action filter="owns-progress-3"><set var="ttemp" value="3"/></action>
+                                  <action filter="owns-progress-4"><set var="ttemp" value="4"/></action>
+                                  <action filter="owns-progress-5"><set var="ttemp" value="5"/></action>
+                            </action>
+                            <action filter="not(odd-placement)">
+                                  <action filter="owns-progress-5"><set var="ttemp" value="1"/></action>
+                                  <action filter="owns-progress-4"><set var="ttemp" value="2"/></action>
+                                  <action filter="owns-progress-3"><set var="ttemp" value="3"/></action>
+                                  <action filter="owns-progress-2"><set var="ttemp" value="4"/></action>
+                                  <action filter="owns-progress-1"><set var="ttemp" value="5"/></action>
+                            </action>
+                            <set var="player.exp_progress" value="ttemp / 5"/>
+                        </action>
                     </switch-scope>
                     <action id="color-tug">
                         <!-- get current tug hill relative to arena-1-progress-1 -->
@@ -2678,6 +2724,7 @@
             <action>
                 <message text="`7[`6${host-title}`7] `6${host-name} `7has enabled the `a`lBlitz `7mutation"/>
                 <message title="`aBlitz" subtitle="`7mutation has been enabled"/>
+                <sound key="${entity.lightning_bolt.thunder}"/>
                 <set var="overtime_level" value="1"/>
                 <switch-scope inner="player" filter="all(all-arenas, participating, alive, playing=1)">
                     <set var="respawns" value="1"/>
@@ -2689,19 +2736,19 @@
 <portals sound="false">
     <portal destination="lobby-spawn" yaw="@${lobby-spawn-yaw}" forward="all(participating, state=${finished})"/>
     <!-- teleport to arena spawns -->
-    <portal destination="arena-1-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=1, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-1-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=2, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-2-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=3, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-2-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=4, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-3-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=5, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-3-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=6, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-4-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=7, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
-    <portal destination="arena-4-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, playing=1, not(respawns=0), placement=8, any(teleport=1, all(alive, not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-1-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, placement=1, any(teleport=1, all(alive, playing=1, not(respawns=0), not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-1-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, placement=2, any(teleport=1, all(alive, playing=1, not(respawns=0), not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-2-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, placement=3, any(teleport=1, all(alive, playing=1, not(respawns=0), not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-2-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, placement=4, any(teleport=1, all(alive, playing=1, not(respawns=0), not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-3-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, placement=5, any(teleport=1, all(alive, playing=1, not(respawns=0), not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-3-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, placement=6, any(teleport=1, all(alive, playing=1, not(respawns=0), not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-4-spawn-1" yaw="@${arena-spawn-1-yaw}" forward="all(match-running, participating, placement=7, any(teleport=1, all(alive, playing=1, not(respawns=0), not(any(all-arenas, below-arenas)))))"/>
+    <portal destination="arena-4-spawn-2" yaw="@${arena-spawn-2-yaw}" forward="all(match-running, participating, placement=8, any(teleport=1, all(alive, playing=1, not(respawns=0), not(any(all-arenas, below-arenas)))))"/>
     <!-- inter-arena teleportation -->
-    <portal destination="arena-1-spectator-spawn" yaw="@${arena-spectator-yaw}" forward="all(match-running, participating, state=${running}, playing=0, goto=1, not(arena-1-finished))"/>
-    <portal destination="arena-2-spectator-spawn" yaw="@${arena-spectator-yaw}" forward="all(match-running, participating, state=${running}, playing=0, goto=2, not(arena-2-finished))"/>
-    <portal destination="arena-3-spectator-spawn" yaw="@${arena-spectator-yaw}" forward="all(match-running, participating, state=${running}, playing=0, goto=3, not(arena-3-finished))"/>
-    <portal destination="arena-4-spectator-spawn" yaw="@${arena-spectator-yaw}" forward="all(match-running, participating, state=${running}, playing=0, goto=4, not(arena-4-finished))"/>
+    <portal destination="arena-1-spectator-spawn" yaw="@${arena-spectator-yaw}" forward="all(match-running, participating, state=${running}, playing=0, goto=1)"/>
+    <portal destination="arena-2-spectator-spawn" yaw="@${arena-spectator-yaw}" forward="all(match-running, participating, state=${running}, playing=0, goto=2)"/>
+    <portal destination="arena-3-spectator-spawn" yaw="@${arena-spectator-yaw}" forward="all(match-running, participating, state=${running}, playing=0, goto=3)"/>
+    <portal destination="arena-4-spectator-spawn" yaw="@${arena-spectator-yaw}" forward="all(match-running, participating, state=${running}, playing=0, goto=4)"/>
     <!-- hack to move players to offset platforms -->
     <if variant="cannon">
         <portal x="9" z="1" y="0" forward="offset-teleport" filter="odd-placement"/>
