@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>The High Seas</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <objective>Eliminate the other team before the time runs out!</objective>
 <created>2025-04-06</created>
 <gamemode>blitz</gamemode>
@@ -13,6 +13,9 @@
 <blitz>
     <broadcastLives>false</broadcastLives>
 </blitz>
+<broadcasts>
+    <alert after="3m30s">The world border is now closing!</alert>
+</broadcasts>
 <teams>
     <team id="pirates" color="dark red" max="16">Pirates</team>
     <team id="royal-navy" color="blue" max="16">Royal Navy</team>
@@ -85,16 +88,16 @@
         <match-running/>
     </pulse>
     <offset id="on-water" vector="~0,~-0.1,~0">
-        <any>
-            <material>stained_glass:3</material>
-            <material>carpet:0</material>
-        </any>
+        <all id="water-blocks">
+            <below y="61"/>
+            <any>
+                <material>stained_glass:3</material>
+                <material>carpet:0</material>
+            </any>
+        </all>
     </offset>   
     <material id="air">air</material>
-    <any id="water-blocks">
-        <material>stained_glass:3</material>
-        <material>carpet:0</material>
-    </any>
+    <material id="water">water</material>
 </filters>
 <actions>
     <message id="intro" fade-in="0" stay="2.5s" fade-out="0.5s">
@@ -119,11 +122,11 @@
     <trigger action="kill-on-water" filter="general-pulse" scope="player"/>
 </actions>
 <regions>
-    <apply region="out-of-bounds" block="never" message="You can't build outside the map!"/>
+    <apply region="out-of-bounds" block-place="water" block-break="always" message="You can't build outside the map!"/>
     <apply block-place-against="not(water-blocks)" message="You can't edit the water!"/>
     <apply region="water-level" block-break="not(water-blocks)" block-place="water-blocks" message="You can't edit the water!"/>
     <negative id="out-of-bounds">
-        <cuboid min="-70,58,-50" max="70,126,50"/>
+        <cuboid min="-70,58,-50" max="70,95,50"/>
     </negative>
     <below id="water-level" y="60"/>
     <union id="ship-hulls">
@@ -134,7 +137,6 @@
 <disabledamage>
     <damage ally="true" self="false" enemy="false" other="false">block explosion</damage>
 </disabledamage>
-<maxbuildheight>125</maxbuildheight>
 <compass show-distance="true">
     <player holder-filter="pirates" filter="royal-navy" show-player="true"/>
     <player holder-filter="royal-navy" filter="pirates" show-player="true"/>
@@ -147,11 +149,18 @@
         </kit>
     </kill-reward>
 </kill-rewards>
+<world-borders center="0.5, 0.5">
+    <world-border size="150" after="3m29s"/>
+    <world-border size="15" after="3m30s" duration="2m" damage="1" buffer="1"/>
+</world-borders>
 <crafting>
     <disable>carpet:0</disable>
     <disable>iron ingot</disable>
     <disable>gold ingot</disable>
 </crafting>
+<itemremove>
+    <item>carpet:0</item>
+</itemremove>
 <hunger>
     <depletion>off</depletion>
 </hunger>
