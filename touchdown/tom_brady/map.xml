@@ -5,31 +5,41 @@
 <!-- |    - Gameplay:  Can only enter the scoring Endzone with Flag          -->
 <!-- ======================================================================= -->
 <name>Tom Brady</name>
-<version>1.2.2</version>
+<version>1.2.3</version>
 <variant id="friendly-fire">Friendly Fire</variant>
 <variant id="low-battery" world="low_battery">Low Battery</variant>
+<variant id="comp" world="comp" override="true">Brady Perfect</variant>
 <created>2024-09-22</created>
 <if variant="friendly-fire">
     <phase>staging</phase>
 </if>
 <constants>
     <constant id="team-size">6</constant>
-    <unless variant="low-battery">
+    <unless variant="low-battery,comp">
         <constant id="team-one-name">Pats</constant>
         <constant id="team-two-name">Bucs</constant>
     </unless>
-    <if variant="low-battery">
+    <if variant="low-battery,comp">
         <constant id="team-one-name">Blue</constant>
         <constant id="team-two-name">Red</constant>
     </if>
     <constant id="team-one-color">blue</constant>
     <constant id="team-two-color">red</constant>
-    <constant id="team-one-spawn">-23.5,35,-102.5</constant>
     <constant id="team-one-yaw">0</constant>
-    <constant id="team-two-spawn">-23.5,35,13.5</constant>
     <constant id="team-two-yaw">180</constant>
     <constant id="flag-post">-23.5,27,-44.5</constant>
-    <constant id="deny-endzone-entry">true</constant>
+    <unless variant="comp">
+        <constant id="team-one-spawn">-23.5,35,-102.5</constant>
+        <constant id="team-two-spawn">-23.5,35,13.5</constant>
+        <constant id="deny-endzone-entry">true</constant>
+    </unless>
+    <if variant="comp">
+        <constant id="void-plane">20</constant>
+        <constant id="team-one-spawn">-23.5,35,-94.5</constant>
+        <constant id="team-two-spawn">-23.5,35,5.5</constant>
+        <constant id="deny-endzone-entry">false</constant>
+        <constant id="dynamic-instaheal">true</constant>
+    </if>
     <if variant="friendly-fire">
         <constant id="melee-weapon">stick</constant>
         <constant id="flag-carrier-effects">flag-carrier-effects-ff</constant>
@@ -41,40 +51,57 @@
 <authors>
     <author uuid="c31e94b2-7678-4551-847e-989c1423323a"/> <!-- TommyHillfigger -->
     <author uuid="b390b87a-47e8-40d8-968a-9e7e2582a88b"/> <!-- MewTwoKing -->
+    <if variant="comp">
+        <author uuid="e419983c-bb20-438d-b900-717f131a272f"/> <!-- KuNet -->
+    </if>
 </authors>
 <contributors>
     <contributor uuid="2fd57dff-4cff-4b60-96a4-d26e37759c03" contribution="XML"/> <!-- Furrie -->
     <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="Bridge Snippets"/> <!-- zzuf -->
     <contributor uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb" contribution="XML Refinements"/> <!-- arcadeboss -->
-    <contributor uuid="e419983c-bb20-438d-b900-717f131a272f" contribution="XML Message Names"/> <!-- KuNet -->
+    <unless variant="comp">
+        <contributor uuid="e419983c-bb20-438d-b900-717f131a272f" contribution="XML Message Names"/> <!-- KuNet -->
+    </unless>
 </contributors>
 <spawns>
     <default>
         <region yaw="90">
-            <unless variant="low-battery">
+            <unless variant="low-battery,comp">
                 <point>45,43,-54.5</point>
             </unless>
             <if variant="low-battery">
                 <point>9.5,28,-44.5</point>
             </if>
+            <if variant="comp">
+                <point>6.5,31,-44.5</point>
+            </if>
         </region>
     </default>
 </spawns>
-<kits>
-    <kit id="flag-carrier-effects-ff" parent="flag-carrier-effects" force="true">
-        <max-health>3</max-health>
-    </kit>
-</kits>
+<if variant="friendly-fire">
+    <kits>
+        <kit id="flag-carrier-effects-ff" parent="flag-carrier-effects" force="true">
+            <max-health>3</max-health>
+        </kit>
+    </kits>
+</if>
 <regions>
-    <cuboid id="playing-field" min="-47,23,-89" max="0,30,0"/>
+    <unless variant="comp">
+        <cuboid id="playing-field" min="-47,23,-89" max="0,30,0"/>
+    </unless>
+    <if variant="comp">
+        <cuboid id="playing-field" min="-47,23,-99" max="0,30,10"/>
+    </if>
     <cuboid id="team-one-portal" min="-48,24,-100" max="1,28,-89"/> <!-- where red scores -->
     <cuboid id="team-two-portal" min="-48,24,0" max="1,28,11"/> <!-- where blue scores -->
     <cuboid id="flag-indicator-upper" min="-25,35,-46" max="-22,40,-43"/>
     <cuboid id="flag-indicator-lower" min="-25,32,-46" max="-22,34,-43"/>
 </regions>
-<portals sound="false" observers="never">
-    <!-- Falling on own team's portal -->
-    <portal destination="team-one-spawn" filter="team-one" region="team-one-portal" yaw="@${team-one-yaw}" pitch="@${team-two-pitch}"/>
-    <portal destination="team-two-spawn" filter="team-two" region="team-two-portal" yaw="@${team-two-yaw}" pitch="@${team-two-pitch}"/>
-</portals>
+<unless variant="comp">
+    <portals sound="false" observers="never">
+        <!-- Falling on own team's portal -->
+        <portal destination="team-one-spawn" filter="team-one" region="team-one-portal" yaw="@${team-one-yaw}" pitch="@${team-two-pitch}"/>
+        <portal destination="team-two-spawn" filter="team-two" region="team-two-portal" yaw="@${team-two-yaw}" pitch="@${team-two-pitch}"/>
+    </portals>
+</unless>
 </map>
