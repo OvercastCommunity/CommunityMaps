@@ -1,7 +1,7 @@
 <map proto="1.5.0">
 <name>Transit</name>
 <variant id="halloween" world="halloween">Halloween Edition</variant>
-<version>1.2.7</version>
+<version>1.2.8</version>
 <objective>Bombers should get to the scorebox and Guards should block their way!</objective>
 <constant id="bomber-color-code">FF0C0C</constant>
 <constant id="guard-color-code">FFCC0C</constant>
@@ -28,7 +28,7 @@
     <alert after="1s" every="40s">Don't fall onto the rail!</alert>
     <tip after="10s" every="1m">Stained glass panes are breakable and renewable!</tip>
     <tip after="15s" every="1m" filter="only-bombers">Two scoreboxes are located in the last compartment!</tip>
-    <tip after="45s" every="1m" filter="only-bombers">Jump on the trapdoor with potion to get on top of the train!</tip>
+    <tip after="45s" every="1m" filter="only-bombers">Reload bombs by reaching the scorebox!</tip>
     <tip after="15s" every="1m" filter="only-guards">Defend the scoreboxes near guards' spawn!</tip>
     <tip after="45s" every="1m" filter="only-guards">Guards run faster in train! Can break cobwebs and glass panes instantly!</tip>
 </broadcasts>
@@ -48,14 +48,14 @@
     </projectile>
 </projectiles>
 <kits>
-    <kit id="spawn">
+    <kit id="spawn" force="true">
         <clear/>
         <item slot="0" enchantment="damage all:10" unbreakable="true" name="`bSword" material="iron sword"/>
         <effect amplifier="-4">health boost</effect>
         <effect amplifier="1">night vision</effect>
         <effect duration="3" amplifier="255">damage resistance</effect>
     </kit>
-    <kit id="bomber-kit" parents="spawn">
+    <kit id="bomber-kit" parents="spawn" force="true">
         <effect amplifier="2">speed</effect>
         <chestplate color="${bomber-color-code}" unbreakable="true" material="leather chestplate"/>
         <leggings color="${bomber-color-code}" unbreakable="true" material="leather leggings"/>
@@ -63,7 +63,7 @@
         <item slot="1" amount="2" name="`cBomb" lore="`9Explosive! Break cobwebs!" material="tnt"/>
         <item slot="2" name="`6Smoke Bomb" projectile="smokebomb" grenade="true" grenade-power="1.6" material="snowball" lore="`9Ranged! Explosive!"/>
     </kit>
-    <kit id="guard-kit" parents="spawn">
+    <kit id="guard-kit" parents="spawn" force="true">
         <effect amplifier="1">speed</effect>
         <effect amplifier="255">haste</effect>
         <chestplate color="${guard-color-code}" unbreakable="true" material="leather chestplate"/>
@@ -84,6 +84,7 @@
         <item slot="8" material="arrow"/>
     </kit>
     <kit id="bomber-scorebox-reward" force="true">
+        <item amount="2" name="`cBomb" lore="`9Explosive! Break cobwebs!" material="tnt"/>
         <item name="`6Smoke Bomb" projectile="smokebomb" grenade="true" grenade-power="1.6" material="snowball" lore="`9Ranged! Explosive!"/>
     </kit>
     <kit id="bomber-scorebox-bonus-reward" force="true">
@@ -141,6 +142,12 @@
         <cuboid min="141,18,18" max="148,22,13"/>
         <cuboid min="141,18,-12" max="148,22,-17"/>
     </union>
+    <union id="bomber-scoreboxes-prot">
+        <cuboid min="145,22,15" max="146,25,16"/>
+        <cuboid min="145,22,-14" max="146,25,-15"/>
+        <cuboid min="141,18,18" max="148,22,13"/>
+        <cuboid min="141,18,-12" max="148,22,-17"/>
+    </union>
     <union id="restricted">
         <cuboid min="-18,32,-2" max="-23,37,3"/>
         <cuboid min="144,18,-2" max="149,23,3"/>
@@ -162,7 +169,7 @@
     <apply block="never" region="restricted" message="You may not edit this area!"/>
     <apply block="interactable" message="You may only break glass panes and cobwebs!"/>
     <apply kit="force-kill" region="tracks"/>
-    <apply enter="only-bombers" region="bomber-scoreboxes" message="You may not enter this area!"/>
+    <apply enter="only-bombers" region="bomber-scoreboxes-prot" message="You may not enter this area!"/>
     <apply enter="only-guards" region="guard-spawn-prot" message="You may not enter this area!"/>
     <apply enter="only-bombers" region="bomber-spawn-prot" message="You may not enter this area!"/>
     <apply kit="bomber-scorebox-reward" region="bomber-scoreboxes"/>
@@ -177,7 +184,7 @@
 <time>5m</time>
 <score>
     <box points="3" filter="only-bombers" region="bomber-scoreboxes"/>
-    <kills>1</kills>
+    <kills>0</kills>
     <deaths>0</deaths>
 </score>
 <portals>
@@ -217,9 +224,7 @@
     <tool>arrow</tool>
 </toolrepair>
 <kill-rewards>
-    <kill-reward filter="only-bombers">
-        <item amount="2" name="`cBomb" lore="`9Explosive! Break cobwebs!" material="tnt"/>
-    </kill-reward>
+    <kill-reward action="score := score + 1" filter="guards"/>
     <kill-reward filter="only-guards">
         <item amount="2" name="`6Cobweb" lore="`9Place near the scorebox!" material="web"/>
     </kill-reward>
