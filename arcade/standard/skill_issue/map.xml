@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Skill Issue</name>
-<version>2.1.0</version>
+<version>2.2.0</version>
 <objective>Capture the Wool in 2 minutes, or prevent the Rusher from doing so!</objective>
 <created>2025-08-04</created>
 <game>Rusher Roulette</game>
@@ -31,9 +31,8 @@
     <constant id="PERK_MAXED_OUT_GEAR">7</constant>
     <!-- LAST ROUND PERK IDS -->
     <constant id="LAST_ROUND_PERKS_AMOUNT">2</constant>
-    <constant id="LAST_ROUND_PERK_BLITZ">1</constant>
-    <constant id="LAST_ROUND_PERK_RAGE">2</constant>
-    <constant id="LAST_ROUND_PERK_TWO_RUSHERS">3</constant>
+    <constant id="LAST_ROUND_PERK_BLITZ_RAGE">1</constant>
+    <constant id="LAST_ROUND_PERK_TWO_RUSHERS">2</constant>
 </constants>
 <teams>
     <team id="rusher" color="dark red" max="1" max-overfill="1">Rusher</team>
@@ -119,7 +118,7 @@
                 <enchantment level="4">protection</enchantment>
             </boots>
         </kit>
-        <kit filter="is_last_round_perk_active_rage=1">
+        <kit filter="is_last_round_perk_active_blitz_rage=1">
             <effect amplifier="10" duration="oo">strength</effect>
         </kit>
         <!-- ADD EXCLUSIVE VAR -->
@@ -132,7 +131,7 @@
         <item material="iron sword" slot="0" unbreakable="true" />
         <kit filter="is_perk_active_bowless_defenders=0">
             <item material="bow" slot="1" unbreakable="true" />
-            <item material="arrow" slot="28" amount="64" />
+            <item material="arrow" slot="28" amount="24" />
         </kit>
         <item material="diamond pickaxe" slot="2" unbreakable="true" />
         <item material="diamond axe" slot="3" unbreakable="true" />
@@ -149,7 +148,7 @@
         <chestplate material="chainmail chestplate" />
         <boots material="leather boots" team-color="true" />
         <!-- PERKS -->
-        <kit filter="is_last_round_perk_active_rage=1">
+        <kit filter="is_last_round_perk_active_blitz_rage=1">
             <max-health>1</max-health>
         </kit>
     </kit>
@@ -223,7 +222,7 @@
             <point id="rusher-spawn">0.5,13,70.5</point>
         </region>
     </spawn>
-    <spawn team="defenders" kit="defenders-kit" filter="not(all(is_last_round_perk_active_blitz=1,round_state=${ROUND_RUNNING}))">
+    <spawn team="defenders" kit="defenders-kit" filter="not(all(is_last_round_perk_active_blitz_rage=1,round_state=${ROUND_RUNNING}))">
         <region yaw="-90">
             <cuboid id="defenders-spawn-west" min="-37.5,7,-1.5" max="-34.5,7,1.5" />
         </region>
@@ -335,12 +334,12 @@
     <portal forward="all(round_state=${ROUND_ABOUT_TO_START},defenders,half-to-east)" yaw="@90" pitch="@0" destination="defenders-spawn-east" sound="false" />
     <portal forward="all(round_state=${ROUND_ABOUT_TO_START},rusher)" yaw="@180" pitch="@0" destination="rusher-spawn" sound="false" />
     <!-- BLITZ RESPAWN TP -->
-    <portal forward="all(defenders,dead,is_last_round_perk_active_blitz=1,round_state=${ROUND_RUNNING})" yaw="@0" pitch="@0" destination="obs-spawn" sound="false" />
+    <portal forward="all(defenders,dead,is_last_round_perk_active_blitz_rage=1,round_state=${ROUND_RUNNING})" yaw="@0" pitch="@0" destination="obs-spawn" sound="false" />
 </portals>
 <respawns>
-    <respawn delay="0" auto="true" filter="any(rusher,is_last_round_perk_active_blitz=0)" />
-    <respawn delay="0" auto="true" spectate="true" filter="all(defenders,is_last_round_perk_active_blitz=1,round_state=${ROUND_RUNNING})">
-        <message>Blitz is active, you won't respawn unless the round restarts...</message>
+    <respawn delay="0" auto="true" filter="any(rusher,is_last_round_perk_active_blitz_rage=0)" />
+    <respawn delay="0" auto="true" spectate="true" filter="all(defenders,is_last_round_perk_active_blitz_rage=1,round_state=${ROUND_RUNNING})">
+        <message>Blitz is active, you won't respawn unless the round restarts</message>
     </respawn>
 </respawns>
 <variables scope="match">
@@ -348,6 +347,7 @@
     <variable id="is_rusher" scope="player" />
     <variable id="tmp_rusher" scope="player" />
     <variable id="tmp_rusher_min" />
+    <variable id="rushers_amount" default="1" />
     <variable id="rusher_identifier" scope="player" exclusive="1" />
     <variable id="round_state" default="-1" />
     <variable id="rounds_completed" />
@@ -357,6 +357,7 @@
     <variable id="countdown_is_on" />
     <variable id="rusher_online_before_round_starts" />
     <variable id="round_must_not_finish" />
+    <worldtime id="custom_world_time"/>
     <!-- PERKS -->
     <variable id="is_perk_active_triple_health" />
     <variable id="is_perk_active_blockless_defenders" />
@@ -367,8 +368,7 @@
     <variable id="is_perk_active_maxed_out_gear" />
     <!-- LAST ROUND PERKS -->
     <variable id="is_last_round_perk_active_two_rushers" />
-    <variable id="is_last_round_perk_active_blitz" />
-    <variable id="is_last_round_perk_active_rage" />
+    <variable id="is_last_round_perk_active_blitz_rage" />
     <!-- RANDOM SEEDS -->
     <variable id="i" />
     <array id="already_selected_perks" size="${ROUNDS_AMOUNT}" />
@@ -429,18 +429,20 @@
             <set var="players" value="players + 1" />
             <set var="tmp_rusher" value="random()" />
         </switch-scope>
-        <set var="tmp_rusher_min" value="99" />
-        <switch-scope inner="player" filter="all(participating,defenders)">
-            <set var="tmp_rusher_min" value="min(tmp_rusher, tmp_rusher_min)" />
-        </switch-scope>
-        <switch-scope inner="player" filter="all(participating,defenders)">
-            <set var="tmp_rusher" value="tmp_rusher - tmp_rusher_min" />
-            <action filter="tmp_rusher=0">
-                <set var="tmp_rusher" value="99" />
-                <set var="is_rusher" value="1" />
-                <set var="rusher_identifier" value="1" />
-            </action>
-        </switch-scope>
+        <repeat times="rushers_amount">
+            <set var="tmp_rusher_min" value="99" />
+            <switch-scope inner="player" filter="all(participating,defenders)">
+                <set var="tmp_rusher_min" value="min(tmp_rusher, tmp_rusher_min)" />
+            </switch-scope>
+            <switch-scope inner="player" filter="all(participating,defenders)">
+                <set var="tmp_rusher" value="tmp_rusher - tmp_rusher_min" />
+                <action filter="tmp_rusher=0">
+                    <set var="tmp_rusher" value="99" />
+                    <set var="is_rusher" value="1" />
+                    <set var="rusher_identifier" value="1" />
+                </action>
+            </switch-scope>
+        </repeat>
     </action>
     <!-- PREPARING NEXT ROUND (MATCH) -->
     <trigger scope="match" filter="round_state=${ROUND_PREPARING}">
@@ -629,7 +631,7 @@
     <!-- ROUND IS ABOUT TO START (DEFENDERS) [RUSHER ONLINE] [SAFETY DELAY] -->
     <trigger scope="team">
         <filter>
-            <after duration="0.8s" filter="all(round_state=${ROUND_ABOUT_TO_START},defenders,rusher_online_before_round_starts=1)" />
+            <after duration="0.8s" filter="all(round_state=${ROUND_ABOUT_TO_START},defenders,rusher_online_before_round_starts=1,rushers_amount=1)" />
         </filter>
         <action>
             <message title="Round `e{current}/{total}`r starting soon..." subtitle="You're a `9`lDefender`r. Prevent {player} from capturing the wool!" stay="4.2s">
@@ -637,6 +639,19 @@
                     <decimal id="current" value="next_round" />
                     <decimal id="total" value="${ROUNDS_AMOUNT}" />
                     <player id="player" var="rusher_identifier" fallback="the Rusher" />
+                </replacements>
+            </message>
+        </action>
+    </trigger>
+    <trigger scope="team">
+        <filter>
+            <after duration="0.8s" filter="all(round_state=${ROUND_ABOUT_TO_START},defenders,rusher_online_before_round_starts=1,not(rushers_amount=1))" />
+        </filter>
+        <action>
+            <message title="Round `e{current}/{total}`r starting soon..." subtitle="You're a `9`lDefender`r. Prevent the `4Rushers`r from capturing the wool!" stay="4.2s">
+                <replacements>
+                    <decimal id="current" value="next_round" />
+                    <decimal id="total" value="${ROUNDS_AMOUNT}" />
                 </replacements>
             </message>
         </action>
@@ -658,7 +673,7 @@
     <!-- ROUND RESTARTING (MATCH) -->
     <trigger filter="all(round_state=${ROUND_RESTARTING},messages_seed=1..50)" scope="match">
         <action>
-            <message title="{player} just gave up ☠" subtitle="`4`lRusher`r left. Round `erestarting`r soon..." stay="3s">
+            <message title="{player} just gave up ☠" subtitle="`4`lRusher`r left. Round `erestarting`r soon..." text="`4`lRusher`r left. Round `erestarting`r soon..." stay="3s">
                 <replacements>
                     <player id="player" var="rusher_identifier" fallback="This player" />
                 </replacements>
@@ -667,7 +682,7 @@
     </trigger>
     <trigger filter="all(round_state=${ROUND_RESTARTING},messages_seed=51..)" scope="match">
         <action>
-            <message title="{player} alt+F4’d lol" subtitle="`4`lRusher`r left. Round `erestarting`r soon..." stay="3s">
+            <message title="{player} alt+F4'd lol" subtitle="`4`lRusher`r left. Round `erestarting`r soon..." text="`4`lRusher`r left. Round `erestarting`r soon..." stay="3s">
                 <replacements>
                     <player id="player" var="rusher_identifier" fallback="This player" />
                 </replacements>
@@ -704,7 +719,7 @@
     </trigger>
     <trigger filter="all(round_state=${ROUND_FINISHED},not(current_round=${ROUNDS_AMOUNT}),messages_seed=61..80)" scope="match">
         <action>
-            <message subtitle="That’s one way to make the match longer, {player}" stay="4s">
+            <message subtitle="That's one way to make the match longer, {player}" stay="4s">
                 <replacements>
                     <player id="player" var="rusher_identifier" fallback="This player" />
                 </replacements>
@@ -752,6 +767,7 @@
         </filter>
         <action>
             <sound key="${entity.ender_dragon.growl}" />
+            <set var="custom_world_time" value="13500" />
         </action>
     </trigger>
     <!-- ROUND IS ABOUT TO START [SAFETY DELAY] -->
@@ -846,30 +862,24 @@
         </action>
     </trigger>
     <!-- LAST ROUND RUSHER PERKS -->
+    <!-- BLITZ + RAGE -->
+    <trigger scope="match" filter="selected_last_round_perk_id=${LAST_ROUND_PERK_BLITZ_RAGE}">
+        <action>
+            <set var="is_last_round_perk_active_blitz_rage" value="1" />
+            <message title="Let's see what we get" subtitle="Their perk is: `d`lBlitz + Rage!" stay="2s" />
+            <message text="The selected perk is: `d`lBlitz + Rage!" />
+            <message text="`eBlitz and Rage: no respawns are allowed, and every hit is an instant kill" />
+        </action>
+    </trigger>
     <!-- 2 RUSHERS -->
     <trigger scope="match" filter="selected_last_round_perk_id=${LAST_ROUND_PERK_TWO_RUSHERS}">
         <action>
             <set var="is_last_round_perk_active_two_rushers" value="1" />
+            <set var="rushers_amount" value="2" />
+            <action id="pick-next-rusher" />
             <message title="Let's see what we get" subtitle="Their perk is: `d`l2 Rushers!" stay="2s" />
-            <message text="`eThe selected perk is: `d`l2 Rushers!" />
-        </action>
-    </trigger>
-    <!-- BLITZ -->
-    <trigger scope="match" filter="selected_last_round_perk_id=${LAST_ROUND_PERK_BLITZ}">
-        <action>
-            <set var="is_last_round_perk_active_blitz" value="1" />
-            <message title="Let's see what we get" subtitle="Their perk is: `d`lBlitz!" stay="2s" />
-            <message text="The selected perk is: `d`lBlitz!" />
-            <message text="`eNo respawns. Once you die, you're out for the rest of the round" />
-        </action>
-    </trigger>
-    <!-- RAGE -->
-    <trigger scope="match" filter="selected_last_round_perk_id=${LAST_ROUND_PERK_RAGE}">
-        <action>
-            <set var="is_last_round_perk_active_rage" value="1" />
-            <message title="Let's see what we get" subtitle="Their perk is: `d`lRage!" stay="2s" />
-            <message text="The selected perk is: `d`lRage!" />
-            <message text="`eOne hit, one kill. The Rusher now kills in a single blow" />
+            <message text="The selected perk is: `d`l2 Rushers!" />
+            <message text="`eOne was easy... now let's see how you handle two!" />
         </action>
     </trigger>
     <!-- RANDOMIZERS -->
@@ -982,8 +992,10 @@
     <item>wood plate</item>
     <item>ladder</item>
     <item>wood step</item>
+    <item>arrow</item>
     <item>birch fence gate</item>
     <item>birch fence</item>
+    <item>ender pearl</item>
 </itemremove>
 <hunger>
     <depletion>off</depletion>
