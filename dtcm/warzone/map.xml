@@ -1,11 +1,24 @@
 <map proto="1.5.0">
 <name>Warzone</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Break your enemy's obsidian and emerald monuments!</objective>
 <created>2025-08-16</created>
 <gamemode>dtm</gamemode>
 <phase>staging</phase>
 <include id="gapple-kill-reward" />
+<constants>
+    <constant id="eff.team-1">blue-team</constant>
+    <constant id="eff.team-2">red-team</constant>
+    <!-- team 1 gets efficiency in red-owned monuments -->
+    <constant id="eff.t1-m1-region">red-east-monument</constant>
+    <constant id="eff.t1-m2-region">red-north-monument</constant>
+    <constant id="eff.t1-m3-region">red-west-monument</constant>
+    <constant id="eff.t2-m1-region">blue-east-monument</constant>
+    <constant id="eff.t2-m2-region">blue-south-monument</constant>
+    <constant id="eff.t2-m3-region">blue-west-monument</constant>
+    <constant id="eff.modes-preset">every-10m</constant>
+</constants>
+<include id="efficiency-variables"/>
 <authors>
     <author uuid="b0523368-9363-4d24-877a-aa1f6342eda0" /> <!-- Palmenikoo -->
     <author uuid="6e9eda4c-a52f-4a84-a489-3e36a60f4b37" /> <!-- Sebasxxtian -->
@@ -19,8 +32,10 @@
 </teams>
 <kits>
     <kit id="spawn-kit">
+        <clear/>
         <item slot="0" material="iron sword" unbreakable="true" />
         <item slot="1" material="bow" unbreakable="true" />
+        <item slot="2" material="diamond pickaxe" unbreakable="true" />
         <item slot="3" material="iron axe" unbreakable="true" />
         <item slot="4" material="wood" damage="3" amount="64" />
         <item slot="5" material="leaves" damage="3" amount="64" />
@@ -36,41 +51,8 @@
         <boots material="leather boots" team-color="true" />
         <effect amplifier="1" duration="10s">speed</effect>
     </kit>
-    <kit id="pickaxe-kit">
-        <kit filter="all(eff_i=0,eff_ii=0,eff_iii=0,eff_iv=0,eff_v=0)">
-            <item slot="2" material="diamond pickaxe" unbreakable="true" />
-        </kit>
-        <kit filter="eff_i=1">
-            <item slot="2" material="diamond pickaxe" unbreakable="true">
-                <enchantment level="1">efficiency</enchantment>
-            </item>
-        </kit>
-        <kit filter="eff_ii=1">
-            <item slot="2" material="diamond pickaxe" unbreakable="true">
-                <enchantment level="2">efficiency</enchantment>
-            </item>
-        </kit>
-        <kit filter="eff_iii=1">
-            <item slot="2" material="diamond pickaxe" unbreakable="true">
-                <enchantment level="3">efficiency</enchantment>
-            </item>
-        </kit>
-        <kit filter="eff_iv=1">
-            <item slot="2" material="diamond pickaxe" unbreakable="true">
-                <enchantment level="4">efficiency</enchantment>
-            </item>
-        </kit>
-        <kit filter="eff_v=1">
-            <item slot="2" material="diamond pickaxe" unbreakable="true">
-                <enchantment level="5">efficiency</enchantment>
-            </item>
-        </kit>
-    </kit>
 </kits>
 <spawns>
-    <player-kit>
-        <kit id="pickaxe-kit" />
-    </player-kit>
     <default>
         <regions yaw="90">
             <point>76.5,59,79.5</point>
@@ -87,13 +69,6 @@
         </regions>
     </spawn>
 </spawns>
-<variables scope="match">
-    <variable id="eff_i" />
-    <variable id="eff_ii" />
-    <variable id="eff_iii" />
-    <variable id="eff_iv" />
-    <variable id="eff_v" />
-</variables>
 <filters>
     <material id="only-iron">iron block</material>
 </filters>
@@ -229,6 +204,12 @@
         <point id="tnt-spawn-region">76.5,6,79.5</point>
         <cuboid id="tnt-player-region" min="74,5,82" max="79,10,77" />
     </union>
+    <cuboid id="blue-east-monument" min="140,15,172" max="139,18,173"/>
+    <cuboid id="blue-south-monument" min="79,13,170" max="74,18,175"/>
+    <cuboid id="blue-west-monument" min="14,15,172" max="13,18,173"/>
+    <cuboid id="red-east-monument" min="139,15,-13" max="140,18,-14"/>
+    <cuboid id="red-north-monument" min="74,13,-11" max="79,18,-16"/>
+    <cuboid id="red-west-monument" min="13,15,-13" max="14,18,-14"/>
     <apply region="void-area" block="never" message="You may not build in the void!" />
     <apply region="blue-spawn" block="only-iron" message="You may only break iron blocks in this area!" />
     <apply region="red-spawn" block="only-iron" message="You may only break iron blocks in this area!" />
@@ -237,110 +218,29 @@
     <apply region="tnt-spawner" block="never" message="You may not modify this area!" />
 </regions>
 <destroyables required="true" show-progress="true">
-    <destroyable id="blue-east-monument" owner="blue-team" name="East Monument" materials="obsidian">
-        <region>
-            <cuboid min="140,15,172" max="139,18,173" />
-        </region>
-    </destroyable>
-    <destroyable id="blue-south-monument" owner="blue-team" name="South Monument" materials="emerald block">
-        <region>
-            <cuboid min="79,13,170" max="74,18,175" />
-        </region>
-    </destroyable>
-    <destroyable id="blue-west-monument" owner="blue-team" name="West Monument" materials="obsidian">
-        <region>
-            <cuboid min="14,15,172" max="13,18,173" />
-        </region>
-    </destroyable>
-    <destroyable id="red-east-monument" owner="red-team" name="East Monument" materials="obsidian">
-        <region>
-            <cuboid min="13,15,-13" max="14,18,-14" />
-        </region>
-    </destroyable>
-    <destroyable id="red-north-monument" owner="red-team" name="North Monument" materials="emerald block">
-        <region>
-            <cuboid min="74,13,-11" max="79,18,-16" />
-        </region>
-    </destroyable>
-    <destroyable id="red-west-monument" owner="red-team" name="West Monument" materials="obsidian">
-        <region>
-            <cuboid min="139,15,-13" max="140,18,-14" />
-        </region>
-    </destroyable>
+    <destroyable owner="blue-team" name="East Monument" region="blue-east-monument" materials="obsidian"/>
+    <destroyable owner="blue-team" name="South Monument" region="blue-south-monument" materials="emerald block"/>
+    <destroyable owner="blue-team" name="West Monument" region="blue-west-monument" materials="obsidian"/>
+    <destroyable owner="red-team" name="East Monument" region="red-east-monument" materials="obsidian"/>
+    <destroyable owner="red-team" name="North Monument" region="red-north-monument" materials="emerald block"/>
+    <destroyable owner="red-team" name="West Monument" region="red-west-monument" materials="obsidian"/>
 </destroyables>
-<actions>
-    <action id="activate_eff_i" scope="match">
-        <set var="eff_i" value="1" />
-        <switch-scope inner="player">
-            <enchant-item ignore-metadata="true" enchantment="efficiency" level="1">
-                <find material="diamond pickaxe"/>
-            </enchant-item>
-        </switch-scope>
-    </action>
-    <action id="activate_eff_ii" scope="match">
-        <set var="eff_i" value="0" />
-        <set var="eff_ii" value="1" />
-        <switch-scope inner="player">
-            <enchant-item ignore-metadata="true" enchantment="efficiency" level="2">
-                <find material="diamond pickaxe"/>
-            </enchant-item>
-        </switch-scope>
-    </action>
-    <action id="activate_eff_iii" scope="match">
-        <set var="eff_i" value="0" />
-        <set var="eff_ii" value="0" />
-        <set var="eff_iii" value="1" />
-        <switch-scope inner="player">
-            <enchant-item ignore-metadata="true" enchantment="efficiency" level="3">
-                <find material="diamond pickaxe"/>
-            </enchant-item>
-        </switch-scope>
-    </action>
-    <action id="activate_eff_iv" scope="match">
-        <set var="eff_i" value="0" />
-        <set var="eff_ii" value="0" />
-        <set var="eff_iii" value="0" />
-        <set var="eff_iv" value="1" />
-        <switch-scope inner="player">
-            <enchant-item ignore-metadata="true" enchantment="efficiency" level="4">
-                <find material="diamond pickaxe"/>
-            </enchant-item>
-        </switch-scope>
-    </action>
-    <action id="activate_eff_v" scope="match">
-        <set var="eff_i" value="0" />
-        <set var="eff_ii" value="0" />
-        <set var="eff_iii" value="0" />
-        <set var="eff_iv" value="0" />
-        <set var="eff_v" value="1" />
-        <switch-scope inner="player">
-            <enchant-item ignore-metadata="true" enchantment="efficiency" level="5">
-                <find material="diamond pickaxe"/>
-            </enchant-item>
-        </switch-scope>
-    </action>
-</actions>
-<modes>
-    <mode name="Efficiency I" after="10m" action="activate_eff_i" />
-    <mode name="Efficiency II" after="20m" action="activate_eff_ii" />
-    <mode name="Efficiency III" after="30m" action="activate_eff_iii" />
-    <mode name="Efficiency IV" after="40m" action="activate_eff_iv" />
-    <mode name="Efficiency V" after="50m" action="activate_eff_v" />
-</modes>
 <spawners>
     <spawner spawn-region="tnt-spawn-region" player-region="tnt-player-region" max-entities="5" delay="15s">
         <item material="tnt" />
     </spawner>
 </spawners>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+    <tool>shears</tool>
+</toolrepair>
 <itemremove>
     <item>gravel</item>
     <item>flint</item>
-    <item>iron sword</item>
-    <item>bow</item>
-    <item>diamond pickaxe</item>
-    <item>iron axe</item>
-    <item>iron spade</item>
-    <item>shears</item>
     <item>leather helmet</item>
     <item>leather chestplate</item>
     <item>chainmail leggings</item>
@@ -351,6 +251,19 @@
     <item>sign</item>
     <item>beacon</item>
 </itemremove>
+<itemkeep>
+    <item>wood</item>
+    <item>leaves</item>
+    <item>vine</item>
+    <item>arrow</item>
+    <item>golden apple</item>
+</itemkeep>
+<kill-rewards>
+    <kill-reward>
+        <item amount="16" material="wood" damage="3"/>
+        <item amount="16" material="leaves" damage="3"/>
+    </kill-reward>
+</kill-rewards>
 <renewables>
     <renewable region="blue-spawn" rate="1" grow="false" avoid-players="3" renew-filter="only-iron" />
     <renewable region="red-spawn" rate="1" grow="false" avoid-players="3" renew-filter="only-iron" />
