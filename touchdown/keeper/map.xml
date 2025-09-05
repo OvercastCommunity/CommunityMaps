@@ -1,0 +1,188 @@
+<map proto="1.5.0">
+<name>Keeper</name>
+<version>2.0</version>
+<created>2022-01-07</created>
+<constants>
+    <constant id="team-size">16</constant>
+    <constant id="team-one-name">Blue</constant>
+    <constant id="team-two-name">Red</constant>
+    <constant id="team-one-color">blue</constant>
+    <constant id="team-two-color">dark red</constant>
+    <constant id="team-one-spawn">141.5,17,144.5</constant>
+    <constant id="team-one-yaw">90</constant>
+    <constant id="team-two-spawn">-30.5,17,144.5</constant>
+    <constant id="team-two-yaw">-90</constant>
+    <constant id="flag-post">55.5,11,144.5</constant>
+    <constant id="enable-night-vision">true</constant>
+    <constant id="deny-endzone-entry">true</constant>
+    <constant id="deny-block-interaction">false</constant>
+    <constant id="time-limit">8m</constant>
+    <constant id="flag-respawn">10s</constant>
+    <constant id="flag-prerespawn">9.8s</constant>
+    <constant id="respawn-timer">5s</constant>
+    <constant id="instaheal-default">2</constant>
+    <constant id="main-kit">block-kit</constant>
+    <constant id="flag-carrier-kit">flag-carrier-kit-custom</constant>
+    <constant id="flag-carrier-effects">flag-carrier-effects-custom</constant>
+    <constant id="flag-carrier-health">20</constant>
+    <constant id="indicator-outer-material" delete="true"/>
+</constants>
+<include id="touchdown"/>
+<authors>
+    <author uuid="c31e94b2-7678-4551-847e-989c1423323a"/> <!-- TommyHillfigger -->
+    <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
+</authors>
+<contributors>
+    <contributor uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b"/> <!-- Tundren -->
+    <contributor uuid="f1ff7ecc-2e79-4320-85de-adb392eb2822"/> <!-- DerStiv -->
+    <contributor uuid="6863869b-4b8c-4445-b778-a8e016775ae4"/> <!-- Cazadorian -->
+</contributors>
+<broadcasts>
+    <tip after="15s" every="3m">Every team has 2 `6"defence sniper bows"`b!</tip>
+</broadcasts>
+<spawns>
+    <default>
+        <region yaw="-90">
+            <point>52.5,65,144.5</point>
+        </region>
+    </default>
+</spawns>
+<kits>
+    <kit id="clear-items">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="${melee-weapon}"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="bow"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="leaves"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="golden apple"/>
+                <replace material="air"/>
+            </replace-item>
+            <replace-item ignore-metadata="true">
+                <find material="snowball"/>
+                <replace material="air"/>
+            </replace-item>
+        </action>
+    </kit>
+    <kit id="block-kit" force="true">
+        <kit id="clear-items"/>
+        <item slot="0" unbreakable="true" name="${melee-weapon-name}" material="${melee-weapon}" enchantment="${melee-weapon-enchantment}" attribute="${melee-weapon-attribute}"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" amount="4" material="leaves" name="`6Body Block"/>
+        <item slot="3" material="golden apple"/>
+        <item slot="8" amount="20" material="arrow"/>
+        <if constant="enable-night-vision" constant-value="true">
+            <effect>night vision</effect>
+        </if>
+        <game-mode>survival</game-mode>
+    </kit>
+    <kit id="flag-carrier-kit-custom" force="true">
+        <kit id="${main-kit}"/>
+        <kit id="football-kit"/>
+        <chestplate unbreakable="true" team-color="true" locked="true" material="leather chestplate"/>
+        <leggings unbreakable="true" locked="true" material="chainmail leggings"/>
+        <boots unbreakable="true" locked="true" material="iron boots"/>
+    </kit>
+    <kit id="flag-carrier-effects-custom" parent="flag-carrier-effects" force="true">
+        <effect duration="0s">slowness</effect>
+    </kit>
+    <kit id="speed-kit">
+        <effect amplifier="3">speed</effect>
+    </kit>
+    <lend kit="speed-kit" filter="speed-lanes"/>
+</kits>
+<filters>
+    <all id="leaves-no-void">
+        <material id="leaves">leaves</material>
+        <not>
+            <void/>
+        </not>
+    </all>
+</filters>
+<regions>
+    <negative id="not-playing-field">
+        <cuboid id="playing-field" min="-15,0,105" max="126,16,184"/>
+    </negative>
+    <cuboid id="team-one-portal" min="132,6,112" max="126,15,177"/> <!-- where red scores -->
+    <cuboid id="team-two-portal" min="-21,6,177" max="-15,15,112"/> <!-- where blue scores -->
+    <union id="speed-lanes">
+        <cuboid id="north-lane" min="-21,17,93" max="132,20,99"/>
+        <cuboid id="south-lane" min="-21,17,189" max="132,20,195"/>
+        <cuboid id="west-left-lane" min="-17,17,141" max="-21,20,99"/>
+        <cuboid id="west-right-lane" min="-17,17,147" max="-21,20,189"/>
+        <cuboid id="east-left-lane" min="127,17,147" max="132,20,189"/>
+        <cuboid id="east-right-lane" min="127,17,141" max="132,20,99"/>
+    </union>
+    <apply block="never" region="nets" message="You may not place blocks in the net"/>
+    <apply block="leaves-no-void" region="playing-field" message="You may only place and break leaves on the playing field"/>
+    <apply block="never" region="not-playing-field" message="You may not modify blocks over the void or off the playing field!"/>
+</regions>
+<actions>
+    <trigger scope="player">
+        <filter>
+            <wearing>
+                <item locked="true" unbreakable="true" material="chainmail leggings"/>
+            </wearing>
+        </filter>
+        <action>
+            <enchant-item ignore-metadata="true" enchantment="projectile_protection" level="1">
+                <find material="chainmail leggings"/>
+            </enchant-item>
+        </action>
+    </trigger>
+</actions>
+<portals>
+    <portal x="@55.5" y="@6.5" z="@105.5">
+        <region>
+            <cuboid min="54,6,185" max="57,10,186"/>
+        </region>
+    </portal>
+    <portal x="@55.5" y="@6.5" z="@183.5">
+        <region>
+            <cuboid min="57,6,104" max="54,10,105"/>
+        </region>
+    </portal>
+</portals>
+<kill-rewards>
+    <kill-reward>
+        <item material="arrow" amount="10"/>
+        <item material="leaves" amount="2" name="`6Body Block"/>
+    </kill-reward>
+</kill-rewards>
+<toolrepair>
+    <tool>bow</tool>
+</toolrepair>
+<itemremove>
+    <item>leaves</item>
+    <item>sapling</item>
+</itemremove>
+<itemkeep>
+    <item>arrow</item>
+</itemkeep>
+<maxbuildheight>8</maxbuildheight>
+<damage>
+    <deny>
+        <all>
+            <attacker>
+                <not>
+                    <variable var="player_state">${throw}</variable>
+                </not>
+            </attacker>
+            <victim>
+                <filter id="ally-damage"/>
+            </victim>
+            <not>
+                <variable var="game_state">${throw}</variable>
+            </not>
+        </all>
+    </deny>
+</damage>
+</map>
