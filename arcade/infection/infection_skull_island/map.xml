@@ -1,0 +1,289 @@
+<map proto="1.5.0">
+<name>Infection: Skull Island</name>
+<version>1.0.0</version>
+<created>2025-09-12</created>
+<phase>staging</phase>
+<constants>
+    <constant id="infected-team-name">Infected</constant>
+    <constant id="infected-team-color">dark green</constant>
+    <constant id="human-team-color">gold</constant>
+    <constant id="time-limit">9</constant> <!-- Time limit in minutes -->
+    <constant id="compass-distribution-time">2</constant>
+    <constant id="border-start">3</constant>
+    <constant id="spawn-switch">4</constant> <!-- move infected spawn to center cause border -->
+    <constant id="enable-player-tracker">always</constant>
+    <constant id="release-seconds">45</constant>
+</constants>
+<include id="gapple-kill-reward"/>
+<objective>The Humans must survive against the Infected for ${time-limit} minutes!</objective>
+<gamemode>infection</gamemode>
+<broadcasts>
+    <tip after="4s" filter="human-team">You are a Human.</tip>
+    <tip after="6s" filter="human-team">To win, survive the Infected attack for ${time-limit} minutes.</tip>
+    <tip after="10s" filter="human-team">If you die, you join the ${infected-team-name}!</tip>
+    <tip after="4s" filter="infected-team">You are an Infected, you must kill all of the Humans to win!</tip>
+    <alert after="${compass-distribution-time}m" filter="${enable-player-tracker}">${infected-team-name} can now track the nearest Human with a compass!</alert>
+    <alert after="${spawn-switch}m">${infected-team-name} now spawn in the center!</alert>
+</broadcasts>
+<teams>
+    <team id="infected-team" color="${infected-team-color}" plural="true" min="1" max="5">${infected-team-name}</team>
+    <team id="human-team" color="${human-team-color}" show-name-tags="false" plural="true" min="1" max="40">Humans</team>
+</teams>
+<time result="human-team">${time-limit}m</time>
+<respawn auto="true"/>
+<authors>
+    <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb"/> <!-- arcadeboss -->
+</authors>
+<rules>
+    <rule>Name tags for Humans don't show</rule>
+</rules>
+<broadcasts>
+    <alert after="1s">The ${infected-team-name} will be released after ${release-seconds} seconds!</alert>
+    <alert after="${release-seconds}s">The ${infected-team-name} have been released!</alert>
+</broadcasts>
+<world-borders center="0.5,0.5" damage="0.1">
+    <world-border size="1000"/>
+    <world-border size="245" after="${border-start}m" duration="0s"/>
+    <world-border size="32" after="${border-start}m" duration="5m30s"/> <!-- duration = time-limit - border-start - 30s -->
+    <world-border size="1000" after="8m56s" duration="4s"/> <!-- time-limit - 4s -->
+</world-borders>
+<maxbuildheight>135</maxbuildheight>
+<spawns>
+    <default yaw="90" region="obs-spawn-point"/>
+    <spawn team="human-team" kit="humans-kit" safe="true">
+        <regions>
+            <point yaw="135">5.5,99,5.5</point>
+            <point yaw="45">5.5,99,-4.5</point>
+            <point yaw="-45">-4.5,101,-4.5</point>
+            <point yaw="-135">-4.5,101,5.5</point>
+        </regions>
+    </spawn>
+    <spawn team="infected-team" kit="infected-kit-start" filter="before-30s">
+        <regions>
+            <point yaw="90">94.5,101,0.5</point> <!-- face west -->
+            <point yaw="-90">-93.5,101,0.5</point> <!-- face east -->
+            <point yaw="0">0.5,101,-93.5</point> <!-- face south -->
+            <point yaw="180">0.5,101,94.5</point> <!-- face north -->
+        </regions>
+    </spawn>
+    <spawn team="infected-team" kit="infected-kit" filter="all(after-30s,not(infected-spawn-switch))">
+        <regions>
+            <point yaw="90">94.5,101,0.5</point> <!-- face west -->
+            <point yaw="-90">-93.5,101,0.5</point> <!-- face east -->
+            <point yaw="0">0.5,101,-93.5</point> <!-- face south -->
+            <point yaw="180">0.5,101,94.5</point> <!-- face north -->
+        </regions>
+    </spawn>
+    <spawn team="infected-team" kit="infected-kit" filter="infected-spawn-switch">
+        <regions>
+            <point yaw="135">5.5,99,5.5</point>
+            <point yaw="45">5.5,99,-4.5</point>
+            <point yaw="-45">-4.5,101,-4.5</point>
+            <point yaw="-135">-4.5,101,5.5</point>
+        </regions>
+    </spawn>
+</spawns>
+<kits>
+    <kit id="infected-kit">
+        <helmet locked="true" unbreakable="true" team-color="true" enchantment="fire_protection:2" material="leather helmet"/>
+        <chestplate locked="true" unbreakable="true" team-color="true" enchantment="fire_protection:2" material="leather chestplate"/>
+        <leggings locked="true" unbreakable="true" team-color="true" material="leather leggings"/>
+        <boots locked="true" unbreakable="true" team-color="true" material="leather boots"/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" material="sponge" damage="1" amount="64"/>
+        <item slot="3" material="vine" amount="64"/>
+        <item slot="4" material="shears" enchantment="efficiency:10"/>
+        <item slot="5" material="tnt" amount="2"/>
+        <item slot="8" material="arrow" amount="40"/>
+        <item slot="29" material="sponge" damage="1" amount="64"/>
+        <item slot="30" material="vine" amount="64"/>
+        <item slot="31" material="shears" enchantment="efficiency:10"/>
+        <effect>speed</effect>
+        <effect duration="3s" amplifier="255">resistance</effect>
+    </kit>
+    <kit id="infected-kit-start" parent="infected-kit">
+        <item slot="5" material="flint and steel" damage="56"/>
+        <effect duration="20">blindness</effect>
+    </kit>
+    <kit id="humans-kit">
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" team-color="true" material="leather leggings"/>
+        <boots unbreakable="true" team-color="true" material="leather boots"/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow"/>
+        <item slot="2" material="vine" amount="64"/>
+        <item slot="3" material="sponge" amount="16"/>
+        <item slot="4" material="ender_pearl"/>
+        <item slot="5" material="potion" damage="16385"/>
+        <item slot="6" material="compass"/>
+        <item slot="8" material="arrow" amount="64"/>
+        <item slot="29" material="vine" amount="64"/>
+        <effect>speed</effect>
+        <effect duration="0">absorption</effect>
+        <effect duration="6s" amplifier="255">resistance</effect>
+    </kit>
+</kits>
+<compass show-distance="true">
+    <player filter="human-team" holder-filter="infected-team" name="`eClosest Human"/>
+    <player filter="infected-team" holder-filter="human-team" name="`eClosest Infected"/>
+</compass>
+<filters>
+    <deny id="deny-participating">
+        <participating/>
+    </deny>
+    <alive id="alive"/>
+    <match-running id="match-running"/>
+    <not id="before-30s">
+        <time id="after-30s">31s</time>
+    </not>
+    <time id="infected-spawn-switch">${spawn-switch}m</time>
+    <time id="border-start-filter">${border-start}m</time>
+    <!-- allow infected to break leaves, vines, etc -->
+    <deny id="original-block-protection-infected">
+        <all>
+            <any>
+                <cause>player</cause>
+                <cause>explosion</cause>
+            </any>
+            <filter id="infected-team"/>
+            <not>
+                <any>
+                    <material>leaves</material>
+                    <material>leaves 2</material>
+                    <material>vine</material>
+                    <material>double plant</material>
+                    <material>long grass</material>
+                    <material>brown mushroom</material>
+                    <material>red mushroom</material>
+                    <material>sponge</material>
+                    <material>fire</material>
+                </any>
+            </not>
+        </all>
+    </deny>
+    <!-- allow humans to break vines, etc -->
+    <deny id="original-block-protection-human">
+        <all>
+            <cause>player</cause>
+            <filter id="human-team"/>
+			<not>
+				<any>
+					<material>vine</material>
+					<material>double plant</material>
+					<material>long grass</material>
+					<material>brown mushroom</material>
+					<material>red mushroom</material>
+					<material>sponge</material>
+					<material>fire</material>
+				</any>
+			</not>
+        </all>
+    </deny>
+</filters>
+<regions>
+    <point id="obs-spawn-point">0.5,128,0.5</point>
+    <above y="144" id="ceiling"/>
+    <union id="cages">
+        <cuboid id="west" min="-90,101,-1" max="-91,104,2"/>
+        <cuboid id="east" min="90,101,-1" max="92,104,2"/>
+        <cuboid id="north" min="-1,101,-90" max="2,104,-92"/>
+        <cuboid id="south" min="-1,101,91" max="2,104,92"/>
+    </union>
+    <apply block-break="original-block-protection-infected" message="You may only remove leaves and sponges!"/>
+    <apply block-break="original-block-protection-human" message="You may only remove vines and sponges!"/>
+    <apply enter="never" region="ceiling" message="You may not go higher!"/>
+</regions>
+<actions>
+    <trigger scope="player">
+        <action>
+            <kit>
+                <item prevent-sharing="true" material="compass"/>
+            </kit>
+            <sound preset="portal"/>
+        </action>
+        <filter>
+            <all>
+                <filter id="${enable-player-tracker}"/>
+                <filter id="infected-team"/>
+                <time>${compass-distribution-time}m</time>
+                <filter id="alive"/>
+                <not>
+                    <carrying>
+                        <item material="compass"/>
+                    </carrying>
+                </not>
+            </all>
+        </filter>
+   </trigger>
+    <trigger scope="match">
+        <filter>
+            <after message="${infected-team-name} released in {0}" duration="${release-seconds}s" filter="match-running"/>
+        </filter>
+        <action>
+            <message fade-in="0.5s" stay="3s" fade-out="0.5s">
+                <title>`c${infected-team-name} Released!</title>
+            </message>
+            <fill region="cages" material="air"/>
+            <sound preset="objective_bad"/>
+        </action>
+    </trigger>
+    <trigger filter="border-start-filter" scope="match">
+        <action>
+            <sound preset="portal"/>
+            <message text="`7[`e`lAlert`7] `6`oThe world border is approaching!`r"/>
+        </action>
+    </trigger>
+</actions>
+<kill-rewards>
+    <kill-reward filter="human-team">
+        <item material="potion" name="Potion of Strength">
+            <effect duration="15s">strength</effect>
+        </item>
+    </kill-reward>
+    <kill-reward filter="infected-team">
+        <item material="tnt"/>
+    </kill-reward>
+</kill-rewards>
+<tnt>
+    <instantignite>true</instantignite>
+    <blockdamage>true</blockdamage>
+    <friendly-defuse>off</friendly-defuse>
+    <fuse>3s</fuse>
+    <yield>0</yield>
+    <power>5</power>
+</tnt>
+<disabledamage>
+    <damage ally="true" self="true" enemy="false" other="false">block explosion</damage>
+</disabledamage>
+<itemremove>
+    <item>arrow</item>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>iron sword</item>
+    <item>diamond sword</item>
+    <item>diamond helmet</item>
+    <item>diamond chestplate</item>
+    <item>diamond leggings</item>
+    <item>diamond boots</item>
+    <item>potion</item>
+    <item>stick</item>
+    <item>bow</item>
+    <item>compass</item>
+    <item>sapling</item>
+    <item>shears</item>
+    <item>sponge</item>
+    <item>vine</item>
+    <item>leaves</item>
+    <item>leaves 2</item>
+    <item>brown mushroom</item>
+    <item>red mushroom</item>
+    <item>apple</item>
+</itemremove>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
