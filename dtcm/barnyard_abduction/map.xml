@@ -1,0 +1,187 @@
+<map proto="1.5.0">
+<name>Barnyard Abduction</name>
+<version>1.0.0</version>
+<objective>Destroy the other team's monument!</objective>
+<created>2025-09-14</created>
+<constants>
+    <constant id="eff.modes-preset">every-5m</constant>
+    <constant id="eff.efficiency-tool">stone pickaxe</constant>
+    <constant id="eff.team-1">blue-team</constant>
+    <constant id="eff.team-2">red-team</constant>
+    <constant id="eff.t1-m1-region">red-monument</constant>
+    <constant id="eff.t2-m1-region">blue-monument</constant>
+</constants>
+<include id="efficiency-variables"/>
+<include id="gapple-kill-reward"/>
+<authors>
+    <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c" /> <!-- mitchiii -->
+</authors>
+<teams>
+    <team id="blue-team" color="blue" max="6">Blue</team>
+    <team id="red-team" color="dark red" max="6">Red</team>
+</teams>
+<spawns>
+    <spawn team="blue-team" region="blue-spawn" yaw="90" kit="main-kit"/>
+    <spawn team="red-team" region="red-spawn" yaw="180" kit="main-kit"/>
+    <default region="obs-spawn" yaw="135"/>
+</spawns>
+<kits>
+    <kit id="main-kit">
+        <clear/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true"/>
+        <item slot="2" material="stone pickaxe" unbreakable="true"/>
+        <item slot="3" material="stone axe" unbreakable="true">
+            <enchantment level="2">efficiency</enchantment>
+        </item>
+        <item slot="4" material="wood" amount="64"/>
+        <item slot="5" material="stained glass" amount="32" team-color="true"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow" amount="32"/>
+        <item slot="30" material="stone spade" unbreakable="true">
+            <enchantment level="2">efficiency</enchantment>
+        </item>
+        <helmet material="leather helmet" unbreakable="true" team-color="true"/>
+        <chestplate material="chainmail chestplate" unbreakable="true"/>
+        <leggings material="leather leggings" unbreakable="true" team-color="true"/>
+        <boots unbreakable="true" material="iron boots"/>
+        <effect>night vision</effect>
+        <knockback-reduction>1</knockback-reduction>
+    </kit>
+    <kit id="leaving-spawn" force="true">
+        <effect duration="2s">night vision</effect>
+        <knockback-reduction>0</knockback-reduction>
+    </kit>
+</kits>
+<kill-rewards>
+    <kill-reward>
+        <item material="arrow" amount="8"/>
+        <item material="wood" amount="12"/>
+        <item material="stained glass" amount="6" team-color="true"/>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="3" repeat="true"/>
+        </filter>
+        <item material="flint and steel" damage="61"/>
+        <item material="tnt"/>
+    </kill-reward>
+</kill-rewards>
+<filters>
+    <cause id="player">player</cause>
+    <material id="gold-block">gold block</material>
+</filters>
+<regions>
+    <cylinder id="obs-spawn" base="27.5,26,28.5" radius="2" height="1"/>
+    <cylinder id="blue-spawn" base="72.5,5,-7.5" radius="1" height="1"/>
+    <cylinder id="red-spawn" base="-8.5,5,73.5" radius="1" height="1"/>
+    <union id="spawn-protection">
+        <resize id="blue-spawn-prot" region="blue-spawn" min="2,1,2" max="2,1,2"/>
+        <resize id="red-spawn-prot" region="red-spawn" min="2,1,2" max="2,1,2"/>
+    </union>
+    <negative id="outside-spawns">
+        <union id="team-spawns">
+            <cuboid id="blue-spawn-protection" min="61,0,-13" size="15,15,11"/>
+            <cuboid id="red-spawn-protection" min="-14,0,62" size="11,15,15"/>
+        </union>
+    </negative>
+    <cuboid id="blue-monument" min="51,10,-30" size="3,4,3"/>
+    <cuboid id="red-monument" min="-31,10,52" size="3,4,3"/>
+    <negative id="restricted-void">
+        <union id="buildable-void">
+            <rectangle min="33,6" max="-20,-21"/>
+            <rectangle min="-22,34" max="3,5"/>
+        </union>
+    </negative>
+    <union id="abduction">
+        <cylinder id="blue-abduction" base="52.5,19,-28.5" radius="1" height="14.5"/>
+        <cylinder id="red-abduction" base="-29.5,19,53.5" radius="1" height="14.5"/>
+    </union>
+    <apply region="blue-spawn-protection" enter="blue-team" message="You may not enter the enemy spawn!"/>
+    <apply region="red-spawn-protection" enter="red-team" message="You may not enter the enemy spawn!"/>
+    <apply region="outside-spawns" kit="leaving-spawn"/>
+    <apply region="team-spawns" block-place="not(player)" block-break="gold-block" message="You may not modify the spawn area!"/>
+    <apply region="restricted-void" block-place="not(void)"/>
+</regions>
+<maxbuildheight>18</maxbuildheight>
+<destroyables name="Monument" materials="emerald block" show-progress="true" mode-changes="true">
+    <destroyable region="blue-monument" owner="blue-team"/>
+    <destroyable region="red-monument" owner="red-team"/>
+</destroyables>
+<block-drops>
+    <rule wrong-tool="true" filter="gold-block">
+        <drops>
+            <item material="gold ingot" amount="9"/>
+        </drops>
+    </rule>
+</block-drops>
+<renewables>
+    <renewable interval="30" grow="true" renew-filter="gold-block" region="team-spawns"/>
+</renewables>
+<item-mods>
+    <rule>
+        <match>
+            <material>bow</material>
+        </match>
+        <modify unbreakable="true"/>
+    </rule>
+</item-mods>
+<actions>
+    <trigger scope="player">
+        <filter>
+            <pulse period="0.2s" duration="0.1s" filter="abduction"/>
+        </filter>
+        <action>
+            <velocity x="0" y="0.4" z="0"/>
+            <sound key="${entity.item.pickup}" volume="0.6" pitch="3"/>
+        </action>
+    </trigger>
+</actions>
+<damage>
+    <deny>
+        <region id="spawn-protection"/>
+    </deny>
+</damage>
+<toolrepair>
+    <tool>bow</tool>
+    <tool>iron chestplate</tool>
+    <tool>stone sword</tool>
+    <tool>stone pickaxe</tool>
+    <tool>stone axe</tool>
+    <tool>stone spade</tool>
+    <tool>gold helmet</tool>
+    <tool>gold chestplate</tool>
+    <tool>gold leggings</tool>
+    <tool>gold boots</tool>
+    <tool>gold sword</tool>
+    <tool>gold pickaxe</tool>
+    <tool>gold axe</tool>
+    <tool>gold spade</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>chainmail chestplate</item>
+    <item>leather leggings</item>
+    <item>iron boots</item>
+    <item>seeds</item>
+    <item>sapling</item>
+    <item>apple</item>
+    <item>string</item>
+    <item>emerald block</item>
+    <item>gold block</item>
+    <item>stained clay</item>
+</itemremove>
+<itemkeep>
+    <item>stained clay</item>
+    <item>stained glass</item>
+    <item>wood</item>
+    <item>arrow</item>
+    <item>golden apple</item>
+</itemkeep>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<gamerules>
+    <doDaylightCycle>true</doDaylightCycle>
+</gamerules>
+</map>
