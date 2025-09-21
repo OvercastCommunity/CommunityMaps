@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Infection: Skull Island</name>
-<version>1.0.0</version>
+<version>2.0.0</version>
 <created>2025-09-12</created>
 <phase>staging</phase>
 <constants>
@@ -9,12 +9,11 @@
     <constant id="human-team-color">gold</constant>
     <constant id="time-limit">9</constant> <!-- Time limit in minutes -->
     <constant id="compass-distribution-time">2</constant>
-    <constant id="border-start">3</constant>
-    <constant id="spawn-switch">4</constant> <!-- move infected spawn to center cause border -->
+    <constant id="border-start">4</constant>
+    <constant id="spawn-switch">5</constant> <!-- move infected spawn to center cause border -->
     <constant id="enable-player-tracker">always</constant>
     <constant id="release-seconds">45</constant>
 </constants>
-<include id="gapple-kill-reward"/>
 <objective>The Humans must survive against the Infected for ${time-limit} minutes!</objective>
 <gamemode>infection</gamemode>
 <broadcasts>
@@ -42,15 +41,16 @@
     <alert after="${release-seconds}s">The ${infected-team-name} have been released!</alert>
 </broadcasts>
 <world-borders center="0.5,0.5" damage="0.1">
-    <world-border size="1000"/>
+    <world-border size="750"/>
     <world-border size="245" after="${border-start}m" duration="0s"/>
-    <world-border size="32" after="${border-start}m" duration="5m30s"/> <!-- duration = time-limit - border-start - 30s -->
+    <world-border size="32" after="${border-start}m" duration="4m30s"/> <!-- duration = time-limit - border-start - 30s -->
+    <!-- release everyone, including observers in the last moments -->
     <world-border size="1000" after="8m56s" duration="4s"/> <!-- time-limit - 4s -->
 </world-borders>
-<maxbuildheight>135</maxbuildheight>
+<maxbuildheight>128</maxbuildheight>
 <spawns>
     <default yaw="90" region="obs-spawn-point"/>
-    <spawn team="human-team" kit="humans-kit" safe="true">
+    <spawn team="human-team" kit="humans-kit" safe="true" filter="before-30s">
         <regions>
             <point yaw="135">5.5,99,5.5</point>
             <point yaw="45">5.5,99,-4.5</point>
@@ -58,8 +58,9 @@
             <point yaw="-135">-4.5,101,5.5</point>
         </regions>
     </spawn>
+    <spawn team="human-team" kit="infected-switch-kit" filter="after-30s" region="obs-spawn-point"/>
     <spawn team="infected-team" kit="infected-kit-start" filter="before-30s">
-        <regions>
+       <regions>
             <point yaw="90">94.5,101,0.5</point> <!-- face west -->
             <point yaw="-90">-93.5,101,0.5</point> <!-- face east -->
             <point yaw="0">0.5,101,-93.5</point> <!-- face south -->
@@ -86,25 +87,29 @@
 <kits>
     <kit id="infected-kit">
         <helmet locked="true" unbreakable="true" team-color="true" enchantment="fire_protection:2" material="leather helmet"/>
-        <chestplate locked="true" unbreakable="true" team-color="true" enchantment="fire_protection:2" material="leather chestplate"/>
+        <chestplate locked="true" unbreakable="true" enchantment="fire_protection:2" material="iron chestplate"/>
         <leggings locked="true" unbreakable="true" team-color="true" material="leather leggings"/>
         <boots locked="true" unbreakable="true" team-color="true" material="leather boots"/>
         <item slot="0" unbreakable="true" material="iron sword"/>
         <item slot="1" unbreakable="true" material="bow"/>
-        <item slot="2" material="sponge" damage="1" amount="64"/>
+        <item slot="2" material="leaves" amount="64"/>
         <item slot="3" material="vine" amount="64"/>
         <item slot="4" material="shears" enchantment="efficiency:10"/>
-        <item slot="5" material="tnt" amount="2"/>
+        <item slot="5" material="tnt" amount="2" lore="`3For `2Leaves`r`3 and `6Humans`r"/>
+        <item slot="6" material="potion" damage="2" lore="`4Speed II, 30 seconds">
+            <effect amplifier="2" duration="30">speed</effect>
+        </item>
         <item slot="8" material="arrow" amount="40"/>
-        <item slot="29" material="sponge" damage="1" amount="64"/>
+        <item slot="11" material="leaves" amount="64"/>
+        <item slot="20" material="leaves" amount="64"/>
+        <item slot="29" material="leaves" amount="64"/>
         <item slot="30" material="vine" amount="64"/>
         <item slot="31" material="shears" enchantment="efficiency:10"/>
         <effect>speed</effect>
         <effect duration="3s" amplifier="255">resistance</effect>
     </kit>
     <kit id="infected-kit-start" parent="infected-kit">
-        <item slot="5" material="flint and steel" damage="56"/>
-        <effect duration="20">blindness</effect>
+        <effect duration="25">blindness</effect>
     </kit>
     <kit id="humans-kit">
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
@@ -114,15 +119,27 @@
         <item slot="0" unbreakable="true" material="iron sword"/>
         <item slot="1" unbreakable="true" material="bow"/>
         <item slot="2" material="vine" amount="64"/>
-        <item slot="3" material="sponge" amount="16"/>
-        <item slot="4" material="ender_pearl"/>
-        <item slot="5" material="potion" damage="16385"/>
+        <item slot="3" material="leaves" amount="64"/>
+        <item slot="4" material="ender_pearl" amount="2"/>
+        <item slot="5" material="potion" damage="9" name="Witch Doctor Potion" lore="`3Strength and Healing Medicine">
+            <effect duration="15s">strength</effect>
+            <effect amplifier="2" duration="30">regeneration</effect>
+            <effect duration="60s">absorption</effect>
+        </item>
         <item slot="6" material="compass"/>
         <item slot="8" material="arrow" amount="64"/>
+        <item slot="11" material="vine" amount="64"/>
+        <item slot="12" material="leaves" amount="64"/>
+        <item slot="20" material="vine" amount="64"/>
+        <item slot="21" material="leaves" amount="64"/>
+        <item slot="30" material="leaves" amount="64"/>
         <item slot="29" material="vine" amount="64"/>
         <effect>speed</effect>
         <effect duration="0">absorption</effect>
         <effect duration="6s" amplifier="255">resistance</effect>
+    </kit>
+    <kit id="infected-switch-kit" force="true">
+        <team-switch team="infected-team"/>
     </kit>
 </kits>
 <compass show-distance="true">
@@ -140,46 +157,43 @@
     </not>
     <time id="infected-spawn-switch">${spawn-switch}m</time>
     <time id="border-start-filter">${border-start}m</time>
-    <!-- allow infected to break leaves, vines, etc -->
-    <deny id="original-block-protection-infected">
-        <all>
-            <any>
-                <cause>player</cause>
-                <cause>explosion</cause>
-            </any>
-            <filter id="infected-team"/>
-            <not>
+    <!-- allow players to break leaves, vines, etc -->
+    <deny id="original-block-protection">
+        <any>
+            <all>
                 <any>
-                    <material>leaves</material>
-                    <material>leaves 2</material>
-                    <material>vine</material>
-                    <material>double plant</material>
-                    <material>long grass</material>
-                    <material>brown mushroom</material>
-                    <material>red mushroom</material>
-                    <material>sponge</material>
-                    <material>fire</material>
+                    <cause>explosion</cause>
                 </any>
-            </not>
-        </all>
-    </deny>
-    <!-- allow humans to break vines, etc -->
-    <deny id="original-block-protection-human">
-        <all>
-            <cause>player</cause>
-            <filter id="human-team"/>
-			<not>
-				<any>
-					<material>vine</material>
-					<material>double plant</material>
-					<material>long grass</material>
-					<material>brown mushroom</material>
-					<material>red mushroom</material>
-					<material>sponge</material>
-					<material>fire</material>
-				</any>
-			</not>
-        </all>
+                <not>
+                    <any>
+                        <material>leaves</material>
+                        <material>leaves 2</material>
+                        <material>vine</material>
+                        <material>double plant</material>
+                        <material>long grass</material>
+                    </any>
+                </not>
+            </all>
+            <all>
+                <any>
+                    <cause>player</cause>
+                </any>
+                <not>
+                    <any>
+                        <material>leaves</material>
+                        <material>leaves 2</material>
+                        <material>vine</material>
+                        <material>double plant</material>
+                        <material>long grass</material>
+                        <material>brown mushroom</material>
+                        <material>red mushroom</material>
+                        <material>red rose</material>
+                        <material>yellow flower</material>
+                        <material>fire</material>
+                    </any>
+                </not>
+            </all>
+        </any>
     </deny>
 </filters>
 <regions>
@@ -191,9 +205,12 @@
         <cuboid id="north" min="-1,101,-90" max="2,104,-92"/>
         <cuboid id="south" min="-1,101,91" max="2,104,92"/>
     </union>
-    <apply block-break="original-block-protection-infected" message="You may only remove leaves and sponges!"/>
-    <apply block-break="original-block-protection-human" message="You may only remove vines and sponges!"/>
+    <negative id="no-go">
+        <rectangle min="-120,-120" max="120,120"/>
+    </negative>
+    <apply block-break="original-block-protection" message="You may only remove leaves and vines!"/>
     <apply enter="never" region="ceiling" message="You may not go higher!"/>
+    <apply enter="never" region="no-go" message="You may not go beyond this point!"/>
 </regions>
 <actions>
     <trigger scope="player">
@@ -238,14 +255,39 @@
 </actions>
 <kill-rewards>
     <kill-reward filter="human-team">
-        <item material="potion" name="Potion of Strength">
+        <item material="potion" damage="9" name="Witch Doctor Potion" lore="`3Strength and Healing Medicine">
             <effect duration="15s">strength</effect>
+            <effect duration="3s">regeneration</effect>
+            <effect duration="60s">absorption</effect>
         </item>
+        <item material="arrow" amount="10"/>
     </kill-reward>
     <kill-reward filter="infected-team">
-        <item material="tnt"/>
+        <item material="tnt" lore="`3For `2Leaves`r`3 and `6Humans`r"/>
+        <item material="arrow" amount="8"/>
+    </kill-reward>
+    <kill-reward>
+        <item material="flint and steel" damage="63"/> <!-- 2 uses -->
+        <filter>
+            <all>
+                <team>infected-team</team>
+                <kill-streak count="3" repeat="false"/>
+            </all>
+        </filter>
+    </kill-reward>
+    <kill-reward>
+        <item material="fireball" projectile="throwable-fireball" name="`rFireball"/>
+        <filter>
+            <all>
+                <team>infected-team</team>
+                <kill-streak count="5" repeat="false"/>
+            </all>
+        </filter>
     </kill-reward>
 </kill-rewards>
+<projectiles>
+    <projectile id="throwable-fireball" name="Fireball" projectile="Fireball" velocity=".6" click="right" power="4" damage="1" cooldown="1s"/>
+</projectiles>
 <tnt>
     <instantignite>true</instantignite>
     <blockdamage>true</blockdamage>
@@ -254,6 +296,13 @@
     <yield>0</yield>
     <power>5</power>
 </tnt>
+<damage>
+    <deny>
+        <all>
+            <cause>fall</cause>
+        </all>
+    </deny>
+</damage>
 <disabledamage>
     <damage ally="true" self="true" enemy="false" other="false">block explosion</damage>
 </disabledamage>
@@ -272,16 +321,18 @@
     <item>potion</item>
     <item>stick</item>
     <item>bow</item>
+    <item>tnt</item>
     <item>compass</item>
     <item>sapling</item>
     <item>shears</item>
-    <item>sponge</item>
     <item>vine</item>
     <item>leaves</item>
     <item>leaves 2</item>
     <item>brown mushroom</item>
     <item>red mushroom</item>
     <item>apple</item>
+    <item>red rose</item>
+    <item>yellow flower</item>
 </itemremove>
 <hunger>
     <depletion>off</depletion>
