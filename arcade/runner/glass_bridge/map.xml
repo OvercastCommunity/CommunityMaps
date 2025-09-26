@@ -1,0 +1,315 @@
+<map proto="1.5.0">
+<name>Glass Bridge</name>
+<version>1.0.1</version>
+<game>Glass Bridge</game>
+<include id="void-death"/>
+<objective>Get across the glass bridge without falling off!</objective>
+<authors>
+    <author uuid="e6b3183f-f4d7-40d5-b0a7-34c481938be1"/> <!-- emcode -->
+    <author uuid="759c7730-4702-4bb1-85c0-d6be18069c59"/> <!-- Beanes -->
+</authors>
+<players min="3" max="64" max-overfill="64"/>
+<regions>
+    <cylinder id="spawn" base="0.5,50,3.5" height="0" radius="1"/>
+    <union id="platforms">
+        <union id="right-platforms">
+            <cuboid id="base-platform" min="-4.5,49,10.5" size="4,6,4"/>
+            <translate region="base-platform" offset="0,0,6"/>
+            <translate region="base-platform" offset="0,0,12"/>
+            <translate region="base-platform" offset="0,0,18"/>
+            <translate region="base-platform" offset="0,0,24"/>
+            <translate region="base-platform" offset="0,0,30"/>
+            <translate region="base-platform" offset="0,0,36"/>
+            <translate region="base-platform" offset="0,0,42"/>
+            <translate region="base-platform" offset="0,0,48"/>
+            <translate region="base-platform" offset="0,0,54"/>
+            <translate region="base-platform" offset="0,0,60"/>
+            <translate region="base-platform" offset="0,0,66"/>
+            <translate region="base-platform" offset="0,0,72"/>
+            <translate region="base-platform" offset="0,0,78"/>
+            <translate region="base-platform" offset="0,0,84"/>
+            <translate region="base-platform" offset="0,0,90"/>
+            <translate region="base-platform" offset="0,0,96"/>
+            <translate region="base-platform" offset="0,0,102"/>
+            <translate region="base-platform" offset="0,0,108"/>
+            <translate region="base-platform" offset="0,0,114"/>
+            <translate region="base-platform" offset="0,0,120"/>
+            <translate region="base-platform" offset="0,0,126"/>
+            <translate region="base-platform" offset="0,0,132"/>
+            <translate region="base-platform" offset="0,0,138"/>
+            <translate region="base-platform" offset="0,0,144"/>
+            <translate region="base-platform" offset="0,0,150"/>
+            <translate region="base-platform" offset="0,0,156"/>
+            <translate region="base-platform" offset="0,0,162"/>
+            <translate region="base-platform" offset="0,0,168"/>
+            <translate region="base-platform" offset="0,0,174"/>
+            <translate region="base-platform" offset="0,0,180"/>
+            <translate region="base-platform" offset="0,0,186"/>
+            <translate region="base-platform" offset="0,0,192"/>
+            <translate region="base-platform" offset="0,0,198"/>
+            <translate region="base-platform" offset="0,0,204"/>
+            <translate region="base-platform" offset="0,0,210"/>
+            <translate region="base-platform" offset="0,0,216"/>
+            <translate region="base-platform" offset="0,0,222"/>
+            <translate region="base-platform" offset="0,0,228"/>
+            <translate region="base-platform" offset="0,0,234"/>
+            <translate region="base-platform" offset="0,0,240"/>
+            <translate region="base-platform" offset="0,0,246"/>
+            <translate region="base-platform" offset="0,0,252"/>
+            <translate region="base-platform" offset="0,0,258"/>
+            <translate region="base-platform" offset="0,0,264"/>
+            <translate region="base-platform" offset="0,0,270"/>
+            <translate region="base-platform" offset="0,0,276"/>
+            <translate region="base-platform" offset="0,0,282"/>
+            <translate region="base-platform" offset="0,0,288"/>
+            <translate region="base-platform" offset="0,0,294"/>
+            <translate region="base-platform" offset="0,0,300"/>
+            <translate region="base-platform" offset="0,0,306"/>
+            <translate region="base-platform" offset="0,0,312"/>
+            <translate region="base-platform" offset="0,0,318"/>
+            <translate region="base-platform" offset="0,0,324"/>
+            <translate region="base-platform" offset="0,0,330"/>
+            <translate region="base-platform" offset="0,0,336"/>
+            <translate region="base-platform" offset="0,0,342"/>
+            <translate region="base-platform" offset="0,0,348"/>
+            <translate region="base-platform" offset="0,0,354"/>
+            <translate region="base-platform" offset="0,0,360"/>
+            <translate region="base-platform" offset="0,0,366"/>
+            <translate region="base-platform" offset="0,0,372"/>
+            <translate region="base-platform" offset="0,0,378"/>
+        </union>
+        <mirror id="left-platforms" region="right-platforms" normal="1,0,0" origin="1,0,0"/>
+    </union>
+    <cuboid id="spawn-region" min="-5,46,0" max="6,56,8" />
+    <apply kit="enter-platform-region-kit" region="right-platforms"/>
+    <apply kit="enter-platform-region-kit" region="left-platforms"/>
+    <apply kit="enter-spawn-region-kit" region="spawn-region"/>
+    <apply kit="enter-end-region-kit" region="end_region"/>
+    <apply block="deny(participating)" region="everywhere"/>
+</regions>
+<spawns>
+    <spawn filter="deny(after-1s)" kit="spawn-kit">
+        <region>
+            <cylinder base="0.5,50,3.5" height="0" radius="1"/>
+        </region>
+    </spawn>
+    <default>
+        <region>
+            <cylinder base="0.5,70,-22.5" height="0" radius="1"/>
+        </region>
+    </default>
+</spawns>
+<time result="objectives">5m</time>
+<variables>
+    <array id="platform_states" size="64" scope="match"/>
+    <variable id="platform_count" default="0" scope="match"/>
+    <variable id="platform_index" default="0" scope="match"/>
+    <variable id="platform_diff" default="0" scope="match"/>
+    <variable id="platform_state" default="0" scope="match"/>
+    <variable id="player_count" default="0" scope="match"/>
+    <variable id="is_dying" default="0" scope="player"/>
+    <variable id="complete" default="0" scope="player"/>
+    <variable id="completions" default="0" scope="match"/>
+    <variable id="recent_completion" default="0" scope="player" exclusive="1"/>
+    <cuboid id="end_region" min="0,0,0" max="0,0,0"/>
+    <cuboid id="fill_region" min="0,0,0" max="0,0,0"/>
+    <timelimit id="timelimit"/>
+</variables>
+<filters>
+    <time id="after-1s">1s</time>
+</filters>
+<actions>
+    <action id="enter-platform-region" scope="player">
+        <set var="platform_index" value="floor((floor(player.z + 0.5) - 10.0) / 6.0)"/>
+        <set var="platform_diff" value="platform_index - platform_count"/>
+        <action filter="all(platform_diff=..-1,platform_index=0..)">
+            <set var="platform_diff" value="platform_index - score"/>
+            <action filter="platform_diff=..0">
+                <set var="platform_state" value="platform_states[platform_index]"/>
+                <action filter="is_dying=1">
+                    <!-- Prevents laggers from crossing multiple platforms -->
+                    <teleport x="player.x" y="player.y - 5" z="player.z" />
+                </action>
+                <action filter="all(any(all(player.x=..1,platform_state=0),all(player.x=1..,platform_state=1)),is_dying=0)">
+                    <set var="is_dying" value="1" />
+                    <set var="platform_states" index="platform_index" value="-1"/>
+                    
+                    <switch-scope inner="match" outer="player">
+                        <set var="fill_region" index="0" value="-3 + (platform_state * 6)"/>
+                        <set var="fill_region" index="1" value="49"/>
+                        <set var="fill_region" index="2" value="12 + (platform_index * 6)"/>
+                        <set var="fill_region" index="3" value="fill_region[0] + 1"/>
+                        <set var="fill_region" index="4" value="fill_region[1] + 1"/>
+                        <set var="fill_region" index="5" value="fill_region[2] + 1"/>
+                        <fill region="fill_region" material="stained_glass:14" events="true"/>
+                        <sound key="dig.glass"/>
+                    </switch-scope>
+                </action>
+                <action filter="is_dying=0">
+                    <set var="score" value="platform_index + 1"/>
+                </action>
+            </action>
+            <action filter="platform_diff=1..">
+                <teleport x="0.5" y="51" z="3.5" yaw="0" pitch="0"/>
+                <sound preset="PORTAL"/>
+                <message text="`ePlease do not try to cheese!"/>
+            </action>
+        </action>
+    </action>
+    <action id="enter-end-region" scope="player">
+        <set var="platform_diff" value="platform_count - score"/>
+        <action filter="platform_diff=0">
+            <teleport x="0.5" y="70" z="-22.5" yaw="0" pitch="0"/>
+            <set var="completions" value="completions + 1"/>
+            <set var="recent_completion" value="1"/>
+            <set var="complete" value="1"/>
+            <switch-scope inner="match">
+                <message text="{player} `ahas crossed the glass bridge in position `3#{position}`r!">
+                    <replacements>
+                        <player id="player" var="recent_completion"/>
+                        <decimal id="position" value="completions"/>
+                    </replacements>
+                </message>
+                <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+            </switch-scope>
+            <sound preset="SCORE"/>
+            <action filter="completions=1">
+                <set var="score" value="score + 1"/>
+                <sound preset="OBJECTIVE_GOOD"/>
+                <action filter="timelimit=20..">
+                    <set var="timelimit" value="20"/>
+                    <switch-scope inner="match">
+                        <message text="`aThe timer has been shortened to `c20 seconds"/>
+                    </switch-scope>
+                </action>
+            </action>
+        </action>
+        <action filter="platform_diff=1..">
+            <teleport x="0.5" y="51" z="3.5" yaw="0" pitch="0"/>
+            <sound preset="PORTAL"/>
+            <message text="`ePlease do not try to cheese!"/>
+        </action>
+    </action>
+    <action id="enter-spawn-region" filter="all(alive,not(complete=1))" scope="player">
+        <set var="score" value="0"/>
+    </action>
+    <trigger filter="any(all(not(alive), after-1s),complete=1)" scope="player">
+        <action>
+            <switch-scope outer="player" inner="match">
+                <set var="player_count" value="0"/>
+                <switch-scope inner="player" outer="match">
+                    <action filter="all(alive,not(complete=1))">
+                        <set var="player_count" value="player_count + 1"/>
+                    </action>
+                </switch-scope>
+                <action filter="player_count=0">
+                    <set var="timelimit" value="0"/>
+                </action>
+            </switch-scope>
+        </action>
+    </trigger>
+    <!-- Workaround, because you can still lose despite being last one alive. -->
+    <trigger scope="player">
+        <filter>
+            <after duration="1s">
+                <dead/>
+            </after>
+        </filter>
+        <action>
+            <teleport x="0.5" y="51" z="3.5" yaw="0" pitch="0"/>
+        </action>
+    </trigger>
+    <trigger filter="match-started" scope="match">
+        <action scope="match">
+            <set var="player_count" value="0"/>
+            <switch-scope inner="player" outer="match">
+                <set var="player_count" value="player_count + 1"/>
+            </switch-scope>
+            <set var="platform_count" value="min(max(floor(player_count * 0.75), 3), 64)"/>
+            <set var="platform_index" value="0"/>
+            <repeat times="platform_count">
+                <set var="platform_states" index="platform_index" value="floor(random() * 2)"/>
+                <paste-structure x="-3" y="50" z="12 + (platform_index * 6)" structure="platform"/>
+                <paste-structure x="3" y="50" z="12 + (platform_index * 6)" structure="platform"/>
+                <set var="fill_region" index="0" value="0"/>
+                <set var="fill_region" index="1" value="49"/>
+                <set var="fill_region" index="2" value="12 + (platform_index * 6)"/>
+                <set var="fill_region" index="3" value="fill_region[0] + 1"/>
+                <set var="fill_region" index="4" value="fill_region[1] + 1"/>
+                <set var="fill_region" index="5" value="fill_region[2] + 1"/>
+                <fill region="fill_region" material="stone" update="false" />
+                <set var="fill_region" index="0" value="0"/>
+                <set var="fill_region" index="1" value="50"/>
+                <set var="fill_region" index="2" value="12 + (platform_index * 6)"/>
+                <set var="fill_region" index="3" value="fill_region[0] + 1"/>
+                <set var="fill_region" index="4" value="fill_region[1] + 1"/>
+                <set var="fill_region" index="5" value="fill_region[2] + 1"/>
+                <fill region="fill_region" material="torch" update="false" />
+                <set var="fill_region" index="0" value="0"/>
+                <set var="fill_region" index="1" value="49"/>
+                <set var="fill_region" index="2" value="12 + (platform_index * 6)"/>
+                <set var="fill_region" index="3" value="fill_region[0] + 1"/>
+                <set var="fill_region" index="4" value="fill_region[1] + 1"/>
+                <set var="fill_region" index="5" value="fill_region[2] + 1"/>
+                <fill region="fill_region" material="air" update="false" />
+                <set var="platform_index" value="platform_index + 1"/>
+            </repeat>
+            <paste-structure x="-4" y="47" z="12 + (platform_count * 6)" structure="end-island"/>
+            <set var="end_region" index="0" value="-5"/>
+            <set var="end_region" index="1" value="50"/>
+            <set var="end_region" index="2" value="15 + (platform_count * 6)"/>
+            <set var="end_region" index="3" value="6"/>
+            <set var="end_region" index="4" value="55"/>
+            <set var="end_region" index="5" value="19 + (platform_count * 6)"/>
+        </action>
+    </trigger>
+</actions>
+<blitz filter="deny(always)"/>
+<score/>
+<respawn delay="0s" auto="true" spectate="true">
+    <message>You can now spectate the game!</message>
+</respawn>
+<kits>
+    <kit id="spawn-kit">
+        <effect amplifier="2">speed</effect>
+    </kit>
+    <kit id="enter-end-region-kit">
+        <action id="enter-end-region"/>
+    </kit>
+    <kit id="enter-platform-region-kit">
+        <action id="enter-platform-region"/>
+    </kit>
+    <kit id="enter-spawn-region-kit">
+        <action id="enter-spawn-region"/>
+    </kit>
+</kits>
+<structures>
+    <structure id="end-island" air="true">
+        <region>
+            <cuboid min="-5,46,-13" max="6,51,-5"/>
+        </region>
+    </structure>
+    <structure id="platform" air="true">
+        <region>
+            <cuboid min="-1,49,11" max="2,50,14"/>
+        </region>
+    </structure>
+</structures>
+<falling-blocks>
+    <rule>
+        <filter>
+            <material>stained_glass</material>
+        </filter>
+    </rule>
+</falling-blocks>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<damage>
+    <deny>
+        <not>
+            <cause>void</cause>
+        </not>
+    </deny>
+</damage>
+</map>
