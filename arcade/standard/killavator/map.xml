@@ -1,0 +1,118 @@
+<map proto="1.5.0">
+<name>Killavator</name>
+<version>1.0.0</version>
+<phase>development</phase>
+<objective>Make kills to go to floor above and reach scorebox on the top floor.</objective>
+<gamemode>scorebox</gamemode>
+<gamemode>ffa</gamemode>
+<created>2025-09-26</created>
+<authors>
+    <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb"/> <!-- arcadeboss -->
+</authors>
+<constants>
+    <constant id="score-limit">5</constant>
+    <constant id="scorebox-points">1000</constant>
+</constants>
+<variables>
+    <variable id="player_floor" scope="player" default="1"/>
+    <variable id="random_yaw" scope="match" default="0"/>
+</variables>
+<time>5m</time>
+<respawn auto="true" delay="3.2s"/>
+<gamerules>
+    <doDaylightCycle>false</doDaylightCycle>
+</gamerules>
+<players min="1" max="50" colors="true"/>
+<spawns>
+    <default region="obs-spawn" yaw="45" pitch="20"/>
+    <spawn kit="play" yaw="0" spread="true" safe="true" region="floor1-spawn"/>
+</spawns>
+<kits>
+    <kit id="play" force="false">
+        <clear effects="true"/>
+        <item slot="0" unbreakable="true" material="wood sword"/>
+        <chestplate material="leather chestplate" enchantment="protection:3" team-color="true" unbreakable="true" locked="true"/>
+        <health>20</health>
+        <effect amplifier="255" duration="3s">damage resistance</effect>
+        <effect amplifier="2" duration="5s">regeneration</effect>
+        <effect amplifier="1" duration="15s">absorption</effect>
+        <game-mode>adventure</game-mode>
+    </kit>
+</kits>
+<regions>
+    <point id="obs-spawn">8.5,102,-7.5</point>
+    <cuboid id="floor1-spawn" min="-15,1,-15" max="15,1.1,15"/>
+    <union id="scoreboxes">
+        <cuboid min="-19,92,-33" max="-17,98,3"/>
+        <cuboid min="17,92,-3" max="19,98,3"/>
+    </union>
+</regions>
+<kill-rewards>
+    <kill-reward action="kill-event" filter="not(player_floor=10)"/>
+    <kill-reward action="kill-event-top" filter="player_floor=10"/>
+</kill-rewards>
+<actions>
+    <!-- Got a kill -->
+    <action id="kill-event" scope="player">
+        <!-- 1) Always: Reset Health -->
+        <kit>
+            <health>20</health>
+            <effect amplifier="2" duration="5s">regeneration</effect>
+            <effect amplifier="1" duration="15s">absorption</effect>
+        </kit>
+        <!-- 2) If Not Top: TP up a floor -->
+        <set var="player_floor" value="player_floor+1"/>
+        <teleport x="player.x" y="(player_floor-1)*10+1" z="player.z"/>
+        <message text="`e`l▲ `6You are on now on Floor `e`l{player_floor}`r`6 !">
+            <replacements>
+                <decimal id="player_floor" value="player_floor"/>
+            </replacements>
+        </message>
+    </action>
+    <action id="kill-event-top" scope="player">
+        <!-- 1) Always: Reset Health -->
+        <kit>
+            <health>20</health>
+            <effect amplifier="2" duration="5s">regeneration</effect>
+            <effect amplifier="1" duration="15s">absorption</effect>
+        </kit>
+        <message text="`e`l▲ `6Jump in the portal to score `e`1${scorebox-points}`r`6 points!"/>
+    </action>
+    <!-- Redo spawn to correct floor -->
+    <trigger filter="alive" scope="player">
+        <action filter="not(player_floor=10)">
+            <teleport x="player.x" y="(player_floor-1)*10+1" z="player.z" yaw="random_yaw"/>
+            <set var="random_yaw" value="random_yaw+15"/>
+        </action>
+    </trigger>
+	<!-- After Scorebox, reset Floor to 1 -->
+    <action id="scorebox-event" scope="player">
+        <set var="player_floor" value="1"/>
+        <set var="random_yaw" value="0"/>
+    </action>
+</actions>
+<score>
+    <box points="${scorebox-points}" region="scoreboxes"/>
+    <kills>1</kills>
+</score>
+<portals>
+    <portal region="scoreboxes" destination="floor1-spawn"/>
+</portals>
+<broadcasts>
+    <alert after="3s">`r`6Each kill takes you up one floor in the Killavator.`r</alert>
+    <alert after="30s">`r`6Jump in the 10th floor scorebox for maximum points.`r</alert>
+</broadcasts>
+<filters>
+    <alive id="alive"/>
+</filters>
+<variables>
+    <timelimit id="timelimit"/>
+</variables>
+<itemremove>
+    <item>leather chestplate</item>
+    <item>wood sword</item>
+</itemremove>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
