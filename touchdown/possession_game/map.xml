@@ -1,0 +1,919 @@
+<map proto="1.5.0">
+<name>Possession Game</name>
+<version>1.0.0</version>
+<objective>Control the flag and reach 300 points to win!</objective>
+<created>2025-09-19</created>
+<phase>staging</phase>
+<game>KotF and Touchdown</game>
+<include id="countdown" />
+<include id="gapple-kill-reward" />
+<include id="sound-keys"/>
+<constants>
+    <!-- FLAG STATES -->
+    <constant id="FLAG_FLOOR">0</constant>
+    <constant id="FLAG_CARRIED">1</constant>
+    <constant id="FLAG_THROWN">2</constant>
+    <constant id="FLAG_DROPPED">3</constant>
+    <!-- POSTS IDS -->
+    <constant id="POST_CENTER">1</constant>
+    <constant id="POST_TOP">2</constant>
+    <constant id="POST_BOTTOM">3</constant>
+    <!-- WHO'S CARRYING -->
+    <constant id="CARRYING_BLUE">1</constant>
+    <constant id="CARRYING_WHITE">2</constant>
+    <!-- SETTINGS -->
+    <constant id="FLAG_AIR_TIME">5s</constant>
+    <constant id="FLAG_RESPAWN_TIME">12.1s</constant>
+</constants>
+<authors>
+    <author uuid="64e840c8-4fb5-4659-a36b-ff93e2f6113a" /> <!-- Javg_ -->
+</authors>
+<teams>
+    <team id="white-team" color="white" max="16" max-overfill="18" plural="true">White</team>
+    <team id="blue-team" color="blue" max="16" max-overfill="18" plural="true">Blue</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear />
+        <game-mode>adventure</game-mode>
+        <item slot="0" material="stone sword" unbreakable="true" />
+        <item slot="1" material="bow" unbreakable="true" />
+        <item slot="2" material="arrow" amount="8" />
+        <item slot="8" material="golden apple" />
+        <helmet material="leather helmet" team-color="true" />
+        <chestplate material="leather chestplate" team-color="true" />
+        <leggings material="leather leggings" team-color="true" />
+        <boots material="leather boots" team-color="true" />
+        <effect duration="3s" amplifier="5">instant health</effect>
+    </kit>
+    <kit id="spectator-kit">
+        <game-mode>spectator</game-mode>
+    </kit>
+    <kit id="fast-lane-kit">
+        <effect duration="oo" amplifier="12">speed</effect>
+        <effect duration="oo" amplifier="8">jump boost</effect>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <regions yaw="-180">
+            <point>0.5,44,64</point>
+        </regions>
+    </default>
+    <spawn team="blue-team" kit="spawn-kit" filter="any(team_currently_carrying=${CARRYING_WHITE},team_currently_carrying=0)">
+        <regions yaw="-90">
+            <region id="blue-spawn" />
+        </regions>
+    </spawn>
+    <spawn team="white-team" kit="spawn-kit" filter="any(team_currently_carrying=${CARRYING_BLUE},team_currently_carrying=0)">
+        <regions yaw="90">
+            <region id="white-spawn" />
+        </regions>
+    </spawn>
+</spawns>
+<respawn spectate="true">
+    <message>
+        {"translate":"death.respawn.confirmed.waiting.flagDropped"}
+    </message>
+</respawn>
+<regions>
+    <point id="blue-spawn">-67.5,38,0.5</point>
+    <point id="white-spawn">68.5,38,0.5</point>
+    <!-- JUMP PADS -->
+    <apply velocity="-2,1,0">
+        <region>
+            <cuboid id="white-spawn-pad" min="48,32,2" max="45,33,-1"/>
+        </region>
+    </apply>
+    <apply velocity="2,1,0">
+        <region>
+            <cuboid id="blue-spawn-pad" min="-47,32,-1" max="-44,33,2"/>
+        </region>
+    </apply>
+    <apply velocity="-0.3,2.7,-0.3">
+        <region>
+            <cuboid id="white-side-pad" min="35,2,32" max="32,3,35" />
+        </region>
+    </apply>
+    <apply velocity="0.3,2.7,0.3">
+        <region>
+            <cuboid id="blue-side-pad" min="-34,2,-31" max="-31,3,-34" />
+        </region>
+    </apply>
+    <apply velocity="-1,2,0">
+        <region>
+            <union id="white-bottom-pad">
+                <cuboid min="35,7,4" max="33,8,-3" />
+                <cuboid min="33,7,2" max="32,8,-1" />
+            </union>
+        </region>
+    </apply>
+    <apply velocity="1,2,0">
+        <region>
+            <union id="blue-bottom-pad">
+                <cuboid min="-34,7,-3" max="-32,8,4" />
+                <cuboid min="-32,7,-1" max="-31,8,2" />
+            </union>
+        </region>
+    </apply>
+    <apply lend-kit="fast-lane-kit">
+        <region>
+            <complement id="fast-lane-white">
+                <cuboid min="7,26,-54" max="55,36,-6" />
+                <region id="playable-area" />
+            </complement>
+            <complement id="fast-lane-blue">
+                <cuboid min="-6,26,55" max="-54,36,7" />
+                <region id="playable-area" />
+            </complement>
+            <complement> <!-- For when it's on the lower ring -->
+                <cuboid min="7,6,-54" max="55,16,-6" />
+                <region id="playable-area" />
+            </complement>
+            <complement>
+                <cuboid min="-6,6,55" max="-54,16,7" />
+                <region id="playable-area" />
+            </complement>
+        </region>
+    </apply>
+    <cuboid id="bottom-post-pad" min="1.6,10,1.6" max="-0.6,12,-0.6"/>
+    <cuboid id="top-north-pad" min="2,23,-30" max="-1,24,-27"/>
+    <cuboid id="bottom-north-pad" min="2,3,-30" max="-1,4,-27"/>
+    <cuboid id="top-south-pad" min="-1,23,31" max="2,24,28"/>
+    <cuboid id="bottom-south-pad" min="-1,3,31" max="2,4,28"/>
+    <circle id="playable-area" center="0.5,0.5" radius="42" />
+    <union id="white-portals">
+        <cuboid min="64,36,4" max="62,37,2" />
+        <cuboid min="64,36,-1" max="62,37,-3" />
+    </union>
+    <union id="blue-portals">
+        <cuboid min="-63,36,-3" max="-61,37,-1" />
+        <cuboid min="-63,36,2" max="-61,37,4" />
+    </union>
+</regions>
+<structures>
+    <structure id="fast-lanes-structure" origin="0.5,26,0.5">
+        <region>
+            <region id="fast-lane-white" />
+            <region id="fast-lane-blue" />
+        </region>
+    </structure>
+    <structure id="center-star-structure" origin="0.5,17,0.5">
+        <region>
+            <cuboid min="21,16,21" max="-20,17,-20" />
+        </region>
+    </structure>
+    <structure id="exclamation-structure" origin="0.5,30,0.5">
+        <region>
+            <cuboid min="2,36,2" max="-1,48,-1" />
+        </region>
+    </structure>
+    <structure id="arrow-structure" origin="0.5,49,0.5">
+        <region>
+            <cuboid min="2,55,5" max="-1,67,-4" />
+        </region>
+    </structure>
+    <structure id="jump-pad-structure" origin="0.5,23,29.5">
+        <region>
+            <cuboid min="3,21,32" max="-2,23,27" />
+        </region>
+    </structure>
+    <structure id="center-post-structure" origin="0.5,20,0.5">
+        <region>
+            <cuboid min="0,17,-1" max="1,20,2" />
+        </region>
+    </structure>
+    <structure id="top-post-structure" origin="0.5,30,0.5">
+        <region>
+            <block>0.5,29,0.5</block>
+        </region>
+    </structure>
+    <structure id="bottom-post-structure" origin="0.5,10,0.5">
+        <region>
+            <block>0.5,9,0.5</block>
+        </region>
+    </structure>
+    <structure id="cages-structure" origin="0.5,20,0.5">
+        <region>
+            <cuboid min="-67,38,-2" max="-66,40,3" />
+            <cuboid min="68,38,3" max="67,40,-2" />
+        </region>
+    </structure>
+    <structure id="portals-structure" origin="0.5,0,0.5">
+        <region>
+            <cuboid min="-63,37,-3" max="-61,38,-1" />
+            <cuboid min="-61,37,2" max="-63,38,4" />
+            <cuboid min="64,37,4" max="62,38,2" />
+            <cuboid min="62,37,-1" max="64,38,-3" />
+        </region>
+    </structure>
+    <dynamic structure="center-star-structure" update="false">
+        <trigger>
+            <not>
+                <any>
+                    <after duration="${FLAG_RESPAWN_TIME}" filter="all(current_post=${POST_BOTTOM},not(flag_state=${FLAG_CARRIED}))" />
+                    <all>
+                        <variable var="current_post">${POST_BOTTOM}</variable>
+                        <variable var="flag_state">${FLAG_FLOOR}</variable>
+                    </all>
+                    <all>
+                        <variable var="current_post">${POST_BOTTOM}</variable>
+                        <variable var="flag_state">${FLAG_CARRIED}</variable>
+                        <variable var="was_passed">0</variable>
+                    </all>
+                </any>
+            </not>
+        </trigger>
+    </dynamic>
+    <dynamic structure="exclamation-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_CENTER})" location="0.5,20,0.5" />
+    <dynamic structure="exclamation-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_TOP})" location="0.5,30,0.5" />
+    <dynamic structure="exclamation-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_BOTTOM})" location="0.5,20,0.5" />
+    <dynamic structure="arrow-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_TOP})" location="0.5,30,29.5" />
+    <dynamic structure="arrow-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_TOP})" location="0.5,30,-28.5" />
+    <dynamic structure="arrow-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_BOTTOM})" location="0.5,15,29.5" />
+    <dynamic structure="arrow-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_BOTTOM})" location="0.5,15,-28.5" />
+    <dynamic structure="jump-pad-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_TOP})" location="0.5,23,29.5" />
+    <dynamic structure="jump-pad-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_TOP})" location="0.5,23,-28.5" />
+    <dynamic structure="jump-pad-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_BOTTOM})" location="0.5,3,29.5" />
+    <dynamic structure="jump-pad-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_BOTTOM})" location="0.5,3,-28.5" />
+    <dynamic structure="center-post-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_CENTER})" location="0.5,20,0.5" update="false" />
+    <dynamic structure="top-post-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_TOP})" location="0.5,30,0.5" />
+    <dynamic structure="bottom-post-structure" trigger="all(flag_state=${FLAG_FLOOR},current_post=${POST_BOTTOM})" location="0.5,10,0.5" />
+    <dynamic structure="cages-structure" trigger="flag_state=${FLAG_DROPPED}" location="0.5,20,0.5" />
+    <dynamic structure="portals-structure" location="0.5,0,0.5">
+        <trigger>
+            <after duration="1s" filter="current_post=${POST_CENTER}" />
+        </trigger>
+    </dynamic>
+    <dynamic structure="fast-lanes-structure" location="0.5,26,0.5">
+        <trigger>
+            <after duration="1s" filter="current_post=${POST_TOP}" />
+        </trigger>
+    </dynamic>
+    <dynamic structure="fast-lanes-structure" location="0.5,6,0.5">
+        <trigger>
+            <after duration="1s" filter="current_post=${POST_BOTTOM}" />
+        </trigger>
+    </dynamic>
+</structures>
+<portals>
+    <portal yaw="@155" pitch="@6" region="white-portals" filter="current_post=${POST_TOP}">
+        <destination>
+            <point>50.5,27,-7.5</point>
+        </destination>
+    </portal>
+    <portal yaw="@155" pitch="@6" region="white-portals" filter="current_post=${POST_BOTTOM}">
+        <destination>
+            <point>50.5,7,-7.5</point>
+        </destination>
+    </portal>
+    <portal yaw="@-25" pitch="@6" region="blue-portals" filter="current_post=${POST_TOP}">
+        <destination>
+            <point>-49.5,27,8.5</point>
+        </destination>
+    </portal>
+    <portal yaw="@-25" pitch="@6" region="blue-portals" filter="current_post=${POST_BOTTOM}">
+        <destination>
+            <point>-49.5,7,8.5</point>
+        </destination>
+    </portal>
+    <portal destination="blue-spawn" yaw="@-90" sound="false">
+        <forward>
+            <all>
+                <after duration="3s" filter="flag_state=${FLAG_DROPPED}" />
+                <team>blue-team</team>
+            </all>
+        </forward>
+    </portal>
+    <portal destination="white-spawn" yaw="@90" sound="false">
+        <forward>
+            <all>
+                <after duration="3s" filter="flag_state=${FLAG_DROPPED}" />
+                <team>white-team</team>
+            </all>
+        </forward>
+    </portal>
+    <portal x="@0.5" y="@27" z="@35.5" yaw="-180" sound="false" forward="all(participating,dead)" />
+</portals>
+<variables scope="match">
+    <variable id="flag_state" />
+    <variable id="last_flag_state" />
+    <variable id="current_post" default="${POST_CENTER}" />
+    <variable id="next_post" default="${POST_TOP}" />
+    <variable id="was_passed" />
+    <variable id="team_currently_carrying" />
+    <variable id="last_team_carrying" />
+    <variable id="messages_seed" />
+    <variable id="alias_seed" />
+</variables>
+<variables scope="player">
+    <variable id="is_carrying" />
+    <variable id="flag_holder" exclusive="1" />
+</variables>
+<filters>
+    <all id="valid-receive">
+        <region id="playable-area" />
+        <damager>
+            <entity>snowball</entity>
+        </damager>
+    </all>
+    <after id="countdown-start" duration="4s" filter="flag_state=${FLAG_DROPPED}" />
+    <after id="should-drop-flag" duration="${FLAG_AIR_TIME}" filter="flag_state=${FLAG_THROWN}" message="Flag thrown. Next round in {0}" />
+</filters>
+<actions>
+    <!-- JUMP PADS -->
+    <trigger scope="player">
+        <filter>
+            <all>
+                <variable var="flag_state">${FLAG_FLOOR}</variable>
+                <any>
+                    <all>
+                        <any>
+                            <region id="top-north-pad" />
+                            <region id="top-south-pad" />
+                        </any>
+                        <variable var="current_post">${POST_TOP}</variable>
+                    </all>
+                    <all>
+                        <any>
+                            <region id="bottom-south-pad" />
+                            <region id="bottom-north-pad" />
+                        </any>
+                        <variable var="current_post">${POST_BOTTOM}</variable>
+                    </all>
+                </any>
+            </all>
+        </filter>
+        <action>
+            <action filter="any(top-north-pad,bottom-north-pad)">
+                <velocity x="0" y="1.18" z="4" />
+            </action>
+            <action filter="any(top-south-pad,bottom-south-pad)">
+                <velocity x="0" y="1.18" z="-4" />
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(bottom-post-pad,flag_state=${FLAG_FLOOR})">
+        <action>
+            <velocity x="0" y="2.5" z="0" />
+        </action>
+    </trigger>
+    <!-- FLAG -->
+    <action id="flag-thrown" scope="player">
+        <set var="is_carrying" value="0" />
+        <set var="was_passed" value="1" />
+        <switch-scope inner="match">
+            <action id="throw-sounds" />
+            <set var="last_flag_state" value="flag_state" />
+            <set var="flag_state" value="${FLAG_THROWN}" />
+            <drop-flag flag="flag" />
+        </switch-scope>
+    </action>
+    <action id="receive-flag" scope="player" filter="valid-receive">
+        <pickup-flag flag="flag" />
+    </action>
+    <trigger scope="player">
+        <filter>
+            <carrying-flag>flag</carrying-flag>
+        </filter>
+        <action>
+            <set var="is_carrying" value="1" />
+            <set var="flag_holder" value="1" />
+            <sound key="${entity.player.levelup}" volume="0.7" pitch="1.5"/>
+            <switch-scope inner="team">
+                <action filter="white-team">
+                    <switch-scope inner="match">
+                        <set var="last_team_carrying" value="team_currently_carrying" />
+                        <set var="team_currently_carrying" value="${CARRYING_WHITE}" />
+                    </switch-scope>
+                </action>
+                <action filter="blue-team">
+                    <switch-scope inner="match">
+                        <set var="last_team_carrying" value="team_currently_carrying" />
+                        <set var="team_currently_carrying" value="${CARRYING_BLUE}" />
+                    </switch-scope>
+                </action>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <all>
+                <variable var="is_carrying">1</variable>
+                <dead />
+            </all>
+        </filter>
+        <action>
+            <set var="last_flag_state" value="flag_state" />
+            <set var="flag_state" value="${FLAG_DROPPED}" />
+            <set var="last_team_carrying" value="team_currently_carrying" />
+            <set var="team_currently_carrying" value="0" />
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <flag-carried>flag</flag-carried>
+        </filter>
+        <action>
+            <set var="last_flag_state" value="flag_state" />
+            <set var="flag_state" value="${FLAG_CARRIED}" />
+        </action>
+    </trigger>
+    <trigger scope="match" filter="should-drop-flag">
+        <action>
+            <set var="last_flag_state" value="flag_state" />
+            <set var="flag_state" value="${FLAG_DROPPED}" />
+            <set var="was_passed" value="0" />
+            <set var="last_team_carrying" value="team_currently_carrying" />
+            <set var="team_currently_carrying" value="0" />
+            <switch-scope inner="player">
+                <set var="is_carrying" value="0" />
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="flag_state=${FLAG_FLOOR}">
+        <action>
+            <action filter="current_post=${POST_CENTER}">
+                <set var="next_post" value="${POST_TOP}" />
+            </action>
+            <action filter="current_post=${POST_TOP}">
+                <set var="next_post" value="${POST_BOTTOM}" />
+            </action>
+            <action filter="current_post=${POST_BOTTOM}">
+                <set var="next_post" value="${POST_CENTER}" />
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="flag_state=${FLAG_DROPPED}">
+        <action>
+            <set var="current_post" value="next_post" />
+            <sound key="${entity.blaze.death}" />
+            <message text=" " />
+            <message subtitle="Flag Dropped! Next round starting soon..." text="» `c`lFlag`r Dropped! Next round `estarting soon..." />
+            <message text=" " />
+            <switch-scope inner="player">
+                <action filter="participating">
+                    <kit id="spectator-kit" />
+                </action>
+            </switch-scope>
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <after duration="3s" filter="all(flag_state=${FLAG_DROPPED},participating,alive)" />
+        </filter>
+        <action>
+            <kit id="spawn-kit" />
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="1s" filter="all(flag_state=${FLAG_DROPPED},not(current_post=${POST_CENTER}))" />
+        </filter>
+        <action>
+            <sound preset="alert" pitch="3" />
+            <action filter="current_post=${POST_TOP}">
+                <message text="» Spawning `e`lTop Fast Lanes`r «" />
+            </action>
+            <action filter="current_post=${POST_BOTTOM}">
+                <message text="» Spawning `e`lBottom Fast Lanes`r «" />
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="7.1s" filter="flag_state=${FLAG_DROPPED}" />
+        </filter>
+        <action>
+            <set var="flag_state" value="${FLAG_FLOOR}" />
+        </action>
+    </trigger>
+    <!-- MESSAGES -->
+    <!-- ANNOUNCE FLAG -->
+    <trigger scope="match">
+        <filter>
+            <after duration="2s" filter="all(flag_state=${FLAG_FLOOR},match-started)" />
+        </filter>
+        <action>
+            <sound preset="alert" pitch="2" />
+            <action filter="current_post=${POST_CENTER}">
+                <message text=" " />
+                <message text="» `c`lThe Flag`r has respawned at the `e`lCenter Post" />
+                <message text="» Head to the `oMiddle Island`r and fight for it!" />
+                <message text=" " />
+            </action>
+            <action filter="current_post=${POST_TOP}">
+                <message text=" " />
+                <message text="» `c`lThe Flag`r has respawned at the `e`lTop Post!" />
+                <message text="» Use the `oJump Pads`r on the `oUpper Ring`r to reach it!" />
+                <message text=" " />
+            </action>
+            <action filter="current_post=${POST_BOTTOM}">
+                <message text=" " />
+                <message text="» `c`lThe Flag`r has respawned at the `e`lBottom Post!" />
+                <message text="» Make the jump from the `oPads`r on the `oLower Ring`r. `lPass it quickly or you'll fall!" />
+                <message text=" " />
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="all(flag_state=${FLAG_CARRIED},last_team_carrying=0)">
+        <action>
+            <action id="pickup-sounds" />
+            <action filter="team_currently_carrying=${CARRYING_WHITE}">
+                <action filter="alias_seed=1">
+                    <message text="» {target} `bbegins the possession for the `f`lWhite Meteors!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="alias_seed=2">
+                    <message text="» {target} `bbegins the possession for the `f`lWhite Astros!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="alias_seed=3">
+                    <message text="» {target} `bbegins the possession for the `f`lWhite Blazers!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="alias_seed=4">
+                    <message text="» {target} `bbegins the possession for the `f`lWhite Thunders!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="alias_seed=5">
+                    <message text="» {target} `bbegins the possession for the `f`lWhite Voyagers!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+            </action>
+            <action filter="team_currently_carrying=${CARRYING_BLUE}">
+                <action filter="alias_seed=1">
+                    <message text="» {target} `bbegins the possession for the `9`lBlue Comets!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="alias_seed=2">
+                    <message text="» {target} `bbegins the possession for the `9`lBlue Nebulas!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="alias_seed=3">
+                    <message text="» {target} `bbegins the possession for the `9`lBlue Rockets!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="alias_seed=4">
+                    <message text="» {target} `bbegins the possession for the `9`lBlue Cyclones!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="alias_seed=5">
+                    <message text="» {target} `bbegins the possession for the `9`lBlue Explorers!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <after duration="0.1s" filter="all(is_carrying=1,current_post=${POST_BOTTOM},last_team_carrying=0)" />
+        </filter>
+        <action>
+            <sound preset="alert" pitch="1.5" />
+            <message text="» `c`lPass now!`r «" subtitle="⚠`l Pass now!`r ⚠" fade-in="0.1s" stay="0.2s" fade-out="0.1" />
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <after duration="0.5s" filter="all(is_carrying=1,current_post=${POST_BOTTOM},last_team_carrying=0)" />
+        </filter>
+        <action>
+            <sound preset="alert" pitch="1.5" />
+            <message text="» `c`lPass now!`r «" subtitle="⚠`l Pass now!`r ⚠" fade-in="0.1s" stay="0.2s" fade-out="0.1" />
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <after duration="0.9s" filter="all(is_carrying=1,current_post=${POST_BOTTOM},last_team_carrying=0)" />
+        </filter>
+        <action>
+            <sound preset="alert" pitch="1.5" />
+            <message text="» `c`lPass now!`r «" subtitle="⚠`l Pass now!`r ⚠" fade-in="0.1s" stay="1s" fade-out="0.5s" />
+        </action>
+    </trigger>
+    <!-- PASS -->
+    <trigger scope="match" filter="all(flag_state=${FLAG_CARRIED},last_flag_state=${FLAG_THROWN})">
+        <action>
+            <action id="random-message-seed-action" />
+            <action filter="any(all(last_team_carrying=${CARRYING_BLUE},team_currently_carrying=${CARRYING_BLUE}),all(last_team_carrying=${CARRYING_WHITE},team_currently_carrying=${CARRYING_WHITE}))">
+                <action filter="messages_seed=1">
+                    <message text="» {target} `bcatches the flag!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=2">
+                    <message text="» `bSmooth pass. {target} has the flag!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=3">
+                    <message text="» `bFlag received by {target}!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=4">
+                    <message text="» `bThe flag is now in {target}’s hands!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=5">
+                    <message text="» `bQuick handoff. {target} is carrying the flag!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=6">
+                    <message text="» {target} `bgrabs the flag with ease!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=7">
+                    <message text="» {target} `bkeeps the play alive!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=8">
+                    <message text="» `bSecure catch by {target}!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=9">
+                    <message text="» {target} `bcontinues the run!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=10">
+                    <message text="» `bGreat pass, {target} takes over!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+            </action>
+            <action filter="any(all(last_team_carrying=${CARRYING_WHITE},team_currently_carrying=${CARRYING_BLUE}),all(last_team_carrying=${CARRYING_BLUE},team_currently_carrying=${CARRYING_WHITE}))">
+                <action filter="messages_seed=1">
+                    <message text="» {target} `6steals the flag!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=2">
+                    <message text="» `6Oh no! The flag goes to {target}">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=3">
+                    <message text="» `6Possession lost. {target} has it!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=4">
+                    <message text="» `6Huge mistake, {target} takes control!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=5">
+                    <message text="» `6The flag slips into {target}'s hands!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=6">
+                    <message text="» `6Bad pass. {target} now holds the flag!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=7">
+                    <message text="» `6Turnover! {target} is carrying the flag!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=8">
+                    <message text="» `6Disaster! {target} has the flag!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=9">
+                    <message text="» {target} `6takes advantage of the misplay!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+                <action filter="messages_seed=10">
+                    <message text="» `6The flag falls right to {target}!">
+                        <replacements>
+                            <player id="target" var="flag_holder" />
+                        </replacements>
+                    </message>
+                </action>
+            </action>
+        </action>
+    </trigger>
+    <!-- SOUNDS -->
+    <action id="throw-sounds" scope="match">
+        <sound key="${entity.snowball.throw}" volume="1" pitch="0.5"/>
+        <sound key="${entity.snowball.throw}" volume="1" pitch="0.6"/>
+        <sound key="${entity.snowball.throw}" volume="1" pitch="0.7"/>
+        <sound key="${entity.firework_rocket.launch}" volume="1" pitch=".5"/>
+    </action>
+    <action id="pickup-sounds" scope="match">
+        <sound key="${entity.firework_rocket.launch}" volume="1" pitch="1"/>
+        <sound key="${entity.firework_rocket.launch}" volume="1" pitch=".9"/>
+        <sound key="${entity.firework_rocket.launch}" volume="1" pitch=".8"/>
+    </action>
+    <action id="catch-sounds" scope="match">
+        <sound key="${block.slime_block.break}" volume="1" pitch="1"/>
+        <sound key="${block.slime_block.break}" volume="1" pitch="0.9"/>
+        <sound key="${block.slime_block.break}" volume="1" pitch="0.8"/>
+        <sound key="${block.note_block.snare}" volume="0.5" pitch="1.2"/>
+        <sound key="${entity.experience_orb.pickup}" volume="0.7" pitch="1.5"/>
+        <sound key="${entity.experience_orb.pickup}" volume="0.6" pitch="1"/>
+        <sound key="${block.portal.travel}" volume="0.1" pitch="1.5"/>
+    </action>
+    <action id="go-sounds" scope="match">
+        <sound key="${block.note_block.pling}" volume=".5" pitch="0.841"/>
+        <sound key="${block.note_block.pling}" volume=".5" pitch="1"/>
+        <sound key="${block.note_block.pling}" volume=".5" pitch="1.122"/>
+        <sound key="${block.note_block.pling}" volume=".5" pitch="1.335"/>
+        <sound key="${block.note_block.pling}" volume=".5" pitch="1.682"/>
+    </action>
+    <trigger scope="match" filter="all(flag_state=${FLAG_CARRIED},any(last_team_carrying=${CARRYING_BLUE},last_team_carrying=${CARRYING_WHITE}))">
+        <action>
+            <action id="catch-sounds" />
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <after duration="0.05s" filter="all(flag_state=${FLAG_FLOOR},match-started)" />
+        </filter>
+        <action>
+            <action id="go-sounds" />
+        </action>
+    </trigger>
+    <!-- RANDOMIZERS -->
+    <action id="random-message-seed-action" scope="match">
+        <set var="messages_seed" value="floor(random() * 10) + 1" />
+    </action>
+    <trigger scope="match" filter="always">
+        <action>
+            <set var="alias_seed" value="floor(random() * 5) + 1" />
+            <action filter="alias_seed=1">
+                <team-alias team="blue-team" alias="Blue Comets" />
+                <team-alias team="white-team" alias="White Meteors" />
+            </action>
+            <action filter="alias_seed=2">
+                <team-alias team="blue-team" alias="Blue Nebulas" />
+                <team-alias team="white-team" alias="White Astros" />
+            </action>
+            <action filter="alias_seed=3">
+                <team-alias team="blue-team" alias="Blue Rockets" />
+                <team-alias team="white-team" alias="White Blazers" />
+            </action>
+            <action filter="alias_seed=4">
+                <team-alias team="blue-team" alias="Blue Cyclones" />
+                <team-alias team="white-team" alias="White Thunders" />
+            </action>
+            <action filter="alias_seed=5">
+                <team-alias team="blue-team" alias="Blue Explorers" />
+                <team-alias team="white-team" alias="White Voyagers" />
+            </action>
+        </action>
+    </trigger>
+</actions>
+<score>
+    <limit>300</limit>
+</score>
+<flags>
+    <flag id="flag" name="Flag" color="pink" shared="true" points-rate="1" show-messages="false">
+        <post recover-time="0" respawn-time="${FLAG_RESPAWN_TIME}">
+            <post id="center-post" name="Center Post" respawn-filter="next_post=${POST_CENTER}">0.5,20,0.5</post>
+            <post id="top-post" name="Top Post" respawn-filter="next_post=${POST_TOP}">0.5,30,0.5</post>
+            <post id="bottom-post" name="Bottom Post" respawn-filter="next_post=${POST_BOTTOM}">0.5,10,0.5</post>
+        </post>
+        <pickup-kit force="true">
+            <potion amplifier="2" duration="oo">speed</potion>
+            <item prevent-sharing="true" consumable="throw-flag" name="`c`lPass!" material="snowball"/>
+            <max-health>8</max-health>
+        </pickup-kit>
+        <drop-kit force="true">
+            <potion duration="0">speed</potion>
+            <max-health>20</max-health>
+        </drop-kit>
+    </flag>
+</flags>
+<consumables>
+    <consumable id="throw-flag" on="right click" override="false" action="flag-thrown" consume="false"/>
+</consumables>
+<kill-rewards>
+    <kill-reward>
+        <item material="arrow" amount="6" />
+    </kill-reward>
+</kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<disabledamage>
+    <damage>fall</damage>
+    <damage ally="true" enemy="false" other="false">entity attack</damage>
+</disabledamage>
+<damage victim-action="receive-flag">
+    <deny>
+        <all>
+            <any>
+                <all>
+                    <attacker>
+                        <team>white-team</team>
+                    </attacker>
+                    <victim>
+                        <team>white-team</team>
+                    </victim>
+                </all>
+                <all>
+                    <attacker>
+                        <team>blue-team</team>
+                    </attacker>
+                    <victim>
+                        <team>blue-team</team>
+                    </victim>
+                </all>
+            </any>
+            <damager>
+                <entity>arrow</entity>
+            </damager>
+        </all>
+    </deny>
+</damage>
+<friendlyfire>on</friendlyfire>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>stone sword</item>
+    <item>bow</item>
+</itemremove>
+</map>
+<!-- Stats de más pases exitosos e intentados -->
