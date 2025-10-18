@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Infection: Skull Island</name>
-<version>2.0.3</version>
+<version>2.0.4</version>
 <created>2025-09-12</created>
 <phase>staging</phase>
 <constants>
@@ -11,6 +11,7 @@
     <constant id="compass-distribution-time">2</constant>
     <constant id="border-start">4</constant>
     <constant id="spawn-switch">5</constant> <!-- move infected spawn to center cause border -->
+    <constant id="fire-time">7</constant> <!-- more fire for infected to deal with leaf sky bases -->
     <constant id="enable-player-tracker">always</constant>
     <constant id="release-seconds">45</constant>
 </constants>
@@ -23,6 +24,7 @@
     <tip after="4s" filter="infected-team">You are an Infected, you must kill all of the Humans to win!</tip>
     <alert after="${compass-distribution-time}m" filter="${enable-player-tracker}">${infected-team-name} can now track the nearest Human with a compass!</alert>
     <alert after="${spawn-switch}m">${infected-team-name} now spawn in the center!</alert>
+    <alert after="${fire-time}m">${infected-team-name} all now have flint and steel!</alert>
 </broadcasts>
 <teams>
     <team id="infected-team" color="${infected-team-color}" plural="true" min="1" max="5">${infected-team-name}</team>
@@ -46,11 +48,11 @@
 <world-borders center="0.5,0.5" damage="0.1">
     <world-border size="800"/>
     <world-border size="245" after="${border-start}m" duration="0s"/>
-    <world-border size="80" after="${border-start}m" duration="4m30s"/> <!-- duration = time-limit - border-start - 30s -->
+    <world-border size="97" after="${border-start}m" duration="4m30s"/> <!-- duration = time-limit - border-start - 30s -->
     <!-- release everyone, including observers in the last moments -->
     <world-border size="1000" after="8m56s" duration="4s"/> <!-- time-limit - 4s -->
 </world-borders>
-<maxbuildheight>128</maxbuildheight>
+<maxbuildheight>118</maxbuildheight>
 <spawns>
     <default yaw="90" region="obs-spawn-point"/>
     <spawn team="human-team" kit="humans-kit" safe="true" filter="before-30s">
@@ -132,13 +134,13 @@
             <effect duration="60s">absorption</effect>
         </item>
         <item slot="6" material="compass"/>
-        <item slot="8" material="arrow" amount="64"/>
-        <item slot="11" material="vine" amount="64"/>
-        <item slot="12" material="leaves" amount="64"/>
-        <item slot="20" material="vine" amount="64"/>
-        <item slot="21" material="leaves" amount="64"/>
-        <item slot="30" material="leaves" amount="64"/>
-        <item slot="29" material="vine" amount="64"/>
+        <item slot="8" material="arrow" amount="45"/>
+        <item slot="11" material="vine" amount="32"/>
+        <item slot="12" material="leaves" amount="32"/>
+        <item slot="20" material="vine" amount="32"/>
+        <item slot="21" material="leaves" amount="32"/>
+        <item slot="30" material="leaves" amount="32"/>
+        <item slot="29" material="vine" amount="32"/>
         <effect>speed</effect>
         <effect duration="0">absorption</effect>
         <effect duration="6s" amplifier="255">resistance</effect>
@@ -161,6 +163,7 @@
         <time id="after-30s">31s</time>
     </not>
     <time id="infected-spawn-switch">${spawn-switch}m</time>
+    <time id="infected-fire-time">${fire-time}m</time>
     <time id="border-start-filter">${border-start}m</time>
     <!-- allow players to break leaves, vines, etc -->
     <deny id="original-block-protection">
@@ -218,6 +221,13 @@
     <apply enter="never" region="no-go" message="You may not go beyond this point!"/>
 </regions>
 <actions>
+    <trigger scope="player" filter="all(infected-team,infected-fire-time)">
+        <action>
+            <kit>
+                <item material="flint and steel" damage="58"/> <!-- 5 uses -->
+            </kit>
+        </action>
+    </trigger>
     <trigger scope="player">
         <action>
             <kit>
