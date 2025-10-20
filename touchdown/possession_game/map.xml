@@ -1,7 +1,7 @@
 <map proto="1.5.0">
 <name>Possession Game</name>
-<version>2.0.1</version>
-<objective>Control the flag and reach 300 points to win!</objective>
+<version>2.1.0</version>
+<objective>Control the flag and score goals to reach 300 points and win!</objective>
 <created>2025-09-19</created>
 <phase>staging</phase>
 <game>KotF and Touchdown</game>
@@ -56,6 +56,7 @@
         <leggings material="leather leggings" team-color="true" unbreakable="true" locked="true" />
         <boots material="leather boots" team-color="true" unbreakable="true" locked="true" />
         <effect duration="3s" amplifier="5">instant health</effect>
+        <!-- <effect duration="oo">night vision</effect> -->
     </kit>
     <kit id="spectator-kit">
         <game-mode>spectator</game-mode>
@@ -176,18 +177,6 @@
             <cuboid min="2,55,5" max="-1,67,-4" />
         </region>
     </structure>
-    <structure id="blue-touchdown-arrows-structure">
-        <region>
-            <cuboid min="-63,9,12" max="-65,52,60" />
-            <cuboid min="-63,9,-11" max="-65,52,-59" />
-        </region>
-    </structure>
-    <structure id="white-touchdown-arrows-structure">
-        <region>
-            <cuboid min="64,9,-11" max="66,52,-59" />
-            <cuboid min="64,9,12" max="66,52,60" />
-        </region>
-    </structure>
     <dynamic structure="exclamation-structure" trigger="all(flag_state=${FLAG_FLOOR},next_post=${POST_CENTER})" location="0.5,20,0.5" />
     <dynamic structure="exclamation-structure" trigger="all(flag_state=${FLAG_FLOOR},next_post=${POST_TOP})" location="0.5,30,0.5" />
     <dynamic structure="exclamation-structure" trigger="all(flag_state=${FLAG_FLOOR},next_post=${POST_BOTTOM})" location="0.5,15,0.5" />
@@ -202,44 +191,6 @@
     <dynamic structure="arrow-structure" trigger="all(flag_state=${FLAG_FLOOR},next_post=${POST_BOTTOM})" location="0.5,15,29.5" />
     <dynamic structure="arrow-structure" trigger="all(flag_state=${FLAG_FLOOR},next_post=${POST_BOTTOM})" location="0.5,15,-28.5" />
     <dynamic structure="mid-star-structure" trigger="not(next_post=${POST_BOTTOM})" location="0.5,17,0.5" />
-    <dynamic structure="blue-touchdown-arrows-structure" trigger="all(team_currently_carrying=${CARRYING_WHITE},any(flag_state=${FLAG_ON_AIR},flag_state=${FLAG_CARRIED}))" />
-    <dynamic structure="white-touchdown-arrows-structure" trigger="all(team_currently_carrying=${CARRYING_BLUE},any(flag_state=${FLAG_ON_AIR},flag_state=${FLAG_CARRIED}))" />
-    <!-- <dynamic structure="mid-star-structure" location="0.5,17,0.5">
-    <trigger>
-        <not>
-            <any>
-                <all>
-                    <variable var="next_post">${POST_BOTTOM}</variable>
-                    <variable var="flag_state">${FLAG_FLOOR}</variable>
-                </all>
-                <all>
-                    <variable var="next_post">${POST_BOTTOM}</variable>
-                    <variable var="flag_state">${FLAG_CARRIED}</variable>
-                    <variable var="was_passed">0</variable>
-                </all>
-                <pulse period="2s" duration="1s"
-    filter="all(next_post=${POST_BOTTOM},any(flag_state=${FLAG_ON_AIR},flag_state=${FLAG_DROPPED}))"
-    />
-            </any>
-        </not>
-    </trigger>
-</dynamic> -->
-    <!-- <dynamic structure="mid-star-glass-structure" location="0.5,17,0.5">
-    <trigger>
-        <pulse period="2s" duration="1s"
-    filter="all(next_post=${POST_BOTTOM},any(flag_state=${FLAG_ON_AIR},flag_state=${FLAG_DROPPED}))"
-    />
-    </trigger>
-</dynamic> -->
-    <!-- <dynamic structure="mid-star-structure" location="0.5,17,0.5">
-    <trigger>
-        <pulse period="2s" duration="1s">
-            <after duration="1s"
-    filter="all(next_post=${POST_BOTTOM},any(flag_state=${FLAG_ON_AIR},flag_state=${FLAG_DROPPED}))"
-    />
-        </pulse>
-    </trigger>
-</dynamic> -->
 </structures>
 <portals>
     <portal destination="blue-spawn" yaw="@-90" sound="false">
@@ -260,19 +211,19 @@
     </portal>
     <portal sound="false" yaw="@-180" x="@0.5" y="@44" z="@64">
         <forward>
-            <after duration="0.5s" filter="all(dead,participating,last_damage=${DAMAGE_VOID})" />
+            <after duration="0.5s" filter="all(dead,participating,any(last_damage=${DAMAGE_VOID},last_damage=0))" />
         </forward>
     </portal>
 </portals>
 <flags>
     <flag id="flag" name="Flag" color="pink" shared="true" points-rate="1" show-messages="false">
         <post recover-time="0">
-            <post name="Center Post" respawn-time="${FLAG_RESPAWN_TIME}" respawn-filter="next_post=${POST_CENTER}">0.5,20,0.5</post>
+            <post name="Center Post" respawn-time="${FLAG_RESPAWN_TIME}" pickup-filter="player.y=20" respawn-filter="next_post=${POST_CENTER}">0.5,20,0.5</post>
             <post name="Top Post" respawn-time="${FLAG_RESPAWN_TIME}" respawn-filter="next_post=${POST_TOP}">0.5,30,0.5</post>
             <post name="Bottom Post" respawn-time="${FLAG_RESPAWN_TIME}" respawn-filter="next_post=${POST_BOTTOM}">0.5,10,0.5</post>
         </post>
         <pickup-kit force="true">
-            <potion amplifier="2" duration="oo">speed</potion>
+            <potion amplifier="1" duration="oo">speed</potion>
             <item prevent-sharing="true" consumable="flag-consumable" name="`c`lPass!" material="snowball" />
             <max-health>14</max-health>
         </pickup-kit>
@@ -435,6 +386,7 @@
             <carrying-flag>flag</carrying-flag>
         </filter>
         <action>
+            <message actionbar="`e`lYou have the flag! Score under the enemy's base" />
             <set var="flag_holder" value="1" />
             <sound key="${entity.player.levelup}" volume="0.7" pitch="1.5" />
             <switch-scope inner="team">
@@ -544,15 +496,15 @@
                 <action filter="should_finish=0">
                     <action filter="current_post=${POST_CENTER}">
                         <set var="next_post" value="${POST_TOP}" />
-                        <message title="`lGOAL!" subtitle="The flag will now respawn at `e`lTop Post" />
+                        <message title="`lGOAL!" subtitle="The flag will now respawn at `e`lTop Post" actionbar="`l+30 Points" />
                     </action>
                     <action filter="current_post=${POST_TOP}">
                         <set var="next_post" value="${POST_BOTTOM}" />
-                        <message title="`lGOAL!" subtitle="The flag will now respawn at `e`lBottom Post" />
+                        <message title="`lGOAL!" subtitle="The flag will now respawn at `e`lBottom Post" actionbar="`l+30 Points" />
                     </action>
                     <action filter="current_post=${POST_BOTTOM}">
                         <set var="next_post" value="${POST_CENTER}" />
-                        <message title="`lGOAL!" subtitle="The flag will now respawn at `e`lCenter Post" />
+                        <message title="`lGOAL!" subtitle="The flag will now respawn at `e`lCenter Post" actionbar="`l+30 Points" />
                     </action>
                 </action>
                 <action id="message-score-display-player" />
@@ -1021,18 +973,6 @@
             <set var="flag_state" value="${FLAG_FLOOR}" />
         </action>
     </trigger>
-    <!-- <trigger scope="match">
-        <filter>
-            <pulse period="1s" duration="0.5s" filter="match-running" />
-        </filter>
-        <action>
-            <message text="round_state: {0}">
-                <replacements>
-                    <decimal id="0" value="round_state" />
-                </replacements>
-            </message>
-        </action>
-    </trigger> -->
 </actions>
 <consumables>
     <consumable id="flag-consumable" on="right click" override="false" action="on-throw" consume="false" />
@@ -1091,7 +1031,6 @@
     <tool>bow</tool>
 </toolrepair>
 <broadcasts>
-    <tip after="10s">Hold the flag to win! You can also score goals under the enemy spawn for 30 points each</tip>
+    <tip after="10s" every="2m">» `e`lYou can score goals under the enemy spawn!</tip>
 </broadcasts>
 </map>
-<!-- hacer espacio dividido cuando la flag esté en bottom -->
