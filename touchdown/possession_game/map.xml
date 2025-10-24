@@ -218,9 +218,9 @@
 <flags>
     <flag id="flag" name="Flag" color="pink" shared="true" points-rate="1" show-messages="false">
         <post recover-time="0">
-            <post name="Center Post" respawn-time="${FLAG_RESPAWN_TIME}" pickup-filter="any(player.y=20,not(flag_state=${FLAG_FLOOR}))" respawn-filter="next_post=${POST_CENTER}">0.5,20,0.5</post>
-            <post name="Top Post" respawn-time="${FLAG_RESPAWN_TIME}" respawn-filter="next_post=${POST_TOP}">0.5,30,0.5</post>
-            <post name="Bottom Post" respawn-time="${FLAG_RESPAWN_TIME}" respawn-filter="next_post=${POST_BOTTOM}">0.5,10,0.5</post>
+            <post name="Center Post" respawn-time="${FLAG_RESPAWN_TIME}" pickup-filter="all(any(player.y=20,not(flag_state=${FLAG_FLOOR})),alive)" respawn-filter="next_post=${POST_CENTER}">0.5,20,0.5</post>
+            <post name="Top Post" respawn-time="${FLAG_RESPAWN_TIME}" pickup-filter="alive" respawn-filter="next_post=${POST_TOP}">0.5,30,0.5</post>
+            <post name="Bottom Post" respawn-time="${FLAG_RESPAWN_TIME}" pickup-filter="alive" respawn-filter="next_post=${POST_BOTTOM}">0.5,10,0.5</post>
         </post>
         <pickup-kit force="true">
             <potion amplifier="1" duration="oo">speed</potion>
@@ -250,6 +250,7 @@
             <entity id="snowball-entity">snowball</entity>
         </damager>
     </all>
+    <entity id="dropped-items">dropped item</entity>
     <cause id="cause-melee">melee</cause>
     <cause id="cause-void">void</cause>
     <after id="countdown-start" duration="${FLAG_RESPAWN_TIME_MINUS_CD}" filter="all(round_state=${ROUND_FINISHED},match-running)" />
@@ -364,20 +365,18 @@
     <trigger scope="match" filter="round_state=${ROUND_FINISHED}">
         <action>
             <set var="should_announce" value="1" />
-            <kill-entities filter="always" />
+            <kill-entities filter="dropped-items" />
             <switch-scope inner="player" filter="participating">
                 <kit id="spectator-kit" />
             </switch-scope>
         </action>
     </trigger>
-    <trigger scope="match">
+    <trigger scope="player">
         <filter>
-            <after duration="3s" filter="round_state=${ROUND_FINISHED}" />
+            <after duration="2.8s" filter="all(round_state=${ROUND_FINISHED},participating)" />
         </filter>
         <action>
-            <switch-scope inner="player" filter="participating">
-                <kit id="spawn-kit" />
-            </switch-scope>
+            <kit id="spawn-kit" />
         </action>
     </trigger>
     <!-- ON CARRY -->
@@ -449,15 +448,15 @@
     <trigger scope="match" filter="all(flag_state=${FLAG_FLOOR},match-running)">
         <action>
             <kill-entities filter="snowball-entity" />
-            <set var="was_passed" value="0" />
-            <set var="team_previously_carrying" value="team_currently_carrying" />
-            <set var="team_currently_carrying" value="0" />
             <switch-scope inner="player">
                 <replace-item ignore-metadata="true">
                     <find material="snowball" />
                     <replace material="air" />
                 </replace-item>
             </switch-scope>
+            <set var="was_passed" value="0" />
+            <set var="team_previously_carrying" value="team_currently_carrying" />
+            <set var="team_currently_carrying" value="0" />
         </action>
     </trigger>
     <!-- GOAL -->
@@ -974,9 +973,21 @@
             <set var="flag_state" value="${FLAG_FLOOR}" />
         </action>
     </trigger>
-    <trigger scope="player" filter="all(flag_state=${FLAG_FLOOR},flag_holder=1)">
+    <trigger scope="player">
+        <filter>
+            <all>
+                <variable var="flag_holder">1</variable>
+                <not>
+                    <carrying-flag>flag</carrying-flag>
+                </not>
+            </all>
+        </filter>
         <action>
             <set var="flag_holder" value="0" />
+            <replace-item ignore-metadata="true">
+                <find material="snowball" />
+                <replace material="air" />
+            </replace-item>
         </action>
     </trigger>
 </actions>
