@@ -1,0 +1,66 @@
+<map proto="1.5.0">
+<include id="infection"/>
+<name>StrikeZone</name>
+<version>1.2.1</version>
+<created>2013-12-01</created>
+<constants>
+    <constant id="time-limit">7</constant>
+    <constant id="compass-distribution-time">6</constant>
+    <constant id="zombie-team-color">green</constant>
+    <constant id="human-team-color">blue</constant>
+</constants>
+<authors>
+    <author uuid="27ac2daf-3c38-4b8e-9448-46f221bb612a"/> <!-- N11cK; https://www.planetminecraft.com/project/minecraft-strikezone-a-call-of-duty-ghosts-multiplayer-map-remake/ -->
+</authors>
+<contributors>
+    <contributor uuid="42195cb9-b21b-42f5-b938-5ef46f303fcd"/> <!-- _Bill -->
+    <contributor uuid="6b093498-6541-447a-bee6-9615484f1350"/> <!-- EERRR8KKJ -->
+    <contributor uuid="811968c3-0a9f-4cb5-80af-19ce37141341"/> <!-- BennyDoesStuff -->
+</contributors>
+<broadcasts>
+    <alert after="2s">The ${zombie-team-name} will be released in `c8 seconds`r!</alert>
+    <tip after="20s" every="2m">${zombie-team-name} are able to `edouble-jump`r every 5 seconds.</tip>
+    <alert after="10s">The ${zombie-team-name} has been `creleased`r!</alert>
+</broadcasts>
+<kits>
+    <kit id="zombie-spawn-kit" parent="default-zombie-kit" force="true">
+        <double-jump recharge-time="5s" power="2" recharge-before-landing="true"/>
+    </kit>
+    <lend filter="all(alive,not(after-release),zombie-team)">
+        <kit>
+            <effect amplifier="255">weakness</effect>
+            <effect amplifier="255">slow</effect>
+            <effect>blindness</effect>
+        </kit>
+    </lend>
+</kits>
+<spawns>
+    <default region="obs-spawn" yaw="90"/>
+    <!-- Human Spawns -->
+    <spawn filter="before-release" team="human-team" kit="default-human-kit" region="human-spawn" yaw="-125"/>
+    <spawn filter="after-release" team="human-team" kit="zombie-switch-kit" region="human-spawn" yaw="-125"/>
+    <!-- Zombie Spawns -->
+    <spawn team="zombie-team" kit="zombie-spawn-kit" region="zombie-spawn" yaw="90"/>
+</spawns>
+<filters>
+    <not id="after-release">
+        <countdown id="before-release" duration="10" message="${zombie-team-name} will be released in {0}">
+            <match-running/>
+        </countdown>
+    </not>
+</filters>
+<regions>
+    <point id="obs-spawn">-1069.5,66,-994.5</point>
+    <point id="human-spawn">-1132.5,35,-964.5</point>
+    <point id="zombie-spawn">-1080.5,40,-1015.5</point>
+    <cuboid id="zombie-cage" min="-1082,40,-1014" size="3,3,-3"/>
+    <apply region="zombie-cage" leave="all(zombie-team,after-release)"/>
+</regions>
+<kill-rewards>
+    <kill-reward filter="human-team">
+        <kit id="human-kill-reward">
+            <effect duration="5" amplifier="2">regeneration</effect>
+        </kit>
+    </kill-reward>
+</kill-rewards>
+</map>
