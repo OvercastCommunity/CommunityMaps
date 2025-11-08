@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Super Bed World</name>
-<version>1.0.4</version>
+<version>1.1.0</version>
 <include id="gapple-kill-reward"/>
 <objective>Destroy the enemy beds and have the last bed standing to win.</objective>
 <gamemode>dtm</gamemode>
@@ -13,6 +13,7 @@
 </gamerules>
 <respawn auto="true" delay="2.5s"/>
 <constants>
+    <constant id="none">0</constant>
     <constant id="red">1</constant>
     <constant id="green">2</constant>
     <constant id="blue">3</constant>
@@ -159,16 +160,16 @@
         </action>
     </kit>
     <!-- Team switch here! -->
-    <kit id="revive-defeated-by-red-switch" force="true">
+    <kit id="revive-defeated-killed-by-red-switch" force="true">
         <team-switch team="red-team" show-title="false"/>
     </kit>
-    <kit id="revive-defeated-by-green-switch" force="true">
+    <kit id="revive-defeated-killed-by-green-switch" force="true">
         <team-switch team="green-team" show-title="false"/>
     </kit>
-    <kit id="revive-defeated-by-blue-switch" force="true">
+    <kit id="revive-defeated-killed-by-blue-switch" force="true">
         <team-switch team="blue-team" show-title="false"/>
     </kit>
-    <kit id="revive-defeated-by-yellow-switch" force="true">
+    <kit id="revive-defeated-killed-by-yellow-switch" force="true">
         <team-switch team="yellow-team" show-title="false"/>
     </kit>
 </kits>
@@ -195,10 +196,11 @@
 <broadcasts>
     <alert after="3s" every="5m" count="2">`r`eLast bed standing wins!`r</alert>
     <alert after="40s" every="5m" count="2">`r`eCapture the 4 wools to level-up your team's kit!`r</alert>
-    <alert after="80s" every="5m" count="2">`r`ePlayers switch to team that broke their bed upon death!`r</alert>
+    <alert after="80s" every="5m" count="2">`r`ePlayers with no bed switch to team that kills them!`r</alert>
     <tip after="120s">`r`eThe central Star Platform has jump boost and gapples!`r</tip>
     <tip after="240s">`r`eBeds can't be destroyed by explosions, they must be mined!`r</tip>
 </broadcasts>
+<damage victim-action="when-damaged"/>
 <filters>
     <alive id="alive"/>
     <deny id="tnt-immune">
@@ -241,80 +243,39 @@
     </all>
     <!-- Filters that trigger when player revives on defeated team -->
     <!-- Delayed so player has time to comprehend before TP and team switch -->
-    <after id="revive-defeated-by-red-delay" duration="2.5s" filter="revive-defeated-by-red" message="Team switch in {0}"/>
-    <after id="revive-defeated-by-blue-delay" duration="2.5s" filter="revive-defeated-by-blue" message="Team switch in {0}"/>
-    <after id="revive-defeated-by-green-delay" duration="2.5s" filter="revive-defeated-by-green" message="Team switch in {0}"/>
-    <after id="revive-defeated-by-yellow-delay" duration="2.5s" filter="revive-defeated-by-yellow" message="Team switch in {0}"/>
-    <all id="revive-defeated-by-red">
+    <after id="revive-defeated-killed-by-red-delay" duration="2.5s" filter="any(revive-defeated-killed-by-red)" message="Team switch in {0}"/>
+    <after id="revive-defeated-killed-by-blue-delay" duration="2.5s" filter="any(revive-defeated-killed-by-blue)" message="Team switch in {0}"/>
+    <after id="revive-defeated-killed-by-green-delay" duration="2.5s" filter="any(revive-defeated-killed-by-green)" message="Team switch in {0}"/>
+    <after id="revive-defeated-killed-by-yellow-delay" duration="2.5s" filter="any(revive-defeated-killed-by-yellow)" message="Team switch in {0}"/>
+    <all id="revive-defeated-killed-by-red">
         <alive/>
-        <any>
-            <all>
-                <team>blue-team</team>
-                <variable var="blue_defeated_by">${red}</variable>
-            </all>
-            <all>
-                <team>green-team</team>
-                <variable var="green_defeated_by">${red}</variable>
-            </all>
-            <all>
-                <team>yellow-team</team>
-                <variable var="yellow_defeated_by">${red}</variable>
-            </all>
-        </any>
+        <variable var="defeated_killed_by">${red}</variable>
+        <not>
+            <team>red-team</team>
+        </not>
         <carrying><item material="egg"/></carrying>
     </all>
-    <all id="revive-defeated-by-blue">
+    <all id="revive-defeated-killed-by-blue">
         <alive/>
-        <any>
-            <all>
-                <team>red-team</team>
-                <variable var="red_defeated_by">${blue}</variable>
-            </all>
-            <all>
-                <team>green-team</team>
-                <variable var="green_defeated_by">${blue}</variable>
-            </all>
-            <all>
-                <team>yellow-team</team>
-                <variable var="yellow_defeated_by">${blue}</variable>
-            </all>
-        </any>
+        <variable var="defeated_killed_by">${blue}</variable>
+        <not>
+            <team>blue-team</team>
+        </not>
         <carrying><item material="egg"/></carrying>
     </all>
-    <all id="revive-defeated-by-green">
+    <all id="revive-defeated-killed-by-green">
         <alive/>
-        <any>
-            <all>
-                <team>blue-team</team>
-                <variable var="blue_defeated_by">${green}</variable>
-            </all>
-            <all>
-                <team>red-team</team>
-                <variable var="red_defeated_by">${green}</variable>
-            </all>
-            <all>
-                <team>yellow-team</team>
-                <variable var="yellow_defeated_by">${green}</variable>
-            </all>
-        </any>
+        <variable var="defeated_killed_by">${green}</variable>
+        <not>
+            <team>green-team</team>
+        </not>
         <carrying><item material="egg"/></carrying>
     </all>
-    <all id="revive-defeated-by-yellow">
-        <alive/>
-        <any>
-            <all>
-                <team>blue-team</team>
-                <variable var="blue_defeated_by">${yellow}</variable>
-            </all>
-            <all>
-                <team>green-team</team>
-                <variable var="green_defeated_by">${yellow}</variable>
-            </all>
-            <all>
-                <team>red-team</team>
-                <variable var="red_defeated_by">${yellow}</variable>
-            </all>
-        </any>
+    <all id="revive-defeated-killed-by-yellow">
+        <variable var="defeated_killed_by">${yellow}</variable>
+        <not>
+            <team>yellow-team</team>
+        </not>
         <carrying><item material="egg"/></carrying>
     </all>
     <!-- Filters that trigger when player revives or team upgrades -->
@@ -397,6 +358,98 @@
         <team>yellow-team</team>
         <alive/>
         <variable var="yellow_kit_level">4</variable>
+    </all>
+    <all id="enemy-blue">
+        <attacker>
+            <team>blue-team</team>
+        </attacker>
+    </all>
+    <all id="enemy-red">
+        <attacker>
+            <team>red-team</team>
+        </attacker>
+    </all>
+    <all id="enemy-green">
+        <attacker>
+            <team>green-team</team>
+        </attacker>
+    </all>
+    <all id="enemy-yellow">
+        <attacker>
+            <team>yellow-team</team>
+        </attacker>
+    </all>
+    <all id="defeated-died-by-blue">
+        <dead/>
+        <variable var="last_death">${blue}</variable>
+        <any>
+            <all>
+                <team>red-team</team>
+                <filter id="red-bed-done"/>
+            </all>
+            <all>
+                <team>green-team</team>
+                <filter id="green-bed-done"/>
+            </all>
+            <all>
+                <team>yellow-team</team>
+                <filter id="yellow-bed-done"/>
+            </all>
+        </any>
+    </all>
+    <all id="defeated-died-by-red">
+        <dead/>
+        <variable var="last_death">${red}</variable>
+        <any>
+            <all>
+                <team>blue-team</team>
+                <filter id="blue-bed-done"/>
+            </all>
+            <all>
+                <team>green-team</team>
+                <filter id="green-bed-done"/>
+            </all>
+            <all>
+                <team>yellow-team</team>
+                <filter id="yellow-bed-done"/>
+            </all>
+        </any>
+    </all>
+    <all id="defeated-died-by-green">
+        <dead/>
+        <variable var="last_death">${green}</variable>
+        <any>
+            <all>
+                <team>red-team</team>
+                <filter id="red-bed-done"/>
+            </all>
+            <all>
+                <team>blue-team</team>
+                <filter id="blue-bed-done"/>
+            </all>
+            <all>
+                <team>yellow-team</team>
+                <filter id="yellow-bed-done"/>
+            </all>
+        </any>
+    </all>
+    <all id="defeated-died-by-yellow">
+        <dead/>
+        <variable var="last_death">${yellow}</variable>
+        <any>
+            <all>
+                <team>red-team</team>
+                <filter id="red-bed-done"/>
+            </all>
+            <all>
+                <team>green-team</team>
+                <filter id="green-bed-done"/>
+            </all>
+            <all>
+                <team>blue-team</team>
+                <filter id="blue-bed-done"/>
+            </all>
+        </any>
     </all>
     <!-- Objective completed filters: beds -->
     <completed id="red-bed-done">red-monument</completed>
@@ -605,11 +658,6 @@
     </rule>
 </block-drops>
 <variables>
-    <!-- Match -->
-    <variable id="red_defeated_by" scope="match"/>
-    <variable id="blue_defeated_by" scope="match"/>
-    <variable id="green_defeated_by" scope="match"/>
-    <variable id="yellow_defeated_by" scope="match"/>
     <!-- Team -->
     <variable id="kit_level" default="0" scope="team"/>
     <with-team id="red_kit_level" var="kit_level" team="red-team"/>
@@ -618,35 +666,72 @@
     <with-team id="yellow_kit_level" var="kit_level" team="yellow-team"/>
     <!-- Player -->
     <variable id="bed_breaker" scope="player" exclusive="1"/>
+    <variable id="defeated_killed_by" default="${none}" scope="player"/>
+    <variable id="last_death" scope="player" default="${none}"/>
 </variables>
 <actions>
+    <action scope="player" id="when-damaged">
+        <set var="last_death" value="${none}"/>
+        <action filter="enemy-blue">
+            <set var="last_death" value="${blue}"/>
+        </action>
+        <action filter="enemy-red">
+            <set var="last_death" value="${red}"/>
+        </action>
+        <action filter="enemy-green">
+            <set var="last_death" value="${green}"/>
+        </action>
+        <action filter="enemy-yellow">
+            <set var="last_death" value="${yellow}"/>
+        </action>
+    </action>
     <!-- Team switch incoming action -->
-    <trigger filter="revive-defeated-by-red" scope="player">
+    <trigger filter="any(revive-defeated-killed-by-red)" scope="player">
         <action>
             <message text="  `4▲`e Your bed is gone, you must fight for Red!"/>
             <message text="  `4▲`e Switching team to Castle Mario..."/>
             <sound preset="portal"/>
         </action>
     </trigger>
-    <trigger filter="revive-defeated-by-green" scope="player">
+    <trigger filter="any(revive-defeated-killed-by-green)" scope="player">
         <action>
             <message text="  `4▲`e Your bed is gone, you must fight for Green!"/>
             <message text="  `4▲`e Switching team to Castle Luigi..."/>
             <sound preset="portal"/>
         </action>
     </trigger>
-    <trigger filter="revive-defeated-by-blue" scope="player">
+    <trigger filter="any(revive-defeated-killed-by-blue)" scope="player">
         <action>
             <message text="  `4▲`e Your bed is gone, you must fight for Blue!"/>
             <message text="  `4▲`e Switching team to Castle Toad..."/>
             <sound preset="portal"/>
         </action>
     </trigger>
-    <trigger filter="revive-defeated-by-yellow" scope="player">
+    <trigger filter="any(revive-defeated-killed-by-yellow)" scope="player">
         <action>
             <message text="  `4▲`e Your bed is gone, you must fight for Yellow!"/>
             <message text="  `4▲`e Switching team to Castle Koopa..."/>
             <sound preset="portal"/>
+        </action>
+    </trigger>
+    <trigger filter="all(red-bed-done,red-team)" scope="player">
+        <action>
+            <message text="  `4▲`e The Red bed is gone, when you die you will join the team that kills you!"/>
+        </action>
+    </trigger>
+    <trigger filter="all(blue-bed-done,blue-team)" scope="player">
+        <action>
+            <message text="  `4▲`e The Blue bed is gone, when you die you will join the team that kills you!"/>
+        </action>
+    </trigger>
+    <trigger filter="all(green-bed-done,green-team)" scope="player">
+        <action>
+            <message text="  `4▲`e The Green bed is gone, when you die you will join the team that kills you!"/>
+        </action>
+    </trigger>
+    <trigger filter="all(yellow-bed-done,yellow-team)" scope="player">
+        <action>
+            <message text="  `4▲`e The Yellow bed is gone, when you die you will join the team that kills you!"/>
         </action>
     </trigger>
     <!-- Clear the Egg -->
@@ -659,77 +744,45 @@
         </action>
     </trigger>
     <!-- Team switch action, delayed by N.N seconds -->
-    <trigger filter="revive-defeated-by-red-delay" scope="player">
+    <trigger filter="revive-defeated-killed-by-red-delay" scope="player">
         <action>
-            <kit id="revive-defeated-by-red-switch"/>
+            <kit id="revive-defeated-killed-by-red-switch"/>
         </action>
     </trigger>
-    <trigger filter="revive-defeated-by-blue-delay" scope="player">
+    <trigger filter="revive-defeated-killed-by-blue-delay" scope="player">
         <action>
-            <kit id="revive-defeated-by-blue-switch"/>
+            <kit id="revive-defeated-killed-by-blue-switch"/>
         </action>
     </trigger>
-    <trigger filter="revive-defeated-by-green-delay" scope="player">
+    <trigger filter="revive-defeated-killed-by-green-delay" scope="player">
         <action>
-            <kit id="revive-defeated-by-green-switch"/>
+            <kit id="revive-defeated-killed-by-green-switch"/>
         </action>
     </trigger>
-    <trigger filter="revive-defeated-by-yellow-delay" scope="player">
+    <trigger filter="revive-defeated-killed-by-yellow-delay" scope="player">
         <action>
-            <kit id="revive-defeated-by-yellow-switch"/>
+            <kit id="revive-defeated-killed-by-yellow-switch"/>
         </action>
     </trigger>
-    <!-- Store which team broke this team's bed for team switching on death -->
-    <trigger filter="red-bed-done" scope="player">
+    <!-- If player has no bed and dies, they go to the team that killed them -->
+    <trigger filter="defeated-died-by-blue" scope="player">
         <action>
-            <switch-scope inner="player" filter="all(bed_breaker=${blue})">
-                <set var="red_defeated_by" value="${blue}"/>
-            </switch-scope>
-            <switch-scope inner="player" filter="all(bed_breaker=${green})">
-                <set var="red_defeated_by" value="${green}"/>
-            </switch-scope>
-            <switch-scope inner="player" filter="all(bed_breaker=${yellow})">
-                <set var="red_defeated_by" value="${yellow}"/>
-            </switch-scope>
+            <set var="defeated_killed_by" value="${blue}"/>
         </action>
     </trigger>
-    <trigger filter="green-bed-done" scope="player">
+    <trigger filter="defeated-died-by-red" scope="player">
         <action>
-            <switch-scope inner="player" filter="all(bed_breaker=${blue})">
-                <set var="green_defeated_by" value="${blue}"/>
-            </switch-scope>
-            <switch-scope inner="player" filter="all(bed_breaker=${red})">
-                <set var="green_defeated_by" value="${red}"/>
-            </switch-scope>
-            <switch-scope inner="player" filter="all(bed_breaker=${yellow})">
-                <set var="green_defeated_by" value="${yellow}"/>
-            </switch-scope>
+            <set var="defeated_killed_by" value="${red}"/>
         </action>
     </trigger>
-    <trigger filter="blue-bed-done" scope="player">
+    <trigger filter="defeated-died-by-green" scope="player">
         <action>
-            <switch-scope inner="player" filter="all(bed_breaker=${green})">
-                <set var="blue_defeated_by" value="${green}"/>
-            </switch-scope>
-            <switch-scope inner="player" filter="all(bed_breaker=${red})">
-                <set var="blue_defeated_by" value="${red}"/>
-            </switch-scope>
-            <switch-scope inner="player" filter="all(bed_breaker=${yellow})">
-                <set var="blue_defeated_by" value="${yellow}"/>
-            </switch-scope>
+            <set var="defeated_killed_by" value="${green}"/>
         </action>
     </trigger>
-    <trigger filter="yellow-bed-done" scope="player">
+    <trigger filter="defeated-died-by-yellow" scope="player">
         <action>
-            <switch-scope inner="player" filter="all(bed_breaker=${green})">
-                <set var="yellow_defeated_by" value="${green}"/>
-            </switch-scope>
-            <switch-scope inner="player" filter="all(bed_breaker=${red})">
-                <set var="yellow_defeated_by" value="${red}"/>
-            </switch-scope>
-            <switch-scope inner="player" filter="all(bed_breaker=${blue})">
-                <set var="yellow_defeated_by" value="${blue}"/>
-            </switch-scope>
+            <set var="defeated_killed_by" value="${yellow}"/>
         </action>
     </trigger>
     <!-- Wool sounds -->
