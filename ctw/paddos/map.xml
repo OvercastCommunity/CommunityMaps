@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Paddo's</name>
-<version>1.0.3</version>
+<version>1.1.0</version>
 <objective>Capture the two wools of the enemy team!</objective>
 <created>2023-01-09</created>
 <include id="gapple-kill-reward"/>
@@ -32,7 +32,7 @@
         <item slot="3" unbreakable="true" material="iron axe"/>
         <item slot="30" unbreakable="true" material="iron spade"/>
         <item slot="4" amount="64" damage="2" material="wood"/>
-        <item slot="5" amount="64" damage="3" material="stone"/>
+        <item slot="5" amount="64" team-color="true" material="stained glass"/>
         <item slot="7" material="bucket"/>
         <item slot="8" material="golden apple"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
@@ -41,7 +41,7 @@
             <enchantment>projectile_protection</enchantment>
         </leggings>
         <boots unbreakable="true" team-color="true" material="leather boots"/>
-        <effect duration="3" amplifier="255">damage resistance</effect>
+        <effect duration="3s" amplifier="255">damage resistance</effect>
     </kit>
 </kits>
 <spawns>
@@ -62,17 +62,7 @@
     </spawn>
 </spawns>
 <filters>
-    <blocks id="wool-room-blocks" region="wool-rooms-blocks-region">
-        <any>
-            <material>air</material>
-            <material>web</material>
-        </any>
-    </blocks>
-    <team id="only-red">red-team</team>
-    <team id="only-blue">blue-team</team>
-    <deny id="deny-iron-trapdoor">
-        <material>iron trapdoor</material>
-    </deny>
+    <material id="chest">chest</material>
     <all id="only-iron-renew">
         <material id="only-iron">iron block</material>
         <cause>world</cause>
@@ -80,69 +70,59 @@
 </filters>
 <regions>
     <union id="spawns">
-        <rectangle id="red-spawn" min="-48,-10" max="-75,4"/>
-        <rectangle id="blue-spawn" min="95,-10" max="122,4"/>
+        <rectangle id="red-spawn" min="-47,-10" max="-75,4"/>
+        <rectangle id="blue-spawn" min="94,-10" max="122,4"/>
     </union>
     <union id="wool-rooms">
         <union id="red-wool-rooms"> <!-- blue capture, red defend -->
-            <rectangle id="magenta-wool-room" min="-69,32" max="-59,22"/>
-            <rectangle id="red-wool-room" min="-69,-28" max="-59,-38"/>
+            <rectangle id="magenta-wool-room" min="-73,35" max="-59,20"/>
+            <rectangle id="red-wool-room" min="-73,-26" max="-59,-41"/>
         </union>
         <union id="blue-wool-rooms"> <!-- red capture, blue defend -->
-            <rectangle id="light-blue-wool-room" min="106,-28" max="116,-38"/>
-            <rectangle id="blue-wool-room" min="106,32" max="116,22"/>
-        </union>
-    </union>
-    <union id="wool-rooms-blocks-region">
-        <union id="red-wool-rooms-blocks">
-            <cuboid id="magenta-wool-room-blocks" min="-69,0,32" max="-59,15,22"/>
-            <cuboid id="red-wool-room-blocks" min="-69,0,-28" max="-59,15,-38"/>
-        </union>
-        <union id="blue-wool-rooms-blocks">
-            <cuboid id="light-blue-wool-room-blocks" min="106,0,-28" max="116,15,-38"/>
-            <cuboid id="blue-wool-room-blocks" min="106,0,32" max="116,15,22"/>
+            <rectangle id="light-blue-wool-room" min="106,-26" max="120,-41"/>
+            <rectangle id="blue-wool-room" min="106,35" max="120,20"/>
         </union>
     </union>
     <negative id="void-area">
         <union id="bridgeable-area">
-            <rectangle min="78,-24" max="63,18"/> <!-- Blue side -->
-            <rectangle min="34,32" max="13,22"/> <!-- South lane -->
+            <rectangle min="88,-39" max="54,33"/> <!-- Blue side -->
+            <rectangle min="34,33" max="13,23"/> <!-- South lane -->
             <rectangle min="58,9" max="-11,-15"/> <!-- Middle lane -->
-            <rectangle min="34,-28" max="13,-38"/> <!-- North lane -->
-            <rectangle min="-31,18" max="-16,-24"/> <!-- Red side -->
+            <rectangle min="34,-29" max="13,-39"/> <!-- North lane -->
+            <rectangle min="-41,33" max="-7,-39"/> <!-- Red side -->
         </union>
     </negative>
     <above id="build-limit" y="20"/>
-    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
-    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
-    <apply enter="only-red" region="blue-wool-rooms" message="You may not enter your own wool rooms!"/>
-    <apply enter="only-blue" region="red-wool-rooms" message="You may not enter your own wool rooms!"/>
+    <apply enter="red-team" region="red-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="blue-team" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="red-team" region="blue-wool-rooms" message="You may not enter your own wool rooms!"/>
+    <apply enter="blue-team" region="red-wool-rooms" message="You may not enter your own wool rooms!"/>
     <apply block="never" region="build-limit">
         <message>{"translate":"match.maxBuildHeight"}</message>
     </apply>
-    <apply block="only-blue" region="red-wool-rooms" message="You may not modify your own wool rooms!"/>
-    <apply block="only-red" region="blue-wool-rooms" message="You may not modify your own wool rooms!"/>
-    <apply block="wool-room-blocks" block-physics="deny-iron-trapdoor" region="wool-rooms-blocks-region" message="You may not modify the wool rooms!"/>
+    <apply block="deny(chest)" region="wool-rooms" message="You may not break this block!"/>
+    <apply block="red-team" region="blue-wool-rooms" message="You may not modify your own wool rooms!"/>
+    <apply block="blue-team" region="red-wool-rooms" message="You may not modify your own wool rooms!"/>
     <apply block-break="only-iron" block-place="only-iron-renew" region="spawns" message="You may only break iron blocks here!"/>
     <apply block="deny(void)" region="void-area" message="You may not modify the void area!"/>
 </regions>
 <wools craftable="false">
-    <wool team="blue-team" color="magenta" location="-64,7,27">
+    <wool team="blue-team" color="magenta" location="-71,7,27">
         <monument>
             <block>120,12,0</block>
         </monument>
     </wool>
-    <wool team="blue-team" color="red" location="-64,7,-33">
+    <wool team="blue-team" color="red" location="-71,7,-34">
         <monument>
             <block>120,12,-7</block>
         </monument>
     </wool>
-    <wool team="red-team" color="light blue" location="111,7,-33">
+    <wool team="red-team" color="light blue" location="117,7,-34">
         <monument>
             <block>-74,12,-7</block>
         </monument>
     </wool>
-    <wool team="red-team" color="blue" location="111,7,27">
+    <wool team="red-team" color="blue" location="117,7,27">
         <monument>
             <block>-74,12,0</block>
         </monument>
@@ -177,31 +157,17 @@
     <item>quartz block</item>
     <item>dirt</item>
     <item>cobblestone</item>
-    <item>stone:4</item>
-    <item>stone:5</item>
+    <item>stone</item>
 </itemremove>
-<block-drops>
-    <rule>
-        <filter>
-            <any>
-                <material>wood</material>
-                <material>stone:3</material>
-            </any>
-        </filter>
-        <drops>
-            <item chance="0" material="wood"/>
-        </drops>
-    </rule>
-</block-drops>
 <itemkeep>
     <item>wood</item>
-    <item>stone:3</item>
+    <item>stained glass</item>
     <item>golden apple</item>
     <item>bucket</item>
 </itemkeep>
 <kill-reward>
     <item amount="16" damage="2" material="wood"/>
-    <item amount="16" damage="3" material="stone"/>
+    <item amount="16" team-color="true" material="stained glass"/>
 </kill-reward>
 <hunger>
     <depletion>off</depletion>
