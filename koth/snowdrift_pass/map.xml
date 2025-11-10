@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Snowdrift Pass</name>
-<version>1.0.1</version>
+<version>1.1.0</version>
 <objective>Get the most points in 7 minutes!</objective>
 <gamemode>koth</gamemode>
 <created>2024-01-12</created>
@@ -31,12 +31,12 @@
 </spawns>
 <score/>
 <time>7m</time>
-<control-points capture-time="4s" neutral-state="true" capture-rule="majority" decay="1">
+<control-points capture-time="4s" neutral-state="true" capture-rule="majority" decay="1" required="false">
     <control-point id="hill-a" name="Point A" capture="everywhere" progress="hill-a-capture" player-filter="any(all(a=9, hill-a-capture), all(not(a=9), not(captured-a)))" capture-filter="all(a=9, hill-a-capture)" scoreboard-filter="a=9"/>
     <control-point id="hill-b" name="Point B" capture="everywhere" progress="hill-b-capture" player-filter="any(all(b=9, hill-b-capture), all(not(b=9), not(captured-b)))" capture-filter="all(b=9, hill-b-capture)" scoreboard-filter="b=9"/>
     <control-point id="hill-c" name="Point C" capture="everywhere" progress="hill-c-capture" player-filter="any(all(c=9, hill-c-capture), all(not(c=9), not(captured-c)))" capture-filter="all(c=9, hill-c-capture)" scoreboard-filter="c=9"/>
-    <control-point id="hill-d" name="Point D" capture="everywhere" progress="hill-d-capture" player-filter="any(all(d=9, hill-d-capture), all(not(d=9), not(captured-d)))" capture-filter="all(d=9, hill-d-capture)" scoreboard-filter="d=9"/>
-    <control-point id="hill-e" name="Point E" capture="everywhere" progress="hill-e-capture" player-filter="any(all(e=9, hill-e-capture), all(not(e=9), not(captured-e)))" capture-filter="all(e=9, hill-e-capture)" scoreboard-filter="e=9"/>
+    <control-point id="hill-d" name="Point D" capture="everywhere" progress="hill-d-capture" player-filter="any(all(b=9, hill-d-capture), all(not(b=9), not(captured-d)))" capture-filter="all(b=9, hill-d-capture)" scoreboard-filter="b=9"/>
+    <control-point id="hill-e" name="Point E" capture="everywhere" progress="hill-e-capture" player-filter="any(all(a=9, hill-e-capture), all(not(a=9), not(captured-e)))" capture-filter="all(a=9, hill-e-capture)" scoreboard-filter="a=9"/>
 </control-points>
 <regions>
     <block id="blue-spawn" location="-351,8,-53"/>
@@ -62,23 +62,21 @@
     <any id="active-hills">
         <all>
             <variable var="a">9</variable>
-            <region id="hill-a-capture"/>
+            <any>
+                <region id="hill-a-capture"/>
+                <region id="hill-e-capture"/>
+            </any>
         </all>
         <all>
             <variable var="b">9</variable>
-            <region id="hill-b-capture"/>
+            <any>
+                <region id="hill-b-capture"/>
+                <region id="hill-d-capture"/>
+            </any>
         </all>
         <all>
             <variable var="c">9</variable>
             <region id="hill-c-capture"/>
-        </all>
-        <all>
-            <variable var="d">9</variable>
-            <region id="hill-d-capture"/>
-        </all>
-        <all>
-            <variable var="e">9</variable>
-            <region id="hill-e-capture"/>
         </all>
     </any>
     <captured id="captured-a">hill-a</captured>
@@ -94,8 +92,6 @@
     <variable id="a"/>
     <variable id="b"/>
     <variable id="c"/>
-    <variable id="d"/>
-    <variable id="e"/>
     <variable id="t"/>
 </variables>
 <actions>
@@ -103,28 +99,20 @@
         <set var="a" value="random()"/>
         <set var="b" value="random()"/>
         <set var="c" value="random()"/>
-        <set var="d" value="random()"/>
-        <set var="e" value="random()"/>
     </action>
     <action id="activate-random-hill" scope="match">
-        <set var="t" value="min(a, b, c, d, e)"/>
+        <set var="t" value="min(a, b, c)"/>
         <action filter="not(a=1..)"><set var="a" value="a - t"/></action>
         <action filter="not(b=1..)"><set var="b" value="b - t"/></action>
         <action filter="not(c=1..)"><set var="c" value="c - t"/></action>
-        <action filter="not(d=1..)"><set var="d" value="d - t"/></action>
-        <action filter="not(e=1..)"><set var="e" value="e - t"/></action>
         <action filter="a=0"><set var="a" value="9"/></action>
         <action filter="b=0"><set var="b" value="9"/></action>
         <action filter="c=0"><set var="c" value="9"/></action>
-        <action filter="d=0"><set var="d" value="9"/></action>
-        <action filter="e=0"><set var="e" value="9"/></action>
     </action>
     <action id="remove-active-hills-from-pool" scope="match">
         <action filter="a=9"><set var="a" value="8"/></action>
         <action filter="b=9"><set var="b" value="8"/></action>
         <action filter="c=9"><set var="c" value="8"/></action>
-        <action filter="d=9"><set var="d" value="8"/></action>
-        <action filter="e=9"><set var="e" value="8"/></action>
     </action>
     <action id="update-hill-blocks" scope="match">
         <fill region="hill-regions" material="stained glass" filter="all(hill-inactive-material, active-hills)"/>
@@ -145,10 +133,10 @@
         <action filter="c=9">
             <message text="`7`l[`e`lAlert`7`l] `bPoint C"/>
         </action>
-        <action filter="d=9">
+        <action filter="b=9">
             <message text="`7`l[`e`lAlert`7`l] `bPoint D"/>
         </action>
-        <action filter="e=9">
+        <action filter="a=9">
             <message text="`7`l[`e`lAlert`7`l] `bPoint E"/>
         </action>
         <sound preset="ALERT"/>
@@ -161,7 +149,6 @@
         <action>
             <action id="reset-hill-states"/>
             <action id="activate-random-hill"/>
-            <action id="activate-random-hill"/>
             <action id="update-hill-blocks"/>
         </action>
     </trigger>
@@ -172,7 +159,6 @@
         </filter>
         <action>
             <action id="remove-active-hills-from-pool"/>
-            <action id="activate-random-hill"/>
             <action id="activate-random-hill"/>
             <action id="activate-random-hill"/>
             <action id="update-hill-blocks"/>
@@ -188,7 +174,6 @@
             <action id="reset-hill-states"/>
             <action id="activate-random-hill"/>
             <action id="activate-random-hill"/>
-            <action id="activate-random-hill"/>
             <action id="update-hill-blocks"/>
             <action id="send-change-message"/>
         </action>
@@ -199,6 +184,7 @@
             <after filter="switch-hills-3" duration="10s" message="Randomizing control points in {0}"/>
         </filter>
         <action>
+            <action id="activate-random-hill"/>
             <action id="activate-random-hill"/>
             <action id="activate-random-hill"/>
             <action id="update-hill-blocks"/>
