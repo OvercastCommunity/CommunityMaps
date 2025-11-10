@@ -1,6 +1,6 @@
 <map proto="1.5.0" game="Mob Arena">
 <name>Santa's Express Delivery</name>
-<version>1.0.0</version>
+<version>1.1.0</version>
 <objective>Get the payload to the mountain top!</objective>
 <created>2024-12-08</created>
 <phase>staging</phase>
@@ -15,9 +15,10 @@
     <contributor uuid="af9c1942-af66-42d1-89f9-9b677c281e03" contribution="St. Carrotfields sample"/> <!-- _IQ -->
 </contributors>
 <teams>
-    <team id="players" color="yellow" max="24">Players</team>
+    <team id="players" color="green" max="36" plural="true">Elves</team>
+    <team id="monsters" color="red" max="0" plural="true">Monsters</team>
 </teams>
-<time>1h</time>
+<time result="monsters">1h</time>
 <respawn delay="0s" auto="true"/>
 <spawns>
     <spawn team="players" region="player-spawn" yaw="0" kit="main-kit"/>
@@ -30,7 +31,7 @@
     <kit id="main-kit">
         <clear/>
         <game-mode>adventure</game-mode>
-        <item material="iron sword" unbreakable="true" locked="true">
+        <item material="stone sword" unbreakable="true" locked="true">
             <can-destroy>
                 <material>web</material>
             </can-destroy>
@@ -38,7 +39,7 @@
         <item material="bow" unbreakable="true" locked="true">
             <enchantment>arrow infinite</enchantment>
         </item>
-        <item material="iron pickaxe" unbreakable="true" locked="true">
+        <item material="stone pickaxe" unbreakable="true" locked="true">
             <can-destroy>
                 <material>mob spawner</material>
             </can-destroy>
@@ -46,20 +47,19 @@
         <item material="golden apple" slot="8"/>
         <item material="arrow" slot="9"/>
         <helmet material="leather helmet" unbreakable="true" locked="true"/>
-        <chestplate material="iron chestplate" unbreakable="true" locked="true"/>
-        <leggings material="iron leggings" unbreakable="true" locked="true">
-            <enchantment level="1">protection projectile</enchantment>
-        </leggings>
+        <chestplate material="gold chestplate" unbreakable="true" locked="true"/>
+        <leggings material="leather leggings" unbreakable="true" locked="true"/>
         <boots material="iron boots" unbreakable="true" locked="true"/>
         <effect amplifier="255" duration="3s">resistance</effect>
         <effect amplifier="255" duration="3s">strength</effect>
+        <effect amplifier="2">slow digging</effect>
     </kit>
     <kit id="spawner-items" deduct-items="false">
         <item material="snow ball" amount="3" name="`4Grenade" grenade="true" grenade-power="3"/>
         <action>
             <set var="match_spawners_broken" value="match_spawners_broken + 1"/>
             <set var="player_spawners_broken" value="player_spawners_broken + 1"/>
-            <action id="enchant-items"/>
+            <action id="enchant-all-items"/>
         </action>
     </kit>
 </kits>
@@ -83,61 +83,53 @@
         <spawn>spawner</spawn>
     </filter>
 </mobs>
-<variables default="0">
+<variables>
     <variable id="match_spawners_broken" scope="match"/>
     <variable id="player_spawners_broken" scope="player"/>
 </variables>
+<stats>
+    <stat value="player_spawners_broken" name="Spawners destroyed"/>
+</stats>
 <actions>
     <trigger scope="player" filter="all(match-running, delayed-alive)">
         <action id="enchant-items" scope="player">
-            <action filter="player_spawners_broken=2..">
+            <action filter="match_spawners_broken=3..">
                 <enchant-item enchantment="damage all" level="1" ignore-metadata="true">
-                    <find material="iron sword"/>
+                    <find material="stone sword"/>
                 </enchant-item>
             </action>
-            <action filter="player_spawners_broken=4..">
-                <enchant-item enchantment="arrow damage" level="1" ignore-metadata="true">
-                    <find material="bow"/>
-                </enchant-item>
-            </action>
-            <action filter="player_spawners_broken=6..">
+            <action filter="match_spawners_broken=7..">
                 <enchant-item enchantment="damage all" level="2" ignore-metadata="true">
-                    <find material="iron sword"/>
+                    <find material="stone sword"/>
                 </enchant-item>
-                <enchant-item enchantment="protection environmental" level="2" ignore-metadata="true">
-                    <find material="iron chestplate"/>
-                </enchant-item>
-            </action>
-            <action filter="player_spawners_broken=8..">
-                <enchant-item enchantment="arrow fire" level="1" ignore-metadata="true">
-                    <find material="bow"/>
-                </enchant-item>
-                <enchant-item enchantment="dig speed" level="1" ignore-metadata="true">
-                    <find material="iron pickaxe"/>
+                <enchant-item enchantment="protection environmental" level="1" ignore-metadata="true">
+                    <find material="gold chestplate"/>
                 </enchant-item>
             </action>
-            <action filter="player_spawners_broken=10..">
+            <action filter="match_spawners_broken=15..">
+              <enchant-item enchantment="protection environmental" level="2" ignore-metadata="true">
+                  <find material="gold chestplate"/>
+              </enchant-item>
+            </action>
+            <action filter="match_spawners_broken=20..">
                 <enchant-item enchantment="damage all" level="3" ignore-metadata="true">
-                    <find material="iron sword"/>
+                    <find material="stone sword"/>
                 </enchant-item>
                 <enchant-item enchantment="arrow damage" level="2" ignore-metadata="true">
                     <find material="bow"/>
                 </enchant-item>
             </action>
-            <action filter="player_spawners_broken=12..">
+            <action filter="match_spawners_broken=25..">
                 <enchant-item enchantment="damage all" level="4" ignore-metadata="true">
-                    <find material="iron sword"/>
+                    <find material="stone sword"/>
                 </enchant-item>
-                <enchant-item enchantment="protection environmental" level="4" ignore-metadata="true">
-                    <find material="iron chestplate"/>
-                </enchant-item>
-                <enchant-item enchantment="dig speed" level="2" ignore-metadata="true">
-                    <find material="iron pickaxe"/>
+                <enchant-item enchantment="protection environmental" level="3" ignore-metadata="true">
+                    <find material="gold chestplate"/>
                 </enchant-item>
             </action>
-            <action filter="player_spawners_broken=16..">
+            <action filter="match_spawners_broken=30..">
                 <enchant-item enchantment="damage all" level="5" ignore-metadata="true">
-                    <find material="iron sword"/>
+                    <find material="stone sword"/>
                 </enchant-item>
                 <enchant-item enchantment="arrow damage" level="3" ignore-metadata="true">
                     <find material="bow"/>
@@ -145,6 +137,13 @@
             </action>
         </action>
     </trigger>
+    <action id="enchant-all-items" scope="player">
+        <switch-scope inner="match">
+            <switch-scope inner="player">
+                <action id="enchant-items"/>
+            </switch-scope>
+        </switch-scope>
+    </action>
 </actions>
 <disabledamage>
     <damage ally="true" self="true" enemy="true" other="false">block explosion</damage>
@@ -154,12 +153,12 @@
 </hunger>
 <timelock>on</timelock>
 <itemremove>
-    <item>iron sword</item>
+    <item>stone sword</item>
     <item>bow</item>
-    <item>iron pickaxe</item>
+    <item>stone pickaxe</item>
     <item>leather helmet</item>
-    <item>iron chestplate</item>
-    <item>iron leggings</item>
+    <item>gold chestplate</item>
+    <item>leather leggings</item>
     <item>iron boots</item>
     <item>arrow</item>
     <item>snow ball</item>
