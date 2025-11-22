@@ -1,5 +1,5 @@
 <map proto="1.5.0">
-<version>1.2.6</version>
+<version>1.2.7</version>
 <name>Dynamite</name>
 <created>2025-02-13</created>
 <phase>development</phase>
@@ -16,8 +16,8 @@
     <tip after="5s" every="4m" count="8">You may not place TNT on the opponent's side!</tip>
 </broadcasts>
 <teams>
-    <team id="red-team" max="20" max-overfill="25" color="red">Red</team>
-    <team id="blue-team" max="20" max-overfill="25" color="dark aqua">Blue</team>
+    <team id="red-team" max="20" color="red">Red</team>
+    <team id="blue-team" max="20" color="dark aqua">Blue</team>
 </teams>
 <kits>
     <kit id="spawn-kit">
@@ -35,12 +35,13 @@
         <item slot="35" material="water bucket"/>
         <item slot="9" amount="16" material="stone button"/>
         <item slot="10" amount="16" material="lever"/>
-        <item slot="11" amount="16" material="stone plate"/>
-        <item slot="12" amount="16" material="fence"/>
-        <item slot="14" amount="16" material="ladder"/>
+        <item slot="11" amount="32" material="stone plate"/>
+        <item slot="12" amount="32" material="fence"/>
+        <item slot="14" amount="32" material="ladder"/>
         <item slot="15" amount="64" material="redstone"/>
         <item slot="16" amount="16" material="diode"/>
         <item slot="23" material="tnt" amount="64"/>
+        <item slot="24" material="redstone torch on" amount="64"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" material="chainmail chestplate">
             <enchantment level="2">projectile protection</enchantment>
@@ -54,13 +55,15 @@
     </kit>
     <kit id="blue-kit" parent="spawn-kit">
         <item slot="4" material="wood" amount="64" damage="5"/>
-        <item slot="31" material="wood" amount="32" damage="5"/>
-        <item slot="13" material="wood step" amount="16" damage="5"/>
+        <item slot="31" material="wood" amount="64" damage="5"/>
+        <item slot="22" material="wood" amount="64" damage="5"/>
+        <item slot="13" material="wood step" amount="32" damage="5"/>
     </kit>
     <kit id="red-kit" parent="spawn-kit">
         <item slot="4" material="wood" amount="64" damage="3"/>
-        <item slot="31" material="wood" amount="32" damage="3"/>
-        <item slot="13" material="wood step" amount="16" damage="3"/>
+        <item slot="31" material="wood" amount="64" damage="3"/>
+        <item slot="22" material="wood" amount="64" damage="3"/>
+        <item slot="13" material="wood step" amount="32" damage="3"/>
     </kit>
 </kits>
 <filters>
@@ -107,21 +110,25 @@
             </not>
         </all>
     </deny>
+    <any id="regen-blocks">
+        <!-- List blocks you wanna allow placing -->
+        <material>stained clay</material>
+        <material>hard clay</material>
+        <material>wood:5</material>
+        <material>wood:3</material>
+        <material>wool</material>
+    </any>
 </filters>
 <regions>
-    <cuboid id="iron-red-B" min="2,12,-50" max="-10,14,-43"/>
-    <cuboid id="iron-red-A" min="-50,12,2" max="-43,14,-10"/>
-    <cuboid id="iron-blue-B" min="23,12,75" max="35,14,68"/>
-    <cuboid id="iron-blue-A" min="75,12,23" max="68,14,35"/>
     <union id="spawns">
         <complement id="red-spawn">
-            <cuboid min="-42,12,-42" max="-59,26,-59"/>
+            <cuboid min="-42,20,-42" max="-59,34,-59"/>
             <half origin="-44.25,0,-44.25" normal="1,0,1"/>
             <half origin="-48.25,0,-52.75" normal="1,0,-1"/>
             <half origin="-52.75,0,-48.25" normal="-1,0,1"/>
         </complement>
         <complement id="blue-spawn">
-            <cuboid min="67,12,67" max="84,26,84"/>
+            <cuboid min="67,20,67" max="84,34,84"/>
             <half origin="69.25,0,69.25" normal="-1,0,-1"/>
             <half origin="77.75,0,73.25" normal="1,0,-1"/>
             <half origin="73.25,0,77.75" normal="-1,0,1"/>
@@ -161,8 +168,6 @@
         </union>
     </negative>
     <apply region="outside-playable" block="never" message="You may not interact with blocks outside the playing field"/>
-    <apply region="red-side" block-place="deny(all(tnt,blue-team))" message="You may not place TNT on the opponent's side"/>
-    <apply region="blue-side" block-place="deny(all(tnt,red-team))" message="You may not place TNT on the opponent's side"/>
     <apply block-place="no-stone"/>
     <apply block-break="no-tnt-damage">
         <region>
@@ -175,15 +180,15 @@
     <!-- Let TNT placables work on the height limit -->
     <apply block-place="not-players">
         <region>
-            <above y="28"/>
+            <above y="36"/>
         </region>
         <message>{"translate":"match.maxBuildHeight"}</message>
     </apply>
     <apply block-place="redstone-blocks-fixed" message="You may only place redstone, water and TNT here!">
         <region>
             <intersect>
-                <above y="25"/>
-                <below y="26"/>
+                <above y="33"/>
+                <below y="34"/>
             </intersect>
         </region>
     </apply>
@@ -191,25 +196,29 @@
 <spawns>
     <default yaw="45">
         <regions>
-            <point>72.5,39,-47.5</point>
+            <point>72.5,47,-47.5</point>
         </regions>
     </default>
     <spawn team="red-team" kit="red-kit" yaw="-45">
         <regions>
-            <cuboid min="-57,19,-57" max="-54,19,-54"/>
+            <cuboid min="-57,27,-57" max="-54,27,-54"/>
         </regions>
     </spawn>
     <spawn team="blue-team" kit="blue-kit" yaw="135">
         <regions>
-            <cuboid min="79,19,79" max="82,19,82"/>
+            <cuboid min="79,27,79" max="82,27,82"/>
         </regions>
     </spawn>
 </spawns>
 <renewables>
-    <renewable region="iron-red-A" renew-filter="only-iron"/>
-    <renewable region="iron-red-B" renew-filter="only-iron"/>
-    <renewable region="iron-blue-A" renew-filter="only-iron"/>
-    <renewable region="iron-blue-B" renew-filter="only-iron"/>
+    <renewable region="everywhere" renew-filter="only-iron" interval="10s"/>
+    <renewable region="everywhere" renew-filter="regen-blocks" interval="25s" grow="true" particles="false" sound="false" avoid-players="2">
+        <replace-filter>
+            <any>
+                <material>air</material>
+            </any>
+        </replace-filter>
+    </renewable>
 </renewables>
 <modes>
     <mode after="20m" material="ender stone" name="END STONE CORE MODE"/>
@@ -218,34 +227,34 @@
 <cores>
     <core team="red-team" material="obsidian" leak="7" mode-changes="true">
         <region>
-            <cuboid min="-22,12,-22" max="-27,17,-27"/>
+            <cuboid min="-22,20,-22" max="-27,25,-27"/>
         </region>
     </core>
     <core team="blue-team" material="obsidian" leak="7" mode-changes="true">
         <region>
-            <cuboid min="47,12,47" max="52,17,52"/>
+            <cuboid min="47,20,47" max="52,25,52"/>
         </region>
     </core>
 </cores>
 <destroyables show-progress="true" materials="ender stone" repairable="false">
     <destroyable name="Monument B" owner="red-team">
         <region>
-            <cuboid min="9,7,-31" max="6,10,-34"/>
+            <cuboid min="9,15,-31" max="6,18,-34"/>
         </region>
     </destroyable>
     <destroyable name="Monument A" owner="red-team">
         <region>
-            <cuboid min="-31,7,9" max="-34,10,6"/>
+            <cuboid min="-31,15,9" max="-34,18,6"/>
         </region>
     </destroyable>
     <destroyable name="Monument B" owner="blue-team">
         <region>
-            <cuboid min="16,7,56" max="19,10,59"/>
+            <cuboid min="16,15,56" max="19,18,59"/>
         </region>
     </destroyable>
     <destroyable name="Monument A" owner="blue-team">
         <region>
-            <cuboid min="56,7,16" max="59,10,19"/>
+            <cuboid min="56,15,16" max="59,18,19"/>
         </region>
     </destroyable>
 </destroyables>
