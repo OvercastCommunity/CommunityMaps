@@ -1,5 +1,5 @@
 <map proto="1.5.0">
-<version>1.2.7</version>
+<version>1.2.8</version>
 <name>Dynamite</name>
 <created>2025-02-13</created>
 <phase>development</phase>
@@ -13,11 +13,11 @@
 <include id="gapple-kill-reward"/>
 <objective>Leak the enemy's core and destroy their endstone monuments</objective>
 <broadcasts>
-    <tip after="5s" every="4m" count="8">You may not place TNT on the opponent's side!</tip>
+    <tip after="5s" every="3m" count="8">`6Gold armour and tools`7 are very powerful in this map. Make good use of them!</tip>
 </broadcasts>
 <teams>
     <team id="red-team" max="20" color="red">Red</team>
-    <team id="blue-team" max="20" color="dark aqua">Blue</team>
+    <team id="blue-team" max="20" color="dark aqua">Cyan</team>
 </teams>
 <kits>
     <kit id="spawn-kit">
@@ -39,9 +39,14 @@
         <item slot="12" amount="32" material="fence"/>
         <item slot="14" amount="32" material="ladder"/>
         <item slot="15" amount="64" material="redstone"/>
-        <item slot="16" amount="16" material="diode"/>
+        <item slot="17" amount="16" material="diode"/>
+        <item slot="21" amount="16" material="trap door"/>
         <item slot="23" material="tnt" amount="64"/>
-        <item slot="24" material="redstone torch on" amount="64"/>
+        <item slot="16" material="redstone torch on" amount="16"/>
+        <item slot="4" material="wood" amount="64" damage="1"/>
+        <item slot="31" material="wood" amount="64" damage="1"/>
+        <item slot="22" material="wood" amount="64" damage="1"/>
+        <item slot="13" material="wood step" amount="32" damage="1"/>
         <helmet unbreakable="true" team-color="true" material="leather helmet"/>
         <chestplate unbreakable="true" material="chainmail chestplate">
             <enchantment level="2">projectile protection</enchantment>
@@ -53,18 +58,6 @@
         </boots>
         <effect duration="4s" amplifier="255">damage resistance</effect>
     </kit>
-    <kit id="blue-kit" parent="spawn-kit">
-        <item slot="4" material="wood" amount="64" damage="5"/>
-        <item slot="31" material="wood" amount="64" damage="5"/>
-        <item slot="22" material="wood" amount="64" damage="5"/>
-        <item slot="13" material="wood step" amount="32" damage="5"/>
-    </kit>
-    <kit id="red-kit" parent="spawn-kit">
-        <item slot="4" material="wood" amount="64" damage="3"/>
-        <item slot="31" material="wood" amount="64" damage="3"/>
-        <item slot="22" material="wood" amount="64" damage="3"/>
-        <item slot="13" material="wood step" amount="32" damage="3"/>
-    </kit>
 </kits>
 <filters>
     <material id="only-iron">iron block</material>
@@ -75,11 +68,8 @@
             <team id="only-red">red-team</team>
         </any>
     </not>
-    <deny id="no-stone">
-        <any>
-            <material>stone</material>
-            <material>cobblestone</material>
-        </any>
+    <deny id="not-cobweb">
+        <material>web</material>
     </deny>
     <deny id="no-tnt-damage">
         <cause>explosion</cause>
@@ -111,10 +101,9 @@
         </all>
     </deny>
     <any id="regen-blocks">
-        <!-- List blocks you wanna allow placing -->
+        <!-- List blocks you wanna allow to regenerate -->
         <material>stained clay</material>
         <material>hard clay</material>
-        <material>wood:5</material>
         <material>wood:3</material>
         <material>wool</material>
     </any>
@@ -122,13 +111,13 @@
 <regions>
     <union id="spawns">
         <complement id="red-spawn">
-            <cuboid min="-42,20,-42" max="-59,34,-59"/>
+            <cuboid min="-42,12,-42" max="-59,34,-59"/>
             <half origin="-44.25,0,-44.25" normal="1,0,1"/>
             <half origin="-48.25,0,-52.75" normal="1,0,-1"/>
             <half origin="-52.75,0,-48.25" normal="-1,0,1"/>
         </complement>
         <complement id="blue-spawn">
-            <cuboid min="67,20,67" max="84,34,84"/>
+            <cuboid min="67,12,67" max="84,34,84"/>
             <half origin="69.25,0,69.25" normal="-1,0,-1"/>
             <half origin="77.75,0,73.25" normal="1,0,-1"/>
             <half origin="73.25,0,77.75" normal="-1,0,1"/>
@@ -167,28 +156,19 @@
             </complement>
         </union>
     </negative>
-    <apply region="outside-playable" block="never" message="You may not interact with blocks outside the playing field"/>
-    <apply block-place="no-stone"/>
-    <apply block-break="no-tnt-damage">
-        <region>
-            <union>
-                <region id="blue-outside-spawn"/>
-                <mirror origin="12.5,0,12.5" normal="-1,0,-1"><region id="blue-outside-spawn"/></mirror>
-            </union>
-        </region>
-    </apply>
+    <apply region="outside-playable" block-place="never" block-break="not-cobweb" message="You may not interact with blocks outside the playing field"/>
     <!-- Let TNT placables work on the height limit -->
     <apply block-place="not-players">
         <region>
-            <above y="36"/>
+            <above y="37"/>
         </region>
         <message>{"translate":"match.maxBuildHeight"}</message>
     </apply>
     <apply block-place="redstone-blocks-fixed" message="You may only place redstone, water and TNT here!">
         <region>
             <intersect>
-                <above y="33"/>
-                <below y="34"/>
+                <above y="36"/>
+                <below y="37"/>
             </intersect>
         </region>
     </apply>
@@ -199,12 +179,12 @@
             <point>72.5,47,-47.5</point>
         </regions>
     </default>
-    <spawn team="red-team" kit="red-kit" yaw="-45">
+    <spawn team="red-team" kit="spawn-kit" yaw="-45">
         <regions>
             <cuboid min="-57,27,-57" max="-54,27,-54"/>
         </regions>
     </spawn>
-    <spawn team="blue-team" kit="blue-kit" yaw="135">
+    <spawn team="blue-team" kit="spawn-kit" yaw="135">
         <regions>
             <cuboid min="79,27,79" max="82,27,82"/>
         </regions>
@@ -370,7 +350,8 @@
     <depletion>off</depletion>
 </hunger>
 <world>
-    <timeset>12620</timeset>
+    <timeset>12300</timeset>
     <timelock>on</timelock>
 </world>
 </map>
+
