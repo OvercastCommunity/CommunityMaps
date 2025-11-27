@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Procedural: Cliff Maze</name>
-<version>2.0.1</version>
+<version>3.0.0</version>
 <created>2023-09-05</created>
 <objective>Kill all player's on the enemy team to win!</objective>
 <include id="gapple-kill-reward"/>
@@ -125,411 +125,313 @@
     </rule>
 </block-drops>
 <actions>
-    <trigger filter="always" action="place-structures" scope="match"/>
-    <set scope="match" id="place-structures" var="structure_choice" value="floor(random() * 15)"/>
+    <!--
+      copyToBackup: Backs up wall array for potential rollback.
+    -->
+    <action id="copyToBackup" scope="match" expose="true">
+        <set var="i" value="0"/>
+        <repeat times="WALL_COUNT">
+            <set var="wallsBack" index="i" value="walls[i]"/>
+            <set var="i" value="i+1"/>
+        </repeat>
+    </action>
+    <!--
+      restoreFromBackup: Restores walls from backup after failed change.
+    -->
+    <action id="restoreFromBackup" scope="match" expose="true">
+        <set var="i" value="0"/>
+        <repeat times="WALL_COUNT">
+            <set var="walls" index="i" value="wallsBack[i]"/>
+            <set var="i" value="i+1"/>
+        </repeat>
+    </action>
+    <!--
+      resetShadow: Zeros out shadow array for fresh flood fill.
+    -->
+    <action id="resetShadow" scope="match" expose="true">
+        <set var="i" value="0"/>
+        <repeat times="CELL_COUNT">
+            <set var="shadow" index="i" value="0"/>
+            <set var="i" value="i+1"/>
+        </repeat>
+    </action>
+    <!--
+      countShadow: Sums shadow array to count reachable cells.
+      @output shadowSum
+    -->
+    <action id="countShadow" scope="match" expose="true">
+        <set var="shadowSum" value="0"/>
+        <set var="i" value="0"/>
+        <repeat times="CELL_COUNT">
+            <set var="shadowSum" value="shadowSum + shadow[i]"/>
+            <set var="i" value="i+1"/>
+        </repeat>
+    </action>
+    <!--
+      computeWallIndices: Computes wall array indices from cell coordinates.
+      @input x, y
+      @output leftWall, rightWall, upWall, downWall
+    -->
+    <action id="computeWallIndices" scope="match" expose="true">
+        <set var="leftWall" value="y*V_STRIDE + x"/>
+        <set var="rightWall" value="y*V_STRIDE + x + 1"/>
+        <set var="upWall" value="H_WALL_OFFSET + y*GRID_SIZE + x"/>
+        <set var="downWall" value="H_WALL_OFFSET + (y+1)*GRID_SIZE + x"/>
+    </action>
+    <!--
+      incrementShadow: One iteration of flood fill propagation.
+    -->
+    <action id="incrementShadow" scope="match" expose="true">
+        <set var="i" value="0"/>
+        <repeat times="CELL_COUNT">
+            <set var="x" value="i % GRID_SIZE"/>
+            <set var="y" value="floor(i/GRID_SIZE)"/>
+            <action id="computeWallIndices"/>
+            <action filter="all(shadow[i]=0, any(all(x-ge-1, walls[leftWall]=0, shadow[i-1]=1), all(x-le-3, walls[rightWall]=0, shadow[i+1]=1), all(y-ge-1, walls[upWall]=0, shadow[i-GRID_SIZE]=1), all(y-le-3, walls[downWall]=0, shadow[i+GRID_SIZE]=1)))">
+                <set var="shadow" index="i" value="1"/>
+            </action>
+            <set var="i" value="i+1"/>
+        </repeat>
+    </action>
+    <!--
+      floodFill: Runs complete flood fill from cell 0.
+    -->
+    <action id="floodFill" scope="match" expose="true">
+        <action id="resetShadow"/>
+        <set var="shadow" index="0" value="1"/>
+        <repeat times="CELL_COUNT - 1">
+            <action id="incrementShadow"/>
+        </repeat>
+    </action>
+    <!--
+      computeWallIndex: Converts randWall (0-39) to wall array index.
+      @input randWall
+      @output wallIndex
+    -->
+    <action id="computeWallIndex" scope="match" expose="true">
+        <action filter="randWall-le-19">
+            <set var="wallIndex" value="floor(randWall / (GRID_SIZE - 1)) * V_STRIDE + (randWall % (GRID_SIZE - 1)) + 1"/>
+        </action>
+        <action filter="randWall-ge-20">
+            <set var="adjustedRand" value="randWall - INTERIOR_WALL_COUNT / 2"/>
+            <set var="wallIndex" value="H_WALL_OFFSET + (floor(adjustedRand / GRID_SIZE) + 1) * GRID_SIZE + (adjustedRand % GRID_SIZE)"/>
+        </action>
+    </action>
+    <!--
+      flipRandomWall: Randomly toggles a wall, validates connectivity.
+    -->
+    <action id="flipRandomWall" scope="match" expose="true">
+        <set var="randWall" value="floor(random() * INTERIOR_WALL_COUNT)"/>
+        <action id="computeWallIndex"/>
+        <set var="rerollCheck" value="floor(random() * 100)"/>
+        <action filter="all(walls[wallIndex]=1, shouldReroll)">
+            <set var="randWall" value="floor(random() * INTERIOR_WALL_COUNT)"/>
+            <action id="computeWallIndex"/>
+        </action>
+        <action id="copyToBackup"/>
+        <set var="walls" index="wallIndex" value="1 - walls[wallIndex]"/>
+        <action id="floodFill"/>
+        <action id="countShadow"/>
+        <!-- Restore if not all cells reachable -->
+        <action filter="shouldRestore">
+            <action id="restoreFromBackup"/>
+        </action>
+    </action>
+    <!--
+      initializeEdgeWalls: Sets boundary walls (except spawn entrances).
+    -->
+    <action id="initializeEdgeWalls" scope="match" expose="true">
+        <!-- Left edge (column 0 of vertical walls) -->
+        <set var="walls" index="0" value="1"/>
+        <set var="walls" index="6" value="1"/>
+        <set var="walls" index="12" value="1"/>
+        <set var="walls" index="18" value="1"/>
+        <set var="walls" index="24" value="1"/>
+        <!-- Right edge (column 5 of vertical walls) -->
+        <set var="walls" index="5" value="1"/>
+        <set var="walls" index="11" value="1"/>
+        <set var="walls" index="17" value="1"/>
+        <set var="walls" index="23" value="1"/>
+        <set var="walls" index="29" value="1"/>
+        <!-- Top edge (row 0 of horizontal walls, skip index 32 for blue spawn) -->
+        <set var="walls" index="30" value="1"/>
+        <set var="walls" index="31" value="1"/>
+        <set var="walls" index="33" value="1"/>
+        <set var="walls" index="34" value="1"/>
+        <!-- Bottom edge (row 5 of horizontal walls, skip index 57 for red spawn) -->
+        <set var="walls" index="55" value="1"/>
+        <set var="walls" index="56" value="1"/>
+        <set var="walls" index="58" value="1"/>
+        <set var="walls" index="59" value="1"/>
+    </action>
+    <!--
+      generateMaze: Main entry point for maze generation.
+    -->
+    <action id="generateMaze" scope="match">
+        <action id="initializeEdgeWalls"/>
+        <repeat times="MAZE_ITERATIONS">
+            <action id="flipRandomWall"/>
+        </repeat>
+    </action>
+    <!--
+      computeCellData: Computes cell/world coordinates and wall configuration.
+      @input i
+      @output x, y, worldX, worldZ, wallConfig
+    -->
+    <action id="computeCellData" scope="match" expose="true">
+        <set var="x" value="i % GRID_SIZE"/>
+        <set var="y" value="floor(i / GRID_SIZE)"/>
+        <set var="worldX" value="x * CELL_SIZE + WORLD_OFFSET"/>
+        <set var="worldZ" value="y * CELL_SIZE + WORLD_OFFSET"/>
+        <action id="computeWallIndices"/>
+        <set var="wallConfig" value="walls[rightWall] + walls[downWall] * 2 + walls[leftWall] * 4 + walls[upWall] * 8"/>
+    </action>
+    <!--
+      pasteCell: Pastes structure based on wall configuration.
+      @input wallConfig, worldX, worldZ
+    -->
+    <action id="pasteCell" scope="match" expose="true">
+        <action filter="wallConfig=0">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-8" update="false"/>
+        </action>
+        <action filter="wallConfig=1">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-6" update="false"/>
+        </action>
+        <action filter="wallConfig=2">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-7" update="false"/>
+        </action>
+        <action filter="wallConfig=3">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-15" update="false"/>
+        </action>
+        <action filter="wallConfig=4">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-4" update="false"/>
+        </action>
+        <action filter="wallConfig=5">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-1" update="false"/>
+        </action>
+        <action filter="wallConfig=6">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-3" update="false"/>
+        </action>
+        <action filter="wallConfig=7">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-9" update="false"/>
+        </action>
+        <action filter="wallConfig=8">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5" update="false"/>
+        </action>
+        <action filter="wallConfig=9">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-12" update="false"/>
+        </action>
+        <action filter="wallConfig=10">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-2" update="false"/>
+        </action>
+        <action filter="wallConfig=11">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-14" update="false"/>
+        </action>
+        <action filter="wallConfig=12">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-0" update="false"/>
+        </action>
+        <action filter="wallConfig=13">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-13" update="false"/>
+        </action>
+        <action filter="wallConfig=14">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-10" update="false"/>
+        </action>
+        <action filter="wallConfig=15">
+            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-11" update="false"/>
+        </action>
+    </action>
+    <!--
+      pasteMaze: Iterates cells and pastes maze structures.
+    -->
+    <action id="pasteMaze" scope="match">
+        <set var="i" value="0"/>
+        <repeat times="CELL_COUNT">
+            <action id="computeCellData"/>
+            <action id="pasteCell"/>
+            <set var="i" value="i + 1"/>
+        </repeat>
+    </action>
+    <trigger filter="always" action="generateMaze" scope="match"/>
+    <trigger filter="structure-filter" action="pasteMaze" scope="match"/>
 </actions>
 <filters>
     <!-- Allows when the t_score variable is greater than or equal to 100 -->
     <after id="physics-filter" duration="5s">
         <match-started id="structure-filter"/>
     </after>
+    <variable id="x-ge-1" var="x">1..</variable>
+    <variable id="x-le-3" var="x">..3</variable>
+    <variable id="y-ge-1" var="y">1..</variable>
+    <variable id="y-le-3" var="y">..3</variable>
+    <variable id="randWall-le-19" var="randWall">..19</variable>
+    <variable id="randWall-ge-20" var="randWall">20..</variable>
+    <variable id="shouldRestore" var="shadowSum">..24</variable>
+    <variable id="shouldReroll" var="rerollCheck">..60</variable>
 </filters>
 <variables>
-    <variable id="structure_choice" scope="match" default="-1"/>
+    <variable id="GRID_SIZE" scope="match" default="5"/>
+    <variable id="CELL_COUNT" scope="match" default="25"/>
+    <variable id="WALL_COUNT" scope="match" default="60"/>
+    <variable id="H_WALL_OFFSET" scope="match" default="30"/>
+    <variable id="V_STRIDE" scope="match" default="6"/>
+    <variable id="INTERIOR_WALL_COUNT" scope="match" default="40"/>
+    <variable id="CELL_SIZE" scope="match" default="10"/>
+    <variable id="WORLD_OFFSET" scope="match" default="1"/>
+    <variable id="MAZE_ITERATIONS" scope="match" default="200"/>
+    <variable id="i" scope="match" default="0"/>
+    <variable id="vIndex" scope="match" default="0"/>
+    <variable id="hIndex" scope="match" default="0"/>
+    <variable id="x" scope="match" default="0"/>
+    <variable id="y" scope="match" default="0"/>
+    <variable id="leftWall" scope="match" default="0"/>
+    <variable id="rightWall" scope="match" default="0"/>
+    <variable id="upWall" scope="match" default="0"/>
+    <variable id="downWall" scope="match" default="0"/>
+    <variable id="shadowSum" scope="match" default="0"/>
+    <variable id="randWall" scope="match" default="0"/>
+    <variable id="adjustedRand" scope="match" default="0"/>
+    <variable id="wallIndex" scope="match" default="0"/>
+    <variable id="worldX" scope="match" default="0"/>
+    <variable id="worldZ" scope="match" default="0"/>
+    <variable id="wallConfig" scope="match" default="0"/>
+    <variable id="rerollCheck" scope="match" default="0"/>
+    <array id="walls" scope="match" size="60"/>
+    <array id="wallsBack" scope="match" size="60"/>
+    <array id="shadow" scope="match" size="25"/>
 </variables>
-<!-- Structures generated using: https://github.com/cswhite2000/procedural-xml-gen -->
 <structures>
-    <structure air="true" clear="false" id="cstr0"><region><cuboid min="1,0,200" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr1"><region><cuboid min="1,0,212" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr2"><region><cuboid min="1,0,224" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr3"><region><cuboid min="1,0,236" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr4"><region><cuboid min="13,0,200" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr5"><region><cuboid min="13,0,212" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr6"><region><cuboid min="13,0,224" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr7"><region><cuboid min="13,0,236" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr8"><region><cuboid min="25,0,200" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr9"><region><cuboid min="25,0,212" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr10"><region><cuboid min="25,0,224" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr11"><region><cuboid min="25,0,236" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr12"><region><cuboid min="37,0,200" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr13"><region><cuboid min="37,0,212" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr14"><region><cuboid min="37,0,224" size="10,20,10"/></region></structure>
-    <structure air="true" clear="false" id="cstr15"><region><cuboid min="37,0,236" size="10,20,10"/></region></structure>
-    <dynamic trigger="structure-filter" id="0dstrid0" structure="cstr10" location="0,0,0"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid1" structure="cstr13" location="0,0,10"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid2" structure="cstr4" location="0,0,20"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid3" structure="cstr1" location="0,0,30"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid4" structure="cstr3" location="0,0,40"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid5" structure="cstr12" location="10,0,0"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid6" structure="cstr4" location="10,0,10"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid7" structure="cstr11" location="10,0,20"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid8" structure="cstr4" location="10,0,30"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid9" structure="cstr7" location="10,0,40"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid10" structure="cstr3" location="20,0,0"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid11" structure="cstr5" location="20,0,10"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid12" structure="cstr6" location="20,0,20"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid13" structure="cstr8" location="20,0,30"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid14" structure="cstr11" location="20,0,40"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid15" structure="cstr5" location="30,0,0"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid16" structure="cstr8" location="30,0,10"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid17" structure="cstr4" location="30,0,20"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid18" structure="cstr15" location="30,0,30"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid19" structure="cstr2" location="30,0,40"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid20" structure="cstr12" location="40,0,0"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid21" structure="cstr6" location="40,0,10"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid22" structure="cstr6" location="40,0,20"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid23" structure="cstr1" location="40,0,30"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="0dstrid24" structure="cstr15" location="40,0,40"><filter><variable var="structure_choice">0</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid0" structure="cstr0" location="0,0,0"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid1" structure="cstr3" location="0,0,10"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid2" structure="cstr10" location="0,0,20"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid3" structure="cstr0" location="0,0,30"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid4" structure="cstr9" location="0,0,40"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid5" structure="cstr12" location="10,0,0"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid6" structure="cstr7" location="10,0,10"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid7" structure="cstr12" location="10,0,20"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid8" structure="cstr7" location="10,0,30"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid9" structure="cstr10" location="10,0,40"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid10" structure="cstr3" location="20,0,0"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid11" structure="cstr2" location="20,0,10"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid12" structure="cstr10" location="20,0,20"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid13" structure="cstr12" location="20,0,30"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid14" structure="cstr11" location="20,0,40"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid15" structure="cstr12" location="30,0,0"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid16" structure="cstr8" location="30,0,10"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid17" structure="cstr8" location="30,0,20"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid18" structure="cstr4" location="30,0,30"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid19" structure="cstr7" location="30,0,40"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid20" structure="cstr13" location="40,0,0"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid21" structure="cstr15" location="40,0,10"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid22" structure="cstr12" location="40,0,20"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid23" structure="cstr6" location="40,0,30"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="1dstrid24" structure="cstr15" location="40,0,40"><filter><variable var="structure_choice">1</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid0" structure="cstr10" location="0,0,0"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid1" structure="cstr13" location="0,0,10"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid2" structure="cstr4" location="0,0,20"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid3" structure="cstr1" location="0,0,30"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid4" structure="cstr3" location="0,0,40"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid5" structure="cstr5" location="10,0,0"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid6" structure="cstr4" location="10,0,10"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid7" structure="cstr6" location="10,0,20"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid8" structure="cstr3" location="10,0,30"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid9" structure="cstr2" location="10,0,40"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid10" structure="cstr11" location="20,0,0"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid11" structure="cstr8" location="20,0,10"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid12" structure="cstr4" location="20,0,20"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid13" structure="cstr6" location="20,0,30"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid14" structure="cstr6" location="20,0,40"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid15" structure="cstr12" location="30,0,0"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid16" structure="cstr8" location="30,0,10"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid17" structure="cstr7" location="30,0,20"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid18" structure="cstr0" location="30,0,30"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid19" structure="cstr3" location="30,0,40"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid20" structure="cstr13" location="40,0,0"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid21" structure="cstr15" location="40,0,10"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid22" structure="cstr12" location="40,0,20"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid23" structure="cstr15" location="40,0,30"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="2dstrid24" structure="cstr14" location="40,0,40"><filter><variable var="structure_choice">2</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid0" structure="cstr13" location="0,0,0"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid1" structure="cstr4" location="0,0,10"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid2" structure="cstr9" location="0,0,20"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid3" structure="cstr0" location="0,0,30"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid4" structure="cstr3" location="0,0,40"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid5" structure="cstr0" location="10,0,0"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid6" structure="cstr7" location="10,0,10"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid7" structure="cstr13" location="10,0,20"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid8" structure="cstr7" location="10,0,30"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid9" structure="cstr2" location="10,0,40"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid10" structure="cstr11" location="20,0,0"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid11" structure="cstr6" location="20,0,10"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid12" structure="cstr1" location="20,0,20"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid13" structure="cstr6" location="20,0,30"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid14" structure="cstr6" location="20,0,40"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid15" structure="cstr12" location="30,0,0"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid16" structure="cstr3" location="30,0,10"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid17" structure="cstr10" location="30,0,20"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid18" structure="cstr0" location="30,0,30"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid19" structure="cstr3" location="30,0,40"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid20" structure="cstr13" location="40,0,0"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid21" structure="cstr6" location="40,0,10"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid22" structure="cstr6" location="40,0,20"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid23" structure="cstr6" location="40,0,30"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="3dstrid24" structure="cstr15" location="40,0,40"><filter><variable var="structure_choice">3</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid0" structure="cstr13" location="0,0,0"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid1" structure="cstr4" location="0,0,10"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid2" structure="cstr1" location="0,0,20"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid3" structure="cstr4" location="0,0,30"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid4" structure="cstr9" location="0,0,40"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid5" structure="cstr0" location="10,0,0"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid6" structure="cstr7" location="10,0,10"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid7" structure="cstr0" location="10,0,20"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid8" structure="cstr8" location="10,0,30"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid9" structure="cstr3" location="10,0,40"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid10" structure="cstr11" location="20,0,0"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid11" structure="cstr15" location="20,0,10"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid12" structure="cstr12" location="20,0,20"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid13" structure="cstr7" location="20,0,30"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid14" structure="cstr5" location="20,0,40"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid15" structure="cstr2" location="30,0,0"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid16" structure="cstr0" location="30,0,10"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid17" structure="cstr4" location="30,0,20"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid18" structure="cstr8" location="30,0,30"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid19" structure="cstr7" location="30,0,40"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid20" structure="cstr12" location="40,0,0"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid21" structure="cstr15" location="40,0,10"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid22" structure="cstr12" location="40,0,20"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid23" structure="cstr15" location="40,0,30"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="4dstrid24" structure="cstr14" location="40,0,40"><filter><variable var="structure_choice">4</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid0" structure="cstr0" location="0,0,0"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid1" structure="cstr1" location="0,0,10"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid2" structure="cstr4" location="0,0,20"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid3" structure="cstr9" location="0,0,30"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid4" structure="cstr10" location="0,0,40"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid5" structure="cstr5" location="10,0,0"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid6" structure="cstr1" location="10,0,10"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid7" structure="cstr7" location="10,0,20"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid8" structure="cstr13" location="10,0,30"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid9" structure="cstr7" location="10,0,40"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid10" structure="cstr6" location="20,0,0"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid11" structure="cstr4" location="20,0,10"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid12" structure="cstr6" location="20,0,20"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid13" structure="cstr1" location="20,0,30"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid14" structure="cstr6" location="20,0,40"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid15" structure="cstr0" location="30,0,0"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid16" structure="cstr15" location="30,0,10"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid17" structure="cstr13" location="30,0,20"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid18" structure="cstr4" location="30,0,30"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid19" structure="cstr3" location="30,0,40"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid20" structure="cstr12" location="40,0,0"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid21" structure="cstr1" location="40,0,10"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid22" structure="cstr1" location="40,0,20"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid23" structure="cstr15" location="40,0,30"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="5dstrid24" structure="cstr14" location="40,0,40"><filter><variable var="structure_choice">5</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid0" structure="cstr0" location="0,0,0"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid1" structure="cstr4" location="0,0,10"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid2" structure="cstr1" location="0,0,20"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid3" structure="cstr4" location="0,0,30"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid4" structure="cstr3" location="0,0,40"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid5" structure="cstr12" location="10,0,0"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid6" structure="cstr11" location="10,0,10"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid7" structure="cstr3" location="10,0,20"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid8" structure="cstr12" location="10,0,30"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid9" structure="cstr7" location="10,0,40"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid10" structure="cstr1" location="20,0,0"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid11" structure="cstr15" location="20,0,10"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid12" structure="cstr12" location="20,0,20"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid13" structure="cstr4" location="20,0,30"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid14" structure="cstr8" location="20,0,40"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid15" structure="cstr0" location="30,0,0"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid16" structure="cstr4" location="30,0,10"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid17" structure="cstr3" location="30,0,20"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid18" structure="cstr2" location="30,0,30"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid19" structure="cstr2" location="30,0,40"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid20" structure="cstr12" location="40,0,0"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid21" structure="cstr6" location="40,0,10"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid22" structure="cstr6" location="40,0,20"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid23" structure="cstr15" location="40,0,30"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="6dstrid24" structure="cstr14" location="40,0,40"><filter><variable var="structure_choice">6</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid0" structure="cstr10" location="0,0,0"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid1" structure="cstr13" location="0,0,10"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid2" structure="cstr4" location="0,0,20"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid3" structure="cstr4" location="0,0,30"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid4" structure="cstr9" location="0,0,40"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid5" structure="cstr12" location="10,0,0"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid6" structure="cstr3" location="10,0,10"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid7" structure="cstr12" location="10,0,20"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid8" structure="cstr11" location="10,0,30"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid9" structure="cstr9" location="10,0,40"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid10" structure="cstr1" location="20,0,0"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid11" structure="cstr6" location="20,0,10"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid12" structure="cstr4" location="20,0,20"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid13" structure="cstr8" location="20,0,30"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid14" structure="cstr4" location="20,0,40"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid15" structure="cstr13" location="30,0,0"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid16" structure="cstr3" location="30,0,10"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid17" structure="cstr5" location="30,0,20"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid18" structure="cstr7" location="30,0,30"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid19" structure="cstr2" location="30,0,40"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid20" structure="cstr13" location="40,0,0"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid21" structure="cstr6" location="40,0,10"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid22" structure="cstr6" location="40,0,20"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid23" structure="cstr15" location="40,0,30"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="7dstrid24" structure="cstr14" location="40,0,40"><filter><variable var="structure_choice">7</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid0" structure="cstr0" location="0,0,0"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid1" structure="cstr9" location="0,0,10"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid2" structure="cstr10" location="0,0,20"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid3" structure="cstr0" location="0,0,30"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid4" structure="cstr3" location="0,0,40"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid5" structure="cstr5" location="10,0,0"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid6" structure="cstr3" location="10,0,10"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid7" structure="cstr2" location="10,0,20"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid8" structure="cstr14" location="10,0,30"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid9" structure="cstr2" location="10,0,40"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid10" structure="cstr8" location="20,0,0"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid11" structure="cstr11" location="20,0,10"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid12" structure="cstr15" location="20,0,20"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid13" structure="cstr13" location="20,0,30"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid14" structure="cstr8" location="20,0,40"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid15" structure="cstr5" location="30,0,0"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid16" structure="cstr6" location="30,0,10"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid17" structure="cstr3" location="30,0,20"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid18" structure="cstr0" location="30,0,30"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid19" structure="cstr7" location="30,0,40"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid20" structure="cstr12" location="40,0,0"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid21" structure="cstr9" location="40,0,10"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid22" structure="cstr12" location="40,0,20"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid23" structure="cstr6" location="40,0,30"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="8dstrid24" structure="cstr15" location="40,0,40"><filter><variable var="structure_choice">8</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid0" structure="cstr0" location="0,0,0"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid1" structure="cstr1" location="0,0,10"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid2" structure="cstr4" location="0,0,20"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid3" structure="cstr4" location="0,0,30"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid4" structure="cstr3" location="0,0,40"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid5" structure="cstr14" location="10,0,0"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid6" structure="cstr13" location="10,0,10"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid7" structure="cstr15" location="10,0,20"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid8" structure="cstr5" location="10,0,30"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid9" structure="cstr7" location="10,0,40"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid10" structure="cstr3" location="20,0,0"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid11" structure="cstr10" location="20,0,10"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid12" structure="cstr0" location="20,0,20"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid13" structure="cstr6" location="20,0,30"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid14" structure="cstr11" location="20,0,40"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid15" structure="cstr2" location="30,0,0"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid16" structure="cstr5" location="30,0,10"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid17" structure="cstr11" location="30,0,20"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid18" structure="cstr1" location="30,0,30"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid19" structure="cstr7" location="30,0,40"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid20" structure="cstr12" location="40,0,0"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid21" structure="cstr6" location="40,0,10"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid22" structure="cstr6" location="40,0,20"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid23" structure="cstr9" location="40,0,30"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="9dstrid24" structure="cstr14" location="40,0,40"><filter><variable var="structure_choice">9</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid0" structure="cstr10" location="0,0,0"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid1" structure="cstr10" location="0,0,10"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid2" structure="cstr0" location="0,0,20"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid3" structure="cstr3" location="0,0,30"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid4" structure="cstr10" location="0,0,40"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid5" structure="cstr5" location="10,0,0"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid6" structure="cstr6" location="10,0,10"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid7" structure="cstr7" location="10,0,20"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid8" structure="cstr2" location="10,0,30"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid9" structure="cstr2" location="10,0,40"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid10" structure="cstr6" location="20,0,0"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid11" structure="cstr9" location="20,0,10"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid12" structure="cstr12" location="20,0,20"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid13" structure="cstr11" location="20,0,30"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid14" structure="cstr8" location="20,0,40"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid15" structure="cstr0" location="30,0,0"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid16" structure="cstr1" location="30,0,10"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid17" structure="cstr4" location="30,0,20"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid18" structure="cstr8" location="30,0,30"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid19" structure="cstr15" location="30,0,40"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid20" structure="cstr12" location="40,0,0"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid21" structure="cstr9" location="40,0,10"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid22" structure="cstr14" location="40,0,20"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid23" structure="cstr12" location="40,0,30"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="10dstrid24" structure="cstr9" location="40,0,40"><filter><variable var="structure_choice">10</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid0" structure="cstr0" location="0,0,0"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid1" structure="cstr9" location="0,0,10"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid2" structure="cstr0" location="0,0,20"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid3" structure="cstr1" location="0,0,30"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid4" structure="cstr9" location="0,0,40"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid5" structure="cstr2" location="10,0,0"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid6" structure="cstr13" location="10,0,10"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid7" structure="cstr11" location="10,0,20"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid8" structure="cstr4" location="10,0,30"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid9" structure="cstr3" location="10,0,40"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid10" structure="cstr7" location="20,0,0"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid11" structure="cstr10" location="20,0,10"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid12" structure="cstr14" location="20,0,20"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid13" structure="cstr12" location="20,0,30"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid14" structure="cstr8" location="20,0,40"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid15" structure="cstr2" location="30,0,0"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid16" structure="cstr2" location="30,0,10"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid17" structure="cstr10" location="30,0,20"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid18" structure="cstr0" location="30,0,30"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid19" structure="cstr15" location="30,0,40"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid20" structure="cstr12" location="40,0,0"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid21" structure="cstr6" location="40,0,10"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid22" structure="cstr6" location="40,0,20"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid23" structure="cstr6" location="40,0,30"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="11dstrid24" structure="cstr9" location="40,0,40"><filter><variable var="structure_choice">11</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid0" structure="cstr10" location="0,0,0"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid1" structure="cstr0" location="0,0,10"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid2" structure="cstr1" location="0,0,20"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid3" structure="cstr1" location="0,0,30"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid4" structure="cstr3" location="0,0,40"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid5" structure="cstr5" location="10,0,0"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid6" structure="cstr7" location="10,0,10"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid7" structure="cstr13" location="10,0,20"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid8" structure="cstr1" location="10,0,30"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid9" structure="cstr15" location="10,0,40"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid10" structure="cstr11" location="20,0,0"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid11" structure="cstr11" location="20,0,10"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid12" structure="cstr4" location="20,0,20"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid13" structure="cstr1" location="20,0,30"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid14" structure="cstr4" location="20,0,40"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid15" structure="cstr12" location="30,0,0"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid16" structure="cstr7" location="30,0,10"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid17" structure="cstr5" location="30,0,20"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid18" structure="cstr1" location="30,0,30"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid19" structure="cstr7" location="30,0,40"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid20" structure="cstr13" location="40,0,0"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid21" structure="cstr15" location="40,0,10"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid22" structure="cstr14" location="40,0,20"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid23" structure="cstr13" location="40,0,30"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="12dstrid24" structure="cstr15" location="40,0,40"><filter><variable var="structure_choice">12</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid0" structure="cstr0" location="0,0,0"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid1" structure="cstr9" location="0,0,10"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid2" structure="cstr0" location="0,0,20"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid3" structure="cstr1" location="0,0,30"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid4" structure="cstr9" location="0,0,40"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid5" structure="cstr5" location="10,0,0"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid6" structure="cstr1" location="10,0,10"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid7" structure="cstr6" location="10,0,20"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid8" structure="cstr4" location="10,0,30"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid9" structure="cstr9" location="10,0,40"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid10" structure="cstr7" location="20,0,0"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid11" structure="cstr0" location="20,0,10"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid12" structure="cstr1" location="20,0,20"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid13" structure="cstr7" location="20,0,30"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid14" structure="cstr0" location="20,0,40"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid15" structure="cstr2" location="30,0,0"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid16" structure="cstr14" location="30,0,10"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid17" structure="cstr0" location="30,0,20"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid18" structure="cstr15" location="30,0,30"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid19" structure="cstr2" location="30,0,40"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid20" structure="cstr14" location="40,0,0"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid21" structure="cstr13" location="40,0,10"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid22" structure="cstr6" location="40,0,20"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid23" structure="cstr1" location="40,0,30"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="13dstrid24" structure="cstr15" location="40,0,40"><filter><variable var="structure_choice">13</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid0" structure="cstr0" location="0,0,0"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid1" structure="cstr4" location="0,0,10"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid2" structure="cstr3" location="0,0,20"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid3" structure="cstr0" location="0,0,30"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid4" structure="cstr3" location="0,0,40"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid5" structure="cstr12" location="10,0,0"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid6" structure="cstr6" location="10,0,10"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid7" structure="cstr8" location="10,0,20"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid8" structure="cstr6" location="10,0,30"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid9" structure="cstr7" location="10,0,40"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid10" structure="cstr3" location="20,0,0"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid11" structure="cstr13" location="20,0,10"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid12" structure="cstr6" location="20,0,20"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid13" structure="cstr4" location="20,0,30"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid14" structure="cstr6" location="20,0,40"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid15" structure="cstr5" location="30,0,0"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid16" structure="cstr4" location="30,0,10"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid17" structure="cstr1" location="30,0,20"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid18" structure="cstr11" location="30,0,30"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid19" structure="cstr3" location="30,0,40"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid20" structure="cstr12" location="40,0,0"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid21" structure="cstr15" location="40,0,10"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid22" structure="cstr13" location="40,0,20"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid23" structure="cstr15" location="40,0,30"><filter><variable var="structure_choice">14</variable></filter></dynamic>
-    <dynamic trigger="structure-filter" id="14dstrid24" structure="cstr14" location="40,0,40"><filter><variable var="structure_choice">14</variable></filter></dynamic>
+    <!-- LEFT+UP walls (wallConfig=12) -->
+    <structure air="true" clear="false" id="structure-0"><region><cuboid min="1,0,200" size="10,20,10"/></region></structure>
+    <!-- RIGHT+LEFT walls (wallConfig=5) -->
+    <structure air="true" clear="false" id="structure-1"><region><cuboid min="1,0,212" size="10,20,10"/></region></structure>
+    <!-- DOWN+UP walls (wallConfig=10) -->
+    <structure air="true" clear="false" id="structure-2"><region><cuboid min="1,0,224" size="10,20,10"/></region></structure>
+    <!-- LEFT+DOWN walls (wallConfig=6) -->
+    <structure air="true" clear="false" id="structure-3"><region><cuboid min="1,0,236" size="10,20,10"/></region></structure>
+    <!-- LEFT wall (wallConfig=4) -->
+    <structure air="true" clear="false" id="structure-4"><region><cuboid min="13,0,200" size="10,20,10"/></region></structure>
+    <!-- UP wall (wallConfig=8) -->
+    <structure air="true" clear="false" id="structure-5"><region><cuboid min="13,0,212" size="10,20,10"/></region></structure>
+    <!-- RIGHT wall (wallConfig=1) -->
+    <structure air="true" clear="false" id="structure-6"><region><cuboid min="13,0,224" size="10,20,10"/></region></structure>
+    <!-- DOWN wall (wallConfig=2) -->
+    <structure air="true" clear="false" id="structure-7"><region><cuboid min="13,0,236" size="10,20,10"/></region></structure>
+    <!-- No walls (wallConfig=0) -->
+    <structure air="true" clear="false" id="structure-8"><region><cuboid min="25,0,200" size="10,20,10"/></region></structure>
+    <!-- RIGHT+DOWN+LEFT walls (wallConfig=7) -->
+    <structure air="true" clear="false" id="structure-9"><region><cuboid min="25,0,212" size="10,20,10"/></region></structure>
+    <!-- LEFT+DOWN+UP walls (wallConfig=14) -->
+    <structure air="true" clear="false" id="structure-10"><region><cuboid min="25,0,224" size="10,20,10"/></region></structure>
+    <!-- All walls (wallConfig=15) -->
+    <structure air="true" clear="false" id="structure-11"><region><cuboid min="25,0,236" size="10,20,10"/></region></structure>
+    <!-- RIGHT+UP walls (wallConfig=9) -->
+    <structure air="true" clear="false" id="structure-12"><region><cuboid min="37,0,200" size="10,20,10"/></region></structure>
+    <!-- RIGHT+LEFT+UP walls (wallConfig=13) -->
+    <structure air="true" clear="false" id="structure-13"><region><cuboid min="37,0,212" size="10,20,10"/></region></structure>
+    <!-- RIGHT+DOWN+UP walls (wallConfig=11) -->
+    <structure air="true" clear="false" id="structure-14"><region><cuboid min="37,0,224" size="10,20,10"/></region></structure>
+    <!-- RIGHT+DOWN walls (wallConfig=3) -->
+    <structure air="true" clear="false" id="structure-15"><region><cuboid min="37,0,236" size="10,20,10"/></region></structure>
 </structures>
 <toolrepair>
     <tool>stone sword</tool>
