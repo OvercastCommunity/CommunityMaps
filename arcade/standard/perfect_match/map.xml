@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Perfect Match</name>
-<version>1.0</version>
+<version>1.0.1</version>
 <objective>Memorize the tiles on the floor and move to the matching one to avoid falling!</objective>
 <created>2025-11-05</created>
 <phase>staging</phase>
@@ -189,9 +189,9 @@
         <action filter="block_similarity=0.97..">
             <set var="block_similarity" value="0.96"/>
         </action>
-        <!-- cap the max gatekeep likeliness to .75 -->
-        <action filter="gatekeep_likeliness=0.76..">
-            <set var="gatekeep_likeliness" value="0.75"/>
+        <!-- cap the max gatekeep likeliness to .80 -->
+        <action filter="gatekeep_likeliness=0.81..">
+            <set var="gatekeep_likeliness" value="0.80"/>
         </action>
         <!-- cap the max selection amount to 36 -->
         <action filter="selection_amount=37..">
@@ -389,7 +389,11 @@
     </trigger>
     <trigger scope="match" action="round_state:=${ROUND_BLANK}">
         <filter>
-            <after duration="15s" filter="round-memory" message="Hiding blocks in {0}"/>
+            <any>
+                <after duration="15s" filter="all(round-memory,round_count=1..6)" message="Hiding blocks in {0}"/>
+                <after duration="10s" filter="all(round-memory,round_count=7..14)" message="Hiding blocks in {0}"/>
+                <after duration="5s" filter="all(round-memory,round_count=15..)" message="Hiding blocks in {0}"/>
+            </any>
         </filter>
     </trigger>
     <trigger scope="match" action="round_state:=${ROUND_SCREEN}">
@@ -409,7 +413,7 @@
     </trigger>
     <trigger scope="match" action="round_state:=${ROUND_PREPARING}">
         <filter>
-            <after duration="5s" filter="round-finished"/>
+            <after duration="0.5s" filter="round-finished"/>
         </filter>
     </trigger>
 
@@ -417,7 +421,7 @@
     <trigger scope="match" filter="round-preparing">
         <action>
             <set var="round_count" value="round_count + 1"/>
-            <set var="selection_amount" value="2 + round_count"/>
+            <set var="selection_amount" value="2 + floor(round_count * 1.8)"/>
             <set var="block_similarity" value="random()"/>
             <set var="gatekeep_likeliness" value="0.05 * (round_count - 1)"/>
             <action id="roll"/>
@@ -563,7 +567,11 @@
     <trigger scope="match">
         <filter>
             <pulse period="1s" duration="0.5s">
-                <after duration="10s" filter="round-memory"/>
+                <any>
+                    <after duration="10s" filter="all(round-memory,round_count=1..6)"/>
+                    <after duration="5s" filter="all(round-memory,round_count=7..14)"/>
+                    <after duration="0.05s" filter="all(round-memory,round_count=15..)"/>
+                </any>
             </pulse>
         </filter>
         <action>
@@ -572,6 +580,12 @@
     </trigger>
 
     <action id="announce-round" scope="match">
+        <action filter="round_count=7">
+            <message text="${ANNOUNCER_PREFIX} Memory time has been reduced to `a10 seconds!"/>
+        </action>
+        <action filter="round_count=15">
+            <message text="${ANNOUNCER_PREFIX} Memory time has been reduced to `a5 seconds!"/>
+        </action>
         <action filter="not(players_left=2)">
             <sound key="${entity.player.levelup}"/>
             <message title="Round `a{r}" subtitle="`a{p} `f{word} left" stay="2s">
@@ -720,7 +734,7 @@
             <after duration="0.1" filter="call_reset_yaw=1"/>
         </filter>
         <action>
-            <teleport x="player.x" y="player.y" z="player.z" yaw="player.yaw + 0.5"/>
+            <teleport x="player.x" y="player.y" z="player.z" yaw="player.yaw + 0.1"/>
             <set var="call_reset_yaw" value="0"/>
         </action>
     </trigger>
@@ -736,3 +750,6 @@
     <depletion>off</depletion>
 </hunger>
 </map>
+<!--
+intentar hacer que las tiles hagan blinking, para evitar bug de viaversion
+-->
