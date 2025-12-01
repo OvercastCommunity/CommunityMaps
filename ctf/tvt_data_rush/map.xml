@@ -1,10 +1,11 @@
 <map proto="1.5.0" game="Flag Assault &amp; Blitz">
 <name>TVT: Data Rush</name>
-<version>1.0.1</version>
+<version>1.1.0</version>
 <phase>development</phase>
 <objective>Score your flag in the enemy goals, last team standing wins!</objective>
 <created>2025-11-15</created>
 <gamemode>ctf</gamemode>
+<modifybowprojectile pickup-filter="never"/>
 <include id="gapple-kill-reward"/>
 <constants>
     <constant id="team-size">12</constant>
@@ -25,7 +26,8 @@
     <rule>No intentional crossteaming allowed!</rule>
 </rules>
 <broadcasts>
-    <tip after="1s" every="2m">Remember to defend your teams goals from the enemy flag carrier!</tip>
+    <tip after="1s" every="3m">Scoring flags in enemy goals will reduce their lives!</tip>
+    <tip after="90s" every="3m">Remember to defend your teams goals from enemy flag carriers!</tip>
 </broadcasts>
 <!--  Teams and Kits  -->
 <teams>
@@ -36,15 +38,15 @@
 </teams>
 <kits>
     <kit id="spawn-kit">
-        <clear/>
+        <clear effects="true"/>
         <item slot="0" unbreakable="true" material="stone sword"/>
         <item slot="3" unbreakable="true" material="gold axe"/>
-        <item slot="1" unbreakable="true" enchantment="infinity" material="bow"/>
+        <item slot="1" unbreakable="true" material="bow"/>
         <item slot="2" amount="6" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
-        <item slot="4" amount="64" damage="3" material="leaves"/>
+        <item slot="4" amount="48" damage="3" material="leaves"/>
         <item slot="5" amount="24" material="wood"/>
         <item slot="6" material="golden apple"/>
-        <item slot="27" material="arrow"/>
+        <item slot="8" amount="6" material="arrow"/>
         <leggings unbreakable="true" locked="true" material="chainmail leggings">
             <enchantment level="2">projectile_protection</enchantment>
         </leggings>
@@ -61,6 +63,66 @@
     <kit id="reset-health" force="true">
         <max-health>20</max-health>
     </kit>
+        <kit id="tutorial-kit">
+        <book show-other="false">
+            <title>`b`lHow to Play</title>
+            <author>Technodono</author>
+            <pages>
+                <page>
+                    `3➠ `lTeam vs Team
+                    `9➥ Overview`0
+
+                    In a battle of fates
+                    four team duel it out
+                    to be the last one
+                    alive!
+
+                    Man your stations,
+                    defend your portals
+                    and eliminate your
+                    foes in this fast 
+                    paced brawl.
+                </page>
+                <page>
+                    `3➠ `lTeam vs Team
+                    `2➥ Objectives`0
+
+                    Each team has a
+                    `5portal `0located
+                    on their starting 
+                    island.
+
+                    Players must defend
+                    `0their `5portal `0to
+                    prevent enemy `6flag
+                    `0carriers from scoring
+                </page>
+                <page>
+                    `3➠ `lTeam vs Team
+                    `2➥ Objectives Cont.`0
+
+                    players that score 
+                    `6flags `0in your `5portal 
+                    `0will deal `cone damage 
+                    `0to your teams heathbar`0, reach 0 hearts and your team is `4`leliminated`r`0!
+
+                </page>
+                <page>
+                    `3➠ `lTeam vs Team
+                    `c➥ Sudden Death`0
+
+                    In sudden death all players are able to score in `5portals `0and will deal `cone damage`0.
+
+                    As an additional bouns, players who score a `6flag `0in 
+                    sudden death deal 
+                    `ctwo damage`0.
+
+                </page>
+
+            </pages>
+        </book>
+    </kit>
+    <give kit="tutorial-kit" filter="all(observing)"/>
 </kits>
 <!--  Spawns and respawns  -->
 <spawns>
@@ -144,6 +206,7 @@
             <material>dark_oak_fence_gate</material>
             <material>acacia_fence_gate</material>
             <material>dropper</material>
+            <material>hopper</material>
             <material>dispenser</material>
             <material>note_block</material>
             <material>furnace</material>
@@ -165,14 +228,14 @@
         <material>chest</material>
         <material>tnt</material>
     </any>
-    <deny id="redstone-blocks-fixed">
-        <all>
-            <cause>player</cause>
-            <not>
-                <material>tnt</material>
-            </not>
-        </all>
-    </deny>
+    <any id="only-explosives">
+        <material>tnt</material>
+    </any>
+    <all id="only-chests">
+        <blocks region="spawners">
+            <material>chest</material>
+        </blocks>
+    </all>
     <any id="is-in-valid-portal">
         <all>
             <region id="red-portal"/>
@@ -191,18 +254,27 @@
             <filter id="blue-team-alive"/>
         </all>
     </any>
+    <after id="sudden-death-enabled" duration="8m" message="`aTime Remaining: {0}">
+        <match-running/>
+    </after>
+    <after duration="5m" message="`cSudden Death Ends In: {0}" filter="sudden-death-enabled"/>
 </filters>
 <actions>
-    <trigger filter="always" scope="match">
-        <action>
-            <switch-scope inner="team" observers="true">
-                <action id="team_lives := (${starting-score})" />
-            </switch-scope>
-        </action>
-    </trigger>
+<!-- exposed -->
+    <action id="force-last-life" scope="team" expose="true">
+        <action id="team_lives := 1"/>
+    </action>
     <action id="force-kill-team" scope="team" expose="true">
         <action id="team_lives := 0"/>
     </action>
+<!-- triggers -->
+    <trigger filter="always" scope="match">
+        <action>
+            <switch-scope inner="team" observers="true">
+                <action id="team_lives := (${starting-score})"/>
+            </switch-scope>
+        </action>
+    </trigger>
     <trigger scope="team" action="notify-team">
         <filter><score>5</score></filter>
     </trigger>
@@ -221,41 +293,92 @@
     <trigger scope="team" action="teleport-team">
         <filter><score>0</score></filter>
     </trigger>
+    <trigger scope="team" action="team_lives := 0">
+        <filter><score>-1</score></filter>
+    </trigger>
     <trigger scope="team" action="kill-team">
         <filter><after duration="3s" message="Returning to OBS in: {0}"><score>0</score></after></filter>
     </trigger>
+    <trigger scope="team" action="notify-team-death">
+        <filter><after duration="3.1s"><score>0</score></after></filter>
+    </trigger>
+    
+    <trigger scope="player" filter="all(red-portal,sudden-death-enabled)" action="red_team_lives := red_team_lives - 1"/>
+    <trigger scope="player" filter="all(yellow-portal,sudden-death-enabled)" action="yellow_team_lives := yellow_team_lives - 1"/>
+    <trigger scope="player" filter="all(green-portal,sudden-death-enabled)" action="green_team_lives := green_team_lives - 1"/>
+    <trigger scope="player" filter="all(blue-portal,sudden-death-enabled)" action="blue_team_lives := blue_team_lives - 1"/>
+    <trigger scope="match" filter="sudden-death-enabled" action="notify-sudden-death"/>
+
      <!-- Automatically updates to show time -->
     
     <action id="notify-team" scope="team">
         <sound key="mob.enderdragon.hit" pitch="1" volume="2"/>
         <sound key="mob.wither.hurt" pitch="0.75" volume="0.3"/>
         <action filter="score = 1">
-            <message title="`d`lOne Life Remaining!"/>
+            <sound key="random.anvil_land" pitch="0.7" volume="0.3"/>
+            <sound key="game.potion.smash" pitch="0.7" volume="2"/>
         </action>
+        <message text="`8`l──────────────────"/>
+        <message text="`6⧩ `7[Your Team`7 Has `d{lives} `7Lives Remaining]">
+            <replacements>
+                <decimal id="lives" value="team_lives"/>
+            </replacements>
+        </message>
+        <message text="`8`l──────────────────"/>
     </action>
     
+    <action id="notify-sudden-death" scope="match">
+        <message text="`8`l──────────────────"/>
+        <message text="`4`l! `7[`cSudden Death `7Enabled]"/>
+        <message text="`8`l──────────────────"/>
+        <switch-scope inner="player">
+            <action filter="participating">
+                <sound key="mob.enderdragon.hit" pitch="1" volume="2"/>
+                <sound key="mob.enderdragon.growl" pitch="1" volume="1"/>
+                <message title="`c`lSudden Death!" subtitle="All players can score in portals"/>
+            </action>
+        </switch-scope>
+    </action>
+
+    <action id="notify-team-death" scope="team">
+            <action filter="team-red">
+                <switch-scope inner="match">
+                    <message text="`8`l──────────────────"/>
+                    <message text="`c✘ `7[`4Red Team`7 Has Been Eliminated]"/>
+                    <message text="`8`l──────────────────"/>
+                </switch-scope>
+            </action>
+            <action filter="team-yellow">
+                <switch-scope inner="match">
+                    <message text="`8`l──────────────────"/>
+                    <message text="`c✘ `7[`eYellow Team`7 Has Been Eliminated]"/>
+                    <message text="`8`l──────────────────"/>
+                </switch-scope>
+            </action>
+            <action filter="team-green">
+                <switch-scope inner="match">
+                    <message text="`8`l──────────────────"/>
+                    <message text="`c✘ `7[`aGreen Team`7 Has Been Eliminated]"/>
+                    <message text="`8`l──────────────────"/>
+                </switch-scope>
+            </action>
+            <action filter="team-blue">
+                <switch-scope inner="match">
+                    <message text="`8`l──────────────────"/>
+                    <message text="`c✘ `7[`9Blue Team`7 Has Been Eliminated]"/>
+                    <message text="`8`l──────────────────"/>
+                </switch-scope>
+            </action>
+    </action>
+
     <action id="teleport-team" scope="team">
-        <sound key="mob.enderdragon.hit" pitch="1" volume="2"/>
-        <sound key="mob.wither.spawn" preset="OBJECTIVE_BAD"/>
         <message title="`c`lTeam Eliminated!"/>
         <set var="team_kill" value="1"/>
         <set var="blitz_enabled" value="1"/>
-        <switch-scope inner="player">
-            <action filter="team-red">
-                <teleport x="-53.5" y="8" z="-53.5" yaw="-90"/>
-            </action>
-            <action filter="team-yellow">
-                <teleport x="54.5" y="8" z="-53.5" yaw="0"/>
-            </action>
-            <action filter="team-green">
-                <teleport x="54.5" y="8" z="54.5" yaw="90"/>
-            </action>
-            <action filter="team-blue">
-                <teleport x="-53.5" y="8" z="54.5" yaw="180"/>
-            </action>
-        </switch-scope>
-   
         <action filter="team-red">
+            <switch-scope inner="player">
+                <teleport x="-53.5" y="8" z="-53.5" yaw="-90"/>
+            </switch-scope>
             <switch-scope inner="match">
                 <fill region="red-spawnroom-door" material="stained clay:14"/>
                 <fill region="red-portal" material="air"/>
@@ -263,6 +386,9 @@
             </switch-scope>
         </action>
         <action filter="team-yellow">
+            <switch-scope inner="player">
+                <teleport x="54.5" y="8" z="-53.5" yaw="0"/>
+            </switch-scope>
             <switch-scope inner="match">
                 <fill region="yellow-spawnroom-door" material="stained clay:1"/>
                 <fill region="yellow-portal" material="air"/>
@@ -270,6 +396,9 @@
             </switch-scope>
         </action>
         <action filter="team-green">
+            <switch-scope inner="player">
+                <teleport x="54.5" y="8" z="54.5" yaw="90"/>
+            </switch-scope>
             <switch-scope inner="match">
                 <fill region="green-spawnroom-door" material="stained clay:13"/>
                 <fill region="green-portal" material="air"/>
@@ -277,44 +406,41 @@
             </switch-scope>
         </action>
         <action filter="team-blue">
+            <switch-scope inner="player">
+                <teleport x="-53.5" y="8" z="54.5" yaw="180"/>
+            </switch-scope>
             <switch-scope inner="match">
                 <fill region="blue-spawnroom-door" material="stained clay:11"/>
                 <fill region="blue-portal" material="air"/>
                 <fill region="blue-objective-sign" material="air"/>
             </switch-scope>
         </action>
-
+        <sound key="mob.enderdragon.hit" pitch="1" volume="2"/>
+        <sound key="mob.wither.spawn" preset="OBJECTIVE_BAD"/>
     </action>
 
     <action id="kill-team" scope="team">
-        <team-alias alias="-----"/>
-        <message text="`8`l──────────────────"/>
-        <action filter="team-red">
-            <message text="`c✘ `7[`4Red Team`7 Has Been Eliminated]"/>
-        </action>
-        <action filter="team-yellow">
-            <message text="`c✘ `7[`eYellow Team`7 Has Been Eliminated]"/>
-        </action>
-        <action filter="team-green">
-            <message text="`c✘ `7[`aGreen Team`7 Has Been Eliminated]"/>
-        </action>
-        <action filter="team-blue">
-            <message text="`c✘ `7[`9Blue Team`7 Has Been Eliminated]"/>
-        </action>
-        <message text="`8`l──────────────────"/>
         <!--send players to observers-->
         <switch-scope inner="player">
-            <teleport x="0.5" y="58" z="0.5" yaw="90"/>
+        <teleport x="0.5" y="-100" z="0.5" yaw="90"/>
             <kit id="join-obs">
                 <effect duration="2" amplifier="100">instant_damage</effect>
             </kit>
         </switch-scope>
+        <team-alias alias="-----"/>
     </action>
 
 </actions>
 <regions>
+    <!-- Block -->
     <apply block="never" region="team-spawnrooms"/>
+    <apply block="never" region="flag-posts" message="You may not modify the flag posts!"/>
+    <apply block="never" region="spawners" message="You may not modify the spawner region!"/>
+    <apply block="only-explosives" region="maxbuild" message="You may only place TNT here!"/>
+    <apply block-place="map-region" message="You may not modify the void area!"/>
+    <apply block="legal-blocks" use="deny-use"/>
 
+    <!-- Enter -->
     <apply enter="deny(team-red)" region="red-portal" message="Cannot score in your own goal!"/>
     <apply enter="deny(team-yellow)" region="yellow-portal" message="Cannot score in your own goal!"/>
     <apply enter="deny(team-green)" region="green-portal" message="Cannot score in your own goal!"/>
@@ -329,18 +455,6 @@
     <apply enter="deny(not(team-yellow))" region="yellow-spawnroom" message="Cannot enter another team's spawn!"/>
     <apply enter="deny(not(team-green))" region="green-spawnroom" message="Cannot enter another team's spawn!"/>
     <apply enter="deny(not(team-blue))" region="blue-spawnroom" message="Cannot enter another team's spawn!"/>
-    <apply block="never" region="flag-posts" message="You may not modify the flag posts!"/>
-    <apply block="never" region="spawners" message="You may not modify the item spawners!"/>
-    <apply block="deny(void)" message="You may not modify the void area!"/>
-    <apply block-place="redstone-blocks-fixed" message="You may only place TNT here!">
-        <region>
-            <above y="20"/>
-        </region>
-    </apply>
-    <apply block="legal-blocks" use="deny-use"/>
-
-
-    <!-- Enter -->
     
     <!-- Apply Kits -->
     <apply kit="spawn-kit" region="red-portal" filter="not(team-red)"/>
@@ -362,10 +476,9 @@
 
 
     <cuboid id="mid-room" min="-15,0,15" max="16,20,-15"/>
-    <block id="mid-spawner-spawning">0,10,0</block>
     <union id="spawners">
         <cuboid id="mid-spawner" min="-1,9,-1" size="3,2,3"/>
-        <cuboid id="red-blue-spawner" min="-56,8,0" size="1,2,1"/> <!--blue-red-->
+        <cuboid id="red-blue-spawner" min="-55,6,2" size="-3,4,-3"/> <!--blue-red-->
         <mirror normal="1,0,1" origin="0.5,0,0.5" region="red-blue-spawner" id="spawner2"/> <!--blue-green-->
         <mirror normal="1,0,0" origin="0.5,0,0.5" region="red-blue-spawner" id="spawner3"/> <!--green-yellow-->
         <mirror normal="1,0,-1" origin="0.5,0,0.5" region="red-blue-spawner" id="spawner4"/> <!--yellow-red-->
@@ -392,6 +505,9 @@
         <cuboid id="green-spawnroom-door" min="34,14,52" size="5,4,-1"/>
         <cuboid id="blue-spawnroom-door" min="-51,14,34" size="1,4,5"/>
     </union>
+
+    <cuboid id="map-region" min="-58,0,-58" max="59,59,59"/>
+    <above id="maxbuild" y="20"/>
 </regions>
 <portals>
     <!-- portals to spawn -->
@@ -401,21 +517,14 @@
     <portal forward="all(all-portals,team-yellow)" filter="is-in-valid-portal" destination="yellow-spawnpoint"/>
 </portals>
 <spawners>
-    <spawner spawn-region="mid-spawner-spawning" player-region="mid-room" max-entities="1" delay="15s">
+    <spawner spawn-region="mid-spawner" player-region="mid-room" max-entities="1" delay="15s">
         <item amount="1" material="golden apple"/>
     </spawner>
-    <spawner spawn-region="red-blue-spawner" player-region="everywhere" max-entities="1" delay="25s">
-        <item amount="1" material="tnt"/>
+    <spawner spawn-region="mid-spawner" player-region="mid-room" max-entities="1" delay="2s">
+        <potion damage="2">
+            <effect duration="35s" amplifier="2">speed</effect>
+        </potion>
     </spawner>
-    <spawner spawn-region="spawner2" player-region="everywhere" max-entities="1" delay="25s">
-        <item amount="1" material="tnt"/>
-    </spawner>
-    <spawner spawn-region="spawner3" player-region="everywhere" max-entities="1" delay="25s">
-        <item amount="1" material="tnt"/>
-    </spawner>
-    <spawner spawn-region="spawner4" player-region="everywhere" max-entities="1" delay="25s">
-        <item amount="1" material="tnt"/>
-</spawner>
 </spawners>
 <!-- Tools and Misc item stuff -->
 <toolrepair>
@@ -458,13 +567,14 @@
     <timelock>on</timelock>
     <timeset>1200</timeset>
 </world>
-<maxbuildheight>30</maxbuildheight>
+<maxbuildheight>56</maxbuildheight>
 <!-- Goal and Flag settings -->
 <kill-rewards>
     <kill-reward>
         <item amount="3" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
-        <item amount="16" material="leaves" damage="3"/>
-        <item amount="8" material="wood"/>
+        <item amount="12" material="leaves" damage="3"/>
+        <item amount="6" material="wood"/>
+        <item amount="4" material="arrow"/>
     </kill-reward>
 </kill-rewards>
 <score display="heart"/>
@@ -474,12 +584,28 @@
     <join-filter><filter id="blitz-disabled"/></join-filter>
     <filter><variable var="team_kill">1</variable></filter>
 </blitz>
-<time>10m</time>
+<time result="score" show="false">13m</time>
 <respawn auto="true"/>
 <tnt>
     <instantignite>on</instantignite>
     <fuse>2s</fuse>
 </tnt>
+<lootables>
+    <loot id="tnt-pool">
+        <any count="1..2" unique="false">
+            <item material="tnt"/>
+        </any>
+        <any count="2..4" unique="false">
+            <option weight="6">
+                <item material="arrow"/>
+            </option>
+            <option weight="3">
+                <item projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
+            </option>
+        </any>
+    </loot>
+    <fill loot="tnt-pool" filter="only-chests" refill-interval="10s" refill-clear="true"/>
+</lootables>
 <flags show-sidebar="false" required="false" stats="false" carry-message="Score this in the enemy's goals!" pickup-kit="flag-pickup" drop-kit="reset-health">
     <flag id="red-flag-1" name="Red Flag" color="red" pickup-filter="team-red">
         <post recover-time="${recover-time}" respawn-time="${respawn-time}" yaw="0">-42,8,-47</post>
@@ -512,4 +638,5 @@
         <net owner="green-team" region="green-portal" capture-filter="all(not(green-team),green-team-alive)"/>
     </flags>
 </flags>
+
 </map>
