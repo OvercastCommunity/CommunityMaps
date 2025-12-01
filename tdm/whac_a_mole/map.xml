@@ -1,12 +1,13 @@
 <map proto="1.5.0" min-server-version="1.21">
 <name>Whac-A-Mole</name>
-<version>1.0.3</version>
+<variant id="bad">Bleak</variant>
+<version>2.0</version>
 <created>2025-06-16</created>
-<objective>Be on the team with the highest amount of kills after 3 minutes!</objective>
+<objective>Be on the team with the highest amount of kills after 2 minutes!</objective>
 <gamemode>tdm</gamemode>
 <include id="void-death"/>
 <constant id="void-plane">55</constant>
-<time result="score">3m</time>
+<time result="score">2m</time>
 <authors>
     <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
 </authors>
@@ -14,85 +15,163 @@
     <team id="purple-team" color="dark purple" max="8">Purple</team>
     <team id="orange-team" color="gold" max="8">Orange</team>
 </teams>
-<broadcasts>
-    <alert after="2s">Fall damage is enabled!</alert>
-</broadcasts>
 <score>
     <kills>1</kills>
 </score>
-<spawns>
-    <player-kit>
-        <attribute operation="add" amount="-0.42">generic.jump_strength</attribute>
-    </player-kit>
-    <spawn team="purple-team" kit="spawn-kit">
-        <region yaw="90" pitch="60">
-            <point>21.5,96,0.5</point>
-        </region>
-    </spawn>
-    <spawn team="orange-team" kit="spawn-kit">
-        <region yaw="-90" pitch="60">
-            <point>-20.5,96,0.5</point>
-        </region>
-    </spawn>
-    <default>
-        <regions>
-            <point yaw="0">0.5,78,-32.5</point>
-            <point yaw="180">0.5,78,33.5</point>
-        </regions>
-    </default>
-</spawns>
-<kits>
-    <kit id="spawn-kit">
-        <effect duration="3s" amplifier="255" ambient="true">damage resistance</effect>
-        <item slot="0" unbreakable="true" material="mace" enchantment="wind burst:3;density:5;breach:10"/>
-        <item slot="1" material="feather" enchantment="infinity" show-enchantments="false" name="`lJump!" lore="`7Go ahead and jump" consumable="zzuf-jump"/>
-        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
-        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
-        <leggings material="leather leggings" team-color="true" unbreakable="true"/>
-        <boots material="leather boots" team-color="true" unbreakable="true"/>
-        <!-- <double-jump recharge-before-landing="true" power="8"/> -->
-        <game-mode>adventure</game-mode>
-    </kit>
-</kits>
-<consumables>
-    <consumable id="zzuf-jump" on="click" consume="false">
-        <action>
-            <velocity x="0" y="2.3" z="0"/>
-            <replace-item ignore-metadata="true">
-                <find>feather</find>
-                <replace>air</replace>
-            </replace-item>
-            <!-- item-mods don't work with these
-            <replace-item ignore-metadata="true">
-                <find>feather</find>
-                <replace>barrier</replace>
-            </replace-item>
-            -->
-            <sound key="entity.wind_charge.wind_burst" volume="0.8"/>
-            <kit>
-                <item material="barrier" enchantment="infinity" show-enchantments="false" name="`c`lRecharging..."/>
-            </kit>
-        </action>
-    </consumable>
-</consumables>
-<regions>
-    <apply block="never" use="never"/>
-</regions>
-<kill-rewards>
-    <kill-reward>
-        <kit>
-            <effect duration="5s">slow falling</effect>
+<if variant="default">
+    <spawns>
+        <if variant="bad">
+            <player-kit>
+                <attribute operation="add" amount="-0.42">generic.jump_strength</attribute>
+            </player-kit>
+        </if>
+        <spawn team="purple-team" kit="spawn-kit">
+            <region yaw="90">
+                <point>21.5,66,0.5</point>
+            </region>
+        </spawn>
+        <spawn team="orange-team" kit="spawn-kit">
+            <region yaw="-90">
+                <point>-20.5,66,0.5</point>
+            </region>
+        </spawn>
+        <default>
+            <regions>
+                <point yaw="0">0.5,78,-32.5</point>
+                <point yaw="180">0.5,78,33.5</point>
+            </regions>
+        </default>
+    </spawns>
+    <kits>
+        <kit id="spawn-kit" potion-particles="true">
+            <effect duration="3s" amplifier="255" ambient="true">damage resistance</effect>
+            <item slot="0" material="mace" enchantment="wind burst:3;density:5;breach:10" unbreakable="true"/>
+            <item slot="1" material="feather" enchantment="infinity" show-enchantments="false" name="`lSuper Jump" lore="`7Go ahead and jump" consumable="zzuf-jump"/>
+            <item slot="2" amount="5" material="ender pearl"/>
+            <item slot="weapon.offhand" amount="5" material="slime block"/>
+            <item slot="8" material="fishing rod" unbreakable="true"/>
+            <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+            <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+            <leggings material="leather leggings" team-color="true" unbreakable="true"/>
+            <boots material="leather boots" team-color="true" unbreakable="true"/>
+            <effect duration="oo" ambient="true">minecraft:wind_charged</effect>
         </kit>
-    </kill-reward>
-    <kill-reward>
-        <filter>
-            <kill-streak count="3"/>
-        </filter>
-        <item material="lingering potion" name="`fBottled Flatulence`r">
-            <effect duration="3s">poison</effect>
-        </item>
-    </kill-reward>
-</kill-rewards>
+    </kits>
+    <filters>
+        <material id="slimed-out">slime block</material>
+    </filters>
+    <regions>
+        <apply block="slimed-out"/>
+    </regions>
+    <kill-rewards>
+        <kill-reward>
+            <kit>
+                <effect duration="1s" amplifier="4">regeneration</effect>
+                <item amount="2" material="ender pearl"/>
+                <item slot="weapon.offhand" amount="3" material="slime block"/>
+            </kit>
+        </kill-reward>
+    </kill-rewards>
+    <consumables>
+        <consumable id="zzuf-jump" on="click" consume="false">
+            <action>
+                <velocity x="0" y="1.6" z="0"/>
+                <replace-item ignore-metadata="true">
+                    <find>feather</find>
+                    <replace>air</replace>
+                </replace-item>
+                <!-- item-mods don't work with these
+                <replace-item ignore-metadata="true">
+                    <find>feather</find>
+                    <replace>barrier</replace>
+                </replace-item>
+                -->
+                <sound key="entity.wind_charge.wind_burst" volume="0.8"/>
+                <kit>
+                    <item material="barrier" enchantment="infinity" show-enchantments="false" name="`c`lRecharging..."/>
+                </kit>
+            </action>
+        </consumable>
+    </consumables>
+</if>
+<if variant="bad">
+    <phase>development</phase>
+    <spawns>
+        <if variant="bad">
+            <player-kit>
+                <attribute operation="add" amount="-0.42">generic.jump_strength</attribute>
+            </player-kit>
+        </if>
+        <spawn team="purple-team" kit="spawn-kit">
+            <region yaw="90" pitch="60">
+                <point>21.5,96,0.5</point>
+            </region>
+        </spawn>
+        <spawn team="orange-team" kit="spawn-kit">
+            <region yaw="-90" pitch="60">
+                <point>-20.5,96,0.5</point>
+            </region>
+        </spawn>
+        <default>
+            <regions>
+                <point yaw="0">0.5,78,-32.5</point>
+                <point yaw="180">0.5,78,33.5</point>
+            </regions>
+        </default>
+    </spawns>
+    <kits>
+        <kit id="spawn-kit">
+            <effect duration="3s" amplifier="255" ambient="true">damage resistance</effect>
+            <item slot="0" unbreakable="true" material="mace" enchantment="wind burst:3;density:5;breach:10"/>
+            <item slot="1" material="feather" enchantment="infinity" show-enchantments="false" name="`lJump!" lore="`7Go ahead and jump" consumable="zzuf-jump"/>
+            <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+            <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+            <leggings material="leather leggings" team-color="true" unbreakable="true"/>
+            <boots material="leather boots" team-color="true" unbreakable="true"/>
+            <!-- <double-jump recharge-before-landing="true" power="8"/> -->
+            <game-mode>adventure</game-mode>
+        </kit>
+    </kits>
+    <regions>
+        <apply block="never" use="never"/>
+    </regions>
+    <consumables>
+        <consumable id="zzuf-jump" on="click" consume="false">
+            <action>
+                <velocity x="0" y="2.3" z="0"/>
+                <replace-item ignore-metadata="true">
+                    <find>feather</find>
+                    <replace>air</replace>
+                </replace-item>
+                <!-- item-mods don't work with these
+                <replace-item ignore-metadata="true">
+                    <find>feather</find>
+                    <replace>barrier</replace>
+                </replace-item>
+                -->
+                <sound key="entity.wind_charge.wind_burst" volume="0.8"/>
+                <kit>
+                    <item material="barrier" enchantment="infinity" show-enchantments="false" name="`c`lRecharging..."/>
+                </kit>
+            </action>
+        </consumable>
+    </consumables>
+    <kill-rewards>
+        <kill-reward>
+            <kit>
+                <effect duration="5s">slow falling</effect>
+            </kit>
+        </kill-reward>
+        <kill-reward>
+            <filter>
+                <kill-streak count="3"/>
+            </filter>
+            <item material="lingering potion" name="`fBottled Flatulence`r">
+                <effect duration="3s">poison</effect>
+            </item>
+        </kill-reward>
+    </kill-rewards>
+</if>
 <actions>
     <trigger scope="player">
         <filter>
@@ -119,6 +198,8 @@
 </toolrepair>
 <itemkeep>
     <item>mace</item>
+    <item>fishing rod</item>
+    <item>slime block</item>
 </itemkeep>
 <itemremove>
     <item>leather helmet</item>
@@ -128,6 +209,8 @@
     <item>lingering potion</item>
     <item>feather</item>
     <item>barrier</item>
+    <item>ender pearl</item>
+    <item>wind charge</item>
 </itemremove>
 <hunger>
     <depletion>off</depletion>
