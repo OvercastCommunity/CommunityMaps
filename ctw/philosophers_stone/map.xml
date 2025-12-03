@@ -1,0 +1,476 @@
+<map proto="1.5.0">
+<name>Philosopher's Stone</name>
+<version>1.0.0</version>
+<phase>development</phase>
+<include id="gapple-kill-reward"/>
+<created>2025-12-01</created>
+<objective>Capture six wools to win!</objective>
+<authors>
+    <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb"/> <!-- arcadeboss -->
+</authors>
+<teams>
+    <team id="blue-team" color="blue" max="16">Plato</team>
+    <team id="yellow-team" color="yellow" max="16">Pythagoras</team>
+    <team id="red-team" color="red" max="16">Socrates</team>
+    <team id="green-team" color="green" max="16">Aristotle</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="false" enchantment="arrow infinite"/>
+        <item slot="2" material="iron pickaxe" unbreakable="true"/>
+        <item slot="3" material="iron axe" unbreakable="true"/>
+        <item slot="4" material="iron spade" unbreakable="true"/>
+        <item slot="5" material="wood" damage="5" amount="64"/>
+        <item slot="32" material="wood" damage="5" amount="64"/>
+        <item slot="33" material="nether brick" amount="20"/>
+        <item slot="6" material="bucket"/>
+        <item slot="7" material="shears" unbreakable="true"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="10" material="arrow"/>
+        <effect duration="3s">regeneration</effect>
+        <effect duration="5s" amplifier="255">damage resistance</effect>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="chainmail chestplate" unbreakable="true"/>
+        <leggings material="leather leggings" team-color="true" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true" enchantment="protection"/>
+        <game-mode>survival</game-mode>
+    </kit>
+    <kit id="woolroom-boots" force="true">
+        <boots material="diamond boots" unbreakable="true" locked="true" name="Pheidippides' Boots" lore="Curse of Binding"/>
+        <action>
+            <sound key="item.armor.equip_diamond" pitch="1" volume="1"/>
+            <sound key="item.armor.equip_diamond" pitch=".9" volume="1"/>
+            <sound key="item.armor.equip_diamond" pitch=".8" volume="1"/>
+        </action>
+    </kit>
+</kits>
+<spawns>
+    <spawn team="blue-team" kit="spawn-kit" yaw="0" region="blue-spawn-point"/>
+    <spawn team="red-team" kit="spawn-kit" yaw="90" region="red-spawn-point"/>
+    <spawn team="green-team" kit="spawn-kit" yaw="270" region="green-spawn-point"/>
+    <spawn team="yellow-team" kit="spawn-kit" yaw="180" region="yellow-spawn-point"/>
+    <default yaw="180" pitch="7" region="obs-spawn-point"/>
+</spawns>
+<respawn auto="true" delay="1s"/>
+<broadcasts>
+    <alert after="6s">`r`6Mine the `bPhilosopher's Stone`6 at the Lyceum to upgrade to Diamond Chestplate!`r</alert>
+    <tip after="7m" filter="blue-team">`r`5Did you know?  `dPlato emphasized ideal forms and the ethereal realm of ideas like the heavens and divinity, traditionally symbolized by the color blue.`r</tip>
+    <tip after="7m" filter="red-team">`r`5Did you know?  `dSocrates' life and death represent a profound transition in philosophy, and red symbolized pivotal life changes in ancient Greek culture.`r</tip>
+    <tip after="7m" filter="yellow-team">`r`5Did you know?  `dPythagoras is linked to mystical and mathematical harmony and regarded yellow as one of the four elementary colors (alongside white, black and red).
+ `r</tip>
+    <tip after="7m" filter="green-team">`r`5Did you know?  `dAristotle wrote extensively on biology and natural sciences aligning him with green, symbolizing growth and nature.`r</tip>
+</broadcasts>
+<actions>
+    <!-- Player Diamond Chestplate -->
+    <trigger filter="chestplate-holding" scope="player">
+        <action>
+            <set var="holding" value="1"/>
+            <sound key="item.armor.equip_diamond" pitch="1" volume="1"/>
+            <sound key="item.armor.equip_diamond" pitch=".9" volume="1"/>
+            <sound key="item.armor.equip_diamond" pitch=".8" volume="1"/>
+            <replace-item ignore-metadata="true">
+                <find material="diamond chestplate"/>
+                <replace material="air"/>
+            </replace-item>
+            <kit force="true" filter="always">
+                <chestplate material="diamond chestplate" enchantment="projectile_protection" unbreakable="true" locked="true" lore="Doctor of PVP Philosophy|Lyceum Honorary PhD Alumni"/>
+            </kit>
+            <set var="holding" value="0"/>
+        </action>
+    </trigger>
+    <trigger filter="chestplate-hoarding" scope="player">
+        <action scope="player">
+            <replace-item ignore-metadata="true">
+                <find material="diamond chestplate" enchantment="projectile_protection"/>
+                <replace material="air"/>
+            </replace-item>
+            <!-- replace chestplates, since we just deleted everything -->
+            <kit force="true" filter="always">
+                <chestplate material="diamond chestplate" enchantment="projectile_protection" unbreakable="true" locked="true" lore="Doctor of PVP Philosophy|Lyceum Honorary PhD Alumni"/>
+            </kit>
+        </action>
+    </trigger>
+</actions>
+<variables>
+    <variable id="holding" scope="player" exclusive="1"/>
+</variables>
+<filters>
+    <material id="only-air">air</material>
+    <material id="only-redstone">redstone wire</material>
+    <all id="only-renewables">
+        <any>
+            <material id="only-iron">iron block</material>
+            <material id="only-diamond">diamond block</material>
+            <material>water</material>
+            <material>stationary water</material>
+        </any>
+        <cause>world</cause>
+    </all>
+    <all id="only-water-flow">
+        <any>
+            <material>water</material>
+            <material>stationary water</material>
+        </any>
+        <cause>world</cause>
+    </all>
+    <any id="only-breakable-blocks">
+        <material>iron block</material>
+        <material>iron fence</material>
+        <material>water</material>
+        <material>stationary water</material>
+        <material>air</material>
+    </any>
+    <any id="only-breakable-blocks-out-of-bounds">
+        <material>iron fence</material>
+        <material>leaves</material>
+        <material>leaves 2</material>
+    </any>
+    <!-- Auto equip the diamond chestplate -->
+    <all id="chestplate-holding">
+        <alive/>
+        <not>
+            <wearing ignore-metadata="true">
+                <item material="diamond chestplate"/>
+            </wearing>
+        </not>
+        <carrying ignore-metadata="true">
+            <item material="diamond chestplate" amount="1"/> <!-- one or more -->
+        </carrying>
+    </all>
+    <!-- Auto remove extra chestplates from inventory -->
+    <all id="chestplate-hoarding">
+        <alive/>
+        <wearing ignore-metadata="true">
+            <item material="diamond chestplate"/>
+        </wearing>
+        <carrying ignore-metadata="true">
+            <item material="diamond chestplate" amount="1"/> <!-- one or more -->
+        </carrying>
+        <filter id="hoarding-pulse"/> <!-- remind filter to fire -->
+    </all>
+    <pulse id="hoarding-pulse" period="5s" duration="1s">
+        <match-running/>
+    </pulse>
+    <not id="no-boots">
+        <all>
+            <alive/>
+            <wearing ignore-metadata="true">
+                <item material="diamond boots"/>
+            </wearing>
+        </all>
+    </not>
+</filters>
+<regions>
+    <point id="obs-spawn-point">0.5,87,0.5</point>
+    <point id="blue-spawn-point">0.5,52.5,-97.5</point>
+    <point id="red-spawn-point">98.5,52.5,0.5</point>
+    <point id="green-spawn-point">-97.5,52.5,0.5</point>
+    <point id="yellow-spawn-point">0.5,52.5,98.5</point>
+    <union id="woolrooms-no-edit">
+        <union id="blue-woolrooms">
+            <rectangle id="purple-woolroom" min="27,-109" max="40,-97"/>
+            <rectangle id="lightblue-woolroom" min="-26,-109" max="-40,-97"/>
+        </union>
+        <union id="yellow-woolrooms">
+            <rectangle id="orange-woolroom" min="-26,110" max="-40,98"/>
+            <rectangle id="brown-woolroom" min="27,110" max="40,98"/>
+        </union>
+        <union id="red-woolrooms">
+            <rectangle id="pink-woolroom" min="110,27" max="98,40"/>
+            <rectangle id="magenta-woolroom" min="98,-40" max="110,-26"/>
+        </union>
+        <union id="green-woolrooms">
+            <rectangle id="cyan-woolroom" min="-109,-26" max="-97,-40"/>
+            <rectangle id="lime-woolroom" min="-109,40" max="-97,27"/>
+        </union>
+    </union>
+    <rectangle id="blue-spawn-region" min="-18,-105" max="18,-67"/>
+    <rectangle id="red-spawn-region" min="105,-18" max="68,18"/>
+    <rectangle id="green-spawn-region" min="-105,-18" max="-67,18"/>
+    <rectangle id="yellow-spawn-region" min="18,105" max="-18,68"/>
+    <union id="spawns-no-edit">
+        <rectangle min="-27,-105" max="28,-67"/>
+        <rectangle min="105,-27" max="68,28"/>
+        <rectangle min="-105,-27" max="-67,28"/>
+        <rectangle min="28,105" max="-27,68"/>
+    </union>
+    <cuboid id="central-no-edit" min="-11,38,-11" max="12,48,12"/>
+    <point id="spawner-magenta">104.5,45,-32.5</point>
+    <point id="spawner-pink">104.5,45,33.5</point>
+    <point id="spawner-brown">33.5,45,104.5</point>
+    <point id="spawner-orange">-32.5,45,104.5</point>
+    <point id="spawner-lime">-103.5,45,33.5</point>
+    <point id="spawner-cyan">-103.5,45,-32.5</point>
+    <point id="spawner-lightblue">-32.5,45,-103.5</point>
+    <point id="spawner-purple">33.5,45,-103.5</point>
+    <point id="gapple1-spawner-magenta">103.5,39,-32.5</point>
+    <point id="gapple1-spawner-pink">103.5,39,33.5</point>
+    <point id="gapple1-spawner-brown">33.5,39,103.5</point>
+    <point id="gapple1-spawner-orange">-32.5,39,103.5</point>
+    <point id="gapple1-spawner-lime">-102.5,39,33.5</point>
+    <point id="gapple1-spawner-cyan">-102.5,39,-32.5</point>
+    <point id="gapple1-spawner-lightblue">-32.5,39,-102.5</point>
+    <point id="gapple1-spawner-purple">33.5,39,-102.5</point>
+    <point id="gapple2-spawner-magenta">103.5,32,-32.5</point>
+    <point id="gapple2-spawner-pink">103.5,32,33.5</point>
+    <point id="gapple2-spawner-brown">33.5,32,103.5</point>
+    <point id="gapple2-spawner-orange">-32.5,32,103.5</point>
+    <point id="gapple2-spawner-lime">-102.5,32,33.5</point>
+    <point id="gapple2-spawner-cyan">-102.5,32,-32.5</point>
+    <point id="gapple2-spawner-lightblue">-32.5,32,-102.5</point>
+    <point id="gapple2-spawner-purple">33.5,32,-102.5</point>
+    <union id="out-of-bounds">
+        <rectangle min="39,39" max="300,300"/>
+        <rectangle min="-38,39" max="-300,300"/>
+        <rectangle min="-38,-38" max="-300,-300"/>
+        <rectangle min="39,-38" max="300,-300"/>
+    </union>
+    <cuboid id="diamond-regen" min="0,41,0" max="1,42,1"/>
+    <union id="iron-regen">
+        <cuboid min="-2,50,-99" max="3,52,-97"/> <!-- blue iron -->
+        <cuboid min="100,50,-2" max="98,52,3"/> <!-- red iron -->
+        <cuboid min="-99,50,-2" max="-97,52,3"/> <!-- green iron -->
+        <cuboid min="-2,50,100" max="3,52,98"/> <!-- yellow iron -->
+    </union>
+    <cuboid id="bottom-no-build" min="-300,0,-300" max="300,30,300"/>
+    <!-- applicators -->
+    <apply filter="all(no-boots,not(blue-team))" region="blue-woolrooms" kit="woolroom-boots"/>
+    <apply filter="all(no-boots,not(red-team))" region="red-woolrooms" kit="woolroom-boots"/>
+    <apply filter="all(no-boots,not(green-team))" region="green-woolrooms" kit="woolroom-boots"/>
+    <apply filter="all(no-boots,not(yellow-team))" region="yellow-woolrooms" kit="woolroom-boots"/>
+    <apply block-break="only-breakable-blocks" block-place="only-renewables" region="spawns-no-edit" message="You may not edit the spawn or surrounding area!"/>
+    <apply block="never" region="woolrooms-no-edit" message="You may not edit the wool room!"/>
+    <apply block-break="only-diamond" block-place="only-renewables" region="central-no-edit" message="You may not edit the Lyceum!"/>
+    <apply block-break="only-breakable-blocks-out-of-bounds" block-place="never" region="out-of-bounds" message="You may not edit outside the map!"/>
+    <apply block-break="not(only-redstone)" region="everywhere" message="You may not edit the markers!"/>
+    <apply block-place="only-water-flow" region="bottom-no-build" message="You may not edit the underworld!"/>
+    <apply enter="red-team" region="red-spawn-region" message="You may not enter the enemy's spawn!"/>
+    <apply enter="blue-team" region="blue-spawn-region" message="You may not enter the enemy's spawn!"/>
+    <apply enter="yellow-team" region="yellow-spawn-region" message="You may not enter the enemy's spawn!"/>
+    <apply enter="green-team" region="green-spawn-region" message="You may not enter the enemy's spawn!"/>
+    <apply enter="not(blue-team)" region="blue-woolrooms" message="You may not enter this woolroom!"/>
+    <apply enter="not(red-team)" region="red-woolrooms" message="You may not enter this woolroom!"/>
+    <apply enter="not(green-team)" region="green-woolrooms" message="You may not enter this woolroom!"/>
+    <apply enter="not(yellow-team)" region="yellow-woolrooms" message="You may not enter this woolroom!"/>
+</regions>
+<wools required="true" craftable="false">
+    <wool id="objective1" team="blue-team" color="magenta" location="104.5,45,-32.5">
+        <monument><block location="13,51,-97"/></monument>
+    </wool>
+    <wool id="objective2" team="blue-team" color="pink" location="104.5,45,33.5">
+        <monument><block location="13,51,-94"/></monument>
+    </wool>
+    <wool id="objective3" team="blue-team" color="brown" location="33.5,45,104.5">
+        <monument><block location="13,51,-91"/></monument>
+    </wool>
+    <wool id="objective4" team="blue-team" color="orange" location="-32.5,45,104.5">
+        <monument><block location="-13,51,-91"/></monument>
+    </wool>
+    <wool id="objective5" team="blue-team" color="lime" location="-103.5,45,33.5">
+        <monument><block location="-13,51,-94"/></monument>
+    </wool>
+    <wool id="objective6" team="blue-team" color="cyan" location="-103.5,45,-32">
+        <monument><block location="-13,51,-97"/></monument>
+    </wool>
+    <wool id="objective7" team="red-team" color="brown" location="33.5,45,104.5">
+        <monument><block location="97,51,13"/></monument>
+    </wool>
+    <wool id="objective8" team="red-team" color="orange" location="-32.5,45,104.5">
+        <monument><block location="94,51,13"/></monument>
+    </wool>
+    <wool id="objective9" team="red-team" color="lime" location="-103.5,45,33.5">
+        <monument><block location="91,51,13"/></monument>
+    </wool>
+    <wool id="objective10" team="red-team" color="cyan" location="-103.5,45,-32">
+        <monument><block location="91,51,-13"/></monument>
+    </wool>
+    <wool id="objective11" team="red-team" color="light blue" location="-32.5,45,-103.5">
+        <monument><block location="94,51,-13"/></monument>
+    </wool>
+    <wool id="objective12" team="red-team" color="purple" location="33.5,45,-103.5">
+        <monument><block location="97,51,-13"/></monument>
+    </wool>
+    <wool id="objective13" team="green-team" color="light blue" location="-32.5,45,-103.5">
+        <monument><block location="-97,51,-13"/></monument>
+    </wool>
+    <wool id="objective14" team="green-team" color="purple" location="33.5,45,-103.5">
+        <monument><block location="-94,51,-13"/></monument>
+    </wool>
+    <wool id="objective15" team="green-team" color="magenta" location="104.5,45,-32.5">
+        <monument><block location="-91,51,-13"/></monument>
+    </wool>
+    <wool id="objective16" team="green-team" color="pink" location="104.5,45,33.5">
+        <monument><block location="-91,51,13"/></monument>
+    </wool>
+    <wool id="objective17" team="green-team" color="brown" location="33.5,45,104.5">
+        <monument><block location="-94,51,13"/></monument>
+    </wool>
+    <wool id="objective18" team="green-team" color="orange" location="-32.5,45,104.5">
+        <monument><block location="-97,51,13"/></monument>
+    </wool>
+    <wool id="objective19" team="yellow-team" color="lime" location="-103.5,45,33.5">
+        <monument><block location="-13,51,97"/></monument>
+    </wool>
+    <wool id="objective20" team="yellow-team" color="cyan" location="-103.5,45,-32">
+        <monument><block location="-13,51,94"/></monument>
+    </wool>
+    <wool id="objective21" team="yellow-team" color="light blue" location="-32.5,45,-103.5">
+        <monument><block location="-13,51,91"/></monument>
+    </wool>
+    <wool id="objective22" team="yellow-team" color="purple" location="33.5,45,-103.5">
+        <monument><block location="13,51,91"/></monument>
+    </wool>
+    <wool id="objective23" team="yellow-team" color="magenta" location="104.5,45,-32.5">
+        <monument><block location="13,51,94"/></monument>
+    </wool>
+    <wool id="objective24" team="yellow-team" color="pink" location="104.5,45,33.5">
+        <monument><block location="13,51,97"/></monument>
+    </wool>
+</wools>
+<block-drops>
+    <rule>
+        <filter>
+            <material>diamond block</material>
+        </filter>
+        <drops>
+            <item chance="1" enchantment="projectile_protection" material="diamond chestplate"/>
+            <item chance="0.35" amount="1" material="diamond"/>
+        </drops>
+    </rule>
+</block-drops>
+<spawners>
+    <spawner spawn-region="spawner-lime" player-region="lime-woolroom" max-entities="1" delay="10s">
+        <item material="wool" damage="5"/>
+    </spawner>
+    <spawner spawn-region="spawner-cyan" player-region="cyan-woolroom" max-entities="1" delay="10s">
+        <item material="wool" damage="9"/>
+    </spawner>
+    <spawner spawn-region="spawner-brown" player-region="brown-woolroom" max-entities="1" delay="10s">
+        <item material="wool" damage="12"/>
+    </spawner>
+    <spawner spawn-region="spawner-orange" player-region="orange-woolroom" max-entities="1" delay="10s">
+        <item material="wool" damage="1"/>
+    </spawner>
+    <spawner spawn-region="spawner-purple" player-region="purple-woolroom" max-entities="1" delay="10s">
+        <item material="wool" damage="10"/>
+    </spawner>
+    <spawner spawn-region="spawner-magenta" player-region="magenta-woolroom" max-entities="1" delay="10s">
+        <item material="wool" damage="2"/>
+    </spawner>
+    <spawner spawn-region="spawner-pink" player-region="pink-woolroom" max-entities="1" delay="10s">
+        <item material="wool" damage="6"/>
+    </spawner>
+    <spawner spawn-region="spawner-lightblue" player-region="lightblue-woolroom" max-entities="1" delay="10s">
+        <item material="wool" damage="3"/>
+    </spawner>
+    <spawner spawn-region="gapple1-spawner-lime" player-region="lime-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple1-spawner-cyan" player-region="cyan-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple1-spawner-brown" player-region="brown-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple1-spawner-orange" player-region="orange-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple1-spawner-purple" player-region="purple-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple1-spawner-magenta" player-region="magenta-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple1-spawner-pink" player-region="pink-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple1-spawner-lightblue" player-region="lightblue-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple2-spawner-lime" player-region="lime-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple2-spawner-cyan" player-region="cyan-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple2-spawner-brown" player-region="brown-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple2-spawner-orange" player-region="orange-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple2-spawner-purple" player-region="purple-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple2-spawner-magenta" player-region="magenta-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple2-spawner-pink" player-region="pink-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+    <spawner spawn-region="gapple2-spawner-lightblue" player-region="lightblue-woolroom" max-entities="1" delay="20s">
+        <item material="golden apple"/>
+    </spawner>
+</spawners>
+<itemkeep>
+    <item>golden apple</item>
+    <item>tnt</item>
+    <item>diamond chestplate</item>
+</itemkeep>
+<itemremove>
+    <item>stone sword</item>
+    <item>iron pickaxe</item>
+    <item>iron spade</item>
+    <item>iron axe</item>
+    <item>bow</item>
+    <item>bucket</item>
+    <item>shears</item>
+    <item>wood</item>
+    <item>apple</item>
+    <item>leather helmet</item>
+    <item>chainmail chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>diamond boots</item>
+</itemremove>
+<maxbuildheight>55</maxbuildheight>
+<renewables>
+    <renewable rate="1" sound="true" region="iron-regen" renew-filter="only-iron" replace-filter="only-air" avoid-players="2"/>
+    <renewable interval="16s" sound="true" region="diamond-regen" renew-filter="only-diamond" replace-filter="only-air" avoid-players="1"/>
+</renewables>
+<tnt>
+    <instantignite>true</instantignite>
+    <blockdamage>true</blockdamage>
+    <friendly-defuse>off</friendly-defuse>
+    <fuse>3s</fuse>
+    <yield>1</yield>
+    <power>2.4</power>
+</tnt>
+<disabledamage>
+    <damage ally="true" self="false" enemy="false" other="false">block explosion</damage>
+</disabledamage>
+<kill-rewards>
+    <kill-reward>
+        <item material="stained glass" damage="15" amount="20"/>
+    </kill-reward>
+    <kill-reward>
+        <item material="tnt"/>
+        <item material="diamond"/>
+        <filter>
+            <kill-streak count="5" repeat="true"/>
+        </filter>
+    </kill-reward>
+</kill-rewards>
+<gamerules>
+    <doDaylightCycle>true</doDaylightCycle>
+</gamerules>
+<world>
+    <timeset>13990</timeset>
+    <timelock>off</timelock> 
+</world>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
