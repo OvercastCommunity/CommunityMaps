@@ -1,17 +1,18 @@
 <map proto="1.5.0">
 <name>Sakura Garden II</name>
-<version>1.0.5</version>
+<version>1.0.6</version>
 <objective>Capture the wool!</objective>
 <gamemode>ctw</gamemode>
 <include id="gapple-kill-reward"/>
+<include id="iron-bulkcrafting"/>
 <created>2022-02-07</created>
 <authors>
   <author uuid="f6f5dce8-a158-461d-b26d-dc8acfaeedd7"/> <!-- Shuliett -->
   <author uuid="38ef938a-7020-4c04-9d12-4875ed0598ca"/> <!-- Kazoha -->
 </authors>
 <teams>
-    <team id="blue-team" color="blue" max="12" max-overfill="20">Blue</team>
-    <team id="red-team" color="red" max="12" max-overfill="20">Red</team>
+    <team id="blue-team" color="blue" max="12">Blue</team>
+    <team id="red-team" color="red" max="12">Red</team>
 </teams>
 <kits>
     <kit id="spawn-kit">
@@ -50,21 +51,21 @@
             <cause>explosion</cause>
         </all>
     </not>
-    <team id="only-blue">blue-team</team>
-    <team id="only-red">red-team</team>
+    <blocks id="woolrooms-blocks-filter" region="woolrooms-blocks">
+        <any>
+            <material>web</material>
+            <material>air</material>
+            <material>redstone wire</material>
+        </any>
+    </blocks>
     <all id="reds-woolrooms-filter">
-        <team>blue-team</team>
-        <filter id="woolrooms-filter"/>
+        <team id="only-blue">blue-team</team>
+        <filter id="woolrooms-blocks-filter"/>
     </all>
     <all id="blues-woolrooms-filter">
-        <team>red-team</team>
-        <filter id="woolrooms-filter"/>
+        <team id="only-red">red-team</team>
+        <filter id="woolrooms-blocks-filter"/>
     </all>
-    <any id="woolrooms-filter">
-        <material>web</material>
-        <material>wood:0</material>
-        <material>glass</material>
-    </any>
     <all id="only-iron-cause-world">
         <material id="only-iron">iron block</material>
         <cause>world</cause>
@@ -98,10 +99,8 @@
         <material>spruce wood stairs</material>
       </any>
     </not>
-    <material id="only-air">air</material>
 </filters>
 <regions>
-    <rectangle id="tnt-protection" min="oo,oo" max="-oo,-oo"/>
     <cylinder id="blue-spawn-point" base="147.5,12,3.5" radius="1" height="0"/>
     <cylinder id="red-spawn-point" base="159.5,12,-154.5" radius="1" height="0"/>
     <cylinder id="obs-spawn-point" base="212.5,44,-75.5" radius="1" height="0"/>
@@ -116,12 +115,12 @@
         </union>
     </negative>
     <union id="woolrooms">
-        <union id="blues-woolrooms"> <!-- blue defends / red attacks -->
-            <rectangle id="magenta-woolroom" min="207,-15" max="225,-40"/>
-        </union>
-        <union id="reds-woolrooms"> <!-- red defends / blue attacks -->
-            <rectangle id="light-blue-woolroom" min="82,-111" max="100,-136"/>
-        </union>
+        <rectangle id="magenta-woolroom" min="207,-15" max="225,-40"/> <!-- blue defends / red attacks -->
+        <rectangle id="light-blue-woolroom" min="82,-111" max="100,-136"/> <!-- red defends / blue attacks -->
+    </union>
+    <union id="woolrooms-blocks">
+        <cuboid id="magenta-woolroom-blocks" min="207,0,-15" max="225,26,-40"/>
+        <cuboid id="light-blue-woolroom-blocks" min="82,0,-111" max="100,26,-136"/>
     </union>
     <negative id="not-build-area">
         <union id="build-area">
@@ -153,13 +152,13 @@
     <!-- applicators -->
     <apply block-place="block-place-void-filter" block-break="block-break-void-filter" region="not-build-area" message="You may not edit the void!"/>
     <apply block-place="only-iron-cause-world" block-break="only-iron" region="spawns" message="You may not edit spawn!"/>
-    <apply block="blues-woolrooms-filter" region="blues-woolrooms" message="You may not edit the wool room!"/>
-    <apply block="reds-woolrooms-filter" region="reds-woolrooms" message="You may not edit the wool room!"/>
+    <apply block="blues-woolrooms-filter" region="magenta-woolroom" message="You may not edit the wool room!"/>
+    <apply block="reds-woolrooms-filter" region="light-blue-woolroom" message="You may not edit the wool room!"/>
     <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
     <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
-    <apply enter="only-red" region="blues-woolrooms" message="You may not enter your own wool room!"/>
-    <apply enter="only-blue" region="reds-woolrooms" message="You may not enter your own wool room!"/>
-    <apply region="tnt-protection" block="tnt-immune"/>
+    <apply enter="only-red" region="magenta-woolroom" message="You may not enter your own wool room!"/>
+    <apply enter="only-blue" region="light-blue-woolroom" message="You may not enter your own wool room!"/>
+    <apply block="tnt-immune"/>
     <apply block-place="never" block-break="never" region="bridges" message="You may not edit the bridge!"/>
     <apply kit="reset-resistance-kit" region="not-spawns"/>
 </regions>
@@ -219,53 +218,8 @@
         <modify unbreakable="true"/>
     </rule>
 </item-mods>
-<crafting>
-    <!-- bulkcrafting -->
-    <shaped override="false">
-        <result material="iron helmet" amount="9"/>
-        <shape>
-            <row>III</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron chestplate" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>III</row>
-            <row>III</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron leggings" amount="9"/>
-        <shape>
-            <row>III</row>
-            <row>I.I</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="iron boots" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>I.I</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-    <shaped override="false">
-        <result material="bucket" amount="9"/>
-        <shape>
-            <row>I.I</row>
-            <row>.I.</row>
-        </shape>
-        <ingredient symbol="I">iron block</ingredient>
-    </shaped>
-</crafting>
 <renewables>
-    <renewable rate="0.5" sound="false" region="spawns" renew-filter="only-iron" replace-filter="only-air" avoid-players="5"/>
+    <renewable rate="0.5" region="spawns" renew-filter="only-iron" avoid-players="5"/>
 </renewables>
 <hunger>
     <depletion>off</depletion>
