@@ -1,0 +1,215 @@
+<map proto="1.5.0">
+<name>Monkey Mania</name>
+<version>1.0.0</version>
+<objective>Capture the most flags!</objective>
+<created>2025-12-06</created>
+<include id="gapple-kill-reward"/>
+<authors>
+    <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
+</authors>
+<teams>
+    <team id="blue" color="blue" max="6">Blue</team>
+    <team id="red" color="dark red" max="6">Red</team>
+</teams>
+<spawns>
+    <spawn team="blue" region="blue-spawn" yaw="0" kit="main-kit"/>
+    <spawn team="red" region="red-spawn" yaw="180" kit="main-kit"/>
+    <default>
+        <regions>
+            <point yaw="-90">-57,24,-0</point>
+            <point yaw="90">59,24,0</point>
+        </regions>
+    </default>
+</spawns>
+<kits>
+    <kit id="main-kit">
+        <clear/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true"/>
+        <item slot="2" material="stone pickaxe" unbreakable="true"/>
+        <item slot="3" material="stone axe" unbreakable="true">
+            <enchantment level="2">efficiency</enchantment>
+        </item>
+        <item slot="4" material="wood" amount="64" damage="3"/>
+        <item slot="5" material="stained glass" amount="32" team-color="true"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow" amount="36"/>
+        <item slot="30" material="stone spade" unbreakable="true">
+            <enchantment level="2">efficiency</enchantment>
+        </item>
+        <helmet material="leather helmet" unbreakable="true" team-color="true"/>
+        <chestplate material="chainmail chestplate" unbreakable="true"/>
+        <leggings material="leather leggings" unbreakable="true" team-color="true"/>
+        <boots unbreakable="true" material="iron boots"/>
+    </kit>
+</kits>
+<kill-rewards>
+    <kill-reward>
+        <item material="arrow" amount="8"/>
+        <item material="wood" amount="12" damage="3"/>
+        <item material="stained glass" amount="6" team-color="true"/>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="3" repeat="true"/>
+        </filter>
+        <item material="tnt"/>
+    </kill-reward>
+</kill-rewards>
+<filters>
+    <cause id="player">player</cause>
+    <material id="gold-block">gold block</material>
+    <material id="tnt">tnt</material>
+    <any id="team-blocks">
+        <material>lapis block</material>
+        <material>redstone block</material>
+    </any>
+    <flag-returned id="blue-flag-returned">blue-flag</flag-returned>
+    <flag-returned id="red-flag-returned">red-flag</flag-returned>
+</filters>
+<regions>
+    <cylinder id="blue-spawn" base="-23,4,-38" radius="1" height="1"/>
+    <cylinder id="red-spawn" base="25,4,38" radius="1" height="1"/>
+    <union id="spawn-protection">
+        <cuboid id="blue-spawn-protection" min="-30,0,-44" size="14,32,16"/>
+        <cuboid id="red-spawn-protection" min="18,0,28" size="14,32,16"/>
+    </union>
+    <union id="post-protection">
+        <cuboid id="blue-post-protection" min="-54,0,-2" size="2,13,4"/>
+        <cuboid id="red-post-protection" min="54,9,-2" size="2,13,4"/>
+    </union>
+    <negative id="restricted-void">
+        <union id="buildable-void">
+            <rectangle min="-29,-18" max="31,18"/>
+            <rectangle min="-6,-21" max="8,21"/>
+        </union>
+    </negative>
+    <union id="blue-capture">
+        <region id="blue-spawn-protection"/>
+        <cylinder base="-53,10,0" radius="3" height="3"/>
+    </union>
+    <union id="red-capture">
+        <region id="red-spawn-protection"/>
+        <cylinder base="54,10,-1" radius="3" height="3"/>
+    </union>
+    <union id="blue-eyes">
+        <block location="-52,21,-2"/>
+        <block location="-52,21,1"/>
+    </union>
+    <union id="red-eyes">
+        <block location="52,21,-2"/>
+        <block location="52,21,1"/>
+    </union>
+    <above id="build-height" y="15"/>
+    <apply region="blue-spawn-protection" enter="blue" message="You may not enter the enemy spawn!"/>
+    <apply region="red-spawn-protection" enter="red" message="You may not enter the enemy spawn!"/>
+    <apply region="spawn-protection" block="never" message="You may not modify the spawn area!"/>
+    <apply region="post-protection" block="tnt" message="You may not modify the flag post!"/>
+    <apply region="build-height" block-place="not(player)" message="{ translate: 'match.maxBuildHeight', color: 'red' }"/>
+    <apply region="restricted-void" block-place="not(void)"/>
+</regions>
+<flags>
+    <flag id="blue-flag" name="Flag" color="blue" owner="blue">
+        <post pickup-filter="red" yaw="-90" recover-time="20s" respawn-time="8s">-53,11,0</post>
+        <net points="1" region="red-capture" capture-filter="red"/>
+    </flag>
+    <flag id="red-flag" name="Flag" color="red" owner="red">
+        <post pickup-filter="blue" yaw="90" recover-time="20s" respawn-time="8s">54,11,-1</post>
+        <net points="1" region="blue-capture" capture-filter="blue"/>
+    </flag>
+</flags>
+<score>
+    <mercy>3</mercy>
+</score>
+<time result="score" overtime="1m" max-overtime="5m">7m</time>
+<actions>
+    <fill id="blue-eyes-wet" region="blue-eyes" material="water" events="true"/>
+    <fill id="blue-eyes-dry" region="blue-eyes" material="air" events="true"/>
+    <fill id="red-eyes-wet" region="red-eyes" material="water" events="true"/>
+    <fill id="red-eyes-dry" region="red-eyes" material="air" events="true"/>
+    <trigger scope="match" filter="blue-flag-returned" action="blue-eyes-dry"/>
+    <trigger scope="match" filter="not(blue-flag-returned)" action="blue-eyes-wet"/>
+    <trigger scope="match" filter="red-flag-returned" action="red-eyes-dry"/>
+    <trigger scope="match" filter="not(red-flag-returned)" action="red-eyes-wet"/>
+</actions>
+<block-drops>
+    <rule wrong-tool="true" filter="gold-block">
+        <drops>
+            <item material="gold ingot" amount="9"/>
+        </drops>
+    </rule>
+    <rule wrong-tool="true" filter="team-blocks">
+        <drops>
+            <item material="glowstone dust"/>
+        </drops>
+    </rule>
+</block-drops>
+<item-mods>
+    <rule>
+        <match>
+            <material>iron pickaxe</material>
+            <material>iron axe</material>
+            <material>gold sword</material>
+            <material>gold pickaxe</material>
+            <material>gold axe</material>
+            <material>gold spade</material>
+            <material>gold hoe</material>
+            <material>gold helmet</material>
+            <material>gold chestplate</material>
+            <material>gold leggings</material>
+            <material>gold boots</material>
+        </match>
+        <modify unbreakable="true"/>
+    </rule>
+</item-mods>
+<tnt>
+    <instantignite>true</instantignite>
+</tnt>
+<damage>
+    <deny>
+        <region id="spawn-protection"/>
+    </deny>
+</damage>
+<toolrepair>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron chestplate</tool>
+    <tool>stone sword</tool>
+    <tool>stone pickaxe</tool>
+    <tool>stone axe</tool>
+    <tool>stone spade</tool>
+    <tool>gold helmet</tool>
+    <tool>gold chestplate</tool>
+    <tool>gold leggings</tool>
+    <tool>gold boots</tool>
+    <tool>gold sword</tool>
+    <tool>gold pickaxe</tool>
+    <tool>gold axe</tool>
+    <tool>gold spade</tool>
+    <tool>gold hoe</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>chainmail chestplate</item>
+    <item>leather leggings</item>
+    <item>iron boots</item>
+    <item>sapling</item>
+    <item>seeds</item>
+    <item>apple</item>
+    <item>double plant</item>
+    <item>gold block</item>
+    <item>stained clay</item>
+</itemremove>
+<itemkeep>
+    <item>stained clay</item>
+    <item>stained glass</item>
+    <item>wood</item>
+    <item>arrow</item>
+    <item>golden apple</item>
+    <item>glowstone dust</item>
+</itemkeep>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
