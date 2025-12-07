@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Monkey Mania</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <objective>Capture the most flags!</objective>
 <created>2025-12-06</created>
 <include id="gapple-kill-reward"/>
@@ -97,13 +97,13 @@
         <block location="-52,21,1"/>
     </union>
     <union id="red-eyes">
-        <block location="52,21,-2"/>
-        <block location="52,21,1"/>
+        <block location="53,21,-2"/>
+        <block location="53,21,1"/>
     </union>
     <above id="build-height" y="15"/>
     <apply region="blue-spawn-protection" enter="blue" message="You may not enter the enemy spawn!"/>
     <apply region="red-spawn-protection" enter="red" message="You may not enter the enemy spawn!"/>
-    <apply region="spawn-protection" block="never" message="You may not modify the spawn area!"/>
+    <apply region="spawn-protection" block-break="gold-block" block-place="not(player)" message="You may not modify the spawn area!"/>
     <apply region="post-protection" block="tnt" message="You may not modify the flag post!"/>
     <apply region="build-height" block-place="not(player)" message="{ translate: 'match.maxBuildHeight', color: 'red' }"/>
     <apply region="restricted-void" block-place="not(void)"/>
@@ -128,9 +128,9 @@
     <fill id="red-eyes-wet" region="red-eyes" material="water" events="true"/>
     <fill id="red-eyes-dry" region="red-eyes" material="air" events="true"/>
     <trigger scope="match" filter="blue-flag-returned" action="blue-eyes-dry"/>
-    <trigger scope="match" filter="not(blue-flag-returned)" action="blue-eyes-wet"/>
     <trigger scope="match" filter="red-flag-returned" action="red-eyes-dry"/>
-    <trigger scope="match" filter="not(red-flag-returned)" action="red-eyes-wet"/>
+    <trigger scope="match" filter="all(match-started, not(blue-flag-returned))" action="blue-eyes-wet"/>
+    <trigger scope="match" filter="all(match-started, not(red-flag-returned))" action="red-eyes-wet"/>
 </actions>
 <block-drops>
     <rule wrong-tool="true" filter="gold-block">
@@ -140,10 +140,13 @@
     </rule>
     <rule wrong-tool="true" filter="team-blocks">
         <drops>
-            <item material="glowstone dust"/>
+            <item material="gold nugget"/>
         </drops>
     </rule>
 </block-drops>
+<renewables>
+    <renewable region="spawn-protection" rate="10" renew-filter="gold-block" avoid-players="0"/>
+</renewables>
 <item-mods>
     <rule>
         <match>
