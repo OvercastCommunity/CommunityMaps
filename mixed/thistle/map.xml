@@ -1,9 +1,9 @@
 <map proto="1.5.0" min-server-version="1.21">
 <name>Thistle</name>
-<version>1.1</version>
+<version>1.1.1</version>
 <objective>Jump into the enemy team's portal, located below their spawn point!</objective>
 <created>2025-07-16</created>
-<include id="bridge"/>
+<include id="tension"/>
 <game>Tension</game>
 <constants>
     <constant id="map-origin">0,0,-35.5</constant>
@@ -13,10 +13,6 @@
     <constant id="team-one-yaw">90</constant>
     <constant id="team-two-spawn">-38.5,170,-35.5</constant>
     <constant id="team-two-yaw">-90</constant>
-    <!-- Misc -->
-    <constant id="main-kit">tension-kit</constant>
-    <constant id="arrow-type">tipped arrow</constant>
-    <constant id="arrow-item-kit">custom-arrow-item-kit</constant>
 </constants>
 <authors>
     <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
@@ -25,9 +21,6 @@
     <team id="team-one" color="yellow" max="5">Yellow</team>
     <team id="team-two" color="blue" max="5">Blue</team>
 </teams>
-<broadcasts>
-    <tip after="3s" every="3m">`3Get some `fReinforced §#BC7E43Pier Caps`3 at middle, and get `n3`3 kills for a §#53AFFFWind Charge`3!</tip>
-</broadcasts>
 <spawns>
     <default>
         <regions>
@@ -36,26 +29,6 @@
         </regions>
     </default>
 </spawns>
-<kits>
-    <kit id="tension-kit">
-        <item material="shield" damage="330" name="`fDamaged Shield `x`B`C`7`E`4`3(repaired for now)`r" slot="slot.weapon.offhand"/>
-        <item unbreakable="true" material="stone sword"/>
-        <item material="bow" unbreakable="true" lore="`e⚠ `cYou can only hold `f1`c arrow at a time!|`9ⓘ `7Get a new one `f3.5 seconds `7after shooting!"/>
-        <item unbreakable="true" material="diamond pickaxe"/>
-        <item material="scaffolding" amount="64" damage="2"/>
-        <item material="scaffolding" amount="64" damage="2"/>
-        <item material="golden apple" amount="3" consumable="bridge-apple" prevent-sharing="true" lore="`9ⓘ `7Instantly restores to `c${max-health} HP`7!|`9ⓘ `7Grants `eAbsorption`7 for `f1 minute`7!"/>
-        <item unbreakable="true" name="`x`4`7`7`8`B`8Light `fMace" material="mace" attributes="generic.attack_speed:add:0.25" enchantments="wind burst:1"/>
-        <effect duration="oo">invisibility</effect>
-        <effect duration="oo" amplifier="255">slow_digging</effect>
-        <effect duration="2s" amplifier="255">resistance</effect>
-    </kit>
-    <kit id="custom-arrow-item-kit">
-        <item slot="8" material="${arrow-type}" damage="14" name="`fArrow of Levitation" lore="`e⚠ `cYou can only hold `f1`c arrow at a time!|`9ⓘ `7Get a new one `f3.5 seconds `7after shooting!" prevent-sharing="true">
-            <potion duration="1.75s">levitation</potion>
-        </item>
-    </kit>
-</kits>
 <filters>
     <any id="block-list">
         <material>scaffolding</material>
@@ -106,86 +79,10 @@
         <cylinder id="team-two-spawn-cage" base="${team-two-spawn}" height="3" radius="2"/>
     </union>
     <!-- Thistle -->
-    <point id="spawner">0,157.2,-35.5</point>
+    <point id="pier-caps-spawner">0,157.2,-35.5</point>
     <apply block-physics="deny-physics"/>
 </regions>
-<actions>
-    <action id="clear-tension-kit" scope="player">
-        <replace-item ignore-metadata="true">
-            <find material="iron sword"/>
-            <replace material="air"/>
-        </replace-item>
-        <replace-item>
-            <find material="bow" unbreakable="true" lore="`e⚠ `cYou can only hold `f1`c arrow at a time!|`9ⓘ `7Get a new one `f3.5 seconds `7after shooting!"/>
-            <replace material="air"/>
-        </replace-item>
-        <replace-item ignore-metadata="true">
-            <find material="tipped arrow"/>
-            <replace material="air"/>
-        </replace-item>
-        <replace-item ignore-metadata="true">
-            <find material="diamond pickaxe"/>
-            <replace material="air"/>
-        </replace-item>
-        <replace-item ignore-metadata="true">
-            <find material="scaffolding"/>
-            <replace material="air"/>
-        </replace-item>
-        <replace-item ignore-metadata="true">
-            <find material="golden apple"/>
-            <replace material="air"/>
-        </replace-item>
-    </action>
-    <trigger scope="player"> <!-- deletes glitched regular arrows -->
-        <filter>
-            <carrying ignore-metadata="true"><item material="arrow"/></carrying>
-        </filter>
-        <action>
-            <replace-item>
-                <find material="arrow"/>
-                <replace material="air"/>
-            </replace-item>
-        </action>
-    </trigger>
-</actions>
-<spawners>
-    <spawner spawn-region="spawner" player-region="everywhere" delay="10s" max-entities="2">
-        <item material="iron block"/>
-    </spawner>
-</spawners>
-<item-mods>
-    <rule>
-        <match>
-            <material>iron block</material>
-        </match>
-        <modify name="`fPier Cap" enchantments="power:1" show-enchantments="false"/> <!-- Could be made into a paste-structure action -->
-    </rule>
-</item-mods>
-<kill-rewards>
-    <kill-reward>
-        <item material="scaffolding" amount="16"/>
-    </kill-reward>
-    <kill-reward>
-        <filter>
-            <kill-streak count="3" repeat="false"/>
-        </filter>
-        <item material="wind charge"/>
-    </kill-reward>
-</kill-rewards>
-<toolrepair>
-    <tool>mace</tool>
-    <tool>stone sword</tool>
-</toolrepair>
-<itemkeep>
-    <item>iron block</item>
-    <item>mace</item>
-    <item>stone sword</item>
-    <item>shield</item>
-</itemkeep>
 <itemremove>
-    <item>scaffolding</item>
     <item>seeds</item>
-    <item>wind charge</item>
-    <item>shield</item>
 </itemremove>
 </map>
