@@ -1,7 +1,7 @@
 <map proto="1.5.0">
 <name>Skill Issue</name>
 <variant id="swap" world="swap">Swap</variant>
-<version>3.0</version>
+<version>3.0.1</version>
 <unless variant="swap">
     <objective>Capture the Wool in 2 minutes, or prevent the Rusher from doing so!</objective>
     <created>2025-08-04</created>
@@ -406,15 +406,15 @@
     </all>
     <after id="countdown-start" duration="6.5s" filter="round-starting"/>
     <variable id="is-final-round" var="current_round">${ROUNDS_AMOUNT}</variable>
-    <players id="rusher-forced" min="2">
-        <all>
-            <team>rusher</team>
-            <unless variant="swap">
+    <unless variant="swap">
+        <players id="rusher-forced" min="2">
+            <all>
+                <team>rusher</team>
                 <not><filter id="is-final-round"/></not>
                 <variable var="rushers_amount">1</variable>
-            </unless>
-        </all>
-    </players>
+            </all>
+        </players>
+    </unless>
 </filters>
 <variables scope="match">
     <unless variant="swap">
@@ -489,6 +489,7 @@
     <variable id="calc"/>
     <if variant="swap">
         <variable id="pending_tp"/>
+        <variable id="joined_normally"/>
     </if>
 </variables>
 <actions>
@@ -557,6 +558,7 @@
                     <set var="tmp_rusher" value="99"/>
                     <set var="is_rusher" value="1"/>
                     <set var="was_rusher" value="1"/>
+                    <set var="joined_normally" value="1"/>
                 </action>
             </switch-scope>
         </if>
@@ -663,6 +665,7 @@
             <action filter="tmp_rusher=0">
                 <if variant="swap">
                     <set var="pending_tp" value="1"/>
+                    <set var="joined_normally" value="1"/>
                 </if>
                 <set var="was_rusher" value="1"/>
                 <set var="tmp_rusher" value="99"/>
@@ -1322,25 +1325,17 @@
 
     <if variant="swap">
         <!-- staff invervention detector -->
-        <trigger scope="match">
+        <trigger scope="player">
             <filter>
-                <after duration="2s" filter="rusher-forced"/>
+                <after duration="0.1s" filter="all(rusher,joined_normally=0)" />
             </filter>
             <action>
-                <message text=" "/>
-                <message text="${ANNOUNCER_PREFIX} Dear staff: this variant only supports one rusher. Don't force anybody..."/>
-                <message text=" "/>
-                <set var="j" value="0"/>
-                <switch-scope inner="player" filter="rusher">
-                    <set var="j" value="j+1"/>
-                </switch-scope>
-                <set var="i" value="1"/>
-                <switch-scope inner="player" filter="rusher">
-                    <set var="j" value="j-i"/>
-                    <action filter="j=1..">
-                        <kit id="team-switch-defenders-kit"/>
-                    </action>
-                    <set var="i" value="i+1"/>
+                <kit id="team-switch-defenders-kit"/>
+                <switch-scope inner="match">
+                    <sound preset="alert" pitch="2" />
+                    <message text=" "/>
+                    <message text="${ANNOUNCER_PREFIX} Dear staff: this variant only supports one rusher. Don't force anybody..."/>
+                    <message text=" "/>
                 </switch-scope>
             </action>
         </trigger>
@@ -1370,10 +1365,11 @@
                 <action id="announce-quit"/>
             </action>
         </trigger>
-        <trigger scope="player" filter="all(rusher,dead,round-running,pending_tp=0)">
+        <trigger scope="player" filter="all(rusher,dead,round-running,pending_tp=0,joined_normally=1)">
             <action>
                 <kit id="team-switch-defenders-kit"/>
                 <set var="outgoing" value="1"/>
+                <set var="joined_normally" value="0" />
                 <switch-scope inner="match">
                     <action id="add-rusher"/>
                     <action id="announce-swap"/>
