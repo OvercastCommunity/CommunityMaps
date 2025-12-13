@@ -4,6 +4,7 @@
 <variant id="honey" world="honey">Honey</variant>
 <variant id="lure" world="lure">Lure</variant>
 <variant id="intense-tugging" world="intense_tugging" min-server-version="1.21">Intense Tugging</variant>
+<variant id="tugmas" world="tugmas">Tugmas</variant>
 <unless variant="default,intense-tugging">
     <created>2023-07-14</created>
 </unless>
@@ -13,7 +14,7 @@
 <if variant="intense-tugging">
     <created>2025-07-18</created>
 </if>
-<version>1.0.7</version>
+<version>1.1.0</version>
 <include id="gapple-kill-reward"/>
 <include id="void-death"/>
 <objective>Capture all the points sequentially in the row to win!</objective>
@@ -35,10 +36,12 @@
     </kit>
     <kit id="default" parent="night-vision">
         <item slot="0" unbreakable="true" material="stone sword"/>
-        <item slot="1" unbreakable="true" enchantment="efficiency" material="diamond pickaxe"/>
-        <item slot="2" amount="6" material="snowball"/>
+        <unless variant="tugmas">
+            <item slot="1" unbreakable="true" enchantment="efficiency" material="diamond pickaxe"/>
+            <item slot="2" amount="6" material="snowball"/>
+        </unless>
         <item slot="5" material="golden apple"/>
-        <unless variant="intense-tugging">
+        <unless variant="intense-tugging,tugmas">
             <item slot="3" team-color="true" amount="64" material="stained clay"/>
             <item slot="4" team-color="true" amount="64" material="stained clay"/>
         </unless>
@@ -51,6 +54,12 @@
         </if>
         <if variant="lure">
             <item slot="8" material="fishing rod" damage="60"/>
+        </if>
+        <if variant="tugmas">
+            <item slot="1" name="``fPresent Opener" material="shears" unbreakable="true"/>
+            <item slot="2" name="Snowball" material="snowball" projectile="tugball" amount="4"/>
+            <item slot="3" team-color="true" amount="64" material="wool"/>
+            <item slot="4" team-color="true" amount="64" material="wool"/>
         </if>
     </kit>
 </kits>
@@ -98,7 +107,23 @@
         <material>stained clay:11</material>
         <if min-server-version="1.21">
             <material>scaffolding</material>
+        </if>        
+        <if variant="honey,lure">
+            <material>wool:14</material>
+            <material>wool:11</material>
         </if>
+        <if variant="tugmas">
+            <material>wool:14</material>
+            <material>wool:11</material>
+            <material>wool:4</material>
+            <material>wool:3</material>
+        </if>
+    </any>
+    <any id="tugmas-blocks">
+        <material>wool:14</material>
+        <material>wool:11</material>
+        <material>wool:4</material>
+        <material>wool:3</material>
     </any>
     <not id="doesnt-control-a">
         <captured id="controls-a">controlling-point-a</captured>
@@ -137,24 +162,24 @@
     </union>
     <union id="hills">
         <union id="point-a">
-            <cylinder id="point-a-hill" base="-43.5,5,0.5" radius="3" height="2"/>
-            <cuboid id="point-a-display" min="-46,17,-2" max="-41,25,2"/>
+            <cuboid id="point-a-hill" min="-45,5,2" max="-42,7,-1"/>
+            <cuboid id="point-a-display" min="-45,5,2" max="-42,25,-1"/>
         </union>
         <union id="point-b">
-            <cylinder id="point-b-hill" base="-21.5,5,0.5" radius="3" height="2"/>
-            <cuboid id="point-b-display" min="-24,17,-2" max="-19,25,2"/>
+            <cuboid id="point-b-hill" min="-23,5,2" max="-20,7,-1"/>
+            <cuboid id="point-b-display" min="-23,5,2" max="-20,25,-1"/>
         </union>
         <union id="point-c">
-            <cylinder id="point-c-hill" base="0.5,5,0.5" radius="3" height="2"/>
-            <cuboid id="point-c-display" min="-2,17,-2" max="2,25,2"/>
+            <cuboid id="point-c-hill" min="-1,5,2" max="2,7,-1"/>
+            <cuboid id="point-c-display" min="-1,5,2" max="2,25,-1"/>
         </union>
         <union id="point-d">
-            <cylinder id="point-d-hill" base="22.5,5,0.5" radius="3" height="2"/>
-            <cuboid id="point-d-display" min="20,17,-2" max="24,25,3"/>
+            <cuboid id="point-d-hill" min="21,5,2" max="24,7,-1"/>
+            <cuboid id="point-d-display" min="21,5,2" max="24,25,-1"/>
         </union>
         <union id="point-e">
-            <cylinder id="point-e-hill" base="44.5,5,0.5" radius="3" height="2"/>
-            <cuboid id="point-e-display" min="42,17,-2" max="46,25,3"/>
+            <cuboid id="point-e-hill" min="43,5,2" max="46,7,-1"/>
+            <cuboid id="point-e-display" min="43,5,2" max="46,25,-1"/>
         </union>
     </union>
     <negative id="not-map">
@@ -165,7 +190,7 @@
     <apply block="only-blocks"/>
 </regions>
 <control-points required="true" capture-time="0s" points="0">
-    <control-point id="controlling-point-a" name="Point A" capture="point-a-hill" captured="point-a" initial-owner="red-team">
+    <control-point id="controlling-point-a" name="Point A" capture="point-a-hill" captured="point-a-display" initial-owner="red-team">
         <player-filter>
             <all>
                 <filter id="blue-team"/>
@@ -176,7 +201,7 @@
             </all>
         </player-filter>
     </control-point>
-    <control-point id="controlling-point-b" name="Point B" capture="point-b-hill" captured="point-b">
+    <control-point id="controlling-point-b" name="Point B" capture="point-b-hill" captured="point-b-display">
         <player-filter>
             <any>
                 <all>
@@ -188,7 +213,7 @@
             </any>
         </player-filter>
     </control-point>
-    <control-point id="controlling-point-c" name="Point C" capture="point-c-hill" captured="point-c">
+    <control-point id="controlling-point-c" name="Point C" capture="point-c-hill" captured="point-c-display">
         <player-filter>
             <any>
                 <all>
@@ -202,7 +227,7 @@
             </any>
         </player-filter>
     </control-point>
-    <control-point id="controlling-point-d" name="Point D" capture="point-d-hill" captured="point-d">
+    <control-point id="controlling-point-d" name="Point D" capture="point-d-hill" captured="point-d-display">
         <player-filter>
             <any>
                 <captured>controlling-point-e</captured>
@@ -214,7 +239,7 @@
             </any>
         </player-filter>
     </control-point>
-    <control-point id="controlling-point-e" name="Point E" capture="point-e-hill" captured="point-e" initial-owner="blue-team">
+    <control-point id="controlling-point-e" name="Point E" capture="point-e-hill" captured="point-e-display" initial-owner="blue-team">
         <player-filter>
             <all>
                 <filter id="red-team"/>
@@ -226,10 +251,22 @@
         </player-filter>
     </control-point>
 </control-points>
+<projectiles>
+    <if variant="tugmas">
+        <projectile id="tugball" name="Snowball" projectile="Snowball" velocity="1" throwable="true" destroy-filter="tugmas-blocks" cooldown="1.25s"/>
+    </if>
+</projectiles>
 <kill-rewards>
-    <kill-reward>
-        <item amount="2" material="snowball"/>
-    </kill-reward>
+    <unless variant="tugmas">
+        <kill-reward>
+            <item amount="2" material="snowball"/>
+        </kill-reward>
+    </unless>
+    <if variant="tugmas">
+        <kill-reward>
+            <item name="Snowball" material="snowball" projectile="tugball" amount="2"/>
+        </kill-reward>
+    </if>
 </kill-rewards>
 <itemremove>
     <item>stone sword</item>
@@ -242,6 +279,11 @@
     <if min-server-version="1.21">
         <item>scaffolding</item>
     </if>
+    <item>wool:14</item>
+    <item>wool:11</item>
+    <item>wool:4</item>
+    <item>wool:3</item>
+    <item>shears</item>
 </itemremove>
 <maxbuildheight>10</maxbuildheight>
 <hunger>
