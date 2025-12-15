@@ -1,0 +1,175 @@
+<map proto="1.5.0">
+<name>Twilight Tuckaway</name>
+<version>1.0.0</version>
+<objective>Destroy the other team's monument!</objective>
+<created>2025-12-15</created>
+<constants>
+    <constant id="eff.modes-preset">every-5m</constant>
+    <constant id="eff.efficiency-tool">stone pickaxe</constant>
+    <constant id="eff.team-1">blue-team</constant>
+    <constant id="eff.team-2">red-team</constant>
+    <constant id="eff.t1-m1-region">red-monument</constant>
+    <constant id="eff.t2-m1-region">blue-monument</constant>
+</constants>
+<include id="efficiency-variables"/>
+<include id="gapple-kill-reward"/>
+<authors>
+    <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c" /> <!-- mitchiii -->
+</authors>
+<teams>
+    <team id="blue-team" color="blue" max="7">Blue</team>
+    <team id="red-team" color="dark red" max="7">Red</team>
+</teams>
+<spawns>
+    <spawn team="blue-team" region="blue-spawn" yaw="0" kit="main-kit"/>
+    <spawn team="red-team" region="red-spawn" yaw="180" kit="main-kit"/>
+    <default region="obs-spawn" yaw="90"/>
+</spawns>
+<kits>
+    <kit id="main-kit">
+        <clear/>
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true"/>
+        <item slot="2" material="stone pickaxe" unbreakable="true"/>
+        <item slot="3" material="stone axe" unbreakable="true">
+            <enchantment level="2">efficiency</enchantment>
+        </item>
+        <item slot="4" material="wood" amount="64" damage="1"/>
+        <item slot="5" material="stained glass" amount="32" team-color="true"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow" amount="32"/>
+        <item slot="30" material="stone spade" unbreakable="true">
+            <enchantment level="2">efficiency</enchantment>
+        </item>
+        <helmet material="leather helmet" unbreakable="true" team-color="true"/>
+        <chestplate material="chainmail chestplate" unbreakable="true"/>
+        <leggings material="leather leggings" unbreakable="true" team-color="true"/>
+        <boots unbreakable="true" material="iron boots"/>
+        <effect duration="3s" amplifier="10">resistance</effect>
+        <knockback-reduction>1</knockback-reduction>
+    </kit>
+    <kit id="leaving-spawn" force="true">
+        <knockback-reduction>0</knockback-reduction>
+    </kit>
+</kits>
+<kill-rewards>
+    <kill-reward>
+        <item material="arrow" amount="8" damage="1"/>
+        <item material="wood" amount="12"/>
+        <item material="stained glass" amount="6" team-color="true"/>
+    </kill-reward>
+    <kill-reward>
+        <filter>
+            <kill-streak count="3" repeat="true"/>
+        </filter>
+        <item material="flint and steel" damage="61"/>
+        <item material="tnt"/>
+    </kill-reward>
+</kill-rewards>
+<filters>
+    <cause id="player">player</cause>
+    <material id="gold-block">gold block</material>
+    <material id="fire">fire</material>
+    <material id="stone">stone</material>
+    <all id="bottom-solid-blocks">
+        <below y="1"/>
+        <material>stone:6</material>
+    </all>
+</filters>
+<regions>
+    <cylinder id="obs-spawn" base="1.5,64,0.5" radius="1" height="1"/>
+    <cylinder id="blue-spawn" base="-7.5,4,-43.5" radius="1" height="1"/>
+    <cylinder id="red-spawn" base="7.5,4,44.5" radius="1" height="1"/>
+    <negative id="outside-spawns">
+        <union id="team-spawns">
+            <cuboid id="blue-spawn-protection" min="-15,0,-54" size="16,64,19"/>
+            <cuboid id="red-spawn-protection" min="-1,0,36" size="16,64,19"/>
+        </union>
+    </negative>
+    <cuboid id="blue-monument" min="-35,14,-22" size="3,4,3"/>
+    <cuboid id="red-monument" min="32,14,20" size="3,4,3"/>
+    <negative id="restricted-void">
+        <rectangle id="buildable-void" min="-44,-31" max="43,32"/>
+    </negative>
+    <apply region="blue-spawn-protection" enter="blue-team" message="You may not enter the enemy spawn!"/>
+    <apply region="red-spawn-protection" enter="red-team" message="You may not enter the enemy spawn!"/>
+    <apply region="outside-spawns" kit="leaving-spawn"/>
+    <apply region="team-spawns" block-place="all(not(player), not(fire))" block-break="gold-block" message="You may not modify the spawn area!"/>
+    <apply region="restricted-void" block-place="not(void)"/>
+    <apply block-break="deny(bottom-solid-blocks)"/>
+</regions>
+<maxbuildheight>20</maxbuildheight>
+<destroyables name="Monument" materials="emerald block" show-progress="true" mode-changes="true">
+    <destroyable region="blue-monument" owner="blue-team"/>
+    <destroyable region="red-monument" owner="red-team"/>
+</destroyables>
+<block-drops>
+    <rule wrong-tool="true" filter="gold-block">
+        <drops>
+            <item material="gold ingot" amount="9"/>
+        </drops>
+    </rule>
+    <rule wrong-tool="false" filter="stone">
+        <drops>
+            <item material="cobblestone"/>
+        </drops>
+    </rule>
+</block-drops>
+<renewables>
+    <renewable rate="10" avoid-players="0" renew-filter="gold-block" region="team-spawns"/>
+</renewables>
+<item-mods>
+    <rule>
+        <match>
+            <material>stone sword</material>
+            <material>bow</material>
+            <material>gold helmet</material>
+            <material>gold chestplate</material>
+            <material>gold leggings</material>
+            <material>gold boots</material>
+            <material>gold sword</material>
+            <material>gold pickaxe</material>
+            <material>gold axe</material>
+            <material>gold spade</material>
+        </match>
+        <modify unbreakable="true"/>
+    </rule>
+</item-mods>
+<toolrepair>
+    <tool>bow</tool>
+    <tool>iron chestplate</tool>
+    <tool>stone sword</tool>
+    <tool>stone pickaxe</tool>
+    <tool>stone axe</tool>
+    <tool>stone spade</tool>
+    <tool>gold helmet</tool>
+    <tool>gold chestplate</tool>
+    <tool>gold leggings</tool>
+    <tool>gold boots</tool>
+    <tool>gold sword</tool>
+    <tool>gold pickaxe</tool>
+    <tool>gold axe</tool>
+    <tool>gold spade</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>chainmail chestplate</item>
+    <item>leather leggings</item>
+    <item>iron boots</item>
+    <item>sapling</item>
+    <item>apple</item>
+    <item>emerald block</item>
+    <item>gold block</item>
+    <item>stained clay</item>
+</itemremove>
+<itemkeep>
+    <item>stained clay</item>
+    <item>stained glass</item>
+    <item>wood</item>
+    <item>arrow</item>
+    <item>golden apple</item>
+</itemkeep>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
