@@ -1,21 +1,20 @@
 <map proto="1.5.0">
 <name>TNT Tag: Incendiary</name>
-<version>1.0.0</version>
-<include id="tnt-tag"/>
-<constant id="block-filter">only-lava</constant>
+<variant id="oitq" override="true">Incendiary</variant>
+<version>1.1.0</version>
 <authors>
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
 </authors>
 <spawns>
-    <spawn region="center" kit="hider-kit" angle="0,10.5,0"/>
     <default yaw="180">
         <regions>
-            <cylinder base="0.5,55,0.5" radius="2" height="1"/>
+            <cylinder base="0.5,55.5,0.5" radius="2" height="1"/>
         </regions>
     </default>
 </spawns>
 <regions>
     <cylinder id="center" base="0.5,9,0.5" radius="3" height="1"/>
+    <block id="sign" location="2,56,-3"/>
     <apply enter="never">
         <region>
             <above y="29"/>
@@ -59,24 +58,29 @@
     <variable id="height"/>
 </variables>
 <actions>
-    <trigger scope="match" filter="all(match-running, round_state=${running}, height=0, not(round_deathmatch=1..))">
-        <action>
-            <set var="height" value="floor((random() * 2) - 0.5)"/>
-        </action>
-    </trigger>
     <trigger scope="match" filter="height=1..">
         <action>
             <message text="`6⚠ The ground begins to rumble..."/>
             <sound key="${entity.lightning_bolt.thunder}" volume="1" pitch="0.2"/>
             <fill region="lava-pools-lower" material="lava"/>
-            <action filter="round=6..">
+            <if variant="default">
+                <action filter="round=6..">
+                    <fill region="lava-pools-upper" material="lava"/>
+                </action>
+            </if>
+            <unless variant="default">
                 <fill region="lava-pools-upper" material="lava"/>
-            </action>
+            </unless>
         </action>
     </trigger>
     <trigger scope="match">
         <filter>
-            <after duration="1m" filter="all(height=1, not(round_deathmatch=1..))"/>
+            <if variant="default">
+                <after duration="1m" filter="all(height=1, not(round_deathmatch=1..))"/>
+            </if>
+            <unless variant="default">
+                <after duration="1m" filter="height=1"/>
+            </unless>
         </filter>
         <action>
             <message text="`6⚠ The rumbling subsides..."/>
@@ -85,29 +89,103 @@
             <set var="height" value="0"/>
         </action>
     </trigger>
-    <trigger scope="match" filter="all(round_state=${running}, round_deathmatch=1)">
-        <action>
-            <fill region="lava-layer-1" material="lava" filter="lava-replaceable"/>
-        </action>
-    </trigger>
-    <trigger scope="match" filter="all(round_state=${running}, round_deathmatch=2)">
-        <action>
-            <fill region="lava-layer-2" material="lava" filter="lava-replaceable"/>
-        </action>
-    </trigger>
-    <trigger scope="match" filter="all(round_state=${running}, round_deathmatch=3)">
-        <action>
-            <fill region="lava-layer-3" material="lava" filter="lava-replaceable"/>
-        </action>
-    </trigger>
-    <trigger scope="match" filter="all(round_state=${running}, round_deathmatch=4)">
-        <action>
-            <fill region="lava-layer-4" material="lava" filter="lava-replaceable"/>
-        </action>
-    </trigger>
 </actions>
 <itemremove>
     <item>red mushroom</item>
     <item>magma cream</item>
 </itemremove>
+<if variant="default">
+    <constant id="block-filter">only-lava</constant>
+    <include id="tnt-tag"/>
+    <spawns>
+        <spawn region="center" kit="hider-kit" angle="0,10.5,0"/>
+    </spawns>
+    <actions>
+        <trigger scope="match" filter="all(match-running, round_state=${running}, height=0, not(round_deathmatch=1..))">
+            <action>
+                <set var="height" value="floor((random() * 2) - 0.5)"/>
+            </action>
+        </trigger>
+        <trigger scope="match" filter="all(round_state=${running}, round_deathmatch=1)">
+            <action>
+                <fill region="lava-layer-1" material="lava" filter="lava-replaceable"/>
+            </action>
+        </trigger>
+        <trigger scope="match" filter="all(round_state=${running}, round_deathmatch=2)">
+            <action>
+                <fill region="lava-layer-2" material="lava" filter="lava-replaceable"/>
+            </action>
+        </trigger>
+        <trigger scope="match" filter="all(round_state=${running}, round_deathmatch=3)">
+            <action>
+                <fill region="lava-layer-3" material="lava" filter="lava-replaceable"/>
+            </action>
+        </trigger>
+        <trigger scope="match" filter="all(round_state=${running}, round_deathmatch=4)">
+            <action>
+                <fill region="lava-layer-4" material="lava" filter="lava-replaceable"/>
+            </action>
+        </trigger>
+    </actions>
+</if>
+<if variant="oitq">
+    <include id="oitq"/>
+    <objective>Be the player with the highest amount of kills after ${time-limit} minutes!</objective>
+    <players max="16" colors="true"/>
+    <spawns>
+        <spawn spread="true">
+            <regions>
+                <point yaw="-135">-43,7,39</point>
+                <point yaw="-130">17,8,17</point>
+                <point yaw="0">5.5,4,-36.5</point>
+                <point yaw="90">42.5,9,-17.5</point>
+                <point yaw="180">-5.5,9,48.5</point>
+                <point yaw="135">46.5,8,9</point>
+                <point yaw="-145">-2.5,19,17.5</point>
+                <point yaw="175">-20,4,21</point>
+                <point yaw="-5">-25.5,4,-3.5</point>
+                <point yaw="-80">9.5,10,-43.5</point>
+                <point yaw="40">31.5,10,-35.5</point>
+                <point yaw="45">21.5,19,-10.5</point>
+                <point yaw="-50">27.5,10,31.5</point>
+                <point yaw="-155">44.5,10,36.5</point>
+                <point yaw="-80">-32.5,17,0.5</point>
+                <point yaw="80">-4,10,-44</point>
+                <point yaw="-150">-25.5,12,25.5</point>
+                <point yaw="60">46.5,9,-9.5</point>
+                <point yaw="135">31.5,21,-23.5</point>
+                <point yaw="25">-22.5,10,-44.5</point>
+                <point yaw="-135">-9.5,10,12</point>
+                <point yaw="-135">-45.5,9,-2.5</point>
+                <point yaw="60">31.5,16,-35</point>
+                <point yaw="-45">-43.5,13,-45</point>
+                <point yaw="0">-19.5,5,-31.5</point>
+                <point yaw="-142">-23.5,15,46.5</point>
+                <point yaw="-45">-46.5,10,-30.5</point>
+                <point yaw="142">18.5,10,49.5</point>
+                <point yaw="30">42.5,10,-40</point>
+                <point yaw="-32">-45.5,9,5.5</point>
+                <point yaw="-130">-36.5,23,2.5</point>
+                <point yaw="180">5,7,33</point>
+                <point yaw="80">24,7,-22</point>
+                <point yaw="-100">-41.5,7,-13.5</point>
+                <point yaw="130">32.5,10,46.5</point>
+                <point yaw="105">43.5,14,28.5</point>
+                <point yaw="180">-22.5,10,44.5</point>
+            </regions>
+        </spawn>
+    </spawns>
+    <actions>
+        <trigger scope="match" filter="always">
+            <action>
+                <fill region="sign" material="air"/>
+            </action>
+        </trigger>
+        <trigger scope="match" action="height := 1">
+            <filter>
+                <time>2m</time>
+            </filter>
+        </trigger>
+    </actions>
+</if>
 </map>
