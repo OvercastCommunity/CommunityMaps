@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Chromatic Conquest</name>
-<version>2.0.1</version>
+<version>2.1.0</version>
 <objective>Paint the majority of enemy players with your team color to win!</objective>
 <created>2024-03-07</created>
 <phase>staging</phase>
@@ -10,7 +10,7 @@
 </authors>
 <constants>
     <constant id="none">0</constant>
-    <constant id="any">1..</constant>
+    <constant id="any">1..4</constant>
     <constant id="blue">1</constant>
     <constant id="red">2</constant>
     <constant id="green">3</constant>
@@ -72,7 +72,7 @@
         <chestplate material="leather chestplate" team-color="true" unbreakable="true" locked="true"/>
         <action filter="any(owned_by=${none}, moving_team=1)">
             <kit force="true">
-                <effect duration="6" amplifier="3">regeneration</effect>
+                <effect duration="4" amplifier="4">regeneration</effect>
                 <double-jump power="3"/>
                 <walk-speed>1.1</walk-speed>
                 <item slot="0" material="stone sword" unbreakable="true" locked="true"/>
@@ -147,14 +147,24 @@
                 <item slot="8" material="wool" damage="1" locked="true"/>
             </kit>
         </action>
+        <action id="set-current-team">
+            <action filter="blue"><set var="current_team" value="${blue}"/></action>
+            <action filter="red"><set var="current_team" value="${red}"/></action>
+            <action filter="green"><set var="current_team" value="${green}"/></action>
+            <action filter="orange"><set var="current_team" value="${orange}"/></action>
+        </action>
     </kit>
 </kits>
 <kill-rewards>
     <kill-reward>
-        <kit deduct-items="false" force="true">
-            <item slot="2" material="arrow" name="`rExplosive Arrow" grenade="true" grenade-power="2"/>
+        <kit force="true">
             <effect duration="6">regeneration</effect>
             <effect duration="24">absorption</effect>
+        </kit>
+    </kill-reward>
+    <kill-reward>
+        <kit deduct-items="false">
+            <item slot="2" material="arrow" name="`rExplosive Arrow" grenade="true" grenade-power="2"/>
         </kit>
     </kill-reward>
 </kill-rewards>
@@ -181,10 +191,7 @@
         <all id="splatable-clay">
             <material>stained clay</material>
             <not>
-                <all>
-                    <region id="team-spawns"/>
-                    <material>stained clay</material>
-                </all>
+                <region id="team-spawns"/>
             </not>
         </all>
     </any>
@@ -210,44 +217,49 @@
     <attacker id="orange-attacker">
         <filter id="orange"/>
     </attacker>
-    <any id="blue-colored">
-        <filter id="all(blue, owned_by=${none})"/>
-        <variable var="owned_by">${blue}</variable>
+    <all id="blue-colored">
+        <filter id="any(all(blue, owned_by=${none}), owned_by=${blue})"/>
+    </all>
+    <all id="red-colored">
+        <filter id="any(all(red, owned_by=${none}), owned_by=${red})"/>
+    </all>
+    <all id="green-colored">
+        <filter id="any(all(green, owned_by=${none}), owned_by=${green})"/>
+    </all>
+    <all id="orange-colored">
+        <filter id="any(all(orange, owned_by=${none}), owned_by=${orange})"/>
+    </all>
+    <variable id="owned-by-target" scope="player" value="owned_by - target">0</variable>
+    <players id="blue-playing" filter="all(blue, owned_by=${none}, eliminated=0)" min="1"/>
+    <players id="red-playing" filter="all(red, owned_by=${none}, eliminated=0)" min="1"/>
+    <players id="green-playing" filter="all(green, owned_by=${none}, eliminated=0)" min="1"/>
+    <players id="orange-playing" filter="all(orange, owned_by=${none}, eliminated=0)" min="1"/>
+    <any id="team-has-alive-players">
+        <filter id="all(blue, blue-playing)"/>
+        <filter id="all(red, red-playing)"/>
+        <filter id="all(green, green-playing)"/>
+        <filter id="all(orange, orange-playing)"/>
     </any>
-    <any id="red-colored">
-        <filter id="all(red, owned_by=${none})"/>
-        <variable var="owned_by">${red}</variable>
+    <any id="move-target-alive">
+        <filter id="all(move_target=${blue}, blue-playing)"/>
+        <filter id="all(move_target=${red}, red-playing)"/>
+        <filter id="all(move_target=${green}, green-playing)"/>
+        <filter id="all(move_target=${orange}, orange-playing)"/>
     </any>
-    <any id="green-colored">
-        <filter id="all(green, owned_by=${none})"/>
-        <variable var="owned_by">${green}</variable>
-    </any>
-    <any id="orange-colored">
-        <filter id="all(orange, owned_by=${none})"/>
-        <variable var="owned_by">${orange}</variable>
-    </any>
-    <variable id="team-eliminated" scope="match" value="eliminated[eliminated_index]">1</variable>
-    <carrying id="carrying-firework" ignore-metadata="true">
-        <item material="firework"/>
-    </carrying>
-    <carrying id="carrying-arrow" ignore-metadata="true">
-        <item material="arrow"/>
-    </carrying>
-    <players id="blue-playing" filter="blue" min="1"/>
-    <players id="red-playing" filter="red" min="1"/>
-    <players id="green-playing" filter="green" min="1"/>
-    <players id="orange-playing" filter="orange" min="1"/>
-    <!-- one(blue-playing, red-playing, green-playing, orange-playing) -->
-    <!-- one filter is not reliable or I am just using it wrong -->
     <any id="exclusive">
         <filter id="all(blue-playing, not(any(red-playing, green-playing, orange-playing)))"/>
         <filter id="all(red-playing, not(any(blue-playing, green-playing, orange-playing)))"/>
         <filter id="all(green-playing, not(any(blue-playing, red-playing, orange-playing)))"/>
         <filter id="all(orange-playing, not(any(blue-playing, red-playing, green-playing)))"/>
     </any>
+    <carrying id="carrying-firework" ignore-metadata="true">
+        <item material="firework"/>
+    </carrying>
+    <carrying id="carrying-arrow" ignore-metadata="true">
+        <item material="arrow"/>
+    </carrying>
 </filters>
 <variables scope="match">
-    <array id="eliminated" size="4"/>
     <with-team id="blue_score" var="score" team="blue"/>
     <with-team id="red_score" var="score" team="red"/>
     <with-team id="green_score" var="score" team="green"/>
@@ -260,13 +272,15 @@
     <variable id="splat_pos_z"/>
     <variable id="target"/>
     <variable id="eliminated_index"/>
-    <variable id="tmp"/>
+    <variable id="temp"/>
+    <variable id="index"/>
 </variables>
 <variables scope="team">
-    <variable id="players"/>
+    <variable id="eliminated"/>
 </variables>
 <variables scope="player">
-    <variable id="owned_by"/>
+    <variable id="current_team" default="${none}"/>
+    <variable id="owned_by" default="${none}"/>
     <variable id="last_attacked_by"/>
     <variable id="last_x"/>
     <variable id="last_y"/>
@@ -279,7 +293,26 @@
     <variable id="frozen_at_z"/>
     <variable id="moved_from_x" scope="player"/>
     <variable id="moved_from_z" scope="player"/>
+    <variable id="move_target"/>
 </variables>
+<replacements>
+    <switch id="players-plural" scope="match" value="temp">
+        <case match="1" result="player"/>
+        <fallback>players</fallback>
+    </switch>
+    <switch id="team-target" scope="match" value="target">
+        <case match="${blue}" result="`9Blue"/>
+        <case match="${red}" result="`4Red"/>
+        <case match="${green}" result="`aGreen"/>
+        <case match="${orange}" result="`6Orange"/>
+    </switch>
+    <switch id="team-owned-by" scope="player" value="owned_by">
+        <case match="${blue}" result="`9Blue"/>
+        <case match="${red}" result="`4Red"/>
+        <case match="${green}" result="`aGreen"/>
+        <case match="${orange}" result="`6Orange"/>
+    </switch>
+</replacements>
 <actions>
     <trigger scope="match">
         <filter>
@@ -290,33 +323,18 @@
             <set var="red_score" value="0"/>
             <set var="green_score" value="0"/>
             <set var="orange_score" value="0"/>
-            <switch-scope inner="team">
-                <set var="players" value="0"/>
-            </switch-scope>
             <switch-scope inner="player" filter="in-match">
-                <action filter="any(all(blue, owned_by=${none}), owned_by=${blue})">
+                <action filter="blue-colored">
                     <set var="blue_score" value="blue_score + 1"/>
-                    <action filter="all(blue, owned_by=${none})">
-                        <set var="players" value="players + 1"/>
-                    </action>
                 </action>
-                <action filter="any(all(red, owned_by=${none}), owned_by=${red})">
+                <action filter="red-colored">
                     <set var="red_score" value="red_score + 1"/>
-                    <action filter="all(red, owned_by=${none})">
-                        <set var="players" value="players + 1"/>
-                    </action>
                 </action>
-                <action filter="any(all(green, owned_by=${none}), owned_by=${green})">
+                <action filter="green-colored">
                     <set var="green_score" value="green_score + 1"/>
-                    <action filter="all(green, owned_by=${none})">
-                        <set var="players" value="players + 1"/>
-                    </action>
                 </action>
-                <action filter="any(all(orange, owned_by=${none}), owned_by=${orange})">
+                <action filter="orange-colored">
                     <set var="orange_score" value="orange_score + 1"/>
-                    <action filter="all(orange, owned_by=${none})">
-                        <set var="players" value="players + 1"/>
-                    </action>
                 </action>
             </switch-scope>
         </action>
@@ -326,7 +344,7 @@
             <action id="unfreeze-player" scope="player">
                 <set var="owned_by" value="${none}"/>
                 <kit force="true">
-                    <health>8</health>
+                    <health>10</health>
                 </kit>
                 <kit id="main-kit"/>
                 <sound key="${entity.experience_orb.pickup}" volume="1" pitch="1.2"/>
@@ -414,9 +432,11 @@
             </action>
         </action>
     </trigger>
-    <trigger scope="player" filter="all(match-running, alive, respawning=1)">
+    <trigger scope="player" filter="all(match-running, delay, alive, respawning=1)">
         <action>
-            <teleport x="last_x" y="last_y" z="last_z" pitch="last_pitch" yaw="last_yaw"/>
+            <action filter="not(last_y=0)">
+                <teleport x="last_x" y="last_y" z="last_z" pitch="last_pitch" yaw="last_yaw"/>
+            </action>
             <set var="respawning" value="0"/>
             <action filter="moving_team=1">
                 <set var="moving_team" value="0"/>
@@ -429,7 +449,13 @@
             <pulse period="2s" duration="1s" filter="all(in-match, alive, owned_by=${any})"/>
         </filter>
         <action>
-            <message actionbar="`b`lYou have been frozen!"/>
+            <action id="frozen-message" scope="player">
+                <message actionbar="`b`lYou have been frozen by {team}`b`l!">
+                    <replacements>
+                        <replacement id="team">team-owned-by</replacement>
+                    </replacements>
+                </message>
+            </action>
             <action id="has-frozen-moved" scope="player">
                 <set var="moved_from_x" value="frozen_at_x - player.x"/>
                 <set var="moved_from_z" value="frozen_at_z - player.z"/>
@@ -443,7 +469,7 @@
             </pulse>
         </filter>
         <action>
-            <message actionbar="`3`lYou have been frozen!"/>
+            <action id="frozen-message"/>
             <action id="has-frozen-moved"/>
         </action>
     </trigger>
@@ -507,7 +533,15 @@
             </kit>
         </action>
     </trigger>
-    <trigger scope="team" filter="all(match-running, delay, players=0)">
+    <trigger scope="player" filter="not(carrying-arrow)">
+        <action>
+            <replace-item ignore-metadata="true">
+                <find material="bow"/>
+                <replace material="air"/>
+            </replace-item>
+        </action>
+    </trigger>
+    <trigger scope="team" filter="all(match-running, delay, not(team-has-alive-players), not(exclusive))">
         <action>
             <action filter="blue">
                 <set var="target" value="${blue}"/>
@@ -522,132 +556,82 @@
                 <set var="target" value="${orange}"/>
             </action>
             <switch-scope inner="match">
-                <action filter="target=${blue}">
-                    <message text="`9Blue `chas been eliminated!"/>
-                </action>
-                <action filter="target=${red}">
-                    <message text="`4Red `chas been eliminated!"/>
-                </action>
-                <action filter="target=${green}">
-                    <message text="`aGreen `chas been eliminated!"/>
-                </action>
-                <action filter="target=${orange}">
-                    <message text="`6Orange `chas been eliminated!"/>
-                </action>
+                <message text="{team} `chas been eliminated!">
+                    <replacements>
+                        <replacement id="team">team-target</replacement>
+                    </replacements>
+                </message>
                 <sound key="${entity.lightning_bolt.thunder}"/>
             </switch-scope>
-            <set var="tmp" value="0"/>
-            <switch-scope inner="player" filter="owned_by=${blue}">
-                <set var="tmp" value="tmp + 1"/>
-            </switch-scope>
-            <switch-scope inner="match" filter="tmp=1..">
-                <message text="`3» `e{0} player(s) `bmoved to `9Blue">
-                    <replacements>
-                        <decimal id="0" value="tmp"/>
-                    </replacements>
-                </message>
-            </switch-scope>
-            <set var="tmp" value="0"/>
-            <switch-scope inner="player" filter="owned_by=${red}">
-                <set var="tmp" value="tmp + 1"/>
-            </switch-scope>
-            <switch-scope inner="match" filter="tmp=1..">
-                <message text="`3» `e{0} player(s) `bmoved to `4Red">
-                    <replacements>
-                        <decimal id="0" value="tmp"/>
-                    </replacements>
-                </message>
-            </switch-scope>
-            <set var="tmp" value="0"/>
-            <switch-scope inner="player" filter="owned_by=${green}">
-                <set var="tmp" value="tmp + 1"/>
-            </switch-scope>
-            <switch-scope inner="match" filter="tmp=1..">
-                <message text="`3» `e{0} player(s) `bmoved to `aGreen">
-                    <replacements>
-                        <decimal id="0" value="tmp"/>
-                    </replacements>
-                </message>
-            </switch-scope>
-            <set var="tmp" value="0"/>
-            <switch-scope inner="player" filter="owned_by=${orange}">
-                <set var="tmp" value="tmp + 1"/>
-            </switch-scope>
-            <switch-scope inner="match" filter="tmp=1..">
-                <message text="`3» `e{0} player(s) `bmoved to `6Orange">
-                    <replacements>
-                        <decimal id="0" value="tmp"/>
-                    </replacements>
-                </message>
-            </switch-scope>
-            <switch-scope inner="player">
-                <set var="respawning" value="1"/>
-                <set var="moving_team" value="1"/>
-                <action id="switch-team" scope="player">
-                    <action filter="owned_by=${blue}">
-                        <kit force="true">
-                            <team-switch team="blue"/>
-                        </kit>
-                        <message text="{ translate: 'join.ok.team', with: ['`9Blue'] }" title="{ translate: 'join.ok.team', with: ['`9Blue'] }"/>
-                    </action>
-                    <action filter="owned_by=${red}">
-                        <kit force="true">
-                            <team-switch team="red"/>
-                        </kit>
-                        <message text="{ translate: 'join.ok.team', with: ['`4Red'] }" title="{ translate: 'join.ok.team', with: ['`4Red'] }"/>
-                    </action>
-                    <action filter="owned_by=${green}">
-                        <kit force="true">
-                            <team-switch team="green"/>
-                        </kit>
-                        <message text="{ translate: 'join.ok.team', with: ['`aGreen'] }" title="{ translate: 'join.ok.team', with: ['`aGreen'] }"/>
-                    </action>
-                    <action filter="owned_by=${orange}">
-                        <kit force="true">
-                            <team-switch team="orange"/>
-                        </kit>
-                        <message text="{ translate: 'join.ok.team', with: ['`6Orange'] }" title="{ translate: 'join.ok.team', with: ['`6Orange'] }"/>
-                    </action>
-                    <sound key="${block.wool.break}"/>
-                </action>
-            </switch-scope>
-            <switch-scope inner="match">
-                <switch-scope inner="player" filter="any(all(target=${blue}, owned_by=${blue}), all(target=${red}, owned_by=${red}), all(target=${green}, owned_by=${green}), all(target=${orange}, owned_by=${orange}))">
-                    <action id="unfreeze-player"/>
+            <set var="index" value="target"/>
+            <set var="target" value="0"/>
+            <repeat times="4">
+                <set var="target" value="target + 1"/>
+                <set var="temp" value="0"/>
+                <switch-scope inner="player" filter="owned-by-target">
+                    <set var="temp" value="temp + 1"/>
                 </switch-scope>
-                <set var="eliminated" index="target - 1" value="1"/>
-            </switch-scope>
-        </action>
-    </trigger>
-    <trigger scope="player" filter="all(in-match, alive)">
-        <action filter="team-eliminated">
-            <set var="eliminated_index" value="floor(random() * 4)"/>
-            <repeat times="4" filter="team-eliminated">
-                <action filter="eliminated_index=4..">
-                    <set var="eliminated_index" value="0"/>
-                </action>
-                <action filter="team-eliminated">
-                    <!-- don't increment eliminated_index var directly as it can get set out
-                         of array bounds and throw an error -->
-                    <set var="tmp" value="eliminated_index + 1"/>
-                    <action filter="tmp=4..">
-                        <set var="tmp" value="0"/>
-                    </action>
-                    <set var="eliminated_index" value="tmp"/>
-                </action>
-                <action filter="not(team-eliminated)">
-                    <set var="owned_by" value="eliminated_index + 1"/>
-                    <action id="switch-team"/>
-                    <action id="unfreeze-player"/>
-                </action>
+                <switch-scope inner="match" filter="temp=1..">
+                    <message text="`3» `e{count} {player} `bmoved to {team}">
+                        <replacements>
+                            <decimal id="count" value="temp"/>
+                            <replacement id="player">players-plural</replacement>
+                            <replacement id="team">team-target</replacement>
+                        </replacements>
+                    </message>
+                </switch-scope>
             </repeat>
+            <set var="target" value="index"/>
+            <set var="eliminated" value="1"/>
         </action>
     </trigger>
-    <trigger scope="player" filter="any(all(blue, owned_by=${blue}), all(red, owned_by=${red}), all(green, owned_by=${green}), all(orange, owned_by=${orange}))">
+    <trigger scope="player" filter="all(match-running, delay, alive, eliminated=1, not(exclusive))">
         <action>
-            <action id="unfreeze-player"/>
+            <action filter="owned_by=${none}">
+                <set var="move_target" value="ceil(random() * 4)"/>
+                <repeat times="4" filter="not(move_target=0)">
+                    <set var="move_target" value="move_target + 1"/>
+                    <action filter="not(move_target=${any})">
+                        <set var="move_target" value="1"/>
+                    </action>
+                    <action filter="move-target-alive">
+                        <set var="owned_by" value="move_target"/>
+                        <set var="move_target" value="0"/>
+                    </action>
+                </repeat>
+            </action>
+            <set var="respawning" value="1"/>
+            <set var="moving_team" value="1"/>
+            <message text="{ translate: 'join.ok.team', with: ['{team}'] }" title="{ translate: 'join.ok.team', with: ['{team}'] }">
+                <replacements>
+                    <replacement id="team">team-owned-by</replacement>
+                </replacements>
+            </message>
+            <action filter="owned_by=${blue}">
+                <kit force="true">
+                    <team-switch team="blue"/>
+                </kit>
+            </action>
+            <action filter="owned_by=${red}">
+                <kit force="true">
+                    <team-switch team="red"/>
+                </kit>
+            </action>
+            <action filter="owned_by=${green}">
+                <kit force="true">
+                    <team-switch team="green"/>
+                </kit>
+            </action>
+            <action filter="owned_by=${orange}">
+                <kit force="true">
+                    <team-switch team="orange"/>
+                </kit>
+            </action>
+            <sound key="${block.wool.break}"/>
         </action>
     </trigger>
+    <trigger scope="player" action="unfreeze-player" filter="any(all(target=${blue}, owned_by=${blue}), all(target=${red}, owned_by=${red}), all(target=${green}, owned_by=${green}), all(target=${orange}, owned_by=${orange}))"/>
+    <trigger scope="player" action="unfreeze-player" filter="any(all(blue, owned_by=${blue}), all(red, owned_by=${red}), all(green, owned_by=${green}), all(orange, owned_by=${orange}))"/>
     <trigger scope="match">
         <filter>
             <after duration="1s" filter="exclusive"/>
