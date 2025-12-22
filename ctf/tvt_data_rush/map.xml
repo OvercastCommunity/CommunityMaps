@@ -1,6 +1,7 @@
-<map proto="1.5.0" game="Flag Assault &amp; Blitz">
-<name>TVT: Data Rush</name>
-<version>1.1.2</version>
+<map proto="1.5.0" game="Flag Battles">
+<name>FB: Data-Rush</name>
+<variant id="comp" override="true">FB: Super-Rush</variant>
+<version>1.2.0</version>
 <phase>development</phase>
 <objective>Score your flag in the enemy goals, last team standing wins!</objective>
 <created>2025-11-15</created>
@@ -16,6 +17,13 @@
     <constant id="starting-score">6</constant> <!-- Starting hearts for each team -->
     <constant id="score-amount">1</constant> <!-- Team damage dealt for sucessful scores -->
     <constant id="score-multiplier">2</constant> <!-- Multiplies the damage dealt by score-ammount when scoring flags during sudden death -->
+    <if variant="comp">
+        <constant id="kill-teams">1</constant> <!-- When teams are killed and this feature is enabled players are sent to obs instead of swapping teams (Used primarily for comp) -->
+    </if>
+    <unless variant="comp">
+        <constant id="kill-teams">0</constant> <!-- When teams are killed and this feature is enabled players are sent to obs instead of swapping teams (Used primarily for comp) -->
+    </unless>
+    <constant id="auto-kill-timer">15</constant> <!-- (Time | Seconds) If a team is empty but not dead how long should the game wait to auto-kill said team -->
 
     <!-- Flag Settings -->
     <constant id="recover-time">15s</constant> <!-- flag recovery time -->
@@ -27,8 +35,15 @@
     <constant id="yellow-team-alias">`eYellow Team</constant> 
     <constant id="green-team-alias">`aGreen Team</constant> 
     <constant id="blue-team-alias">`9Blue Team</constant> 
+    <constant id="dead-team-alias">-----</constant> 
     <constant id="score-message">{player} dealt `d`l1 `rdamage to</constant> <!-- Message for when players deal regular damage to teams -->
     <constant id="score-message-double">{player} dealt `5`l2 `rdamage to</constant> <!-- Message for when players deal double damage to teams -->
+
+    <!-- Internal -->
+    <constant id="no-players">999</constant> 
+    <constant id="no-message">0</constant> 
+    <constant id="team-lives-message">1</constant> 
+    <constant id="team-deathswap-message">2</constant> 
 
 </constants>
 <authors>
@@ -89,7 +104,7 @@
             <author>Technodono</author>
             <pages>
                 <page>
-                    `3➠ `lTeam vs Team
+                    `3➠ `lFlag Battles
                     `9➥ Overview`0
 
                     In a battle of fates
@@ -184,19 +199,42 @@
     <with-team id="green_team_lives" var="team_lives" team="green-team"/>
     <with-team id="blue_team_lives" var="team_lives" team="blue-team"/>
     
-    <!-- Team Messages -->
-    <variable id="notify_team" scope="team">0</variable>
-    <with-team id="notify_red_team" var="notify_team" team="red-team"/>
-    <with-team id="notify_yellow_team" var="notify_team" team="yellow-team"/>
-    <with-team id="notify_green_team" var="notify_team" team="green-team"/>
-    <with-team id="notify_blue_team" var="notify_team" team="blue-team"/>
+    <!-- Messages -->
+    <variable id="notify_mesage_to_player" scope="player">${no-message}</variable>
+    <variable id="notify_mesage_to_team" scope="team">${no-message}</variable>
+    <with-team id="notify_red_team" var="notify_mesage_to_team" team="red-team"/>
+    <with-team id="notify_yellow_team" var="notify_mesage_to_team" team="yellow-team"/>
+    <with-team id="notify_green_team" var="notify_mesage_to_team" team="green-team"/>
+    <with-team id="notify_blue_team" var="notify_mesage_to_team" team="blue-team"/>
 
     <!-- Match Variables -->
     <variable id="blitz_enabled" scope="match">0</variable>
-    <variable id="team_kill" scope="team">0</variable>
+    <variable id="team_kill_enabled" scope="match"/>
+
+    <variable id="team_is_dead" scope="team">0</variable>
+    <with-team id="red_team_is_dead" var="team_is_dead" team="red-team"/>
+    <with-team id="yellow_team_is_dead" var="team_is_dead" team="yellow-team"/>
+    <with-team id="green_team_is_dead" var="team_is_dead" team="green-team"/>
+    <with-team id="blue_team_is_dead" var="team_is_dead" team="blue-team"/>
+
+    <variable id="team_removal_timer" scope="team"/>
+    <variable id="lowest_playercount" scope="match">0</variable>
+    <variable id="teams_remaining" scope="match">4</variable>
+    <variable id="team_teleport_activated" scope="team">0</variable>
+    <variable id="team_death_message_sent" scope="team">0</variable>
+    <variable id="team_kill_trigger" scope="team">0</variable>
+
+    <variable id="team_playercount" scope="team">0</variable>
+    <with-team id="red_team_playercount" var="team_playercount" team="red-team"/>
+    <with-team id="yellow_team_playercount" var="team_playercount" team="yellow-team"/>
+    <with-team id="green_team_playercount" var="team_playercount" team="green-team"/>
+    <with-team id="blue_team_playercount" var="team_playercount" team="blue-team"/>
+
     <timelimit id="match_timelimit"/>
     
-    <!-- Player Variables -->
+    <!-- Player & Team Variables -->
+    <variable id="tmp_selected_team" scope="team" exclusive="1"/>
+    <variable id="tmp_selected_player" scope="player" exclusive="1"/>
     <variable id="player_identifier" scope="player" exclusive="1"/>
     <variable id="score_cooldown" scope="player">0</variable>
     <variable id="team_damage_dealt_tracker" scope="player">0</variable>
@@ -218,6 +256,8 @@
     <variable id="yellow-team-alive" var="yellow_team_lives">[1,oo]</variable>
     <variable id="green-team-alive" var="green_team_lives">[1,oo]</variable>
     <variable id="blue-team-alive" var="blue_team_lives">[1,oo]</variable>
+    <variable id="team-is-empty" var="team_playercount">0</variable>
+    <variable id="team-kill-enabled" var="team_kill_enabled">1</variable>
     <players id="can-score-red-portal" filter="all(match-running, alive, not(team-red), red-portal, has-any-flag)"/>
     <players id="can-score-yellow-portal" filter="all(match-running, alive, not(team-yellow), yellow-portal, has-any-flag)"/>
     <players id="can-score-green-portal" filter="all(match-running, alive, not(team-green), green-portal, has-any-flag)"/>
@@ -314,7 +354,7 @@
     </after>
     <after duration="${sudden-death-timelimit}" message="`cSudden Death Ends In: {0}" filter="sudden-death-enabled"/>
     <after id="sudden-death-enabled-2" duration="3.5s" filter="sudden-death-enabled"/>
-    <after id="match-loaded" duration="0.1s" filter="always"/> <!-- small delay to ensure action consistently runs on match start -->
+    <after id="match-loaded" duration="0.2s" filter="always"/> <!-- small delay to ensure action consistently runs on match start -->
 </filters>
 <actions>
 <!-- exposed -->
@@ -329,22 +369,49 @@
         <action>
             <switch-scope inner="team" observers="true">
                 <action id="team_lives := (${starting-score})"/>
+                <action id="teams_remaining := 4"/>
+                <action id="team_removal_timer := ceil(${auto-kill-timer}/2)"/>
                 <action id="match_timelimit := (${match-timelimit} + ${sudden-death-timelimit})"/>
+                <action id="team_kill_enabled := ${kill-teams}"/>
             </switch-scope>
         </action>
     </trigger>
-    <trigger scope="team" action="notify-team"><filter><variable var="notify_team">1</variable></filter></trigger>
-    <trigger scope="team" action="teleport-team">
-        <filter><score>0</score></filter>
-    </trigger>
-    <trigger scope="team" action="team_lives := 0">
-        <filter><score>-1</score></filter>
+
+    <trigger scope="team" action="notify-team-lives"><filter><variable var="notify_mesage_to_team">${team-lives-message}</variable></filter></trigger>
+    <trigger scope="team" action="team_lives := 0"><filter><variable var="team_removal_timer">..0</variable></filter></trigger>
+    <trigger scope="team" action="team_lives := 0"><filter><score>..-1</score></filter></trigger>
+
+
+    <trigger scope="team" action="teleport-team" >
+        <filter>
+        <all>
+            <score>0</score>
+            <pulse period="0.1s" duration="0.05s" filter="match-running"/>
+            <filter id="team_teleport_activated = 0"/>
+        </all>
+        </filter>
     </trigger>
     <trigger scope="team" action="kill-team">
-        <filter><after duration="3s" message="Returning to OBS in: {0}"><score>0</score></after></filter>
+        <filter>
+            <all>
+                <after duration="3s" message="Returning to OBS in: {0}"><score>0</score></after>
+                <filter id="team_kill_trigger = 1"/>
+            </all>
+        </filter>
     </trigger>
-    <trigger scope="team" action="notify-team-death">
-        <filter><after duration="3.2s"><score>0</score></after></filter>
+
+    <trigger scope="team" action="notify-team-death"> <!-- late notifications for when cop mode is enabled -->
+        <filter><after duration="0.2s" filter="all(team-kill-enabled,team_death_message_sent=0,team_is_dead=1)"></after></filter>
+    </trigger>
+    <trigger scope="player" action="notify-team-death-for-players"> <!-- late notifications for when cop mode is enabled -->
+        <filter><after duration="0.4s"><variable var="notify_mesage_to_player">${team-deathswap-message}</variable></after></filter>
+    </trigger>
+
+    <!-- Track team count numbers -->
+    <trigger scope="match" action="check-teams">
+        <filter>
+            <pulse period="2s" duration="0.1s" filter="match-running"/>
+        </filter>
     </trigger>
     
     <!-- logic for teams scoring in portals & scoring messages -->
@@ -466,9 +533,56 @@
     <trigger scope="match" filter="sudden-death-enabled-2" action="notify-sudden-death-2"/>
 
      <!-- Actions -->
-    
-    <action id="notify-team" scope="team">
-        <set var="notify_team" value="0"/>
+
+    <!-- Ensure teams start with or have enough players -->
+    <action id="check-teams" scope="match">
+        <action id="get-team-playercounts">
+            <set var="red_team_playercount" value="0"/>
+            <set var="yellow_team_playercount" value="0"/>
+            <set var="green_team_playercount" value="0"/>
+            <set var="blue_team_playercount" value="0"/>
+            <switch-scope inner="player" filter="red-team">
+                <set var="red_team_playercount" value="red_team_playercount+1"/>
+            </switch-scope>
+            <switch-scope inner="player" filter="yellow-team">
+                <set var="yellow_team_playercount" value="yellow_team_playercount+1"/>
+            </switch-scope>
+            <switch-scope inner="player" filter="green-team">
+                <set var="green_team_playercount" value="green_team_playercount+1"/>
+            </switch-scope>
+            <switch-scope inner="player" filter="blue-team">
+                <set var="blue_team_playercount" value="blue_team_playercount+1"/>
+            </switch-scope>
+            <switch-scope inner="team">
+                <action filter="team_playercount = ..0">
+                    <action id="team_playercount := ${no-players}"/>
+                </action>
+            </switch-scope>
+        </action>
+        <switch-scope inner="team">
+            <action filter="team_playercount = ${no-players}">
+                <set var="team_removal_timer" value="team_removal_timer - 1"/>
+            </action>
+            <action filter="team_playercount = 1..998">
+                <action id="team_removal_timer := ceil(${auto-kill-timer}/2)"/>
+            </action>
+        </switch-scope>
+    </action>
+
+    <action id="notify-team-death-for-players" scope="player">
+        <set var="notify_mesage_to_player" value="${no-message}"/>
+        <action filter="teams_remaining = 2..">
+            <message title="`c`lTeam Eliminated!" subtitle="`7You have been swapped to a new team."/>
+        </action>
+        <action filter="teams_remaining = ..1">
+            <message title="`c`lTeam Eliminated!" subtitle="`7Try harder next time."/>
+        </action>
+        <sound key="mob.enderdragon.hit" pitch="1" volume="2"/>
+        <sound key="mob.wither.spawn" preset="OBJECTIVE_BAD"/>
+    </action>
+
+    <action id="notify-team-lives" scope="team">
+        <set var="notify_mesage_to_team" value="${no-message}"/>
         <sound key="mob.enderdragon.hit" pitch="1" volume="2"/>
         <sound key="mob.wither.hurt" pitch="0.75" volume="0.3"/>
         <action filter="score = 1">
@@ -505,6 +619,7 @@
         </switch-scope>
     </action>
     <action id="notify-team-death" scope="team">
+            <action id="team_death_message_sent := 1"/>
             <action filter="team-red">
                 <switch-scope inner="match">
                     <message text="`8`l──────────────────"/>
@@ -536,9 +651,14 @@
     </action>
 
     <action id="teleport-team" scope="team">
-        <message title="`c`lTeam Eliminated!"/>
-        <set var="team_kill" value="1"/>
-        <set var="blitz_enabled" value="1"/>
+        <set var="team_teleport_activated" value="1"/>
+        <set var="teams_remaining" value="teams_remaining-1"/>
+        <action filter="teams_remaining=..1"> <!-- If only 1 team is alive force kill the other team-->
+            <set var="team_kill_enabled" value="1"/>
+        </action>
+        <switch-scope inner="player">
+            <action id="notify_mesage_to_player := ${team-deathswap-message}"/>
+        </switch-scope>
         <action filter="team-red">
             <switch-scope inner="player">
                 <teleport x="-53.5" y="8" z="-53.5" yaw="-90"/>
@@ -579,19 +699,66 @@
                 <fill region="blue-objective-sign" material="air"/>
             </switch-scope>
         </action>
-        <sound key="mob.enderdragon.hit" pitch="1" volume="2"/>
-        <sound key="mob.wither.spawn" preset="OBJECTIVE_BAD"/>
+        <!-- if team kill is enabled-->
+        <action filter="team-kill-enabled">
+            <action id="team_kill_trigger := 1"/>
+        </action>
+        <!-- if team kill is disabled-->
+        <action filter="not(team-kill-enabled)">
+            <set var="team_is_dead" value="1"/>
+            <set var="blitz_enabled" value="1"/>
+            <action id="notify-team-death"/>
+            <team-alias alias="${dead-team-alias}"/>
+            <action id="send-players-to-new-teams"/>
+        </action>        
     </action>
+    
+    <action id="send-players-to-new-teams" scope="team">
+        <switch-scope inner="match">
+            <action id="get-team-playercounts"/>
+        </switch-scope>
+        <switch-scope inner="player">
+            <set var="tmp_selected_player" value="1"/>
+        </switch-scope>
+       <set var="lowest_playercount" value="min(red_team_playercount,yellow_team_playercount,green_team_playercount,blue_team_playercount)"/>
+        <switch-scope inner="player">
+            <action filter="red_team_playercount - lowest_playercount = 0">
+                <kit filter="tmp_selected_player=1"><team-switch team="red-team"/></kit>
+                <set var="lowest_playercount" value="-999"/>
+            </action>
+            <action filter="yellow_team_playercount - lowest_playercount = 0">
+                <kit filter="tmp_selected_player=1"><team-switch team="yellow-team"/></kit>
+                <set var="lowest_playercount" value="-999"/>
+            </action>
+            <action filter="green_team_playercount - lowest_playercount = 0">
+                <kit filter="tmp_selected_player=1"><team-switch team="green-team"/></kit>
+                <set var="lowest_playercount" value="-999"/>
+            </action>
+            <action filter="blue_team_playercount - lowest_playercount = 0">
+                <kit filter="tmp_selected_player=1"><team-switch team="blue-team"/></kit>
+                <set var="lowest_playercount" value="-999"/>
+            </action>
+        </switch-scope>
+        <switch-scope inner="match">
+            <action id="get-team-playercounts"/>
+        </switch-scope>
+        <action filter="not(team-is-empty)">
+            <action id="send-players-to-new-teams"/>
+        </action>
+    </action>
+
 
     <action id="kill-team" scope="team">
         <!--send players to observers-->
+        <set var="team_is_dead" value="1"/>
+        <set var="blitz_enabled" value="1"/>
         <switch-scope inner="player">
         <teleport x="0.5" y="-100" z="0.5" yaw="90"/>
             <kit id="join-obs">
                 <effect duration="2" amplifier="100">instant_damage</effect>
             </kit>
         </switch-scope>
-        <team-alias alias="-----"/>
+        <team-alias alias="${dead-team-alias}"/>
     </action>
 
 </actions>
@@ -747,7 +914,7 @@
     <lives>1</lives>
     <broadcastLives>false</broadcastLives>
     <join-filter><filter id="blitz-disabled"/></join-filter>
-    <filter><variable var="team_kill">1</variable></filter>
+    <filter><variable var="team_is_dead">1</variable></filter>
 </blitz>
 <time result="score" show="false">-10</time>
 <respawn auto="true"/>
