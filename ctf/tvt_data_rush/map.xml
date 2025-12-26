@@ -2,7 +2,7 @@
 <name>FB: Data-Rush</name>
 <slug>tvt_data_rush</slug>
 <variant id="comp" override="true">FB: Super-Rush</variant>
-<version>1.2.0</version>
+<version>1.2.1</version>
 <phase>development</phase>
 <objective>Score your flag in the enemy goals, last team standing wins!</objective>
 <created>2025-11-15</created>
@@ -24,8 +24,7 @@
     <unless variant="comp">
         <constant id="kill-teams">0</constant> <!-- When teams are killed and this feature is enabled players are sent to obs instead of swapping teams (Used primarily for comp) -->
     </unless>
-    <constant id="auto-kill-timer">15</constant> <!-- (Time | Seconds) If a team is empty but not dead how long should the game wait to auto-kill said team -->
-
+    
     <!-- Flag Settings -->
     <constant id="recover-time">15s</constant> <!-- flag recovery time -->
     <constant id="respawn-time">7s</constant> <!-- flag respawn time -->
@@ -45,7 +44,9 @@
     <constant id="no-message">0</constant> 
     <constant id="team-lives-message">1</constant> 
     <constant id="team-deathswap-message">2</constant> 
-
+    <constant id="auto-kill-timer">0.1</constant> 
+    <!-- (Time | Seconds) If a team is empty but not dead how long should the game wait to auto-kill said team -->
+    <!-- [setting this to other values may cause unintended behaviour when the team kill mode is disabled] -->
 </constants>
 <authors>
     <author uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609" contribution="Map Author"/> <!-- Technodono -->
@@ -60,7 +61,7 @@
 </rules>
 <broadcasts>
     <tip after="1s" every="3m">Scoring flags in enemy goals will reduce their lives!</tip>
-    <tip after="90s" every="3m">Remember to defend your teams goals from enemy flag carriers!</tip>
+    <tip after="90s" every="3m">TNT and other supplies can be found in loot chests!</tip>
 </broadcasts>
 <stats>
     <stat name="`6Most damage dealt to enemy teams" value="team_damage_dealt_tracker"/>
@@ -224,6 +225,9 @@
     <variable id="team_teleport_activated" scope="team">0</variable>
     <variable id="team_death_message_sent" scope="team">0</variable>
     <variable id="team_kill_trigger" scope="team">0</variable>
+    <variable id="team_swap_trigger" scope="team">0</variable>
+
+    <variable id="raw_team_playercount" scope="team">0</variable>
 
     <variable id="team_playercount" scope="team">0</variable>
     <with-team id="red_team_playercount" var="team_playercount" team="red-team"/>
@@ -231,11 +235,18 @@
     <with-team id="green_team_playercount" var="team_playercount" team="green-team"/>
     <with-team id="blue_team_playercount" var="team_playercount" team="blue-team"/>
 
+    <variable id="tmp_team_playercount" scope="team">0</variable>
+    <with-team id="tmp_red_team_playercount" var="tmp_team_playercount" team="red-team"/>
+    <with-team id="tmp_yellow_team_playercount" var="tmp_team_playercount" team="yellow-team"/>
+    <with-team id="tmp_green_team_playercount" var="tmp_team_playercount" team="green-team"/>
+    <with-team id="tmp_blue_team_playercount" var="tmp_team_playercount" team="blue-team"/>
+
     <timelimit id="match_timelimit"/>
     
     <!-- Player & Team Variables -->
     <variable id="tmp_selected_team" scope="team" exclusive="1"/>
-    <variable id="tmp_selected_player" scope="player" exclusive="1"/>
+    <variable id="selected_player" scope="player" exclusive="1"/>
+    <variable id="was_selected_player" scope="player"/>
     <variable id="player_identifier" scope="player" exclusive="1"/>
     <variable id="score_cooldown" scope="player">0</variable>
     <variable id="team_damage_dealt_tracker" scope="player">0</variable>
@@ -257,13 +268,20 @@
     <variable id="yellow-team-alive" var="yellow_team_lives">[1,oo]</variable>
     <variable id="green-team-alive" var="green_team_lives">[1,oo]</variable>
     <variable id="blue-team-alive" var="blue_team_lives">[1,oo]</variable>
-    <variable id="team-is-empty" var="team_playercount">0</variable>
     <variable id="team-kill-enabled" var="team_kill_enabled">1</variable>
     <players id="can-score-red-portal" filter="all(match-running, alive, not(team-red), red-portal, has-any-flag)"/>
     <players id="can-score-yellow-portal" filter="all(match-running, alive, not(team-yellow), yellow-portal, has-any-flag)"/>
     <players id="can-score-green-portal" filter="all(match-running, alive, not(team-green), green-portal, has-any-flag)"/>
     <players id="can-score-blue-portal" filter="all(match-running, alive, not(team-blue), blue-portal, has-any-flag)"/>
 
+    <any id="is-empty-team">
+        <variable var="raw_team_playercount">0</variable>
+        <variable var="team_is_dead">1</variable>
+    </any>
+    <any id="tmp-is-empty-team">
+        <variable var="tmp_team_playercount">0</variable>
+        <variable var="team_is_dead">1</variable>
+    </any>
     <any id="has-any-flag">
         <carrying-flag>red-flag-1</carrying-flag>
         <carrying-flag>red-flag-2</carrying-flag>
@@ -350,10 +368,21 @@
         </all>
     </any>
     <countdown id="recently-had-flag" duration="${flag-drop-buffer}" filter="not(has-any-flag)"/>
-    <after id="sudden-death-enabled" duration="${match-timelimit}" message="`aTime Remaining: {0}">
+    <countdown id="game-countdown" duration="${match-timelimit}" message="`aTime Remaining: {0}">
+        <all>
+            <match-running/>
+            <score>1..</score>
+        </all>
+    </countdown>
+    <after id="sudden-death-enabled" duration="${match-timelimit}">
         <match-running/>
     </after>
-    <after duration="${sudden-death-timelimit}" message="`cSudden Death Ends In: {0}" filter="sudden-death-enabled"/>
+    <countdown id="suddendeath-countdown" duration="${sudden-death-timelimit}" message="`cSudden Death Ends In: {0}">
+        <all>
+            <filter id="sudden-death-enabled"/>
+            <score>1..</score>
+        </all>
+    </countdown>
     <after id="sudden-death-enabled-2" duration="3.5s" filter="sudden-death-enabled"/>
     <after id="match-loaded" duration="0.2s" filter="always"/> <!-- small delay to ensure action consistently runs on match start -->
 </filters>
@@ -394,9 +423,13 @@
     </trigger>
     <trigger scope="team" action="kill-team">
         <filter>
+                <after duration="3s" message="Returning to OBS in: {0}"><all><filter id="team_kill_trigger = 1"/></all></after>
+        </filter>
+    </trigger>
+    <trigger scope="team" action="send-players-to-new-teams">
+        <filter>
             <all>
-                <after duration="3s" message="Returning to OBS in: {0}"><score>0</score></after>
-                <filter id="team_kill_trigger = 1"/>
+                <after duration="3s" message="Swapping teams in: {0}"><filter id="team_swap_trigger = 1"/></after>
             </all>
         </filter>
     </trigger>
@@ -535,27 +568,30 @@
 
      <!-- Actions -->
 
+    <action id="tmp-get-team-playercounts"  scope="match">
+        <switch-scope inner="team">
+            <set var="tmp_team_playercount" value="0"/>
+        </switch-scope>
+        <switch-scope inner="player">
+            <set var="tmp_team_playercount" value="tmp_team_playercount+1"/>
+        </switch-scope>
+        <switch-scope inner="team" filter="tmp-is-empty-team">
+            <action id="tmp_team_playercount := ${no-players}"/>
+        </switch-scope>
+    </action>
     <!-- Ensure teams start with or have enough players -->
     <action id="check-teams" scope="match">
         <action id="get-team-playercounts">
-            <set var="red_team_playercount" value="0"/>
-            <set var="yellow_team_playercount" value="0"/>
-            <set var="green_team_playercount" value="0"/>
-            <set var="blue_team_playercount" value="0"/>
-            <switch-scope inner="player" filter="red-team">
-                <set var="red_team_playercount" value="red_team_playercount+1"/>
+            <switch-scope inner="team">
+                <set var="raw_team_playercount" value="0"/>
+                <set var="team_playercount" value="0"/>
             </switch-scope>
-            <switch-scope inner="player" filter="yellow-team">
-                <set var="yellow_team_playercount" value="yellow_team_playercount+1"/>
-            </switch-scope>
-            <switch-scope inner="player" filter="green-team">
-                <set var="green_team_playercount" value="green_team_playercount+1"/>
-            </switch-scope>
-            <switch-scope inner="player" filter="blue-team">
-                <set var="blue_team_playercount" value="blue_team_playercount+1"/>
+            <switch-scope inner="player">
+                <set var="raw_team_playercount" value="raw_team_playercount+1"/>
+                <set var="team_playercount" value="team_playercount+1"/>
             </switch-scope>
             <switch-scope inner="team">
-                <action filter="team_playercount = ..0">
+                <action filter="is-empty-team">
                     <action id="team_playercount := ${no-players}"/>
                 </action>
             </switch-scope>
@@ -572,9 +608,11 @@
 
     <action id="notify-team-death-for-players" scope="player">
         <set var="notify_mesage_to_player" value="${no-message}"/>
-        <action filter="teams_remaining = 2..">
-            <message title="`c`lTeam Eliminated!" subtitle="`7You have been swapped to a new team."/>
-        </action>
+        <if variant="comp">
+            <action filter="teams_remaining = 2..">
+                <message title="`c`lTeam Eliminated!" subtitle="`7Try harder next time."/>
+            </action>
+        </if>
         <action filter="teams_remaining = ..1">
             <message title="`c`lTeam Eliminated!" subtitle="`7Try harder next time."/>
         </action>
@@ -706,46 +744,55 @@
         </action>
         <!-- if team kill is disabled-->
         <action filter="not(team-kill-enabled)">
-            <set var="team_is_dead" value="1"/>
             <set var="blitz_enabled" value="1"/>
             <action id="notify-team-death"/>
             <team-alias alias="${dead-team-alias}"/>
-            <action id="send-players-to-new-teams"/>
+            <action id="team_swap_trigger := 1"/>
         </action>        
     </action>
     
     <action id="send-players-to-new-teams" scope="team">
         <switch-scope inner="match">
-            <action id="get-team-playercounts"/>
+            <action id="tmp-get-team-playercounts"/>
         </switch-scope>
-        <switch-scope inner="player">
-            <set var="tmp_selected_player" value="1"/>
-        </switch-scope>
-       <set var="lowest_playercount" value="min(red_team_playercount,yellow_team_playercount,green_team_playercount,blue_team_playercount)"/>
-        <switch-scope inner="player">
-            <action filter="red_team_playercount - lowest_playercount = 0">
-                <kit filter="tmp_selected_player=1"><team-switch team="red-team"/></kit>
-                <set var="lowest_playercount" value="-999"/>
-            </action>
-            <action filter="yellow_team_playercount - lowest_playercount = 0">
-                <kit filter="tmp_selected_player=1"><team-switch team="yellow-team"/></kit>
-                <set var="lowest_playercount" value="-999"/>
-            </action>
-            <action filter="green_team_playercount - lowest_playercount = 0">
-                <kit filter="tmp_selected_player=1"><team-switch team="green-team"/></kit>
-                <set var="lowest_playercount" value="-999"/>
-            </action>
-            <action filter="blue_team_playercount - lowest_playercount = 0">
-                <kit filter="tmp_selected_player=1"><team-switch team="blue-team"/></kit>
-                <set var="lowest_playercount" value="-999"/>
-            </action>
-        </switch-scope>
-        <switch-scope inner="match">
-            <action id="get-team-playercounts"/>
-        </switch-scope>
-        <action filter="not(team-is-empty)">
-            <action id="send-players-to-new-teams"/>
-        </action>
+        <repeat times="tmp_team_playercount">
+            <set var="tmp_team_playercount" value="${no-players}"/>
+            <switch-scope inner="player" filter="was_selected_player=..0">
+                <action id="selected_player := 1"/>
+            </switch-scope>
+            <switch-scope inner="player" filter="selected_player = 1..">
+                <set var="lowest_playercount" value="min(tmp_red_team_playercount,tmp_yellow_team_playercount,tmp_green_team_playercount,tmp_blue_team_playercount)"/>
+                <action id="was_selected_player := 1"/>
+                <action filter="tmp_red_team_playercount - lowest_playercount = 0">
+                    <set var="tmp_red_team_playercount" value="tmp_red_team_playercount + 1"/>
+                    <message title="`c`lTeam Eliminated!" subtitle="`7Your new team is: ${red-team-alias}."/>
+                    <kit force="true"><team-switch team="red-team" show-title="false"/></kit>
+                    <set var="lowest_playercount" value="-999"/>
+                </action>
+                <action filter="tmp_yellow_team_playercount - lowest_playercount = 0">
+                    <set var="tmp_yellow_team_playercount" value="tmp_yellow_team_playercount + 1"/>
+                    <message title="`c`lTeam Eliminated!" subtitle="`7Your new team is: ${yellow-team-alias}."/>
+                    <kit force="true"><team-switch team="yellow-team" show-title="false"/></kit>
+                    <set var="lowest_playercount" value="-999"/>
+                </action>
+                <action filter="tmp_green_team_playercount - lowest_playercount = 0">
+                    <set var="tmp_green_team_playercount" value="tmp_green_team_playercount + 1"/>
+                    <message title="`c`lTeam Eliminated!" subtitle="`7Your new team is: ${green-team-alias}."/>
+                    <kit force="true"><team-switch team="green-team" show-title="false"/></kit>
+                    <set var="lowest_playercount" value="-999"/>
+                </action>
+                <action filter="tmp_blue_team_playercount - lowest_playercount = 0">
+                    <set var="tmp_blue_team_playercount" value="tmp_blue_team_playercount + 1"/>
+                    <message title="`c`lTeam Eliminated!" subtitle="`7Your new team is: ${blue-team-alias}."/>
+                    <kit force="true"><team-switch team="blue-team" show-title="false"/></kit>
+                    <set var="lowest_playercount" value="-999"/>
+                </action>
+            </switch-scope>
+            <switch-scope inner="match">
+                <action id="get-team-playercounts"/>
+            </switch-scope>
+        </repeat>
+        <set var="team_is_dead" value="1"/>
     </action>
 
 
