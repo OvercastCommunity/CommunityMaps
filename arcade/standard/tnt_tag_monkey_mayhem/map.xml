@@ -1,13 +1,33 @@
 <map proto="1.5.0">
 <name>TNT Tag: Monkey Mayhem</name>
-<version>1.0.0</version>
+<variant id="tail" override="true">Tail Tag: Monkey Mayhem</variant>
+<version>1.0.1</version>
 <created>2026-01-02</created>
 <authors>
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c" /> <!-- mitchiii -->
 </authors>
-<include id="tnt-tag"/>
+<if variant="default">
+    <include id="tnt-tag"/>
+</if>
+<if variant="tail">
+    <objective>Collect and hold more flags than any other team!</objective>
+    <teams>
+        <team id="blue" color="blue" max="8">Blue</team>
+        <team id="red" color="dark red" max="8">Red</team>
+        <team id="green" color="dark green" max="8">Green</team>
+        <team id="yellow" color="yellow" max="8">Yellow</team>
+    </teams>
+</if>
 <spawns>
-    <spawn region="center" kit="hider-kit" angle="0.5,11.5,0.5"/>
+    <if variant="default">
+        <spawn region="center" kit="hider-kit" angle="0.5,11.5,0.5"/>
+    </if>
+    <if variant="tail">
+        <spawn team="blue" kit="tag-kit" region="blue-spawn" yaw="0"/>
+        <spawn team="red" kit="tag-kit" region="red-spawn" yaw="180"/>
+        <spawn team="yellow" kit="tag-kit" region="yellow-spawn" yaw="90"/>
+        <spawn team="green" kit="tag-kit" region="green-spawn" yaw="-90"/>
+    </if>
     <default angle="0.5,21,0.5">
         <regions>
             <block location="0,20,-39"/>
@@ -52,9 +72,267 @@
     <apply block="not(player)"/>
 </regions>
 <structures>
-    <structure id="flags" region="center-flags"/>
+    <structure id="flags" region="center-flags" origin="0,0,0"/>
+    <if variant="tail">
+        <dynamic structure="flags" trigger="flags_remaining=1.."/>
+    </if>
 </structures>
-<disabledamage>
-    <damage>fall</damage>
-</disabledamage>
+<if variant="tail">
+    <game>Score</game>
+    <score/>
+    <time>3m</time>
+    <kits>
+        <kit id="tag-kit" force="true">
+            <clear/>
+            <helmet material="leather helmet" team-color="true" unbreakable="true" locked="true"/>
+            <chestplate material="leather chestplate" team-color="true" unbreakable="true" locked="true"/>
+            <item slot="4" material="compass" locked="true"/>
+            <game-mode>adventure</game-mode>
+        </kit>
+        <kit id="flag-kit" force="true">
+            <action filter="blue">
+                <kit force="true">
+                    <banner slot="slot.armor.head" locked="true" base-color="blue">
+                        <layer pattern="circle middle" color="black"/>
+                        <layer pattern="cross" color="brown"/>
+                        <layer pattern="creeper" color="black"/>
+                        <layer pattern="flower" color="brown"/>
+                        <layer pattern="stripe top" color="blue"/>
+                        <layer pattern="stripe bottom" color="blue"/>
+                        <layer pattern="triangles top" color="light blue"/>
+                        <layer pattern="triangles bottom" color="light blue"/>
+                    </banner>
+                </kit>
+            </action>
+            <action filter="red">
+                <kit force="true">
+                    <banner slot="slot.armor.head" locked="true" base-color="red">
+                        <layer pattern="circle middle" color="black"/>
+                        <layer pattern="cross" color="brown"/>
+                        <layer pattern="creeper" color="black"/>
+                        <layer pattern="flower" color="brown"/>
+                        <layer pattern="stripe top" color="red"/>
+                        <layer pattern="stripe bottom" color="red"/>
+                        <layer pattern="triangles top" color="orange"/>
+                        <layer pattern="triangles bottom" color="orange"/>
+                    </banner>
+                </kit>
+            </action>
+            <action filter="yellow">
+                <kit force="true">
+                    <banner slot="slot.armor.head" locked="true" base-color="yellow">
+                        <layer pattern="circle middle" color="black"/>
+                        <layer pattern="cross" color="brown"/>
+                        <layer pattern="creeper" color="black"/>
+                        <layer pattern="flower" color="brown"/>
+                        <layer pattern="stripe top" color="yellow"/>
+                        <layer pattern="stripe bottom" color="yellow"/>
+                        <layer pattern="triangles top" color="orange"/>
+                        <layer pattern="triangles bottom" color="orange"/>
+                    </banner>
+                </kit>
+            </action>
+            <action filter="green">
+                <kit force="true">
+                    <banner slot="slot.armor.head" locked="true" base-color="green">
+                        <layer pattern="circle middle" color="black"/>
+                        <layer pattern="cross" color="brown"/>
+                        <layer pattern="creeper" color="black"/>
+                        <layer pattern="flower" color="brown"/>
+                        <layer pattern="stripe top" color="green"/>
+                        <layer pattern="stripe bottom" color="green"/>
+                        <layer pattern="triangles top" color="lime"/>
+                        <layer pattern="triangles bottom" color="lime"/>
+                    </banner>
+                </kit>
+            </action>
+            <item slot="0" material="wool" team-color="true" locked="true"/>
+            <item slot="1" material="wool" team-color="true" locked="true"/>
+            <item slot="2" material="wool" team-color="true" locked="true"/>
+            <item slot="3" material="wool" team-color="true" locked="true"/>
+            <item slot="4" material="wool" team-color="true" locked="true"/>
+            <item slot="5" material="wool" team-color="true" locked="true"/>
+            <item slot="6" material="wool" team-color="true" locked="true"/>
+            <item slot="7" material="wool" team-color="true" locked="true"/>
+            <item slot="8" material="wool" team-color="true" locked="true"/>
+        </kit>
+    </kits>
+    <compass show-distance="true">
+        <player holder-filter="blue" filter="all(not(blue), has_flag=1)" show-player="true"/>
+        <player holder-filter="red" filter="all(not(red), has_flag=1)" show-player="true"/>
+        <player holder-filter="yellow" filter="all(not(yellow), has_flag=1)" show-player="true"/>
+        <player holder-filter="green" filter="all(not(green), has_flag=1)" show-player="true"/>
+    </compass>
+    <filters>
+        <any id="game-damage">
+            <cause>potion</cause>
+            <cause>void</cause>
+            <cause>combustion</cause>
+            <cause>suffocation</cause>
+            <cause>squash</cause>
+            <cause>drowning</cause>
+            <cause>cactus</cause>
+        </any>
+        <relation id="ally">ally</relation>
+        <pulse id="match-pulse" period="1" duration="0.1" filter="match-running"/>
+        <attacker id="attacker-no-flag">
+            <variable id="no-flag" var="has_flag">0</variable>
+        </attacker>
+        <attacker id="attacker-getting-flag">
+            <variable id="getting-flag" var="has_flag">2</variable>
+        </attacker>
+        <victim id="victim-has-flag">
+            <variable id="has-flag" var="has_flag">1</variable>
+        </victim>
+        <variable id="score-is-correct" scope="team" value="score - score_check">0</variable>
+        <variable id="even-time" scope="match" value="timelimit % 2">0</variable>
+    </filters>
+    <variables scope="match">
+        <variable id="players"/>
+        <variable id="flags_remaining" default="1"/>
+    </variables>
+    <variables scope="team">
+        <variable id="show_message"/>
+        <variable id="score_check"/>
+    </variables>
+    <variables scope="player">
+        <variable id="has_flag"/>
+        <variable id="flags_stolen"/>
+        <variable id="seconds_held"/>
+        <variable id="seconds_held_continuous"/>
+        <variable id="last_attacker" scope="player" exclusive="1"/>
+        <variable id="last_victim" scope="player" exclusive="1"/>
+    </variables>
+    <stats>
+        <stat value="flags_stolen" name="Tails stolen"/>
+        <stat value="seconds_held" name="Seconds held"/>
+        <stat value="seconds_held_continuous" name="Seconds held streak"/>
+    </stats>
+    <replacements>
+        <decimal id="flag-count" scope="match" value="flags_remaining"/>
+        <switch id="flag-plural" scope="match" value="flags_remaining">
+            <case match="1" result="flag"/>
+            <case match="2.." result="flags"/>
+        </switch>
+    </replacements>
+    <actions>
+        <trigger scope="match" filter="match-started">
+            <action>
+                <switch-scope inner="player">
+                    <set var="players" value="players + 1"/>
+                </switch-scope>
+                <!-- <set var="flags_remaining" value="floor(players / 2)"/> -->
+                <set var="flags_remaining" value="2"/>
+                <message id="flags-remaining-message" subtitle="`c{0} `a{1} remaining!" stay="3m" fade-in="0.3s" fade-out="0s">
+                    <replacements>
+                        <replacement id="0">flag-count</replacement>
+                        <replacement id="1">flag-plural</replacement>
+                    </replacements>
+                </message>
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(match-running, has_flag=0)" action="tag-kit"/>
+        <trigger scope="player" filter="all(match-running, has_flag=1)" action="flag-kit"/>
+        <trigger scope="player" filter="all(match-running, flags_remaining=1.., center-flags, not(has_flag=1))">
+            <action>
+                <set var="flags_remaining" value="max(0, flags_remaining - 1)"/>
+                <set var="last_attacker" value="1"/>
+                <set var="has_flag" value="1"/>
+                <set var="score" value="score + 1"/>
+                <set var="seconds_held_continuous" value="0"/>
+                <switch-scope inner="match">
+                    <action id="flags-remaining-message"/>
+                    <message text="{0} `7picked up a tail">
+                        <replacements>
+                            <player id="0" var="last_attacker" style="color"/>
+                        </replacements>
+                    </message>
+                    <sound key="${entity.firework_rocket.twinkle}" volume="0.2" pitch=".9"/>
+                </switch-scope>
+            </action>
+        </trigger>
+        <trigger scope="match" filter="all(match-running, flags_remaining=0)">
+            <action>
+                <message subtitle=" "/>
+                <sound preset="OBJECTIVE_BAD"/>
+            </action>
+        </trigger>
+        <action id="take-flag" scope="player" filter="all(match-running, attacker-no-flag, victim-has-flag)">
+            <set var="last_attacker" value="1"/>
+            <set var="show_message" value="1"/>
+            <set var="has_flag" value="2"/>
+            <set var="score" value="score + 1"/>
+            <set var="seconds_held_continuous" value="0"/>
+            <set var="flags_stolen" value="flags_stolen + 1"/>
+        </action>
+        <action id="drop-flag" scope="player" filter="all(match-running)">
+            <kit force="true">
+                <health>20</health>
+            </kit>
+            <action filter="all(attacker-getting-flag, victim-has-flag)">
+                <set var="last_victim" value="1"/>
+                <set var="show_message" value="1"/>
+                <set var="has_flag" value="0"/>
+                <set var="score" value="score - 1"/>
+                <switch-scope inner="match">
+                    <switch-scope inner="team" filter="show_message=1">
+                        <message text="{0} `7stole a tail from {1}">
+                            <replacements>
+                                <player id="0" var="last_attacker" style="color"/>
+                                <player id="1" var="last_victim" style="color"/>
+                            </replacements>
+                        </message>
+                        <sound key="${entity.firework_rocket.twinkle}" volume="0.2" pitch=".9"/>
+                        <set var="show_message" value="0"/>
+                    </switch-scope>
+                </switch-scope>
+            </action>
+        </action>
+        <trigger scope="player" filter="has_flag=2" action="has_flag := 1"/>
+        <trigger scope="player" filter="all(match-pulse, has_flag=1)">
+            <action>
+                <set var="seconds_held" value="seconds_held + 1"/>
+                <set var="seconds_held_continuous" value="seconds_held_continuous + 1"/>
+                <message actionbar="{ translate: 'flag.carrying', with: [{ text: 'Flag', 'color': 'green' }] }"/>
+            </action>
+        </trigger>
+        <trigger scope="team" filter="match-pulse">
+            <action>
+                <set var="score_check" value="0"/>
+                <switch-scope inner="player" filter="has_flag=1">
+                    <set var="score_check" value="score_check + 1"/>
+                </switch-scope>
+                <action filter="not(score-is-correct)">
+                    <set var="score" value="score_check"/>
+                </action>
+            </action>
+        </trigger>
+    </actions>
+    <damage attacker-action="take-flag" victim-action="drop-flag">
+        <deny>
+            <any>
+                <not>
+                    <any>
+                        <all>
+                            <any>
+                                <cause>melee</cause>
+                                <cause>projectile</cause>
+                            </any>
+                            <filter id="match-running"/>
+                        </all>
+                        <filter id="game-damage"/>
+                    </any>
+                </not>
+            </any>
+        </deny>
+    </damage>
+    <hunger>
+        <depletion>off</depletion>
+    </hunger>
+    <itemremove>
+        <item>leather helmet</item>
+        <item>leather chestplate</item>
+        <item>banner</item>
+    </itemremove>
+</if>
 </map>
