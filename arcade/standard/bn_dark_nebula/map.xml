@@ -1,25 +1,38 @@
 <map proto="1.5.0">
 <name>BN: Dark Nebula</name>
 <variant id="rage" override="true">Dark Nebula: Snowball RAGE</variant>
-<version>1.0.2</version>
+<variant id="quake" override="true">Dark Nebula: Arena</variant>
+<version>1.0.3</version>
 <if variant="default">
     <include id="blasternauts"/>
     <constant id="dark-nebula-kit">blasternaut-kit</constant>
+    <constant id="max-players">12</constant>
 </if>
 <if variant="rage">
     <include id="void-death"/>
     <objective>Be the team with the highest amount of kills after 3 minutes!</objective>
     <constant id="dark-nebula-kit">snowball-kit</constant>
+    <constant id="max-players">8</constant>
     <time>3m</time>
     <rage/>
+</if>
+<if variant="quake">
+    <include id="void-death"/>
+    <time>3m</time>
+    <objective>Be the team with the highest amount of kills after 3 minutes!</objective>
+    <constant id="dark-nebula-kit">quakecraft-kit</constant>
+    <constant id="max-players">6</constant>
+    <constant id="void-plane">1</constant>
+    <gamemode>ffa</gamemode>
+    <game>Quake</game> <!-- Xonoticraft 🤔 -->
 </if>
 <created>2023-04-29</created>
 <authors>
     <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
 </authors>
 <teams>
-    <team id="yellow" color="yellow" max="14">Yellow</team>
-    <team id="red" color="dark red" max="14">Red</team>
+    <team id="yellow" color="yellow" max="${max-players}">Yellow</team>
+    <team id="red" color="dark red" max="${max-players}">Red</team>
 </teams>
 <spawns>
     <spawn team="yellow" kit="${dark-nebula-kit}">
@@ -112,6 +125,70 @@
     </itemremove>
     <disabledamage>
         <damage>fall</damage>
+    </disabledamage>
+    <hunger>
+        <depletion>off</depletion>
+    </hunger>
+</if>
+<if variant="quake">
+    <kits>
+        <kit id="quakecraft-kit">
+            <item slot="0" unbreakable="true" material="diamond barding" name="`bRailgun" lore="`eLeft click `7to boost, `eRight click`7 to fire.|`8Obtained by running 'impulse 9' in Beyond." projectile="zzuf-quake" consumable="zzuf-railgun"/>
+            <effect duration="3s" amplifier="255" ambient="true">damage resistance</effect>
+            <game-mode>adventure</game-mode>
+            <actions>
+                <set var="railgun_boost" value="0"/>
+            </actions>
+        </kit>
+    </kits>
+    <respawn auto="true" delay="0"/>
+    <projectiles>
+        <projectile
+            id="zzuf-quake"
+            name="Railgun"
+            projectile="SmallFireball"
+            velocity="12"
+            damage="100"
+            throwable="false"
+            click="right"
+            cooldown="1s"/>
+    </projectiles>
+    <variables>
+        <variable id="railgun_boost" default="0" scope="player"/>
+    </variables>
+    <consumables>
+        <consumable id="zzuf-railgun" on="left click" consume="false">
+            <action filter="railgun_boost=0">
+                <sound key="${entity.generic.extinguish_fire}" volume="0.25" pitch=".5"/>
+                <teleport x="player.x" y="player.y+0.5" z="player.z"/>
+                <velocity x="player.vel_x+player.dir_x*2" y="0" z="player.vel_z+player.dir_z*2"/>
+                <set var="railgun_boost" value="1"/>
+            </action>
+        </consumable>
+    </consumables>
+    <actions>
+        <trigger scope="player">
+            <filter>
+                <after duration="2s" filter="railgun_boost=1"/>
+            </filter>
+            <action>
+                <set var="railgun_boost" value="0"/>
+            </action>
+        </trigger>
+    </actions>
+    <regions>
+        <apply block="never"/>
+    </regions>
+    <score>
+        <kills>1</kills>
+    </score>
+    <itemremove>
+        <item>diamond barding</item>
+    </itemremove>
+    <disabledamage>
+        <damage>fall</damage>
+        <damage>entity attack</damage>
+        <damage>fire tick</damage>
     </disabledamage>
     <hunger>
         <depletion>off</depletion>
