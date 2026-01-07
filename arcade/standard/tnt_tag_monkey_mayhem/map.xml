@@ -1,7 +1,7 @@
 <map proto="1.5.0">
 <name>TNT Tag: Monkey Mayhem</name>
 <variant id="tail" override="true">Tail Tag: Monkey Mayhem</variant>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <created>2026-01-02</created>
 <authors>
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c" /> <!-- mitchiii -->
@@ -46,7 +46,12 @@
     <block id="yellow-spawn" location="37,9,0"/>
     <block id="green-spawn" location="-37,9,0"/>
     <cylinder id="center" base="0.5,10,0.5" radius="2" height="1"/>
-    <cuboid id="center-flags" min="-1,10,-1" size="3,30,3"/>
+    <cuboid id="center-indicator" min="-1,20,-1" size="3,14,3"/>
+    <complement id="center-flags-cage">
+        <cuboid min="-2,10,-2" size="5,3,5"/>
+        <cuboid id="center-flags" min="-1,10,-1" size="3,2,3"/>
+    </complement>
+    <above id="cage-top" y="12"/>
     <cylinder id="ne-inner-jump" base="6,9,-5" radius="1" height="1"/>
     <cylinder id="se-inner-jump" base="6,9,6" radius="1" height="1"/>
     <cylinder id="sw-inner-jump" base="-5,9,6" radius="1" height="1"/>
@@ -72,9 +77,13 @@
     <apply block="not(player)"/>
 </regions>
 <structures>
-    <structure id="flags" region="center-flags" origin="0,0,0"/>
+    <structure id="flags" region="center-indicator"/>
+    <if variant="default">
+        <structure id="flags-inner" region="center-flags"/>
+        <dynamic structure="flags" offset="0,0,0" trigger="never"/>
+    </if>
     <if variant="tail">
-        <dynamic structure="flags" trigger="flags_remaining=1.."/>
+        <dynamic structure="flags" offset="0,0,0" trigger="flags_remaining=1.."/>
     </if>
 </structures>
 <if variant="tail">
@@ -86,7 +95,8 @@
             <clear/>
             <helmet material="leather helmet" team-color="true" unbreakable="true" locked="true"/>
             <chestplate material="leather chestplate" team-color="true" unbreakable="true" locked="true"/>
-            <item slot="4" material="compass" locked="true"/>
+            <item slot="0" material="stick" enchantments="knockback"/>
+            <item slot="1" material="compass"/>
             <game-mode>adventure</game-mode>
         </kit>
         <kit id="flag-kit" force="true">
@@ -173,6 +183,9 @@
             <cause>drowning</cause>
             <cause>cactus</cause>
         </any>
+        <material id="air">air</material>
+        <material id="cage-fence">jungle fence</material>
+        <material id="cage-roof">wood step:3</material>
         <relation id="ally">ally</relation>
         <pulse id="match-pulse" period="1" duration="0.1" filter="match-running"/>
         <attacker id="attacker-no-flag">
@@ -186,10 +199,13 @@
         </victim>
         <variable id="score-is-correct" scope="team" value="score - score_check">0</variable>
         <variable id="even-time" scope="match" value="timelimit % 2">0</variable>
+        <time id="queue-flags-1">45s</time>
+        <time id="queue-flags-2">1m45s</time>
+        <after id="release-additional-flags" filter="all(flags_remaining=..-1, queue-flags-1)" duration="15s" message="More tails release in {0}"/>
     </filters>
     <variables scope="match">
         <variable id="players"/>
-        <variable id="flags_remaining" default="1"/>
+        <variable id="flags_remaining"/>
     </variables>
     <variables scope="team">
         <variable id="show_message"/>
@@ -218,19 +234,32 @@
     <actions>
         <trigger scope="match" filter="match-started">
             <action>
-                <switch-scope inner="player">
-                    <set var="players" value="players + 1"/>
-                </switch-scope>
-                <!-- <set var="flags_remaining" value="floor(players / 2)"/> -->
-                <set var="flags_remaining" value="2"/>
-                <message id="flags-remaining-message" subtitle="`c{0} `a{1} remaining!" stay="3m" fade-in="0.3s" fade-out="0s">
-                    <replacements>
-                        <replacement id="0">flag-count</replacement>
-                        <replacement id="1">flag-plural</replacement>
-                    </replacements>
-                </message>
+                <action id="count-releasable-flags">
+                    <set var="players" value="0"/>
+                    <switch-scope inner="player" filter="has_flag=0">
+                        <set var="players" value="players + 1"/>
+                    </switch-scope>
+                    <set var="flags_remaining" value="floor(players / 3) * -1"/>
+                </action>
+                <action filter="not(flags_remaining=..-1)">
+                    <set var="flags_remaining" value="-1"/>
+                </action>
+                <action id="release-flags">
+                    <set var="flags_remaining" value="flags_remaining * -1"/>
+                    <fill region="center-flags-cage" material="air" filter="any(cage-fence, cage-roof)"/>
+                    <sound preset="OBJECTIVE_GOOD"/>
+                    <message id="flags-remaining-message" subtitle="`c{0} `a{1} remaining!" stay="3m" fade-in="0.3s" fade-out="0s">
+                        <replacements>
+                            <replacement id="0">flag-count</replacement>
+                            <replacement id="1">flag-plural</replacement>
+                        </replacements>
+                    </message>
+                </action>
             </action>
         </trigger>
+        <trigger scope="match" filter="all(match-running, queue-flags-1)" action="count-releasable-flags"/>
+        <trigger scope="match" filter="all(match-running, queue-flags-2)" action="count-releasable-flags"/>
+        <trigger scope="match" filter="all(match-running, release-additional-flags)" action="release-flags"/>
         <trigger scope="player" filter="all(match-running, has_flag=0)" action="tag-kit"/>
         <trigger scope="player" filter="all(match-running, has_flag=1)" action="flag-kit"/>
         <trigger scope="player" filter="all(match-running, flags_remaining=1.., center-flags, not(has_flag=1))">
@@ -255,6 +284,13 @@
             <action>
                 <message subtitle=" "/>
                 <sound preset="OBJECTIVE_BAD"/>
+                <fill region="center-flags-cage" material="wood step:3" filter="all(air, cage-top)"/>
+                <fill region="center-flags-cage" material="jungle fence" filter="air"/>
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(flags_remaining=..0, center-flags)">
+            <action>
+                <teleport x="player.x" y="12.6" z="player.z"/>
             </action>
         </trigger>
         <action id="take-flag" scope="player" filter="all(match-running, attacker-no-flag, victim-has-flag)">
@@ -293,7 +329,16 @@
             <action>
                 <set var="seconds_held" value="seconds_held + 1"/>
                 <set var="seconds_held_continuous" value="seconds_held_continuous + 1"/>
-                <message actionbar="{ translate: 'flag.carrying', with: [{ text: 'Flag', 'color': 'green' }] }"/>
+                <message actionbar="{ translate: 'flag.carrying', with: [{ text: '{0}' }] }">
+                    <replacements>
+                        <switch id="0">
+                            <case filter="blue" result="`1Flag"/>
+                            <case filter="red" result="`4Flag"/>
+                            <case filter="yellow" result="`eFlag"/>
+                            <case filter="green" result="`2Flag"/>
+                        </switch>
+                    </replacements>
+                </message>
             </action>
         </trigger>
         <trigger scope="team" filter="match-pulse">
@@ -333,6 +378,9 @@
         <item>leather helmet</item>
         <item>leather chestplate</item>
         <item>banner</item>
+        <item>wool</item>
+        <item>stick</item>
+        <item>compass</item>
     </itemremove>
 </if>
 </map>
