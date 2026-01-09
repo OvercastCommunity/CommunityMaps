@@ -17,7 +17,7 @@
                                         \/
 -->
 <name>The Grand Dueling Tournament II</name>
-<version>3.0.6</version>
+<version>3.0.7</version>
 <objective>Defeat opposing teams in The Grand ${tournament-type} Tournament!</objective>
 <phase>staging</phase>
 <variant id="default" world="duel"/>
@@ -952,7 +952,6 @@
     <material id="air">air</material>
     <material id="tnt">tnt</material>
     <material id="wool">wool</material>
-    <material id="barrier">barrier</material>
     <material id="arena-spawn-box-material">stained glass:0</material>
     <any id="clearable-entities">
         <entity>dropped item</entity>
@@ -1273,7 +1272,7 @@
             <translate id="arena-3-bridge-diagonal" region="arena-1-bridge-diagonal" offset="${arena-3-x-offset},0,${arena-3-z-offset}"/>
             <translate id="arena-4-bridge-diagonal" region="arena-1-bridge-diagonal" offset="${arena-4-x-offset},0,${arena-4-z-offset}"/>
         </union>
-        <union id="arena-bridges-side">  <!-- 3 -->
+        <union id="arena-bridges-side"> <!-- 3 -->
             <translate region="arena-bridges" offset="10,0,0"/>
             <translate region="arena-bridges" offset="-10,0,0"/>
         </union>
@@ -1497,23 +1496,12 @@
         <variable id="tuggability" scope="team"/>
     </if>
     <cuboid id="arena_anchor" min="${arena-1-origin}" size="1,1,1"/>
-    <with-team id="team_1_placement" var="placement" team="team-1"/>
-    <with-team id="team_2_placement" var="placement" team="team-2"/>
-    <with-team id="team_3_placement" var="placement" team="team-3"/>
-    <with-team id="team_4_placement" var="placement" team="team-4"/>
-    <with-team id="team_5_placement" var="placement" team="team-5"/>
-    <with-team id="team_6_placement" var="placement" team="team-6"/>
-    <with-team id="team_7_placement" var="placement" team="team-7"/>
-    <with-team id="team_8_placement" var="placement" team="team-8"/>
 </variables>
 <constant id="intro">0</constant>
 <constant id="idle">1</constant>
 <constant id="starting">2</constant>
 <constant id="running">3</constant>
 <constant id="finished">4</constant>
-<constant id="round-1-kit-formula">(bound(abs(kits[0] - current_kit), 0, 1) + 1) % 2</constant>
-<constant id="round-2-kit-formula">(bound(abs(kits[1] - current_kit), 0, 1) + 1) % 2</constant>
-<constant id="round-3-kit-formula">(bound(abs(kits[2] - current_kit), 0, 1) + 1) % 2</constant>
 <replacements>
     <switch id="current-kit-name" value="current_kit" scope="match">
         <if constant="kit-count" constant-value="1.." constant-comparison="range"><case match="0" result="${kit-0-name}"/></if>
@@ -1532,18 +1520,15 @@
         <if constant="kit-count" constant-value="14.." constant-comparison="range"><case match="13" result="${kit-13-name}"/></if>
     </switch>
     <decimal id="current-kit-number" scope="match" value="current_kit"/>
-    <decimal id="round-1-kit-state" scope="match" value="${round-1-kit-formula}"/>
-    <decimal id="round-2-kit-state" scope="match" value="${round-2-kit-formula}"/>
-    <decimal id="round-3-kit-state" scope="match" value="${round-3-kit-formula}"/>
-    <switch id="round-1-kit-display" scope="match" value="${round-1-kit-formula}">
+    <switch id="round-1-kit-display" scope="match" value="(bound(abs(kits[0] - current_kit), 0, 1) + 1) % 2">
         <case match="0" result="[_]"/>
         <case match="1" result="`a[1]"/>
     </switch>
-    <switch id="round-2-kit-display" scope="match" value="${round-2-kit-formula}">
+    <switch id="round-2-kit-display" scope="match" value="(bound(abs(kits[1] - current_kit), 0, 1) + 1) % 2">
         <case match="0" result="[_]"/>
         <case match="1" result="`a[2]"/>
     </switch>
-    <switch id="round-3-kit-display" scope="match" value="${round-3-kit-formula}">
+    <switch id="round-3-kit-display" scope="match" value="(bound(abs(kits[2] - current_kit), 0, 1) + 1) % 2">
         <case match="0" result="[_]"/>
         <case match="1" result="`a[3]"/>
     </switch>
@@ -1641,6 +1626,7 @@
         </kit>
     </action>
     <trigger scope="player" filter="all(participating, playing=0, all-spectators)" action="disable-spectator-mode"/>
+    <trigger scope="player" filter="all(participating, state=${running}, playing=0, spectator_mode=0, not(all-spectators), not(all-arenas-finished))" action="enable-spectator-mode"/>
     <action id="goto-next-arena" scope="player" filter="all(participating, playing=0)">
         <set var="goto" value="goto + 1"/>
         <action filter="goto=5.."><set var="goto" value="1"/></action>
@@ -1698,6 +1684,7 @@
         <switch-scope inner="player">
             <kit id="clear-kit"/>
             <set var="goto" value="0"/>
+            <set var="teleport" value="0"/>
         </switch-scope>
     </action>
     <action id="apply-current-kit" scope="match">
@@ -2124,7 +2111,7 @@
         <action id="kit-console"/>
     </action>
     <action id="toggle-debug" scope="player" expose="true" filter="not(match-started)">
-        <set var="debug" value="1 - state"/>
+        <set var="debug" value="1 - debug"/>
         <action id="kit-console"/>
     </action>
     <!--
@@ -2352,7 +2339,9 @@
                     </switch>
                 </replacements>
             </message>
-            <set var="teleport" value="0"/>
+            <switch-scope inner="player">
+                <set var="teleport" value="0"/>
+            </switch-scope>
         </action>
     </trigger>
     <trigger scope="player" filter="all(match-running, state=${running}, playing=1, arena-1)" action="goto:=1"/>
@@ -2432,7 +2421,7 @@
     </trigger>
     <trigger scope="match" filter="all(match-finished, current_round=3, all-arenas-finished)">
         <action>
-            <switch-scope inner="team" filter="score=3">
+            <switch-scope inner="team" filter="score=3" observers="true">
                 <set var="callout" index="0" value="current_team"/>
             </switch-scope>
             <set var="current_round" value="0"/>
