@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Find the Button!</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <objective>Find the buttons hidden on classic OCN maps!</objective>
 <created>2025-11-12</created>
 <game>Progress</game>
@@ -346,6 +346,7 @@
     <variable id="last_stage_played"/>
     <variable id="someone_won"/>
     <variable id="should_finish"/>
+    <array id="positions" size="16"/>
     <!-- 
     buttons arrays
     [0 = amount, 1 = x, 2 = y, 3 = z, 4 = r, x, y, z, r, ...]
@@ -1061,6 +1062,7 @@
             <set var="someone_won" value="1"/>
             <set var="did_win" value="1"/>
         </action>
+        <set var="positions" index="current_stage" value="positions[current_stage] + 1" />
         <set var="current_stage" value="current_stage + 1"/>
         <action filter="current_stage=17">
             <message title="`eYou won!"/>
@@ -1079,16 +1081,6 @@
     </trigger>
     <trigger scope="player" filter="all(participating,just_changed_stage=1)">
         <action>
-            <action filter="current_stage=0">
-                <set var="current_stage_button" index="0" value="stage_0_buttons[stage_0_selected_button] - 0.5"/>
-                <set var="current_stage_button" index="1" value="stage_0_buttons[stage_0_selected_button+1]"/>
-                <set var="current_stage_button" index="2" value="stage_0_buttons[stage_0_selected_button+2] - 0.5"/>
-            </action>
-            <action filter="current_stage=1">
-                <set var="current_stage_button" index="0" value="stage_1_buttons[stage_1_selected_button] - 0.5"/>
-                <set var="current_stage_button" index="1" value="stage_1_buttons[stage_1_selected_button+1]"/>
-                <set var="current_stage_button" index="2" value="stage_1_buttons[stage_1_selected_button+2] - 0.5"/>
-            </action>
             <action filter="current_stage=0">
                 <set var="current_stage_button" index="0" value="stage_0_buttons[stage_0_selected_button] - 0.5"/>
                 <set var="current_stage_button" index="1" value="stage_0_buttons[stage_0_selected_button+1]"/>
@@ -1201,9 +1193,9 @@
     <trigger scope="player" filter="just_changed_stage=1">
         <action>
             <set var="last_player_that_pressed" value="1"/>
-            <action filter="current_stage=1..">
+            <action filter="all(current_stage=1..,positions[current_stage-1]=1..3)">
                 <switch-scope inner="match">
-                    <message text="{p} has found the button in `a{n}!">
+                    <message text="{p} was the {o} to find the button in `a{n}!">
                         <replacements>
                             <player id="p" var="last_player_that_pressed"/>
                             <switch id="n" value="last_stage_played - 1">
@@ -1224,6 +1216,11 @@
                                 <case match="14" result="Directrix"/>
                                 <case match="15" result="Hot Dam"/>
                                 <case match="16" result="Canopy"/>
+                            </switch>
+                            <switch id="o" value="positions[last_stage_played - 1]">
+                                <case match="1" result="`6`l1st`r"/>
+                                <case match="2" result="`7`l2nd`r"/>
+                                <case match="3" result="`c`l3rd`r"/>
                             </switch>
                         </replacements>
                     </message>
