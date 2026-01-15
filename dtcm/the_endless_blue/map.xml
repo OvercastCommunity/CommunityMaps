@@ -1,0 +1,160 @@
+<map proto="1.5.0">
+<name>The Endless Blue</name>
+<version>1.0</version>
+<objective>Destroy 90% of the enemy team's monument!</objective>
+<created>2026-01-09</created>
+<phase>staging</phase>
+<include id="gapple-kill-reward"/>
+<maxbuildheight>64</maxbuildheight>
+<authors>
+    <author uuid="1af9f952-e33e-42a5-8e1e-296757747fdc"/> <!-- Alphaboy98yt -->
+</authors>
+<contributors>
+    <contributor uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128" contribution="XML"/> <!-- zzuf -->
+</contributors>
+<teams>
+    <team id="blue-team" color="blue" max="28">Blue</team>
+    <team id="red-team" color="dark red" max="28">Red</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
+        <item slot="1" unbreakable="true" material="bow">
+            <enchantment>infinity</enchantment>
+        </item>
+        <item slot="28" material="arrow"/>
+        <item slot="2" unbreakable="true" material="stone pickaxe"/>
+        <item slot="3" unbreakable="true" material="iron axe">
+            <enchantment>efficiency</enchantment>
+        </item>
+        <item slot="4" unbreakable="true" material="shears"/>
+        <item slot="31" unbreakable="true" material="iron spade"/>
+        <item slot="5" amount="64" material="wood"/>
+        <item slot="32" amount="64" material="wood"/>
+        <item slot="6" amount="64" material="leaves"/>
+        <item slot="8" material="golden apple"/>
+        <helmet unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate unbreakable="true" team-color="true" material="leather chestplate"/>
+        <leggings unbreakable="true" team-color="true" material="leather leggings"/>
+        <boots unbreakable="true" team-color="true" material="leather boots">
+            <enchantment>feather falling</enchantment>
+        </boots>
+    </kit>
+    <kit id="efficiency-kit">
+        <action>
+            <enchant-item enchantment="efficiency" level="2" ignore-metadata="true">
+                <find material="stone pickaxe"/>
+            </enchant-item>
+        </action>
+    </kit>
+    <kit id="not-efficiency-kit">
+        <action>
+            <enchant-item enchantment="efficiency" level="0" ignore-metadata="true">
+                <find material="stone pickaxe"/>
+            </enchant-item>
+        </action>
+    </kit>
+    <give kit="efficiency-kit" filter="any(all(red-team,blue-monument,mon_mode=1),all(blue-team,red-monument,mon_mode=1))"/>
+    <give kit="not-efficiency-kit" filter="any(all(red-team,not(blue-monument),mon_mode=1),all(blue-team,not(red-monument),mon_mode=1))"/>
+</kits>
+<spawns>
+    <default yaw="-90">
+        <region>
+            <cylinder base="-459.5,93,-160.5" radius="1.5" height="0"/>
+        </region>
+    </default>
+    <spawn team="blue-team" kit="spawn-kit" yaw="-135">
+        <region>
+            <point>-372.5,36,-7.5</point>
+        </region>
+    </spawn>
+    <spawn team="red-team" kit="spawn-kit" yaw="45">
+        <region>
+            <point>-301.5,36,-313.5</point>
+        </region>
+    </spawn>
+</spawns>
+<filters>
+    <deny id="deny-iron">
+        <all>
+            <cause>player</cause>
+            <material id="only-iron">iron block</material>
+        </all>
+    </deny>
+</filters>
+<regions>
+    <union id="spawns">
+        <union id="blue-spawn">
+            <cylinder base="-371.5,30,-8.5" height="oo" radius="7.5"/>
+            <cylinder base="-365.5,30,-14.5" height="oo" radius="3.5"/>
+        </union>
+        <union id="red-spawn">
+            <cylinder base="-302.5,30,-312.5" height="oo" radius="7.5"/>
+            <cylinder base="-308.5,30,-306.5" height="oo" radius="3.5"/>
+        </union>
+    </union>
+    <union id="iron-mines">
+        <cuboid id="blue-iron" min="-371,18,-10" max="-387,30,-29"/>
+        <mirror id="red-iron" region="blue-iron-mirror" normal="1,0,0" origin="-336.5,0,-160.5"/>
+    </union>
+    <mirror id="blue-iron-mirror" region="blue-iron" normal="0,0,1" origin="-336.5,0,-160.5"/>
+    <apply enter="blue-team" region="blue-spawn" message="You may not enter the enemy's spawn tower!"/>
+    <apply enter="red-team" region="red-spawn" message="You may not enter the enemy's spawn tower!"/>
+    <apply block="never" region="spawns" message="You may not break or place blocks in the spawn towers!"/>
+    <apply block-place="deny-iron" region="iron-mines" message="You may not place iron blocks here."/>
+    <apply block-place="deny(void)" message="You may not build outside of the map!"/>
+    <sphere id="red-monument" origin="-363.5,43.5,-290.5" radius="10.5"/>
+    <sphere id="blue-monument" origin="-310.5,43.5,-30.5" radius="10.5"/>
+</regions>
+<renewables>
+    <renewable region="iron-mines" renew-filter="only-iron"/>
+</renewables>
+<destroyables materials="ender stone" show-progress="true" repairable="false" completion="90%">
+    <destroyables>
+        <destroyable owner="blue-team" region="blue-monument" name="§9Monument§r"/>
+        <destroyable owner="red-team" region="red-monument" name="§4Monument§r"/>
+    </destroyables>
+</destroyables>
+<variables>
+    <variable id="mon_mode" default="0" scope="match"/>
+</variables>
+<modes>
+    <mode id="efficiency-mode" after="20m" name="`bEfficiency II`3 near the monuments" action="mon_mode:=1"/>
+</modes>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>stone pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>shears</tool>
+    <tool>iron spade</tool>
+    <tool>arrow</tool>
+</toolrepair>
+<itemkeep>
+    <item>golden apple</item>
+    <item>wood</item>
+    <item>leaves</item>
+</itemkeep>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>ender stone</item>
+    <item>39</item>
+    <item>sapling</item>
+</itemremove>
+<kill-rewards>
+    <kill-reward>
+        <item amount="32" material="wood"/>
+        <item amount="16" material="leaves"/>
+    </kill-reward>
+</kill-rewards>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<crafting>
+    <disable>iron pickaxe</disable>
+</crafting>
+</map>
