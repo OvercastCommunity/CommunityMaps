@@ -17,14 +17,17 @@
                                         \/
 -->
 <name>The Grand Dueling Tournament II</name>
-<version>3.0.7</version>
+<version>3.1.0</version>
 <objective>Defeat opposing teams in The Grand ${tournament-type} Tournament!</objective>
 <phase>staging</phase>
 <variant id="default" world="duel"/>
+<variant id="modern" world="modern" override="true" min-server-version="1.21.10">The Grand Dueling Tournament III</variant>
 <variant id="spleef" world="spleef" override="true">The Grand Spleefing Tournament II</variant>
 <variant id="cannon" world="cannon" override="true">The Grand Cannoning Tournament II</variant>
 <variant id="cacti" world="cacti" override="true">The Grand Cacti Tournament II</variant>
 <variant id="tug" world="tug" override="true">The Grand Tugging Tournament II</variant>
+<constant id="tournament-type">Dueling</constant>
+<constant id="tournament-action">fight</constant>
 <constant id="host-name">Tirion</constant>                         <!-- string - name for the host -->
 <constant id="host-title">Arena Master</constant>                  <!-- string - prefix for the host, e.g., [Arena Master] Tirion -->
 <constant id="host-console">218,5,31.5</constant>                  <!-- block location - where the host is physically located -->
@@ -57,6 +60,7 @@
 <constant id="kit-count">1</constant>                              <!-- number - how many kits are there - must define kit-x-name constant and kit-x kit (max 14) -->
 <constant id="kit-0-name">Default</constant>                       <!-- string - name of the kit, can use color codes -->
 <constant id="kit-default-respawns">1</constant>                   <!-- number - how many lives do kits give by default, can be overridden per kit -->
+<constant id="gapple-reward-filter">reward-gapple</constant>       <!-- filter - -->
 <constant id="round-begin-seconds">5</constant>                    <!-- number - match start countdown duration -->
 <constant id="round-begin-countdown-after-seconds">2</constant>    <!-- number - 3 less than round-begin-seconds for countdown include -->
 <constant id="round-begin-rearrange-after-seconds" delete="true"/> <!-- number - seconds after round start countdown to allow kit rearranging (cannot be 0, min 0.1) -->
@@ -71,8 +75,6 @@
 <constant id="tnt-instant-ignite">true</constant>
 <if variant="default">
     <created>2016-01-19</created>
-    <constant id="tournament-type">Dueling</constant>
-    <constant id="tournament-action">fight</constant>
     <constant id="arena-variants">8</constant>
     <constant id="kit-count">14</constant>
     <constant id="kit-0-name">`bIron</constant>
@@ -91,6 +93,40 @@
     <constant id="kit-13-name">`6Soup</constant>
     <constant id="tnt-fuse">1.25s</constant>
     <constant id="tnt-power">3</constant>
+</if>
+<if variant="modern">
+    <created>2026-01-17</created>
+    <constant id="host-console">202.5,9,31.5</constant>
+    <constant id="lobby-origin">160,0,2</constant>
+    <constant id="lobby-size">56,64,56</constant>
+    <constant id="lobby-spawn">189.5,1,31.5</constant>
+    <constant id="arena-variants">8</constant>
+    <constant id="arena-variant-0-size">37,27,61</constant> 
+    <constant id="arena-1-size">37,27,61</constant>
+    <constant id="arena-1-spawn-1-spawn">248,7,-29</constant>
+    <constant id="arena-1-spawn-2-spawn">248,7,25</constant>
+    <constant id="arena-1-spectator-origin">225,9,-16</constant>
+    <constant id="arena-1-spectator-spawn">226.5,10,-2.5</constant>
+    <constant id="kit-count">14</constant>
+    <constant id="kit-0-name">`bIron</constant>
+    <constant id="kit-1-name">`6Copper</constant>
+    <constant id="kit-2-name">`8Mace</constant>
+    <constant id="kit-3-name">`3Crossbow</constant>
+    <constant id="kit-4-name">`aLumberjack</constant>
+    <constant id="kit-5-name">`cMCSG</constant>
+    <constant id="kit-6-name">`8Netherite</constant>
+    <constant id="kit-7-name">`5Potions</constant>
+    <constant id="kit-8-name">`6Gapple</constant>
+    <!-- <constant id="kit-8-name">`6Jousting</constant> -->
+    <constant id="kit-9-name">`3Trident</constant>
+    <constant id="kit-10-name">`bConquest</constant>
+    <constant id="kit-11-name">`eBlasternauts</constant>
+    <!-- <constant id="kit-11-name">`dBlast Bow</constant> -->
+    <constant id="kit-12-name">`cUHC</constant>
+    <constant id="kit-13-name">`6Soup</constant>
+    <constant id="tnt-fuse">1.25s</constant>
+    <constant id="tnt-power">3</constant>
+    <constant id="win-condition">never</constant>
 </if>
 <if variant="spleef">
     <created>2016-06-29</created>
@@ -213,9 +249,7 @@
 </if>
 <include id="countdown"/>
 <include id="void-death"/>
-<if variant="tug">
-    <include id="gapple-kill-reward"/>
-</if>
+<include id="gapple-kill-reward"/>
 <authors>
     <if variant="default, spleef">
         <author uuid="07fa10c6-f564-4630-861e-fe134ae27527"/> <!-- Yoyo_ -->
@@ -233,6 +267,9 @@
         <author uuid="d5a64b26-15ea-46c4-8319-f9c83e82a1fa"/> <!-- Eliminate -->
     </if>
     <author uuid="f690a591-348b-482e-a18d-7779d0c0a28c"/> <!-- mitchiii -->
+    <if variant="modern">
+        <author uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609"/> <!-- Technodono -->
+    </if>
 </authors>
 <contributors>
     <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="Grandmaster of PGM, XML, and existence itself"/> <!-- Pablete1234 -->
@@ -287,9 +324,12 @@
         <effect amplifier="100" duration="1">instant health</effect>
         <action>
             <set var="current_kill_reward" value="0"/>
+            <set var="current_kill_reward_includes_gapple" value="0"/>
             <set var="current_kit_requires_survival" value="0"/>
             <set var="current_kit_max_respawns" value="0"/>
+            <set var="current_player_size" value="1"/>
             <set var="player.exp_progress" value="0"/>
+            <set var="player.level" value="0"/>
         </action>
         <action filter="not(state=${starting})">
             <set var="playing" value="0"/>
@@ -315,7 +355,27 @@
     <kit id="survival-kit" force="true">
         <game-mode>survival</game-mode>
     </kit>
-    <if variant="default">
+    <if min-server-version="1.21.10">
+        <lend filter="current_player_size=0">
+            <kit> <!-- values taken from OvercastCommunity/CommunityMaps/fun_house -->
+                <attribute operation="add" amount="-0.5">scale</attribute>
+                <attribute operation="add" amount="-0.10">jump_strength</attribute>
+                <attribute operation="add" amount="-0.3">step_height</attribute>
+                <attribute operation="add" amount="-1">entity_interaction_range</attribute>
+            </kit>
+        </lend>
+        <lend filter="current_player_size=2">
+            <kit>
+                <attribute operation="add" amount="1">scale</attribute>
+                <attribute operation="add" amount="-0.02">movement_speed</attribute>
+                <attribute operation="add" amount="0.21">jump_strength</attribute>
+                <attribute operation="add" amount="1.6">step_height</attribute>
+                <attribute operation="add" amount="1.5">entity_interaction_range</attribute>
+                <attribute operation="add" amount="0.01">gravity</attribute>
+            </kit>
+        </lend>
+    </if>
+    <if variant="default,modern">
         <kit id="kit-0"> <!-- iron -->
             <item slot="0" material="iron sword" unbreakable="true"/>
             <item slot="1" material="bow" unbreakable="true"/>
@@ -326,50 +386,88 @@
             <boots material="iron boots"/>
             <action>
                 <set var="current_kill_reward" value="1"/>
+                <set var="current_kill_reward_includes_gapple" value="1"/>
             </action>
         </kit>
-        <kit id="kit-1"> <!-- gold -->
-            <item slot="0" material="stone sword" unbreakable="true"/>
+        <kit id="kit-1">
+            <if variant="default"> <!-- gold -->
+                <item slot="0" material="stone sword" unbreakable="true"/>
+                <helmet material="gold helmet"/>
+                <chestplate material="gold chestplate"/>
+                <leggings material="gold leggings"/>
+                <boots material="gold boots"/>
+            </if>
+            <if variant="modern"> <!-- copper -->
+                <item slot="0" material="copper sword" unbreakable="true"/>
+                <helmet material="copper helmet"/>
+                <chestplate material="copper chestplate"/>
+                <leggings material="copper leggings"/>
+                <boots material="copper boots"/>
+            </if>
             <item slot="1" material="bow" unbreakable="true"/>
             <item slot="2" material="arrow" amount="24"/>
-            <helmet material="gold helmet"/>
-            <chestplate material="gold chestplate"/>
-            <leggings material="gold leggings"/>
-            <boots material="gold boots"/>
             <action>
                 <set var="current_kill_reward" value="1"/>
+                <set var="current_kill_reward_includes_gapple" value="1"/>
             </action>
         </kit>
-        <kit id="kit-2"> <!-- slappy fish -->
-            <item slot="0" material="raw fish">
-                <enchantment level="1">damage all</enchantment>
-                <enchantment level="1">knockback</enchantment>
-            </item>
+        <kit id="kit-2">
+            <if variant="default"> <!-- slappy fish -->
+                <item slot="0" material="raw fish">
+                    <enchantment level="1">damage all</enchantment>
+                    <enchantment level="1">knockback</enchantment>
+                </item>
+            </if>
+            <if variant="modern"> <!-- mace -->
+                <item slot="slot.weapon.offhand" material="shield" damage="330"/>
+                <item slot="0" material="mace" unbreakable="true">
+                    <enchantment level="1">wind burst</enchantment>
+                </item>
+                <item slot="1" material="wind charge" amount="16"/>
+                <helmet material="netherite helmet"/>
+                <chestplate material="netherite chestplate"/>
+                <action>
+                    <set var="current_kill_reward_includes_gapple" value="1"/>
+                </action>
+            </if>
         </kit>
-        <kit id="kit-3"> <!-- archer -->
-            <item slot="0" material="bow" unbreakable="true">
-                <enchantment level="1">arrow damage</enchantment>
-                <enchantment level="1">arrow infinite</enchantment>
-            </item>
-            <item slot="27" material="arrow"/>
+        <kit id="kit-3">  <!-- archer / crossbow -->
+            <if variant="default">
+                <item slot="0" material="bow" unbreakable="true">
+                    <enchantment level="1">arrow damage</enchantment>
+                    <enchantment level="1">arrow infinite</enchantment>
+                </item>
+            </if>
+            <if variant="modern">
+                <item slot="0" material="crossbow" unbreakable="true">
+                    <enchantment level="1">quick charge</enchantment>
+                    <enchantment level="1">arrow infinite</enchantment>
+                </item>w
+            </if>
             <helmet material="iron helmet"/>
-            <chestplate material="leather chestplate" team-color="true"/>
+            <chestplate material="leather chestplate" team-color="true">
+                <enchantment level="2">protection projectile</enchantment>
+            </chestplate>
             <leggings material="leather leggings" team-color="true"/>
             <boots material="iron boots"/>
+            <item slot="27" material="arrow"/>
             <action>
-                <set var="current_kill_reward" value="2"/>
+                <set var="current_kill_reward_includes_gapple" value="1"/>
             </action>
         </kit>
         <kit id="kit-4"> <!-- lumberjack -->
             <item slot="0" material="diamond axe" unbreakable="true">
                 <enchantment level="2">damage all</enchantment>
             </item>
+            <if variant="modern">
+                <item slot="weapon.offhand" material="shield" damage="330"/>
+            </if>
             <helmet material="diamond helmet"/>
             <chestplate material="diamond chestplate"/>
             <leggings material="diamond leggings"/>
             <boots material="diamond boots"/>
             <action>
-                <set var="current_kill_reward" value="2"/>
+                <set var="current_kill_reward_includes_gapple" value="1"/>
             </action>
         </kit>
         <kit id="kit-5"> <!-- mcsg -->
@@ -383,17 +481,27 @@
             <leggings material="chainmail leggings"/>
             <boots material="chainmail boots"/>
         </kit>
-        <kit id="kit-6"> <!-- diamond -->
-            <item slot="0" material="diamond sword" unbreakable="true"/>
+        <kit id="kit-6">
+            <if variant="default"> <!-- diamond -->
+                <item slot="0" material="diamond sword" unbreakable="true"/>
+                <helmet material="diamond helmet"/>
+                <chestplate material="diamond chestplate"/>
+                <leggings material="diamond leggings"/>
+                <boots material="diamond boots"/>
+            </if>
+            <if variant="modern"> <!-- netherite -->
+                <item slot="0" material="netherite sword" unbreakable="true"/>
+                <helmet material="netherite helmet"/>
+                <chestplate material="netherite chestplate"/>
+                <leggings material="netherite leggings"/>
+                <boots material="netherite boots"/>
+            </if>
             <item slot="1" material="bow" unbreakable="true"/>
             <item slot="2" amount="2" material="golden apple"/>
             <item slot="8" amount="24" material="arrow"/>
-            <helmet material="diamond helmet"/>
-            <chestplate material="diamond chestplate"/>
-            <leggings material="diamond leggings"/>
-            <boots material="diamond boots"/>
             <action>
-                <set var="current_kill_reward" value="3"/>
+                <set var="current_kill_reward" value="1"/>
+                <set var="current_kill_reward_includes_gapple" value="1"/>
             </action>
         </kit>
         <kit id="kit-7"> <!-- pot -->
@@ -439,7 +547,7 @@
             </boots>
             <effect amplifier="2">speed</effect>
             <action>
-                <set var="current_kill_reward" value="4"/>
+                <set var="current_kill_reward" value="3"/>
             </action>
         </kit>
         <kit id="kit-8"> <!-- gapple -->
@@ -461,8 +569,18 @@
             </boots>
             <effect amplifier="2">speed</effect>
         </kit>
-        <kit id="kit-9"> <!-- gunz -->
-            <item slot="0" material="wood hoe" unbreakable="true" projectile="egg-gun" name="`rEgg Gun"/>
+        <kit id="kit-9">
+            <if variant="default"> <!-- gunz -->
+                <item slot="0" material="wood hoe" unbreakable="true" projectile="egg-gun" name="`rEgg Gun"/>
+            </if>
+            <if variant="modern"> <!-- trident -->
+                <item slot="0" material="trident" unbreakable="true">
+                    <enchantment level="3">loyalty</enchantment>
+                    <enchantment level="1">impaling</enchantment>
+                </item>
+                <helmet material="turtle helmet"/>
+                <chestplate material="netherite chestplate"/>
+            </if>
         </kit>
         <kit id="kit-10"> <!-- conquest  -->
             <item slot="0" material="stone sword" unbreakable="true"/>
@@ -476,23 +594,45 @@
             </leggings>
             <boots material="iron boots" unbreakable="true"/>
             <action>
-                <set var="current_kill_reward" value="5"/>
+                <set var="current_kill_reward" value="2"/>
+                <set var="current_kill_reward_includes_gapple" value="1"/>
             </action>
         </kit>
-        <kit id="kit-11"> <!-- blasternauts  -->
-            <item slot="0" material="blaze rod" name="`rMelee Stick">
-                <enchantment level="2">knockback</enchantment>
-                <enchantment level="2">damage all</enchantment>
-            </item>
-            <item slot="1" material="gold hoe" unbreakable="true" projectile="tnt-gun" name="`rTNT Launcher"/>
-            <item slot="2" material="tnt" amount="6" show-can-place-on="false">
-                <can-place-on>
-                    <all-blocks/>
-                </can-place-on>
-            </item>
-            <item slot="3" material="snow ball" amount="16" name="`rGrenade" grenade="true" grenade-power="1.2"/>
-            <item slot="4" material="snow ball" amount="16" name="`rGrenade" grenade="true" grenade-power="1.2"/>
-            <item slot="8" material="potion" damage="8229"/>
+        <kit id="kit-11">
+            <if variant="default, modern"> <!-- blasternauts  -->
+                <item slot="0" material="blaze rod" name="`rMelee Stick">
+                    <enchantment level="2">knockback</enchantment>
+                    <enchantment level="2">damage all</enchantment>
+                </item>
+                <item slot="1" material="gold hoe" unbreakable="true" projectile="tnt-gun" name="`rTNT Launcher"/>
+                <item slot="2" material="tnt" amount="6" show-can-place-on="false">
+                    <can-place-on>
+                        <all-blocks/>
+                    </can-place-on>
+                </item>
+                <item slot="3" material="snow ball" amount="16" name="`rGrenade" grenade="true" grenade-power="1.2"/>
+                <item slot="4" material="snow ball" amount="16" name="`rGrenade" grenade="true" grenade-power="1.2"/>
+                <item slot="8" material="potion" damage="8229"/>
+                <action>
+                    <set var="current_kill_reward" value="6"/>
+                </action>
+            </if>
+            <!-- blast bow
+            <if variant="modern">
+                <firework slot="slot.weapon.offhand" amount="128" power="3">
+                    <explosion type="burst" flicker="false" trail="false">
+                        <color>F0F0F0</color>
+                        <fade>DECF2A</fade>
+                    </explosion>
+                </firework>
+                <item slot="0" material="crossbow" unbreakable="true">
+                    <enchantment level="1">quick charge</enchantment>
+                    <enchantment level="1">multishot</enchantment>
+                </item>
+                <action>
+                    <set var="current_player_size" value="0"/>
+                </action>
+            </if> --> 
             <helmet material="iron helmet" unbreakable="true"/>
             <chestplate material="leather chestplate" unbreakable="true" team-color="true"/>
             <leggings material="chainmail leggings" unbreakable="true">
@@ -500,9 +640,6 @@
             </leggings>
             <boots material="iron boots" unbreakable="true"/>
             <double-jump/>
-            <action>
-                <set var="current_kill_reward" value="6"/>
-            </action>
         </kit>
         <kit id="kit-12" force="true"> <!-- uhc -->
             <foodlevel>16</foodlevel>
@@ -781,6 +918,7 @@
                 <action id="show-tug-progress"/>
                 <set var="current_kit_requires_survival" value="1"/>
                 <set var="current_kill_reward" value="1"/>
+                <set var="current_kill_reward_includes_gapple" value="1"/>
             </action>
         </kit>
         <kit id="kit-1" parents="kit-0"/> <!-- bridge gone -->
@@ -812,7 +950,7 @@
     <projectile id="tnt-gun" name="TNT Gun" projectile="TNTPrimed" velocity="2" damage="15" throwable="false" cooldown="3s"/>
     <projectile id="cacti-gun" name="cactus" projectile="FallingBlock" material="cactus" velocity="0.75" damage="0" throwable="true" cooldown="0s"/>
 </projectiles>
-<modifybowprojectile pickup-filter="never"/>
+<modifybowprojectile pickup-filter="disable_arrow_pickup=0"/>
 <hunger>
     <depletion>off</depletion>
 </hunger>
@@ -825,17 +963,12 @@
 <kill-rewards>
     <if variant="default">
         <kill-reward filter="current_kill_reward=1">
-            <item material="golden apple"/>
-            <item material="arrow" amount="8"/>
-        </kill-reward>
-        <kill-reward filter="current_kill_reward=2">
-            <item material="golden apple"/>
-        </kill-reward>
-        <kill-reward filter="current_kill_reward=3">
-            <item material="golden apple"/>
             <item material="arrow" amount="12"/>
         </kill-reward>
-        <kill-reward filter="current_kill_reward=4">
+        <kill-reward filter="current_kill_reward=2">
+            <item material="arrow" amount="4"/>
+        </kill-reward>
+        <kill-reward filter="current_kill_reward=3">
             <item material="potion" damage="16421">
                 <potion amplifier="2">heal</potion>
             </item>
@@ -844,11 +977,7 @@
             </item>
             <item material="arrow" amount="6"/>
         </kill-reward>
-        <kill-reward filter="current_kill_reward=5">
-            <item material="golden apple"/>
-            <item material="arrow" amount="4"/>
-        </kill-reward>
-        <kill-reward filter="current_kill_reward=6">
+        <kill-reward filter="current_kill_reward=4">
             <item material="tnt" amount="2" show-can-place-on="false">
                 <can-place-on>
                     <all-blocks/>
@@ -953,6 +1082,7 @@
     <material id="tnt">tnt</material>
     <material id="wool">wool</material>
     <material id="arena-spawn-box-material">stained glass:0</material>
+    <variable id="reward-gapple" var="current_kill_reward_includes_gapple">1</variable>
     <any id="clearable-entities">
         <entity>dropped item</entity>
         <entity>arrow</entity>
@@ -1460,6 +1590,8 @@
     <variable id="current_kit_requires_survival"/>
     <variable id="current_kit_max_respawns"/>
     <variable id="current_kill_reward"/>
+    <variable id="current_kill_reward_includes_gapple"/>
+    <variable id="current_player_size" default="1"/>
     <variable id="ptemp"/>
 </variables>
 <variables scope="team">
@@ -1485,6 +1617,7 @@
     <variable id="current_variant"/>
     <variable id="current_kit"/>
     <variable id="teleport"/>
+    <variable id="disable_arrow_pickup" default="1"/>
     <if variant="cannon">
         <variable id="current_platform_size"/>
         <variable id="current_platform_bridge"/>
@@ -1610,7 +1743,7 @@
             </action>
         </action>
     </trigger>
-    <action id="enable-spectator-mode" scope="player" filter="all(spectator_mode=0, playing=0)">
+    <action id="enable-spectator-mode" scope="player" filter="all(participating, alive, spectator_mode=0, playing=0)">
         <sound key="${entity.experience_orb.pickup}" volume="1" pitch="1.2"/>
         <message text="`7`oFrom `6${host-name}`r: Return to the arena observing zone to exit spectator mode"/>
         <set var="spectator_mode" value="1"/>
@@ -1626,7 +1759,7 @@
         </kit>
     </action>
     <trigger scope="player" filter="all(participating, playing=0, all-spectators)" action="disable-spectator-mode"/>
-    <trigger scope="player" filter="all(participating, state=${running}, playing=0, spectator_mode=0, not(all-spectators), not(all-arenas-finished))" action="enable-spectator-mode"/>
+    <trigger scope="player" filter="all(participating, state=${running}, playing=0, spectator_mode=0, not(all-spectators), not(all-arenas-finished), not(lobby))" action="enable-spectator-mode"/>
     <action id="goto-next-arena" scope="player" filter="all(participating, playing=0)">
         <set var="goto" value="goto + 1"/>
         <action filter="goto=5.."><set var="goto" value="1"/></action>
@@ -1768,6 +1901,11 @@
         <action filter="teleport=1">
             <action id="display-current-kit-title"/>
         </action>
+        <if variant="modern">
+            <action filter="current_kit=11"> <!-- blast bow -->
+                <set var="disable_arrow_pickup" value="0"/>
+            </action>
+        </if>
         <if variant="cannon">
             <!-- set current platform buildable size preset -->
             <set var="current_platform_size" value="0"/> <!-- default -->
@@ -1806,6 +1944,23 @@
     <trigger scope="player" filter="observing" observers="true" action="playing:=0"/>
     <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=1, current_kit_requires_survival=1, all-arenas)" action="survival-kit"/>
     <trigger scope="player" filter="all(match-running, participating, state=${running}, playing=0, all-spectators)" action="spectator-kit"/>
+    <if min-server-version="1.21.10">
+        <action id="player-size-tiny" scope="match" expose="true">
+            <switch-scope inner="player" filter="all(alive, playing=1)">
+                <set var="current_player_size" value="0"/>
+            </switch-scope>
+        </action>
+        <action id="player-size-normal" scope="match" expose="true">
+            <switch-scope inner="player" filter="all(alive, playing=1)">
+                <set var="current_player_size" value="1"/>
+            </switch-scope>
+        </action>
+        <action id="player-size-big" scope="match" expose="true">
+            <switch-scope inner="player" filter="all(alive, playing=1)">
+                <set var="current_player_size" value="2"/>
+            </switch-scope>
+        </action>
+    </if>
     <trigger scope="player" filter="all(observing, host-console, not(match-started))" observers="true">
         <action>
             <sound key="${entity.experience_orb.pickup}" volume="1" pitch="1.2"/>
@@ -1826,7 +1981,7 @@
         <set var="current_kit" value="0"/>
         <repeat times="${kit-count}">
             <message>
-                <text>{"text": "","extra":[{"text":" {r1} ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-{num}"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 1 ${kit-noun} to {kit}","color":"aqua"}},"color":"aqua"},{"text":"{r2} ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-{num}"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 2 ${kit-noun} to {kit}","color":"aqua"}},"color":"aqua"},{"text":"{r3}","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-{num}"},"hoverEvent":{"action":"show_text","contents":{"text":"Set round 3 ${kit-noun} to {kit}","color":"aqua"}},"color":"aqua"},{"text":" : {kit}"}],"color":"white"}</text>
+                <text>{"text": "","extra":[{"text":" {r1} ","clickEvent":{"action":"run_command","value":"/action trigger set-round-1-kit-{num}"},"hoverEvent":{"action":"show_text","contents":{"text":"Set `3Round 1 `b${kit-noun} to {kit}","color":"aqua"}},"color":"aqua"},{"text":"{r2} ","clickEvent":{"action":"run_command","value":"/action trigger set-round-2-kit-{num}"},"hoverEvent":{"action":"show_text","contents":{"text":"Set `3Round 2 `b${kit-noun} to {kit}","color":"aqua"}},"color":"aqua"},{"text":"{r3}","clickEvent":{"action":"run_command","value":"/action trigger set-round-3-kit-{num}"},"hoverEvent":{"action":"show_text","contents":{"text":"Set `3Round 3 `b${kit-noun} to {kit}","color":"aqua"}},"color":"aqua"},{"text":" : {kit}"}],"color":"white"}</text>
                 <replacements>
                     <replacement id="kit">current-kit-name</replacement>
                     <replacement id="num">current-kit-number</replacement>
@@ -2416,6 +2571,7 @@
                 </action>
                 <set var="placement" value="temp"/>
             </switch-scope>
+            <set var="disable_arrow_pickup" value="1"/>
             <action id="apply-clear-kit"/>
         </action>
     </trigger>
@@ -2676,6 +2832,7 @@
                                   <action filter="owns-progress-1"><set var="ttemp" value="5"/></action>
                             </action>
                             <set var="player.exp_progress" value="ttemp / 5"/>
+                            <set var="player.level" value="ttemp * 100 + (5 - ttemp)"/>
                         </action>
                     </switch-scope>
                     <action id="color-tug">
@@ -2923,6 +3080,21 @@
     <item>torch</item>
     <item>snow ball</item>
     <item>ink sack</item>
+    <item>seeds</item>
+    <if variant="modern">
+        <item>turtle helmet</item>
+        <item>copper helmet</item>
+        <item>copper chestplate</item>
+        <item>copper leggings</item>
+        <item>copper boots</item>
+        <item>netherite helmet</item>
+        <item>netherite chestplate</item>
+        <item>netherite leggings</item>
+        <item>netherite boots</item>
+        <item>wind charge</item>
+        <item>tipped arrow</item>
+        <item>shield</item>
+    </if>
 </itemremove>
 <toolrepair>
     <tool>wood sword</tool>
@@ -2944,6 +3116,13 @@
     <tool>flint and steel</tool>
     <tool>diamond pickaxe</tool>
     <tool>shears</tool>
+    <if variant="modern">
+        <tool>copper sword</tool>
+        <tool>netherite sword</tool>
+        <tool>mace</tool>
+        <tool>crossbow</tool>
+        <tool>trident</tool>
+    </if>
 </toolrepair>
 <if variant="tug">
     <gamerules>
