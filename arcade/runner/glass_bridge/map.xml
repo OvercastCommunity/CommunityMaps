@@ -1,12 +1,25 @@
 <map proto="1.5.0">
 <name>Glass Bridge</name>
-<version>1.1.3</version>
+<variant id="pvp">Slap Edition</variant>
+<version>1.2.0</version>
 <game>Glass Bridge</game>
+<constants>
+    <constant id="slap-ability-cooldown">10</constant> <!-- 1 seconds -->
+    <if variant="default">
+        <constant id="max-platform-count">32</constant>
+    </if>
+    <if variant="pvp">
+        <constant id="max-platform-count">12</constant>
+    </if>
+</constants>
 <include id="void-death"/>
 <objective>Get across the glass bridge without falling off!</objective>
 <authors>
     <author uuid="e6b3183f-f4d7-40d5-b0a7-34c481938be1"/> <!-- emcode -->
     <author uuid="759c7730-4702-4bb1-85c0-d6be18069c59"/> <!-- Beanes -->
+    <if variant="pvp">
+        <author uuid="1aad55f7-2dea-4f22-85ca-ad9de3a78609"/> <!-- Technodono -->
+    </if>
 </authors>
 <players min="3" max="64" max-overfill="64"/>
 <regions>
@@ -74,10 +87,26 @@
     <variable id="recent_completion" default="0" scope="player" exclusive="1"/>
     <cuboid id="end_region" min="0,0,0" max="0,0,0"/>
     <cuboid id="fill_region" min="0,0,0" max="0,0,0"/>
+    <if variant="pvp">
+        <player-location id="xp_bar_prog" component="exp progress"/>
+        <variable id="slap_ability_cd" default="0" scope="player"/>
+    </if>
     <timelimit id="timelimit"/>
 </variables>
 <filters>
     <time id="after-1s">1s</time>
+    <if variant="pvp">
+        <carrying id="has-wheat">
+            <item material="wheat" enchantment="infinity:1" prevent-sharing="true" name="`e`lSlap"/>
+        </carrying>
+        <carrying id="has-stick" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+            <item material="stick" prevent-sharing="true" name="`7`lSlap"/>
+        </carrying>
+        <holding id="holding-wheat" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+            <item material="wheat"/>
+        </holding>
+        <pulse id="slap-progress" duration="0.05" period="0.1" filter="slap_ability_cd=1.."/>
+    </if>
 </filters>
 <actions>
     <action id="enter-platform-region" scope="player">
@@ -205,6 +234,7 @@
                 <set var="player_count" value="player_count + 1"/>
             </switch-scope>
             <set var="platform_count" value="min(max(floor(player_count * 0.8), 3), 32)"/>
+            <set var="platform_count" value="min(max(floor(player_count * 0.8), 3), ${max-platform-count})"/>
             <set var="platform_index" value="0"/>
             <repeat times="platform_count">
                 <set var="platform_states" index="platform_index" value="floor(random() * 2)"/>
@@ -255,6 +285,41 @@
             </action>
         </action>
     </trigger>
+    <if variant="pvp">
+        <action id="use-slap-ability" scope="player" filter="slap_ability_cd=0">
+            <replace-item ignore-metadata="true">
+                <find material="wheat" enchantment="infinity:1" prevent-sharing="true" name="`e`lSlap"/>
+                <replace material="stick" prevent-sharing="true" name="`7`lSlap"/>
+            </replace-item>
+            <set var="slap_ability_cd" value="${slap-ability-cooldown}"/>
+            <set var="xp_bar_prog" value="0"/>
+        </action>
+        <trigger filter="slap-progress" scope="player">
+            <action>
+                <set var="slap_ability_cd" value="slap_ability_cd-1"/>
+                <set var="xp_bar_prog" value="min(0.99, 1 - (slap_ability_cd/${slap-ability-cooldown}))" />
+                <action filter="slap_ability_cd=0">
+                    <replace-item ignore-metadata="true">
+                        <find material="stick" prevent-sharing="true" name="`7`lSlap"/>
+                        <replace material="wheat" enchantment="infinity:1" prevent-sharing="true" name="`e`lSlap"/>
+                    </replace-item>
+                </action>
+            </action>
+        </trigger>
+        <trigger filter="all(not(has-wheat),not(has-stick),alive)" action="give-new-slap-ability" scope="player"/>
+        <action id="give-new-slap-ability" scope="player">
+            <action filter="slap_ability_cd=1..">
+                <kit>
+                    <item material="stick" prevent-sharing="true" name="`7`lSlap"/>
+                </kit>
+            </action>
+            <action filter="slap_ability_cd=0">
+                <kit>
+                    <item material="wheat" enchantment="infinity:1" prevent-sharing="true" name="`e`lSlap"/>
+                </kit>
+            </action>
+        </action>
+    </if>
 </actions>
 <modes show-before="10s">
     <mode after="20s" action="remove-spawn" name="Removing spawn"/>
@@ -300,7 +365,13 @@
 </respawn>
 <kits>
     <kit id="spawn-kit">
-        <effect amplifier="1">invisibility</effect>
+        <unless variant="pvp">
+            <effect amplifier="1">invisibility</effect>
+        </unless>
+        <if variant="pvp">
+            <item material="wheat" enchantment="infinity:1" prevent-sharing="true" name="`e`lSlap"/>
+            <knockback-reduction>0.25</knockback-reduction>
+        </if>
         <boots material="leather boots" team-color="true" unbreakable="true"/>
         <leggings material="leather leggings" team-color="true" unbreakable="true"/>
     </kit>
@@ -308,6 +379,30 @@
         <action id="enter-end-region"/>
     </kit>
 </kits>
+<itemremove>
+    <item>wheat</item>
+    <item>stick</item>
+</itemremove>
+<if variant="pvp">
+    <damage attacker-action="use-slap-ability"/>
+    <damage>
+        <any>
+            <attacker>
+                <filter id="holding-wheat"/>
+            </attacker>
+            <cause>void</cause>
+        </any>
+    </damage>
+</if>
+<unless variant="pvp">
+    <damage>
+        <deny>
+            <not>
+                <cause>void</cause>
+            </not>
+        </deny>
+    </damage>
+</unless>
 <structures>
     <structure id="end-island" air="true">
         <region>
@@ -330,11 +425,4 @@
 <hunger>
     <depletion>off</depletion>
 </hunger>
-<damage>
-    <deny>
-        <not>
-            <cause>void</cause>
-        </not>
-    </deny>
-</damage>
 </map>
