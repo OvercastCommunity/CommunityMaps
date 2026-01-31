@@ -1,15 +1,16 @@
 <map proto="1.5.0">
 <name>Glass Bridge</name>
 <variant id="pvp">Slap Edition</variant>
-<version>1.2.0</version>
+<version>1.2.1</version>
 <game>Glass Bridge</game>
 <constants>
-    <constant id="slap-ability-cooldown">10</constant> <!-- 1 seconds -->
+    <constant id="max-slap-ability-cooldown">60</constant> <!-- 6 seconds -->
+    <constant id="min-slap-ability-cooldown">10</constant> <!-- 1 seconds -->
     <if variant="default">
-        <constant id="max-platform-count">32</constant>
+        <constant id="playercount-platform-ratio">0.8</constant>
     </if>
     <if variant="pvp">
-        <constant id="max-platform-count">12</constant>
+        <constant id="playercount-platform-ratio">0.35</constant>
     </if>
 </constants>
 <include id="void-death"/>
@@ -90,6 +91,7 @@
     <if variant="pvp">
         <player-location id="xp_bar_prog" component="exp progress"/>
         <variable id="slap_ability_cd" default="0" scope="player"/>
+        <variable id="tmp_slap_ability_cd" default="0" scope="player"/>
     </if>
     <timelimit id="timelimit"/>
 </variables>
@@ -233,8 +235,7 @@
             <switch-scope inner="player" outer="match">
                 <set var="player_count" value="player_count + 1"/>
             </switch-scope>
-            <set var="platform_count" value="min(max(floor(player_count * 0.8), 3), 32)"/>
-            <set var="platform_count" value="min(max(floor(player_count * 0.8), 3), ${max-platform-count})"/>
+            <set var="platform_count" value="min(max(floor(player_count * ${playercount-platform-ratio}), 3), 32)"/>
             <set var="platform_index" value="0"/>
             <repeat times="platform_count">
                 <set var="platform_states" index="platform_index" value="floor(random() * 2)"/>
@@ -291,13 +292,14 @@
                 <find material="wheat" enchantment="infinity:1" prevent-sharing="true" name="`e`lSlap"/>
                 <replace material="stick" prevent-sharing="true" name="`7`lSlap"/>
             </replace-item>
-            <set var="slap_ability_cd" value="${slap-ability-cooldown}"/>
+            <set var="tmp_slap_ability_cd" value="floor(((platform_count - score) / platform_count) * (${max-slap-ability-cooldown} - ${min-slap-ability-cooldown}) + ${min-slap-ability-cooldown})"/>
+            <set var="slap_ability_cd" value="tmp_slap_ability_cd"/>
             <set var="xp_bar_prog" value="0"/>
         </action>
         <trigger filter="slap-progress" scope="player">
             <action>
                 <set var="slap_ability_cd" value="slap_ability_cd-1"/>
-                <set var="xp_bar_prog" value="min(0.99, 1 - (slap_ability_cd/${slap-ability-cooldown}))" />
+                <set var="xp_bar_prog" value="min(0.99, 1 - (slap_ability_cd/tmp_slap_ability_cd))" />
                 <action filter="slap_ability_cd=0">
                     <replace-item ignore-metadata="true">
                         <find material="stick" prevent-sharing="true" name="`7`lSlap"/>
@@ -318,6 +320,10 @@
                     <item material="wheat" enchantment="infinity:1" prevent-sharing="true" name="`e`lSlap"/>
                 </kit>
             </action>
+        </action>
+        <action id="reset-slap-cooldown" scope="player">
+            <set var="slap_ability_cd" value="0"/>
+            <set var="xp_bar_prog" value="1"/>
         </action>
     </if>
 </actions>
@@ -371,6 +377,7 @@
         <if variant="pvp">
             <item material="wheat" enchantment="infinity:1" prevent-sharing="true" name="`e`lSlap"/>
             <knockback-reduction>0.25</knockback-reduction>
+            <action id="reset-slap-cooldown"/>
         </if>
         <boots material="leather boots" team-color="true" unbreakable="true"/>
         <leggings material="leather leggings" team-color="true" unbreakable="true"/>
