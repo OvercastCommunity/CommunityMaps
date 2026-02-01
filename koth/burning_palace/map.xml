@@ -1,13 +1,14 @@
 <map proto="1.5.0">
 <name>Burning Palace</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <created>2026-01-17</created>
 <constant id="score">750</constant>
 <constant id="respawn-timer">3s</constant>
 <constant id="points-per-second">1</constant>
 <constant id="damage-resistance">2s</constant>
 <constant id="map-center">0.5,0.5,0.5</constant>
-<constant id="long-refill-timer">30s</constant>
+<constant id="long-refill-timer">60s</constant>
+<constant id="medium-refill-timer">30s</constant>
 <constant id="short-refill-timer">10s</constant>
 <include id="conquest"/>
 <objective>Be the first team to reach ${score} points!</objective>
@@ -33,6 +34,7 @@
 </kits>
 <projectiles>
     <projectile id="arrow" name="crossbow bolt" velocity="4" damage="7" throwable="true" cooldown="2.5s"/>
+    <projectile id="blaze" name="flaming fireball" projectile="SmallFireball" velocity="0.3" damage="20" throwable="true" cooldown="0.1s" precise="true" click="right"/>
 </projectiles>
 <spawns>
     <default>
@@ -64,10 +66,14 @@
         <block>-2,15,44</block>
     </union>
     <union id="crossbow-chests">
-        <block>10,13,-15</block>
+        <block>-2,13,18</block>
         <block>-35,7,-8</block>
-        <block>-10,13,15</block>
+        <block>2,13,-18</block>
         <block>35,7,8</block>
+    </union>
+    <union id="ultimate-chests">
+        <block>0,10,13</block>
+        <block>0,10,-13</block>
     </union>
     <union id="utility-chests">
         <union id="red-utility-chests">
@@ -80,7 +86,7 @@
         <block id="red-grenade-chest">0,8,-11</block>
         <mirror normal="0,0,1" origin="${map-center}" region="red-grenade-chest"/>
     </union>
-    <complement id="center-hill">
+    <complement  id="center-hill">
         <cuboid min="8,16,-7" size="-15,4,15"/>
         <cuboid min="4,16,-3" size="-7,4,7"/>
     </complement>
@@ -99,7 +105,7 @@
     </loot>
     <loot id="grenade">
         <any count="3" unique="false">
-            <item name="`6Grenade" grenade="true" grenade-power="1.2" material="snow ball"/>
+            <item name="`6Grenade" grenade="true" grenade-power="2" material="snow ball"/>
         </any>
     </loot>
     <loot id="arrowloot">
@@ -110,7 +116,7 @@
     <loot id="utility">
         <any>
             <item material="potion" damage="5" name="Super Heal">
-                <effect amplifier="1">instant_health</effect>
+                <effect amplifier="1" duration="0.1s">instant_health</effect>
                 <effect duration="6s" amplifier="3">regeneration</effect>
             </item>
             <item material="potion" damage="9" name="Enrage Juice">
@@ -123,13 +129,19 @@
             </item>
         </any>
     </loot>
+    <loot id="ultimate">
+        <any count="8" unique="false">
+            <item amount="2" projectile="blaze" name="`cFlamming fireballs" lore="`r`7Right-click to fire!" material="magma cream"/>
+        </any>
+    </loot>
     <!-- Define inventories to refill -->
     <!-- Filling always happens when a player opens the inventory -->
     <!-- Any block or entity that has an inventory (and matches the filter) will be filled -->
+    <fill loot="ultimate" filter="ultimate-chests" refill-interval="${long-refill-timer}" refill-clear="true"/>
     <fill loot="utility" filter="utility-chests" refill-interval="${long-refill-timer}" refill-clear="true"/>
     <fill loot="crossbow" filter="crossbow-chests" refill-interval="${short-refill-timer}" refill-clear="true"/>
     <fill loot="arrowloot" filter="arrow-chests" refill-interval="${short-refill-timer}" refill-clear="true"/>
-    <fill loot="grenade" filter="grenade-chests" refill-interval="${long-refill-timer}" refill-clear="true"/>
+    <fill loot="grenade" filter="grenade-chests" refill-interval="${medium-refill-timer}" refill-clear="true"/>
 </lootables>
 <control-points required="false" capture-time="5s" points="${points-per-second}" time-multiplier="0" show-progress="true" neutral-state="true" incremental="true" permanent="false">
     <control-point name="Center" capture="center-hill" progress="center-hill"/>
