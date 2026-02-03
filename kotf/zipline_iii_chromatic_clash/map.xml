@@ -14,7 +14,8 @@
     <rule>No camping inside any ziplines!</rule>
 </rules>
 <broadcasts>
-    <tip after="0m" every="3m">Ziplines transport you really fast in a direction as indicated by the arrows! Use them to get around.</tip>
+    <tip after="0s" every="3m">Ziplines transport you really fast in a direction as indicated by the arrows! Use them to get around.</tip>
+    <tip after="90s" every="3m">Levitator send you directly upwards within their trigger area. Use them to reach higher ground.</tip>
 </broadcasts>
 <teams>
     <team id="blue-team" color="blue" max="24">Blue</team>
@@ -113,6 +114,22 @@
             <velocity x="0" y="0" z="2"/>
         </action>
     </trigger>
+    <trigger scope="player" observers="true"> <!-- Move players inside west ziplines (entry-comp) -->
+        <filter>
+            <pulse period="0.1s" duration="0.05s" filter="west-side-entry-ziplines"/>
+        </filter>
+        <action>
+            <velocity x="-2" y="0" z="0"/>
+        </action>
+    </trigger>
+    <trigger scope="player" observers="true"> <!-- Move players inside east ziplines (entry-comp) -->
+        <filter>
+            <pulse period="0.1s" duration="0.05s" filter="east-side-entry-ziplines"/>
+        </filter>
+        <action>
+            <velocity x="2" y="0" z="0"/>
+        </action>
+    </trigger>
     <!-- SOUNDS -->
     <trigger scope="player" observers="true"> <!-- Generic wind sound (levitators) -->
         <filter>
@@ -149,6 +166,16 @@
             <mirror id="red-stair-west-pad" normal="1,0,0" origin="0.5,0,1.5" region="red-stair-east-pad"/>
         </union>
         <mirror id="blue-stair-pads" normal="0,0,1" origin="0.5,0,1.5" region="red-stair-pads"/>
+        <!-- Launcher Pads -->
+        <union id="launcher-pads">
+            <cuboid id="red-launcher-pad" min="-1,30,46" size="3,0.5,-1"/>
+            <mirror id="blue-launcher-pad" normal="0,0,1" origin="0.5,0,1.5" region="red-launcher-pad"/>
+        </union>
+        <!-- Mid Connector Pads -->
+        <union id="mid-connector-pads">
+            <cuboid id="red-connector-pad" min="4,19,18" size="-7,0.5,2"/>
+            <mirror id="blue-connector-pad" normal="0,0,1" origin="0.5,0,1.5" region="red-connector-pad"/>
+        </union>
         <!-- Bridge Pads -->
         <union id="red-bridge-pads">
             <cuboid id="red-bridge-east-pad" min="16,19,9" max="21,19.5,7"/>
@@ -162,7 +189,6 @@
         </union>
         <mirror id="fountain-west-pads" normal="1,0,0" origin="0.5,0,1.5" region="fountain-east-pads"/>
     </union>
-
     <union id="levitators"> <!-- Regions for levitators extend far up to create the fan blower mechanic -->
         <union id="red-levitators">
             <cuboid id="red-central-levitator" min="-3,19.5,28" max="4,42,24"/> 
@@ -173,7 +199,6 @@
         </union>
         <mirror id="blue-levitators" normal="0,0,1" origin="0.5,0,1.5" region="red-levitators"/>
     </union>
-
     <union id="ziplines"> 
         <union id="vertical-comp-ziplines"> <!-- the vertical tube for every zipline -->
             <union id="red-team-vertical-comp-ziplines">
@@ -184,7 +209,6 @@
             </union>
             <mirror normal="0,0,1" origin="0.5,0,1.5" region="red-team-vertical-comp-ziplines"/> <!-- blue teams ziplines -->
         </union>
-
         <union id="red-team-horizontal-comp-ziplines"> <!-- the vertical tube for red side ziplines -->  
             <cuboid id="red-zipline-2" min="-46,41,53" size="3,3,13"/>
             <cuboid id="orange-zipline-2" min="-37,24,36" size="3,3,25"/> 
@@ -192,12 +216,21 @@
             <mirror normal="1,0,0" origin="0.5,0,1.5" region="orange-zipline-2"/> <!-- green zipline -->
         </union>
         <mirror id="blue-team-horizontal-comp-ziplines" normal="0,0,1" origin="0.5,0,1.5" region="red-team-horizontal-comp-ziplines"/>
+        <union id="west-side-entry-ziplines"> <!-- the vertical tube for red side ziplines -->  
+            <cuboid id="red-zipline-e" min="-30,18,66" size="-15,5,-3"/>
+            <cuboid id="orange-zipline-e" min="-30,18,61" size="-6,5,-3"/> 
+            <mirror normal="0,0,-1" origin="0.5,0,1.5" region="red-zipline-e"/> <!-- blue zipline -->
+            <mirror normal="0,0,-1" origin="0.5,0,1.5" region="orange-zipline-e"/> <!-- light blue zipline -->
+        </union>
+        <mirror id="east-side-entry-ziplines" normal="1,0,0" origin="0.5,0,1.5" region="west-side-entry-ziplines"/>
     </union>
 
     <!-- apply blocks -->
     <apply block="never" use="never"/>
-
     <!--apply veolcities-->
+    <apply velocity="0.0,0.6,-4.4" region="red-launcher-pad"/>
+    <apply velocity="0.0,0.6,4.4" region="blue-launcher-pad"/>
+    <apply velocity="0.0,1.6,0.0" region="mid-connector-pads"/>
     <apply velocity="0.0,1.4,-0.2" region="red-bridge-pads"/>
     <apply velocity="0.0,1.4,0.2" region="blue-bridge-pads"/>
     <apply velocity="0.0,1.4,-0.3" region="red-stair-pads"/>
@@ -226,7 +259,7 @@
           show-respawn-on-pickup="${announce-post-pickup}">
         <post return-time="0s" respawn-time="${flag-respawn-timer}">
             <post name="Rainbow Fountain" respawn-filter="all(next-post-top,not(flag-carried))">0,47,1</post>
-            <post name="Lower Bridge" respawn-filter="all(next-post-bottom,not(flag-carried))">0,27,1</post>
+            <post name="Lower Bridge" respawn-filter="all(next-post-bottom,not(flag-carried))">0,23,1</post>
             <post name="East Post" respawn-filter="all(next-post-east,not(flag-carried))">35,31,1</post>
             <post name="West Post" respawn-filter="all(next-post-west,not(flag-carried))">-35,31,1</post>
         </post>
@@ -239,7 +272,7 @@
         </region>
     </structure>
     <dynamic structure="flag-post-indicator" location="0.5,54,1.5" trigger="all(next-post-top,not(flag-carried))"/>
-    <dynamic structure="flag-post-indicator" location="0.5,32,1.5" trigger="all(next-post-bottom,not(flag-carried))"/>
+    <dynamic structure="flag-post-indicator" location="0.5,31,1.5" trigger="all(next-post-bottom,not(flag-carried))"/>
     <dynamic structure="flag-post-indicator" location="35.5,41,1.5" trigger="all(next-post-east,not(flag-carried))"/>
     <dynamic structure="flag-post-indicator" location="-34.5,41,1.5" trigger="all(next-post-west,not(flag-carried))"/>
 </structures>
