@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Sunbliss</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Capture the enemy's wool!</objective>
 <created>2026-01-10</created>
 <phase>staging</phase>
@@ -37,23 +37,20 @@
     </kit>
 </kits>
 <spawns>
-    <spawn team="blue-team" kit="spawn-kit" yaw="44.5">
-        <region>
-            <point>208.5,9,51.5</point>
-        </region>
-    </spawn>
-    <spawn team="red-team" kit="spawn-kit" yaw="-135.5">
-        <region>
-            <point>113.5,9,271.5</point>
-        </region>
-    </spawn>
-    <default>
-        <region yaw="90">
-            <cylinder base="161.5,68,161.5" radius="0.75" height="0"/>
-        </region>
-    </default>
+    <spawn team="blue-team" kit="spawn-kit" yaw="44.5" region="blue-spawn-point"/>
+    <spawn team="red-team" kit="spawn-kit" yaw="-135.5" region="red-spawn-point"/>
+    <default yaw="90" region="obs-spawn-point"/>
 </spawns>
 <filters>
+    <all id="not-water-cause-world">
+        <not>
+            <any>
+                <material>water</material>
+                <material>stationary water</material>
+            </any>
+        </not>
+        <cause>world</cause>
+    </all>
     <any id="block-break-void-filter">
         <all>
             <any>
@@ -69,16 +66,16 @@
             <void/>
         </not>
     </any>
-    <all id="blues-woolrooms-filter">
+    <all id="blues-wool-room-filter">
         <team id="only-red">red-team</team>
-        <filter id="woolrooms-filter"/>
+        <filter id="wool-rooms-filter"/>
     </all>
-    <all id="reds-woolrooms-filter">
+    <all id="reds-wool-room-filter">
         <team id="only-blue">blue-team</team>
-        <filter id="woolrooms-filter"/>
+        <filter id="wool-rooms-filter"/>
     </all>
-    <all id="woolrooms-filter">
-        <blocks region="woolrooms-blocks">
+    <all id="wool-rooms-filter">
+        <blocks region="wool-rooms-blocks">
             <any>
                 <material>air</material>
                 <material>web</material>
@@ -86,41 +83,40 @@
             </any>
         </blocks>
         <not>
-            <any>
-                <material>redstone torch on</material>
-                <material>wooden door</material>
-                <material>spruce door</material>
-                <material>birch door</material>
-                <material>jungle door</material>
-                <material>iron door block</material>
-                <material>trap door</material>
-                <material>iron trapdoor</material>
-                <void/>
-            </any>
+            <void/>
         </not>
     </all>
-    <all id="only-iron-cause-world">
+    <all id="only-iron-renew">
         <material id="only-iron">iron block</material>
         <cause>world</cause>
     </all>
-    <deny id="deny-redstone">
-        <material>redstone wire</material>
-    </deny>
-    <deny id="deny-wood-button">
-        <material>wood button</material>
-    </deny>
-    <deny id="deny-stone-button">
-        <material>stone button</material>
-    </deny>
-    <deny id="deny-lever">
+    <any id="decoration">
         <material>lever</material>
-    </deny>
-    <material id="only-air">air</material>
+        <material>stone button</material>
+        <material>wood button</material>
+        <material>trap door</material>
+        <material>iron trapdoor</material>
+        <material>wooden door</material>
+        <material>spruce door</material>
+        <material>birch door</material>
+        <material>jungle door</material>
+        <material>dark oak door</material>
+        <material>fence gate</material>
+        <material>spruce fence gate</material>
+        <material>birch fence gate</material>
+        <material>jungle fence gate</material>
+        <material>cauldron</material>
+    </any>
+    <material id="sign">wall sign</material>
+    <material id="redstone">redstone wire</material>
 </filters>
 <regions>
+    <point id="blue-spawn-point">208.5,9,51.5</point>
+    <point id="red-spawn-point">113.5,9,271.5</point>
+    <cylinder id="obs-spawn-point" base="161.5,68,161.5" radius="0.75" height="0"/>
     <block id="blue-team-red-wool">214,10,51</block>
     <block id="red-team-blue-wool">107,10,271</block>
-    <union id="spawns">
+    <union id="spawn-regions">
         <union id="blue-spawn">
             <rectangle min="193,63" max="218,44"/>
             <rectangle min="193,65" max="208,63"/>
@@ -140,8 +136,8 @@
             <rectangle min="134,249" max="119,250"/>
         </union>
     </union>
-    <union id="woolrooms">
-        <union id="blues-woolrooms"> <!-- blue defend, red capture -->
+    <union id="wool-rooms">
+        <union id="blues-wool-room"> <!-- blue defend, red capture -->
             <rectangle min="174,38" max="148,35"/>
             <rectangle min="175,35" max="147,21"/>
             <rectangle min="174,21" max="163,20"/>
@@ -149,7 +145,7 @@
             <rectangle min="171,20" max="166,19"/>
             <rectangle min="155,20" max="150,19"/>
         </union>
-        <union id="reds-woolrooms"> <!-- red defend, blue capture -->
+        <union id="reds-wool-room"> <!-- red defend, blue capture -->
             <rectangle min="148,285" max="174,288"/>
             <rectangle min="147,288" max="175,302"/>
             <rectangle min="148,302" max="159,303"/>
@@ -158,70 +154,76 @@
             <rectangle min="167,303" max="172,304"/>
         </union>
     </union>
-    <union id="woolrooms-blocks">
-        <union id="blues-woolrooms-blocks">
-            <cuboid min="174,0,38" max="148,24,35"/>
-            <cuboid min="175,0,35" max="147,24,21"/>
-            <cuboid min="174,0,21" max="163,24,20"/>
-            <cuboid min="158,0,21" max="148,24,20"/>
-            <cuboid min="171,0,20" max="166,24,19"/>
-            <cuboid min="155,0,20" max="150,24,19"/>
+    <complement id="wool-rooms-without-doors"> <!-- wool rooms excluding doors in actual use -->
+        <union id="wool-rooms-blocks">
+            <cuboid min="174,0,38" max="148,49,35"/> <!-- blues wool room blocks -->
+            <cuboid min="175,0,35" max="147,49,21"/>
+            <cuboid min="174,0,21" max="163,49,20"/>
+            <cuboid min="158,0,21" max="148,49,20"/>
+            <cuboid min="171,0,20" max="166,49,19"/>
+            <cuboid min="155,0,20" max="150,49,19"/>
+            <cuboid min="148,0,285" max="174,49,288"/> <!-- reds wool room blocks -->
+            <cuboid min="147,0,288" max="175,49,302"/>
+            <cuboid min="148,0,302" max="159,49,303"/>
+            <cuboid min="164,0,302" max="174,49,303"/>
+            <cuboid min="151,0,303" max="156,49,304"/>
+            <cuboid min="167,0,303" max="172,49,304"/>
         </union>
-        <union id="red-woolrooms-blocks">
-            <cuboid min="148,0,285" max="174,24,288"/>
-            <cuboid min="147,0,288" max="175,24,302"/>
-            <cuboid min="148,0,302" max="159,24,303"/>
-            <cuboid min="164,0,302" max="174,24,303"/>
-            <cuboid min="151,0,303" max="156,24,304"/>
-            <cuboid min="167,0,303" max="172,24,304"/>
-        </union>
+        <cuboid min="167,18,28" max="166,20,29"/>
+        <cuboid min="155,18,295" max="156,20,294"/>
+    </complement>
+    <union id="victory-monument-areas">
+        <cuboid min="215,9,50" max="213,20,53"/>
+        <cuboid min="107,9,273" max="109,20,270"/>
     </union>
-    <negative id="not-build-area">
+    <union id="interaction-protected-region">
+        <region id="spawn-regions"/>
+        <region id="wool-rooms-without-doors"/>
+    </union>
+    <negative id="void-area">
         <union id="build-area">
-            <complement> <!--blue team diagonal island-->
+            <complement> <!-- blue side diagonal island -->
                 <cuboid min="129,0,85" max="152,oo,62"/>
                 <half origin="129,0,85" normal="-1,0,-1"/>
             </complement>
-            <rectangle min="197,146" max="181,177"/> <!--middle lane-->
+            <rectangle min="197,146" max="181,177"/> <!-- centre lane -->
             <rectangle min="125,177" max="141,146"/>
-            <complement> <!--red team diagonal island-->
+            <complement> <!-- red side diagonal island -->
                 <cuboid min="193,0,238" max="170,oo,261"/>
                 <half origin="193,0,238" normal="1,0,1"/>
             </complement>
         </union>
     </negative>
     <above id="build-limit" y="24"/>
-    <apply use="deny-wood-button" region="woolrooms"/>
-    <apply use="deny-stone-button" region="woolrooms"/>
-    <apply use="deny-lever" region="woolrooms"/>
-    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
-    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
-    <apply enter="only-red" region="blues-woolrooms" message="You may not enter your own wool room!"/>
-    <apply enter="only-blue" region="reds-woolrooms" message="You may not enter your own wool room!"/>
-    <apply block-place="only-iron-cause-world" block-break="only-iron" region="spawns" message="You may not edit spawn!"/>
-    <apply block-place="only-iron-cause-world" block-break="only-iron" region="spawns" message="You may not edit spawn!"/>
+    <apply enter="blue-team" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="red-team" region="red-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="red-team" region="blues-wool-room" message="You may not enter your team's wool room!"/>
+    <apply enter="blue-team" region="reds-wool-room" message="You may not enter your team's wool room!"/>
+    <apply enter="never" block="never" region="victory-monument-areas" message="You may not obstruct or modify the victory monument!"/>
+    <apply block-place="only-iron-renew" block-break="any(only-iron,sign)" region="spawn-regions" message="You may only break iron blocks in the spawn!"/>
     <apply block-place="never" region="build-limit">
         <message>{"translate":"match.maxBuildHeight"}</message>
     </apply>
-    <apply block="blues-woolrooms-filter" region="blues-woolrooms" message="You may not edit the wool room!"/>
-    <apply block="reds-woolrooms-filter" region="reds-woolrooms" message="You may not edit the wool room!"/>
-    <apply block-place="block-place-void-filter" block-break="block-break-void-filter" region="not-build-area" message="You may not build in the void!"/>
-    <apply block-physics="deny-redstone" region="woolrooms"/>
+    <apply block="deny(not-water-cause-world)" region="wool-rooms"/>
+    <apply block="blues-wool-room-filter" region="blues-wool-room" message="You may not edit the wool room!"/>
+    <apply block="reds-wool-room-filter" region="reds-wool-room" message="You may not edit the wool room!"/>
+    <apply block-place="block-place-void-filter" block-break="block-break-void-filter" region="void-area" message="You may not build in the void!"/>
+    <apply use="deny(decoration)" block-physics="all(deny(redstone),deny(decoration))" region="interaction-protected-region"/>
 </regions>
 <wools craftable="false">
-    <wool team="blue-team" color="red" monument="blue-team-red-wool" location="149.5,19,295.5"/>
-    <wool team="red-team" color="blue" monument="red-team-blue-wool" location="172.5,19,27.5"/>
+    <wool team="blue-team" color="red" monument="blue-team-red-wool" location="149.5,19,296"/>
+    <wool team="red-team" color="blue" monument="red-team-blue-wool" location="172.5,19,27"/>
 </wools>
 <renewables>
-    <renewable region="spawns" renew-filter="only-iron" rate="1"/>
+    <renewable region="spawn-regions" renew-filter="only-iron"/>
 </renewables>
 <toolrepair>
     <tool>iron sword</tool>
     <tool>bow</tool>
-    <tool>arrow</tool>
     <tool>iron pickaxe</tool>
     <tool>iron axe</tool>
     <tool>iron spade</tool>
+    <tool>arrow</tool>
 </toolrepair>
 <itemremove>
     <item>leather helmet</item>
@@ -231,6 +233,7 @@
     <item>string</item>
     <item>redstone</item>
     <item>red rose</item>
+    <item>brown mushroom</item>
     <item>sapling</item>
     <item>apple</item>
 </itemremove>
@@ -239,6 +242,16 @@
     <item>glass</item>
     <item>golden apple</item>
 </itemkeep>
+<block-drops>
+    <rule>
+        <filter>
+            <material>coal ore</material>
+        </filter>
+        <drops>
+            <item material="coal"/>
+        </drops>
+    </rule>
+</block-drops>
 <kill-rewards>
     <kill-reward>
         <item amount="16" material="wood"/>
