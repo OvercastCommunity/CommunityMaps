@@ -1,16 +1,16 @@
 <map proto="1.5.0">
 <name>Armature</name>
-<version>1.0.9</version>
+<version>1.1</version>
 <include id="gapple-kill-reward"/>
 <objective>Destroy the enemy's monument and repair yours!</objective>
 <created>2022-11-19</created>
+<constants>
+    <if max-server-version="1.8.8"><constant id="gold-block-name">tile.blockGold.name</constant></if>
+    <if min-server-version="1.21"><constant id="gold-block-name">block.minecraft.gold_block</constant></if>
+</constants>
 <authors>
     <author uuid="9d4779a8-d35f-45d2-b51c-95de7a77e128"/> <!-- zzuf -->
 </authors>
-<broadcasts>
-    <tip after="2s" every="4m">`3Pick up `eGold Blocks`3 from the spawner at middle to repair your monument!</tip>
-    <tip after="4s" every="4m">`3Keep in mind that you'll also get `7Slowness 5`3 for a bit!</tip>
-</broadcasts>
 <teams>
     <team id="red-team" color="dark red" max="12">Red</team>
     <team id="yellow-team" color="yellow" max="12">Yellow</team>
@@ -56,17 +56,19 @@
     </default>
 </spawns>
 <filters>
-    <deny id="deny-players">
-        <participating/>
-    </deny>
-    <team id="only-red">red-team</team>
-    <team id="only-yellow">yellow-team</team>
     <deny id="deny-beacon">
         <material>beacon</material>
     </deny>
-    <deny id="deny-gold-block">
-        <material>gold block</material>
-    </deny>
+    <material id="gold-block">gold block</material>
+    <offset id="no-gold" vector="0,8,0" filter="not(gold-block)"/>
+    <pulse id="gold-pulse" duration="0.25s" period="40s">
+        <after duration="40s">
+            <all>
+                <match-running/>
+                <filter id="no-gold"/>
+            </all>
+        </after>
+    </pulse>
 </filters>
 <regions>
     <above y="21" id="ceiling"/>
@@ -75,8 +77,12 @@
     </apply>
     <point id="middle-spawner-point">0.5,6.5,0.5</point>
     <block id="middle-spawner-area">0,6,0</block>
-    <rectangle id="middle-spawner-greater-area" min="-2,-2" max="3,3"/>
-    <apply block="deny-players" region="middle-spawner-greater-area" message="You may not edit this area!"/>
+    <complement id="middle-spawner-greater-area">
+        <rectangle min="-2,-2" max="3,3"/>
+        <region id="tha-block"/>
+    </complement>
+    <apply block="never" region="middle-spawner-greater-area" message="You may not edit this area"/>
+    <apply block-break="gold-block" block-place="never" region="tha-block" message="`kIt consumes you"/>
     <union id="spawn-areas">
         <union id="red-spawn-areas">
             <rectangle min="-50,30" max="-68,21"/> <!-- South -->
@@ -88,14 +94,16 @@
         </union>
     </union>
     <apply block="never" region="spawn-areas" message="You may not modify the spawn areas!"/>
-    <apply enter="only-red" region="red-spawn-areas" message="You may not enter the enemy's spawn!"/>
-    <apply enter="only-yellow" region="yellow-spawn-areas" message="You may not enter the enemy's spawn!"/>
+    <apply enter="red-team" region="red-spawn-areas" message="You may not enter the enemy's spawn!"/>
+    <apply enter="yellow-team" region="yellow-spawn-areas" message="You may not enter the enemy's spawn!"/>
     <!-- Monuments -->
     <negative id="not-monuments">
-        <cuboid id="red-monument" min="-77,18,-1" max="-80,15,2"/>
-        <cuboid id="yellow-monument" min="78,18,2" max="81,15,-1"/>
+        <union id="monuments">
+            <cuboid id="red-monument" min="-77,18,-1" max="-80,15,2"/>
+            <cuboid id="yellow-monument" min="78,18,2" max="81,15,-1"/>
+        </union>
     </negative>
-    <apply block-place="deny-gold-block" region="not-monuments" message="You may only place `eGold Blocks`r in your damaged monument!"/>
+    <apply block-place="deny(gold-block)" region="not-monuments" message="You may only place `eGold Blocks`r in your damaged monument!"/>
     <apply use="deny-beacon"/>
     <negative id="void-area">
         <rectangle min="-22,28" max="23,-27"/> <!-- Middle -->
@@ -104,19 +112,60 @@
         <region id="spawn-areas"/>
     </negative>
     <apply block="deny(void)" region="void-area" message="You may not edit the void!"/>
+    <block id="tha-block">0,8,0</block>
+    <translate id="tha-block-hat" offset="0,1,0"><region id="tha-block"/></translate>
+    <translate id="tha-block-shoes" offset="0,-1,0"><region id="tha-block"/></translate>
 </regions>
+<actions>
+    <trigger filter="match-started" scope="match">
+        <action>
+            <fill material="step:4" region="tha-block-hat"/>
+            <fill material="sea lantern" region="tha-block"/>
+            <fill material="step:12" region="tha-block-shoes"/>
+        </action>
+    </trigger>
+    <!--
+    <trigger filter="all(player.target_x=0,player.target_y=8,player.target_z=0)" scope="player">
+        <action>
+            <message text="It consumes you, XML reader"/>
+        </action>
+    </trigger>
+    -->
+    <trigger filter="gold-pulse" scope="match">
+        <action filter="no-gold">
+            <fill material="gold block" region="tha-block"/>
+            <message text="{'text':'','extra':[{'text':'[','color':'white'},{'text':'Au','color':'gold'},{'text':'] ','color':'white'},{'text':'A new ','color':'gray'},{'translate': '${gold-block-name}','color':'yellow'},{'text':' has appeared at ','color':'gray'},{'translate': 'misc.middle','color':'aqua'}]}"/>
+        </action>
+    </trigger>
+    <action id="broken-msg" scope="player">
+        <action filter="yellow-team">
+            <set var="breaker" value="1"/>
+            <switch-scope inner="match">
+                <message>
+                    <text>{"text":"","extra":[{"text":"[","color":"white"},{"text":"Au","color":"gold"},{"text":"] ","color":"white"},{translate: 'wool.touch.owned.player', with: ['{player}',{"translate": "${gold-block-name}","color":"yellow"},'`eYellow']}],"color":"gray"}</text>
+                    <replacements>
+                        <player id="player" var="breaker" style="color"/>
+                    </replacements>
+                </message>
+            </switch-scope>
+        </action>
+        <action filter="red-team">
+            <set var="breaker" value="1"/>
+            <switch-scope inner="match">
+                <message>
+                    <text>{"text":"","extra":[{"text":"[","color":"white"},{"text":"Au","color":"gold"},{"text":"] ","color":"white"},{translate: 'wool.touch.owned.player', with: ['{player}',{"translate": "${gold-block-name}","color":"yellow"},'`4Red']}],"color":"gray"}</text>
+                    <replacements>
+                        <player id="player" var="breaker" style="color"/>
+                    </replacements>
+                </message>
+            </switch-scope>
+        </action>
+    </action>
+</actions>
 <destroyables materials="gold block" show-progress="true" required="true" repairable="true">
-    <destroyable owner="red-team" name="Red Monument" region="red-monument"/>
-    <destroyable owner="yellow-team" name="Yellow Monument" region="yellow-monument"/>
+    <destroyable owner="red-team" name="§4Monument§r" region="red-monument"/>
+    <destroyable owner="yellow-team" name="§eMonument§r" region="yellow-monument"/>
 </destroyables>
-<spawners>
-    <spawner spawn-region="middle-spawner-point" player-region="middle-spawner-area" delay="40" max-entities="1">
-        <item material="gold block" amount="1" prevent-sharing="true"/>
-        <potion duration="30" amplifier="5" damage="10">
-            <effect>slowness</effect>
-        </potion>
-    </spawner>
-</spawners>
 <itemkeep>
     <item>stone sword</item>
     <item>bow</item>
@@ -153,11 +202,31 @@
 <block-drops>
     <rule>
         <filter>
-            <material>gold block</material>
+            <all>
+                <region id="monuments"/>
+                <material>gold block</material>
+            </all>
         </filter>
         <drops>
             <item chance="0" material="gold block"/>
         </drops>
+    </rule>
+    <rule>
+        <filter>
+            <all>
+                <region id="tha-block"/>
+                <material>gold block</material>
+            </all>
+        </filter>
+        <kit deduct-items="false">
+            <action>
+                <action id="broken-msg"/>
+                <set var="gold_blocks" value="gold_blocks+1"/>
+            </action>
+            <item material="gold block" prevent-sharing="true"/>
+            <effect duration="10s" amplifier="3">slowness</effect>
+        </kit>
+        <replacement>sea lantern</replacement>
     </rule>
     <rule>
         <filter>
@@ -181,6 +250,14 @@
         </drops>
     </rule>
 </block-drops>
+<variables>
+    <variable id="breaker" scope="player" exclusive="1"/>
+    <variable id="gold_blocks" scope="player" default="0"/>
+    <variable id="mon_mode" default="0" scope="match"/>
+</variables>
+<stats>
+    <stat value="gold_blocks" name="`eGold blocks`r broken"/>
+</stats>
 <tnt>
     <instantignite>true</instantignite>
     <fuse>2s</fuse>
