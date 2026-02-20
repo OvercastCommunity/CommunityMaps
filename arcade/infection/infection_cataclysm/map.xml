@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Infection: Cataclysm</name>
-<version>1.1.2</version>
+<version>1.2.0</version>
 <created>2025-01-24</created>
 <phase>staging</phase>
 <variant id="oitq" override="true">Cataclysm</variant>
@@ -69,8 +69,9 @@
 <if variant="default">
     <constants>
         <constant id="zombie-team-name">Zombie Militant</constant>
-        <constant id="time-limit">7</constant>
-        <constant id="compass-distribution-time">6</constant>
+        <constant id="time-limit">6</constant>
+        <constant id="compass-distribution-time">100</constant>
+        <constant id="enable-player-tracker">never</constant>
     </constants>
     <include id="infection"/>
     <respawns auto="true">
@@ -188,28 +189,32 @@
     <kits>
         <kit id="human-kit">
             <game-mode>adventure</game-mode>
-            <item slot="0" locked="true" unbreakable="true" material="iron sword" name="`6`lLast Hope"/>
+            <item slot="0" locked="true" unbreakable="true" material="iron sword"/>
             <helmet locked="true" unbreakable="true" material="chainmail helmet"/>
             <chestplate locked="true" unbreakable="true" material="chainmail chestplate"/>
             <leggings locked="true" unbreakable="true" material="chainmail leggings"/>
             <boots locked="true" unbreakable="true" material="iron boots"/>
         </kit>
-        <kit id="zombie-kit">
+        <kit id="zombie-kit" force="true">
             <game-mode>adventure</game-mode>
             <clear effects="true"/>
-            <item slot="0" locked="true" unbreakable="true" material="stone sword" name="`2`lJustice"/>
+            <item slot="0" locked="true" unbreakable="true" material="stone sword"/>
             <helmet locked="true" material="skull item" damage="2"/>
             <chestplate locked="true" unbreakable="true" team-color="true" material="leather chestplate"/>
             <leggings locked="true" unbreakable="true" team-color="true" material="leather leggings"/>
             <boots locked="true" unbreakable="true" team-color="true" material="leather boots"/>
             <walk-speed>1</walk-speed>
             <knockback-reduction>0</knockback-reduction>
+            <max-health>14</max-health>
+            <foodlevel>16</foodlevel>
+            <shield health="6" delay="4s"/>
+            <double-jump power="1.8" recharge-time="2s"/>
             <action>
                 <set var="is_zombie_respawning" value="0"/>
                 <set var="is_zombie_transforming" value="0"/>
             </action>
         </kit>
-        <kit id="zombie-reanimating-kit">
+        <kit id="zombie-reanimating-kit" force="true">
             <game-mode>adventure</game-mode>
             <helmet locked="true" material="skull item" damage="2"/>
             <chestplate locked="true" unbreakable="true" team-color="true" material="leather chestplate"/>
@@ -220,6 +225,9 @@
             <effect amplifier="999">resistance</effect>
             <walk-speed>0</walk-speed>
             <knockback-reduction>1</knockback-reduction>
+            <max-health>14</max-health>
+            <foodlevel>16</foodlevel>
+            <shield health="6" delay="4s"/>
             <action filter="has_last_pos=0">
                 <action id="record-last-victim-position"/>
                 <set var="is_zombie_transforming" value="0"/>
@@ -240,6 +248,7 @@
         <kill-reward filter="zombie-team">
             <kit deduct-items="false">
                 <head slot="8" locked="true" name="Brains" uuid="bae8e78f-ef7c-4e20-bb6c-052af0d010ea" skin="eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmRkM2IwMWVjMzJmM2Y1ZWEyNmFkNGUyMzMwNTQwMWY3M2QxM2YzYzE2YjNmYWNlZmU3MGQ5MjE3NmIzMTEifX19"/>
+                <effect duration="3s" amplifier="2">regeneration</effect>
                 <action>
                     <set var="last_killer" value="1"/>
                     <switch-scope inner="match">
@@ -279,7 +288,6 @@
         <variable id="i"/>
         <variable id="calc"/>
         <variable id="tmp"/>
-        <variable id="warcry"/>
         <variable id="last_x" scope="player"/>
         <variable id="last_y" scope="player"/>
         <variable id="last_z" scope="player"/>
@@ -373,7 +381,7 @@
                 </action>
                 <set var="last_y" value="last_y - 2"/>
                 <action filter="delayed-match-running">
-                    <message title="`cRising from Death..." stay="3s"/>
+                    <message title="`cRising from death..." stay="3s"/>
                 </action>
             </action>
         </trigger>
@@ -389,7 +397,7 @@
                     <teleport x="last_x" y="last_y" z="last_z" yaw="last_yaw"/>
                     <set var="last_yaw" value="0"/>
                 </action>
-                <set var="last_y" value="last_y + 0.07"/>
+                <set var="last_y" value="last_y + 0.08"/>
             </action>
         </trigger>
         <trigger scope="player">
@@ -402,100 +410,28 @@
             </action>
         </trigger>
         <action id="zombie-chat" scope="match">
-            <set var="warcry" value="floor(random() * 8)"/>
-            <action filter="warcry=1">
-                <set var="warcry" value="floor(random() * 13)"/>
-                <action filter="warcry=0">
-                    <message text="&#x003C;{p1}&#x003E;: `aBlood will spill so that oil may flow. BRAINS!!!">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="warcry=1">
-                    <message text="&#x003C;{p1}&#x003E;: `aThe putrid stench of the living shall be made pure.">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="warcry=2">
-                    <message text="&#x003C;{p1}&#x003E;: `aFree your soul from its prison of fresh meat.">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="warcry=3">
-                    <message text="&#x003C;{p1}&#x003E;: `aWe will stabilize your land so that your bodies may flourish.">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="warcry=4">
-                    <message text="&#x003C;{p1}&#x003E;: `aCAPITAL GAINS AND DELICIOUS BRAINS!!">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="warcry=5">
-                    <message text="&#x003C;{p1}&#x003E;: `aSurrender your beating hearts.">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="warcry=6">
-                    <message text="&#x003C;{p1}&#x003E;: `aOur arms race towards those yet turned.">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="warcry=7">
-                    <message text="&#x003C;{p1}&#x003E;: `aThe deceased will rise for the glory of all.">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="warcry=8">
-                    <message text="&#x003C;{p1}&#x003E;: `aIn Rot We Trust">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="warcry=9">
-                    <message text="&#x003C;{p1}&#x003E;: `aA world united by undying spirit. Crave with us!">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="warcry=10">
-                    <message text="&#x003C;{p1}&#x003E;: `aSeize the night, brethren.">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="warcry=11">
-                    <message text="&#x003C;{p1}&#x003E;: `aEmbrace the cold hand of death.">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="warcry=12">
-                    <message text="&#x003C;{p1}&#x003E;: `aDo not roll in your grave, there is much to be done.">
-                        <replacements>
-                            <player id="p1" var="last_killer"/>
-                        </replacements>
-                    </message>
-                </action>
+            <set var="tmp" value="floor(random() * 10)"/>
+            <action filter="tmp=1">
+                <message text="&#x003C;{0}&#x003E;: `a{1}">
+                    <replacements>
+                        <player id="0" var="last_killer"/>
+                        <switch id="1" value="floor(random() * 13)">
+                            <case match="0" result="Blood will spill so that oil may flow. BRAINS!!!"/>
+                            <case match="1" result="The putrid stench of the living shall be made pure."/>
+                            <case match="2" result="Free your soul from its prison of fresh meat."/>
+                            <case match="3" result="We will stabilize your land so that your bodies may flourish."/>
+                            <case match="4" result="CAPITAL GAINS AND DELICIOUS BRAINS!!"/>
+                            <case match="5" result="Surrender your beating hearts."/>
+                            <case match="6" result="Our arms race towards those yet turned."/>
+                            <case match="7" result="The deceased will rise for the glory of all."/>
+                            <case match="8" result="In Rot We Trust"/>
+                            <case match="9" result="A world united by undying spirit. Crave with us!"/>
+                            <case match="10" result="Seize the night, brethren."/>
+                            <case match="11" result="Embrace the cold hand of death."/>
+                            <case match="12" result="Do not roll in your grave, there is much to be done."/>
+                        </switch>
+                    </replacements>
+                </message>
             </action>
         </action>
     </actions>
