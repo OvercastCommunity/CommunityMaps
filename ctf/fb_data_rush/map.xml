@@ -3,23 +3,22 @@
 <!--<slug>tvt_data_rush</slug>-->
 <variant id="comp" override="true">FB: Super-Rush</variant>
 <variant id="modern" world="modern" override="true" min-server-version="1.21.9">FB: Data-Rush ⟨CMP Edition⟩</variant>
-<version>2.0.3</version>
+<version>2.0.4</version>
 <phase>development</phase>
 <created>2025-11-15</created>
 <constants>
     <constant id="team-size">12</constant>
     <constant id="build-limit">20</constant>
-    <constant id="default-kit">custom-spawn-kit</constant>
-    <constant id="default-leaves-1">3</constant>
-    <constant id="default-leaves-2">7</constant> <!-- add 4 to the previous number -->
-    <constant id="default-leaves-3">11</constant> <!-- add 4 to the previous number -->
-    <constant id="default-leaves-4">15</constant> <!-- add 4 to the previous number -->
-    <constant id="default-leaves-modern">jungle leaves</constant> 
+    <constant id="default-leaves-classic-damage">3</constant>
+    <constant id="default-leaves-modern">jungle leaves</constant>
+    <constant id="default-planks-classic">3</constant>
+    <constant id="default-planks-modern">mangrove planks</constant>
+    <constant id="deny-use">custom-deny-use</constant>
     <constant id="map-center">0.5,0.0,0.5</constant>
-    <constant id="central-island-chest-region">outer-platforms</constant> <!-- gives the central chest loot -->
-    <constant id="central-island-chest-refill-timer">10s</constant> <!-- time it takes for these chests to refill-->
+    <constant id="central-island-chest-region">outer-platforms</constant>
+    <constant id="central-island-chest-refill-timer">10s</constant> 
     <if variant="comp">
-        <constant id="kill-teams">1</constant> <!-- When teams are killed and this feature is enabled players are sent to obs instead of swapping teams (Used primarily for comp) -->
+        <constant id="kill-teams">1</constant>
     </if>
     <constant id="obs-yaw">90</constant>
     <constant id="obs-pitch">0</constant>
@@ -39,6 +38,8 @@
     <constant id="team-four-pitch">0</constant>
     <constant id="team-four-flag-post-1-yaw">-90</constant>
     <constant id="team-four-flag-post-2-yaw">-90</constant>
+    <!-- Disable legacy PvP -->
+    <constant id="legacy-pvp">false</constant>
 </constants>
 <include id="flag-battles"/>
 <authors>
@@ -47,34 +48,17 @@
 <contributors>
     <contributor uuid="9602cd49-4779-4965-846f-67d49bce48a8" contribution="Map Layout"/> <!-- Abuelos -->
 </contributors>
-<kits>
-    <kit id="custom-spawn-kit">
-        <clear effects="true"/>
-        <item slot="0" unbreakable="true" material="stone sword"/>
-        <unless min-server-version="1.14">
-            <item slot="1" amount="6" projectile="arrow" name="`rCrossbow" lore="`r`7Right-click to fire!" material="firework charge"/>
-        </unless>
-        <if min-server-version="1.14">
-            <item slot="1" unbreakable="true" material="crossbow">
-                <enchantment level="1">quick_charge</enchantment>
-            </item>
-            <item slot="17" amount="6" material="arrow"/>
-        </if>
-        <item slot="2" unbreakable="true" material="gold axe"/>
-        <item slot="3" amount="48" damage="${default-leaves-1}" material="leaves"/>
-        <item slot="4" amount="24" material="wood"/>
-        <item slot="8" material="golden apple"/>
-        <leggings unbreakable="true" locked="true" material="chainmail leggings">
-            <enchantment level="2">projectile_protection</enchantment>
-        </leggings>
-        <boots unbreakable="true" locked="true" material="iron boots"/>
-        <potion duration="2" amplifier="10">regeneration</potion>
-        <potion duration="2" amplifier="10">damage_resistance</potion>
-        <game-mode>survival</game-mode>
-        <helmet team-color="true" locked="true" unbreakable="true" material="leather helmet"/>
-        <chestplate team-color="true" locked="true" unbreakable="true" material="leather chestplate"/>
-    </kit>
-</kits>
+<filters>
+    <deny id="custom-deny-use">
+        <any>
+            <material>lever</material>
+            <material>note block</material>
+            <material>hopper</material>
+            <material>furnace</material>
+            <material>anvil</material>
+        </any>
+    </deny>
+</filters>
 <regions>
     <apply block="never" region="flag-post-deny-zones" message="You may not modify the flag posts!"/>
     <apply block="never" region="spawner-deny-zone" message="You may not modify the spawner region!"/>
@@ -124,10 +108,22 @@
     <block id="team-four-flag-1-post">-47, 8, 44</block>
     <block id="team-four-flag-2-post">-47, 8, 42</block>
 
-    <cuboid id="team-one-spawnroom" min="-56,14,-57" size="24,19,7"/>
-    <cuboid id="team-two-spawnroom" min="58,14,-56" size="-7,19,24"/>
-    <cuboid id="team-three-spawnroom" min="57,14,58" size="-24,19,-7"/>
-    <cuboid id="team-four-spawnroom" min="-57,14,57" size="7,19,-24"/>
+    <complement id="team-one-spawnroom">
+        <cuboid min="-56,0,-57" size="24,19,7"/>
+        <cuboid min="-39,8,-50" size="7,5,-7"/>
+    </complement>
+    <complement id="team-two-spawnroom">
+        <cuboid min="58,0,-56" size="-7,19,24"/>
+        <cuboid min="51,8,-39" size="7,5,7"/>
+    </complement>
+    <complement id="team-three-spawnroom">
+        <cuboid min="57,0,58" size="-24,19,-7"/>
+        <cuboid min="40,8,51" size="-7,5,7"/>
+    </complement>
+    <complement id="team-four-spawnroom">
+        <cuboid min="-57,0,57" size="7,19,-24"/>
+        <cuboid min="-50,8,40" size="-7,5,-7"/>
+    </complement>
 
     <cuboid id="team-one-spawnroom-door" min="-33,14,-51" size="-5,5,1"/>
     <cuboid id="team-two-spawnroom-door" min="52,14,-33" size="-1,5,-5"/>
