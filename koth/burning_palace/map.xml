@@ -56,8 +56,24 @@
 <filters>
     <material id="only-chest">chest</material>
     <random id="50-percent">0.5</random>
+    <any id="fall-damage-immune">
+        <filter id="fall-damage-disabling-regions"/>
+        <countdown duration="2s">
+            <not>
+                <filter id="trigger-fall-damage-immunity"/>
+            </not>
+        </countdown>
+    </any>
 </filters>
 <regions>
+    <union id="fall-damage-disabling-regions">
+        <cuboid id="mid-jump-area" min="-2,7,-2" max="3,25,3"/>
+        <cuboid id="mid-koth-area" min="13,17,13" max="-12,21,-12"/>
+        <union id="trigger-fall-damage-immunity">
+            <cuboid id="blue-spawn-area" min="32,12,32" max="46,oo,46"/>
+            <mirror normal="-1,0,-1" origin="${map-center}" region="blue-spawn-area"/>
+        </union>
+    </union>
     <cuboid id="ne-hill" min="38,11,-37" size="-9,4,9"/>
     <mirror normal="-1,0,1" origin="${map-center}" region="ne-hill" id="sw-hill"/>
     <union id="arrow-chests">
@@ -131,7 +147,7 @@
             </item>
             <item material="potion" damage="2" name="Energy Juice">
                 <effect duration="15s" amplifier="1">speed</effect>
-                <effect duration="15s" amplifier="2">jump_boost</effect>
+                <effect duration="15s" amplifier="3">jump_boost</effect>
             </item>
         </any>
     </loot>
@@ -149,6 +165,14 @@
     <fill loot="arrowloot" filter="arrow-chests" refill-interval="${short-refill-timer}" refill-clear="true"/>
     <fill loot="grenade" filter="grenade-chests" refill-interval="${medium-refill-timer}" refill-clear="true"/>
 </lootables>
+<damage>
+    <deny>
+        <all>
+            <filter id="fall-damage-immune"/>
+            <cause>fall</cause>
+        </all>
+    </deny>
+</damage>
 <control-points required="false" capture-time="5s" points="${points-per-second}" time-multiplier="0" show-progress="true" neutral-state="true" incremental="true" permanent="false">
     <control-point name="Center" capture="center-hill" progress="center-hill"/>
     <control-point name="A Gardens" capture="ne-hill" progress="ne-hill"/>
