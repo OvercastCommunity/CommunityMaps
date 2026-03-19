@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Cherry City</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Capture the enemies flag 3 times!</objective>
 <created>2026-01-17</created>
 <include id="gapple-kill-reward"/>
@@ -34,7 +34,10 @@
     </spawn>
 </spawns>
 <kits>
-    <kit id="spawn-kit">
+    <kit id="spawn-resistance">
+        <effect duration="3s" amplifier="255">damage resistance</effect>
+    </kit>
+    <kit id="spawn-kit" parents="spawn-resistance">
         <clear/>
         <item slot="0" material="iron sword" unbreakable="true"/>
         <item slot="1" material="bow" unbreakable="true"/>
@@ -42,9 +45,10 @@
         <item slot="3" material="golden apple"/>
         <helmet material="leather helmet" team-color="true" unbreakable="true" locked="true"/>
         <chestplate material="leather chestplate" team-color="true" unbreakable="true" locked="true"/>
-        <leggings material="chainmail leggings" unbreakable="true" locked="true"/>
+        <leggings material="chainmail leggings" unbreakable="true" locked="true">
+            <enchantment level="4">blast_protection</enchantment>
+        </leggings>
         <boots material="leather boots" team-color="true" unbreakable="true" locked="true"/>
-        <game-mode>adventure</game-mode>
     </kit>
 </kits>
 <regions>
@@ -56,26 +60,18 @@
         <cuboid id="red-net" min="81,24,73" max="88,30,80"/>
         <cuboid id="blue-net" min="-47,24,31" max="-40,30,38"/>
     </union>
-    <apply block="never" use="blocks"/>
-    <apply region="red-spawn" enter="all(red-team,not(carrying))"/>
-    <apply region="blue-spawn" enter="all(blue-team,not(carrying))"/>
+    <apply region="red-spawn" enter="all(red-team,not(carrying))" block-place="never"/>
+    <apply region="blue-spawn" enter="all(blue-team,not(carrying))" block-place="never"/>
     <apply region="red-spawn" enter="red-team" message="You may not enter the opposing team's spawn!"/>
     <apply region="blue-spawn" enter="blue-team" message="You may not enter the opposing team's spawn!"/>
+    <apply region="everywhere" block="tnt"/>
 </regions>
 <filters>
     <any id="carrying">
         <carrying-flag>red-flag</carrying-flag>
         <carrying-flag>blue-flag</carrying-flag>
     </any>
-    <any id="blocks">
-        <material>wooden_door</material>
-        <material>spruce_door</material>
-        <material>birch_door</material>
-        <material>jungle_door</material>
-        <material>acacia_door</material>
-        <material>dark_oak_door</material>
-        <material>chest</material>
-    </any>
+    <material id="tnt">tnt</material>
 </filters>
 <flags>
     <flag id="red-flag" name="Red Flag" owner="red-team">
@@ -92,9 +88,30 @@
 <score>
     <limit>3</limit>
 </score>
-<kill-reward>
-    <item amount="16" material="arrow"/>
-</kill-reward>
+<kill-rewards>
+    <kill-reward>
+        <item amount="16" material="arrow"/>
+    </kill-reward>
+    <kill-reward>
+        <filter><kill-streak count="2"/></filter>
+        <item material="tnt"/>
+    </kill-reward>
+    <kill-reward>
+        <filter><kill-streak count="5"/></filter>
+        <item material="potion" damage="5" name="`dCherry Juice">
+            <effect duration="10s" amplifier="2">speed</effect>
+            <effect duration="10s">strength</effect>
+        </item>
+    </kill-reward>
+</kill-rewards>
+<tnt>
+    <instantignite>true</instantignite>
+    <blockdamage>false</blockdamage>
+    <fuse>2s</fuse>
+</tnt>
+<disabledamage>
+    <damage ally="true" self="false" enemy="false" other="false">block explosion</damage>
+</disabledamage>
 <toolrepair>
     <tool>iron sword</tool>
     <tool>bow</tool>
@@ -104,6 +121,19 @@
     <item>leather chestplate</item>
     <item>chainmail leggings</item>
     <item>leather boots</item>
+    <item>wooden_door</item>
+    <item>spruce_door</item>
+    <item>birch_door</item>
+    <item>jungle_door</item>
+    <item>acacia_door</item>
+    <item>dark_oak_door</item>
+    <item>gray carpet</item>
+    <item>item frame</item>
+    <item>painting</item>
+    <item>redstone block</item>
+    <item>snowball</item>
+    <item>lever</item>
+    <item>glass bottle</item>
 </itemremove>
 <itemkeep>
     <item>arrow</item>
