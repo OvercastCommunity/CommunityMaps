@@ -1,16 +1,8 @@
 <map proto="1.5.0">
 <name>Skill Issue</name>
-<variant id="swap" world="swap">Swap</variant>
-<version>3.1.0</version>
-<unless variant="swap">
-    <objective>Capture the Wool in 2 minutes, or prevent the Rusher from doing so!</objective>
-    <created>2025-08-04</created>
-</unless>
-<if variant="swap">
-    <objective>Capture the Wool within 10 minutes, or stop the Rusher from doing so!</objective>
-    <created>2025-12-08</created>
-    <phase>staging</phase>
-</if>
+<version>3.1.1</version>
+<objective>Capture the Wool in 2 minutes, or prevent the Rusher from doing so!</objective>
+<created>2025-08-04</created>
 <game>Rusher Roulette</game>
 <include id="countdown"/>
 <include id="void-death"/>
@@ -18,16 +10,9 @@
     <author uuid="64e840c8-4fb5-4659-a36b-ff93e2f6113a"/> <!-- Javg_ -->
 </authors>
 <constants>
-    <unless variant="swap">
-        <constant id="MAP_NAME">`l&#34;Skill Issue&#34;`r</constant>
-        <constant id="ROUNDS_AMOUNT">5</constant>
-        <constant id="ROUND_DURATION">120</constant> <!-- in seconds -->
-    </unless>
-    <if variant="swap">
-        <constant id="ROUND_DURATION">600</constant> <!-- in seconds -->
-        <constant id="MAP_NAME">`l&#34;Skill Issue: Swap&#34;`r</constant>
-        <constant id="ROUNDS_AMOUNT">1</constant>
-    </if>
+    <constant id="MAP_NAME">`l&#34;Skill Issue&#34;`r</constant>
+    <constant id="ROUNDS_AMOUNT">5</constant>
+    <constant id="ROUND_DURATION">120</constant> <!-- in seconds -->
     <!-- game states -->
     <constant id="GAME_TUTORIAL">1</constant>
     <constant id="GAME_RUNNING">2</constant>
@@ -48,14 +33,7 @@
     <constant id="PERK_VOID_GUARD">5</constant>
     <constant id="PERK_TNT_KIT">6</constant>
     <constant id="PERK_MAXED_OUT_GEAR">7</constant>
-    <unless variant="swap">
-        <constant id="PERKS_AMOUNT">7</constant>
-    </unless>
-    <if variant="swap">
-        <constant id="PERK_MAP_RESET">8</constant>
-        <constant id="PERK_NO_KB">9</constant>
-        <constant id="PERKS_AMOUNT">9</constant>
-    </if>
+    <constant id="PERKS_AMOUNT">7</constant>
     <!-- last round perks settings and ids -->
     <constant id="LAST_ROUND_PERKS_AMOUNT">4</constant>
     <constant id="LAST_ROUND_PERK_BLITZ">8</constant>
@@ -81,9 +59,6 @@
         <clear/>
     </kit>
     <kit id="rusher-kit">
-        <if variant="swap">
-            <clear/>
-        </if>
         <kit filter="is_perk_active_maxed_out_gear=0">
             <item material="diamond sword" slot="0" unbreakable="true"/>
             <item material="bow" slot="1" unbreakable="true">
@@ -102,12 +77,7 @@
         </kit>
         <item material="log 2" amount="64" damage="1" slot="4"/>
         <item material="log 2" amount="64" damage="1" slot="31"/>
-        <if variant="swap">
-            <item material="wool" damage="14" amount="1" slot="5"/>
-        </if>
-        <unless variant="swap">
-            <item material="stained glass" amount="64" team-color="true" slot="5"/>
-        </unless>
+        <item material="stained glass" amount="64" team-color="true" slot="5"/>
         <item material="stained glass" amount="64" team-color="true" slot="32"/>
         <item material="water bucket" slot="7"/>
         <item material="water bucket" slot="34"/>
@@ -145,11 +115,6 @@
         <kit filter="is_last_round_perk_active_no_kb=1">
             <knockback-reduction>1</knockback-reduction>
         </kit>
-        <if variant="swap">
-            <kit id="no-kb-perk-kit" filter="is_perk_active_no_kb=1">
-                <knockback-reduction>1</knockback-reduction>
-            </kit>
-        </if>
         <kit id="maxed-out-gear-perk-kit" filter="is_perk_active_maxed_out_gear=1">
             <item material="diamond sword" slot="0" unbreakable="true">
                 <enchantment level="5">sharpness</enchantment>
@@ -195,9 +160,6 @@
         </action>
     </kit>
     <kit id="defenders-kit">
-        <if variant="swap">
-            <clear/>
-        </if>
         <item material="iron sword" slot="0" unbreakable="true"/>
         <kit filter="is_perk_active_bowless_defenders=0">
             <item material="bow" slot="1" unbreakable="true"/>
@@ -224,15 +186,6 @@
     </kit>
     <give kit="defenders-kit" filter="all(defenders,round-preparing)"/>
     <give kit="empty-kit" filter="all(participating,any(round-finished,round-restarting),not(is-final-round))"/>
-    <if variant="swap">
-        <give kit="triple-health-perk-kit" filter="all(rusher,is_perk_active_triple_health=1)"/>
-        <give kit="potion-buff-perk-kit" filter="all(rusher,is_perk_active_potion_buff=1)"/>
-        <give kit="tnt-kit-perk-kit" filter="all(rusher,is_perk_active_tnt_kit=1)"/>
-        <give kit="maxed-out-gear-perk-kit" filter="all(rusher,is_perk_active_maxed_out_gear=1)"/>
-        <give kit="no-kb-perk-kit" filter="all(rusher,is_perk_active_no_kb=1)"/>
-        <give kit="defenders-kit" filter="all(defenders,is_perk_active_blockless_defenders=1)"/>
-        <give kit="defenders-kit" filter="all(defenders,is_perk_active_bowless_defenders=1)"/>
-    </if>
 </kits>
 <spawns>
     <default>
@@ -272,9 +225,6 @@
 <score scoreboard-filter="defenders">
     <limit>${ROUNDS_AMOUNT}</limit>
 </score>
-<if variant="swap">
-    <time result="defenders">6m</time>
-</if>
 <spawners>
     <spawner spawn-region="wool-spawner-1" player-region="wool-room" max-entities="1" delay="2s">
         <item material="wool" damage="14"/>
@@ -375,12 +325,7 @@
     <structure id="void-guard-structure" region="void-guard"/>
     <dynamic structure="ground-cages-structure" trigger="not(round-running)"/>
     <dynamic structure="void-guard-structure" trigger="is_perk_active_void_guard=1"/>
-    <unless variant="swap">
-        <dynamic structure="renewable-map-structure" trigger="round-starting"/>
-    </unless>
-    <if variant="swap">
-        <dynamic structure="renewable-map-structure" trigger="is_perk_active_map_reset=1"/>
-    </if>
+    <dynamic structure="renewable-map-structure" trigger="round-starting"/>
 </structures>
 <portals>
     <portal forward="all(round-starting,defenders,half-to-west)" yaw="@-90" pitch="@0" destination="defenders-spawn-west" sound="false"/>
@@ -434,25 +379,16 @@
     </all>
     <after id="countdown-start" duration="6.5s" filter="round-starting"/>
     <variable id="is-final-round" var="current_round">${ROUNDS_AMOUNT}</variable>
-    <unless variant="swap">
-        <players id="rusher-forced" min="2">
-            <all>
-                <team>rusher</team>
-                <not><filter id="is-final-round"/></not>
-                <variable var="rushers_amount">1</variable>
-            </all>
-        </players>
-    </unless>
-    <if variant="swap">
-        <players id="multiple-rushers" min="2">
+    <players id="rusher-forced" min="2">
+        <all>
             <team>rusher</team>
-        </players>
-    </if>
+            <not><filter id="is-final-round"/></not>
+            <variable var="rushers_amount">1</variable>
+        </all>
+    </players>
 </filters>
 <variables scope="match">
-    <unless variant="swap">
-        <variable id="rushers_amount" default="1"/>
-    </unless>
+    <variable id="rushers_amount" default="1"/>
     <variable id="playercount"/>
     <variable id="game_state"/>
     <variable id="round_state"/>
@@ -487,20 +423,6 @@
     <variable id="is_last_round_perk_active_blitz"/>
     <variable id="is_last_round_perk_active_rage"/>
     <variable id="is_last_round_perk_active_no_kb"/>
-    <if variant="swap">
-        <variable id="last_rusher_x"/>
-        <variable id="last_rusher_y"/>
-        <variable id="last_rusher_z"/>
-        <variable id="last_rusher_pitch"/>
-        <variable id="last_rusher_yaw"/>
-        <variable id="is_void" default="1"/>
-        <variable id="perks_given"/>
-        <variable id="is_rusher_out"/>
-        <timelimit id="tl"/>
-        <!-- perks -->
-        <variable id="is_perk_active_map_reset"/>
-        <variable id="is_perk_active_no_kb"/>
-    </if>
 </variables>
 <variables scope="player">
     <variable id="is_rusher"/>
@@ -517,10 +439,6 @@
     <!-- util -->
     <variable id="tmp_rusher"/>
     <variable id="calc"/>
-    <if variant="swap">
-        <variable id="pending_tp"/>
-        <variable id="joined_normally"/>
-    </if>
 </variables>
 <actions>
     <!-- states -->
@@ -545,13 +463,11 @@
     <action id="set-round-restarting" scope="match">
         <set var="round_state" value="${ROUND_RESTARTING}"/>
     </action>
-    <unless variant="swap">
-        <trigger scope="match" action="round_state:=${ROUND_FINISHED}">
-            <filter>
-                <after duration="${ROUND_DURATION}" filter="round-running" message="Round over in {0}"/>
-            </filter>
-        </trigger>
-    </unless>
+    <trigger scope="match" action="round_state:=${ROUND_FINISHED}">
+        <filter>
+            <after duration="${ROUND_DURATION}" filter="round-running" message="Round over in {0}"/>
+        </filter>
+    </trigger>
 
     <!-- pick rushers -->
     <action id="pick-rushers" scope="match">
@@ -561,23 +477,7 @@
         <switch-scope inner="player" filter="all(participating,defenders,alive)">
             <set var="tmp_rusher" value="random()"/>
         </switch-scope>
-        <unless variant="swap">
-            <repeat times="rushers_amount">
-                <set var="tmp_rusher_min" value="99"/>
-                <switch-scope inner="player" filter="all(participating,defenders,alive)">
-                    <set var="tmp_rusher_min" value="min(tmp_rusher, tmp_rusher_min)"/>
-                </switch-scope>
-                <switch-scope inner="player" filter="all(participating,defenders,alive)">
-                    <set var="tmp_rusher" value="tmp_rusher - tmp_rusher_min"/>
-                    <action filter="tmp_rusher=0">
-                        <set var="tmp_rusher" value="99"/>
-                        <set var="is_rusher" value="1"/>
-                        <set var="was_rusher" value="1"/>
-                    </action>
-                </switch-scope>
-            </repeat>
-        </unless>
-        <if variant="swap">
+        <repeat times="rushers_amount">
             <set var="tmp_rusher_min" value="99"/>
             <switch-scope inner="player" filter="all(participating,defenders,alive)">
                 <set var="tmp_rusher_min" value="min(tmp_rusher, tmp_rusher_min)"/>
@@ -588,20 +488,17 @@
                     <set var="tmp_rusher" value="99"/>
                     <set var="is_rusher" value="1"/>
                     <set var="was_rusher" value="1"/>
-                    <set var="joined_normally" value="1"/>
                 </action>
             </switch-scope>
-        </if>
+        </repeat>
     </action>
     <!-- pick perk -->
     <action id="pick-perk" scope="match">
         <set var="should_repeat" value="1"/>
-        <unless variant="swap">
-            <action filter="current_round+1=${ROUNDS_AMOUNT}">
-                <set var="last_selected_perk" value="floor(random() * (${LAST_ROUND_PERKS_AMOUNT} - is_match_modified)) + ${PERKS_AMOUNT} + 1"/>    
-                <set var="should_repeat" value="0"/>
-            </action>
-        </unless>
+        <action filter="current_round+1=${ROUNDS_AMOUNT}">
+            <set var="last_selected_perk" value="floor(random() * (${LAST_ROUND_PERKS_AMOUNT} - is_match_modified)) + ${PERKS_AMOUNT} + 1"/>    
+            <set var="should_repeat" value="0"/>
+        </action>
         <repeat times="999" filter="should_repeat=1">
             <set var="should_repeat" value="0"/>
             <set var="tmp_perk" value="floor(random() * ${PERKS_AMOUNT}) + 1"/>
@@ -618,26 +515,13 @@
         </repeat>
         <set var="i" value="0"/>
         <set var="should_repeat" value="1"/>
-        <unless variant="swap">
-            <repeat times="${PERKS_AMOUNT}" filter="should_repeat=1">
-                <action filter="already_selected_perks[i]=0">
-                    <set var="already_selected_perks" index="i" value="last_selected_perk"/>
-                    <set var="should_repeat" value="0"/>
-                </action>
-                <set var="i" value="i+1"/>
-            </repeat>
-        </unless>
-        <if variant="swap">
-            <repeat times="${PERKS_AMOUNT}" filter="should_repeat=1">
-                <action filter="already_selected_perks[i]=0">
-                    <set var="already_selected_perks" index="i" value="last_selected_perk"/>
-                    <set var="just_selected_perk" value="1"/>
-                    <set var="should_repeat" value="0"/>
-                    <set var="perks_given" value="perks_given + 1"/>
-                </action>
-                <set var="i" value="i+1"/>
-            </repeat>
-        </if>
+        <repeat times="${PERKS_AMOUNT}" filter="should_repeat=1">
+            <action filter="already_selected_perks[i]=0">
+                <set var="already_selected_perks" index="i" value="last_selected_perk"/>
+                <set var="should_repeat" value="0"/>
+            </action>
+            <set var="i" value="i+1"/>
+        </repeat>
         <action filter="last_selected_perk=${PERK_TRIPLE_HEALTH}">
             <set var="is_perk_active_triple_health" value="1"/>
         </action>
@@ -659,25 +543,18 @@
         <action filter="last_selected_perk=${PERK_MAXED_OUT_GEAR}">
             <set var="is_perk_active_maxed_out_gear" value="1"/>
         </action>
-        <unless variant="swap">
-            <action filter="last_selected_perk=${LAST_ROUND_PERK_BLITZ}">
-                <set var="is_last_round_perk_active_blitz" value="1"/>
-            </action>
-            <action filter="last_selected_perk=${LAST_ROUND_PERK_RAGE}">
-                <set var="is_last_round_perk_active_rage" value="1"/>
-            </action>
-            <action filter="last_selected_perk=${LAST_ROUND_PERK_FIVE_RUSHERS}">
-                <set var="is_last_round_perk_active_five_rushers" value="1"/>
-            </action>
-            <action filter="last_selected_perk=${LAST_ROUND_PERK_NO_KB}">
-                <set var="is_last_round_perk_active_no_kb" value="1"/>
-            </action>
-        </unless>
-        <if variant="swap">
-            <action filter="last_selected_perk=${PERK_MAP_RESET}">
-                <set var="is_perk_active_map_reset" value="1"/>
-            </action>
-        </if>
+        <action filter="last_selected_perk=${LAST_ROUND_PERK_BLITZ}">
+            <set var="is_last_round_perk_active_blitz" value="1"/>
+        </action>
+        <action filter="last_selected_perk=${LAST_ROUND_PERK_RAGE}">
+            <set var="is_last_round_perk_active_rage" value="1"/>
+        </action>
+        <action filter="last_selected_perk=${LAST_ROUND_PERK_FIVE_RUSHERS}">
+            <set var="is_last_round_perk_active_five_rushers" value="1"/>
+        </action>
+        <action filter="last_selected_perk=${LAST_ROUND_PERK_NO_KB}">
+            <set var="is_last_round_perk_active_no_kb" value="1"/>
+        </action>
     </action>
     <!-- add rusher -->
     <action id="add-rusher" scope="match">
@@ -700,12 +577,6 @@
         <switch-scope inner="player" filter="all(participating,defenders,alive,was_rusher=0,not(outgoing=1))">
             <set var="tmp_rusher" value="tmp_rusher - tmp_rusher_min"/>
             <action filter="tmp_rusher=0">
-                <if variant="swap">
-                    <set var="pending_tp" value="1"/>
-                    <set var="joined_normally" value="1"/>
-                    <set var="incoming" value="1"/>
-                    <message actionbar="Your turn. `cGo!"/>
-                </if>
                 <set var="was_rusher" value="1"/>
                 <set var="tmp_rusher" value="99"/>
                 <set var="is_rusher" value="1"/>
@@ -746,30 +617,11 @@
             <after duration="25s" filter="game-tutorial"/>
         </filter>
     </trigger>
-    <if variant="swap">
-        <trigger scope="match" action="current_message:=7">
-            <filter>
-                <after duration="28s" filter="game-tutorial"/>
-            </filter>
-        </trigger>
-        <trigger scope="match" action="current_message:=8">
-            <filter>
-                <after duration="31s" filter="game-tutorial"/>
-            </filter>
-        </trigger>
-        <trigger scope="match" action="set-game-running"> <!-- start game -->
-            <filter>
-                <after duration="34s" filter="game-tutorial"/>
-            </filter>
-        </trigger>
-    </if>
-    <unless variant="swap">
-        <trigger scope="match" action="set-game-running"> <!-- start game -->
-            <filter>
-                <after duration="28s" filter="game-tutorial"/>
-            </filter>
-        </trigger>
-    </unless>
+    <trigger scope="match" action="set-game-running"> <!-- start game -->
+        <filter>
+            <after duration="28s" filter="game-tutorial"/>
+        </filter>
+    </trigger>
 
     <!-- rounds -->
     <trigger scope="match" filter="round-preparing">
@@ -794,19 +646,14 @@
             <after duration="0.5s" filter="round-starting"/>
         </filter>
     </trigger>
-    <if variant="swap">
-        <trigger scope="match" filter="round-running" action="tl:=${ROUND_DURATION}"/>
-    </if>
-    <unless variant="swap">
-        <trigger scope="match">
-            <filter>
-                <after duration="${ROUND_DURATION_MINUS_FOUR}" filter="round-running"/>
-            </filter>
-            <action>
-                <sound key="portal.trigger"/>
-            </action>
-        </trigger>
-    </unless>
+    <trigger scope="match">
+        <filter>
+            <after duration="${ROUND_DURATION_MINUS_FOUR}" filter="round-running"/>
+        </filter>
+        <action>
+            <sound key="portal.trigger"/>
+        </action>
+    </trigger>
     <trigger scope="match" filter="round-restarting">
         <action>
             <set var="current_message" value="1"/>
@@ -859,24 +706,12 @@
             <message text="{text}">
                 <replacements>
                     <switch id="text" value="current_message">
-                        <unless variant="swap">
-                            <case match="1" result="${ANNOUNCER_PREFIX} Welcome to ${MAP_NAME}, a `aRusher Roulette`r map!"/>
-                            <case match="2" result="${ANNOUNCER_PREFIX} In this game, you'll be chosen either as the `4`lRusher`r or as a `9`lDefender."/>
-                            <case match="3" result="${ANNOUNCER_PREFIX} If you're the `4`lRusher`r, your goal is to capture the `4Red Wool`r at the monument on the other side of the field."/>
-                            <case match="4" result="${ANNOUNCER_PREFIX} If you're a `9`lDefender`r, your job is to stop the `4Rusher`r at all costs."/>
-                            <case match="5" result="${ANNOUNCER_PREFIX} With each round, the `4Rusher`r earns a new `aPerk`r, that either empowers them or weakens the `9Defenders."/>
-                            <case match="6" result="${ANNOUNCER_PREFIX} The roulette spins... Let the game begin!"/>
-                        </unless>
-                        <if variant="swap">
-                            <case match="1" result="${ANNOUNCER_PREFIX} Welcome to ${MAP_NAME}, a `aRusher Roulette`r map!"/>
-                            <case match="2" result="${ANNOUNCER_PREFIX} In this game, you'll be chosen either as the `4`lRusher`r or as a `9`lDefender."/>
-                            <case match="3" result="${ANNOUNCER_PREFIX} If you're the `4`lRusher`r, your goal is to capture the `4Red Wool`r located on the opposite side of the field."/>
-                            <case match="4" result="${ANNOUNCER_PREFIX} If you're a `9`lDefender`r, your job is to stop the `4Rusher`r at all costs."/>
-                            <case match="5" result="${ANNOUNCER_PREFIX} Every time the `4Rusher`r dies, a random player instantly replaces them, `b`otaking over their exact position."/>
-                            <case match="6" result="${ANNOUNCER_PREFIX} There's only one `a10 minute`r round."/>
-                            <case match="7" result="${ANNOUNCER_PREFIX} `lStay alert!`r At `oany moment`r you could be the next."/>
-                            <case match="8" result="${ANNOUNCER_PREFIX} The roulette spins... Let the game begin!"/>
-                        </if>
+                        <case match="1" result="${ANNOUNCER_PREFIX} Welcome to ${MAP_NAME}, a `aRusher Roulette`r map!"/>
+                        <case match="2" result="${ANNOUNCER_PREFIX} In this game, you'll be chosen either as the `4`lRusher`r or as a `9`lDefender."/>
+                        <case match="3" result="${ANNOUNCER_PREFIX} If you're the `4`lRusher`r, your goal is to capture the `4Red Wool`r at the monument on the other side of the field."/>
+                        <case match="4" result="${ANNOUNCER_PREFIX} If you're a `9`lDefender`r, your job is to stop the `4Rusher`r at all costs."/>
+                        <case match="5" result="${ANNOUNCER_PREFIX} With each round, the `4Rusher`r earns a new `aPerk`r, that either empowers them or weakens the `9Defenders."/>
+                        <case match="6" result="${ANNOUNCER_PREFIX} The roulette spins... Let the game begin!"/>
                     </switch>
                 </replacements>
             </message>
@@ -886,320 +721,275 @@
             <set var="current_message" value="0"/>
         </action>
     </trigger>
-    <unless variant="swap">
-        <!-- round finished -->
-        <trigger scope="match">
-            <filter>
-                <after duration="0.2s" filter="all(round-finished,not(current_message=0))"/>
-            </filter>
-            <action>
-                <action filter="current_message=1">
-                    <sound key="${entity.blaze.death}"/>
-                    <action filter="rushers_amount=1">
-                        <set var="random_message" value="floor(random() * 10) + 1"/>
-                        <action filter="random_message=1">
-                            <message subtitle="{p}'s not that good then...">
-                                <replacements>
-                                    <player id="p" var="rusher_identifier"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=2">
-                            <message subtitle="It looks like {p} loves long matches...">
-                                <replacements>
-                                    <player id="p" var="rusher_identifier"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=3">
-                            <message subtitle="{p} had one job">
-                                <replacements>
-                                    <player id="p" var="rusher_identifier"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=4">
-                            <message subtitle="That's one way to make the match longer, {p}">
-                                <replacements>
-                                    <player id="p" var="rusher_identifier"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=5">
-                            <message subtitle="Not even lag could excuse that one, {p}">
-                                <replacements>
-                                    <player id="p" var="rusher_identifier"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=6">
-                            <message subtitle="{p} just gave everyone time for a bathroom break">
-                                <replacements>
-                                    <player id="p" var="rusher_identifier"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=7">
-                            <message subtitle="{p} ran out of skill halfway there">
-                                <replacements>
-                                    <player id="p" var="rusher_identifier"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=8">
-                            <message subtitle="Somehow {p} made the defenders feel safe">
-                                <replacements>
-                                    <player id="p" var="rusher_identifier"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=9">
-                            <message subtitle="I swear it's not that difficult, {p} just sucks">
-                                <replacements>
-                                    <player id="p" var="rusher_identifier"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=10">
-                            <message subtitle="{p}, was that a warm-up or the actual attempt?">
-                                <replacements>
-                                    <player id="p" var="rusher_identifier"/>
-                                </replacements>
-                            </message>
-                        </action>
-                    </action>
-                    <action filter="rushers_amount=2">
-                        <set var="random_message" value="floor(random() * 5) + 1"/>
-                        <action filter="random_message=1">
-                            <message subtitle="You two are really living up to this map's name"/>
-                        </action>
-                        <action filter="random_message=2">
-                            <message subtitle="That was expected, tbh"/>
-                        </action>
-                        <action filter="random_message=3">
-                            <message subtitle="Mods, just `b/team force [a_real_rusher]"/>
-                        </action>
-                        <action filter="random_message=4">
-                            <message subtitle="Are you guys having fun? not these two"/>
-                        </action>
-                        <action filter="random_message=5">
-                            <message subtitle="No comment"/>
-                        </action>
-                    </action>
-                    <action filter="rushers_amount=3..">
-                        <set var="random_message" value="floor(random() * 5) + 1"/>
-                        <action filter="random_message=1">
-                            <message subtitle="{p} has to be the worse of the {n}, for sure">
-                                <replacements>
-                                    <decimal id="n" value="rushers_amount"/>
-                                    <player id="p" var="rusher_identifier"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=2">
-                            <message subtitle="All {n} sucked, but let's blame {p}">
-                                <replacements>
-                                    <decimal id="n" value="rushers_amount"/>
-                                    <player id="p" var="rusher_identifier"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=3">
-                            <message subtitle="You {n} are really living up to this map's name">
-                                <replacements>
-                                    <decimal id="n" value="rushers_amount"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=4">
-                            <message subtitle="{p}... not even with {n} more guys?">
-                                <replacements>
-                                    <player id="p" var="rusher_identifier"/>
-                                    <decimal id="n" value="rushers_amount - 1"/>
-                                </replacements>
-                            </message>
-                        </action>
-                        <action filter="random_message=5">
-                            <message subtitle="No wonder we have 3h matches"/>
-                        </action>
-                    </action>
-                </action>
-                <action filter="current_message=2">
-                    <set var="random_message" value="floor(random() * 5) + 1"/>
-                    <message title="{t}" subtitle="{s}">
-                        <replacements>
-                            <switch id="t" value="random_message">
-                                <case match="1" result="Seems harder than expected..."/>
-                                <case match="2" result="Let's forget that happened"/>
-                                <case match="3" result="We've seen worse, don't worry"/>
-                                <case match="4" result="Are you guys even trying?"/>
-                                <case match="5" result="Yikes..."/>
-                            </switch>
-                            <switch id="s" value="random_message">
-                                <case match="1" result="What if we give the next rusher a little `e`ogift`r?"/>
-                                <case match="2" result="Here's a little `e`otreat`r for the next"/>
-                                <case match="3" result="Here's a tiny `e`oboost`r for the next"/>
-                                <case match="4" result="Maybe I can give a little `e`ohelp"/>
-                                <case match="5" result="Let's hand the next Rusher a `e`oboost"/>
-                            </switch>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="current_message=3">
-                    <message title="Let's see what we get" subtitle="Their perk is: `e`kXXXXXXXXXXXXXXXXXXXX" stay="10s"/>
-                </action>
-                <action filter="not(current_message=1)">
-                    <sound key="random.click"/>
-                </action>
-                <set var="current_message" value="0"/>
-            </action>
-        </trigger>
-        <!-- round restarting -->
-        <trigger scope="match">
-            <filter>
-                <after duration="0.2s" filter="all(round-restarting,not(current_message=0))"/>
-            </filter>
-            <action>
-                <action filter="rusher_checking_timer=3..">
-                    <set var="random_message" value="floor(random() * 2) + 1"/>
+    <!-- round finished -->
+    <trigger scope="match">
+        <filter>
+            <after duration="0.2s" filter="all(round-finished,not(current_message=0))"/>
+        </filter>
+        <action>
+            <action filter="current_message=1">
+                <sound key="${entity.blaze.death}"/>
+                <action filter="rushers_amount=1">
+                    <set var="random_message" value="floor(random() * 10) + 1"/>
                     <action filter="random_message=1">
-                        <message title="{player} just gave up ☠" subtitle="`4`lRusher`r left. Round `erestarting`r soon..." stay="3s">
+                        <message subtitle="{p}'s not that good then...">
                             <replacements>
-                                <player id="player" var="rusher_identifier" fallback="This player"/>
+                                <player id="p" var="rusher_identifier"/>
                             </replacements>
                         </message>
                     </action>
                     <action filter="random_message=2">
-                        <message title="{player} alt+F4'd lol" subtitle="`4`lRusher`r left. Round `erestarting`r soon..." stay="3s">
+                        <message subtitle="It looks like {p} loves long matches...">
                             <replacements>
-                                <player id="player" var="rusher_identifier" fallback="This player"/>
+                                <player id="p" var="rusher_identifier"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <action filter="random_message=3">
+                        <message subtitle="{p} had one job">
+                            <replacements>
+                                <player id="p" var="rusher_identifier"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <action filter="random_message=4">
+                        <message subtitle="That's one way to make the match longer, {p}">
+                            <replacements>
+                                <player id="p" var="rusher_identifier"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <action filter="random_message=5">
+                        <message subtitle="Not even lag could excuse that one, {p}">
+                            <replacements>
+                                <player id="p" var="rusher_identifier"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <action filter="random_message=6">
+                        <message subtitle="{p} just gave everyone time for a bathroom break">
+                            <replacements>
+                                <player id="p" var="rusher_identifier"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <action filter="random_message=7">
+                        <message subtitle="{p} ran out of skill halfway there">
+                            <replacements>
+                                <player id="p" var="rusher_identifier"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <action filter="random_message=8">
+                        <message subtitle="Somehow {p} made the defenders feel safe">
+                            <replacements>
+                                <player id="p" var="rusher_identifier"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <action filter="random_message=9">
+                        <message subtitle="I swear it's not that difficult, {p} just sucks">
+                            <replacements>
+                                <player id="p" var="rusher_identifier"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <action filter="random_message=10">
+                        <message subtitle="{p}, was that a warm-up or the actual attempt?">
+                            <replacements>
+                                <player id="p" var="rusher_identifier"/>
                             </replacements>
                         </message>
                     </action>
                 </action>
-                <action filter="not(rusher_checking_timer=3..)">
-                    <message title="{player} just froze" subtitle="`4`lRusher`r is AFK. Round `erestarting`r soon..." stay="3s">
+                <action filter="rushers_amount=2">
+                    <set var="random_message" value="floor(random() * 5) + 1"/>
+                    <action filter="random_message=1">
+                        <message subtitle="You two are really living up to this map's name"/>
+                    </action>
+                    <action filter="random_message=2">
+                        <message subtitle="That was expected, tbh"/>
+                    </action>
+                    <action filter="random_message=3">
+                        <message subtitle="Mods, just `b/team force [a_real_rusher]"/>
+                    </action>
+                    <action filter="random_message=4">
+                        <message subtitle="Are you guys having fun? not these two"/>
+                    </action>
+                    <action filter="random_message=5">
+                        <message subtitle="No comment"/>
+                    </action>
+                </action>
+                <action filter="rushers_amount=3..">
+                    <set var="random_message" value="floor(random() * 5) + 1"/>
+                    <action filter="random_message=1">
+                        <message subtitle="{p} has to be the worse of the {n}, for sure">
+                            <replacements>
+                                <decimal id="n" value="rushers_amount"/>
+                                <player id="p" var="rusher_identifier"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <action filter="random_message=2">
+                        <message subtitle="All {n} sucked, but let's blame {p}">
+                            <replacements>
+                                <decimal id="n" value="rushers_amount"/>
+                                <player id="p" var="rusher_identifier"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <action filter="random_message=3">
+                        <message subtitle="You {n} are really living up to this map's name">
+                            <replacements>
+                                <decimal id="n" value="rushers_amount"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <action filter="random_message=4">
+                        <message subtitle="{p}... not even with {n} more guys?">
+                            <replacements>
+                                <player id="p" var="rusher_identifier"/>
+                                <decimal id="n" value="rushers_amount - 1"/>
+                            </replacements>
+                        </message>
+                    </action>
+                    <action filter="random_message=5">
+                        <message subtitle="No wonder we have 3h matches"/>
+                    </action>
+                </action>
+            </action>
+            <action filter="current_message=2">
+                <set var="random_message" value="floor(random() * 5) + 1"/>
+                <message title="{t}" subtitle="{s}">
+                    <replacements>
+                        <switch id="t" value="random_message">
+                            <case match="1" result="Seems harder than expected..."/>
+                            <case match="2" result="Let's forget that happened"/>
+                            <case match="3" result="We've seen worse, don't worry"/>
+                            <case match="4" result="Are you guys even trying?"/>
+                            <case match="5" result="Yikes..."/>
+                        </switch>
+                        <switch id="s" value="random_message">
+                            <case match="1" result="What if we give the next rusher a little `e`ogift`r?"/>
+                            <case match="2" result="Here's a little `e`otreat`r for the next"/>
+                            <case match="3" result="Here's a tiny `e`oboost`r for the next"/>
+                            <case match="4" result="Maybe I can give a little `e`ohelp"/>
+                            <case match="5" result="Let's hand the next Rusher a `e`oboost"/>
+                        </switch>
+                    </replacements>
+                </message>
+            </action>
+            <action filter="current_message=3">
+                <message title="Let's see what we get" subtitle="Their perk is: `e`kXXXXXXXXXXXXXXXXXXXX" stay="10s"/>
+            </action>
+            <action filter="not(current_message=1)">
+                <sound key="random.click"/>
+            </action>
+            <set var="current_message" value="0"/>
+        </action>
+    </trigger>
+    <!-- round restarting -->
+    <trigger scope="match">
+        <filter>
+            <after duration="0.2s" filter="all(round-restarting,not(current_message=0))"/>
+        </filter>
+        <action>
+            <action filter="rusher_checking_timer=3..">
+                <set var="random_message" value="floor(random() * 2) + 1"/>
+                <action filter="random_message=1">
+                    <message title="{player} just gave up ☠" subtitle="`4`lRusher`r left. Round `erestarting`r soon..." stay="3s">
                         <replacements>
                             <player id="player" var="rusher_identifier" fallback="This player"/>
                         </replacements>
                     </message>
                 </action>
-                <sound key="mob.villager.no"/>
+                <action filter="random_message=2">
+                    <message title="{player} alt+F4'd lol" subtitle="`4`lRusher`r left. Round `erestarting`r soon..." stay="3s">
+                        <replacements>
+                            <player id="player" var="rusher_identifier" fallback="This player"/>
+                        </replacements>
+                    </message>
+                </action>
             </action>
-        </trigger>
-    </unless>
+            <action filter="not(rusher_checking_timer=3..)">
+                <message title="{player} just froze" subtitle="`4`lRusher`r is AFK. Round `erestarting`r soon..." stay="3s">
+                    <replacements>
+                        <player id="player" var="rusher_identifier" fallback="This player"/>
+                    </replacements>
+                </message>
+            </action>
+            <sound key="mob.villager.no"/>
+        </action>
+    </trigger>
     <!-- announce round -->
     <action id="announce-round" scope="match">
         <sound key="entity.skeleton_horse.death"/>
         <message text=" "/>
-        <unless variant="swap">
-            <message text="» Round `e{current}/${ROUNDS_AMOUNT}`r starting soon...">
-                <replacements>
-                    <decimal id="current" value="current_round"/>
-                </replacements>
-            </message>
-            <action filter="rushers_amount=1">
-                <message text="» {player} is the `4`lRusher">
-                    <replacements>
-                        <player id="player" var="rusher_identifier" fallback="Some player"/>
-                    </replacements>
-                </message>
-            </action>
-            <action filter="rushers_amount=2..">
-                <message text="» There are {amount} `4`lRushers">
-                    <replacements>
-                        <decimal id="amount" value="rushers_amount"/>
-                    </replacements>
-                </message>
-            </action>
-        </unless>
-        <if variant="swap">
-            <message text="» Match starting soon..."/>
+        <message text="» Round `e{current}/${ROUNDS_AMOUNT}`r starting soon...">
+            <replacements>
+                <decimal id="current" value="current_round"/>
+            </replacements>
+        </message>
+        <action filter="rushers_amount=1">
             <message text="» {player} is the `4`lRusher">
                 <replacements>
                     <player id="player" var="rusher_identifier" fallback="Some player"/>
                 </replacements>
             </message>
-        </if>
+        </action>
+        <action filter="rushers_amount=2..">
+            <message text="» There are {amount} `4`lRushers">
+                <replacements>
+                    <decimal id="amount" value="rushers_amount"/>
+                </replacements>
+            </message>
+        </action>
         <message text=" "/>
         <switch-scope inner="player" filter="rusher">
-            <unless variant="swap">
-                <message text="You're the `4`lRusher`r. Capture the wool `obefore`r the round ends!" title="Round `e{current}/${ROUNDS_AMOUNT}`r starting soon..." subtitle="You're the `4`lRusher`r. Capture the wool `obefore`r the round ends!" stay="4.2s">
+            <message text="You're the `4`lRusher`r. Capture the wool `obefore`r the round ends!" title="Round `e{current}/${ROUNDS_AMOUNT}`r starting soon..." subtitle="You're the `4`lRusher`r. Capture the wool `obefore`r the round ends!" stay="4.2s">
+                <replacements>
+                    <decimal id="current" value="current_round"/>
+                </replacements>
+            </message>
+        </switch-scope>
+        <switch-scope inner="player" filter="defenders">
+            <action filter="rushers_amount=1">
+                <message text="You're a `9`lDefender`r. Prevent {player} from capturing the wool!" title="Round `e{current}/${ROUNDS_AMOUNT}`r starting soon..." subtitle="You're a `9`lDefender`r. Prevent {player} from capturing the wool!" stay="4.2s">
+                    <replacements>
+                        <decimal id="current" value="current_round"/>
+                        <player id="player" var="rusher_identifier" fallback="the Rusher"/>
+                    </replacements>
+                </message>
+            </action>
+            <action filter="rushers_amount=2..">
+                <message text="You're a `9`lDefender`r. Prevent the `4Rushers`r from capturing the wool!" title="Round `e{current}/${ROUNDS_AMOUNT}`r starting soon..." subtitle="You're a `9`lDefender`r. Prevent the `4Rushers`r from capturing the wool!" stay="4.2s">
                     <replacements>
                         <decimal id="current" value="current_round"/>
                     </replacements>
                 </message>
-            </unless>
-            <if variant="swap">
-                <message text="You're the `4`lRusher`r. Capture the wool `obefore`r the round ends!" title="Match starting soon..." subtitle="You're the `4`lRusher`r. Capture the wool `obefore`r the round ends!" stay="4.2s"/>
-            </if>
-        </switch-scope>
-        <switch-scope inner="player" filter="defenders">
-            <unless variant="swap">
-                <action filter="rushers_amount=1">
-                    <message text="You're a `9`lDefender`r. Prevent {player} from capturing the wool!" title="Round `e{current}/${ROUNDS_AMOUNT}`r starting soon..." subtitle="You're a `9`lDefender`r. Prevent {player} from capturing the wool!" stay="4.2s">
-                        <replacements>
-                            <decimal id="current" value="current_round"/>
-                            <player id="player" var="rusher_identifier" fallback="the Rusher"/>
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="rushers_amount=2..">
-                    <message text="You're a `9`lDefender`r. Prevent the `4Rushers`r from capturing the wool!" title="Round `e{current}/${ROUNDS_AMOUNT}`r starting soon..." subtitle="You're a `9`lDefender`r. Prevent the `4Rushers`r from capturing the wool!" stay="4.2s">
-                        <replacements>
-                            <decimal id="current" value="current_round"/>
-                        </replacements>
-                    </message>
-                </action>
-            </unless>
-            <if variant="swap">
-                <message text="You're a `9`lDefender`r. Prevent {player} from capturing the wool!" title="Match starting soon..." subtitle="You're a `9`lDefender`r. Prevent {player} from capturing the wool!" stay="4.2s">
-                    <replacements>
-                        <player id="player" var="rusher_identifier" fallback="the Rusher"/>
-                    </replacements>
-                </message>
-            </if>
+            </action>
         </switch-scope>
     </action>
     <!-- announce perk -->
     <action id="announce-perk" scope="match">
         <message text=" "/>
-        <unless variant="swap">
-            <message title="Let's see what we get" subtitle="Their perk is: {perk}" text="» {perk}">
-                <replacements>
-                    <switch id="perk" value="last_selected_perk">
-                        <case match="${PERK_TRIPLE_HEALTH}" result="`a`lTriple Health!"/>
-                        <case match="${PERK_BLOCKLESS_DEFENDERS}" result="`a`lBlockless Defenders!"/>
-                        <case match="${PERK_BOWLESS_DEFENDERS}" result="`a`lBowless Defenders!"/>
-                        <case match="${PERK_POTION_BUFF}" result="`a`lPotion Buff!"/>
-                        <case match="${PERK_VOID_GUARD}" result="`a`lVoid Guard!"/>
-                        <case match="${PERK_TNT_KIT}" result="`a`lTNT Kit!"/>
-                        <case match="${PERK_MAXED_OUT_GEAR}" result="`a`lMaxed out Gear!"/>
-                        <case match="${LAST_ROUND_PERK_BLITZ}" result="`d`lBlitz!"/>
-                        <case match="${LAST_ROUND_PERK_RAGE}" result="`d`lRage!"/>
-                        <case match="${LAST_ROUND_PERK_FIVE_RUSHERS}" result="`d`l5 Rushers!"/>
-                        <case match="${LAST_ROUND_PERK_NO_KB}" result="`d`lNo Knockback!"/>
-                    </switch>
-                </replacements>
-            </message>
-        </unless>
-        <if variant="swap">
-            <message subtitle="{perk}" text="» {perk}" fade-in="0.2s" stay="0.5s" fade-out="0.5s">
-                <replacements>
-                    <switch id="perk" value="last_selected_perk">
-                        <case match="${PERK_TRIPLE_HEALTH}" result="`a`lTriple Health!"/>
-                        <case match="${PERK_BLOCKLESS_DEFENDERS}" result="`a`lBlockless Defenders!"/>
-                        <case match="${PERK_BOWLESS_DEFENDERS}" result="`a`lBowless Defenders!"/>
-                        <case match="${PERK_POTION_BUFF}" result="`a`lPotion Buff!"/>
-                        <case match="${PERK_VOID_GUARD}" result="`a`lVoid Guard!"/>
-                        <case match="${PERK_TNT_KIT}" result="`a`lTNT Kit!"/>
-                        <case match="${PERK_MAXED_OUT_GEAR}" result="`a`lMaxed out Gear!"/>
-                        <case match="${PERK_MAP_RESET}" result="`a`lMap Reset!"/>
-                        <case match="${PERK_NO_KB}" result="`a`lNo Knockback!"/>
-                    </switch>
-                </replacements>
-            </message>
-        </if>
+        <message title="Let's see what we get" subtitle="Their perk is: {perk}" text="» {perk}">
+            <replacements>
+                <switch id="perk" value="last_selected_perk">
+                    <case match="${PERK_TRIPLE_HEALTH}" result="`a`lTriple Health!"/>
+                    <case match="${PERK_BLOCKLESS_DEFENDERS}" result="`a`lBlockless Defenders!"/>
+                    <case match="${PERK_BOWLESS_DEFENDERS}" result="`a`lBowless Defenders!"/>
+                    <case match="${PERK_POTION_BUFF}" result="`a`lPotion Buff!"/>
+                    <case match="${PERK_VOID_GUARD}" result="`a`lVoid Guard!"/>
+                    <case match="${PERK_TNT_KIT}" result="`a`lTNT Kit!"/>
+                    <case match="${PERK_MAXED_OUT_GEAR}" result="`a`lMaxed out Gear!"/>
+                    <case match="${LAST_ROUND_PERK_BLITZ}" result="`d`lBlitz!"/>
+                    <case match="${LAST_ROUND_PERK_RAGE}" result="`d`lRage!"/>
+                    <case match="${LAST_ROUND_PERK_FIVE_RUSHERS}" result="`d`l5 Rushers!"/>
+                    <case match="${LAST_ROUND_PERK_NO_KB}" result="`d`lNo Knockback!"/>
+                </switch>
+            </replacements>
+        </message>
         <message text="» {text}">
             <replacements>
                 <switch id="text" value="last_selected_perk">
@@ -1210,16 +1000,10 @@
                     <case match="${PERK_VOID_GUARD}" result="Safety first! Barriers cover the void, keeping the Rusher from dropping into the abyss."/>
                     <case match="${PERK_TNT_KIT}" result="The Rusher now carries TNT, redstone, and buttons. Perfect for blasting themselves across the map!"/>
                     <case match="${PERK_MAXED_OUT_GEAR}" result="The Rusher's kit is now enchanted to the limit. Brace yourselves."/>
-                    <unless variant="swap">
-                        <case match="${LAST_ROUND_PERK_BLITZ}" result="No more respawns. Once you're down, you're out."/>
-                        <case match="${LAST_ROUND_PERK_RAGE}" result="The Rusher now kills in a single hit. Don't let them touch you."/>
-                        <case match="${LAST_ROUND_PERK_FIVE_RUSHERS}" result="Five Rushers are unleashed at once. Now they surely can pull this off... right?"/>
-                        <case match="${LAST_ROUND_PERK_NO_KB}" result="The Rusher no longer takes knockback. Punching them does nothing."/>
-                    </unless>
-                    <if variant="swap">
-                        <case match="${PERK_MAP_RESET}" result="The map has been reset. Looks brand new, doesn't it?"/>
-                        <case match="${PERK_NO_KB}" result="The Rusher no longer takes knockback. Punching them does nothing."/>
-                    </if>
+                    <case match="${LAST_ROUND_PERK_BLITZ}" result="No more respawns. Once you're down, you're out."/>
+                    <case match="${LAST_ROUND_PERK_RAGE}" result="The Rusher now kills in a single hit. Don't let them touch you."/>
+                    <case match="${LAST_ROUND_PERK_FIVE_RUSHERS}" result="Five Rushers are unleashed at once. Now they surely can pull this off... right?"/>
+                    <case match="${LAST_ROUND_PERK_NO_KB}" result="The Rusher no longer takes knockback. Punching them does nothing."/>
                 </switch>
             </replacements>
         </message>
@@ -1232,206 +1016,83 @@
             <set var="custom_world_time" value="13500"/>
         </action>
     </action>
-    <if variant="swap">
-        <!-- announce swap -->
-        <action id="announce-swap" scope="match">
-            <sound preset="alert" pitch="2"/>
-            <message text="» `aRusher swap!`r {in} replaces {out}." title="`7`o↻ Swapping Rusher ↻" subtitle="{in} replaces {out}" stay="1s" fade-in="0.1s" fade-out="0.5s">
-                <replacements>
-                    <player id="out" var="outgoing"/>
-                    <player id="in" var="incoming"/>
-                </replacements>
-            </message>
-        </action>
-        <!-- announce yeeter -->
-        <action id="announce-yeeter" scope="match">
-            <set var="random_message" value="floor(random() * 4) + 1"/>
-            <action filter="random_message=1">
-                <message text="${ANNOUNCER_PREFIX} Hey, {p}, just so you know, if you don't get out in `a30 seconds`r, I'll get you out of there myself.">
-                    <replacements>
-                        <player id="p" var="rusher_identifier"/>
-                    </replacements>
-                </message>
-            </action>
-            <action filter="random_message=2">
-                <message text="${ANNOUNCER_PREFIX} Btw, {p}, don't get comfy in there, you have `a30 seconds`r to get out.">
-                    <replacements>
-                        <player id="p" var="rusher_identifier"/>
-                    </replacements>
-                </message>
-            </action>
-            <action filter="random_message=3">
-                <message text="${ANNOUNCER_PREFIX} {p}, if you don't wanna end up like a hedgehog, get out of there fast. You have `a30 seconds`r.">
-                    <replacements>
-                        <player id="p" var="rusher_identifier"/>
-                    </replacements>
-                </message>
-            </action>
-            <action filter="random_message=4">
-                <message text="${ANNOUNCER_PREFIX} Staying in the wool room is not the strat, {p}, just an `oFYI`r. You have `a30 seconds`r.">
-                    <replacements>
-                        <player id="p" var="rusher_identifier"/>
-                    </replacements>
-                </message>
-            </action>
-            <sound key="random.click"/>
-        </action>
-        <!-- announce yeet -->
-        <action id="announce-yeet" scope="match">
-            <set var="random_message" value="floor(random() * 3) + 1"/>
-            <message text="{t}">
-                <replacements>
-                    <switch id="t" value="random_message">
-                        <case match="1" result="${ANNOUNCER_PREFIX} Enough waiting. Get moving now."/>
-                        <case match="2" result="${ANNOUNCER_PREFIX} Stop wasting our time. Get out!"/>
-                        <case match="3" result="${ANNOUNCER_PREFIX} Time's up! Get outta there and do something."/>
-                    </switch>
-                </replacements>
-            </message>
-        </action>
-    </if>
 
     <!-- rusher leaving logic -->
     <trigger scope="match" action="rusher_checking_timer:=rusher_checking_timer+1">
         <filter>
-            <unless variant="swap">
-                <pulse period="1s" duration="0.5s" filter="round-running"/>
-            </unless>
-            <if variant="swap">
-                <pulse period="0.1s" duration="0.05s" filter="round-running"/>
-            </if>
+            <pulse period="1s" duration="0.5s" filter="round-running"/>
         </filter>
     </trigger>
     <trigger scope="player" action="rusher_checking_timer:=0">
         <filter>
-            <unless variant="swap">
-                <pulse period="1s" duration="0.5s" filter="all(round-running,is_rusher=1,rusher)"/>
-            </unless>
-            <if variant="swap">
-                <pulse period="0.1s" duration="0.05s" filter="all(round-running,is_rusher=1,rusher)"/>
-            </if>
+            <pulse period="1s" duration="0.5s" filter="all(round-running,is_rusher=1,rusher)"/>
         </filter>
     </trigger>
-    <unless variant="swap">
-        <trigger filter="rusher_checking_timer=3.." scope="match" action="set-round-restarting"/>
-    </unless>
+    <trigger filter="rusher_checking_timer=3.." scope="match" action="set-round-restarting"/>
 
     <!-- rusher afk logic -->
-    <unless variant="swap">
-        <trigger scope="player" filter="all(round-running,rusher)">
-            <action>
-                <set var="last_x" value="player.x"/>
-                <set var="last_y" value="player.y"/>
-                <set var="last_z" value="player.z"/>
+    <trigger scope="player" filter="all(round-running,rusher)">
+        <action>
+            <set var="last_x" value="player.x"/>
+            <set var="last_y" value="player.y"/>
+            <set var="last_z" value="player.z"/>
+            <set var="is_afk" value="0"/>
+            <set var="calc" value="last_x"/>
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <pulse period="0.3s" duration="0.2s" filter="all(round-running,rusher)"/>
+        </filter>
+        <action>
+            <set var="calc" value="(last_x-player.x)+(last_y-player.y)+(last_z-player.z)"/>
+            <action filter="calc=0">
+                <set var="is_afk" value="1"/>
+            </action>
+            <action filter="not(calc=0)">
                 <set var="is_afk" value="0"/>
-                <set var="calc" value="last_x"/>
             </action>
-        </trigger>
-        <trigger scope="player">
-            <filter>
-                <pulse period="0.3s" duration="0.2s" filter="all(round-running,rusher)"/>
-            </filter>
-            <action>
-                <set var="calc" value="(last_x-player.x)+(last_y-player.y)+(last_z-player.z)"/>
-                <action filter="calc=0">
-                    <set var="is_afk" value="1"/>
-                </action>
-                <action filter="not(calc=0)">
-                    <set var="is_afk" value="0"/>
-                </action>
-            </action>
-        </trigger>
-        <trigger scope="player">
-            <filter>
-                <pulse period="1s" duration="0.5s">
-                    <after duration="5s" filter="all(is_afk=1,round-running,rusher)"/>
-                </pulse>
-            </filter>
-            <action>
-                <message subtitle="`c⚠ Move! ⚠" stay="0.5s"/>
-                <sound preset="alert"/>
-            </action>
-        </trigger>
-        <trigger scope="player">
-            <filter>
-                <after duration="10s" filter="all(is_afk=1,round-running,rusher)" message="If you don't move in {0} you'll become defender again"/>
-            </filter>
-            <unless variant="swap">
-                <action>
-                    <set var="is_afk" value="0"/>
-                    <action filter="rushers_amount=1">
-                        <switch-scope inner="match">
-                            <action id="set-round-restarting"/> 
-                        </switch-scope>
-                    </action>
-                    <action filter="not(rushers_amount=1)">
-                        <set var="identifier" value="1"/>
-                        <kit id="team-switch-defenders-kit"/>
-                        <switch-scope inner="match">
-                            <message text="» {p} is AFK. Replacing them with another rusher...">
-                                <replacements>
-                                    <player id="p" var="identifier"/>
-                                </replacements>
-                            </message>
-                            <action id="add-rusher"/>
-                        </switch-scope>
-                    </action>
-                </action>
-            </unless>
-            <if variant="swap">
-                <action>
-                    <set var="identifier" value="1"/>
-                    <kit id="team-switch-defenders-kit"/>
-                    <switch-scope inner="match">
-                        <message text="» {p} is AFK. Replacing them with another rusher...">
-                            <replacements>
-                                <player id="p" var="identifier"/>
-                            </replacements>
-                        </message>
-                        <action id="add-rusher"/>
-                    </switch-scope>
-                </action>
-            </if>
-        </trigger>
-    </unless>
-    <if variant="swap">
-        <trigger scope="match">
-            <filter>
-                <after duration="30s" message="Forcing rusher out of the wool room in {0}">
-                    <after duration="5s" filter="all(is_rusher_out=0,round-running)"/>
-                </after>
-            </filter>
-            <action>
-                <action id="announce-yeet"/>
-                <switch-scope inner="player" filter="rusher">
-                    <teleport x="0.5" y="42" z="53.5" yaw="180" pitch="0"/>
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <pulse period="1s" duration="0.5s">
+                <after duration="5s" filter="all(is_afk=1,round-running,rusher)"/>
+            </pulse>
+        </filter>
+        <action>
+            <message subtitle="`c⚠ Move! ⚠" stay="0.5s"/>
+            <sound preset="alert"/>
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <after duration="10s" filter="all(is_afk=1,round-running,rusher)" message="If you don't move in {0} you'll become defender again"/>
+        </filter>
+        <action>
+            <set var="is_afk" value="0"/>
+            <action filter="rushers_amount=1">
+                <switch-scope inner="match">
+                    <action id="set-round-restarting"/> 
                 </switch-scope>
             </action>
-        </trigger>
-        <trigger scope="match" action="announce-yeeter">
-            <filter>
-                <after duration="5s" filter="all(is_rusher_out=0,round-running)"/>
-            </filter>
-        </trigger>
-        <trigger scope="player">
-            <filter>
-                <pulse period="1s" duration="0.5s" filter="all(rusher,round-running)"/>
-            </filter>
-            <action>
-                <action filter="playable-area">
-                    <set var="is_rusher_out" value="1"/>
-                </action>
-                <action filter="any(wool-room,rusher-base,rusher-parkour)">
-                    <set var="is_rusher_out" value="0"/>
-                </action>
+            <action filter="not(rushers_amount=1)">
+                <set var="identifier" value="1"/>
+                <kit id="team-switch-defenders-kit"/>
+                <switch-scope inner="match">
+                    <message text="» {p} is AFK. Replacing them with another rusher...">
+                        <replacements>
+                            <player id="p" var="identifier"/>
+                        </replacements>
+                    </message>
+                    <action id="add-rusher"/>
+                </switch-scope>
             </action>
-        </trigger>
-    </if>
+        </action>
+    </trigger>
 
     <!-- five rushers perk -->
-    <unless variant="swap">
-        <trigger scope="match" filter="is_last_round_perk_active_five_rushers=1" action="rushers_amount:=5"/>
-    </unless>
+    <trigger scope="match" filter="is_last_round_perk_active_five_rushers=1" action="rushers_amount:=5"/>
 
     <!-- tnt kit fake tip -->
     <trigger scope="match">
@@ -1444,130 +1105,30 @@
         </action>
     </trigger>
 
-    <if variant="swap">
-        <!-- staff invervention detector -->
-        <trigger scope="player">
-            <filter>
-                <after duration="1s" filter="all(rusher,joined_normally=0,multiple-rushers)"/>
-            </filter>
-            <action>
-                <kit id="team-switch-defenders-kit"/>
-                <switch-scope inner="match">
-                    <sound preset="alert" pitch="2"/>
-                    <message text="${ANNOUNCER_PREFIX} Dear staff: `othis variant only supports one rusher. `b`oDon't force anybody..."/>
-                </switch-scope>
-            </action>
-        </trigger>
-        <!-- register rusher position -->
-        <trigger scope="player">
-            <filter>
-                <pulse period="0.1s" duration="0.05s" filter="all(rusher,alive,round-running,any(playable-area,wool-room))"/>
-            </filter>
-            <action>
-                <set var="is_void" value="0"/>
-                <set var="last_rusher_x" value="player.x"/>
-                <set var="last_rusher_y" value="player.y"/>
-                <set var="last_rusher_z" value="player.z"/>
-                <set var="last_rusher_pitch" value="player.pitch"/>
-                <set var="last_rusher_yaw" value="player.yaw"/>
-            </action>
-        </trigger>
-        <trigger scope="player" action="is_void:=1">
-            <filter>
-                <pulse period="0.1s" duration="0.05s" filter="all(rusher,alive,round-running,not(playable-area),not(rusher-base),not(wool-room))"/>
-            </filter>
-        </trigger>
-        <!-- replace rusher -->
-        <trigger scope="match" filter="rusher_checking_timer=3..">
-            <action>
-                <action id="add-rusher"/>
-                <action id="announce-swap"/>
-            </action>
-        </trigger>
-        <trigger scope="player" filter="all(rusher,dead,round-running,pending_tp=0,joined_normally=1)">
-            <action>
-                <kit id="team-switch-defenders-kit"/>
-                <set var="outgoing" value="1"/>
-                <set var="joined_normally" value="0"/>
-            </action>
-        </trigger>
-        <trigger scope="player" filter="all(rusher,alive,pending_tp=1)">
-            <action>
-                <action filter="is_void=0">
-                    <teleport x="last_rusher_x" y="last_rusher_y" z="last_rusher_z" yaw="last_rusher_yaw" pitch="last_rusher_pitch"/>
-                </action>
-                <action filter="is_void=1">
-                    <switch-scope inner="match">
-                        <message text="» Unsafe respawn location detected. Respawning at base."/>
-                    </switch-scope>
-                </action>
-                <set var="pending_tp" value="0"/>
-            </action>
-        </trigger>
-        <!-- fixes weird bug -->
-        <trigger scope="player" action="joined_normally:=1">
-            <filter>
-                <after duration="1s" filter="all(rusher,wool-room)"/>
-            </filter>
-        </trigger>
-        <!-- give point -->
-        <trigger scope="match">
-            <filter>
-                <after duration="609.5" filter="any(round-starting,round-running)"/>
-            </filter>
-            <action>
-                <switch-scope inner="team" filter="defenders">
-                    <set var="score" value="1"/>
-                </switch-scope>
-            </action>
-        </trigger>
-        <!-- perks -->
-        <trigger scope="match">
-            <filter>
-                <after duration="10s" message="Dropping perk in {0}">
-                    <after duration="50s" filter="all(round-running,just_selected_perk=0,not(perks_given=${PERKS_AMOUNT}..))"/>
-                </after>
-            </filter>
-            <action>
-                <action id="pick-perk"/>
-                <action id="announce-perk"/>
-            </action>
-        </trigger>
-        <trigger scope="match" action="just_selected_perk:=0">
-            <filter>
-                <after duration="5s" filter="just_selected_perk=1"/>
-            </filter>
-        </trigger>
-        <!-- reset timelimit -->
-        <trigger scope="match" filter="match-started" action="tl:=-1"/>
-    </if>
-
     <!-- mod intervention detector -->
-    <unless variant="swap">
-        <trigger scope="match">
-            <filter>
-                <after duration="1s" filter="any(all(rushers_amount=2..,not(is-final-round)),rusher-forced)"/>
-            </filter>
-            <action>
-                <message subtitle="`c⚠ A staff member is adding more rushers ⚠"/>
-                <set var="is_match_modified" value="1"/>
-                <sound preset="alert"/>
-            </action>
-        </trigger>
-        <trigger scope="match">
-            <filter>
-                <pulse period="5s" duration="1s" filter="round-running"/>
-            </filter>
-            <action>
-                <set var="i" value="0"/>
-                <switch-scope inner="player" filter="rusher">
-                    <set var="i" value="i+1"/>
-                </switch-scope>
-                <set var="rushers_amount" value="i"/>
-            </action>
-        </trigger>
-        <trigger scope="match" filter="rushers_amount=..0" action="rushers_amount:=1"/>
-    </unless>
+    <trigger scope="match">
+        <filter>
+            <after duration="1s" filter="any(all(rushers_amount=2..,not(is-final-round)),rusher-forced)"/>
+        </filter>
+        <action>
+            <message subtitle="`c⚠ A staff member is adding more rushers ⚠"/>
+            <set var="is_match_modified" value="1"/>
+            <sound preset="alert"/>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <pulse period="5s" duration="1s" filter="round-running"/>
+        </filter>
+        <action>
+            <set var="i" value="0"/>
+            <switch-scope inner="player" filter="rusher">
+                <set var="i" value="i+1"/>
+            </switch-scope>
+            <set var="rushers_amount" value="i"/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="rushers_amount=..0" action="rushers_amount:=1"/>
 
     <!-- actions for staff -->
     <action id="skip-tutorial" scope="player" expose="true">
