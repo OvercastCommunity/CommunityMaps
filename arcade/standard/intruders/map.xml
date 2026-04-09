@@ -1,0 +1,620 @@
+<map proto="1.5.0">
+<name>Intruders</name>
+<version>1.0</version>
+<objective>Hide from the intruders or capture the hiders!</objective>
+<created>2026-03-20</created>
+<game>Hide n' Seek</game>
+<constants>
+    <constant id="TEAM_CYAN">1</constant>
+    <constant id="TEAM_MAGENTA">2</constant>
+    <constant id="TEAM_YELLOW">3</constant>
+    <constant id="TEAM_ORANGE">4</constant>
+    <constant id="RND_TUTORIAL">1</constant>
+    <constant id="RND_PREPARING">2</constant>
+    <constant id="RND_RUNNING">3</constant>
+    <constant id="RND_FINISHED">4</constant>
+    <constant id="ANNOUNCER_PREFIX">`a[Announcer]:`r</constant>
+    <constant id="MAP_NAME">`l&#34;Intruders&#34;`r</constant>
+</constants>
+<authors>
+    <author uuid="64e840c8-4fb5-4659-a36b-ff93e2f6113a" contribution="Idea, Layout and XML" /> <!-- Javg_ -->
+    <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Layout and Building"/> <!-- Tundren -->
+    <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e" contribution="Layout and Building"/> <!-- Mewzzy -->
+</authors>
+<teams name-tags-allies-filter="any(is-seeking,not(any(round-running,round-preparing)))" name-tags-enemies-filter="any(is-seeking,not(any(round-running,round-preparing)))">
+    <team id="cyan" color="dark aqua" min="1" max="16" max-overfill="20">Cyan</team>
+    <team id="magenta" color="light purple" min="1" max="16" max-overfill="20">Magenta</team>
+    <team id="yellow" color="yellow" min="1" max="16" max-overfill="20">Yellow</team>
+    <team id="orange" color="gold" min="1" max="16" max-overfill="20">Orange</team>
+</teams>
+<score />
+<kits>
+    <kit id="seeker-kit">
+        <clear />
+        <item slot="0" material="diamond sword" enchantment="damage all:1" unbreakable="true" prevent-sharing="true" />
+        <helmet material="leather helmet" team-color="true" locked="true" />
+        <chestplate material="leather chestplate" team-color="true" locked="true" />
+        <leggings material="diamond leggings" locked="true" />
+        <boots material="diamond boots" locked="true" />
+    </kit>
+    <kit id="hider-kit">
+        <clear />
+        <kit filter="is_invis=0">
+            <item material="potion" damage="14" consumable="invis-consumable" />
+        </kit>
+        <boots material="leather boots" team-color="true" locked="true" />
+        <kit filter="is-brave">
+            <item material="bow" name="`d`lIntruder destroyer" slot="0" unbreakable="true" enchantment="power:127" />
+            <item material="arrow" slot="7" />
+        </kit>
+        <kit filter="is-snitch">
+            <item material="blaze rod" name="`d`lPlayer revealer" slot="0" />
+        </kit>
+        <action>
+            <set var="is_invis" value="0" />
+        </action>
+    </kit>
+    <kit id="invis-kit">
+        <clear />
+        <effect duration="15s">invisibility</effect>
+        <action>
+            <set var="is_invis" value="1" />
+        </action>
+    </kit>
+    <kit id="empty-kit">
+        <clear effects="true" />
+    </kit>
+</kits>
+<consumables>
+    <consumable id="invis-consumable" action="invis-kit" on="eat" />
+</consumables>
+<spawns>
+    <spawn filter="all(seeking=0,can_respawn=1,not(any(round-running,round-preparing)))">
+        <region>
+            <cylinder id="hiders-spawn" base="-2.5,13.06,-1.5" radius="2.5" height="0" />
+        </region>
+    </spawn>
+    <spawn filter="all(seeking=1,not(any(round-running,round-preparing)))">
+        <region yaw="30">
+            <point id="seekers-spawn">4.5,10,-62.5</point>
+        </region>
+    </spawn>
+    <default>
+        <region>
+            <point>-2.5,19.5,-105.5</point>
+        </region>
+    </default>
+</spawns>
+<respawns>
+    <respawn spectate="true" auto="true">
+        <message>You will respawn after the round is over</message>
+    </respawn>
+</respawns>
+<regions>
+    <apply block-break="block" />
+    <apply velocity="-0.05,1.5,0">
+        <region>
+            <cuboid min="29,15,4" max="27,16,1" />
+        </region>
+    </apply>
+</regions>
+<filters>
+    <not id="block">
+        <cause>player</cause>
+    </not>
+    <all id="round-tutorial">
+        <match-running />
+        <variable var="round_state">${RND_TUTORIAL}</variable>
+    </all>
+    <all id="round-preparing">
+        <match-running />
+        <variable var="round_state">${RND_PREPARING}</variable>
+    </all>
+    <all id="round-running">
+        <match-running />
+        <variable var="round_state">${RND_RUNNING}</variable>
+    </all>
+    <all id="round-finished">
+        <match-running />
+        <variable var="round_state">${RND_FINISHED}</variable>
+    </all>
+    <variable id="is-brave" var="is_brave">1</variable>
+    <variable id="is-snitch" var="is_snitch">1</variable>
+    <variable id="is-seeking" var="seeking">1</variable>
+    <variable id="was-revealed" var="was_revealed">1</variable>
+    <holding id="holding-rod" ignore-durability="true" ignore-metadata="true" ignore-name="true" ignore-enchantments="true">
+        <item material="blaze rod" />
+    </holding>
+    <victim id="victim-is-seeking">
+        <filter id="is-seeking" />
+    </victim>
+    <attacker id="attacker-is-brave">
+        <filter id="is-brave" />
+    </attacker>
+    <attacker id="attacker-is-snitch">
+        <filter id="is-snitch" />
+    </attacker>
+    <cause id="projectile">projectile</cause>
+</filters>
+<portals sound="false">
+    <portal destination="seekers-spawn" yaw="@30">
+        <forward>
+            <after duration="0.05s" filter="all(round-preparing,seeking=1,alive)" />
+        </forward>
+    </portal>
+    <portal destination="hiders-spawn" yaw="@0">
+        <forward>
+            <after duration="0.05s" filter="all(round-preparing,seeking=0,alive)" />
+        </forward>
+    </portal>
+    <!-- <portal forward="round-finished" destination="hiders-spawn" yaw="@0" /> -->
+    <portal destination="hiders-spawn" yaw="@0" forward="all(round-running,seeking=1,alive)" />
+</portals>
+<variables scope="match">
+    <variable id="round_state" />
+    <variable id="round_count" />
+    <variable id="i" />
+    <variable id="j" />
+    <variable id="tmp" />
+    <variable id="min_value" />
+    <variable id="max_value" />
+    <variable id="can_respawn" default="1" />
+    <variable id="current_seekers" />
+    <variable id="alive_players" />
+    <array id="seek_order" size="4" />
+    <array id="team_sizes" size="4" />
+    <variable id="seeking" scope="team" />
+    <variable id="team_id" scope="team" />
+    <variable id="is_invis" scope="player" />
+    <variable id="is_snitch" scope="player" />
+    <variable id="is_brave" scope="player" />
+    <variable id="was_revealed" scope="player" />
+    <variable id="p_id" scope="player" />
+    <variable id="just_revealed" scope="player" exclusive="1" />
+    <timelimit id="tl"/>
+</variables>
+<actions>
+    <!-- round setters -->
+    <action id="set-round-tutorial" scope="match">
+        <set var="round_state" value="${RND_TUTORIAL}" />
+    </action>
+    <action id="set-round-preparing" scope="match">
+        <set var="round_count" value="round_count + 1" />
+        <set var="round_state" value="${RND_PREPARING}" />
+    </action>
+    <action id="set-round-running" scope="match">
+        <set var="round_state" value="${RND_RUNNING}" />
+    </action>
+    <action id="set-round-finished" scope="match">
+        <set var="round_state" value="${RND_FINISHED}" />
+    </action>
+
+    <!-- tutorial -->
+    <trigger scope="match" filter="match-started" action="set-round-tutorial" />
+    <trigger scope="match" filter="round-tutorial">
+        <action>
+            <schedule after="1.5s">
+                <message title="${MAP_NAME}" subtitle="`aA team-based Hide n' Seek" text="${ANNOUNCER_PREFIX} Welcome to ${MAP_NAME}. A `ateam-based Hide n' Seek game" />
+                <sound key="random.click"/>
+            </schedule>
+            <schedule after="4s">
+                <message text="${ANNOUNCER_PREFIX} In this game, four teams take turns hiding and seeking." />
+                <sound key="random.click"/>
+            </schedule>
+            <schedule after="7s">
+                <message text="${ANNOUNCER_PREFIX} `oIf you are a hider`r, the more teammates that survive, the more points your team earns." />
+                <sound key="random.click"/>
+            </schedule>
+            <schedule after="11s">
+                <message text="${ANNOUNCER_PREFIX} `oIf you are an intruder`r, you earn points by finding and capturing hiders." />
+                <sound key="random.click"/>
+            </schedule>
+            <schedule after="15s">
+                <message text="${ANNOUNCER_PREFIX} Each hiding team has one player with a special role called the `cBrave`r. Braves can use a bow to eliminate an intruder." />
+                <sound key="random.click"/>
+            </schedule>
+            <schedule after="19s">
+                <message text="${ANNOUNCER_PREFIX} Another role is the `bSnitch`r. They can reveal the location of a player from another hiding team." />
+                <sound key="random.click"/>
+            </schedule>
+            <schedule after="23s">
+                <message text="${ANNOUNCER_PREFIX} Get ready... let the game begin!" />
+                <sound key="random.click"/>
+            </schedule>
+            <schedule after="25s">
+                <action id="set-round-preparing" />
+            </schedule>
+        </action>
+    </trigger>
+
+    <!-- team order -->
+    <trigger scope="match" filter="always">
+        <action>
+            <set var="seek_order" index="0" value="1" />
+            <set var="seek_order" index="1" value="2" />
+            <set var="seek_order" index="2" value="3" />
+            <set var="seek_order" index="3" value="4" />
+
+            <set var="i" value="3" />
+            <repeat times="3">
+                <set var="j" value="floor(random() * (i + 1))" />
+                <set var="tmp" value="seek_order[i]" />
+                <set var="seek_order" index="i" value="seek_order[j]" />
+                <set var="seek_order" index="j" value="tmp" />
+                <set var="i" value="i - 1" />
+            </repeat>
+        </action>
+    </trigger>
+    <!-- assign ids -->
+    <trigger scope="team" filter="match-started">
+        <action>
+            <action filter="cyan">
+                <set var="team_id" value="${TEAM_CYAN}" />
+            </action>
+            <action filter="magenta">
+                <set var="team_id" value="${TEAM_MAGENTA}" />
+            </action>
+            <action filter="yellow">
+                <set var="team_id" value="${TEAM_YELLOW}" />
+            </action>
+            <action filter="orange">
+                <set var="team_id" value="${TEAM_ORANGE}" />
+            </action>
+        </action>
+    </trigger>
+
+    <!-- prepare round -->
+    <trigger scope="match" filter="round-preparing">
+        <action>
+            <set var="can_respawn" value="0" />
+            <switch-scope inner="player">
+                <set var="is_snitch" value="0" />
+                <set var="is_brave" value="0" />
+                <set var="was_revealed" value="0" />
+            </switch-scope>
+            <switch-scope inner="team">
+                <set var="seeking" value="0" />
+            </switch-scope>
+            <switch-scope inner="team" filter="seek_order[round_count-1]-team_id=0">
+                <set var="seeking" value="1" />
+                <set var="current_seekers" value="team_id" />
+                <message title="You are an `lIntruder" subtitle="`eHunt as much hiders as you can" />
+                <switch-scope inner="player">
+                    <kit id="seeker-kit" />
+                </switch-scope>
+            </switch-scope>
+            <switch-scope inner="player" filter="not(seek_order[round_count-1]-team_id=0)">
+                <message title="You are a `lHider" subtitle="{0} are the Intruders">
+                    <replacements>
+                        <switch id="0" value="current_seekers">
+                            <case match="${TEAM_CYAN}" result="`3`lCyans`r" />
+                            <case match="${TEAM_MAGENTA}" result="`d`lMagentas`r" />
+                            <case match="${TEAM_YELLOW}" result="`e`lYellows`r" />
+                            <case match="${TEAM_ORANGE}" result="`6`lOranges`r" />
+                        </switch>
+                    </replacements>
+                </message>
+            </switch-scope>
+        </action>
+    </trigger>
+
+    <!-- start round -->
+    <trigger scope="match" action="set-round-running">
+        <filter>
+            <after duration="15s" filter="round-preparing" message="Releasing intruders in {0}" />
+        </filter>
+    </trigger>
+
+    <!-- finish round -->
+    <trigger scope="match" action="set-round-finished">
+        <filter>
+            <after duration="105s" filter="round-running" message="Round over in {0}" />
+        </filter>
+    </trigger>
+
+    <!-- round finished -->
+    <trigger scope="match" filter="round-finished">
+        <action>
+            <!-- cyan -->
+            <set var="alive_players" value="0" />
+            <switch-scope inner="player" filter="all(cyan,alive,not(is-seeking))">
+                <set var="alive_players" value="alive_players + 1" />
+            </switch-scope>
+            <switch-scope inner="team" filter="all(cyan,not(is-seeking))">
+                <set var="score" value="score + ((alive_players * 100 / team_sizes[0]))" />
+                <message title="`e`l+{0} Points" subtitle="{0}% of your team survived">
+                    <replacements>
+                        <decimal id="0" value="(alive_players * 100 / team_sizes[0])" />
+                    </replacements>
+                </message>
+            </switch-scope>
+            <!-- magenta -->
+            <set var="alive_players" value="0" />
+            <switch-scope inner="player" filter="all(magenta,alive,not(is-seeking))">
+                <set var="alive_players" value="alive_players + 1" />
+            </switch-scope>
+            <switch-scope inner="team" filter="all(magenta,not(is-seeking))">
+                <set var="score" value="score + ((alive_players * 100 / team_sizes[1]))" />
+                <message title="`e`l+{0} Points" subtitle="{0}% of your team survived">
+                    <replacements>
+                        <decimal id="0" value="(alive_players * 100 / team_sizes[1])" />
+                    </replacements>
+                </message>
+            </switch-scope>
+            <!-- yellow -->
+            <set var="alive_players" value="0" />
+            <switch-scope inner="player" filter="all(yellow,alive,not(is-seeking))">
+                <set var="alive_players" value="alive_players + 1" />
+            </switch-scope>
+            <switch-scope inner="team" filter="all(yellow,not(is-seeking))">
+                <set var="score" value="score + ((alive_players * 100 / team_sizes[2]))" />
+                <message title="`e`l+{0} Points" subtitle="{0}% of your team survived">
+                    <replacements>
+                        <decimal id="0" value="(alive_players * 100 / team_sizes[2])" />
+                    </replacements>
+                </message>
+            </switch-scope>
+            <!-- orange -->
+            <set var="alive_players" value="0" />
+            <switch-scope inner="player" filter="all(orange,alive,not(is-seeking))">
+                <set var="alive_players" value="alive_players + 1" />
+            </switch-scope>
+            <switch-scope inner="team" filter="all(orange,not(is-seeking))">
+                <set var="score" value="score + ((alive_players * 100 / team_sizes[3]))" />
+                <message title="`e`l+{0} Points" subtitle="{0}% of your team survived">
+                    <replacements>
+                        <decimal id="0" value="(alive_players * 100 / team_sizes[3])" />
+                    </replacements>
+                </message>
+            </switch-scope>
+
+            <switch-scope inner="player" filter="participating">
+                <kit id="empty-kit" />
+            </switch-scope>
+
+            <schedule after="1s">
+                <action filter="round_count=4">
+                    <set var="tl" value="0" />
+                </action> 
+            </schedule>
+            <set var="can_respawn" value="1" />
+        </action>
+    </trigger>
+
+    <trigger scope="match" action="set-round-preparing">
+        <filter>
+            <after duration="5s" filter="all(round-finished,not(round_count=4))" message="Next round in {0}" />
+        </filter>
+    </trigger>
+
+    <!-- round started -->
+    <trigger scope="match" filter="round-running">
+        <action>
+            <set var="team_sizes" index="0" value="0" />
+            <set var="team_sizes" index="1" value="0" />
+            <set var="team_sizes" index="2" value="0" />
+            <set var="team_sizes" index="3" value="0" />
+            
+            <switch-scope inner="player" filter="cyan">
+                <set var="team_sizes" index="0" value="team_sizes[0] + 1" />
+                <set var="p_id" value="random()" />
+            </switch-scope>
+            <switch-scope inner="player" filter="magenta">
+                <set var="team_sizes" index="1" value="team_sizes[1] + 1" />
+                <set var="p_id" value="random()" />
+            </switch-scope>
+            <switch-scope inner="player" filter="yellow">
+                <set var="team_sizes" index="2" value="team_sizes[2] + 1" />
+                <set var="p_id" value="random()" />
+            </switch-scope>
+            <switch-scope inner="player" filter="orange">
+                <set var="team_sizes" index="3" value="team_sizes[3] + 1" />
+                <set var="p_id" value="random()" />
+            </switch-scope>
+
+            <set var="min_value" value="min(team_sizes[0],team_sizes[1],team_sizes[2],team_sizes[3])" />
+
+            <action filter="min_value=2..">
+                <!-- cyan -->
+                <set var="min_value" value="999" />
+                <set var="max_value" value="-999" />
+                <switch-scope inner="player" filter="all(cyan,not(is-seeking))">
+                    <set var="min_value" value="min(min_value,p_id)" />
+                    <set var="max_value" value="max(max_value,p_id)" />
+                </switch-scope>
+                <switch-scope inner="player" filter="all(cyan,p_id-min_value=0,not(is-seeking))">
+                    <set var="is_brave" value="1" />
+                </switch-scope>
+                <switch-scope inner="player" filter="all(cyan,p_id-max_value=0,not(is-seeking))">
+                    <set var="is_snitch" value="1" />
+                </switch-scope>
+                <!-- magenta -->
+                <set var="min_value" value="999" />
+                <set var="max_value" value="-999" />
+                <switch-scope inner="player" filter="all(magenta,not(is-seeking))">
+                    <set var="min_value" value="min(min_value,p_id)" />
+                    <set var="max_value" value="max(max_value,p_id)" />
+                </switch-scope>
+                <switch-scope inner="player" filter="all(magenta,p_id-min_value=0,not(is-seeking))">
+                    <set var="is_brave" value="1" />
+                </switch-scope>
+                <switch-scope inner="player" filter="all(magenta,p_id-max_value=0,not(is-seeking))">
+                    <set var="is_snitch" value="1" />
+                </switch-scope>
+                <!-- yellow -->
+                <set var="min_value" value="999" />
+                <set var="max_value" value="-999" />
+                <switch-scope inner="player" filter="all(yellow,not(is-seeking))">
+                    <set var="min_value" value="min(min_value,p_id)" />
+                    <set var="max_value" value="max(max_value,p_id)" />
+                </switch-scope>
+                <switch-scope inner="player" filter="all(yellow,p_id-min_value=0,not(is-seeking))">
+                    <set var="is_brave" value="1" />
+                </switch-scope>
+                <switch-scope inner="player" filter="all(yellow,p_id-max_value=0,not(is-seeking))">
+                    <set var="is_snitch" value="1" />
+                </switch-scope>
+                <!-- orange -->
+                <set var="min_value" value="999" />
+                <set var="max_value" value="-999" />
+                <switch-scope inner="player" filter="all(orange,not(is-seeking))">
+                    <set var="min_value" value="min(min_value,p_id)" />
+                    <set var="max_value" value="max(max_value,p_id)" />
+                </switch-scope>
+                <switch-scope inner="player" filter="all(orange,p_id-min_value=0,not(is-seeking))">
+                    <set var="is_brave" value="1" />
+                </switch-scope>
+                <switch-scope inner="player" filter="all(orange,p_id-max_value=0,not(is-seeking))">
+                    <set var="is_snitch" value="1" />
+                </switch-scope>
+            </action>
+
+            <switch-scope inner="player" filter="not(is-seeking)">
+                <kit id="hider-kit" />
+            </switch-scope>
+
+            <message text="${ANNOUNCER_PREFIX} The {0} have been released!">
+                <replacements>
+                    <switch id="0" value="current_seekers">
+                        <case match="${TEAM_CYAN}" result="`3Intruders`r" />
+                        <case match="${TEAM_MAGENTA}" result="`dIntruders`r" />
+                        <case match="${TEAM_YELLOW}" result="`eIntruders`r" />
+                        <case match="${TEAM_ORANGE}" result="`6Intruders`r" />
+                    </switch>
+                </replacements>
+            </message>
+            <sound preset="OBJECTIVE_MODE" />
+        </action>
+    </trigger>
+
+    <!-- role reveal -->
+    <trigger scope="player" filter="is-brave">
+        <action>
+            <message title="You are a `c`lBrave" subtitle="`eYou can use a bow to eliminate an Intruder" />
+        </action>
+    </trigger>
+
+    <trigger scope="player" filter="is-snitch">
+        <action>
+            <message title="You are a `b`lSnitch" subtitle="`eYou can reveal the location of an enemy" />
+        </action>
+    </trigger>
+
+    <!-- invis -->
+    <trigger scope="player" action="hider-kit">
+        <filter>
+            <after duration="15s" filter="is_invis=1" />
+        </filter>
+    </trigger>
+
+    <action id="on-damage-attacker" scope="player">
+        <action filter="all(is-snitch,not(victim-is-seeking))">
+            <replace-item ignore-metadata="true">
+                <find material="blaze rod"/>
+                <replace material="air"/>
+            </replace-item>
+            <set var="score" value="score + 5" />
+            <message title="`e`l+5 Points" subtitle="Revealing an enemy's position" stay="1s" fade-in="0.3s" fade-out="0.3s" />
+        </action>
+    </action>
+
+    <action id="on-damage-victim" scope="player">
+        <action filter="all(attacker-is-snitch,not(victim-is-seeking))">
+            <set var="was_revealed" value="1" />
+            <set var="just_revealed" value="1" />
+            <message subtitle="`c⚠ Your position has been revealed! ⚠" stay="1s" fade-in="0.3s" fade-out="0.3s" />
+            <switch-scope inner="match">
+                <message text="${ANNOUNCER_PREFIX} {p}'s position was just revealed to the Intruders!">
+                    <replacements>
+                        <player id="p" var="just_revealed" />
+                    </replacements>
+                </message>
+                <switch-scope inner="player" filter="is-seeking">
+                    <kit>
+                        <item slot="8" material="compass" locked="true"/>
+                    </kit>
+                </switch-scope>
+            </switch-scope>
+        </action>
+    </action>
+
+    <!-- door barrier -->
+    <trigger scope="match" filter="match-started">
+        <action>
+            <fill material="barrier">
+                <cuboid min="-1,13,-25" max="-4,18,-24" />
+            </fill>
+        </action>
+    </trigger>
+</actions>
+<compass>
+    <player filter="was-revealed" show-player="true" />
+</compass>
+<kill-rewards>
+    <kill-reward filter="is-seeking">
+        <action>
+            <set var="score" value="score + 5" />
+            <message actionbar="`e`l+5 Points" />
+            <switch-scope inner="match">
+                <set var="alive_players" value="0" />
+                <switch-scope inner="player" filter="all(not(is-seeking),alive)">
+                    <set var="alive_players" value="alive_players + 1" />
+                </switch-scope>
+                <action filter="alive_players=0">
+                    <action id="set-round-finished" />
+                </action>
+            </switch-scope>
+        </action>
+    </kill-reward>
+    <kill-reward filter="is-brave">
+        <action>
+            <set var="score" value="score + 10" />
+            <message title="`e`l+10 Points" subtitle="Eliminating an Intruder" stay="1s" fade-in="0.3s" fade-out="0.3s" />
+        </action>
+    </kill-reward>
+</kill-rewards>
+<world>
+    <timeset>16000</timeset>
+</world>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<damage attacker-action="on-damage-attacker" victim-action="on-damage-victim">
+    <deny>
+        <any>
+            <all>
+                <attacker>
+                    <not>
+                        <any>
+                            <all>
+                                <filter id="is-snitch" />
+                                <filter id="holding-rod" />
+                            </all>
+                            <filter id="is-seeking" />
+                        </any>
+                    </not>
+                </attacker>
+                <victim>
+                    <not>
+                        <filter id="is-seeking" />
+                    </not>
+                </victim>
+            </all>
+            <cause>fall</cause>
+            <not>
+                <filter id="round-running" />
+            </not>
+        </any>
+    </deny>
+</damage>
+<itemremove>
+    <item>potion</item>
+    <item>blaze rod</item>
+    <item>bow</item>
+    <item>diamond sword</item>
+    <item>arrow</item>
+</itemremove>
+<broadcasts>
+    <tip after="30s">Visible name tags are `lIntruders`r. Hide!</tip>
+</broadcasts>
+</map>
