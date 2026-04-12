@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Intruders</name>
-<version>1.0</version>
+<version>1.0.1</version>
 <objective>Hide from the intruders or capture the hiders!</objective>
 <created>2026-03-20</created>
 <phase>staging</phase>
@@ -30,15 +30,18 @@
 </teams>
 <score />
 <kits>
-    <kit id="seeker-kit">
+    <kit id="default-kit">
+        <game-mode>adventure</game-mode>
+    </kit>
+    <kit id="seeker-kit" parent="default-kit">
         <clear />
-        <item slot="0" material="diamond sword" enchantment="damage all:1" unbreakable="true" prevent-sharing="true" />
+        <item slot="0" material="stone sword" unbreakable="true" prevent-sharing="true" />
         <helmet material="leather helmet" team-color="true" locked="true" />
         <chestplate material="leather chestplate" team-color="true" locked="true" />
         <leggings material="diamond leggings" locked="true" />
         <boots material="diamond boots" locked="true" />
     </kit>
-    <kit id="hider-kit">
+    <kit id="hider-kit" parent="default-kit">
         <clear />
         <kit filter="is_invis=0">
             <item material="potion" damage="14" consumable="invis-consumable" />
@@ -55,14 +58,14 @@
             <set var="is_invis" value="0" />
         </action>
     </kit>
-    <kit id="invis-kit">
+    <kit id="invis-kit" parent="default-kit">
         <clear />
         <effect duration="15s">invisibility</effect>
         <action>
             <set var="is_invis" value="1" />
         </action>
     </kit>
-    <kit id="empty-kit">
+    <kit id="empty-kit" parent="default-kit">
         <clear effects="true" />
     </kit>
 </kits>
@@ -70,12 +73,12 @@
     <consumable id="invis-consumable" action="invis-kit" on="eat" />
 </consumables>
 <spawns>
-    <spawn filter="all(seeking=0,can_respawn=1,not(any(round-running,round-preparing)))">
+    <spawn kit="default-kit" filter="all(seeking=0,can_respawn=1,not(any(round-running,round-preparing)))">
         <region>
             <cylinder id="hiders-spawn" base="-2.5,13.06,-1.5" radius="2.5" height="0" />
         </region>
     </spawn>
-    <spawn filter="all(seeking=1,not(any(round-running,round-preparing)))">
+    <spawn kit="default-kit" filter="all(seeking=1,not(any(round-running,round-preparing)))">
         <region yaw="30">
             <point id="seekers-spawn">4.5,10,-62.5</point>
         </region>
@@ -92,17 +95,29 @@
     </respawn>
 </respawns>
 <regions>
-    <apply block-break="block" />
     <apply velocity="-0.05,1.5,0">
         <region>
             <cuboid min="29,15,4" max="27,16,1" />
         </region>
     </apply>
+    <apply block="always">
+        <region>
+            <cuboid min="-8,13,10" max="-10,15,12" />
+        </region>
+    </apply>
+    <apply block="never" use="use" />
 </regions>
 <filters>
-    <not id="block">
-        <cause>player</cause>
-    </not>
+    <any id="use">
+        <material>lever</material>
+        <material>chest</material>
+        <material>wooden door</material>
+        <material>trap door</material>
+        <material>spruce door</material>
+        <material>birch door</material>
+        <material>jungle door</material>
+        <material>dark oak door</material>
+    </any>
     <all id="round-tutorial">
         <match-running />
         <variable var="round_state">${RND_TUTORIAL}</variable>
@@ -136,6 +151,10 @@
         <filter id="is-snitch" />
     </attacker>
     <cause id="projectile">projectile</cause>
+    <any id="entities">
+        <entity>dropped item</entity>
+        <entity>arrow</entity>
+    </any>
 </filters>
 <portals sound="false">
     <portal destination="seekers-spawn" yaw="@30">
@@ -316,6 +335,7 @@
     <!-- round finished -->
     <trigger scope="match" filter="round-finished">
         <action>
+            <kill-entities filter="entities" />
             <!-- cyan -->
             <set var="alive_players" value="0" />
             <switch-scope inner="player" filter="all(cyan,alive,not(is-seeking))">
@@ -602,6 +622,7 @@
                 </victim>
             </all>
             <cause>fall</cause>
+            <cause>combustion</cause>
             <not>
                 <filter id="round-running" />
             </not>
