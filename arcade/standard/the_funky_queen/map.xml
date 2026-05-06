@@ -1,6 +1,6 @@
   <map proto="1.5.0">
       <name>The Funky Queen</name>
-      <version>1.0</version>
+      <version>1.0.1</version>
       <objective>Be the best funky player, and become the Queen of Funky!</objective>
       <created>2025-09-29</created>
       <phase>development</phase>
@@ -728,7 +728,7 @@
               </region>
           </spawn>
           <spawn region="rlgl-center" kit="spectator-kit" filter="all(playing-rlgl,round-finished)"></spawn>
-          <spawn safe="true" spread="true" kit="sumo-kit" filter="all(game-playing,playing-sumo,not(cant-join))">
+          <spawn kit="sumo-kit" filter="all(game-playing,playing-sumo,not(cant-join))">
               <region yaw="-90">
                   <point id="sumo-spawn-1">-200,9.5,329.5</point>
               </region>
@@ -1845,6 +1845,11 @@
           <rectangle id="tnt-tag-area" min="300,300" max="474,474"></rectangle>
           <rectangle id="wool-story-area" min="-299,124" max="-386,211"></rectangle>
           <below id="almost-void" y="0"></below>
+          <apply enter="not(game-epilogue)">
+              <region>
+                  <rectangle min="30,0" max="-30,10"></rectangle>
+              </region>
+          </apply>
           <apply region="bow-spleef-area" block="bow-spleef-block"></apply>
           <apply region="cacti-area" block="cacti-block"></apply>
           <apply region="dig-down-area" block-break="all(dig-down-allowed-blocks,round-playing,playing-dig-down)"></apply>
@@ -2338,6 +2343,7 @@
           <variable id="dig_down_won" scope="player"></variable>
           <variable id="gb_selected_route" scope="player"></variable>
           <variable id="gb_platform_found" scope="player"></variable>
+          <variable id="gb_has_finished" scope="player"></variable>
           <variable id="gb_has_started" scope="player"></variable>
           <variable id="gb_current_platform" scope="player" default="-1"></variable>
           <variable id="gb_i_p" scope="player"></variable>
@@ -2355,6 +2361,7 @@
           <variable id="infection_min"></variable>
           <variable id="infection_zombie_amount"></variable>
           <variable id="infection_zombies_left_to_assign" default="-1"></variable>
+          <variable id="mobarena_pvp"></variable>
           <variable id="race_p"></variable>
           <variable id="race_last_position"></variable>
           <variable id="race_time_decs"></variable>
@@ -2761,6 +2768,48 @@
         <fill material="redstone block" update="true" events="true">
             <block>-2.5,8.5,-5.5</block>
         </fill>
+    </action>
+          <action id="calculate-podium" scope="match">
+        <switch-scope inner="player">
+            <set var="hidden_score" value="0" />
+            <set var="player_i" value="0" />
+            <set var="round_position" value="0" />
+            <set var="available_positions" value="0" />
+            <repeat times="${MG_AMOUNT}">
+                <set var="hidden_score" value="hidden_score + points_per_round[player_i]" />
+                <set var="player_i" value="player_i + 1" />
+            </repeat>
+            <set var="hidden_score" value="hidden_score + random()" />
+        </switch-scope>
+        <action id="count-players" />
+        <set var="round_p" value="1" />
+        <repeat times="players">
+            <set var="round_max" value="-9999" />
+            <switch-scope inner="player" filter="all(round_position=0,participating,hidden_score=1..)">
+                <set var="round_max" value="max(hidden_score,round_max)" />
+            </switch-scope>
+            <switch-scope inner="player" filter="participating">
+                <action filter="hidden_score-round_max=0">
+                    <set var="round_position" value="round_p" />
+                    <!-- <set var="hidden_score" value="players - (round_position - 1)" /> -->
+                    <set var="score" value="0" />
+                    <action filter="round_position=1">
+                        <set var="first_place" value="1" />
+                        <set var="available_positions" value="1" />
+                    </action>
+                    <action filter="round_position=2">
+                        <set var="second_place" value="1" />
+                        <set var="available_positions" value="2" />
+                    </action>
+                    <action filter="round_position=3">
+                        <set var="third_place" value="1" />
+                        <set var="available_positions" value="3" />
+                    </action>
+                </action>
+            </switch-scope>
+            <set var="round_p" value="round_p + 1" />
+        </repeat>
+        
     </action>
           <action id="cacti-calculate-circle" scope="match" expose="true">
         <set var="cacti_center" index="0" value="-371" />
@@ -3763,47 +3812,15 @@
             </switch-scope>
         </schedule>
     </action>
-          <action id="calculate-podium" scope="match">
+          <action id="calculate-leaderboard" scope="match">
         <switch-scope inner="player">
             <set var="hidden_score" value="0" />
             <set var="player_i" value="0" />
-            <set var="round_position" value="0" />
-            <set var="available_positions" value="0" />
             <repeat times="${MG_AMOUNT}">
                 <set var="hidden_score" value="hidden_score + points_per_round[player_i]" />
                 <set var="player_i" value="player_i + 1" />
             </repeat>
-            <set var="hidden_score" value="hidden_score + random()" />
         </switch-scope>
-        <action id="count-players" />
-        <set var="round_p" value="1" />
-        <repeat times="players">
-            <set var="round_max" value="-9999" />
-            <switch-scope inner="player" filter="all(round_position=0,participating,hidden_score=1..)">
-                <set var="round_max" value="max(hidden_score,round_max)" />
-            </switch-scope>
-            <switch-scope inner="player" filter="participating">
-                <action filter="hidden_score-round_max=0">
-                    <set var="round_position" value="round_p" />
-                    <!-- <set var="hidden_score" value="players - (round_position - 1)" /> -->
-                    <set var="score" value="0" />
-                    <action filter="round_position=1">
-                        <set var="first_place" value="1" />
-                        <set var="available_positions" value="1" />
-                    </action>
-                    <action filter="round_position=2">
-                        <set var="second_place" value="1" />
-                        <set var="available_positions" value="2" />
-                    </action>
-                    <action filter="round_position=3">
-                        <set var="third_place" value="1" />
-                        <set var="available_positions" value="3" />
-                    </action>
-                </action>
-            </switch-scope>
-            <set var="round_p" value="round_p + 1" />
-        </repeat>
-        
     </action>
           <action id="reveal-scores" scope="match">
         <switch-scope inner="player">
@@ -3811,7 +3828,7 @@
         </switch-scope>
     </action>
           <action id="show-leaderboard" scope="match">
-        <action id="calculate-podium" />
+        <action id="calculate-leaderboard" />
         <action id="reveal-scores" />
     </action>
           <action id="select-random-minigame" scope="match">
@@ -3979,7 +3996,7 @@
               <action>
             <set var="lost" value="1" />
             <switch-scope inner="match">
-                <switch-scope inner="player" filter="ap">
+                <switch-scope inner="player" filter="all(ap,lost=0)">
                     <set var="score" value="score + 1" />
                     <message actionbar="`a`l+1 `fPoint `o(Staying alive)" />
                 </switch-scope>
@@ -4009,7 +4026,7 @@
               <action>
             <set var="lost" value="1" />
             <switch-scope inner="match">
-                <switch-scope inner="player" filter="ap">
+                <switch-scope inner="player" filter="all(lost=0,ap)">
                     <set var="score" value="score + 1" />
                     <message actionbar="`a`l+1 `fPoint `o(Staying alive)" />
                 </switch-scope>
@@ -4222,11 +4239,12 @@
                   <after duration="1m" message="Someone has finished. Ending the game in {0}" filter="all(playing-glass-bridge,round-playing,gb_someone_finished=1)"></after>
               </filter>
           </trigger>
-          <trigger filter="all(round-playing,playing-glass-bridge,ap,lost=0,gb_should_lose=0,glass-bridge-finish-line,gb_has_started=1)" scope="player">
+          <trigger filter="all(round-playing,playing-glass-bridge,ap,lost=0,gb_should_lose=0,gb_has_finished=0,glass-bridge-finish-line,gb_has_started=1)" scope="player">
               <action>
             <kit id="spectator-kit" />
             <set var="score" value="score + 5" />
             <set var="gb_someone_finished" value="1" />
+            <set var="gb_has_finished" value="1" />
             <message actionbar="`a`l+5 `fPoints `o(Finishing)" />
             <switch-scope inner="match">
                 <action id="check-to-finish" />
@@ -4286,7 +4304,7 @@
               <action>
             <set var="lost" value="1" />
             <switch-scope inner="match">
-                <switch-scope inner="player" filter="ap">
+                <switch-scope inner="player" filter="all(lost=0,ap)">
                     <set var="score" value="score + 1" />
                     <message actionbar="`a`l+1 `fPoint `o(Staying alive)" />
                 </switch-scope>
@@ -4365,11 +4383,23 @@
                   </pulse>
               </filter>
           </trigger>
+          <trigger scope="match">
+              <filter>
+                  <after duration="1m" message="PVP active in {0}">
+                      <after duration="1m" filter="all(round-playing,playing-mobarena)"></after>
+                  </after>
+              </filter>
+              <action>
+            <set var="mobarena_pvp" value="1" />
+            <message text="${ANNOUNCER_PREFIX} PVP is now `a`lactive!" />
+            <sound key="random.click" />
+        </action>
+          </trigger>
           <trigger filter="all(round-playing,playing-mobarena,dead)" scope="player">
               <action>
             <set var="lost" value="1" />
             <switch-scope inner="match">
-                <switch-scope inner="player" filter="ap">
+                <switch-scope inner="player" filter="all(ap,lost=0)">
                     <set var="score" value="score + 1" />
                     <message actionbar="`a`l+1 `fPoint `o(Staying alive)" />
                 </switch-scope>
@@ -4587,7 +4617,7 @@
               </filter>
               <action>
             <set var="rlgl_coords_difference" value="abs((player.x - rlgl_last_coords[0]) + (player.y - rlgl_last_coords[1]) + (player.z - rlgl_last_coords[2]))" />
-            <action filter="rlgl_coords_difference=0.1..">
+            <action filter="rlgl_coords_difference=0.2..">
                 <set var="lost" value="1" />
                 <kit>
                     <effect duration="3" amplifier="10">instant damage</effect>
@@ -6336,8 +6366,11 @@
                           <filter id="playing-dropper"></filter>
                           <filter id="playing-rlgl"></filter>
                           <filter id="playing-dig-down"></filter>
-                          <filter id="playing-mobarena"></filter>
                           <filter id="playing-glass-bridge"></filter>
+                          <all>
+                              <filter id="playing-mobarena"></filter>
+                              <variable var="mobarena_pvp">0</variable>
+                          </all>
                       </any>
                       <attacker>
                           <any></any>
@@ -6351,6 +6384,7 @@
                           <filter id="playing-dig-down"></filter>
                           <filter id="playing-tnt-tag"></filter>
                           <filter id="playing-infection"></filter>
+                          <filter id="playing-sumo"></filter>
                       </any>
                   </all>
                   <all>
