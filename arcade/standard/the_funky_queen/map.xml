@@ -1,9 +1,9 @@
   <map proto="1.5.0">
       <name>The Funky Queen</name>
-      <version>1.0.1</version>
+      <version>1.0.2</version>
       <objective>Be the best funky player, and become the Queen of Funky!</objective>
       <created>2025-09-29</created>
-      <phase>development</phase>
+      <phase>staging</phase>
       <game>Tournament</game>
       <include id="countdown"></include>
       <include id="void-death"></include>
@@ -72,7 +72,6 @@
           <constant id="GS_PYRO">7</constant>
           <constant id="GS_SCOUT">8</constant>
           <constant id="GS_SPAWNER">9</constant>
-          <constant id="SUMO_GRACE_PERIOD">3</constant>
           <constant id="RND_AMOUNT">5</constant>
           <constant id="RND_IDLE">-1</constant>
           <constant id="RND_PREPARING">1</constant>
@@ -2321,7 +2320,6 @@
           <variable id="current_message"></variable>
           <variable id="debug_mode" default="${DEBUG_MODE}"></variable>
           <variable id="debugger" scope="player"></variable>
-          <variable id="player_i" scope="player"></variable>
           <variable id="epilogue_tp"></variable>
           <variable id="cacti_decider"></variable>
           <variable id="cacti_material"></variable>
@@ -2438,17 +2436,23 @@
           <variable id="lost" scope="player"></variable>
           <variable id="on_time" scope="player"></variable>
           <variable id="scoring_i"></variable>
+          <variable id="round_real_p"></variable>
           <variable id="round_p"></variable>
           <variable id="round_max"></variable>
-          <variable id="available_positions"></variable>
-          <variable id="winner_available"></variable>
+          <variable id="player_i" scope="player"></variable>
+          <variable id="hidden_score" scope="player"></variable>
           <variable id="first_place" exclusive="1" scope="player"></variable>
           <variable id="second_place" exclusive="1" scope="player"></variable>
           <variable id="third_place" exclusive="1" scope="player"></variable>
           <variable id="fourth_place" exclusive="1" scope="player"></variable>
           <variable id="fifth_place" exclusive="1" scope="player"></variable>
           <variable id="round_position" scope="player"></variable>
-          <variable id="hidden_score" scope="player"></variable>
+          <variable id="round_unique_position" scope="player"></variable>
+          <variable id="currently_showing_position"></variable>
+          <variable id="currently_showing_player" exclusive="1" scope="player"></variable>
+          <variable id="repeated_amount"></variable>
+          <variable id="available_positions"></variable>
+          <variable id="winners_available"></variable>
           <variable id="current_selection_mode"></variable>
           <variable id="selection_switched"></variable>
           <variable id="selection_mode_ready"></variable>
@@ -2493,8 +2497,6 @@
           <array id="tip_toe_path" size="88"></array>
           <array id="tip_toe_xz_standing" size="2" scope="player"></array>
           <array id="tip_toe_tile_standing" size="2" scope="player"></array>
-          <array id="top_scores" size="5"></array>
-          <array id="repeated_positions" size="5"></array>
           <array id="points_per_round" size="${MG_AMOUNT}" scope="player"></array>
           <array id="played_minigames" size="${MG_AMOUNT}"></array>
           <array id="roulette_center" size="2"></array>
@@ -3647,172 +3649,175 @@
             </action>
         </schedule>
     </action>
-          <action id="announce-winner" scope="match">
-        <action filter="winner_available=1">
+          <action id="scoring-rank-players" scope="match">
+        <!-- reset vars -->
+        <set var="winners_available" value="0" />
+        <set var="available_positions" value="0" />
+        <action id="count-players" />
+        <switch-scope inner="player" filter="participating">
+            <set var="round_position" value="0" />
+            <set var="round_unique_position" value="0" />
+            <set var="hidden_score" value="0" />
+        </switch-scope>
+        <set var="round_p" value="1" />
+        <set var="round_real_p" value="1" />
+        <repeat times="players">
+            <set var="round_max" value="-9999" />
+            <switch-scope inner="player" filter="all(round_position=0,participating,score=1..)">
+                <set var="round_max" value="max(score,round_max)" />
+            </switch-scope>
+            <!-- save how many players have the same position -->
+            <set var="repeated_amount" value="-1" />
+            <switch-scope inner="player" filter="all(participating,score-round_max=0)">
+                <set var="round_position" value="round_p" />
+                <set var="round_unique_position" value="round_real_p" />
+                <set var="hidden_score" value="players - (round_position - 1)" />
+                <set var="score" value="max(floor(hidden_score * multiplier), 0)" />
+                <set var="repeated_amount" value="repeated_amount + 1" />
+                <!-- save amount of winners -->
+                <action filter="round_position=1">
+                    <set var="winners_available" value="winners_available + 1" />
+                </action>
+                <!-- assign exclusive vars -->
+                <action filter="round_real_p=1">
+                    <set var="first_place" value="1" />
+                    <set var="available_positions" value="1" />
+                </action>
+                <action filter="round_real_p=2">
+                    <set var="second_place" value="1" />
+                    <set var="available_positions" value="2" />
+                </action>
+                <action filter="round_real_p=3">
+                    <set var="third_place" value="1" />
+                    <set var="available_positions" value="3" />
+                </action>
+                <action filter="round_real_p=4">
+                    <set var="fourth_place" value="1" />
+                    <set var="available_positions" value="4" />
+                </action>
+                <action filter="round_real_p=5">
+                    <set var="fifth_place" value="1" />
+                    <set var="available_positions" value="5" />
+                </action>
+                <set var="round_real_p" value="round_real_p + 1" />
+            </switch-scope>
+            <set var="round_p" value="round_p + repeated_amount + 1" />
+        </repeat>
+    </action>
+          <action id="scoring-save-points" scope="match">
+        <switch-scope inner="player" filter="participating">
+            <set var="points_per_round" index="current_round - 1" value="max(floor(hidden_score * multiplier), 0)" />
+        </switch-scope>
+    </action>
+          <action id="announce-winners" scope="match">
+        <action filter="winners_available=0">
+            <message title="`cGame Over!" />
+        </action>
+        <action filter="winners_available=1">
             <message title="{p} wins!">
                 <replacements>
                     <player id="p" var="first_place" />
                 </replacements>
             </message>
         </action>
-        <action filter="winner_available=0">
-            <message title="`cGame Over!" />
+        <action filter="winners_available=2">
+            <message title="`eTied!" subtitle="{f} and {s} won">
+                <replacements>
+                    <player id="f" var="first_place" />
+                    <player id="s" var="second_place" />
+                </replacements>
+            </message>
+        </action>
+        <action filter="winners_available=3..">
+            <message title="`eTied!" subtitle="{w} players won">
+                <replacements>
+                    <decimal id="w" value="winners_available" />
+                </replacements>
+            </message>
         </action>
         <sound preset="OBJECTIVE_GOOD" />
     </action>
           <action id="announce-scores" scope="match">
+        <sound preset="OBJECTIVE_FIREWORKS_TWINKLE" />
         <message text="`lTop Players this round:" />
+
         <set var="scoring_i" value="1" />
         <repeat times="available_positions">
-            <action filter="scoring_i=1">
-                <action filter="repeated_positions[0]=1">
-                    <message text="1. {p}" >
-                        <replacements>
-                            <player id="p" var="first_place" />
-                            <!-- <decimal id="s" value="top_scores[0]" /> -->
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="repeated_positions[0]=2..">
-                    <message text="1. {p} (and {r} more)" >
-                        <replacements>
-                            <player id="p" var="first_place" />
-                            <!-- <decimal id="s" value="top_scores[0]" /> -->
-                            <decimal id="r" value="repeated_positions[0] - 1" />
-                        </replacements>
-                    </message>
-                </action>
-            </action>
-            <action filter="scoring_i=2">
-                <action filter="repeated_positions[1]=1">
-                    <message text="2. {p}" >
-                        <replacements>
-                            <player id="p" var="second_place" />
-                            <!-- <decimal id="s" value="top_scores[1]" /> -->
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="repeated_positions[1]=2..">
-                    <message text="2. {p} (and {r} more)" >
-                        <replacements>
-                            <player id="p" var="second_place" />
-                            <!-- <decimal id="s" value="top_scores[1]" /> -->
-                            <decimal id="r" value="repeated_positions[1] - 1" />
-                        </replacements>
-                    </message>
-                </action>
-            </action>
-            <action filter="scoring_i=3">
-                <action filter="repeated_positions[2]=1">
-                    <message text="3. {p}" >
-                        <replacements>
-                            <player id="p" var="third_place" />
-                            <!-- <decimal id="s" value="top_scores[2]" /> -->
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="repeated_positions[2]=2..">
-                    <message text="3. {p} (and {r} more)" >
-                        <replacements>
-                            <player id="p" var="third_place" />
-                            <!-- <decimal id="s" value="top_scores[2]" /> -->
-                            <decimal id="r" value="repeated_positions[2] - 1" />
-                        </replacements>
-                    </message>
-                </action>
-            </action>
-            <action filter="scoring_i=4">
-                <action filter="repeated_positions[3]=1">
-                    <message text="4. {p}" >
-                        <replacements>
-                            <player id="p" var="fourth_place" />
-                            <!-- <decimal id="s" value="top_scores[3]" /> -->
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="repeated_positions[3]=2..">
-                    <message text="4. {p} (and {r} more)" >
-                        <replacements>
-                            <player id="p" var="fourth_place" />
-                            <!-- <decimal id="s" value="top_scores[3]" /> -->
-                            <decimal id="r" value="repeated_positions[3] - 1" />
-                        </replacements>
-                    </message>
-                </action>
-            </action>
-            <action filter="scoring_i=5">
-                <action filter="repeated_positions[4]=1">
-                    <message text="5. {p}" >
-                        <replacements>
-                            <player id="p" var="fifth_place" />
-                            <!-- <decimal id="s" value="top_scores[4]" /> -->
-                        </replacements>
-                    </message>
-                </action>
-                <action filter="repeated_positions[4]=2..">
-                    <message text="5. {p} (and {r} more)" >
-                        <replacements>
-                            <player id="p" var="fifth_place" />
-                            <!-- <decimal id="s" value="top_scores[4]" /> -->
-                            <decimal id="r" value="repeated_positions[4] - 1" />
-                        </replacements>
-                    </message>
-                </action>
-            </action>
+            <switch-scope inner="player" filter="round_unique_position-scoring_i=0">
+                <set var="currently_showing_position" value="round_position" />
+                <set var="currently_showing_player" value="1" />
+            </switch-scope>
+
+            <message text="{position}. {player}">
+                <replacements>
+                    <player id="player" var="currently_showing_player" />
+                    <decimal id="position" value="currently_showing_position"/>
+                </replacements>
+            </message>
+
             <set var="scoring_i" value="scoring_i + 1" />
         </repeat>
-        <switch-scope inner="player" filter="participating">
-            <set var="score" value="hidden_score * multiplier" />
+
+        <switch-scope 
+            inner="player" 
+            filter="not(any(first_place=1,second_place=1,third_place=1,fourth_place=1,fifth_place=1,round_position=0))"
+        >
+            <action filter="round_position=7..">
+                <message text="·" />
+            </action>
+            <message text="`l{position}. `e`lYou`r">
+                <replacements>
+                    <decimal id="position" value="round_position" />
+                </replacements>
+            </message>
         </switch-scope>
-        <sound preset="OBJECTIVE_FIREWORKS_TWINKLE" />
-        <schedule after="2s">
-            <switch-scope inner="player" filter="not(round_position=0)">
-                <message title="`e`l{position}{ordinal} place" subtitle="`a+{s} `f{word}`r ({m})">
-                    <replacements>
-                        <switch id="word" value="score">
-                            <case match="1" result="Point" />
-                            <fallback>Points</fallback>
-                        </switch>
-                        <decimal id="position" value="round_position" />
-                        <decimal id="s" value="score" />
-                        <replacement id="m">multiplier-replacement</replacement>
-                        <switch id="ordinal" value="round_position">
-                            <case match="1" result="st" />
-                            <case match="21" result="st" />
-                            <case match="31" result="st" />
-                            <case match="41" result="st" />
-                            <case match="51" result="st" />
-                            <case match="61" result="st" />
-                            <case match="71" result="st" />
-                            <case match="81" result="st" />
-                            <case match="91" result="st" />
-                            <case match="2" result="nd" />
-                            <case match="22" result="nd" />
-                            <case match="32" result="nd" />
-                            <case match="42" result="nd" />
-                            <case match="52" result="nd" />
-                            <case match="62" result="nd" />
-                            <case match="72" result="nd" />
-                            <case match="82" result="nd" />
-                            <case match="92" result="nd" />
-                            <case match="3" result="rd" />
-                            <case match="23" result="rd" />
-                            <case match="33" result="rd" />
-                            <case match="43" result="rd" />
-                            <case match="53" result="rd" />
-                            <case match="63" result="rd" />
-                            <case match="73" result="rd" />
-                            <case match="83" result="rd" />
-                            <case match="93" result="rd" />
-                            <fallback>th</fallback>
-                        </switch>
-                    </replacements>
-                </message>
-                <sound key="random.levelup" />
-            </switch-scope>
-        </schedule>
+
     </action>
-          <action id="calculate-leaderboard" scope="match">
+          <action id="announce-position" scope="player">
+        <sound key="random.levelup" />
+        <message title="`e`l{position}{ordinal} place" subtitle="`a+{s} `f{word}`r ({m})">
+            <replacements>
+                <switch id="word" value="score">
+                    <case match="1" result="Point" />
+                    <fallback>Points</fallback>
+                </switch>
+                <decimal id="position" value="round_position" />
+                <decimal id="s" value="score" />
+                <replacement id="m">multiplier-replacement</replacement>
+                <switch id="ordinal" value="round_position">
+                    <case match="1" result="st" />
+                    <case match="21" result="st" />
+                    <case match="31" result="st" />
+                    <case match="41" result="st" />
+                    <case match="51" result="st" />
+                    <case match="61" result="st" />
+                    <case match="71" result="st" />
+                    <case match="81" result="st" />
+                    <case match="91" result="st" />
+                    <case match="2" result="nd" />
+                    <case match="22" result="nd" />
+                    <case match="32" result="nd" />
+                    <case match="42" result="nd" />
+                    <case match="52" result="nd" />
+                    <case match="62" result="nd" />
+                    <case match="72" result="nd" />
+                    <case match="82" result="nd" />
+                    <case match="92" result="nd" />
+                    <case match="3" result="rd" />
+                    <case match="23" result="rd" />
+                    <case match="33" result="rd" />
+                    <case match="43" result="rd" />
+                    <case match="53" result="rd" />
+                    <case match="63" result="rd" />
+                    <case match="73" result="rd" />
+                    <case match="83" result="rd" />
+                    <case match="93" result="rd" />
+                    <fallback>th</fallback>
+                </switch>
+            </replacements>
+        </message>
+    </action>
+          <action id="scoring-calculate-leaderboard" scope="match">/
         <switch-scope inner="player">
             <set var="hidden_score" value="0" />
             <set var="player_i" value="0" />
@@ -3826,10 +3831,6 @@
         <switch-scope inner="player">
             <set var="score" value="hidden_score" />
         </switch-scope>
-    </action>
-          <action id="show-leaderboard" scope="match">
-        <action id="calculate-leaderboard" />
-        <action id="reveal-scores" />
     </action>
           <action id="select-random-minigame" scope="match">
         <set var="roulette_spinning_i" value="1" />
@@ -3887,7 +3888,7 @@
         </schedule>
     </action>
           <action id="messages-winner-chooses" scope="match">
-        <action filter="winner_available=1">
+        <action filter="winners_available=1..">
             <schedule after="1s">
                 <message title="`b`lWinner chooses!" subtitle="Let's wait for {p}'s decision">
                     <replacements>
@@ -3905,7 +3906,7 @@
                 <action id="set-game-selecting" />
             </schedule>
         </action>
-        <action filter="winner_available=0">
+        <action filter="winners_available=0">
             <schedule after="1s">
                 <message text="${ANNOUNCER_PREFIX} There seems to be no winner... Let's select a random game instead." />
                 <sound key="random.click" />
@@ -5747,91 +5748,26 @@
           </trigger>
           <trigger filter="round-finished" scope="match">
               <action>
-            <set var="top_scores" index="0" value="0" />
-            <set var="top_scores" index="1" value="0" />
-            <set var="top_scores" index="2" value="0" />
-            <set var="top_scores" index="3" value="0" />
-            <set var="top_scores" index="4" value="0" />
-            <set var="repeated_positions" index="0" value="0" />
-            <set var="repeated_positions" index="1" value="0" />
-            <set var="repeated_positions" index="2" value="0" />
-            <set var="repeated_positions" index="3" value="0" />
-            <set var="repeated_positions" index="4" value="0" />
-            <set var="available_positions" value="0" />
-            <set var="winner_available" value="0" />
+            <action id="scoring-rank-players" />
+            <action id="scoring-save-points" />
+            <action id="announce-winners" />
 
-            <action id="count-players" />
-            <switch-scope inner="player" filter="participating">
-                <set var="round_position" value="0" />
-                <set var="hidden_score" value="0" />
-                <set var="score" value="score" />
-            </switch-scope>
-            <set var="round_p" value="1" />
-            <repeat times="players">
-                <set var="round_max" value="-9999" />
-                <switch-scope inner="player" filter="all(round_position=0,participating,score=1..)">
-                    <set var="round_max" value="max(score,round_max)" />
-                </switch-scope>
-                <switch-scope inner="player" filter="participating">
-                    <action filter="score-round_max=0">
-                        <set var="round_position" value="round_p" />
-                        <set var="hidden_score" value="players - (round_position - 1)" />
-                        <set var="score" value="0" />
-                        <action filter="round_position=1">
-                            <set var="repeated_positions" index="0" value="repeated_positions[0] + 1" />
-                            <set var="first_place" value="1" />
-                            <set var="available_positions" value="1" />
-                            <set var="winner_available" value="1" />
-                            <set var="top_scores" index="0" value="hidden_score" />
-                        </action>
-                        <action filter="round_position=2">
-                            <set var="repeated_positions" index="1" value="repeated_positions[1] + 1" />
-                            <set var="second_place" value="1" />
-                            <set var="available_positions" value="2" />
-                            <set var="top_scores" index="1" value="hidden_score" />
-                        </action>
-                        <action filter="round_position=3">
-                            <set var="repeated_positions" index="2" value="repeated_positions[2] + 1" />
-                            <set var="third_place" value="1" />
-                            <set var="available_positions" value="3" />
-                            <set var="top_scores" index="2" value="hidden_score" />
-                        </action>
-                        <action filter="round_position=4">
-                            <set var="repeated_positions" index="3" value="repeated_positions[3] + 1" />
-                            <set var="fourth_place" value="1" />
-                            <set var="available_positions" value="4" />
-                            <set var="top_scores" index="3" value="hidden_score" />
-                        </action>
-                        <action filter="round_position=5">
-                            <set var="repeated_positions" index="4" value="repeated_positions[4] + 1" />
-                            <set var="fifth_place" value="1" />
-                            <set var="available_positions" value="5" />
-                            <set var="top_scores" index="4" value="hidden_score" />
-                        </action>
-                    </action>
-                </switch-scope>
-                <set var="round_p" value="round_p + 1" />
-            </repeat>
-            <!-- save points -->
-            <switch-scope inner="player" filter="participating">
-                <set var="points_per_round" index="current_round - 1" value="max(hidden_score * multiplier, 0)" />
-            </switch-scope>
-            <switch-scope inner="player" filter="participating">
-                <set var="score" value="0" />
-            </switch-scope>
-            <action id="announce-winner" />
-            <schedule after="2s">
-                <action filter="winner_available=1">
-                    <action id="announce-scores" />
-                </action>
+            <schedule after="2s" filter="winners_available=1..">
+                <action id="announce-scores" />
             </schedule>
+
+            <schedule after="4s" filter="winners_available=1..">
+                <switch-scope inner="player" filter="not(round_position=0)">
+                    <action id="announce-position" />
+                </switch-scope>
+            </schedule>
+            
             <schedule after="4s">
                 <set var="ready_to_lobby" value="1" />
             </schedule>
         </action>
           </trigger>
           <trigger action="score := 0" filter="round-preparing" scope="player"></trigger>
-          <trigger action="show-leaderboard" filter="round-idle" scope="match"></trigger>
           <trigger scope="match">
               <filter>
                   <after duration="5s" message="Teleporting to minigame in {0}" filter="all(game-selecting,game_was_announced=1)"></after>
@@ -5848,6 +5784,8 @@
           <trigger filter="game-transition" scope="match">
               <action>
             <action filter="not(any(current_round-rounds_amount=0,current_round=${MG_AMOUNT}))">
+                <action id="scoring-calculate-leaderboard" />
+                <action id="reveal-scores" />
                 <action filter="any(current_selection_mode=0,selection-winner-chooses)">
                     <set var="current_selection_mode" value="${SELECTION_RANDOM}" />
                     <action id="select-random-minigame" />
@@ -5883,10 +5821,10 @@
             <action id="count-players" />
             <set var="transition_i" value="0" />
             <switch-scope inner="player" filter="ap">
-                <action filter="all(selection-winner-chooses,winner_available=1,first_place=1)">
+                <action filter="all(selection-winner-chooses,winners_available=1..,first_place=1)">
                     <teleport x="roulette_center[0]" y="12" z="roulette_center[1]" yaw="0" pitch="0" />
                 </action>
-                <action filter="any(selection-random,all(selection-winner-chooses,any(winner_available=0,not(first_place=1))))">
+                <action filter="any(selection-random,all(selection-winner-chooses,any(winners_available=0,not(first_place=1))))">
                     <set var="transition_player_angle" value="2 * 3.14159265359 / players * transition_i" />
 
                     <set var="around_roulette_pos" index="0" value="roulette_center[0] + roulette_radius * cos(transition_player_angle)" />
@@ -6386,6 +6324,10 @@
                           <filter id="playing-infection"></filter>
                           <filter id="playing-sumo"></filter>
                       </any>
+                  </all>
+                  <all>
+                      <filter id="playing-cacti"></filter>
+                      <cause>explosion</cause>
                   </all>
                   <all>
                       <filter id="playing-bow-spleef"></filter>
