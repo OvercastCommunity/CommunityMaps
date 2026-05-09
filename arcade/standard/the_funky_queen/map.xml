@@ -1,6 +1,6 @@
   <map proto="1.5.0">
       <name>The Funky Queen</name>
-      <version>1.0.3</version>
+      <version>1.0.4</version>
       <objective>Be the best funky player, and become the Queen of Funky!</objective>
       <created>2025-09-29</created>
       <phase>staging</phase>
@@ -104,7 +104,7 @@
           <constant id="WC_ANNOUNCER_PLAYER_AFK">Welp... it seems that {p} went for a nap.</constant>
           <constant id="WC_ANNOUNCER_PLAYER_AFK_DECISION">I'll select the game myself.</constant>
       </constants>
-      <players min="10" max="80" max-overfill="100" name-tags-filter="not(playing-gs)" colors="true"></players>
+      <players min="10" max="80" max-overfill="100" name-tags-filter="not(any(all(playing-gs,round-playing),all(round-playing,playing-glass-bridge)))" colors="true"></players>
       <kits>
           <kit id="lobby-kit">
               <clear effects="true"></clear>
@@ -195,7 +195,9 @@
           </kit>
           <kit id="glass-bridge-kit">
               <clear effects="true"></clear>
+              <boots material="leather boots" team-color="true"></boots>
               <effect>night vision</effect>
+              <effect>invisibility</effect>
               <fly can-fly="false"></fly>
               <game-mode>adventure</game-mode>
           </kit>
@@ -2451,6 +2453,7 @@
           <variable id="race_player_id" scope="player"></variable>
           <variable id="rlgl_can_move" default="1"></variable>
           <variable id="rlgl_can_check"></variable>
+          <variable id="rlgl_can_safely_reset_check"></variable>
           <variable id="rlgl_rng"></variable>
           <variable id="rlgl_chance"></variable>
           <variable id="rlgl_p"></variable>
@@ -4030,6 +4033,42 @@
           <action id="skip-tutorial" scope="match" expose="true">
         <action id="set-game-transition" />
     </action>
+          <action id="announce-votes" scope="match">
+        <set var="i" value="0" />
+        <message text="`lTotal votes:" />
+        <repeat times="${MG_AMOUNT}">
+            <action filter="voting_count[i]=1..">
+                <message text="{winner}`6`l[{votes}]`r`6 {game}">
+                    <replacements>
+                        <decimal id="votes" value="voting_count[i]" />
+                        <switch id="winner" value="voting_count[i]-voting_max">
+                            <case match="0" result="`n" />
+                            <fallback>`r</fallback>
+                        </switch>
+                        <switch id="game" value="i+1">
+                            <case match="${MG_RLGL}" result="`6Red Light, Green Light" />
+                            <case match="${MG_DROPPER}" result="`6Mini Dropper" />
+                            <case match="${MG_RACE}" result="`6Race" />
+                            <case match="${MG_TIP_TOE}" result="`6Tip Toe" />
+                            <case match="${MG_INFECTION}" result="`6Infection" />
+                            <case match="${MG_WOOL_STORY}" result="`6Wool Story Bro" />
+                            <case match="${MG_GS}" result="`6Ghost Squadron" />
+                            <case match="${MG_SUMO}" result="`6Sumo" />
+                            <case match="${MG_MOBARENA}" result="`6MobArena" />
+                            <case match="${MG_DIG_DOWN}" result="`6Dig Down" />
+                            <case match="${MG_TNT_TAG}" result="`6TNT Tag" />
+                            <case match="${MG_GLASS_BRIDGE}" result="`6Glass Bridge" />
+                            <case match="${MG_RAGE}" result="`6Rage" />
+                            <case match="${MG_BOW_SPLEEF}" result="`6Bow Spleef" />
+                            <case match="${MG_CACTI}" result="`6Cacti Rage" />
+                            <case match="${MG_LADDERP}" result="`6Ladderp" />
+                        </switch>
+                    </replacements>
+                </message>
+            </action>
+            <set var="i" value="i + 1" />
+        </repeat>
+    </action>
           <trigger action="game_state:=${GAME_TUTORIAL}" filter="match-started" scope="match"></trigger>
           <trigger filter="game-epilogue" scope="match">
               <action>
@@ -4696,7 +4735,14 @@
               </filter>
               <action>
             <set var="rlgl_coords_difference" value="abs((player.x - rlgl_last_coords[0]) + (player.y - rlgl_last_coords[1]) + (player.z - rlgl_last_coords[2]))" />
-            <action filter="rlgl_coords_difference=0.2..">
+            <action filter="debug_mode=1">
+                <message text="diff: {0}">
+                    <replacements>
+                        <decimal id="0" value="rlgl_coords_difference" format="#.00" />
+                    </replacements>
+                </message>
+            </action>
+            <action filter="rlgl_coords_difference=0.1..">
                 <set var="lost" value="1" />
                 <kit>
                     <effect duration="3" amplifier="10">instant damage</effect>
@@ -4711,16 +4757,17 @@
           </trigger>
           <trigger scope="player">
               <filter>
-                  <after duration="0.75s" filter="all(round-playing,playing-rlgl,rlgl_can_move=0,ap)"></after>
+                  <after duration="1s" filter="all(round-playing,playing-rlgl,rlgl_can_move=0,ap)"></after>
               </filter>
               <action>
             <set var="rlgl_last_coords" index="0" value="player.x" />
             <set var="rlgl_last_coords" index="1" value="player.y" />
             <set var="rlgl_last_coords" index="2" value="player.z" />
             <set var="rlgl_can_check" value="1" />
+            <set var="rlgl_can_safely_reset_check" value="1" />
         </action>
           </trigger>
-          <trigger action="rlgl_can_check:=0" filter="all(round-playing,playing-rlgl,rlgl_can_move=1)" scope="match"></trigger>
+          <trigger action="rlgl_can_check := 0" filter="all(round-playing,playing-rlgl,rlgl_can_move=1,rlgl_can_safely_reset_check=1)" scope="match"></trigger>
           <trigger scope="match">
               <filter>
                   <pulse period="0.5s" duration="0.1s" filter="all(round-playing,playing-rlgl)"></pulse>
@@ -6011,72 +6058,56 @@
           </trigger>
           <trigger scope="player">
               <filter>
-                  <pulse period="0.1s" duration="0.05s" filter="all(game-selecting,can_announce=0,selection-voting,roulette)"></pulse>
+                  <pulse period="0.5s" duration="0.1s" filter="all(game-selecting,can_announce=0,selection-voting,roulette)"></pulse>
               </filter>
               <action>
             <action filter="all(roulette-rlgl,played_minigames[${MG_RLGL}-1]=0)">
                 <message actionbar="Voting for `lRed Light, Green Light" />
-                <set var="voting_for" value="${MG_RLGL}" />
             </action>
             <action filter="all(roulette-ladderp,played_minigames[${MG_LADDERP}-1]=0)">
                 <message actionbar="Voting for `lLadderp" />
-                <set var="voting_for" value="${MG_LADDERP}" />
             </action>
             <action filter="all(roulette-cacti,played_minigames[${MG_CACTI}-1]=0)">
                 <message actionbar="Voting for `lCacti Rage" />
-                <set var="voting_for" value="${MG_CACTI}" />
             </action>
             <action filter="all(roulette-bow-spleef,played_minigames[${MG_BOW_SPLEEF}-1]=0)">
                 <message actionbar="Voting for `lBow Spleef" />
-                <set var="voting_for" value="${MG_BOW_SPLEEF}" />
             </action>
             <action filter="all(roulette-rage,played_minigames[${MG_RAGE}-1]=0)">
                 <message actionbar="Voting for `lRage" />
-                <set var="voting_for" value="${MG_RAGE}" />
             </action>
             <action filter="all(roulette-glass-bridge,played_minigames[${MG_GLASS_BRIDGE}-1]=0)">
                 <message actionbar="Voting for `lGlass Bridge" />
-                <set var="voting_for" value="${MG_GLASS_BRIDGE}" />
             </action>
             <action filter="all(roulette-tnt-tag,played_minigames[${MG_TNT_TAG}-1]=0)">
                 <message actionbar="Voting for `lTNT Tag" />
-                <set var="voting_for" value="${MG_TNT_TAG}" />
             </action>
             <action filter="all(roulette-dig-down,played_minigames[${MG_DIG_DOWN}-1]=0)">
                 <message actionbar="Voting for `lDig Down" />
-                <set var="voting_for" value="${MG_DIG_DOWN}" />
             </action>
             <action filter="all(roulette-mobarena,played_minigames[${MG_MOBARENA}-1]=0)">
                 <message actionbar="Voting for `lMobArena" />
-                <set var="voting_for" value="${MG_MOBARENA}" />
             </action>
             <action filter="all(roulette-sumo,played_minigames[${MG_SUMO}-1]=0)">
                 <message actionbar="Voting for `lSumo" />
-                <set var="voting_for" value="${MG_SUMO}" />
             </action>
             <action filter="all(roulette-gs,played_minigames[${MG_GS}-1]=0)">
                 <message actionbar="Voting for `lGhost Squadron" />
-                <set var="voting_for" value="${MG_GS}" />
             </action>
             <action filter="all(roulette-wool-story,played_minigames[${MG_WOOL_STORY}-1]=0)">
                 <message actionbar="Voting for `lWool Story Bro" />
-                <set var="voting_for" value="${MG_WOOL_STORY}" />
             </action>
             <action filter="all(roulette-infection,played_minigames[${MG_INFECTION}-1]=0)">
                 <message actionbar="Voting for `lInfection" />
-                <set var="voting_for" value="${MG_INFECTION}" />
             </action>
             <action filter="all(roulette-tip-toe,played_minigames[${MG_TIP_TOE}-1]=0)">
                 <message actionbar="Voting for `lTip Toe" />
-                <set var="voting_for" value="${MG_TIP_TOE}" />
             </action>
             <action filter="all(roulette-race,played_minigames[${MG_RACE}-1]=0)">
                 <message actionbar="Voting for `lRace" />
-                <set var="voting_for" value="${MG_RACE}" />
             </action>
             <action filter="all(roulette-dropper,played_minigames[${MG_DROPPER}-1]=0)">
                 <message actionbar="Voting for `lMini Dropper" />
-                <set var="voting_for" value="${MG_DROPPER}" />
             </action>
         </action>
           </trigger>
@@ -6085,8 +6116,59 @@
                   <after duration="15s" message="Voting ends in {0}" filter="all(game-selecting,selection-voting)"></after>
               </filter>
               <action>
+            <switch-scope inner="player" filter="ap">
+                <action filter="all(roulette-rlgl,played_minigames[${MG_RLGL}-1]=0)">
+                    <set var="voting_for" value="${MG_RLGL}" />
+                </action>
+                <action filter="all(roulette-ladderp,played_minigames[${MG_LADDERP}-1]=0)">
+                    <set var="voting_for" value="${MG_LADDERP}" />
+                </action>
+                <action filter="all(roulette-cacti,played_minigames[${MG_CACTI}-1]=0)">
+                    <set var="voting_for" value="${MG_CACTI}" />
+                </action>
+                <action filter="all(roulette-bow-spleef,played_minigames[${MG_BOW_SPLEEF}-1]=0)">
+                    <set var="voting_for" value="${MG_BOW_SPLEEF}" />
+                </action>
+                <action filter="all(roulette-rage,played_minigames[${MG_RAGE}-1]=0)">
+                    <set var="voting_for" value="${MG_RAGE}" />
+                </action>
+                <action filter="all(roulette-glass-bridge,played_minigames[${MG_GLASS_BRIDGE}-1]=0)">
+                    <set var="voting_for" value="${MG_GLASS_BRIDGE}" />
+                </action>
+                <action filter="all(roulette-tnt-tag,played_minigames[${MG_TNT_TAG}-1]=0)">
+                    <set var="voting_for" value="${MG_TNT_TAG}" />
+                </action>
+                <action filter="all(roulette-dig-down,played_minigames[${MG_DIG_DOWN}-1]=0)">
+                    <set var="voting_for" value="${MG_DIG_DOWN}" />
+                </action>
+                <action filter="all(roulette-mobarena,played_minigames[${MG_MOBARENA}-1]=0)">
+                    <set var="voting_for" value="${MG_MOBARENA}" />
+                </action>
+                <action filter="all(roulette-sumo,played_minigames[${MG_SUMO}-1]=0)">
+                    <set var="voting_for" value="${MG_SUMO}" />
+                </action>
+                <action filter="all(roulette-gs,played_minigames[${MG_GS}-1]=0)">
+                    <set var="voting_for" value="${MG_GS}" />
+                </action>
+                <action filter="all(roulette-wool-story,played_minigames[${MG_WOOL_STORY}-1]=0)">
+                    <set var="voting_for" value="${MG_WOOL_STORY}" />
+                </action>
+                <action filter="all(roulette-infection,played_minigames[${MG_INFECTION}-1]=0)">
+                    <set var="voting_for" value="${MG_INFECTION}" />
+                </action>
+                <action filter="all(roulette-tip-toe,played_minigames[${MG_TIP_TOE}-1]=0)">
+                    <set var="voting_for" value="${MG_TIP_TOE}" />
+                </action>
+                <action filter="all(roulette-race,played_minigames[${MG_RACE}-1]=0)">
+                    <set var="voting_for" value="${MG_RACE}" />
+                </action>
+                <action filter="all(roulette-dropper,played_minigames[${MG_DROPPER}-1]=0)">
+                    <set var="voting_for" value="${MG_DROPPER}" />
+                </action>
+            </switch-scope>
+
             <set var="i" value="0" />
-            <repeat times="16">
+            <repeat times="${MG_AMOUNT}">
                 <set var="voting_count" index="i" value="0" />
                 <set var="i" value="i + 1" />
             </repeat>
@@ -6100,7 +6182,7 @@
 
             <set var="i" value="0" />
             <set var="voting_max" value="-99" />
-            <repeat times="16">
+            <repeat times="${MG_AMOUNT}">
                 <set var="voting_max" value="max(voting_max, voting_count[i])" />
                 <action filter="voting_count[i]-voting_max=0">
                     <set var="tmp_minigame" value="i + 1" /> <!-- +1 cause zero-based index to 1-16 -->
@@ -6114,6 +6196,9 @@
             </action>
             <action filter="not(voting_max=0)">
                 <action id="set-current-minigame" />
+                <schedule after="0.5s">
+                    <action id="announce-votes" />
+                </schedule>
             </action>
             <set var="roulette_spinning_i" value="0" />
             <set var="can_announce" value="1" />
@@ -6363,6 +6448,7 @@
                   <all>
                       <any>
                           <filter id="playing-dropper"></filter>
+                          <filter id="playing-bow-spleef"></filter>
                           <filter id="playing-rlgl"></filter>
                           <filter id="playing-dig-down"></filter>
                           <filter id="playing-glass-bridge"></filter>
@@ -6384,6 +6470,7 @@
                           <filter id="playing-tnt-tag"></filter>
                           <filter id="playing-infection"></filter>
                           <filter id="playing-sumo"></filter>
+                          <filter id="playing-bow-spleef"></filter>
                       </any>
                   </all>
                   <all>
