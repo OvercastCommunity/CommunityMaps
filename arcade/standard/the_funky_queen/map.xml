@@ -1,9 +1,9 @@
   <map proto="1.5.0">
       <name>The Funky Queen</name>
-      <version>1.0.4</version>
+      <version>1.0.5</version>
       <objective>Be the best funky player, and become the Queen of Funky!</objective>
       <created>2025-09-29</created>
-      <phase>staging</phase>
+      <phase>development</phase>
       <game>Tournament</game>
       <include id="countdown"></include>
       <include id="void-death"></include>
@@ -2544,8 +2544,8 @@
           <variable id="roulette_radius"></variable>
           <variable id="transition_player_angle" scope="player"></variable>
           <variable id="voting_for" scope="player"></variable>
-          <variable id="voting_winner"></variable>
           <variable id="voting_max"></variable>
+          <variable id="voting_winners_amount"></variable>
           <variable id="winner_chooses_rng" default="1"></variable>
           <variable id="winner_chooses_choice"></variable>
           <variable id="winner_is_afk"></variable>
@@ -2590,31 +2590,31 @@
       <actions>
           <action id="set-game-transition" scope="match">
         <set var="game_state" value="${GAME_TRANSITION}" />
-        <action filter="debug_mode=1">
+        <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`6`lGAME TRANSITION" />
-        </action>
+        </switch-scope>
     </action>
           <action id="set-game-selecting" scope="match">
         <set var="game_state" value="${GAME_SELECTING}" />
-        <action filter="debug_mode=1">
+        <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`6`lGAME SELECTING" />
-        </action>
+        </switch-scope>
     </action>
           <action id="set-game-playing" scope="match">
         <set var="game_state" value="${GAME_PLAYING}" />
         <set var="selection_mode_ready" value="0" />
-        <action filter="debug_mode=1">
+        <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`6`lGAME PLAYING" />
-        </action>
+        </switch-scope>
         <switch-scope inner="player" filter="participating">
             <set var="on_time" value="1" />
         </switch-scope>
     </action>
           <action id="set-game-epilogue" scope="match">
         <set var="game_state" value="${GAME_EPILOGUE}" />
-        <action filter="debug_mode=1">
+        <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`6`lGAME EPILOGUE" />
-        </action>
+        </switch-scope>
     </action>
           <action id="on-damage-attacker" scope="player">
         <action filter="playing-tnt-tag">
@@ -2798,6 +2798,14 @@
         </action>
         <action filter="debug_mode=1">
             <open-shop shop="debug-gui" />
+        </action>
+    </action>
+          <action id="emergency" scope="match" expose="true">
+        <action filter="game-playing">
+            <message text="${ANNOUNCER_PREFIX} Oh no! There's an error. Skipping game!" />
+            <sound key="random.click" />
+            <set var="rounds_amount" value="max(16, rounds_amount + 1)" />
+            <action id="set-round-finished" />
         </action>
     </action>
           <action id="epilogue-announce-first" scope="match">
@@ -3674,29 +3682,29 @@
         <set var="round_state" value="${RND_PREPARING}" />
         <set var="current_round" value="current_round + 1" />
         <action id="count-players" />
-        <action filter="debug_mode=1">
+        <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`c`lROUND PREPARING" />
-        </action>
+        </switch-scope>
     </action>
           <action id="set-round-playing" scope="match">
         <set var="round_state" value="${RND_PLAYING}" />
-        <action filter="debug_mode=1">
+        <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`c`lROUND PLAYING" />
-        </action>
+        </switch-scope>
     </action>
           <action id="set-round-finished" scope="match">
         <set var="round_state" value="${RND_FINISHED}" />
-        <action filter="debug_mode=1">
+        <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`c`lROUND FINISHED" />
-        </action>
+        </switch-scope>
     </action>
           <action id="set-round-idle" scope="match">
         <set var="round_state" value="${RND_IDLE}" />
         <set var="current_minigame" value="0" />
         <set var="ready_to_lobby" value="0" />
-        <action filter="debug_mode=1">
+        <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`c`lROUND IDLE" />
-        </action>
+        </switch-scope>
         <!-- reset player state -->
         <switch-scope inner="player" filter="participating">
             <set var="spectating" value="0" />
@@ -3719,13 +3727,13 @@
             <action filter="any(players_still_playing=0,all(players_still_playing=1,any(
             playing-bow-spleef,playing-cacti,playing-gs,playing-tnt-tag,playing-mobarena
             )))">
-                <action filter="debug_mode=1">
+                <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
                     <message text="Players still playing: {0}">
                         <replacements>
                             <decimal id="0" value="players_still_playing" />
                         </replacements>
                     </message>
-                </action>
+                </switch-scope>
                 <action id="set-round-finished" />
             </action>
         </schedule>
@@ -3749,7 +3757,7 @@
             </switch-scope>
             <!-- save how many players have the same position -->
             <set var="repeated_amount" value="-1" />
-            <switch-scope inner="player" filter="all(participating,score-round_max=0)">
+            <switch-scope inner="player" filter="all(round_position=0,participating,score-round_max=0)">
                 <set var="round_position" value="round_p" />
                 <set var="round_unique_position" value="round_real_p" />
                 <set var="hidden_score" value="players - (round_position - 1)" />
@@ -4038,10 +4046,13 @@
         <message text="`lTotal votes:" />
         <repeat times="${MG_AMOUNT}">
             <action filter="voting_count[i]=1..">
-                <message text="{winner}`6`l[{votes}]`r`6 {game}">
+                <action filter="voting_count[i]-voting_max=0">
+                    <set var="voting_winners_amount" value="voting_winners_amount - 1" />
+                </action>
+                <message text="{winner}`e`l[{votes}]`r`6 {game}">
                     <replacements>
                         <decimal id="votes" value="voting_count[i]" />
-                        <switch id="winner" value="voting_count[i]-voting_max">
+                        <switch id="winner" value="(voting_count[i]-voting_max) + voting_winners_amount">
                             <case match="0" result="`n" />
                             <fallback>`r</fallback>
                         </switch>
@@ -4735,7 +4746,7 @@
               </filter>
               <action>
             <set var="rlgl_coords_difference" value="abs((player.x - rlgl_last_coords[0]) + (player.y - rlgl_last_coords[1]) + (player.z - rlgl_last_coords[2]))" />
-            <action filter="debug_mode=1">
+            <action filter="any(debug_mode=1,debugger=1)">
                 <message text="diff: {0}">
                     <replacements>
                         <decimal id="0" value="rlgl_coords_difference" format="#.00" />
@@ -4955,15 +4966,6 @@
             <set var="tip_toe_xz_standing" index="0" value="abs(abs(player.z) - 143)" />
             <set var="tip_toe_xz_standing" index="1" value="abs(abs(player.x) - 390)" />
 
-            <action filter="debug_mode=1">
-                <message text="{0} {1}">
-                    <replacements>
-                        <decimal id="0" value="tip_toe_xz_standing[0]" format="#.00" />
-                        <decimal id="1" value="tip_toe_xz_standing[1]" format="#.00" />
-                    </replacements>
-                </message>
-            </action>
-
             <action filter="not(tip-toe-tile-spaces)">
                 <set 
                     var="tip_toe_calc_p"
@@ -4972,6 +4974,17 @@
                 <set var="tip_toe_tile_standing" index="0" value="min(floor((tip_toe_xz_standing[0] + 0.5) / 6), 7)" />
                 <set var="tip_toe_tile_standing" index="1" value="min(floor((tip_toe_xz_standing[1] + 0.5) / 6), 10)" />
                 <set var="tip_toe_ip" value="tip_toe_tile_standing[1] * 8 + tip_toe_tile_standing[0]" />
+
+                <action filter="any(debug_mode=1,debugger=1)">
+                    <message actionbar="{0} {1} / {2} {3}">
+                        <replacements>
+                            <decimal id="0" value="tip_toe_tile_standing[0]" />
+                            <decimal id="1" value="tip_toe_tile_standing[1]" />
+                            <decimal id="2" value="tip_toe_xz_standing[0]" format="#.00" />
+                            <decimal id="3" value="tip_toe_xz_standing[1]" format="#.00" />
+                        </replacements>
+                    </message>
+                </action>
 
                 <!-- only color tile when changed -->
                 <action filter="not(tip_toe_calc_p=0)">
@@ -4988,14 +5001,6 @@
                             <set var="tip_toe_cursor" index="5" value="-143 - 6 * tip_toe_x" />
                             <fill region="tip_toe_cursor" material="stained clay:4" events="true" />
                         </switch-scope>
-                    </action>
-                    <action filter="debug_mode=1">
-                        <message actionbar="{0} {1}">
-                            <replacements>
-                                <decimal id="0" value="tip_toe_tile_standing[0]" />
-                                <decimal id="1" value="tip_toe_tile_standing[1]" />
-                            </replacements>
-                        </message>
                     </action>
                 </action>
 
@@ -6189,6 +6194,16 @@
                 </action>
                 <set var="i" value="i + 1" />
             </repeat>
+
+            <set var="i" value="0" />
+            <set var="voting_winners_amount" value="0" />
+            <repeat times="${MG_AMOUNT}">
+                <action filter="voting_count[i]-voting_max=0">
+                    <set var="voting_winners_amount" value="voting_winners_amount + 1" />
+                </action>
+                <set var="i" value="i + 1" />
+            </repeat>
+
             <action filter="voting_max=0">
                 <message text="${ANNOUNCER_PREFIX} Huh? No votes registered. Selecting random game" />
                 <action id="select-random-minigame" />
