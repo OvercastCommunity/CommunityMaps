@@ -1,6 +1,6 @@
   <map proto="1.5.0">
       <name>The Funky Queen</name>
-      <version>1.0.6</version>
+      <version>1.0.7</version>
       <objective>Be the best funky player, and become the Queen of Funky!</objective>
       <created>2025-09-29</created>
       <phase>development</phase>
@@ -115,7 +115,7 @@
               <double-jump enabled="false"></double-jump>
               <game-mode>adventure</game-mode>
               <kit filter="any(debug_mode=1,debugger=1)">
-                  <item slot="8" material="golden carrot" consumable="open-debug-gui"></item>
+                  <kit id="debugger-kit"></kit>
               </kit>
           </kit>
           <kit id="spectator-kit">
@@ -129,6 +129,9 @@
               <clear effects="true"></clear>
               <fly flying="true"></fly>
               <game-mode>adventure</game-mode>
+          </kit>
+          <kit id="debugger-kit" force="true">
+              <item slot="8" material="golden carrot" consumable="open-debug-menu"></item>
           </kit>
           <kit id="bow-spleef-kit" force="true">
               <clear effects="true"></clear>
@@ -198,7 +201,8 @@
               <boots material="leather boots" team-color="true"></boots>
               <effect>night vision</effect>
               <effect>invisibility</effect>
-              <effect duration="1" amplifier="20">slowness</effect>
+              <effect duration="3" amplifier="20">slowness</effect>
+              <effect duration="3" amplifier="-10">jump</effect>
               <fly can-fly="false"></fly>
               <game-mode>adventure</game-mode>
           </kit>
@@ -569,7 +573,7 @@
           <give kit="cacti-kit" filter="all(game-playing,round-playing,playing-cacti,ap)"></give>
           <give kit="dig-down-kit" filter="all(game-playing,round-playing,playing-dig-down,ap)"></give>
           <give kit="dropper-kit" filter="all(game-playing,round-playing,playing-dropper,ap)"></give>
-          <give kit="glass-bridge-kit" filter="all(game-playing,round-playing,playing-glass-bridge,ap)"></give>
+          <give kit="glass-bridge-kit" filter="all(game-playing,round-preparing,countdown-start,playing-glass-bridge,ap)"></give>
           <give kit="gs-class-selection-kit" filter="all(game-playing,round-preparing,playing-gs,ap,gs-area)"></give>
           <give kit="gs-alchemist-kit" filter="all(game-playing,round-playing,playing-gs,ap,gs_selected_kit=${GS_ALCHEMIST})"></give>
           <give kit="gs-archer-kit" filter="all(game-playing,round-playing,playing-gs,ap,gs_selected_kit=${GS_ARCHER})"></give>
@@ -1126,8 +1130,8 @@
           <portal destination="dropper-spawn-6" yaw="@-45" forward="all(dropper-scorebox,round-playing,tp_seed=6,playing-dropper)"></portal>
           <portal destination="dropper-spawn-7" yaw="@45" forward="all(dropper-scorebox,round-playing,tp_seed=7,playing-dropper)"></portal>
           <portal destination="dropper-spawn-8" yaw="@135" forward="all(dropper-scorebox,round-playing,tp_seed=8,playing-dropper)"></portal>
-          <portal destination="glass-bridge-spawn-1" yaw="@45" forward="all(playing-glass-bridge,round-playing,gb_selected_route=1)"></portal>
-          <portal destination="glass-bridge-spawn-2" yaw="@-135" forward="all(playing-glass-bridge,round-playing,gb_selected_route=2)"></portal>
+          <portal destination="glass-bridge-spawn-1" yaw="@45" forward="all(playing-glass-bridge,round-preparing,countdown-start,gb_selected_route=1)"></portal>
+          <portal destination="glass-bridge-spawn-2" yaw="@-135" forward="all(playing-glass-bridge,round-preparing,countdown-start,gb_selected_route=2)"></portal>
           <portal destination="glass-bridge-center" yaw="@135" forward="all(playing-glass-bridge,round-preparing)"></portal>
           <portal destination="gs-spawn" yaw="@-90" forward="all(playing-gs,round-preparing)"></portal>
           <portal destination="gs-spawn" sound="false" forward="all(playing-gs,round-playing,dead)"></portal>
@@ -1846,6 +1850,7 @@
           <rectangle id="tip-toe-area" min="-299,-123" max="-416,-210"></rectangle>
           <rectangle id="tnt-tag-area" min="300,300" max="474,474"></rectangle>
           <rectangle id="wool-story-area" min="-299,124" max="-386,211"></rectangle>
+          <block id="debug-block">-32.5,17.5,51.5</block>
           <below id="almost-void" y="0"></below>
           <apply enter="not(game-epilogue)">
               <region>
@@ -2397,6 +2402,7 @@
           <variable id="current_message"></variable>
           <variable id="debug_mode" default="${DEBUG_MODE}"></variable>
           <variable id="debugger" scope="player"></variable>
+          <variable id="debug_target" exclusive="1" scope="player"></variable>
           <variable id="epilogue_tp"></variable>
           <variable id="cacti_decider"></variable>
           <variable id="cacti_material"></variable>
@@ -2407,6 +2413,7 @@
           <variable id="dig_down_should_add_more_x"></variable>
           <variable id="dig_down_should_add_more_z"></variable>
           <variable id="dig_down_min_y"></variable>
+          <variable id="dig_down_rng"></variable>
           <variable id="dig_down_p"></variable>
           <variable id="dig_down_i"></variable>
           <variable id="dig_down_j"></variable>
@@ -2582,6 +2589,7 @@
           <array id="voting_competing" size="16"></array>
           <array id="voting_count" size="16"></array>
           <cuboid id="cacti_drawer" min="0,9,0" max="0,10,0"></cuboid>
+          <cuboid id="dig_down_filler" min="128,43,304" max="229,44,405"></cuboid>
           <cuboid id="gb_cursor" min="0,29,0" max="1,30,1"></cuboid>
           <cuboid id="tip_toe_cursor" min="0,12,0" max="1,13,1"></cuboid>
           <cuboid id="tip_toe_destroyer" min="0,11,0" max="1,12,1"></cuboid>
@@ -2593,12 +2601,18 @@
         <set var="game_state" value="${GAME_TRANSITION}" />
         <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`6`lGAME TRANSITION" />
+            <schedule after="1s">
+                <kit id="debugger-kit" />
+            </schedule>
         </switch-scope>
     </action>
           <action id="set-game-selecting" scope="match">
         <set var="game_state" value="${GAME_SELECTING}" />
         <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`6`lGAME SELECTING" />
+            <schedule after="1s">
+                <kit id="debugger-kit" />
+            </schedule>
         </switch-scope>
     </action>
           <action id="set-game-playing" scope="match">
@@ -2606,6 +2620,9 @@
         <set var="selection_mode_ready" value="0" />
         <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`6`lGAME PLAYING" />
+            <schedule after="1s">
+                <kit id="debugger-kit" />
+            </schedule>
         </switch-scope>
         <switch-scope inner="player" filter="participating">
             <set var="on_time" value="1" />
@@ -2615,6 +2632,9 @@
         <set var="game_state" value="${GAME_EPILOGUE}" />
         <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`6`lGAME EPILOGUE" />
+            <schedule after="1s">
+                <kit id="debugger-kit" />
+            </schedule>
         </switch-scope>
     </action>
           <action id="on-damage-attacker" scope="player">
@@ -2631,182 +2651,283 @@
         </action>
     </action>
           <action id="debug-play-rage" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_RAGE}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_RAGE}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-tip-toe" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_TIP_TOE}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_TIP_TOE}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-dropper" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_DROPPER}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_DROPPER}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-wool-story" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_WOOL_STORY}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_WOOL_STORY}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-bow-spleef" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_BOW_SPLEEF}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_BOW_SPLEEF}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-race" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_RACE}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_RACE}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-rlgl" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_RLGL}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_RLGL}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-dig-down" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_DIG_DOWN}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_DIG_DOWN}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-tnt-tag" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_TNT_TAG}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_TNT_TAG}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-ladderp" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_LADDERP}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_LADDERP}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-glass-bridge" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_GLASS_BRIDGE}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_GLASS_BRIDGE}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-sumo" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_SUMO}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_SUMO}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-gs" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_GS}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_GS}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-cacti" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_CACTI}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_CACTI}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-mobarena" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_MOBARENA}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_MOBARENA}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
     </action>
           <action id="debug-play-infection" scope="player" expose="true">
-        <action filter="debug_mode=0">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <switch-scope inner="match" filter="debug_mode=1">
-            <set var="current_minigame" value="${MG_INFECTION}" />
-            <action id="set-game-playing" />
-            <action id="set-round-preparing" />
-        </switch-scope>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <set var="current_minigame" value="${MG_INFECTION}" />
+                <action id="set-game-playing" />
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
+    </action>
+          <action id="debug-finish-round" scope="player">
+        <action filter="all(debug_mode=0,debugger=0)">
+            <action id="debug-error-message" />
+        </action>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <action id="set-round-finished" />
+            </switch-scope>
+        </action>
+    </action>
+          <action id="debug-prepare-round" scope="player">
+        <action filter="all(debug_mode=0,debugger=0)">
+            <action id="debug-error-message" />
+        </action>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <action id="set-round-preparing" />
+            </switch-scope>
+        </action>
+    </action>
+          <action id="debug-play-round" scope="player">
+        <action filter="all(debug_mode=0,debugger=0)">
+            <action id="debug-error-message" />
+        </action>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <switch-scope inner="match">
+                <action id="set-round-playing" />
+            </switch-scope>
+        </action>
+    </action>
+          <action id="debug-show-vars" scope="player">
+        <action filter="all(debug_mode=0,debugger=0)">
+            <action id="debug-error-message" />
+        </action>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <message text="`7`oImportant variables" />
+            <message text="game_state: {0}">
+                <replacements>
+                    <decimal id="0" value="game_state" />
+                </replacements>
+            </message>
+            <message text="round_state: {0}">
+                <replacements>
+                    <decimal id="0" value="round_state" />
+                </replacements>
+            </message>
+            <message text="rounds_amount: {0}">
+                <replacements>
+                    <decimal id="0" value="rounds_amount" />
+                </replacements>
+            </message>
+            <message text="current_round: {0}">
+                <replacements>
+                    <decimal id="0" value="current_round" />
+                </replacements>
+            </message>
+            <message text="ready_to_lobby: {0}">
+                <replacements>
+                    <decimal id="0" value="ready_to_lobby" />
+                </replacements>
+            </message>
+            <message text="current_minigame: {0}">
+                <replacements>
+                    <decimal id="0" value="current_minigame" />
+                </replacements>
+            </message>
+        </action>
+    </action>
+          <action id="debug-add-round" scope="player">
+        <action filter="all(debug_mode=0,debugger=0)">
+            <action id="debug-error-message" />
+        </action>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <message text="${ANNOUNCER_PREFIX} A new round has been added!" />
+            <set var="rounds_amount" value="rounds_amount + 1" />
+        </action>
     </action>
           <action id="debug-error-message" scope="player">
-        <message text="Enable debug mode ('debug_mode = 1') to use this tool" />
+        <message text="`cEnable debug mode ('debug_mode = 1' or 'debugger = 1') to use this tool" />
     </action>
-          <action id="debug-open-gui" scope="player">
-        <action filter="debug_mode=0">
+          <action id="debug-open-menu" scope="player">
+        <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
         </action>
-        <action filter="debug_mode=1">
-            <open-shop shop="debug-gui" />
-        </action>
-    </action>
-          <action id="emergency" scope="match" expose="true">
-        <action filter="game-playing">
-            <message text="${ANNOUNCER_PREFIX} Oh no! There's an error. Skipping game!" />
-            <sound key="random.click" />
-            <set var="rounds_amount" value="max(16, rounds_amount + 1)" />
-            <action id="set-round-finished" />
+        <action filter="any(debug_mode=1,debugger=1)">
+            <open-shop shop="debug-menu" />
         </action>
     </action>
           <action id="epilogue-announce-first" scope="match">
@@ -3573,7 +3694,7 @@
           <action id="tnt-tag-new-round" scope="match">
         <set var="tnt_tag_round" value="tnt_tag_round + 1" />
         <set var="tnt_tag_round_state" value="1" />
-        <schedule after="15s" filter="playing-tnt-tag">
+        <schedule after="15s" filter="all(playing-tnt-tag,round-playing)">
             <sound key="${entity.creeper.primed}"/>
         </schedule>
         <action id="tnt-tag-pick" />
@@ -3685,18 +3806,27 @@
         <action id="count-players" />
         <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`c`lROUND PREPARING" />
+            <schedule after="1s">
+                <kit id="debugger-kit" />
+            </schedule>
         </switch-scope>
     </action>
           <action id="set-round-playing" scope="match">
         <set var="round_state" value="${RND_PLAYING}" />
         <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`c`lROUND PLAYING" />
+            <schedule after="1s">
+                <kit id="debugger-kit" />
+            </schedule>
         </switch-scope>
     </action>
           <action id="set-round-finished" scope="match">
         <set var="round_state" value="${RND_FINISHED}" />
         <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`c`lROUND FINISHED" />
+            <schedule after="1s">
+                <kit id="debugger-kit" />
+            </schedule>
         </switch-scope>
     </action>
           <action id="set-round-idle" scope="match">
@@ -4047,41 +4177,39 @@
         <message text="`lTotal votes:" />
         <repeat times="${MG_AMOUNT}">
             <action filter="voting_count[i]=1..">
-                <action filter="voting_count[i]-voting_max=0">
-                    <set var="voting_winners_amount" value="voting_winners_amount - 1" />
+                <action filter="not(current_minigame-i=1)">
+                    <message text="`e`l[{votes}]`r`6 {game}">
+                        <replacements>
+                            <decimal id="votes" value="voting_count[i]" />
+                            <replacement id="game">voting-game-replacement</replacement>
+                        </replacements>
+                    </message>
                 </action>
-                <message text="{winner}`e`l[{votes}]`r`6 {game}">
-                    <replacements>
-                        <decimal id="votes" value="voting_count[i]" />
-                        <switch id="winner" value="(voting_count[i]-voting_max) + voting_winners_amount">
-                            <case match="0" result="`n" />
-                            <fallback>`r</fallback>
-                        </switch>
-                        <switch id="game" value="i+1">
-                            <case match="${MG_RLGL}" result="`6Red Light, Green Light" />
-                            <case match="${MG_DROPPER}" result="`6Mini Dropper" />
-                            <case match="${MG_RACE}" result="`6Race" />
-                            <case match="${MG_TIP_TOE}" result="`6Tip Toe" />
-                            <case match="${MG_INFECTION}" result="`6Infection" />
-                            <case match="${MG_WOOL_STORY}" result="`6Wool Story Bro" />
-                            <case match="${MG_GS}" result="`6Ghost Squadron" />
-                            <case match="${MG_SUMO}" result="`6Sumo" />
-                            <case match="${MG_MOBARENA}" result="`6MobArena" />
-                            <case match="${MG_DIG_DOWN}" result="`6Dig Down" />
-                            <case match="${MG_TNT_TAG}" result="`6TNT Tag" />
-                            <case match="${MG_GLASS_BRIDGE}" result="`6Glass Bridge" />
-                            <case match="${MG_RAGE}" result="`6Rage" />
-                            <case match="${MG_BOW_SPLEEF}" result="`6Bow Spleef" />
-                            <case match="${MG_CACTI}" result="`6Cacti Rage" />
-                            <case match="${MG_LADDERP}" result="`6Ladderp" />
-                        </switch>
-                    </replacements>
-                </message>
+                <action filter="current_minigame-i=1">
+                    <message text="`e`l[{votes}]`r`6 `n{game}">
+                        <replacements>
+                            <decimal id="votes" value="voting_count[i]" />
+                            <replacement id="game">voting-game-replacement</replacement>
+                        </replacements>
+                    </message>
+                </action>
             </action>
             <set var="i" value="i + 1" />
         </repeat>
     </action>
           <trigger action="game_state:=${GAME_TUTORIAL}" filter="match-started" scope="match"></trigger>
+          <trigger filter="debugger=1" scope="player">
+              <action>
+            <kit id="debugger-kit" />
+            <message text="You are now in `aDebug mode" />
+            <sound key="${entity.experience_orb.pickup}" />
+        </action>
+          </trigger>
+          <trigger action="debugger := 1" scope="player">
+              <filter>
+                  <after duration="5s" filter="debug-block"></after>
+              </filter>
+          </trigger>
           <trigger filter="game-epilogue" scope="match">
               <action>
             <action id="calculate-podium" />
@@ -4202,6 +4330,24 @@
           </trigger>
           <trigger filter="playing-dig-down" scope="match">
               <action>
+            <repeat times="42">
+                <set var="dig_down_rng" value="floor(random() * 3)" />
+                <action filter="dig_down_rng=0">
+                    <fill region="dig_down_filler" material="stone:0" filter="wool" />
+                </action>
+                <action filter="dig_down_rng=1">
+                    <fill region="dig_down_filler" material="wood:0" filter="wool" />
+                </action>
+                <action filter="dig_down_rng=2">
+                    <fill region="dig_down_filler" material="dirt:0" filter="wool" />
+                </action>
+                <set var="dig_down_filler" index="1" value="dig_down_filler[1] - 1" />
+                <set var="dig_down_filler" index="4" value="dig_down_filler[4] - 1" />
+            </repeat>
+        </action>
+          </trigger>
+          <trigger filter="playing-dig-down" scope="match">
+              <action>
             <set var="dig_down_starting_coords" index="0" value="228.5" />
             <set var="dig_down_starting_coords" index="1" value="404.5" />
 
@@ -4299,22 +4445,19 @@
             <message actionbar="`a`l+1 `fPoint" />
         </action>
           </trigger>
-          <trigger action="gb_selected_route:=floor(random() * 2) + 1" filter="playing-glass-bridge" scope="player"></trigger>
+          <trigger action="gb_selected_route:=floor(random() * 2) + 1" filter="all(playing-glass-bridge,round-preparing)" scope="player"></trigger>
           <trigger filter="playing-glass-bridge" scope="match">
               <action>
-            <!-- ================= SW (suroeste → noreste) ================= -->
             <set var="gb_i" value="0" />
             <set var="gb_p" value="0" />
             <set var="gb_x" value="312.5" />
             <set var="gb_z" value="195.5" />
 
-            <!-- guardar punto inicial -->
             <set var="gb_sw_platforms" index="0" value="312.5" />
             <set var="gb_sw_platforms" index="1" value="195.5" />
             <set var="gb_p" value="2" />
 
-            <repeat times="17"> <!-- 17 pasos adicionales para total 18 -->
-                <!-- movimiento según patrón -->
+            <repeat times="17">
                 <action filter="gb_i%2=0">
                     <set var="gb_x" value="gb_x + 3" />
                     <set var="gb_z" value="gb_z + 3" />
@@ -4323,28 +4466,23 @@
                     <set var="gb_z" value="gb_z - 6" />
                 </action>
 
-                <!-- guardar punto actual -->
                 <set var="gb_sw_platforms" index="gb_p" value="gb_x" />
                 <set var="gb_sw_platforms" index="gb_p+1" value="gb_z" />
 
-                <!-- incrementar índices -->
                 <set var="gb_i" value="gb_i + 1" />
                 <set var="gb_p" value="gb_p + 2" />
             </repeat>
 
-            <!-- ================= NE (noreste → suroeste) ================= -->
             <set var="gb_i" value="0" />
             <set var="gb_p" value="0" />
             <set var="gb_x" value="374.5" />
             <set var="gb_z" value="139.5" />
 
-            <!-- guardar punto inicial -->
             <set var="gb_ne_platforms" index="0" value="374.5" />
             <set var="gb_ne_platforms" index="1" value="139.5" />
             <set var="gb_p" value="2" />
 
-            <repeat times="17"> <!-- 17 pasos adicionales -->
-                <!-- movimiento según patrón invertido -->
+            <repeat times="17">
                 <action filter="gb_i%2=0">
                     <set var="gb_x" value="gb_x - 3" />
                     <set var="gb_z" value="gb_z - 3" />
@@ -4353,11 +4491,9 @@
                     <set var="gb_z" value="gb_z + 6" />
                 </action>
 
-                <!-- guardar punto actual -->
                 <set var="gb_ne_platforms" index="gb_p" value="gb_x" />
                 <set var="gb_ne_platforms" index="gb_p+1" value="gb_z" />
 
-                <!-- incrementar índices -->
                 <set var="gb_i" value="gb_i + 1" />
                 <set var="gb_p" value="gb_p + 2" />
             </repeat>
@@ -4366,7 +4502,7 @@
           </trigger>
           <trigger action="set-round-finished" scope="match">
               <filter>
-                  <after duration="1m" message="Someone has finished. Ending the game in {0}" filter="all(playing-glass-bridge,round-playing,gb_someone_finished=1)"></after>
+                  <after duration="30s" message="Someone has finished. Ending the game in {0}" filter="all(playing-glass-bridge,round-playing,gb_someone_finished=1)"></after>
               </filter>
           </trigger>
           <trigger filter="all(round-playing,playing-glass-bridge,ap,lost=0,gb_should_lose=0,gb_has_finished=0,glass-bridge-finish-line,gb_has_started=1)" scope="player">
@@ -4410,7 +4546,7 @@
           <trigger scope="player">
               <filter>
                   <pulse period="0.1s" duration="0.05s">
-                      <after duration="0.5s" filter="all(playing-glass-bridge,round-playing,ap,lost=0)"></after>
+                      <after duration="0.1s" filter="all(playing-glass-bridge,round-playing,ap,lost=0)"></after>
                   </pulse>
               </filter>
               <action>
@@ -6186,15 +6322,6 @@
                 <set var="i" value="i + 1" />
             </repeat>
 
-            <set var="i" value="0" />
-            <set var="voting_winners_amount" value="0" />
-            <repeat times="${MG_AMOUNT}">
-                <action filter="voting_count[i]-voting_max=0">
-                    <set var="voting_winners_amount" value="voting_winners_amount + 1" />
-                </action>
-                <set var="i" value="i + 1" />
-            </repeat>
-
             <action filter="voting_max=0">
                 <message text="${ANNOUNCER_PREFIX} Huh? No votes registered. Selecting random game" />
                 <action id="select-random-minigame" />
@@ -6300,10 +6427,28 @@
               <case match="${MG_CACTI}" result="`e`lCacti Rage"></case>
               <case match="${MG_LADDERP}" result="`e`lLadderp"></case>
           </switch>
+          <switch id="voting-game-replacement" value="i+1" scope="match">
+              <case match="${MG_RLGL}" result="`6Red Light, Green Light"></case>
+              <case match="${MG_DROPPER}" result="`6Mini Dropper"></case>
+              <case match="${MG_RACE}" result="`6Race"></case>
+              <case match="${MG_TIP_TOE}" result="`6Tip Toe"></case>
+              <case match="${MG_INFECTION}" result="`6Infection"></case>
+              <case match="${MG_WOOL_STORY}" result="`6Wool Story Bro"></case>
+              <case match="${MG_GS}" result="`6Ghost Squadron"></case>
+              <case match="${MG_SUMO}" result="`6Sumo"></case>
+              <case match="${MG_MOBARENA}" result="`6MobArena"></case>
+              <case match="${MG_DIG_DOWN}" result="`6Dig Down"></case>
+              <case match="${MG_TNT_TAG}" result="`6TNT Tag"></case>
+              <case match="${MG_GLASS_BRIDGE}" result="`6Glass Bridge"></case>
+              <case match="${MG_RAGE}" result="`6Rage"></case>
+              <case match="${MG_BOW_SPLEEF}" result="`6Bow Spleef"></case>
+              <case match="${MG_CACTI}" result="`6Cacti Rage"></case>
+              <case match="${MG_LADDERP}" result="`6Ladderp"></case>
+          </switch>
       </replacements>
       <shops>
-          <shop id="debug-gui" name="Debug Menu">
-              <category id="main" name="Force play" material="gold block">
+          <shop id="debug-menu" name="Debug Menu">
+              <category id="menu-force-play" name="Force play" material="gold block">
                   <item name="Red Light, Green Light" material="wool" damage="9" action="debug-play-rlgl"></item>
                   <item name="Ladderp" material="wool" damage="11" action="debug-play-ladderp"></item>
                   <item name="Infection" material="wool" damage="2" action="debug-play-infection"></item>
@@ -6321,13 +6466,21 @@
                   <item name="Race" material="wool" damage="4" action="debug-play-race"></item>
                   <item name="Mini Dropper" material="wool" damage="5" action="debug-play-dropper"></item>
               </category>
+              <category id="menu-actions" name="Actions" material="diamond block">
+                  <item name="Log important variables" material="ink sack:4" action="debug-show-vars"></item>
+                  <item name="Add round" material="ink sack:9" action="debug-add-round"></item>
+                  <item name="Prepare round (round-preparing)" material="ink sack:2" action="debug-prepare-round"></item>
+                  <item name="Play round (round-playing)" material="ink sack:10" action="debug-play-round"></item>
+                  <item name="Finish round (round-finished)" material="ink sack:1" action="debug-finish-round"></item>
+                  <item name="Finish match" material="redstone block" action="tl := 0"></item>
+              </category>
           </shop>
       </shops>
       <projectiles>
           <projectile id="bow-spleef-throwable-fireball" name="Fireball" projectile="Fireball" power="1.2" damage="0" velocity=".5" click="right" cooldown="2.5s"></projectile>
       </projectiles>
       <consumables>
-          <consumable id="open-debug-gui" action="debug-open-gui" on="right click" consume="false"></consumable>
+          <consumable id="open-debug-menu" action="debug-open-menu" on="right click" consume="false"></consumable>
           <consumable id="gs-select-kit-consumable" action="gs-select-kit" on="right click" override="true" consume="false"></consumable>
           <consumable id="infection-infected-consumable" action="infection-be-infected" on="right click" consume="true"></consumable>
           <consumable id="winner-selects-rlgl" action="winner_chooses_choice := ${MG_RLGL}" on="right click" consume="true"></consumable>
@@ -6422,6 +6575,8 @@
           <item>dirt:0</item>
           <item>slime ball</item>
           <item>string</item>
+          <item>iron sword</item>
+          <item>stone sword</item>
           <item>arrow</item>
           <item>leather helmet</item>
           <item>leather chestplate</item>
@@ -6434,8 +6589,6 @@
           <tool>stone pickaxe</tool>
           <tool>stone axe</tool>
           <tool>stone spade</tool>
-          <tool>iron sword</tool>
-          <tool>stone sword</tool>
           <tool>bow</tool>
       </toolrepair>
       <compass order="closest" show-distance="true">
