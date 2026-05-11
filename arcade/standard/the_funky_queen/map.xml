@@ -1,6 +1,6 @@
   <map proto="1.5.0">
       <name>The Funky Queen</name>
-      <version>1.0.7</version>
+      <version>1.0.8</version>
       <objective>Be the best funky player, and become the Queen of Funky!</objective>
       <created>2025-09-29</created>
       <phase>development</phase>
@@ -2872,6 +2872,17 @@
             </switch-scope>
         </action>
     </action>
+          <action id="debug-allow-glass-bridge" scope="player">
+        <action filter="all(debug_mode=0,debugger=0)">
+            <action id="debug-error-message" />
+        </action>
+        <action filter="any(debug_mode=1,debugger=1)">
+            <message text="`aGlass Bridge is now allowed" />
+            <switch-scope inner="match">
+                <set var="played_minigames" index="${MG_GLASS_BRIDGE}-1" value="0" />
+            </switch-scope>
+        </action>
+    </action>
           <action id="debug-show-vars" scope="player">
         <action filter="all(debug_mode=0,debugger=0)">
             <action id="debug-error-message" />
@@ -4060,7 +4071,7 @@
             <set var="tmp_minigame" value="floor(random() * ${MG_AMOUNT} + 1)" />
             <set var="i" value="0" />
             <repeat times="${MG_AMOUNT}">
-                <action filter="any(minigames_per_round[i]-tmp_minigame=0)">
+                <action filter="any(minigames_per_round[i]-tmp_minigame=0,tmp_minigame=${MG_GLASS_BRIDGE})">
                     <set var="should_repeat" value="1" />
                 </action>
                 <set var="i" value="i+1" />
@@ -6007,6 +6018,11 @@
         </action>
           </trigger>
           <trigger action="score := 0" filter="round-preparing" scope="player"></trigger>
+          <trigger filter="match-started" scope="match">
+              <action>
+            <set var="played_minigames" index="${MG_GLASS_BRIDGE}-1" value="1" />
+        </action>
+          </trigger>
           <trigger scope="match">
               <filter>
                   <after duration="5s" message="Teleporting to minigame in {0}" filter="all(game-selecting,game_was_announced=1)"></after>
@@ -6467,6 +6483,7 @@
                   <item name="Mini Dropper" material="wool" damage="5" action="debug-play-dropper"></item>
               </category>
               <category id="menu-actions" name="Actions" material="diamond block">
+                  <item name="Allow glass bridge" material="stained glass:15" action="debug-allow-glass-bridge"></item>
                   <item name="Log important variables" material="ink sack:4" action="debug-show-vars"></item>
                   <item name="Add round" material="ink sack:9" action="debug-add-round"></item>
                   <item name="Prepare round (round-preparing)" material="ink sack:2" action="debug-prepare-round"></item>
