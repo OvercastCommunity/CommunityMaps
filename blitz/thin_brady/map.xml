@@ -1,0 +1,117 @@
+<map proto="1.5.0">
+<name>THIN BRADY</name>
+<authors>
+	<author uuid="9c14b7e9-8488-427a-bc81-7193becde2d3"/>
+</authors>
+<version>1.0.0</version>
+<objective>KILLLLLLLLLLLLLLLL AND GET THE FLAGG MAYBE</objective>
+<broadcasts>
+	<alert after="1s">THIS MAP HAS NO SNOWBALL</alert>
+	<alert after="3s">BECAUSE IM STUPID</alert>
+</broadcasts>
+<!--so team one is red? blue is team two-->
+<teams>
+	<team id="red-team" color="dark red" max="99">RREEDD</team>
+	<team id="blue-team" color="blue" max="99">BBLLUUEE</team>
+</teams>
+<!--separationfr-->
+<spawns>
+	<spawn team="red-team" kit="spawn-kit">
+		<region>
+			<point>0.5,13.1,-54.5</point>
+		</region>
+	</spawn>
+	<spawn team="blue-team" kit="spawn-kit" yaw="180">
+		<region>
+			<point>0.5,13.1,55.5</point>
+		</region>
+	</spawn>
+	<default>
+		<region>
+			<point>0.5,4.5,0.5</point>
+		</region>
+	</default>
+</spawns>
+<!---ssperations-->
+<kits>
+	<kit id="spawn-kit">
+		<item slot="0" material="wooden sword"/>
+		<item slot="8" material="golden apple"/>
+		<max-health>20</max-health>
+	</kit>
+	<kit id="flag-kit">
+		<effect>slowness</effect>
+		<effect duration="5s">absorption</effect>
+		<max-health>12</max-health>
+	</kit>
+</kits>
+<!--separation ig-->
+<regions>
+	<cuboid id="playing-field" min="2.5,0,57.5" max="-1.5,10,-56.5"/>
+	<cuboid id="team-one-portal" min="2.5,1,-56.5" max="-1.5,5,-51.5"/>
+	<cuboid id="team-two-portal" min="2.6,1,52.5" max="-1.5,5,57.5"/>
+</regions>
+<!--fglag-->
+<blitz>
+	<lives>1</lives>
+</blitz>
+<time>90s</time>
+<score>
+	<limit>1</limit>
+</score>
+<flags>
+	<post id="flag-post" respawn-time="5" recover-time="0">0.5,4,0.5</post>
+	<flag id="flag" shared="true" required="true" name="BRADY FLAG" post="flag-post" points="99999" drop-kit="spawn-kit" carry-kit="flag-kit">
+		<net region="team-one-portal" owner="blue-team" points="99999" post="flag-post" capture-filter="blue-only"/>
+		<net region="team-two-portal" owner="red-team" points="99999" post="flag-post" capture-filter="red-only"/>
+	</flag>
+</flags>
+<!--filters variables actions, thank u javg-->
+<variables>
+    <variable id="flag_holder" exclusive="1" scope="player" />
+</variables>
+<actions>
+    <trigger scope="player" action="flag_holder := 1">
+        <filter>
+            <carrying-flag>flag</carrying-flag>
+        </filter>
+    </trigger>
+    <action id="on-kill" scope="player">
+        <pickup-flag flag="flag" />
+    </action>
+</actions>
+<filters>
+	<victim id="victim-is-not-carrier">
+        <variable var="flag_holder">0</variable>
+    </victim>
+	<victim id="victim-has-flag">
+        <variable var="flag_holder">1</variable>
+    </victim>
+	<!--only enemy goal post-->
+    <all id="team-1-carrying-flag">
+        <team id="red-only">red-team</team>
+        <carrying-flag>flag</carrying-flag>
+    </all>
+    <all id="team-2-carrying-flag">
+        <team id="blue-only">blue-team</team>
+        <carrying-flag>flag</carrying-flag>
+    </all>
+</filters>
+<!-->>>>-->
+<kill-rewards>
+    <kill-reward filter="victim-has-flag" action="on-kill"/>
+</kill-rewards>
+<!--ex-->
+<itemremove>
+	<item>wooden sword</item>
+	<item>golden apple</item>
+</itemremove>
+<hunger>
+	<depletion>off</depletion>
+</hunger>
+<damage>
+	<deny>
+		<cause>fall</cause>
+	</deny>
+</damage>
+</map>
