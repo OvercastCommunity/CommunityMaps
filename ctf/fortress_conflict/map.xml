@@ -1,24 +1,26 @@
 <map proto="1.5.1">
-<version>1.0.0</version>
+<version>1.0.1</version>
 <name>Fortress Conflict</name>
 <objective>Capture each of the enemy's flags to win!</objective>
 <created>2026-05-24</created>
 <gamemode>ctf</gamemode>
+<phase>staging</phase>
+<include id="gapple-kill-reward"/>
 <authors>
     <author uuid="4d6ecfd1-2e0e-49b6-83c6-e230efe448d4"/> <!-- 3lii3 -->
     <author uuid="9c14b7e9-8488-427a-bc81-7193becde2d3" contribution="Helped with decorations."/> <!-- MrTinyPig -->
 </authors>
-<include id="gapple-kill-reward"/>
 <contributors>
     <contributor uuid="64e840c8-4fb5-4659-a36b-ff93e2f6113a" contribution="Restructured map and rewritten code."/> <!-- Javg_ -->
 </contributors>
 <maxbuildheight>24</maxbuildheight>
 <teams>
-    <team id="cyan" plural="true" color="DARK AQUA" dye-color="CYAN" max="20" max-overfill="24">Creepoids</team>
-    <team id="orange" plural="true" color="GOLD" dye-color="ORANGE" max="20" max-overfill="24">Skeletals</team>
+    <team id="cyan-team" plural="true" color="dark aqua" max="20">Creepoids</team>
+    <team id="orange-team" plural="true" color="gold" max="20">Skeletals</team>
 </teams>
 <kits>
     <kit id="default-kit">
+        <clear/>
         <item slot="0" material="stone sword" unbreakable="true"/>
         <item slot="1" material="bow" unbreakable="true"/>
         <item slot="2" material="wool" team-color="true" amount="64"/>
@@ -27,34 +29,22 @@
         <item slot="7" material="shears" unbreakable="true">
             <enchantment level="2">efficiency</enchantment>
         </item>
-        <item slot="8" material="golden apple" amount="1"/>
+        <item slot="8" material="golden apple"/>
         <item slot="29" material="arrow" amount="48"/>
-        <helmet material="iron helmet"/>
-        <chestplate team-color="true" material="leather chestplate"/>
-        <leggings team-color="true" material="leather leggings"/>
-        <boots team-color="true" material="leather boots"/>
+        <helmet material="iron helmet" unbreakable="true"/>
+        <chestplate team-color="true" material="leather chestplate" unbreakable="true"/>
+        <leggings team-color="true" material="leather leggings" unbreakable="true"/>
+        <boots team-color="true" material="leather boots" unbreakable="true"/>
     </kit>
     <kit id="carrier-kit">
         <effect>speed</effect>
-        <effect duration="10" amplifier="1">absorption</effect>
+        <effect duration="10s">absorption</effect>
     </kit>
 </kits>
 <spawns>
-    <default>
-        <region yaw="180">
-            <point id="default-spawn-point">0.5,37,0.5</point>
-        </region>
-    </default>
-    <spawn team="cyan" kit="default-kit">
-        <region yaw="90">
-            <point id="cyan-spawn-point">94.5,22,-64.5</point>
-        </region>
-    </spawn>
-    <spawn team="orange" kit="default-kit">
-        <region yaw="-90">
-            <point id="orange-spawn-point">-93.5,22,-64.5</point> 
-        </region>
-    </spawn>
+    <default yaw="180" region="default-spawn-point"/>
+    <spawn team="cyan-team" kit="default-kit" yaw="90" region="cyan-spawn-point"/>
+    <spawn team="orange-team" kit="default-kit" yaw="-90" region="orange-spawn-point"/>
 </spawns>
 <filters>
     <any id="only-player-blocks">
@@ -62,75 +52,61 @@
         <material>cyan wool</material>
         <material>orange stained glass</material>
         <material>cyan stained glass</material>
-        <material>sponge</material>
+        <!-- material>sponge</material -->
     </any>
-    <team id="orange-only">orange</team>
-    <team id="cyan-only">cyan</team>
 </filters>
 <regions>
+    <point id="default-spawn-point">0.5,37,0.5</point>
+    <point id="orange-spawn-point">-93.5,22,-64.5</point>
+    <point id="cyan-spawn-point">94.5,22,-64.5</point>
     <cuboid id="orange-capture" min="-96,22,-67" max="-91,25,-62"/>
     <cuboid id="cyan-capture" min="97,22,-67" max="92,25,-62"/>
-    
-    <rectangle id="orange-spawn" min="-76,-56" max="-98, -73"/>
-    <rectangle id="cyan-spawn" min="77, -56" max="98, -73"/>
-
-    <rectangle id="gameplay-area" min="-99,-100" max="99,-30"/>
-
+    <union id="spawns">
+        <rectangle id="orange-spawn" min="-76,-56" max="-98,-73"/>
+        <rectangle id="cyan-spawn" min="77,-56" max="98,-73"/>
+    </union>
     <negative id="invisible-border-wall">
-        <region id="gameplay-area"/>
+        <rectangle id="gameplay-area" min="-99,-100" max="99,-30"/>
     </negative>
-
     <union id="flags-region">
         <cuboid min="-84,10,-38" max="-81,15,-35"/>
         <cuboid min="-84,10,-94" max="-81,15,-91"/>
         <cuboid min="85,10,-38" max="82,15,-35"/>
         <cuboid min="85,10,-94" max="82,15,-91"/>
     </union>
-
-    <apply block="never" region="flags-region" message="You may not edit the flags area"/>
-
-    <apply block="never" region="orange-spawn" message="You may not edit the spawn area"/>
-    <apply block="never" region="cyan-spawn" message="You may not edit the spawn area"/>
-
-    <apply enter="orange-only" block="never" region="orange-spawn" message="You cannot enter other team's spawn!"/>
-    <apply enter="cyan-only" block="never" region="cyan-spawn" message="You cannot enter other team's spawn!"/>
-
-    <apply block="never" message="You have may not build outside the map!" region="invisible-border-wall" />
-    <apply block="deny(void)" message="You cannot modify the void!"/>
+    <apply enter="orange-team" region="orange-spawn" message="You cannot enter other team's spawn!"/>
+    <apply enter="cyan-team" region="cyan-spawn" message="You cannot enter other team's spawn!"/>
+    <apply block="never" region="flags-region" message="You may not edit the flags area!"/>
+    <apply block="never" region="spawns" message="You may not edit the spawn area!"/>
+    <apply block="never" region="invisible-border-wall" message="You may not build outside the map!"/>
+    <apply block="deny(void)" message="You may not modify the void!"/>
     <apply block="only-player-blocks" message="You can only break player-placed blocks!"/>
 </regions>
 <flags>
-    <flags owner="orange" pickup-filter="cyan" carry-kit="carrier-kit" drop-on-water="false">
-        <flag id="alpha-flag" name="Alpha Flag" color="ORANGE">
-            <post recover-time="12s">-83,10,-93</post>        
+    <flags owner="orange-team" pickup-filter="cyan-team" carry-kit="carrier-kit" drop-on-water="false">
+        <flag id="alpha-flag" name="Alpha Flag" color="orange">
+            <post recover-time="12s">-83,10,-93</post>
         </flag>
-        <flag id="beta-flag" name="Beta Flag" color="RED">    
+        <flag id="beta-flag" name="Beta Flag" color="red">
             <post recover-time="12s">-83,10,-37</post>
         </flag>
     </flags>
-    
-    <flags owner="cyan" pickup-filter="orange" carry-kit="carrier-kit" drop-on-water="false">
-        <flag id="delta-flag" name="Delta Flag" color="LIGHT_BLUE">
-            <post recover-time="12s">83,10,-93</post>        
+    <flags owner="cyan-team" pickup-filter="orange-team" carry-kit="carrier-kit" drop-on-water="false">
+        <flag id="delta-flag" name="Delta Flag" color="light blue">
+            <post recover-time="12s">83,10,-93</post>
         </flag>
-        <flag id="omega-flag" name="Omega Flag" color="CYAN">    
+        <flag id="omega-flag" name="Omega Flag" color="cyan">
             <post recover-time="12s">83,10,-37</post>
         </flag>
     </flags>
-
-    <net region="cyan-capture" flags="alpha-flag beta-flag" capture-filter="cyan" post="cyan-monument"/>
-    <net region="orange-capture" flags="delta-flag omega-flag" capture-filter="orange" post="orange-monument"/>
-
+    <net region="cyan-capture" flags="alpha-flag beta-flag" capture-filter="cyan-team" post="cyan-monument"/>
+    <net region="orange-capture" flags="delta-flag omega-flag" capture-filter="orange-team" post="orange-monument"/>
     <flags permanent="true" sequential="true">
-        <post id="cyan-monument"
-              owner="cyan"
-              yaw="90">
+        <post id="cyan-monument" owner="cyan-team" yaw="90">
             <block>94,23,-60</block>
             <block>94,23,-70</block>
         </post>
-        <post id="orange-monument"
-              owner="orange"
-              yaw="-90">
+        <post id="orange-monument" owner="orange-team" yaw="-90">
             <block>-94,23,-60</block>
             <block>-94,23,-70</block>
         </post>
@@ -141,16 +117,25 @@
     <item>leather boots</item>
     <item>leather chestplate</item>
     <item>leather leggings</item>
-    <item>cyan stained glass</item>
-    <item>orange stained glass </item>
-    <item>orange wool</item>
-    <item>cyan wool</item>
 </itemremove>
 <toolrepair>
     <tool>stone sword</tool>
     <tool>bow</tool>
     <tool>shears</tool>
 </toolrepair>
+<itemkeep>
+    <item>stained glass</item>
+    <item>wool</item>
+    <item>golden apple</item>
+    <item>arrow</item>
+</itemkeep>
+<kill-rewards>
+    <kill-reward>
+        <item material="wool" team-color="true" amount="24"/>
+        <item material="stained glass" team-color="true" amount="16"/>
+        <item material="arrow" amount="12"/>
+    </kill-reward>
+</kill-rewards>
 <gamerules>
     <randomTickSpeed>0</randomTickSpeed>
 </gamerules>
