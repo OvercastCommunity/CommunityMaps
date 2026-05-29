@@ -1,0 +1,161 @@
+<map proto="1.5.1">
+<version>1.0.0</version>
+<name>Fortress Conflict</name>
+<objective>Capture each of the enemy's flags to win!</objective>
+<created>2026-05-24</created>
+<gamemode>ctf</gamemode>
+<authors>
+    <author uuid="4d6ecfd1-2e0e-49b6-83c6-e230efe448d4"/> <!-- 3lii3 -->
+    <author uuid="9c14b7e9-8488-427a-bc81-7193becde2d3" contribution="Helped with decorations."/> <!-- MrTinyPig -->
+</authors>
+<include id="gapple-kill-reward"/>
+<contributors>
+    <contributor uuid="64e840c8-4fb5-4659-a36b-ff93e2f6113a" contribution="Restructured map and rewritten code."/> <!-- Javg_ -->
+</contributors>
+<maxbuildheight>24</maxbuildheight>
+<teams>
+    <team id="cyan" plural="true" color="DARK AQUA" dye-color="CYAN" max="20" max-overfill="24">Creepoids</team>
+    <team id="orange" plural="true" color="GOLD" dye-color="ORANGE" max="20" max-overfill="24">Skeletals</team>
+</teams>
+<kits>
+    <kit id="default-kit">
+        <item slot="0" material="stone sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true"/>
+        <item slot="2" material="wool" team-color="true" amount="64"/>
+        <item slot="3" material="wool" team-color="true" amount="32"/>
+        <item slot="4" material="stained glass" team-color="true" amount="64"/>
+        <item slot="7" material="shears" unbreakable="true">
+            <enchantment level="2">efficiency</enchantment>
+        </item>
+        <item slot="8" material="golden apple" amount="1"/>
+        <item slot="29" material="arrow" amount="48"/>
+        <helmet material="iron helmet"/>
+        <chestplate team-color="true" material="leather chestplate"/>
+        <leggings team-color="true" material="leather leggings"/>
+        <boots team-color="true" material="leather boots"/>
+    </kit>
+    <kit id="carrier-kit">
+        <effect>speed</effect>
+        <effect duration="10" amplifier="1">absorption</effect>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <region yaw="180">
+            <point id="default-spawn-point">0.5,37,0.5</point>
+        </region>
+    </default>
+    <spawn team="cyan" kit="default-kit">
+        <region yaw="90">
+            <point id="cyan-spawn-point">94.5,22,-64.5</point>
+        </region>
+    </spawn>
+    <spawn team="orange" kit="default-kit">
+        <region yaw="-90">
+            <point id="orange-spawn-point">-93.5,22,-64.5</point> 
+        </region>
+    </spawn>
+</spawns>
+<filters>
+    <any id="only-player-blocks">
+        <material>orange wool</material>
+        <material>cyan wool</material>
+        <material>orange stained glass</material>
+        <material>cyan stained glass</material>
+        <material>sponge</material>
+    </any>
+    <team id="orange-only">orange</team>
+    <team id="cyan-only">cyan</team>
+</filters>
+<regions>
+    <cuboid id="orange-capture" min="-96,22,-67" max="-91,25,-62"/>
+    <cuboid id="cyan-capture" min="97,22,-67" max="92,25,-62"/>
+    
+    <rectangle id="orange-spawn" min="-76,-56" max="-98, -73"/>
+    <rectangle id="cyan-spawn" min="77, -56" max="98, -73"/>
+
+    <rectangle id="gameplay-area" min="-99,-100" max="99,-30"/>
+
+    <negative id="invisible-border-wall">
+        <region id="gameplay-area"/>
+    </negative>
+
+    <union id="flags-region">
+        <cuboid min="-84,10,-38" max="-81,15,-35"/>
+        <cuboid min="-84,10,-94" max="-81,15,-91"/>
+        <cuboid min="85,10,-38" max="82,15,-35"/>
+        <cuboid min="85,10,-94" max="82,15,-91"/>
+    </union>
+
+    <apply block="never" region="flags-region" message="You may not edit the flags area"/>
+
+    <apply block="never" region="orange-spawn" message="You may not edit the spawn area"/>
+    <apply block="never" region="cyan-spawn" message="You may not edit the spawn area"/>
+
+    <apply enter="orange-only" block="never" region="orange-spawn" message="You cannot enter other team's spawn!"/>
+    <apply enter="cyan-only" block="never" region="cyan-spawn" message="You cannot enter other team's spawn!"/>
+
+    <apply block="never" message="You have may not build outside the map!" region="invisible-border-wall" />
+    <apply block="deny(void)" message="You cannot modify the void!"/>
+    <apply block="only-player-blocks" message="You can only break player-placed blocks!"/>
+</regions>
+<flags>
+    <flags owner="orange" pickup-filter="cyan" carry-kit="carrier-kit" drop-on-water="false">
+        <flag id="alpha-flag" name="Alpha Flag" color="ORANGE">
+            <post recover-time="12s">-83,10,-93</post>        
+        </flag>
+        <flag id="beta-flag" name="Beta Flag" color="RED">    
+            <post recover-time="12s">-83,10,-37</post>
+        </flag>
+    </flags>
+    
+    <flags owner="cyan" pickup-filter="orange" carry-kit="carrier-kit" drop-on-water="false">
+        <flag id="delta-flag" name="Delta Flag" color="LIGHT_BLUE">
+            <post recover-time="12s">83,10,-93</post>        
+        </flag>
+        <flag id="omega-flag" name="Omega Flag" color="CYAN">    
+            <post recover-time="12s">83,10,-37</post>
+        </flag>
+    </flags>
+
+    <net region="cyan-capture" flags="alpha-flag beta-flag" capture-filter="cyan" post="cyan-monument"/>
+    <net region="orange-capture" flags="delta-flag omega-flag" capture-filter="orange" post="orange-monument"/>
+
+    <flags permanent="true" sequential="true">
+        <post id="cyan-monument"
+              owner="cyan"
+              yaw="90">
+            <block>94,23,-60</block>
+            <block>94,23,-70</block>
+        </post>
+        <post id="orange-monument"
+              owner="orange"
+              yaw="-90">
+            <block>-94,23,-60</block>
+            <block>-94,23,-70</block>
+        </post>
+    </flags>
+</flags>
+<itemremove>
+    <item>iron helmet</item>
+    <item>leather boots</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>cyan stained glass</item>
+    <item>orange stained glass </item>
+    <item>orange wool</item>
+    <item>cyan wool</item>
+</itemremove>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+    <tool>shears</tool>
+</toolrepair>
+<gamerules>
+    <randomTickSpeed>0</randomTickSpeed>
+</gamerules>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<respawn delay="3s"/>
+</map>
