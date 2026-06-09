@@ -1,43 +1,162 @@
-<map proto="1.5.0">
+<map proto="1.5.1">
 <name>Pillars</name>
-<version>1.0.4</version>
+<variant id="ffa" world="ffa">FFA</variant>
+<version>1.1</version>
 <objective>Be the last player standing!</objective>
 <gamemode>blitz</gamemode>
-<created>2025-05-28</created>
-<phase>staging</phase>
+<include id="void-death" />
+<if variant="ffa">
+    <created>2026-06-09</created>
+    <phase>development</phase>
+</if>
+<unless variant="ffa">
+    <created>2025-05-28</created>
+    <phase>staging</phase>
+</unless>
 <authors>
+    <if variant="ffa">
+        <author uuid="64e840c8-4fb5-4659-a36b-ff93e2f6113a" /> <!-- Javg_ -->
+    </if>
     <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
 </authors>
 <contributors>
-    <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="xml"/> <!-- Pablete1234 -->
-    <contributor uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30" contribution="mental help"/> <!-- Ruediger_LP -->
+    <contributor uuid="e82603df-417d-4a95-bd1f-1720648be0b4" contribution="XML"/> <!-- Pablete1234 -->
+    <contributor uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30" contribution="Mental help"/> <!-- Ruediger_LP -->
     <contributor contribution="intelligence">Claude Sonnet 4</contributor> <!-- Claude -->
 </contributors>
+<if variant="ffa">
+    <players max="70" />
+</if>
+<unless variant="ffa">
+    <teams>
+        <team id="black-team" color="black" max="4">Black</team>
+        <team id="white-team" color="white" max="4">White</team>
+        <team id="red-team" color="red" max="4">Red</team>
+        <team id="blue-team" color="blue" max="4">Blue</team>
+        <team id="green-team" color="green" max="4">Green</team>
+        <team id="yellow-team" color="yellow" max="4">Yellow</team>
+        <team id="purple-team" color="dark purple" max="4">Purple</team>
+        <team id="aqua-team" color="dark aqua" max="4">Aqua</team>
+    </teams>
+</unless>
 <blitz>
     <lives>3</lives>
 </blitz>
 <time>10m</time>
+<spawns>
+    <if variant="ffa">
+        <spawn yaw="0" region="obs-spawn-point" />
+    </if>
+    <unless variant="ffa">
+        <spawn team="black-team" angle="0,34,0" region="black-spawn-point"/>
+        <spawn team="white-team" angle="0,34,0" region="white-spawn-point"/>
+        <spawn team="red-team" angle="0,34,0" region="red-spawn-point"/>
+        <spawn team="blue-team" angle="0,34,0" region="blue-spawn-point"/>
+        <spawn team="green-team" angle="0,34,0" region="green-spawn-point"/>
+        <spawn team="yellow-team" angle="0,34,0" region="yellow-spawn-point"/>
+        <spawn team="purple-team" angle="0,34,0" region="purple-spawn-point"/>
+        <spawn team="aqua-team" angle="0,34,0" region="aqua-spawn-point"/>
+    </unless>
+    <default yaw="0" region="obs-spawn-point"/>
+</spawns>
 <respawn auto="true"/>
-<teams>
-    <team id="black-team" color="black" max="4">Black</team>
-    <team id="white-team" color="white" max="4">White</team>
-    <team id="red-team" color="red" max="4">Red</team>
-    <team id="blue-team" color="blue" max="4">Blue</team>
-    <team id="green-team" color="green" max="4">Green</team>
-    <team id="yellow-team" color="yellow" max="4">Yellow</team>
-    <team id="purple-team" color="dark purple" max="4">Purple</team>
-    <team id="aqua-team" color="dark aqua" max="4">Aqua</team>
-</teams>
-<variables scope="player">
-    <variable id="next_kit"/>
+<regions>
+    <cylinder id="black-spawn-point" base="7.5,32,7.5" radius="0" height="1"/>
+    <cylinder id="white-spawn-point" base="0.5,32,10.5" radius="0" height="1"/>
+    <cylinder id="red-spawn-point" base="-6.5,32,7.5" radius="0" height="1"/>
+    <cylinder id="blue-spawn-point" base="-9.5,32,0.5" radius="0" height="1"/>
+    <cylinder id="green-spawn-point" base="-6.5,32,-6.5" radius="0" height="1"/>
+    <cylinder id="yellow-spawn-point" base="0.5,32,-9.5" radius="0" height="1"/>
+    <cylinder id="purple-spawn-point" base="7.5,32,-6.5" radius="0" height="1"/>
+    <cylinder id="aqua-spawn-point" base="10.5,32,0.5" radius="0" height="1"/>
+    <cylinder id="obs-spawn-point" base="0.5,35,0.5" radius="0" height="1"/>
+</regions>
+<if variant="ffa">
+    <structures>
+        <structure id="pillar-structure">
+            <region>
+                <cuboid min="2,5,2" max="-1,32,-1" />
+            </region>
+        </structure>
+    </structures>
+</if>
+<variables>
+    <if variant="ffa">
+        <array id="pillars_x" size="150" scope="match" />
+        <array id="pillars_z" size="150" scope="match" />
+        <array id="center" size="2" scope="match" />
+        <array id="paste_coords" size="2" scope="match" />
+        <variable id="rings" scope="match" />
+        <variable id="ready" scope="match" />
+        <variable id="current_ring" scope="match" />
+        <variable id="players_left" scope="match" />
+        <variable id="i" scope="match" />
+        <variable id="calc" scope="match" />
+        <variable id="angle" scope="match" />
+        <variable id="radius" default="20" scope="match" />
+        <variable id="players" scope="match" />
+        <variable id="id" scope="player" default="-1" />
+        <variable id="needs_tp" scope="player" default="1" />
+    </if>
+    <variable id="next_kit" scope="player" />
 </variables>
-<filters>
-    <pulse id="grant-items-filter" period="5s" duration="0.1s">
-        <time>5s</time>
-    </pulse>
-</filters>
 <actions>
-    <trigger filter="grant-items-filter" action="grant-random-items" scope="player"/>
+    <if variant="ffa">
+        <!-- generate pillars -->
+        <trigger scope="match" filter="match-started">
+            <action>
+                <set var="i" value="0" />
+                <switch-scope inner="player" filter="participating">
+                    <set var="id" value="i" />
+                    <set var="players" value="players + 1" />
+                    <set var="i" value="i + 1" />
+                </switch-scope>
+                <set var="rings" value="max(1, ceil(log(players / 12) / log(2) + 1))" />
+                <set var="center" index="0" value="0.5" />
+                <set var="center" index="1" value="0.5" />
+                <set var="i" value="0" />
+                <set var="current_ring" value="1" />
+                <repeat times="rings">
+                    <set var="players_left" value="players - i" />
+                    <repeat times="12 * pow(2, current_ring - 1)" filter="not(players-i=0)">
+                        <set var="angle" value="(2 * 3.14159265 * i) / min(players_left, 12 * pow(2, current_ring - 1))" />
+                        <set var="paste_coords" index="0" value="(radius * cos(angle)) + center[0]" />
+                        <set var="paste_coords" index="1" value="(radius * sin(angle)) + center[1]" />
+                        <paste-structure 
+                            x="floor(paste_coords[0] + 0.5) - 1" 
+                            y="0" 
+                            z="floor(paste_coords[1] + 0.5) - 1" 
+                            structure="pillar-structure" 
+                        />
+                        <set var="pillars_x" index="i" value="floor(paste_coords[0] + 0.5) - 1" />
+                        <set var="pillars_z" index="i" value="floor(paste_coords[1] + 0.5) - 1" />
+                        <set var="i" value="i + 1" />
+                    </repeat>
+                    <set var="radius" value="radius + 20" />
+                    <set var="current_ring" value="current_ring + 1" />
+                </repeat>
+                <set var="ready" value="1" />
+            </action>
+        </trigger>
+
+        <trigger scope="player" filter="all(needs_tp=1,alive)" action="tp-to-spawn" />
+        <trigger scope="player" filter="dead" action="needs_tp := 1" />
+
+        <action id="tp-to-spawn" scope="player">
+            <teleport x="pillars_x[id]" y="24" z="pillars_z[id]" />
+            <set var="needs_tp" value="0" />
+        </action>
+    </if>
+
+    <!-- randomizer logic -->  
+    <trigger action="grant-random-items" scope="player">
+        <filter>
+            <pulse period="5s" duration="0.1s">
+                <time>5s</time>
+            </pulse>
+        </filter>
+    </trigger>
+
     <action id="grant-random-items" scope="player">
         <set var="next_kit" value="floor(random() * 1000)"/>
         <!-- Blocks (0-599, 60%) -->
@@ -218,31 +337,14 @@
         </kit>
     </action>
 </actions>
-<spawns>
-    <spawn team="black-team" angle="0,34,0" region="black-spawn-point"/>
-    <spawn team="white-team" angle="0,34,0" region="white-spawn-point"/>
-    <spawn team="red-team" angle="0,34,0" region="red-spawn-point"/>
-    <spawn team="blue-team" angle="0,34,0" region="blue-spawn-point"/>
-    <spawn team="green-team" angle="0,34,0" region="green-spawn-point"/>
-    <spawn team="yellow-team" angle="0,34,0" region="yellow-spawn-point"/>
-    <spawn team="purple-team" angle="0,34,0" region="purple-spawn-point"/>
-    <spawn team="aqua-team" angle="0,34,0" region="aqua-spawn-point"/>
-    <default yaw="0" region="obs-spawn-point"/>
-</spawns>
-<regions>
-    <cylinder id="black-spawn-point" base="7.5,32,7.5" radius="0" height="1"/>
-    <cylinder id="white-spawn-point" base="0.5,32,10.5" radius="0" height="1"/>
-    <cylinder id="red-spawn-point" base="-6.5,32,7.5" radius="0" height="1"/>
-    <cylinder id="blue-spawn-point" base="-9.5,32,0.5" radius="0" height="1"/>
-    <cylinder id="green-spawn-point" base="-6.5,32,-6.5" radius="0" height="1"/>
-    <cylinder id="yellow-spawn-point" base="0.5,32,-9.5" radius="0" height="1"/>
-    <cylinder id="purple-spawn-point" base="7.5,32,-6.5" radius="0" height="1"/>
-    <cylinder id="aqua-spawn-point" base="10.5,32,0.5" radius="0" height="1"/>
-    <cylinder id="obs-spawn-point" base="0.5,34,0.5" radius="0" height="1"/>
-</regions>
+<if variant="ffa">
+    <damage>
+        <deny>
+            <variable var="ready">0</variable>
+        </deny>
+    </damage>
+</if>
 <hunger>
     <depletion>off</depletion>
 </hunger>
-
 </map>
-
