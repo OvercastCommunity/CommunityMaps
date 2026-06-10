@@ -1,7 +1,7 @@
 <map proto="1.5.1">
 <name>Pillars</name>
 <variant id="ffa" world="ffa">FFA</variant>
-<version>1.1</version>
+<version>1.1.1</version>
 <objective>Be the last player standing!</objective>
 <gamemode>blitz</gamemode>
 <include id="void-death" />
@@ -13,6 +13,9 @@
     <created>2025-05-28</created>
     <phase>staging</phase>
 </unless>
+<constants>
+    <constant id="ANNOUNCER_PREFIX">`a[Announcer]:`r</constant>
+</constants>
 <authors>
     <if variant="ffa">
         <author uuid="64e840c8-4fb5-4659-a36b-ff93e2f6113a" /> <!-- Javg_ -->
@@ -25,7 +28,7 @@
     <contributor contribution="intelligence">Claude Sonnet 4</contributor> <!-- Claude -->
 </contributors>
 <if variant="ffa">
-    <players max="70" />
+    <players max="84" />
 </if>
 <unless variant="ffa">
     <teams>
@@ -43,19 +46,24 @@
     <lives>3</lives>
 </blitz>
 <time>10m</time>
+<kits>
+    <kit id="default-kit">
+        <effect amplifier="5" duration="5s">damage resistance</effect>
+    </kit>
+</kits>
 <spawns>
     <if variant="ffa">
-        <spawn yaw="0" region="obs-spawn-point" />
+        <spawn kit="default-kit" yaw="0" region="obs-spawn-point" />
     </if>
     <unless variant="ffa">
-        <spawn team="black-team" angle="0,34,0" region="black-spawn-point"/>
-        <spawn team="white-team" angle="0,34,0" region="white-spawn-point"/>
-        <spawn team="red-team" angle="0,34,0" region="red-spawn-point"/>
-        <spawn team="blue-team" angle="0,34,0" region="blue-spawn-point"/>
-        <spawn team="green-team" angle="0,34,0" region="green-spawn-point"/>
-        <spawn team="yellow-team" angle="0,34,0" region="yellow-spawn-point"/>
-        <spawn team="purple-team" angle="0,34,0" region="purple-spawn-point"/>
-        <spawn team="aqua-team" angle="0,34,0" region="aqua-spawn-point"/>
+        <spawn kit="default-kit" team="black-team" angle="0,34,0" region="black-spawn-point"/>
+        <spawn kit="default-kit" team="white-team" angle="0,34,0" region="white-spawn-point"/>
+        <spawn kit="default-kit" team="red-team" angle="0,34,0" region="red-spawn-point"/>
+        <spawn kit="default-kit" team="blue-team" angle="0,34,0" region="blue-spawn-point"/>
+        <spawn kit="default-kit" team="green-team" angle="0,34,0" region="green-spawn-point"/>
+        <spawn kit="default-kit" team="yellow-team" angle="0,34,0" region="yellow-spawn-point"/>
+        <spawn kit="default-kit" team="purple-team" angle="0,34,0" region="purple-spawn-point"/>
+        <spawn kit="default-kit" team="aqua-team" angle="0,34,0" region="aqua-spawn-point"/>
     </unless>
     <default yaw="0" region="obs-spawn-point"/>
 </spawns>
@@ -84,6 +92,7 @@
     <if variant="ffa">
         <array id="pillars_x" size="150" scope="match" />
         <array id="pillars_z" size="150" scope="match" />
+        <array id="pillars_angle" size="150" scope="match" />
         <array id="center" size="2" scope="match" />
         <array id="paste_coords" size="2" scope="match" />
         <variable id="rings" scope="match" />
@@ -96,7 +105,11 @@
         <variable id="radius" default="20" scope="match" />
         <variable id="players" scope="match" />
         <variable id="id" scope="player" default="-1" />
+        <variable id="should_kill" scope="player" />
+        <variable id="target" scope="player" exclusive="1" />
+        <variable id="first_spawn" scope="player" />
         <variable id="needs_tp" scope="player" default="1" />
+        <cuboid id="spawn_checker" min="0,24,0" max="1,26,1" />
     </if>
     <variable id="next_kit" scope="player" />
 </variables>
@@ -128,11 +141,12 @@
                             z="floor(paste_coords[1] + 0.5) - 1" 
                             structure="pillar-structure" 
                         />
-                        <set var="pillars_x" index="i" value="floor(paste_coords[0] + 0.5) - 1" />
-                        <set var="pillars_z" index="i" value="floor(paste_coords[1] + 0.5) - 1" />
+                        <set var="pillars_x" index="i" value="floor(paste_coords[0] + 0.5) - 0.5" />
+                        <set var="pillars_z" index="i" value="floor(paste_coords[1] + 0.5) - 0.5" />
+                        <set var="pillars_angle" index="i" value="angle" />
                         <set var="i" value="i + 1" />
                     </repeat>
-                    <set var="radius" value="radius + 20" />
+                    <set var="radius" value="radius + 16" />
                     <set var="current_ring" value="current_ring + 1" />
                 </repeat>
                 <set var="ready" value="1" />
@@ -143,9 +157,55 @@
         <trigger scope="player" filter="dead" action="needs_tp := 1" />
 
         <action id="tp-to-spawn" scope="player">
-            <teleport x="pillars_x[id]" y="24" z="pillars_z[id]" />
-            <set var="needs_tp" value="0" />
+            <action filter="not(id=-1)">
+                <action filter="first_spawn=1">
+                    <set var="spawn_checker" index="0" value="pillars_x[id] - 0.5" />
+                    <set var="spawn_checker" index="2" value="pillars_z[id] - 0.5" />
+                    <set var="spawn_checker" index="3" value="pillars_x[id] + 0.5" />
+                    <set var="spawn_checker" index="5" value="pillars_z[id] + 0.5" />
+                    <switch-scope inner="match">
+                        <fill region="spawn_checker" material="air" />
+                    </switch-scope>
+                </action>
+                <teleport
+                    x="pillars_x[id]" 
+                    y="24"
+                    z="pillars_z[id]" 
+                    yaw="(pillars_angle[id] * (180 / 3.14159265) + 90)"
+                    pitch="0" 
+                />
+                <set var="needs_tp" value="0" />
+                <set var="first_spawn" value="1" />
+            </action>
         </action>
+
+        <!-- someone was forced -->
+        <trigger scope="player">
+            <filter>
+                <after duration="1s" filter="all(id=-1,needs_tp=1,match-started)" />
+            </filter>
+            <action>
+                <set var="should_kill" value="1" />
+                <!-- <set var="target" value="1" />
+                <switch-scope inner="match">
+                    <message text="${ANNOUNCER_PREFIX} A staff member forced {player} in, and there's no pillar for them...">
+                        <replacements>
+                            <player id="player" var="target" />
+                        </replacements>
+                    </message>
+                </switch-scope> -->
+            </action>
+        </trigger>
+
+        <trigger scope="player" filter="all(alive,should_kill=1)">
+            <action>
+                <message text="`7`oFrom ${ANNOUNCER_PREFIX} You were forced into the match, so there's no pillar for you :(" />
+                <kit>
+                    <clear effects="true" />
+                    <effect amplifier="10">instant damage</effect>
+                </kit>
+            </action>
+        </trigger>
     </if>
 
     <!-- randomizer logic -->  
