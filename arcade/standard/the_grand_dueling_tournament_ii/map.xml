@@ -17,7 +17,7 @@
                                         \/
 -->
 <name>The Grand Dueling Tournament II</name>
-<version>3.1.2</version>
+<version>3.2.0</version>
 <objective>Defeat opposing teams in The Grand ${tournament-type} Tournament!</objective>
 <phase>staging</phase>
 <variant id="default" world="duel"/>
@@ -116,12 +116,10 @@
     <constant id="kit-5-name">`cMCSG</constant>
     <constant id="kit-6-name">`8Netherite</constant>
     <constant id="kit-7-name">`5Potions</constant>
-    <constant id="kit-8-name">`6Gapple</constant>
-    <!-- <constant id="kit-8-name">`6Jousting</constant> -->
+    <constant id="kit-8-name">`6Jousting</constant>
     <constant id="kit-9-name">`3Trident</constant>
     <constant id="kit-10-name">`bConquest</constant>
-    <constant id="kit-11-name">`eBlasternauts</constant>
-    <!-- <constant id="kit-11-name">`dBlast Bow</constant> -->
+    <constant id="kit-11-name">`dBlast Bow</constant>
     <constant id="kit-12-name">`cUHC</constant>
     <constant id="kit-13-name">`6Soup</constant>
     <constant id="tnt-fuse">1.25s</constant>
@@ -441,7 +439,7 @@
                 <item slot="0" material="crossbow" unbreakable="true">
                     <enchantment level="1">quick charge</enchantment>
                     <enchantment level="1">arrow infinite</enchantment>
-                </item>w
+                </item>
             </if>
             <helmet material="iron helmet"/>
             <chestplate material="leather chestplate" team-color="true">
@@ -549,24 +547,35 @@
                 <set var="current_kill_reward" value="3"/>
             </action>
         </kit>
-        <kit id="kit-8"> <!-- gapple -->
-            <item slot="0" material="diamond sword" unbreakable="true">
-                <enchantment level="5">damage all</enchantment>
-            </item>
-            <item slot="1" material="golden apple" damage="1" amount="64"/>
-            <helmet material="diamond helmet" damage="250">
-                <enchantment level="3">protection environmental</enchantment>
-            </helmet>
-            <chestplate material="diamond chestplate" damage="300">
-                <enchantment level="3">protection environmental</enchantment>
-            </chestplate>
-            <leggings material="diamond leggings" damage="300">
-                <enchantment level="3">protection environmental</enchantment>
-            </leggings>
-            <boots material="diamond boots" damage="300">
-                <enchantment level="3">protection environmental</enchantment>
-            </boots>
-            <effect amplifier="2">speed</effect>
+        <kit id="kit-8">
+            <if variant="default"> <!-- gapple -->
+                <item slot="0" material="diamond sword" unbreakable="true">
+                    <enchantment level="5">damage all</enchantment>
+                </item>
+                <item slot="1" material="golden apple" damage="1" amount="64"/>
+                <helmet material="diamond helmet" damage="250">
+                    <enchantment level="3">protection environmental</enchantment>
+                </helmet>
+                <chestplate material="diamond chestplate" damage="300">
+                    <enchantment level="3">protection environmental</enchantment>
+                </chestplate>
+                <leggings material="diamond leggings" damage="300">
+                    <enchantment level="3">protection environmental</enchantment>
+                </leggings>
+                <boots material="diamond boots" damage="300">
+                    <enchantment level="3">protection environmental</enchantment>
+                </boots>
+                <effect amplifier="2">speed</effect>
+            </if>
+            <if variant="modern"> <!-- jousting -->
+                <item slot="0" material="iron spear" unbreakable="true">
+                    <enchantment level="1">sharpness</enchantment>
+                </item>
+                <item slot="weapon.offhand" material="shield" damage="330"/>
+                <helmet material="netherite helmet" unbreakable="true"/>
+                <chestplate material="chainmail chestplate" unbreakable="true"/>
+                <effect amplifier="3">speed</effect>
+            </if>
         </kit>
         <kit id="kit-9">
             <if variant="default"> <!-- gunz -->
@@ -598,7 +607,7 @@
             </action>
         </kit>
         <kit id="kit-11">
-            <if variant="default, modern"> <!-- blasternauts  -->
+            <if variant="default"> <!-- blasternauts  -->
                 <item slot="0" material="blaze rod" name="`rMelee Stick">
                     <enchantment level="2">knockback</enchantment>
                     <enchantment level="2">damage all</enchantment>
@@ -616,22 +625,12 @@
                     <set var="current_kill_reward" value="6"/>
                 </action>
             </if>
-            <!-- blast bow
-            <if variant="modern">
-                <firework slot="slot.weapon.offhand" amount="128" power="3">
-                    <explosion type="burst" flicker="false" trail="false">
-                        <color>F0F0F0</color>
-                        <fade>DECF2A</fade>
-                    </explosion>
-                </firework>
+            <if variant="modern"> <!-- blast bow --> 
                 <item slot="0" material="crossbow" unbreakable="true">
-                    <enchantment level="1">quick charge</enchantment>
-                    <enchantment level="1">multishot</enchantment>
+                    <enchantment level="2">quick charge</enchantment>
                 </item>
-                <action>
-                    <set var="current_player_size" value="0"/>
-                </action>
-            </if> --> 
+                <action id="give-team-firework"/>
+            </if>
             <helmet material="iron helmet" unbreakable="true"/>
             <chestplate material="leather chestplate" unbreakable="true" team-color="true"/>
             <leggings material="chainmail leggings" unbreakable="true">
@@ -1036,6 +1035,23 @@
 <damage>
     <deny>
         <any>
+            <all>
+                <cause>explosion</cause>
+                <not>
+                    <any>
+                        <relation>neutral</relation>
+                        <if constant="tnt-disable-self" constant-value="false">
+                            <relation>self</relation>
+                        </if>
+                        <if constant="tnt-disable-ally" constant-value="false">
+                            <relation>ally</relation>
+                        </if>
+                        <if constant="tnt-disable-enemy" constant-value="false">
+                            <relation>enemy</relation>
+                        </if>
+                    </any>
+                </not>
+            </all>
             <not>
                 <any>
                     <filter id="all(all-arenas, state=${running})"/>
@@ -1073,7 +1089,6 @@
     </deny>
 </damage>
 <disabledamage>
-    <damage self="${tnt-disable-self}" ally="${tnt-disable-ally}" enemy="${tnt-disable-ally}" other="true">block explosion</damage>
     <damage>fall</damage>
 </disabledamage>
 <filters>
@@ -1087,6 +1102,9 @@
         <entity>arrow</entity>
         <entity>creeper</entity>
         <entity id="tnt-primed">primed tnt</entity>
+        <if variant="modern">
+            <entity>trident</entity>
+        </if>
     </any>
     <cause id="trample">trample</cause>
     <time id="intro-announcer-1">3s</time>
@@ -1917,7 +1935,7 @@
             </message>
         </action>
         <if variant="modern">
-            <action filter="current_kit=11"> <!-- blast bow -->
+            <action filter="any(current_kit=9, current_kit=11)"> <!-- trident / blast bow -->
                 <set var="disable_arrow_pickup" value="0"/>
             </action>
         </if>
@@ -2906,6 +2924,74 @@
             </action>
         </trigger>
     </if>
+    <if variant="modern">
+        <action scope="player" id="give-team-firework">
+            <kit filter="team-1">
+                <firework slot="slot.weapon.offhand" amount="256" power="3" show-other="false">
+                    <explosion type="burst" flicker="false" trail="false">
+                        <color>B3312C</color>
+                        <fade>F0F0F0</fade>
+                    </explosion>
+                </firework>
+            </kit>
+            <kit filter="team-2">
+                <firework slot="slot.weapon.offhand" amount="256" power="3" show-other="false">
+                    <explosion type="burst" flicker="false" trail="false">
+                        <color>253192</color>
+                        <fade>F0F0F0</fade>
+                    </explosion>
+                </firework>
+            </kit>
+            <kit filter="team-3">
+                <firework slot="slot.weapon.offhand" amount="256" power="3" show-other="false">
+                    <explosion type="burst" flicker="false" trail="false">
+                        <color>3B511A</color>
+                        <fade>F0F0F0</fade>
+                    </explosion>
+                </firework>
+            </kit>
+            <kit filter="team-4">
+                <firework slot="slot.weapon.offhand" amount="256" power="3" show-other="false">
+                    <explosion type="burst" flicker="false" trail="false">
+                        <color>EB8844</color>
+                        <fade>F0F0F0</fade>
+                    </explosion>
+                </firework>
+            </kit>
+            <kit filter="team-5">
+                <firework slot="slot.weapon.offhand" amount="256" power="3" show-other="false">
+                    <explosion type="burst" flicker="false" trail="false">
+                        <color>DECF2A</color>
+                        <fade>F0F0F0</fade>
+                    </explosion>
+                </firework>
+            </kit>
+            <kit filter="team-6">
+                <firework slot="slot.weapon.offhand" amount="256" power="3" show-other="false">
+                    <explosion type="burst" flicker="false" trail="false">
+                        <color>7B2FBE</color>
+                        <fade>F0F0F0</fade>
+                    </explosion>
+                </firework>
+            </kit>
+            <kit filter="team-7">
+                <firework slot="slot.weapon.offhand" amount="256" power="3" show-other="false">
+                    <explosion type="burst" flicker="false" trail="false">
+                        <color>C354CD</color>
+                        <fade>F0F0F0</fade>
+                    </explosion>
+                </firework>
+            </kit>
+            <kit filter="team-8">
+                <firework slot="slot.weapon.offhand" amount="256" power="3" show-other="false">
+                    <explosion type="burst" flicker="false" trail="false">
+                        <color>287697</color>
+                        <fade>F0F0F0</fade>
+                    </explosion>
+                </firework>
+            </kit>
+        </action>
+    </if>
 </actions>
 <portals sound="false">
     <portal destination="lobby-spawn" yaw="@${lobby-spawn-yaw}" forward="all(participating, state=${idle}, not(lobby))"/>
@@ -3036,88 +3122,96 @@
     <item>diamond leggings</item>
     <item>diamond boots</item>
     <item>arrow</item>
-    <item>potion</item>
-    <item>golden apple</item>
-    <item>tnt</item>
-    <item>snow block</item>
-    <item>monster egg</item>
-    <item>egg</item>
-    <item>dispenser</item>
-    <item>trap door</item>
-    <item>ladder</item>
-    <item>obsidian</item>
-    <item>stone plate</item>
-    <item>stone button</item>
-    <item>water bucket</item>
+    <item>bed</item>
+    <item>bowl</item>
     <item>bucket</item>
+    <item>cobblestone</item>
+    <item>diamond block</item>
     <item>diode</item>
-    <item>redstone torch on</item>
-    <item>redstone block</item>
-    <item>redstone</item>
-    <item>lever</item>
-    <item>piston base</item>
-    <item>nether fence</item>
-    <item>stained glass</item>
-    <item>stained clay</item>
-    <item>sulphur</item>
+    <item>dispenser</item>
+    <item>egg</item>
     <item>exp bottle</item>
+    <item>feather</item>
+    <item>firework</item>
+    <item>golden apple</item>
+    <item>ink sack</item>
+    <item>iron block</item>
+    <item>iron fence</item>
+    <item>ladder</item>
+    <item>lever</item>
+    <item>monster egg</item>
+    <item>mushroom soup</item>
+    <item>nether fence</item>
+    <item>obsidian</item>
+    <item>piston base</item>
+    <item>potion</item>
     <item>quartz block</item>
     <item>quartz stairs</item>
-    <item>step</item>
-    <item>wool</item>
-    <item>iron fence</item>
-    <item>iron block</item>
-    <item>diamond block</item>
-    <item>bed</item>
-    <item>mushroom soup</item>
-    <item>bowl</item>
-    <item>feather</item>
-    <item>cobblestone</item>
-    <item>torch</item>
-    <item>snow ball</item>
-    <item>ink sack</item>
+    <item>redstone block</item>
+    <item>redstone torch on</item>
+    <item>redstone</item>
     <item>seeds</item>
+    <item>snow ball</item>
+    <item>snow block</item>
+    <item>stained clay</item>
+    <item>stained glass</item>
+    <item>step</item>
+    <item>stone button</item>
+    <item>stone plate</item>
+    <item>sulphur</item>
+    <item>tnt</item>
+    <item>torch</item>
+    <item>trap door</item>
+    <item>water bucket</item>
+    <item>wool</item>
     <if variant="modern">
-        <item>turtle helmet</item>
-        <item>copper helmet</item>
-        <item>copper chestplate</item>
-        <item>copper leggings</item>
         <item>copper boots</item>
-        <item>netherite helmet</item>
-        <item>netherite chestplate</item>
-        <item>netherite leggings</item>
+        <item>copper chestplate</item>
+        <item>copper helmet</item>
+        <item>copper leggings</item>
         <item>netherite boots</item>
-        <item>wind charge</item>
-        <item>tipped arrow</item>
+        <item>netherite chestplate</item>
+        <item>netherite helmet</item>
+        <item>netherite leggings</item>
         <item>shield</item>
+        <item>tipped arrow</item>
+        <item>turtle helmet</item>
+        <item>wind charge</item>
     </if>
 </itemremove>
 <toolrepair>
-    <tool>wood sword</tool>
-    <tool>stone sword</tool>
-    <tool>iron sword</tool>
-    <tool>diamond sword</tool>
+    <tool>blaze rod</tool>
     <tool>bow</tool>
     <tool>diamond axe</tool>
-    <tool>wood hoe</tool>
-    <tool>gold hoe</tool>
-    <tool>blaze rod</tool>
-    <tool>raw fish</tool>
-    <tool>fishing rod</tool>
-    <tool>wood spade</tool>
-    <tool>stone spade</tool>
-    <tool>iron spade</tool>
-    <tool>gold spade</tool>
-    <tool>diamond spade</tool>
-    <tool>flint and steel</tool>
     <tool>diamond pickaxe</tool>
+    <tool>diamond spade</tool>
+    <tool>diamond sword</tool>
+    <tool>fishing rod</tool>
+    <tool>flint and steel</tool>
+    <tool>gold hoe</tool>
+    <tool>gold spade</tool>
+    <tool>iron spade</tool>
+    <tool>iron sword</tool>
+    <tool>raw fish</tool>
     <tool>shears</tool>
+    <tool>stone spade</tool>
+    <tool>stone sword</tool>
+    <tool>wood hoe</tool>
+    <tool>wood spade</tool>
+    <tool>wood sword</tool>
     <if variant="modern">
+        <tool>copper spear</tool>
         <tool>copper sword</tool>
-        <tool>netherite sword</tool>
-        <tool>mace</tool>
         <tool>crossbow</tool>
+        <tool>diamond spear</tool>
+        <tool>golden spear</tool>
+        <tool>iron spear</tool>
+        <tool>mace</tool>
+        <tool>netherite spear</tool>
+        <tool>netherite sword</tool>
+        <tool>stone spear</tool>
         <tool>trident</tool>
+        <tool>wooden spear</tool>
     </if>
 </toolrepair>
 <if variant="tug">
