@@ -1,7 +1,7 @@
 <map proto="1.5.1">
 <name>Pillars</name>
 <variant id="ffa" world="ffa">FFA</variant>
-<version>1.2.2</version>
+<version>1.2.3</version>
 <objective>Be the last player standing!</objective>
 <gamemode>blitz</gamemode>
 <include id="void-death" />
@@ -85,9 +85,6 @@
     <cylinder id="obs-spawn-point" base="0.5,35,0.5" radius="0" height="1"/>
 </regions>
 <if variant="ffa">
-    <modes>
-        <mode name="World Border" action="world_border_active := 1" after="5m" show-before="1m" />
-    </modes>
     <structures>
         <structure id="pillar-structure">
             <region>
@@ -103,7 +100,6 @@
         <array id="pillars_angle" size="150" scope="match" />
         <array id="center" size="2" scope="match" />
         <array id="paste_coords" size="2" scope="match" />
-        <variable id="world_border_active" scope="match" />
         <variable id="rings" scope="match" />
         <variable id="ready" scope="match" />
         <variable id="current_ring" scope="match" />
@@ -116,9 +112,7 @@
         <variable id="id" scope="player" default="-1" />
         <variable id="should_kill" scope="player" />
         <variable id="target" scope="player" exclusive="1" />
-        <variable id="first_spawn" scope="player" />
         <variable id="needs_tp" scope="player" default="1" />
-        <cuboid id="spawn_checker" min="0,24,0" max="1,26,1" />
     </if>
     <variable id="next_kit" scope="player" />
 </variables>
@@ -167,15 +161,6 @@
 
         <action id="tp-to-spawn" scope="player">
             <action filter="not(id=-1)">
-                <action filter="first_spawn=1">
-                    <set var="spawn_checker" index="0" value="pillars_x[id] - 0.5" />
-                    <set var="spawn_checker" index="2" value="pillars_z[id] - 0.5" />
-                    <set var="spawn_checker" index="3" value="pillars_x[id] + 0.5" />
-                    <set var="spawn_checker" index="5" value="pillars_z[id] + 0.5" />
-                    <switch-scope inner="match">
-                        <fill region="spawn_checker" material="air" />
-                    </switch-scope>
-                </action>
                 <teleport
                     x="pillars_x[id]" 
                     y="24"
@@ -184,26 +169,14 @@
                     pitch="0" 
                 />
                 <set var="needs_tp" value="0" />
-                <set var="first_spawn" value="1" />
             </action>
         </action>
 
         <!-- someone was forced -->
-        <trigger scope="player">
+        <trigger scope="player" action="should_kill := 1">
             <filter>
                 <after duration="1s" filter="all(id=-1,needs_tp=1,match-started)" />
             </filter>
-            <action>
-                <set var="should_kill" value="1" />
-                <!-- <set var="target" value="1" />
-                <switch-scope inner="match">
-                    <message text="${ANNOUNCER_PREFIX} A staff member forced {player} in, and there's no pillar for them...">
-                        <replacements>
-                            <player id="player" var="target" />
-                        </replacements>
-                    </message>
-                </switch-scope> -->
-            </action>
         </trigger>
 
         <trigger scope="player" filter="all(alive,should_kill=1)">
