@@ -54,23 +54,41 @@
         <spawn team="red" kit="spawn-kit" yaw="90" region="red-spawn-point"/>
         <spawn team="blue" kit="spawn-kit" yaw="90" region="blue-spawn-point"/>
     </spawns>
-    <!-- Staggered wools: each team's first wool is live from the start; capturing it reveals the
-         second (scoreboard-filter shows it, and its spawner below starts producing it). -->
+    <!-- Staggered wools: both of a team's wools share one spot. The first is live from the start;
+         capturing it reveals the second (scoreboard) and hands the spawner over (see <spawners>). -->
     <wools>
         <wool team="blue" color="red" location="-45,25,-35" monument="red-blue-monument" id="blue-wool-1"/>
-        <wool team="blue" color="orange" location="-45,25,-34" monument="orange-blue-monument" scoreboard-filter="blue-2-revealed"/>
+        <wool team="blue" color="orange" location="-45,25,-35" monument="orange-blue-monument" scoreboard-filter="blue-2-revealed"/>
         <wool team="red" color="blue" location="-45,25,35" monument="blue-red-monument" id="red-wool-1"/>
-        <wool team="red" color="light_blue" location="-45,25,34" monument="light_blue-red-monument" scoreboard-filter="red-2-revealed"/>
+        <wool team="red" color="light_blue" location="-45,25,35" monument="light_blue-red-monument" scoreboard-filter="red-2-revealed"/>
     </wools>
     <filters>
         <not id="no-void">
             <void/>
         </not>
-        <team id="only-red">red</team>
         <team id="only-blue">blue</team>
-        <!-- Match-scoped gates for the staggered second wools: true once the first is captured. -->
+        <!-- Stagger gates (match-scoped). *-revealed = the first wool is captured; *-live = it is not. -->
         <completed id="blue-2-revealed">blue-wool-1</completed>
         <completed id="red-2-revealed">red-wool-1</completed>
+        <not id="blue-1-live">
+            <completed>blue-wool-1</completed>
+        </not>
+        <not id="red-1-live">
+            <completed>red-wool-1</completed>
+        </not>
+        <!-- Matches any wool color; used as a mask so box-recolor fills only touch wool blocks -->
+        <material id="any-wool">wool</material>
+        <team id="only-red">red</team>
+        <not id="not-blue">
+            <filter id="only-blue"/>
+        </not>
+        <all id="reds-woolrooms-filter">
+            <filter id="not-red"/>
+            <filter id="woolrooms-filter"/>
+        </all>
+        <not id="not-red">
+            <filter id="only-red"/>
+        </not>
         <any id="woolrooms-filter">
             <material>web</material>
             <material>stained glass</material>
@@ -85,39 +103,33 @@
                 </any>
             </all>
         </any>
-        <not id="not-red">
-            <filter id="only-red"/>
-        </not>
-        <all id="reds-woolrooms-filter">
-            <filter id="not-red"/>
-            <filter id="woolrooms-filter"/>
-        </all>
-        <not id="not-blue">
-            <filter id="only-blue"/>
-        </not>
         <all id="blues-woolrooms-filter">
             <filter id="not-blue"/>
             <filter id="woolrooms-filter"/>
         </all>
     </filters>
     <regions>
-        <point id="red-spawn-point">20,16,-35</point>
         <point id="blue-spawn-point">20,16,35</point>
-        <point id="red-wool-spawn">-45,25,-35</point>
-        <point id="orange-wool-spawn">-45,25,-34</point>
+        <point id="red-spawn-point">20,16,-35</point>
         <point id="blue-wool-spawn">-45,25,35</point>
-        <point id="light_blue-wool-spawn">-45,25,34</point>
+        <point id="orange-wool-spawn">-45,25,-35</point>
+        <point id="red-wool-spawn">-45,25,-35</point>
+        <point id="light_blue-wool-spawn">-45,25,35</point>
         <point id="observer-spawn">0,25,0</point>
-        <block id="red-blue-monument">17,17,32</block>
-        <block id="orange-blue-monument">17,17,37</block>
-        <block id="blue-red-monument">17,17,-38</block>
         <block id="light_blue-red-monument">17,17,-33</block>
-        <rectangle id="red-spawn" min="16,-39" max="24,-31"/>
-        <rectangle id="blue-spawn" min="16,31" max="24,39"/>
-        <rectangle id="red-wool" min="-49,-39" max="-41,-31"/>
-        <rectangle id="orange-wool" min="-49,-38" max="-41,-30"/>
-        <rectangle id="blue-wool" min="-49,31" max="-41,39"/>
-        <rectangle id="light_blue-wool" min="-49,30" max="-41,38"/>
+        <block id="blue-red-monument">17,17,-38</block>
+        <block id="orange-blue-monument">17,17,37</block>
+        <block id="red-blue-monument">17,17,32</block>
+        <rectangle id="blue-spawn" min="15,30" max="25,40"/>
+        <rectangle id="red-spawn" min="15,-40" max="25,-30"/>
+        <rectangle id="light_blue-wool" min="-50,30" max="-40,40"/>
+        <rectangle id="blue-wool" min="-50,30" max="-40,40"/>
+        <rectangle id="orange-wool" min="-50,-40" max="-40,-30"/>
+        <rectangle id="red-wool" min="-50,-40" max="-40,-30"/>
+        <!-- Wool blocks stamped into each box (pedestal at y=25 + frame ring at y=29).
+             Recolored in place by the box-recolor actions to match the live wool. -->
+        <cuboid id="blue-box" min="-49,25,-39" max="-42,29,-32"/>
+        <cuboid id="red-box" min="-49,25,31" max="-42,29,38"/>
         <union id="reds-woolrooms">
             <region id="red-wool"/>
             <region id="orange-wool"/>
@@ -159,20 +171,44 @@
         <apply block="blues-woolrooms-filter" region="blues-woolrooms" message="You may not edit the wool room!"/>
         <apply block="no-void" region="not-build-area" message="You may not edit the void!"/>
     </regions>
+    <!-- Exactly one wool of each pair spawns at a time: the first until it is captured, then the
+         second. Same spot, so it reads as the wool swapping in place. -->
     <spawners>
-        <spawner spawn-region="red-wool-spawn" player-region="red-wool" delay="1.5s">
+        <spawner spawn-region="red-wool-spawn" player-region="red-wool" delay="1.5s" filter="blue-1-live">
             <item material="wool" damage="14"/>
         </spawner>
         <spawner spawn-region="orange-wool-spawn" player-region="orange-wool" delay="1.5s" filter="blue-2-revealed">
             <item material="wool" damage="1"/>
         </spawner>
-        <spawner spawn-region="blue-wool-spawn" player-region="blue-wool" delay="1.5s">
+        <spawner spawn-region="blue-wool-spawn" player-region="blue-wool" delay="1.5s" filter="red-1-live">
             <item material="wool" damage="11"/>
         </spawner>
         <spawner spawn-region="light_blue-wool-spawn" player-region="light_blue-wool" delay="1.5s" filter="red-2-revealed">
             <item material="wool" damage="3"/>
         </spawner>
     </spawners>
+    <!-- Recolor each box's stamped wool to match the live wool. PGM never swaps wool blocks on
+         capture, so we do it explicitly: each trigger fires on the rising edge of a stagger gate
+         (the "1-live" gate is true from match start, so the phase-1 color is applied immediately).
+         The any-wool filter keeps glass/air in the box untouched; fills bypass block protections. -->
+    <actions>
+        <action id="blue-box-red" scope="match">
+            <fill region="blue-box" material="red wool" filter="any-wool"/>
+        </action>
+        <action id="blue-box-orange" scope="match">
+            <fill region="blue-box" material="orange wool" filter="any-wool"/>
+        </action>
+        <action id="red-box-blue" scope="match">
+            <fill region="red-box" material="blue wool" filter="any-wool"/>
+        </action>
+        <action id="red-box-light-blue" scope="match">
+            <fill region="red-box" material="light blue wool" filter="any-wool"/>
+        </action>
+        <trigger action="blue-box-red" scope="match" filter="blue-1-live"/>
+        <trigger action="blue-box-orange" scope="match" filter="blue-2-revealed"/>
+        <trigger action="red-box-blue" scope="match" filter="red-1-live"/>
+        <trigger action="red-box-light-blue" scope="match" filter="red-2-revealed"/>
+    </actions>
     <block-drops>
         <rule>
             <filter>
