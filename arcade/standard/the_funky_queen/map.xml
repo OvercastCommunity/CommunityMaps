@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>The Funky Queen</name>
-<version>1.1.3</version>
+<version>1.1.4</version>
 <objective>Be the best funky player, and become the Queen of Funky!</objective>
 <created>2025-09-29</created>
 <phase>development</phase>
@@ -401,7 +401,7 @@
         <chestplate material="leather chestplate" color="DECF2A" locked="true"/>
         <leggings material="leather leggings" color="DECF2A" locked="true"/>
         <boots material="leather boots" color="DECF2A" locked="true"/>
-        <effect duration="3s" amplifier="100">damage resistance</effect>
+        <effect duration="1s" amplifier="100">damage resistance</effect>
         <max-health>4</max-health>
         <double-jump power="2.2" recharge-before-landing="true"/>
         <fly can-fly="false"/>
@@ -3079,6 +3079,7 @@
     <variable id="spectating" scope="player"/>
     <variable id="lost" scope="player"/>
     <variable id="on_time" scope="player"/>
+    <variable id="last_played_round" scope="player"/>
     <variable id="scoring_i"/>
     <variable id="round_real_p"/>
     <variable id="round_p"/>
@@ -3097,6 +3098,7 @@
     <variable id="repeated_amount"/>
     <variable id="available_positions"/>
     <variable id="winners_available"/>
+    <variable id="did_score_during_last_round" scope="player"/>
     <variable id="current_selection_mode"/>
     <variable id="selection_switched"/>
     <variable id="selection_mode_ready"/>
@@ -4425,6 +4427,9 @@
     <action id="set-round-preparing" scope="match">
         <set var="round_state" value="${RND_PREPARING}"/>
         <set var="current_round" value="current_round + 1"/>
+        <switch-scope inner="player" filter="participating">
+            <set var="last_played_round" value="current_round"/>
+        </switch-scope>
         <action id="count-players"/>
         <switch-scope inner="player" filter="any(debug_mode=1,debugger=1)">
             <message text="`c`lROUND PREPARING"/>
@@ -4547,6 +4552,7 @@
     <action id="scoring-save-points" scope="match">
         <switch-scope inner="player" filter="participating">
             <set var="points_per_round" index="current_round - 1" value="max(floor(hidden_score * multiplier), 0)"/>
+            <set var="did_score_during_last_round" value="1"/>
         </switch-scope>
     </action>
     <action id="announce-winners" scope="match">
@@ -6908,6 +6914,15 @@
             <after duration="0.1s" filter="all(game-playing,participating,dead,cant-join)"/>
         </filter>
     </trigger>
+    <trigger action="score := 0" filter="all(not(game-playing),did_score_during_last_round=0)" scope="player"/>
+    <trigger filter="game-playing" scope="player">
+        <action>
+            <action filter="not(last_played_round-current_round=0)">
+                <set var="score" value="0"/>
+                <set var="on_time" value="0"/>
+            </action>
+        </action>
+    </trigger>
     <trigger filter="round-finished" scope="match">
         <action>
             <action id="scoring-rank-players"/>
@@ -6929,7 +6944,12 @@
             </schedule>
         </action>
     </trigger>
-    <trigger action="score := 0" filter="round-preparing" scope="player"/>
+    <trigger filter="round-preparing" scope="player">
+        <action>
+            <set var="score" value="0"/>
+            <set var="did_score_during_last_round" value="0"/>
+        </action>
+    </trigger>
     <trigger scope="match">
         <filter>
             <after duration="5s" message="Teleporting to minigame in {0}" filter="all(game-selecting,game_was_announced=1)"/>
