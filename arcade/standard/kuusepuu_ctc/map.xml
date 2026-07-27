@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <map proto="1.5.0">
 <name>Kuusepuu CTC</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <objective>Eat the ENEMY cake, carry it home, and place it on your own monument. Both teams attack and defend!</objective>
 <gamemode>ctw</gamemode>
-<created>2026-07-27</created>
 <phase>development</phase>
+<created>2026-07-27</created>
 <authors>
     <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
     <author uuid="f1ff7ecc-2e79-4320-85de-adb392eb2822"/> <!-- DerStiv -->
@@ -25,7 +25,8 @@
     - BLUE spawns at -x. BLUE eats the RED cake (46,15,5) and places it on BLUE's monument
       (-74,13,10), the spot marked by the RED stained glass beside blue spawn.
   Both cakes sit on the bedrock pedestals where the DTM monuments used to stand. First team to
-  deliver wins (score limit 1); otherwise the higher score at the time limit wins, a tie draws.
+  deliver wins (score limit 1). There is NO time limit: the Cookie Monster eats a slice out of
+  both cakes every ${monster-interval}, so a stalemate keeps getting easier to break.
 
   CAKE HEALTH (see <constants>): *-cake-health is how many bites a cake survives before the
   eater grabs it. 7 = a pristine cake; set it lower to start that cake PRE-DAMAGED (the block is
@@ -47,11 +48,15 @@
 -->
 
 <constants>
-    <constant id="score-limit">1</constant>
-    <constant id="time-limit">60</constant>
     <!-- Bites each cake survives before it is grabbed. Lower = spawns pre-damaged. -->
     <constant id="blue-cake-health">7</constant>
     <constant id="red-cake-health">7</constant>
+    <!-- How often the Cookie Monster helps himself to a slice. Include the unit, so this can be
+         dropped to something like 20s for testing without touching anything else. -->
+    <constant id="monster-interval">10m</constant>
+    <!-- Pulses (0.1s each) a player must wait between slices. Also applied on (re)spawn, which
+         is what stops a right-click held down in observers from landing a bite on join. -->
+    <constant id="eat-delay">20</constant>
     <!-- Pulses (0.1s each) without a carrier heartbeat before the cake returns home. -->
     <constant id="return-delay">3</constant>
 </constants>
@@ -122,18 +127,36 @@
     <variable id="carrying_blue" exclusive="1" scope="player"/> <!-- a RED player is carrying the blue cake -->
     <variable id="carrying_red" exclusive="1" scope="player"/>  <!-- a BLUE player is carrying the red cake -->
     <variable id="has_eaten" scope="player"/>        <!-- 1 once you've eaten your one slice this life -->
+    <variable id="eat_delay" scope="player"/>        <!-- pulses left before this player may bite again -->
+    <variable id="has_killed" scope="player"/>       <!-- 1 once you've had your first kill this match -->
     <!-- Authoritative cake health (slices left, 7 = pristine). Only the team-gated food-spike
          detector lowers these; the physical cake is re-painted from them every tick, so any
          ungated eat (left-click / own-cake / wrong-team) is cosmetic and erased. This is both
          the anti-grief source of truth and the pre-damage knob. -->
     <variable id="blue_cake_health" scope="match" default="${blue-cake-health}"/>
     <variable id="red_cake_health" scope="match" default="${red-cake-health}"/>
+    <!-- The health a cake comes BACK at. The Cookie Monster lowers this, not just the live health,
+         so his slices are permanent: without it every cake return would undo his work and the
+         match would never converge, which is the whole point of him replacing the time limit. -->
+    <variable id="blue_cake_max" scope="match" default="${blue-cake-health}"/>
+    <variable id="red_cake_max" scope="match" default="${red-cake-health}"/>
+    <!-- Last health painted into the world. The sidebar proxy is driven with events="true" so the
+         destroyable goal can see it, and <fill> fires an event per block on EVERY call (it is not
+         idempotent), so the proxy may only be re-painted when the value actually changes. -->
+    <!-- 1 once that cake has actually been delivered. The proxy's LAST block is reserved for
+         this: a destroyable that reaches 100% is COMPLETE and PGM never un-completes it, so a bar
+         that hit 100% merely on pick-up would stick there for the rest of the match (verified:
+         after 100%, putting health back to 7 left it at 100%). Holding one block back means
+         normal play tops out just under 100% and stays repairable. -->
+    <variable id="blue_cake_captured" scope="match"/>
+    <variable id="red_cake_captured" scope="match"/>
+    <variable id="blue_cake_painted" scope="match" default="-1"/>
+    <variable id="red_cake_painted" scope="match" default="-1"/>
     <!-- Pulses since the carrier last checked in. See CAKE RETURN below. -->
     <variable id="blue_carrier_ticks" scope="match"/>
     <variable id="red_carrier_ticks" scope="match"/>
     <!-- exclusive = only one player holds it at a time, so <player var> resolves to that player -->
     <variable id="recent_actor" exclusive="1" scope="player"/>
-    <score id="cake_score"/> <!-- team-scoped score, ties into the <score> module below -->
 </variables>
 
 <filters>
@@ -154,6 +177,15 @@
     <!-- a cake block sitting on either monument spot -->
     <offset id="cake-on-red-monument" vector="73,13,-11"><material>cake block:0</material></offset>
     <offset id="cake-on-blue-monument" vector="-74,13,10"><material>cake block:0</material></offset>
+    <!-- The Cookie Monster's alarm clock. <after> rises once match-started has held for the
+         interval, and the pulse below counts ITS periods from that moment - so the first visit is
+         at 1x the interval, not at t=0 the way a bare match-started pulse would fire. -->
+    <after id="monster-awake" duration="${monster-interval}" filter="match-started"/>
+    <!-- staggered briefing after the match starts -->
+    <after id="intro-1" duration="3s" filter="match-started"/>
+    <after id="intro-2" duration="11s" filter="match-started"/>
+    <after id="intro-3" duration="19s" filter="match-started"/>
+    <after id="intro-4" duration="27s" filter="match-started"/>
 </filters>
 
 <regions>
@@ -165,9 +197,11 @@
     <block id="blue-cake">-47,15,-6</block>
     <block id="red-cake">46,15,5</block>
     <union id="cakes"><region id="blue-cake"/><region id="red-cake"/></union>
-    <!-- 1-block shell around each cake. <cuboid> max is EXCLUSIVE, so it is centre+1 per axis. -->
-    <cuboid id="blue-cake-zone" min="-48,14,-7" max="-45,17,-4"/>
-    <cuboid id="red-cake-zone" min="45,14,4" max="48,17,7"/>
+    <!-- 3x3 column around each cake. A <rectangle> is unbounded in Y, so this also stops anyone
+         roofing the cake over: it stays reachable from directly above at any height. (Rectangle
+         max is inclusive, but block centres sit at .5, so the +1 convention still gives 3 wide.) -->
+    <rectangle id="blue-cake-zone" min="-48,-7" max="-45,-4"/>
+    <rectangle id="red-cake-zone" min="45,4" max="48,7"/>
     <union id="cake-zones"><region id="blue-cake-zone"/><region id="red-cake-zone"/></union>
 
     <!-- delivery spots: the bedrock pedestal under the coloured glass marker beside each spawn.
@@ -177,6 +211,34 @@
     <cuboid id="red-monument-zone" min="72,12,-12" max="75,15,-9"/>
     <cuboid id="blue-monument-zone" min="-75,12,9" max="-72,15,12"/>
     <union id="monument-zones"><region id="red-monument-zone"/><region id="blue-monument-zone"/></union>
+
+    <!-- SIDEBAR PROXY. PGM's sidebar can only render scores and goals - there is no free-text
+         row - so the cake tracker is a hidden <destroyable> whose blocks are knocked out one
+         per slice. These are bedrock in the world floor at y=0, entombed under more bedrock
+         at y=1, so no player can ever see or reach them. -->
+    <block id="blue-proxy-1">-48,0,-30</block>
+    <block id="blue-proxy-2">-47,0,-30</block>
+    <block id="blue-proxy-3">-46,0,-30</block>
+    <block id="blue-proxy-4">-45,0,-30</block>
+    <block id="blue-proxy-5">-44,0,-30</block>
+    <block id="blue-proxy-6">-43,0,-30</block>
+    <block id="blue-proxy-7">-42,0,-30</block>
+    <block id="blue-proxy-8">-41,0,-30</block>
+    <block id="red-proxy-1">46,0,-25</block>
+    <block id="red-proxy-2">47,0,-25</block>
+    <block id="red-proxy-3">48,0,-25</block>
+    <block id="red-proxy-4">49,0,-25</block>
+    <block id="red-proxy-5">50,0,-25</block>
+    <block id="red-proxy-6">51,0,-25</block>
+    <block id="red-proxy-7">52,0,-25</block>
+    <block id="red-proxy-8">53,0,-25</block>
+    <cuboid id="blue-cake-proxy" min="-48,0,-30" max="-40,1,-29"/>
+    <cuboid id="red-cake-proxy" min="46,0,-25" max="54,1,-24"/>
+    <!-- Deliberately NOT protected by an <apply>: the proxy is driven by <fill events="true">,
+         and any region rule that denies the resulting BlockFormEvent silently freezes the
+         tracker (FillAction skips cancelled blocks). It needs no guard anyway - these blocks
+         are entombed in the y=0 bedrock floor under more bedrock. -->
+    <union id="cake-proxies"><region id="blue-cake-proxy"/><region id="red-cake-proxy"/></union>
 
     <negative id="not-spawns">
         <union id="spawns">
@@ -221,14 +283,28 @@
     <apply kit="reset-resistance-kit" region="not-spawns"/>
 </regions>
 
+<!-- CAKE SIZE TRACKER *and* the win condition. This map deliberately has no score module:
+     delivering a cake completes that cake's monument, and PGM ends the match on the goal itself.
+     Routing the win through a score instead meant the match ended in the same tick the proxy was
+     filled, and PGM stops refreshing sidebars once a match is finished - so the bar visibly froze
+     short of full. repairable, plus one block held back for the delivery, keeps it live all match. -->
+<destroyables materials="bedrock" show-progress="true">
+    <destroyable id="blue-cake-goal" name="Blue Cake" owner="blue-team" region="blue-cake-proxy"
+                 required="true" repairable="true"/>
+    <destroyable id="red-cake-goal" name="Red Cake" owner="red-team" region="red-cake-proxy"
+                 required="true" repairable="true"/>
+</destroyables>
+
 <actions>
     <!-- MAIN per-player loop: eat-detect (both cakes) + carry bookkeeping + look tracking + food pin -->
     <trigger scope="player">
         <filter><pulse period="0.1s" duration="0.05s" filter="all(match-started,participating)"/></filter>
         <action>
             <!-- ===== RED eats the BLUE cake ===== -->
-            <action filter="all(only-red, player.food=20.., was_looking_blue=1, has_eaten=0, blue_cake_health=1..)">
+            <action filter="all(only-red, player.food=20.., was_looking_blue=1, has_eaten=0, eat_delay=..0, blue_cake_health=1..)">
                 <set var="has_eaten" value="1"/>
+                <set var="eat_delay" value="${eat-delay}"/>
+                <sound key="${entity.generic.eat}" volume="1" pitch="1"/>  <!-- the mouthful -->
                 <!-- read health BEFORE lowering it: 2.. = slices remain, ..1 = that was the last -->
                 <action filter="blue_cake_health=2..">
                     <message actionbar="`aYou bit the Blue Cake!"/>
@@ -269,8 +345,10 @@
             </action>
 
             <!-- ===== BLUE eats the RED cake ===== -->
-            <action filter="all(only-blue, player.food=20.., was_looking_red=1, has_eaten=0, red_cake_health=1..)">
+            <action filter="all(only-blue, player.food=20.., was_looking_red=1, has_eaten=0, eat_delay=..0, red_cake_health=1..)">
                 <set var="has_eaten" value="1"/>
+                <set var="eat_delay" value="${eat-delay}"/>
+                <sound key="${entity.generic.eat}" volume="1" pitch="1"/>  <!-- the mouthful -->
                 <action filter="red_cake_health=2..">
                     <message actionbar="`aYou bit the Red Cake!"/>
                     <sound preset="objective fireworks far"/>
@@ -355,6 +433,9 @@
                 <switch-scope inner="match"><set var="red_carrier_ticks" value="0"/></switch-scope>
             </action>
 
+            <!-- count the eating delay down -->
+            <action filter="eat_delay=1.."><set var="eat_delay" value="eat_delay-1"/></action>
+
             <!-- pin food: 19 while you can still eat this life, 20 (blocked) once you've eaten -->
             <action filter="has_eaten=0"><set var="player.food" value="19"/></action>
             <action filter="has_eaten=1"><set var="player.food" value="20"/></action>
@@ -372,7 +453,7 @@
             <action filter="blue_cake_health=..0">
                 <set var="blue_carrier_ticks" value="blue_carrier_ticks+1"/>
                 <action filter="blue_carrier_ticks=${return-delay}..">
-                    <set var="blue_cake_health" value="${blue-cake-health}"/>
+                    <set var="blue_cake_health" value="blue_cake_max"/>
                     <set var="blue_carrier_ticks" value="0"/>
                     <message text="`rThe `9Blue Cake `rreturned to its spawn!"/>
                     <!-- owner (blue) hears a relieved chime, the attackers hear it slip away -->
@@ -387,7 +468,7 @@
             <action filter="red_cake_health=..0">
                 <set var="red_carrier_ticks" value="red_carrier_ticks+1"/>
                 <action filter="red_carrier_ticks=${return-delay}..">
-                    <set var="red_cake_health" value="${red-cake-health}"/>
+                    <set var="red_cake_health" value="red_cake_max"/>
                     <set var="red_carrier_ticks" value="0"/>
                     <message text="`rThe `cRed Cake `rreturned to its spawn!"/>
                     <switch-scope inner="team" filter="only-red">
@@ -397,6 +478,47 @@
                         <sound key="${entity.firework_rocket.twinkle_far}" volume="1" pitch="1"/>
                     </switch-scope>
                 </action>
+            </action>
+
+            <!-- blue cake: 7 slice blocks, plus one held back for the delivery. Block i is
+                 gone once (7 - health) >= i, so the bar tops out at 7/8 while the cake
+                 is merely stolen, and only a real capture takes it to 100%. -->
+            <action filter="all(blue_cake_captured=..0, not(blue_cake_health-blue_cake_painted=0))">
+                <action filter="blue_cake_health=7.."><fill material="bedrock" region="blue-proxy-1" events="true"/></action>
+                <action filter="blue_cake_health=..6"><fill material="air" region="blue-proxy-1" events="true"/></action>
+                <action filter="blue_cake_health=6.."><fill material="bedrock" region="blue-proxy-2" events="true"/></action>
+                <action filter="blue_cake_health=..5"><fill material="air" region="blue-proxy-2" events="true"/></action>
+                <action filter="blue_cake_health=5.."><fill material="bedrock" region="blue-proxy-3" events="true"/></action>
+                <action filter="blue_cake_health=..4"><fill material="air" region="blue-proxy-3" events="true"/></action>
+                <action filter="blue_cake_health=4.."><fill material="bedrock" region="blue-proxy-4" events="true"/></action>
+                <action filter="blue_cake_health=..3"><fill material="air" region="blue-proxy-4" events="true"/></action>
+                <action filter="blue_cake_health=3.."><fill material="bedrock" region="blue-proxy-5" events="true"/></action>
+                <action filter="blue_cake_health=..2"><fill material="air" region="blue-proxy-5" events="true"/></action>
+                <action filter="blue_cake_health=2.."><fill material="bedrock" region="blue-proxy-6" events="true"/></action>
+                <action filter="blue_cake_health=..1"><fill material="air" region="blue-proxy-6" events="true"/></action>
+                <action filter="blue_cake_health=1.."><fill material="bedrock" region="blue-proxy-7" events="true"/></action>
+                <action filter="blue_cake_health=..0"><fill material="air" region="blue-proxy-7" events="true"/></action>
+                <set var="blue_cake_painted" value="blue_cake_health"/>
+            </action>
+            <!-- red cake: 7 slice blocks, plus one held back for the delivery. Block i is
+                 gone once (7 - health) >= i, so the bar tops out at 7/8 while the cake
+                 is merely stolen, and only a real capture takes it to 100%. -->
+            <action filter="all(red_cake_captured=..0, not(red_cake_health-red_cake_painted=0))">
+                <action filter="red_cake_health=7.."><fill material="bedrock" region="red-proxy-1" events="true"/></action>
+                <action filter="red_cake_health=..6"><fill material="air" region="red-proxy-1" events="true"/></action>
+                <action filter="red_cake_health=6.."><fill material="bedrock" region="red-proxy-2" events="true"/></action>
+                <action filter="red_cake_health=..5"><fill material="air" region="red-proxy-2" events="true"/></action>
+                <action filter="red_cake_health=5.."><fill material="bedrock" region="red-proxy-3" events="true"/></action>
+                <action filter="red_cake_health=..4"><fill material="air" region="red-proxy-3" events="true"/></action>
+                <action filter="red_cake_health=4.."><fill material="bedrock" region="red-proxy-4" events="true"/></action>
+                <action filter="red_cake_health=..3"><fill material="air" region="red-proxy-4" events="true"/></action>
+                <action filter="red_cake_health=3.."><fill material="bedrock" region="red-proxy-5" events="true"/></action>
+                <action filter="red_cake_health=..2"><fill material="air" region="red-proxy-5" events="true"/></action>
+                <action filter="red_cake_health=2.."><fill material="bedrock" region="red-proxy-6" events="true"/></action>
+                <action filter="red_cake_health=..1"><fill material="air" region="red-proxy-6" events="true"/></action>
+                <action filter="red_cake_health=1.."><fill material="bedrock" region="red-proxy-7" events="true"/></action>
+                <action filter="red_cake_health=..0"><fill material="air" region="red-proxy-7" events="true"/></action>
+                <set var="red_cake_painted" value="red_cake_health"/>
             </action>
 
             <!-- ===== RE-PAINT: health N -> cake block with (7-N) slices eaten; 0 -> air ===== -->
@@ -419,9 +541,77 @@
         </action>
     </trigger>
 
-    <!-- reset the one-slice limit each time you (re)spawn -->
+    <!-- THE COOKIE MONSTER. With no time limit, a stalemate would last forever, so every
+         ${monster-interval} he takes a slice out of BOTH cakes and they get easier to steal.
+         He lowers the respawn max as well as the live health, so his slices survive a cake
+         return. He never takes the last slice: at 1 health the cake still needs a real player
+         bite to be grabbed, so he can't hand anyone a capture. -->
+    <trigger scope="match">
+        <filter><pulse period="${monster-interval}" duration="0.05s" filter="monster-awake"/></filter>
+        <action>
+            <action filter="blue_cake_max=2..">
+                <set var="blue_cake_max" value="blue_cake_max-1"/>
+                <!-- only bite the cake itself if it is home and has a slice to spare; while it is
+                     being carried (health 0) he just takes it out of what it returns at -->
+                <action filter="blue_cake_health=2..">
+                    <set var="blue_cake_health" value="blue_cake_health-1"/>
+                </action>
+                <message text="`6`lThe Cookie Monster `rwandered past and ate a slice of the `9Blue Cake`r! `7({s} left)">
+                    <replacements><decimal id="s" scope="match" value="blue_cake_max" format="#"/></replacements>
+                </message>
+                <sound preset="objective fireworks twinkle"/>
+            </action>
+            <action filter="red_cake_max=2..">
+                <set var="red_cake_max" value="red_cake_max-1"/>
+                <action filter="red_cake_health=2..">
+                    <set var="red_cake_health" value="red_cake_health-1"/>
+                </action>
+                <message text="`6`lThe Cookie Monster `rwandered past and ate a slice of the `cRed Cake`r! `7({s} left)">
+                    <replacements><decimal id="s" scope="match" value="red_cake_max" format="#"/></replacements>
+                </message>
+                <sound preset="objective fireworks twinkle"/>
+            </action>
+        </action>
+    </trigger>
+
+    <!-- Reset the one-slice limit each time you (re)spawn. player.food is forced back to 19 here
+         because an OBSERVER can right-click a cake: RegionMatchModule skips non-participants
+         entirely, so their eat is ungated and their food climbs to 20 unseen, and the first pulse
+         after they join a team would read that stale 20 as a bite. Clearing food and arming the
+         eat delay on spawn is what closes that. -->
     <trigger scope="player" filter="alive">
-        <action><set var="has_eaten" value="0"/></action>
+        <action>
+            <set var="has_eaten" value="0"/>
+            <set var="player.food" value="19"/>
+            <set var="eat_delay" value="${eat-delay}"/>
+        </action>
+    </trigger>
+
+    <!-- BRIEFING: staggered so it reads as a briefing rather than a wall of text at t=0 -->
+    <trigger scope="match" filter="intro-1">
+        <action>
+            <message text="`6`m                                                            "/>
+            <message text="`e`lCAPTURE THE CAKE `7- eat the enemy's cake, carry it home."/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="intro-2">
+        <action>
+            <message text="`f1. `7Right-click the `9ENEMY `7cake to take a slice. You can only"/>
+            <message text="`7   eat `fone slice per life `7- then you need a kill, or a respawn."/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="intro-3">
+        <action>
+            <message text="`f2. `7Whoever eats the `flast `7slice picks the cake up. Carry it to"/>
+            <message text="`7   `fyour own monument `7and place it there to win."/>
+        </action>
+    </trigger>
+    <trigger scope="match" filter="intro-4">
+        <action>
+            <message text="`f3. `7Kill the carrier and their cake goes straight home. Watch for"/>
+            <message text="`7   the `6Cookie Monster`7: he thins both cakes as the match drags on."/>
+            <message text="`6`m                                                            "/>
+        </action>
     </trigger>
 
     <!-- CAPTURE: a cake on RED's monument (only its carrier can place it there) scores red 1 -> win -->
@@ -431,11 +621,20 @@
             <sound preset="objective mode"/>
             <!-- the objective is delivered, so the cake is no longer "out": this restores it at
                  home, stops the carry watchdog, and lets the pulse clear the carrier's flag -->
-            <set var="blue_cake_health" value="${blue-cake-health}"/>
+            <!-- Complete the monument HERE, not from the match pulse: the pulse is a Tickable
+                 that stops the moment the match ends, and the win lands in this same tick, so a
+                 fill deferred to the next pulse would never happen and the bar would stick just
+                 short of full. captured=1 also stops the slice ladder repairing these back. -->
+            <set var="blue_cake_captured" value="1"/>
+            <fill material="air" region="blue-proxy-1" events="true"/>
+            <fill material="air" region="blue-proxy-2" events="true"/>
+            <fill material="air" region="blue-proxy-3" events="true"/>
+            <fill material="air" region="blue-proxy-4" events="true"/>
+            <fill material="air" region="blue-proxy-5" events="true"/>
+            <fill material="air" region="blue-proxy-6" events="true"/>
+            <fill material="air" region="blue-proxy-7" events="true"/>
+            <fill material="air" region="blue-proxy-8" events="true"/>
             <set var="blue_carrier_ticks" value="0"/>
-            <switch-scope inner="team" filter="only-red">
-                <set var="cake_score" value="cake_score+1"/>
-            </switch-scope>
         </action>
     </trigger>
     <!-- CAPTURE: a cake on BLUE's monument scores blue 1 -> win -->
@@ -443,11 +642,20 @@
         <action>
             <message text="`9`lBlue captured the Red Cake!"/>
             <sound preset="objective mode"/>
-            <set var="red_cake_health" value="${red-cake-health}"/>
+            <!-- Complete the monument HERE, not from the match pulse: the pulse is a Tickable
+                 that stops the moment the match ends, and the win lands in this same tick, so a
+                 fill deferred to the next pulse would never happen and the bar would stick just
+                 short of full. captured=1 also stops the slice ladder repairing these back. -->
+            <set var="red_cake_captured" value="1"/>
+            <fill material="air" region="red-proxy-1" events="true"/>
+            <fill material="air" region="red-proxy-2" events="true"/>
+            <fill material="air" region="red-proxy-3" events="true"/>
+            <fill material="air" region="red-proxy-4" events="true"/>
+            <fill material="air" region="red-proxy-5" events="true"/>
+            <fill material="air" region="red-proxy-6" events="true"/>
+            <fill material="air" region="red-proxy-7" events="true"/>
+            <fill material="air" region="red-proxy-8" events="true"/>
             <set var="red_carrier_ticks" value="0"/>
-            <switch-scope inner="team" filter="only-blue">
-                <set var="cake_score" value="cake_score+1"/>
-            </switch-scope>
         </action>
     </trigger>
 
@@ -498,9 +706,22 @@
     <kill-reward>
         <item material="wood" amount="16"/>
         <item material="stained clay" team-color="true" amount="48"/>
+        <!-- Healing has to come from potions, not food: this map has no edible items at all
+             (the golden apples went with the DTM version), because the eat detector keys on a
+             food spike and anything edible would read as a cake bite. Drinking or splashing a
+             potion never touches the food bar, so it is the one safe way to heal here. -->
+        <item material="potion" damage="16421" amount="2" name="`c`lSplash Health II"
+              lore="`7The only healing on this map:|`7nothing edible can exist here."/>
         <action>
             <set var="has_eaten" value="0"/>
             <set var="player.food" value="19"/>
+            <set var="eat_delay" value="0"/>   <!-- a kill buys an immediate slice -->
+            <!-- teach the mechanic once, the first time it can possibly matter -->
+            <action filter="has_killed=0">
+                <set var="has_killed" value="1"/>
+                <message text="`a`lHunger restored! `r`7That kill bought you another slice of cake - go take a bite."/>
+            </action>
+            <message actionbar="`aHunger restored - you can eat another slice!"/>
         </action>
     </kill-reward>
 </kill-rewards>
@@ -519,9 +740,13 @@
     <item>vine</item>
 </itemkeep>
 
-<!-- cake is here as well as prevent-sharing on the item: <itemremove> cancels the ItemSpawnEvent,
-     so ANY cake that would ever hit the ground is destroyed, including one that never came from
-     the kit (a /give during testing, say) and therefore carries no PGM tag. -->
+<!-- cake is listed here as a second line of defence, but note what each layer actually covers
+     (measured in-game, not assumed): <itemremove> only cancels ItemSpawnEvent, and CraftBukkit
+     does NOT fire that for a player's manual drop - it fires PlayerDropItemEvent. So this entry
+     catches cakes entering the world by other routes, while the kit item's prevent-sharing tag is
+     what deletes a manually dropped cake (verified: dropping the tagged kit cake leaves no ground
+     entity, dropping an untagged /give cake does). The rule that actually makes a stray cake
+     harmless either way is the monument's carrying_* check - an uncarried cake can never score. -->
 <itemremove>
     <item>iron helmet</item>
     <item>chainmail chestplate</item>
@@ -601,11 +826,8 @@
 
 <maxbuildheight>30</maxbuildheight>
 
-<score>
-    <limit>${score-limit}</limit>
-</score>
-
-<!-- Symmetric race: first cake delivered wins (score limit above). If the timer expires with
-     no delivery, the higher score wins and an even score is a draw (no result= on <time>). -->
-<time>${time-limit}m</time>
+<!-- Symmetric race: delivering the enemy cake completes their monument and wins outright - that
+     goal IS the win condition, there is no score. There is deliberately no time limit either. What stops a stalemate lasting
+     forever is the Cookie Monster, who thins both cakes every ${monster-interval} until they
+     take a single bite to steal. -->
 </map>
