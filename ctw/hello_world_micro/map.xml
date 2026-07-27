@@ -1,9 +1,9 @@
 <map proto="1.5.0">
     <name>Hello World Micro</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <gamemode>ctw</gamemode>
+    <objective>Capture your enemy's wool — a per-game roll decides whether you need 1 or 2!</objective>
     <phase>development</phase>
-    <objective>Capture both enemy wools — the second appears once you take the first!</objective>
     <include id="gapple-kill-reward"/>
     <authors>
         <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
@@ -54,41 +54,97 @@
         <spawn team="red" kit="spawn-kit" yaw="90" region="red-spawn-point"/>
         <spawn team="blue" kit="spawn-kit" yaw="90" region="blue-spawn-point"/>
     </spawns>
-    <!-- Staggered wools: both of a team's wools share one spot. The first is live from the start;
-         capturing it reveals the second (scoreboard) and hands the spawner over (see <spawners>). -->
+    <!-- Each team must capture wool_count (1 or 2, rolled per game — see <variables>/<actions>) wools.
+         The "final" wool is the single required goal, so victory fires only when it is captured — i.e.
+         after exactly N captures. The "lead-in" wool is an extra step that only exists when the roll is
+         2. Both of a team's wools share one spot and one scoreboard slot: only the live one shows.
+         PGM can't randomise the *required* count natively (isRequired is static), so a fixed required
+         "final" wool plus a roll-gated lead-in is how we vary how many captures a win takes. -->
     <wools>
-        <wool team="blue" color="red" location="-45,25,-35" monument="red-blue-monument" id="blue-wool-1"/>
-        <wool team="blue" color="orange" location="-45,25,-35" monument="orange-blue-monument" scoreboard-filter="blue-2-revealed"/>
-        <wool team="red" color="blue" location="-45,25,35" monument="blue-red-monument" id="red-wool-1"/>
-        <wool team="red" color="light_blue" location="-45,25,35" monument="light_blue-red-monument" scoreboard-filter="red-2-revealed"/>
+        <!-- Blue's objective wools sit in red's wool room. Final = orange (required); lead-in = red. -->
+        <wool team="blue" color="red" location="-45,25,-35" monument="red-blue-monument"
+              id="blue-wool-lead" required="false" scoreboard-filter="blue-lead-live"/>
+        <wool team="blue" color="orange" location="-45,25,-35" monument="orange-blue-monument"
+              id="blue-wool-final" required="true" scoreboard-filter="blue-final-live"/>
+        <!-- Red's objective wools sit in blue's wool room. Final = light blue (required); lead-in = blue. -->
+        <wool team="red" color="blue" location="-45,25,35" monument="blue-red-monument"
+              id="red-wool-lead" required="false" scoreboard-filter="red-lead-live"/>
+        <wool team="red" color="light_blue" location="-45,25,35" monument="light_blue-red-monument"
+              id="red-wool-final" required="true" scoreboard-filter="red-final-live"/>
     </wools>
+    <variables>
+        <!-- Rolled once at match start to 1 or 2: how many wools each team must capture to win.
+             Default 0 = "not rolled yet", so nothing is live until the roll lands (see <actions>). -->
+        <variable id="wool_count" scope="match" default="0"/>
+    </variables>
     <filters>
         <not id="no-void">
             <void/>
         </not>
         <team id="only-blue">blue</team>
-        <!-- Stagger gates (match-scoped). *-revealed = the first wool is captured; *-live = it is not. -->
-        <completed id="blue-2-revealed">blue-wool-1</completed>
-        <completed id="red-2-revealed">red-wool-1</completed>
-        <not id="blue-1-live">
-            <completed>blue-wool-1</completed>
-        </not>
-        <not id="red-1-live">
-            <completed>red-wool-1</completed>
-        </not>
-        <!-- Matches any wool color; used as a mask so box-recolor fills only touch wool blocks -->
-        <material id="any-wool">wool</material>
         <team id="only-red">red</team>
         <not id="not-blue">
             <filter id="only-blue"/>
         </not>
-        <all id="reds-woolrooms-filter">
-            <filter id="not-red"/>
-            <filter id="woolrooms-filter"/>
-        </all>
         <not id="not-red">
             <filter id="only-red"/>
         </not>
+
+        <!-- ===== Per-game wool-count roll gates (match-scoped) =====
+             wool_count is rolled to 1 or 2 at match start; these flip the instant it lands. Because
+             wool_count writes invalidate the filter module, every gate below re-evaluates reactively. -->
+        <variable id="need-one" var="wool_count">1</variable>
+        <variable id="need-two" var="wool_count">2</variable>
+
+        <!-- Capture state of each wool -->
+        <completed id="blue-lead-captured">blue-wool-lead</completed>
+        <completed id="red-lead-captured">red-wool-lead</completed>
+        <completed id="blue-final-captured">blue-wool-final</completed>
+        <completed id="red-final-captured">red-wool-final</completed>
+
+        <!-- Lead-in wool wants capturing: only in 2-wool games, until it is captured -->
+        <all id="blue-lead-live">
+            <filter id="need-two"/>
+            <not><filter id="blue-lead-captured"/></not>
+        </all>
+        <all id="red-lead-live">
+            <filter id="need-two"/>
+            <not><filter id="red-lead-captured"/></not>
+        </all>
+
+        <!-- Final (required) wool wants capturing: live from the start in 1-wool games,
+             or once the lead-in is captured in 2-wool games (lead-captured can't be true in a
+             1-wool game, since that wool never spawns) -->
+        <all id="blue-final-live">
+            <not><filter id="blue-final-captured"/></not>
+            <any>
+                <filter id="need-one"/>
+                <filter id="blue-lead-captured"/>
+            </any>
+        </all>
+        <all id="red-final-live">
+            <not><filter id="red-final-captured"/></not>
+            <any>
+                <filter id="need-one"/>
+                <filter id="red-lead-captured"/>
+            </any>
+        </all>
+
+        <!-- Rising edge = "the wool room switched colors": only in 2-wool games, when the lead-in falls -->
+        <all id="blue-room-switched">
+            <filter id="need-two"/>
+            <filter id="blue-lead-captured"/>
+        </all>
+        <all id="red-room-switched">
+            <filter id="need-two"/>
+            <filter id="red-lead-captured"/>
+        </all>
+
+        <!-- Masks so the box-recolor fills only touch wool / glass-pane blocks (leaving air, etc.) -->
+        <material id="any-wool">wool</material>
+        <material id="any-pane">stained glass pane</material>
+
+        <!-- ===== Wool-room protection ===== -->
         <any id="woolrooms-filter">
             <material>web</material>
             <material>stained glass</material>
@@ -103,6 +159,10 @@
                 </any>
             </all>
         </any>
+        <all id="reds-woolrooms-filter">
+            <filter id="not-red"/>
+            <filter id="woolrooms-filter"/>
+        </all>
         <all id="blues-woolrooms-filter">
             <filter id="not-blue"/>
             <filter id="woolrooms-filter"/>
@@ -126,10 +186,12 @@
         <rectangle id="blue-wool" min="-50,30" max="-40,40"/>
         <rectangle id="orange-wool" min="-50,-40" max="-40,-30"/>
         <rectangle id="red-wool" min="-50,-40" max="-40,-30"/>
-        <!-- Wool blocks stamped into each box (pedestal at y=25 + frame ring at y=29).
-             Recolored in place by the box-recolor actions to match the live wool. -->
-        <cuboid id="blue-box" min="-49,25,-39" max="-42,29,-32"/>
-        <cuboid id="red-box" min="-49,25,31" max="-42,29,38"/>
+        <!-- Wool blocks stamped into each box (pedestal at y=25 + frame ring at y=29), recolored in
+             place by the box-recolor actions. NB: PGM cuboid max is EXCLUSIVE at the block level, so
+             max = last-block-coord + 1 on every axis; otherwise the y=29 frame ring and the -42/-32
+             far edges are never iterated (verified in-game: only the y=25 pedestal recolored). -->
+        <cuboid id="blue-box" min="-49,25,-39" max="-41,30,-31"/>
+        <cuboid id="red-box" min="-49,25,31" max="-41,30,39"/>
         <union id="reds-woolrooms">
             <region id="red-wool"/>
             <region id="orange-wool"/>
@@ -171,43 +233,90 @@
         <apply block="blues-woolrooms-filter" region="blues-woolrooms" message="You may not edit the wool room!"/>
         <apply block="no-void" region="not-build-area" message="You may not edit the void!"/>
     </regions>
-    <!-- Exactly one wool of each pair spawns at a time: the first until it is captured, then the
-         second. Same spot, so it reads as the wool swapping in place. -->
+    <!-- Only the live wool of each team spawns at a time. In a 2-wool game the lead-in spawns first;
+         capturing it makes the final wool live in the same spot, so it reads as the wool swapping.
+         In a 1-wool game the lead-in never spawns and the final wool is live from the start. -->
     <spawners>
-        <spawner spawn-region="red-wool-spawn" player-region="red-wool" delay="1.5s" filter="blue-1-live">
-            <item material="wool" damage="14"/>
+        <spawner spawn-region="red-wool-spawn" player-region="red-wool" delay="1.5s" filter="blue-lead-live">
+            <item material="wool" damage="14"/> <!-- red = blue's lead-in -->
         </spawner>
-        <spawner spawn-region="orange-wool-spawn" player-region="orange-wool" delay="1.5s" filter="blue-2-revealed">
-            <item material="wool" damage="1"/>
+        <spawner spawn-region="orange-wool-spawn" player-region="orange-wool" delay="1.5s" filter="blue-final-live">
+            <item material="wool" damage="1"/> <!-- orange = blue's final (required) -->
         </spawner>
-        <spawner spawn-region="blue-wool-spawn" player-region="blue-wool" delay="1.5s" filter="red-1-live">
-            <item material="wool" damage="11"/>
+        <spawner spawn-region="blue-wool-spawn" player-region="blue-wool" delay="1.5s" filter="red-lead-live">
+            <item material="wool" damage="11"/> <!-- blue = red's lead-in -->
         </spawner>
-        <spawner spawn-region="light_blue-wool-spawn" player-region="light_blue-wool" delay="1.5s" filter="red-2-revealed">
-            <item material="wool" damage="3"/>
+        <spawner spawn-region="light_blue-wool-spawn" player-region="light_blue-wool" delay="1.5s" filter="red-final-live">
+            <item material="wool" damage="3"/> <!-- light blue = red's final (required) -->
         </spawner>
     </spawners>
-    <!-- Recolor each box's stamped wool to match the live wool. PGM never swaps wool blocks on
-         capture, so we do it explicitly: each trigger fires on the rising edge of a stagger gate
-         (the "1-live" gate is true from match start, so the phase-1 color is applied immediately).
-         The any-wool filter keeps glass/air in the box untouched; fills bypass block protections. -->
     <actions>
+        <!-- Roll the per-game requirement (1 or 2) the instant the match starts. floor(random()*2)+1
+             is 1 or 2; the write invalidates the filter module, so every gate below reacts at once. -->
+        <action id="roll-wool-count" scope="match">
+            <set var="wool_count" value="floor(random() * 2) + 1"/>
+        </action>
+        <trigger action="roll-wool-count" scope="match" filter="match-started"/>
+
+        <!-- Announce the rolled requirement. need-one/need-two go true only after the roll lands
+             (default 0 matches neither), so exactly one of these fires, once, right at the start. -->
+        <action id="announce-one" scope="match">
+            <message stay="3s" title="`a`l1 Wool" subtitle="`7Capture the enemy wool to win!"
+                     text="`7[`e`lObjective`7] This game: capture `a1`7 wool to win!"/>
+            <sound preset="alert"/>
+        </action>
+        <action id="announce-two" scope="match">
+            <message stay="3s" title="`a`l2 Wools" subtitle="`7Capture both enemy wools to win!"
+                     text="`7[`e`lObjective`7] This game: capture `a2`7 wools to win!"/>
+            <sound preset="alert"/>
+        </action>
+        <trigger action="announce-one" scope="match" filter="need-one"/>
+        <trigger action="announce-two" scope="match" filter="need-two"/>
+
+        <!-- Recolor each team's display box (wool + glass panes) to the live wool. PGM never swaps
+             blocks on capture, so we fill explicitly on the rising edge of each liveness gate. Each
+             fill's material-filter (any-wool / any-pane) touches only that block type, leaving air
+             and everything else alone; fills bypass block protections. In a 1-wool game only the
+             *-final fill runs (box goes straight to the final colour); in a 2-wool game *-lead runs first. -->
         <action id="blue-box-red" scope="match">
             <fill region="blue-box" material="red wool" filter="any-wool"/>
+            <fill region="blue-box" material="red stained glass pane" filter="any-pane"/>
         </action>
         <action id="blue-box-orange" scope="match">
             <fill region="blue-box" material="orange wool" filter="any-wool"/>
+            <fill region="blue-box" material="orange stained glass pane" filter="any-pane"/>
         </action>
         <action id="red-box-blue" scope="match">
             <fill region="red-box" material="blue wool" filter="any-wool"/>
+            <fill region="red-box" material="blue stained glass pane" filter="any-pane"/>
         </action>
         <action id="red-box-light-blue" scope="match">
             <fill region="red-box" material="light blue wool" filter="any-wool"/>
+            <fill region="red-box" material="light blue stained glass pane" filter="any-pane"/>
         </action>
-        <trigger action="blue-box-red" scope="match" filter="blue-1-live"/>
-        <trigger action="blue-box-orange" scope="match" filter="blue-2-revealed"/>
-        <trigger action="red-box-blue" scope="match" filter="red-1-live"/>
-        <trigger action="red-box-light-blue" scope="match" filter="red-2-revealed"/>
+        <trigger action="blue-box-red" scope="match" filter="blue-lead-live"/>
+        <trigger action="blue-box-orange" scope="match" filter="blue-final-live"/>
+        <trigger action="red-box-blue" scope="match" filter="red-lead-live"/>
+        <trigger action="red-box-light-blue" scope="match" filter="red-final-live"/>
+
+        <!-- Wool-room switch alert: broadcast + sound the moment a team's lead-in is captured. Gated on
+             *-room-switched, so it only fires in 2-wool games (never at start, never in 1-wool games). -->
+        <action id="blue-room-switch-alert" scope="match">
+            <message stay="2.5s"
+                     text="`7[`e`lAlert`7] `9Blue`7 captured the `cRed`7 wool — their wool room switched to `6Orange`7!"
+                     title="`6`lWool Room Switched"
+                     subtitle="`9Blue`7's wool is now `6Orange"/>
+            <sound preset="alert"/>
+        </action>
+        <action id="red-room-switch-alert" scope="match">
+            <message stay="2.5s"
+                     text="`7[`e`lAlert`7] `cRed`7 captured the `9Blue`7 wool — their wool room switched to `bLight Blue`7!"
+                     title="`6`lWool Room Switched"
+                     subtitle="`cRed`7's wool is now `bLight Blue"/>
+            <sound preset="alert"/>
+        </action>
+        <trigger action="blue-room-switch-alert" scope="match" filter="blue-room-switched"/>
+        <trigger action="red-room-switch-alert" scope="match" filter="red-room-switched"/>
     </actions>
     <block-drops>
         <rule>
