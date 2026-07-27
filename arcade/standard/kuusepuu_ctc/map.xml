@@ -1,0 +1,611 @@
+<?xml version="1.0"?>
+<map proto="1.5.0">
+<name>Kuusepuu CTC</name>
+<version>1.0.0</version>
+<objective>Eat the ENEMY cake, carry it home, and place it on your own monument. Both teams attack and defend!</objective>
+<gamemode>ctw</gamemode>
+<created>2026-07-27</created>
+<phase>development</phase>
+<authors>
+    <author uuid="fe3608b7-d105-4029-8800-34b3147065b6"/> <!-- rockymine -->
+    <author uuid="f1ff7ecc-2e79-4320-85de-adb392eb2822"/> <!-- DerStiv -->
+    <author contribution="CTC conversion">Claude Opus 5</author>
+</authors>
+<contributors>
+    <contributor uuid="e2d2c2c6-cea9-4510-9ab2-a091b5605b30" contribution="XML"/> <!-- Ruediger_LP -->
+</contributors>
+
+<!--
+  CAPTURE THE CAKE on the Kuusepuu terrain. This is the DTM map with the destroyables removed
+  and the cake objective of capture_the_cake_ctw dropped in; the regions, spawns, kit, build
+  rules and crafting are Kuusepuu's.
+
+    - RED spawns at +x. RED eats the BLUE cake (-47,15,-6) and places it on RED's monument
+      (73,13,-11), the spot marked by the BLUE stained glass beside red spawn.
+    - BLUE spawns at -x. BLUE eats the RED cake (46,15,5) and places it on BLUE's monument
+      (-74,13,10), the spot marked by the RED stained glass beside blue spawn.
+  Both cakes sit on the bedrock pedestals where the DTM monuments used to stand. First team to
+  deliver wins (score limit 1); otherwise the higher score at the time limit wins, a tie draws.
+
+  CAKE HEALTH (see <constants>): *-cake-health is how many bites a cake survives before the
+  eater grabs it. 7 = a pristine cake; set it lower to start that cake PRE-DAMAGED (the block is
+  painted from the health value, so a health of 4 spawns a cake missing 3 slices). Values above
+  7 make a tougher cake that simply shows as full until 7 bites remain.
+
+  TWO THINGS THAT MUST NOT COME BACK FROM THE DTM VERSION:
+    1. <hunger><depletion>off</depletion></hunger>. HungerMatchModule reverts EVERY food change,
+       so food could never rise to 20 and no bite would ever be detected. Vanilla depletion is
+       kept instead, and the per-player pulse pins food to 19, so nobody ever actually starves.
+    2. Golden apples (the kit item, the <itemkeep> entry and the gapple-kill-reward include).
+       The eat detector keys on a food spike, so ANY edible item reads as a cake bite - a player
+       could stand looking at the enemy cake and eat their way through it without ever clicking
+       it. Nothing edible may be obtainable on this map.
+
+  BLOCK RULES: Kuusepuu's own build rules are unchanged (spawns sealed, no editing outside the
+  build area). On top of them the cakes and monuments are protected, and a cake may ONLY be
+  placed on its carrier's own monument spot. Rule order matters and is documented below.
+-->
+
+<constants>
+    <constant id="score-limit">1</constant>
+    <constant id="time-limit">60</constant>
+    <!-- Bites each cake survives before it is grabbed. Lower = spawns pre-damaged. -->
+    <constant id="blue-cake-health">7</constant>
+    <constant id="red-cake-health">7</constant>
+    <!-- Pulses (0.1s each) without a carrier heartbeat before the cake returns home. -->
+    <constant id="return-delay">3</constant>
+</constants>
+
+<teams>
+    <team id="blue-team" color="blue" max="16">Blue</team>
+    <team id="red-team" color="red" max="16">Red</team>
+</teams>
+
+<kits>
+    <!-- Kuusepuu's loadout, minus the golden apple in slot 8 (see the header comment).
+         Slot 8 is now where a carried cake lands. -->
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true" enchantment="arrow infinite"/>
+        <item slot="2" material="iron pickaxe" unbreakable="true"/>
+        <item slot="3" material="iron axe" unbreakable="true"/>
+        <item slot="4" material="wood" amount="64"/>
+        <item slot="5" material="stained clay" team-color="true" amount="48"/>
+        <item slot="6" material="vine" amount="24"/>
+        <item slot="28" material="arrow"/>
+        <item slot="29" material="shears" unbreakable="true"/>
+        <item slot="30" material="iron spade" unbreakable="true"/>
+        <helmet material="iron helmet" unbreakable="true"/>
+        <chestplate material="chainmail chestplate" unbreakable="true"/>
+        <effect duration="oo" amplifier="100">damage resistance</effect>
+    </kit>
+    <kit force="true" id="reset-resistance-kit">
+        <effect duration="0" amplifier="0">damage resistance</effect>
+    </kit>
+    <!-- Separate kits for armor colors are intentional -->
+    <kit id="blue-kit" parent="spawn-kit">
+        <leggings material="leather leggings" color="2471A3" unbreakable="true"/>
+        <boots material="leather boots" color="2471A3" unbreakable="true"/>
+    </kit>
+    <kit id="red-kit" parent="spawn-kit">
+        <leggings material="leather leggings" color="CB4335" unbreakable="true"/>
+        <boots material="leather boots" color="CB4335" unbreakable="true"/>
+    </kit>
+    <!-- The name/lore are pure decoration: the carry check is <carrying ignore-metadata="true">
+         on the CAKE material, so renaming or re-writing the lore can never break the objective. -->
+    <kit id="give-blue-cake" force="true">
+        <item slot="8" material="cake" amount="1" prevent-sharing="true"
+              name="`9`lB`9`ll`3`lu`b`le `b`lC`b`la`f`lk`f`le"
+              lore="`7Seven bites of enemy morale, frosted|`7in `9blue`7 and still suspiciously warm.|`8It cannot be dropped, shared or stashed.|`8Only your own monument will take it."/>
+    </kit>
+    <kit id="give-red-cake" force="true">
+        <item slot="8" material="cake" amount="1" prevent-sharing="true"
+              name="`4`lR`c`le`c`ld `6`lC`6`la`e`lk`e`le"
+              lore="`7Seven bites of enemy morale, frosted|`7in `cred`7 and still suspiciously warm.|`8It cannot be dropped, shared or stashed.|`8Only your own monument will take it."/>
+    </kit>
+    <kit id="take-cake"><clear/></kit>
+</kits>
+
+<spawns>
+    <spawn team="blue-team" kit="blue-kit" yaw="-90" region="blue-spawn-point"/>
+    <spawn team="red-team" kit="red-kit" yaw="90" region="red-spawn-point"/>
+    <default yaw="180" region="obs-spawn-point"/>
+</spawns>
+
+<variables>
+    <variable id="was_looking_blue" scope="player"/> <!-- looking at the blue cake block this tick -->
+    <variable id="was_looking_red" scope="player"/>  <!-- looking at the red cake block this tick -->
+    <!-- exclusive="1": at most ONE player may hold each cake at a time. If a second player ever
+         became a carrier, PGM evicts the previous one back to 0. (The health guard on the eat
+         detector already makes a double-grab impossible; this is the belt to that pair of braces.) -->
+    <variable id="carrying_blue" exclusive="1" scope="player"/> <!-- a RED player is carrying the blue cake -->
+    <variable id="carrying_red" exclusive="1" scope="player"/>  <!-- a BLUE player is carrying the red cake -->
+    <variable id="has_eaten" scope="player"/>        <!-- 1 once you've eaten your one slice this life -->
+    <!-- Authoritative cake health (slices left, 7 = pristine). Only the team-gated food-spike
+         detector lowers these; the physical cake is re-painted from them every tick, so any
+         ungated eat (left-click / own-cake / wrong-team) is cosmetic and erased. This is both
+         the anti-grief source of truth and the pre-damage knob. -->
+    <variable id="blue_cake_health" scope="match" default="${blue-cake-health}"/>
+    <variable id="red_cake_health" scope="match" default="${red-cake-health}"/>
+    <!-- Pulses since the carrier last checked in. See CAKE RETURN below. -->
+    <variable id="blue_carrier_ticks" scope="match"/>
+    <variable id="red_carrier_ticks" scope="match"/>
+    <!-- exclusive = only one player holds it at a time, so <player var> resolves to that player -->
+    <variable id="recent_actor" exclusive="1" scope="player"/>
+    <score id="cake_score"/> <!-- team-scoped score, ties into the <score> module below -->
+</variables>
+
+<filters>
+    <team id="only-blue">blue-team</team>
+    <team id="only-red">red-team</team>
+    <!-- Kuusepuu: the only things breakable outside the build area -->
+    <any id="block-break-void-filter">
+        <material>leaves</material>
+        <material>stained clay:9</material>
+        <material>mossy cobblestone</material>
+    </any>
+    <!-- the block being placed is a cake (any slice count) -->
+    <material id="cake-block">cake block</material>
+    <!-- the carrier still physically has their cake item -->
+    <carrying id="holding-a-cake" ignore-metadata="true">
+        <item material="cake"/>
+    </carrying>
+    <!-- a cake block sitting on either monument spot -->
+    <offset id="cake-on-red-monument" vector="73,13,-11"><material>cake block:0</material></offset>
+    <offset id="cake-on-blue-monument" vector="-74,13,10"><material>cake block:0</material></offset>
+</filters>
+
+<regions>
+    <cylinder id="blue-spawn-point" base="-89.5,16,11.5" radius="0" height="0"/>
+    <cylinder id="red-spawn-point" base="89.5,16,-11.5" radius="0" height="0"/>
+    <cylinder id="obs-spawn-point" base="0,29,40" radius="1" height="0"/>
+
+    <!-- the two cakes, on the bedrock pedestals where the DTM monuments stood -->
+    <block id="blue-cake">-47,15,-6</block>
+    <block id="red-cake">46,15,5</block>
+    <union id="cakes"><region id="blue-cake"/><region id="red-cake"/></union>
+    <!-- 1-block shell around each cake. <cuboid> max is EXCLUSIVE, so it is centre+1 per axis. -->
+    <cuboid id="blue-cake-zone" min="-48,14,-7" max="-45,17,-4"/>
+    <cuboid id="red-cake-zone" min="45,14,4" max="48,17,7"/>
+    <union id="cake-zones"><region id="blue-cake-zone"/><region id="red-cake-zone"/></union>
+
+    <!-- delivery spots: the bedrock pedestal under the coloured glass marker beside each spawn.
+         The glass tells you WHICH cake belongs there: blue glass over red's spot, red over blue's. -->
+    <block id="red-monument-spot">73,13,-11</block>
+    <block id="blue-monument-spot">-74,13,10</block>
+    <cuboid id="red-monument-zone" min="72,12,-12" max="75,15,-9"/>
+    <cuboid id="blue-monument-zone" min="-75,12,9" max="-72,15,12"/>
+    <union id="monument-zones"><region id="red-monument-zone"/><region id="blue-monument-zone"/></union>
+
+    <negative id="not-spawns">
+        <union id="spawns">
+            <rectangle id="blue-spawn" min="-68,32" max="-98,-32"/>
+            <rectangle id="red-spawn" min="68,-32" max="98,32"/>
+        </union>
+    </negative>
+    <negative id="not-build-area">
+        <rectangle min="-66,-30" max="66,30" id="build-area"/>
+    </negative>
+
+    <!-- ============================ BLOCK RULES ============================
+         Region rules are FIRST-MATCH-WINS in document order, and neither a <team> nor a
+         <material> filter ever abstains, so each rule decides for everything it covers.
+         The monument allows MUST come before the spawn and build-area denies: both delivery
+         spots sit inside a spawn rectangle AND outside the build area, so either of those
+         rules would otherwise reject the winning placement. -->
+
+    <!-- 1. each team may only EAT the enemy's cake (right-click) -->
+    <apply use="only-red" region="blue-cake" message="Only red may eat the blue cake."/>
+    <apply use="only-blue" region="red-cake" message="Only blue may eat the red cake."/>
+    <!-- 2. a cake is never mined and never built over: it is only ever eaten -->
+    <apply block="never" region="cakes" message="`cYou can only EAT the cake."/>
+    <!-- 3. and nobody boxes a cake in either -->
+    <apply block="never" region="cake-zones" message="`cNo building right next to the cake."/>
+    <!-- 4. a monument spot takes exactly one thing: a cake, placed by THE carrier of that cake.
+            The carrying_* check is what stops a stray cake item from ever scoring. -->
+    <apply block-place="all(only-red,cake-block,carrying_blue=1)" region="red-monument-spot"
+           message="`cOnly the carrier of the Blue Cake can place it here!"/>
+    <apply block-place="all(only-blue,cake-block,carrying_red=1)" region="blue-monument-spot"
+           message="`cOnly the carrier of the Red Cake can place it here!"/>
+    <!-- 5. the rest of each monument, including its glass marker, is untouchable -->
+    <apply block="never" region="monument-zones" message="`cThe monument is protected."/>
+    <!-- 6. Kuusepuu's own rules, unchanged -->
+    <apply enter="only-blue" region="blue-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply enter="only-red" region="red-spawn" message="You may not enter the enemy's spawn!"/>
+    <apply block="never" region="spawns" message="You may not edit spawn!"/>
+    <apply block-place="never" block-break="block-break-void-filter" region="not-build-area" message="You may not edit the void!"/>
+    <!-- 7. inside the build area you may build freely, but never a cake: rule 4 already let the
+            two monument spots through, and this is the last block-place rule -->
+    <apply block-place="not(cake-block)" message="`cCarry the cake to your own monument!"/>
+    <apply kit="reset-resistance-kit" region="not-spawns"/>
+</regions>
+
+<actions>
+    <!-- MAIN per-player loop: eat-detect (both cakes) + carry bookkeeping + look tracking + food pin -->
+    <trigger scope="player">
+        <filter><pulse period="0.1s" duration="0.05s" filter="all(match-started,participating)"/></filter>
+        <action>
+            <!-- ===== RED eats the BLUE cake ===== -->
+            <action filter="all(only-red, player.food=20.., was_looking_blue=1, has_eaten=0, blue_cake_health=1..)">
+                <set var="has_eaten" value="1"/>
+                <!-- read health BEFORE lowering it: 2.. = slices remain, ..1 = that was the last -->
+                <action filter="blue_cake_health=2..">
+                    <message actionbar="`aYou bit the Blue Cake!"/>
+                    <!-- the destroyable "sparks" sound (a firework pop): a bite chips the cake -->
+                    <sound preset="objective fireworks far"/>
+                    <sound preset="objective fireworks twinkle"/>
+                    <set var="recent_actor" value="1"/>
+                    <switch-scope inner="match">
+                        <message text="`e{p} `rtook a bite of the `9Blue Cake`r!">
+                            <replacements><player id="p" var="recent_actor"/></replacements>
+                        </message>
+                    </switch-scope>
+                    <set var="recent_actor" value="0"/>
+                </action>
+                <action filter="blue_cake_health=..1">   <!-- that was the LAST slice -->
+                    <kit id="give-blue-cake"/>
+                    <set var="carrying_blue" value="1"/>
+                    <message title="`aYou grabbed the Blue Cake!" subtitle="Place it on your monument!"/>
+                    <set var="recent_actor" value="1"/>
+                    <switch-scope inner="match">
+                        <!-- start the carry watchdog fresh, or it would fire on this very tick -->
+                        <set var="blue_carrier_ticks" value="0"/>
+                        <message text="`c`l{p} `r`cgrabbed the `9Blue Cake`c and is carrying it!">
+                            <replacements><player id="p" var="recent_actor"/></replacements>
+                        </message>
+                        <!-- CTF FLAG_PICKUP style: the cake's OWNER (blue) hears an ominous wither,
+                             the taker (red) hears a firework blast -->
+                        <switch-scope inner="team" filter="only-blue">
+                            <sound key="${entity.wither.hurt}" volume="0.8" pitch="1"/>
+                        </switch-scope>
+                        <switch-scope inner="team" filter="only-red">
+                            <sound key="${entity.firework_rocket.blast_far}" volume="1" pitch="0.7"/>
+                        </switch-scope>
+                    </switch-scope>
+                    <set var="recent_actor" value="0"/>
+                </action>
+                <set var="blue_cake_health" value="blue_cake_health-1"/>  <!-- take the slice -->
+            </action>
+
+            <!-- ===== BLUE eats the RED cake ===== -->
+            <action filter="all(only-blue, player.food=20.., was_looking_red=1, has_eaten=0, red_cake_health=1..)">
+                <set var="has_eaten" value="1"/>
+                <action filter="red_cake_health=2..">
+                    <message actionbar="`aYou bit the Red Cake!"/>
+                    <sound preset="objective fireworks far"/>
+                    <sound preset="objective fireworks twinkle"/>
+                    <set var="recent_actor" value="1"/>
+                    <switch-scope inner="match">
+                        <message text="`e{p} `rtook a bite of the `cRed Cake`r!">
+                            <replacements><player id="p" var="recent_actor"/></replacements>
+                        </message>
+                    </switch-scope>
+                    <set var="recent_actor" value="0"/>
+                </action>
+                <action filter="red_cake_health=..1">   <!-- that was the LAST slice -->
+                    <kit id="give-red-cake"/>
+                    <set var="carrying_red" value="1"/>
+                    <message title="`aYou grabbed the Red Cake!" subtitle="Place it on your monument!"/>
+                    <set var="recent_actor" value="1"/>
+                    <switch-scope inner="match">
+                        <set var="red_carrier_ticks" value="0"/>
+                        <message text="`9`l{p} `r`9grabbed the `cRed Cake`9 and is carrying it!">
+                            <replacements><player id="p" var="recent_actor"/></replacements>
+                        </message>
+                        <!-- owner (red) hears the wither, taker (blue) hears the firework blast -->
+                        <switch-scope inner="team" filter="only-red">
+                            <sound key="${entity.wither.hurt}" volume="0.8" pitch="1"/>
+                        </switch-scope>
+                        <switch-scope inner="team" filter="only-blue">
+                            <sound key="${entity.firework_rocket.blast_far}" volume="1" pitch="0.7"/>
+                        </switch-scope>
+                    </switch-scope>
+                    <set var="recent_actor" value="0"/>
+                </action>
+                <set var="red_cake_health" value="red_cake_health-1"/>  <!-- take the slice -->
+            </action>
+
+            <!-- record my look for next tick's detect (both cakes) -->
+            <action filter="all(player.target_x=-47,player.target_y=15,player.target_z=-6)">
+                <set var="was_looking_blue" value="1"/>
+            </action>
+            <action filter="any(not(player.target_x=-47),not(player.target_y=15),not(player.target_z=-6))">
+                <set var="was_looking_blue" value="0"/>
+            </action>
+            <action filter="all(player.target_x=46,player.target_y=15,player.target_z=5)">
+                <set var="was_looking_red" value="1"/>
+            </action>
+            <action filter="any(not(player.target_x=46),not(player.target_y=15),not(player.target_z=5))">
+                <set var="was_looking_red" value="0"/>
+            </action>
+
+            <!-- I'm flagged as the carrier but the cake item is gone from my inventory.
+                 prevent-sharing plus <itemremove> stop the cake ever reaching the ground, so the
+                 only way here is that the item was destroyed rather than handed off. Two cases:
+                   - the cake is still off its stand: I threw it away; hand it straight back, so a
+                     stray Q-press can never soft-lock or duplicate the objective.
+                   - the cake is back home (I just delivered it, or it returned): clear the flag.
+                 The monument check suppresses the re-give for the tick the cake lands on the
+                 monument, so delivering never mints a second cake. -->
+            <action filter="all(carrying_blue=1, alive, not(holding-a-cake))">
+                <action filter="all(blue_cake_health=..0, not(cake-on-red-monument))">
+                    <kit id="give-blue-cake"/>
+                    <message actionbar="`cThe Blue Cake cannot be dropped!"/>
+                </action>
+                <action filter="blue_cake_health=1.."><set var="carrying_blue" value="0"/></action>
+            </action>
+            <action filter="all(carrying_red=1, alive, not(holding-a-cake))">
+                <action filter="all(red_cake_health=..0, not(cake-on-blue-monument))">
+                    <kit id="give-red-cake"/>
+                    <message actionbar="`cThe Red Cake cannot be dropped!"/>
+                </action>
+                <action filter="red_cake_health=1.."><set var="carrying_red" value="0"/></action>
+            </action>
+
+            <!-- CARRIER HEARTBEAT: proof that a living, participating player still has the cake.
+                 It stops on death, on joining observers, and on disconnect (the pulse simply never
+                 runs again), which is exactly when the cake should come home. A player-scoped
+                 trigger CANNOT act on a disconnect, which is why this is a heartbeat and not a
+                 leave handler. -->
+            <action filter="all(carrying_blue=1, alive)">
+                <switch-scope inner="match"><set var="blue_carrier_ticks" value="0"/></switch-scope>
+            </action>
+            <action filter="all(carrying_red=1, alive)">
+                <switch-scope inner="match"><set var="red_carrier_ticks" value="0"/></switch-scope>
+            </action>
+
+            <!-- pin food: 19 while you can still eat this life, 20 (blocked) once you've eaten -->
+            <action filter="has_eaten=0"><set var="player.food" value="19"/></action>
+            <action filter="has_eaten=1"><set var="player.food" value="20"/></action>
+        </action>
+    </trigger>
+
+    <!-- MATCH loop: carry watchdog, then re-assert each cake block from its authoritative health.
+         update=false keeps the re-paint a pure block set (no physics, no events, and it bypasses
+         the cakes' own block="never" protection), silently overwriting any vanilla slice stolen
+         by an ungated eat (left-click / own-cake / wrong-team). -->
+    <trigger scope="match">
+        <filter><pulse period="0.1s" duration="0.05s" filter="match-started"/></filter>
+        <action>
+            <!-- ===== CARRY WATCHDOG: only runs while a cake is off its stand ===== -->
+            <action filter="blue_cake_health=..0">
+                <set var="blue_carrier_ticks" value="blue_carrier_ticks+1"/>
+                <action filter="blue_carrier_ticks=${return-delay}..">
+                    <set var="blue_cake_health" value="${blue-cake-health}"/>
+                    <set var="blue_carrier_ticks" value="0"/>
+                    <message text="`rThe `9Blue Cake `rreturned to its spawn!"/>
+                    <!-- owner (blue) hears a relieved chime, the attackers hear it slip away -->
+                    <switch-scope inner="team" filter="only-blue">
+                        <sound key="${entity.experience_orb.pickup}" volume="1" pitch="1"/>
+                    </switch-scope>
+                    <switch-scope inner="team" filter="only-red">
+                        <sound key="${entity.firework_rocket.twinkle_far}" volume="1" pitch="1"/>
+                    </switch-scope>
+                </action>
+            </action>
+            <action filter="red_cake_health=..0">
+                <set var="red_carrier_ticks" value="red_carrier_ticks+1"/>
+                <action filter="red_carrier_ticks=${return-delay}..">
+                    <set var="red_cake_health" value="${red-cake-health}"/>
+                    <set var="red_carrier_ticks" value="0"/>
+                    <message text="`rThe `cRed Cake `rreturned to its spawn!"/>
+                    <switch-scope inner="team" filter="only-red">
+                        <sound key="${entity.experience_orb.pickup}" volume="1" pitch="1"/>
+                    </switch-scope>
+                    <switch-scope inner="team" filter="only-blue">
+                        <sound key="${entity.firework_rocket.twinkle_far}" volume="1" pitch="1"/>
+                    </switch-scope>
+                </action>
+            </action>
+
+            <!-- ===== RE-PAINT: health N -> cake block with (7-N) slices eaten; 0 -> air ===== -->
+            <action filter="blue_cake_health=7.."><fill material="cake block:0" region="blue-cake" update="false"/></action>
+            <action filter="blue_cake_health=6"><fill material="cake block:1" region="blue-cake" update="false"/></action>
+            <action filter="blue_cake_health=5"><fill material="cake block:2" region="blue-cake" update="false"/></action>
+            <action filter="blue_cake_health=4"><fill material="cake block:3" region="blue-cake" update="false"/></action>
+            <action filter="blue_cake_health=3"><fill material="cake block:4" region="blue-cake" update="false"/></action>
+            <action filter="blue_cake_health=2"><fill material="cake block:5" region="blue-cake" update="false"/></action>
+            <action filter="blue_cake_health=1"><fill material="cake block:6" region="blue-cake" update="false"/></action>
+            <action filter="blue_cake_health=..0"><fill material="air" region="blue-cake" update="false"/></action>
+            <action filter="red_cake_health=7.."><fill material="cake block:0" region="red-cake" update="false"/></action>
+            <action filter="red_cake_health=6"><fill material="cake block:1" region="red-cake" update="false"/></action>
+            <action filter="red_cake_health=5"><fill material="cake block:2" region="red-cake" update="false"/></action>
+            <action filter="red_cake_health=4"><fill material="cake block:3" region="red-cake" update="false"/></action>
+            <action filter="red_cake_health=3"><fill material="cake block:4" region="red-cake" update="false"/></action>
+            <action filter="red_cake_health=2"><fill material="cake block:5" region="red-cake" update="false"/></action>
+            <action filter="red_cake_health=1"><fill material="cake block:6" region="red-cake" update="false"/></action>
+            <action filter="red_cake_health=..0"><fill material="air" region="red-cake" update="false"/></action>
+        </action>
+    </trigger>
+
+    <!-- reset the one-slice limit each time you (re)spawn -->
+    <trigger scope="player" filter="alive">
+        <action><set var="has_eaten" value="0"/></action>
+    </trigger>
+
+    <!-- CAPTURE: a cake on RED's monument (only its carrier can place it there) scores red 1 -> win -->
+    <trigger scope="match" filter="cake-on-red-monument">
+        <action>
+            <message text="`c`lRed captured the Blue Cake!"/>
+            <sound preset="objective mode"/>
+            <!-- the objective is delivered, so the cake is no longer "out": this restores it at
+                 home, stops the carry watchdog, and lets the pulse clear the carrier's flag -->
+            <set var="blue_cake_health" value="${blue-cake-health}"/>
+            <set var="blue_carrier_ticks" value="0"/>
+            <switch-scope inner="team" filter="only-red">
+                <set var="cake_score" value="cake_score+1"/>
+            </switch-scope>
+        </action>
+    </trigger>
+    <!-- CAPTURE: a cake on BLUE's monument scores blue 1 -> win -->
+    <trigger scope="match" filter="cake-on-blue-monument">
+        <action>
+            <message text="`9`lBlue captured the Red Cake!"/>
+            <sound preset="objective mode"/>
+            <set var="red_cake_health" value="${red-cake-health}"/>
+            <set var="red_carrier_ticks" value="0"/>
+            <switch-scope inner="team" filter="only-blue">
+                <set var="cake_score" value="cake_score+1"/>
+            </switch-scope>
+        </action>
+    </trigger>
+
+    <!-- Carrier DIED. The watchdog above is what actually returns the cake (it also covers
+         disconnects and observers); these two only drop the carry flag and name the victim. -->
+    <trigger scope="player" filter="all(carrying_blue=1, dead)">
+        <action>
+            <set var="carrying_blue" value="0"/>
+            <kit id="take-cake"/>
+            <set var="recent_actor" value="1"/>
+            <switch-scope inner="match">
+                <message text="`e{p} `rdied with the `9Blue Cake`r!">
+                    <replacements><player id="p" var="recent_actor"/></replacements>
+                </message>
+            </switch-scope>
+            <set var="recent_actor" value="0"/>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="all(carrying_red=1, dead)">
+        <action>
+            <set var="carrying_red" value="0"/>
+            <kit id="take-cake"/>
+            <set var="recent_actor" value="1"/>
+            <switch-scope inner="match">
+                <message text="`e{p} `rdied with the `cRed Cake`r!">
+                    <replacements><player id="p" var="recent_actor"/></replacements>
+                </message>
+            </switch-scope>
+            <set var="recent_actor" value="0"/>
+        </action>
+    </trigger>
+
+    <!-- Carrier walked out of the match into observers. Drop the flag so they can't come back
+         still "carrying" a cake that has long since respawned. (A full disconnect can't run any
+         action at all: that case is the watchdog's, and a rejoin resets these variables.) -->
+    <trigger scope="player" observers="true" filter="all(carrying_blue=1, observing)">
+        <action><set var="carrying_blue" value="0"/></action>
+    </trigger>
+    <trigger scope="player" observers="true" filter="all(carrying_red=1, observing)">
+        <action><set var="carrying_red" value="0"/></action>
+    </trigger>
+</actions>
+
+<!-- Kuusepuu's kill reward, plus the CTC part: a kill grants another slice this life, so the
+     killer may eat the enemy cake again (has_eaten normally only clears on respawn). food=19 is
+     set here too so it takes effect instantly rather than on the next 0.1s pulse. -->
+<kill-rewards>
+    <kill-reward>
+        <item material="wood" amount="16"/>
+        <item material="stained clay" team-color="true" amount="48"/>
+        <action>
+            <set var="has_eaten" value="0"/>
+            <set var="player.food" value="19"/>
+        </action>
+    </kill-reward>
+</kill-rewards>
+
+<itemkeep>
+    <item>iron sword</item>
+    <item>bow</item>
+    <item>iron pickaxe</item>
+    <item>iron axe</item>
+    <item>shears</item>
+    <item>arrow</item>
+    <item>iron spade</item>
+    <item>wood</item>
+    <item>stained clay</item>
+    <item>leaves</item>
+    <item>vine</item>
+</itemkeep>
+
+<!-- cake is here as well as prevent-sharing on the item: <itemremove> cancels the ItemSpawnEvent,
+     so ANY cake that would ever hit the ground is destroyed, including one that never came from
+     the kit (a /give during testing, say) and therefore carries no PGM tag. -->
+<itemremove>
+    <item>iron helmet</item>
+    <item>chainmail chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>stone</item>
+    <item>emerald block</item>
+    <item>cake</item>
+</itemremove>
+
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>arrow</tool>
+    <tool>shears</tool>
+    <tool>iron spade</tool>
+</toolrepair>
+
+<item-mods>
+    <rule>
+        <match>
+            <material>iron helmet</material>
+            <material>iron chestplate</material>
+            <material>iron leggings</material>
+            <material>iron boots</material>
+            <material>iron sword</material>
+            <material>iron pickaxe</material>
+            <material>iron axe</material>
+            <material>iron spade</material>
+            <material>shears</material>
+        </match>
+        <modify unbreakable="true"/>
+    </rule>
+</item-mods>
+
+<crafting>
+    <!-- the cake is an objective, not a resource: it can't be crafted back into existence -->
+    <disable>cake</disable>
+    <!-- bulkcrafting -->
+    <shaped override="false">
+        <result material="iron helmet" amount="9"/>
+        <shape>
+            <row>III</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="iron chestplate" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>III</row>
+            <row>III</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="iron leggings" amount="9"/>
+        <shape>
+            <row>III</row>
+            <row>I.I</row>
+            <row>I.I</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+    <shaped override="false">
+        <result material="bucket" amount="9"/>
+        <shape>
+            <row>I.I</row>
+            <row>.I.</row>
+        </shape>
+        <ingredient symbol="I">iron block</ingredient>
+    </shaped>
+</crafting>
+
+<maxbuildheight>30</maxbuildheight>
+
+<score>
+    <limit>${score-limit}</limit>
+</score>
+
+<!-- Symmetric race: first cake delivered wins (score limit above). If the timer expires with
+     no delivery, the higher score wins and an even score is a draw (no result= on <time>). -->
+<time>${time-limit}m</time>
+</map>
