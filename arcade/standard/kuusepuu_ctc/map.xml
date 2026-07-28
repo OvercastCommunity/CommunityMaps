@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <map proto="1.5.0">
 <name>Kuusepuu CTC</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <objective>Eat the ENEMY cake, carry it home, and place it on your own monument. Both teams attack and defend!</objective>
 <gamemode>ctw</gamemode>
 <phase>development</phase>
@@ -25,8 +25,11 @@
     - BLUE spawns at -x. BLUE eats the RED cake (46,15,5) and places it on BLUE's monument
       (-74,13,10), the spot marked by the RED stained glass beside blue spawn.
   Both cakes sit on the bedrock pedestals where the DTM monuments used to stand. First team to
-  deliver wins (score limit 1). There is NO time limit: the Cookie Monster eats a slice out of
-  both cakes every ${monster-interval}, so a stalemate keeps getting easier to break.
+  Delivering the enemy cake completes their monument and wins outright - that goal IS the win
+  condition, there is no score and no time limit. Progression comes from two Cookie Monster
+  visits: he takes a slice from both cakes every ${monster-interval}, AND he takes one from any
+  cake that gets eaten in full, so every successful steal makes that cake permanently cheaper.
+  He never takes the last slice - a cake always needs at least one real player bite.
 
   CAKE HEALTH (see <constants>): *-cake-health is how many bites a cake survives before the
   eater grabs it. 7 = a pristine cake; set it lower to start that cake PRE-DAMAGED (the block is
@@ -327,6 +330,17 @@
                     <switch-scope inner="match">
                         <!-- start the carry watchdog fresh, or it would fire on this very tick -->
                         <set var="blue_carrier_ticks" value="0"/>
+                        <!-- EATEN IN FULL: the Cookie Monster takes his cut on the way out, so a
+                             cake that is successfully stolen comes back permanently smaller. This
+                             is what makes players - not just the clock - drive the progression.
+                             Same floor as the timed visit: he never takes it below 1. -->
+                        <action filter="blue_cake_max=2..">
+                            <set var="blue_cake_max" value="blue_cake_max-1"/>
+                            <message text="`6`lThe Cookie Monster `rgot to the `9Blue Cake `rwhile it was away - it comes back a slice smaller! `7({s} left)">
+                                <replacements><decimal id="s" scope="match" value="blue_cake_max" format="#"/></replacements>
+                            </message>
+                            <sound preset="objective fireworks twinkle"/>
+                        </action>
                         <message text="`c`l{p} `r`cgrabbed the `9Blue Cake`c and is carrying it!">
                             <replacements><player id="p" var="recent_actor"/></replacements>
                         </message>
@@ -368,6 +382,17 @@
                     <set var="recent_actor" value="1"/>
                     <switch-scope inner="match">
                         <set var="red_carrier_ticks" value="0"/>
+                        <!-- EATEN IN FULL: the Cookie Monster takes his cut on the way out, so a
+                             cake that is successfully stolen comes back permanently smaller. This
+                             is what makes players - not just the clock - drive the progression.
+                             Same floor as the timed visit: he never takes it below 1. -->
+                        <action filter="red_cake_max=2..">
+                            <set var="red_cake_max" value="red_cake_max-1"/>
+                            <message text="`6`lThe Cookie Monster `rgot to the `cRed Cake `rwhile it was away - it comes back a slice smaller! `7({s} left)">
+                                <replacements><decimal id="s" scope="match" value="red_cake_max" format="#"/></replacements>
+                            </message>
+                            <sound preset="objective fireworks twinkle"/>
+                        </action>
                         <message text="`9`l{p} `r`9grabbed the `cRed Cake`9 and is carrying it!">
                             <replacements><player id="p" var="recent_actor"/></replacements>
                         </message>
