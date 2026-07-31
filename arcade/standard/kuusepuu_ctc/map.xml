@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <map proto="1.5.0">
 <name>Kuusepuu CTC</name>
-<version>1.0.2</version>
+<version>1.0.3</version>
 <objective>Eat the ENEMY cake, carry it home, and place it on your own monument. Both teams attack and defend!</objective>
 <gamemode>ctw</gamemode>
 <phase>development</phase>
@@ -609,6 +609,17 @@
             <set var="has_eaten" value="0"/>
             <set var="player.food" value="19"/>
             <set var="eat_delay" value="${eat-delay}"/>
+            <!-- RESPAWNING IS AUTHORITATIVE: you cannot be carrying a cake at the instant you
+                 spawn, so clear the flags unconditionally rather than trusting the death trigger
+                 to have done it. Reported live: a carrier died, the cake went home, and he still
+                 came back holding a usable cake and placed it for the win. Whatever leaves the
+                 flag set (a death trigger that did not fire, an <exclusive> eviction, the pulse's
+                 re-give racing the respawn), clearing it here means the monument rule
+                 (carrying_*=1) refuses the placement and the pulse's re-give cannot arm. The
+                 spawn kit's own <clear/> removes the stale item itself. This trigger fires on the
+                 RISE of alive, so it never touches a carrier who is already alive and running. -->
+            <set var="carrying_blue" value="0"/>
+            <set var="carrying_red" value="0"/>
         </action>
     </trigger>
 
