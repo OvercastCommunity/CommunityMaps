@@ -1,6 +1,6 @@
-<map proto="1.5.0">
+<map proto="1.5.1">
 <name>Dreamland</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <include id="gapple-kill-reward"/>
 <objective>Capture the other team's wool!</objective>
 <created>2025-11-15</created>
@@ -14,19 +14,19 @@
     <constant id="observers-kit" delete="true"/>
 </constants>
 <teams>
-    <team id="pink" color="light purple" max="32">Pink</team>
-    <team id="blue" color="blue" max="32">Blue</team>
+    <team id="pink-team" color="light purple" max="32">Pink</team>
+    <team id="blue-team" color="blue" max="32">Blue</team>
 </teams>
 <spawns>
     <default kit="${observers-kit}" yaw="90">
-        <regions>
+        <region>
             <point>120.5,71,0.5</point>
-        </regions>
+        </region>
     </default>
-    <spawn team="blue" kit="spawn-kit" yaw="0" region="blue-spawnpoint"/>
-    <spawn team="pink" kit="spawn-kit" yaw="180" region="pink-spawnpoint"/>
+    <spawn team="blue-team" kit="spawn-kit" yaw="0" region="blue-spawnpoint"/>
+    <spawn team="pink-team" kit="spawn-kit" yaw="180" region="pink-spawnpoint"/>
 </spawns>
-<kits>s
+<kits>
     <kit id="speed-kit">
         <effect amplifier="2">speed</effect>
     </kit>
@@ -34,7 +34,8 @@
         <effect>night vision</effect>
     </kit>
     <kit id="spawn-kit" parent="speed-kit">
-        <item slot="0" material="iron sword" unbreakable="true"/>
+        <clear/>
+        <item slot="0" unbreakable="true" material="iron sword"/>
         <item slot="1" unbreakable="true" material="bow"/>
         <item slot="2" unbreakable="true" material="iron pickaxe"/>
         <item slot="3" unbreakable="true" material="iron axe"/>
@@ -49,27 +50,14 @@
         <leggings unbreakable="true" team-color="true" material="leather leggings"/>
         <boots unbreakable="true" team-color="true" material="leather boots"/>
         <effect duration="oo" amplifier="1">night vision</effect>
-        <effect duration="6" amplifier="255">damage resistance</effect>
+        <effect duration="6s" amplifier="5">damage resistance</effect>
     </kit>
-    <take kit="speed-kit">
-        <filter>
-            <not>
-                <region id="spawns"/>
-            </not>
-        </filter>
-    </take>
+    <take kit="speed-kit" filter="not(spawns)"/>
 </kits>
 <filters>
     <all id="only-iron-renew">
         <material id="only-iron">iron block</material>
         <cause>world</cause>
-    </all>
-    <!--Territory Filters-->
-    <all id="blue-in-wr">
-        <team id="only-blue">blue</team>
-    </all>
-    <all id="pink-in-wr">
-        <team id="only-pink">pink</team>
     </all>
 </filters>
 <regions>
@@ -145,17 +133,14 @@
         <region id="wool-rooms"/>
     </negative>
     <apply block="never" region="spawner-protection" message="You may not break or place around the spawner!"/>
-    <apply block-break="only-iron" region="spawns" message="You may only break iron blocks in the spawns!"/>
-    <apply block-place="only-iron-renew" region="spawns" message="You may only break iron blocks in the spawns!"/>
+    <apply block-break="only-iron" block-place="only-iron-renew" region="spawns" message="You may only break iron blocks in the spawns!"/>
     <apply block-place="deny(void)" region="void-area" message="You may not build in the void area!"/>
-    <apply block-break="blue-in-wr" region="pink-wool-rooms" message="You may not interact with this block!"/>
-    <apply block-break="pink-in-wr" region="blue-wool-rooms" message="You may not interact with this block!"/>
-    <apply block-place="deny(pink)" region="pink-wool-rooms" message="You may not interact with this block!"/>
-    <apply block-place="deny(blue)" region="blue-wool-rooms" message="You may not interact with this block!"/>
-    <apply enter="only-blue" region="blue-protection" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-pink" region="pink-protection" message="You may not enter the opponent's spawn!"/>
-    <apply enter="only-blue" region="pink-wool-rooms" message="You may not enter your own wool room!"/>
-    <apply enter="only-pink" region="blue-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply block="blue-team" region="pink-wool-rooms" message="You may not interact with this block!"/>
+    <apply block="pink-team" region="blue-wool-rooms" message="You may not interact with this block!"/>
+    <apply enter="blue-team" region="blue-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="pink-team" region="pink-protection" message="You may not enter the opponent's spawn!"/>
+    <apply enter="blue-team" region="pink-wool-rooms" message="You may not enter your own wool room!"/>
+    <apply enter="pink-team" region="blue-wool-rooms" message="You may not enter your own wool room!"/>
 </regions>
 <spawners>
     <spawner spawn-region="east-point" player-region="east-player" delay="15s">
@@ -203,23 +188,23 @@
 </spawners>
 <wools craftable="false">
     <!-- Blue Team -->
-    <wool team="blue" color="cyan" location="-6.5,18,-127.5">
+    <wool team="blue-team" color="cyan" location="-66.5,8,149.5">
         <monument>
             <block>-7,18,-128</block>
         </monument>
     </wool>
-    <wool team="blue" color="lime" location="7.5,18,-127.5">
+    <wool team="blue-team" color="lime" location="69.5,8,149.5">
         <monument>
             <block>7,18,-128</block>
         </monument>
     </wool>
     <!-- Pink Team -->
-    <wool team="pink" color="purple" location="7.5,18,128.5">
+    <wool team="pink-team" color="purple" location="67.5,8,-148.5">
         <monument>
             <block>7,18,128</block>
         </monument>
     </wool>
-    <wool team="pink" color="magenta" location="-6.5,18,128.5">
+    <wool team="pink-team" color="magenta" location="-68.5,8,-148.5">
         <monument>
             <block>-7,18,128</block>
         </monument>
@@ -239,11 +224,11 @@
     <item>arrow</item>
 </itemkeep>
 <toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
     <tool>iron pickaxe</tool>
     <tool>iron axe</tool>
     <tool>stone spade</tool>
-    <tool>iron sword</tool>
-    <tool>bow</tool>
 </toolrepair>
 <itemremove>
     <item>leather helmet</item>
@@ -253,6 +238,10 @@
     <item>string</item>
     <item>seeds</item>
     <item>leaves</item>
+    <item>sapling</item>
+    <item>apple</item>
+    <item>glowstone dust</item>
+    <item>prismarine crystals</item>
 </itemremove>
 <kill-rewards>
     <kill-reward>
