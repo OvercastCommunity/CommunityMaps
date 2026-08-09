@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Skill Issue</name>
-<version>3.1.1</version>
+<version>3.1.2</version>
 <objective>Capture the Wool in 2 minutes, or prevent the Rusher from doing so!</objective>
 <created>2025-08-04</created>
 <game>Rusher Roulette</game>
@@ -425,6 +425,7 @@
     <variable id="is_last_round_perk_active_no_kb"/>
 </variables>
 <variables scope="player">
+    <variable id="should_be_rusher"/>
     <variable id="is_rusher"/>
     <variable id="was_rusher"/>
     <variable id="last_x"/>
@@ -476,6 +477,10 @@
         </switch-scope>
         <switch-scope inner="player" filter="all(participating,defenders,alive)">
             <set var="tmp_rusher" value="random()"/>
+            <action filter="should_be_rusher=1">
+                <set var="tmp_rusher" value="-1"/>
+                <set var="should_be_rusher" value="0"/>
+            </action>
         </switch-scope>
         <repeat times="rushers_amount">
             <set var="tmp_rusher_min" value="99"/>
@@ -1149,6 +1154,12 @@
             </action>
         </switch-scope>
     </action>
+    <trigger scope="player" filter="should_be_rusher=1">
+        <action>
+            <sound key="${entity.experience_orb.pickup}" volume="1" pitch="1.2"/>
+            <message text="`7`oFrom`r ${ANNOUNCER_PREFIX} You've been selected as the rusher by a staff member! Shhh" />
+        </action>
+    </trigger>
     <!-- <action id="debug-give-perk" scope="match" expose="true">
         <action id="pick-perk"/>
         <action id="announce-perk"/>
