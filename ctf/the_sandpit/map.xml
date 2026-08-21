@@ -1,0 +1,179 @@
+<map proto="1.5.1">
+<name>The Sandpit</name>
+<version>1.0.0</version>
+<created>2025-06-12</created>
+<objective>Capture the flag from the enemy to win!</objective>
+<gamemode>ctf</gamemode>
+<authors>
+    <author uuid="bf331953-4f92-43ee-8abc-7544b8234936"/> <!-- Vice -->
+</authors>
+<broadcasts>
+    <alert after="3s" every="2m30s">You only need to capture the enemy's flag once to win!</alert>
+</broadcasts>
+<teams>
+    <team id="red" color="dark red" max="8">Red</team>
+    <team id="blue" color="blue" max="8">Blue</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <item slot="0" material="stone sword"/>
+        <item slot="1" material="bow"/>
+        <item slot="28" amount="16" material="arrow"/>
+        <item slot="2" material="iron pickaxe"/>
+        <item slot="3" enchantment="dig speed" material="stone axe"/>
+        <item slot="4" material="stone spade"/>
+        <item slot="5" amount="24" damage="2" material="wood"/>
+        <item slot="6" amount="16" material="sandstone"/>
+        <helmet locked="true" unbreakable="true" team-color="true" material="leather helmet"/>
+        <chestplate locked="true" unbreakable="true" team-color="true" enchantment="protection environmental" material="leather chestplate"/>
+        <leggings locked="true" unbreakable="true" team-color="true" material="leather leggings"/>
+        <boots locked="true" unbreakable="true" team-color="true" material="leather boots"/>
+        <effect duration="2">heal</effect>
+        <effect duration="3">damage resistance</effect>
+    </kit>
+</kits>
+<spawns>
+    <default>
+        <region yaw="-90">
+            <cuboid min="-4,22,-7" max="-6,22,-5"/>
+        </region>
+    </default>
+    <spawn team="red" kit="spawn-kit">
+        <region yaw="90">
+            <cuboid min="28,15,-66" max="27,15,-65"/>
+        </region>
+    </spawn>
+    <spawn team="blue" kit="spawn-kit">
+        <region yaw="-90">
+            <cuboid min="0,15,54" max="1,15,53"/>
+        </region>
+    </spawn>
+</spawns>
+<filters>
+    <not id="no-beacon">
+        <material>beacon</material>
+    </not>
+    <not id="not-blue">
+        <team id="only-blue">blue</team>
+    </not>
+    <not id="not-red">
+        <team id="only-red">red</team>
+    </not>
+    <all id="only-gold-regen">
+        <material id="only-gold">gold block</material>
+        <cause>world</cause>
+    </all>
+    <deny id="deny-lava">
+        <any>
+            <material>lava</material>
+            <material>stationary lava</material>
+        </any>
+    </deny>
+</filters>
+<renewables>
+    <renewable rate="3" grow="false" particles="true" sound="true" avoid-entities="true" region="spawns" renew-filter="only-gold"/>
+</renewables>
+<spawners>
+    <spawner id="gapple-spawner" spawn-region="gapple-spawn-area" player-region="gapple-spawn-radius" max-entities="9999" delay="6s">
+        <item amount="1" material="golden apple"/>
+    </spawner>
+</spawners>
+<regions>
+    <union id="spawner-stuff">
+        <cuboid id="gapple-spawn-area" min="13,7,-5" max="15,10,-7"/>
+        <cuboid id="gapple-spawn-radius" min="10,7,-10" max="18,10,-2"/>
+    </union>
+    <cuboid id="observers-platform" min="-2,22,-3" max="-7,26,-10"/>
+    <cuboid id="ceiling" min="30,26,-70" max="-2,26,58"/>
+    <union id="strips">
+        <cuboid id="strip-one" min="-2,20,-52" max="-2,18,39"/>
+        <cuboid id="strip-two" min="30,18,39" max="30,20,-51"/>
+    </union>
+    <union id="edging">
+        <cuboid id="edge-one" min="31,26,59" max="30,6,-70"/>
+        <cuboid id="edge-two" min="30,6,-70" max="-3,26,-71"/>
+        <cuboid id="edge-three" min="-2,26,-70" max="-3,6,59"/>
+        <cuboid id="edge-four" min="-2,26,58" max="31,6,59"/>
+    </union>
+    <union id="flag-return">
+        <cuboid id="red-return" min="29,15,-62" max="15,20,-69"/>
+        <cuboid id="blue-return" min="-1,15,50" max="13,20,57"/>
+    </union>
+    <union id="flag-platforms">
+        <cuboid id="blue-platform" min="24,20,51" max="24,22,51"/>
+        <cuboid id="red-platform" min="4,20,-63" max="4,22,-63"/>
+    </union>
+    <negative id="not-spawns">
+        <union id="spawns">
+            <cuboid id="blue-spawns" min="-1,26,57" max="14,14,49"/>   
+            <cuboid id="red-spawns" min="14,14,-61" max="29,26,-69"/>
+        </union>
+    </negative>
+    <negative id="void-area">
+        <rectangle min="-2,-70" max="30,58"/>
+    </negative>
+    <!-- Applications -->
+    <apply use="no-beacon"/>
+    <apply block="deny-lava" use="deny-lava" message="You may not place this block!"/>
+    <apply region="flag-platforms" block="never" message="You may not edit the flag platform"/>
+    <apply region="observers-platform" enter="never" message="You may not enter the observers' spawn area!"/>
+    <apply region="strips" enter="never" message="You may not enter the side strips area!"/>
+    <apply region="blue-spawns" enter="not-red" message="You may not enter the enemy's spawn!"/>
+    <apply region="red-spawns" enter="not-blue" message="You may not enter the enemy's spawn!"/>
+    <apply region="spawns" block="never" message="You may not break or place blocks in the spawn regions!"/>
+    <apply block-place="only-gold-regen" block-break="only-gold" region="spawns" message="You may not edit the spawns!"/>
+    <apply region="ceiling" enter="never" message="You may not leave the map!"/>
+    <apply region="void-area" block="never" message="You may not build outside of the playing field!"/>
+</regions>
+<disabledamage>
+    <damage>suffocation</damage>
+</disabledamage>
+<flags flag-proximity-metric="none" net-proximity-metric="none">
+    <flag id="blue-flag" name="Blue Flag" owner="blue" color="blue" pickup-filter="only-red">
+        <post yaw="135" return-time="20s">24.5,20,51.5</post>
+        <net points="1" region="red-return"/>
+    </flag>
+    <flag id="red-flag" name="Red Flag" owner="red" color="red" pickup-filter="only-blue">
+        <post yaw="-45" return-time="20s">4.5,20,-62.5</post>
+        <net points="1" region="blue-return"/>
+    </flag>
+</flags>
+<maxbuildheight>22</maxbuildheight>
+<score>
+    <limit>1</limit>
+</score>
+<toolrepair>
+    <tool>stone sword</tool>
+    <tool>bow</tool>
+    <tool>iron pickaxe</tool>
+    <tool>stone axe</tool>
+    <tool>arrow</tool>
+    <tool>stone spade</tool>
+    <tool>diamond spade</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>gold helmet</tool>
+    <tool>gold chestplate</tool>
+    <tool>gold leggings</tool>
+    <tool>gold boots</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>leather leggings</item>
+    <item>leather boots</item>
+    <item>wood</item>
+    <item>obsidian</item>
+    <item>golden apple</item>
+    <item>sandstone</item>
+</itemremove>
+<kill-reward>
+    <item material="golden apple"/>
+    <item amount="8" material="arrow"/>
+</kill-reward>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<timelock>on</timelock>
+<respawn delay="3s" auto="true"/>
+</map>
