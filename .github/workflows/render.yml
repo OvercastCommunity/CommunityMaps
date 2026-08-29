@@ -1,0 +1,63 @@
+name: Render maps
+
+on:
+  push:
+    branches: ["master"]
+  workflow_dispatch:
+
+env:
+  OCI_REGION: ca-montreal-1
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.OCI_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.OCI_SECRET_ACCESS_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Download mciso
+        run: |
+          curl -fsSL -o mciso https://github.com/OvercastCommunity/mciso/releases/download/latest/mciso-linux-x86_64
+          curl -fsSL -o mciso-upload https://github.com/OvercastCommunity/mciso/releases/download/latest/mciso-upload-linux-x86_64
+          chmod +x mciso mciso-upload
+      - name: Render
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          since=""
+          if [ "${{ github.event_name }}" = "push" ] && \
+             [ "$BEFORE" != "0000000000000000000000000000000000000000" ] && \
+             git cat-file -e "$BEFORE" 2>/dev/null; then
+            since="$BEFORE"
+          fi
+          ./mciso -i . -o out --smooth ${since:+-s "$since"}
+      - name: Upload to OCI
+        if: env.AWS_ACCESS_KEY_ID != ''
+        run: |
+          if [ -n "$(ls out/*.png 2>/dev/null)" ]; then
+            ./mciso-upload -i out --region "$OCI_REGION"
+          else
+            echo "No images to upload"
+          fi
+      - uses: actions/upload-artifact@v7
+        with:
+          name: map-images
+          path: out
+          if-no-files-found: warn
+      - name: Pick preview image
+        id: preview
+        run: |
+          maps=$(ls out 2>/dev/null | sed -E 's/_(tr|br|bl|tl)(-thumb)?\.png$//' | sort -u)
+          if [ "$(printf '%s\n' "$maps" | grep -c .)" = "1" ]; then
+            echo "file=out/${maps}_tr.png" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Upload preview unzipped
+        if: steps.preview.outputs.file != ''
+        uses: actions/upload-artifact@v7
+        with:
+          path: ${{ steps.preview.outputs.file }}
+          archive: false
