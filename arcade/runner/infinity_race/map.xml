@@ -1,6 +1,6 @@
 <map proto="1.5.1">
 <name>Infinity Race</name>
-<version>2.0</version>
+<version>2.0.1</version>
 <objective>Get as far as you can in the parkour!</objective>
 <created>2026-08-29</created>
 <game>Parkour</game>
@@ -33,6 +33,17 @@
         <effect duration="oo">invisibility</effect>
         <boots material="leather boots" team-color="true" />
     </kit>
+    <kit id="checkpoint-kit">
+        <item slot="0" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
+        <item slot="1" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
+        <item slot="2" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
+        <item slot="3" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
+        <item slot="4" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
+        <item slot="5" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
+        <item slot="6" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
+        <item slot="7" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
+        <item slot="8" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
+    </kit>
 </kits>
 <spawns>
     <default>
@@ -48,7 +59,7 @@
 </spawns>
 <players max="80" colors="true" show-name-tags="false" />
 <score />
-<time>5m</time>
+<time>7m</time>
 <filters>
     <offset id="on-checkpoint" vector="~0,~-1,~0">
         <material>gold block</material>
@@ -350,6 +361,9 @@
                     <set var="max_checkpoint" value="max_checkpoint + 1" />
                 </action>
             </action>
+            <action filter="all(player.vel_y=..-1,alive)">
+                <kit id="checkpoint-kit" />
+            </action>
         </action>
     </trigger>
 
@@ -358,19 +372,29 @@
         <action>
             <set var="just_lost" value="0" />
             <action filter="not(checkpoint[1]=-1)">
-                <teleport x="checkpoint[0]" y="checkpoint[1]" z="checkpoint[2]" yaw="checkpoint[3]" />
+                <action id="return-to-checkpoint" />
             </action>
         </action>
     </trigger>
 
+    <action id="return-to-checkpoint" scope="player">
+        <teleport x="checkpoint[0]" y="checkpoint[1]" z="checkpoint[2]" yaw="checkpoint[3]" pitch="0" />
+        <schedule after="0.1s">
+            <kit>
+                <clear armor="false" />
+            </kit>
+        </schedule>
+    </action>
+
     <action id="generate" scope="match" expose="true">
         <set var="tiles_amount" value="tiles_amount + 1" />
-        <set var="jump_length" value="2 + floor(random() * 2)" />
+        <set var="jump_length" value="2 + floor(random() + 0.1 + difficulty * 0.6 / 100)" />
         <set var="forward_distance" value="jump_length + tile_length" />
         <set var="side_distance" value="floor(random() * 3) * (floor(random() * 2) * 2 - 1)" />
         <set var="selected_tile" value="floor(random() * (1 + 8 * difficulty / 100)) + 1" />
         <action filter="should-place-checkpoint">
             <set var="selected_tile" value="${TILE_CHECKPOINT}" />
+            <set var="difficulty" value="min(100, difficulty + 4)" />
         </action>
 
         <action filter="selected_tile=${TILE_CHECKPOINT}">
@@ -407,7 +431,7 @@
             all(any(selected_tile=${TILE_GLASS},prev_tile=${TILE_GLASS}),jump_length=3..)
         ))">
             <set var="y_rng" value="floor(random() + 0.2)" />
-            <action filter="any(should-turn,y_rng=1)">
+            <action filter="any(should-turn,should-place-checkpoint,y_rng=1)">
                 <set var="current_y" value="current_y + 1" />
             </action>
             <!-- always go up 2 if previous was 'ladder' -->
@@ -460,10 +484,6 @@
             <action filter="direction=4">
                 <set var="direction" value="0" />
             </action>
-        </action>
-
-        <action filter="tiles_amount%10=0">
-            <set var="difficulty" value="min(100, difficulty + 7)" />
         </action>
     </action>
 
@@ -847,9 +867,15 @@
     </action>
 
 </actions>
+<consumables>
+    <consumable id="return-to-checkpoint-consumable" action="return-to-checkpoint" on="click" consume="true" />
+</consumables>
 <hunger>
     <depletion>off</depletion>
 </hunger>
+<world>
+    <timeset>12000</timeset>
+</world>
 <damage>
     <deny>
         <any>
