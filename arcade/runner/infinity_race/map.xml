@@ -1,6 +1,6 @@
 <map proto="1.5.1">
 <name>Infinity Race</name>
-<version>2.1</version>
+<version>2.1.1</version>
 <objective>Get as far as you can in the parkour!</objective>
 <created>2026-08-29</created>
 <game>Parkour</game>
@@ -11,6 +11,9 @@
     <author uuid="ec5ec930-5cf3-4f8a-ad9f-09056aeed71b" contribution="Spawn" /> <!-- Tundren -->
     <author uuid="b2539be1-8f98-4375-b653-9d91cd04c30e" contribution="Spawn" /> <!-- Mewzzy -->
 </authors>
+<contributors>
+    <contributor uuid="534470be-4122-4762-83e1-f45abb474cdc" contribution="Feedback" /> <!-- Necrozma -->
+</contributors>
 <terrain environment="the end" />
 <constants>
     <constant id="TILE_1">3</constant>
@@ -281,6 +284,7 @@
     <variable id="side_distance" />
     <variable id="tile_variant" />
     <variable id="difficulty" />
+    <variable id="should_go_up" />
     <variable id="y_rng" />
     <variable id="max_checkpoint" />
     <variable id="tiles_to_generate" default="15" />
@@ -427,14 +431,19 @@
         </action>
 
         <!-- only go up under specific conditions -->
+        <action filter="prev_tile=${TILE_CHECKPOINT}">
+            <set var="should_go_up" value="1" />
+        </action>
+
         <action filter="not(any(
             prev_tile=${TILE_HEAD},
             selected_tile=${TILE_FENCE},
             all(any(selected_tile=${TILE_GLASS},prev_tile=${TILE_GLASS}),jump_length=3..)
         ))">
-            <set var="y_rng" value="floor(random() + 0.2)" />
-            <action filter="any(should-turn,should-place-checkpoint,y_rng=1)">
+            <set var="y_rng" value="floor(random() + 0.2) + should_go_up" />
+            <action filter="any(should-turn,should-place-checkpoint,y_rng=1..)">
                 <set var="current_y" value="current_y + 1" />
+                <set var="should_go_up" value="0" />
             </action>
             <!-- always go up 2 if previous was 'ladder' -->
             <action filter="prev_tile=${TILE_LADDER}">
