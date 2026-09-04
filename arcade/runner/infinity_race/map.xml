@@ -1,6 +1,6 @@
 <map proto="1.5.1">
 <name>Infinity Race</name>
-<version>2.1.1</version>
+<version>2.1.2</version>
 <objective>Get as far as you can in the parkour!</objective>
 <created>2026-08-29</created>
 <game>Parkour</game>
@@ -34,20 +34,10 @@
 <kits>
     <kit id="default-kit">
         <game-mode>adventure</game-mode>
+        <item slot="8" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
         <effect duration="oo">invisibility</effect>
         <effect duration="oo">night vision</effect>
         <boots material="leather boots" team-color="true" />
-    </kit>
-    <kit id="checkpoint-kit">
-        <item slot="0" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
-        <item slot="1" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
-        <item slot="2" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
-        <item slot="3" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
-        <item slot="4" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
-        <item slot="5" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
-        <item slot="6" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
-        <item slot="7" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
-        <item slot="8" material="ink sack" damage="10" name="`e`lReturn to Checkpoint" consumable="return-to-checkpoint-consumable" prevent-sharing="true" />
     </kit>
 </kits>
 <spawns>
@@ -367,9 +357,6 @@
                     <set var="max_checkpoint" value="max_checkpoint + 1" />
                 </action>
             </action>
-            <action filter="all(player.vel_y=..-1,alive)">
-                <kit id="checkpoint-kit" />
-            </action>
         </action>
     </trigger>
 
@@ -384,12 +371,13 @@
     </trigger>
 
     <action id="return-to-checkpoint" scope="player">
-        <teleport x="checkpoint[0]" y="checkpoint[1]" z="checkpoint[2]" yaw="checkpoint[3]" pitch="0" />
-        <schedule after="0.1s">
-            <kit>
-                <clear armor="false" />
-            </kit>
-        </schedule>
+        <action filter="checkpoint[1]=-1">
+            <sound key="note.bassattack"/>
+            <message text="`c⚠ You haven't reached a checkpoint yet!" />
+        </action>
+        <action filter="not(checkpoint[1]=-1)">
+            <teleport x="checkpoint[0]" y="checkpoint[1]" z="checkpoint[2]" yaw="checkpoint[3]" pitch="0" />
+        </action>
     </action>
 
     <action id="generate" scope="match" expose="true">
@@ -788,14 +776,13 @@
     </action>
 
     <action id="paste-glass" scope="match">
-        <set var="tile_length" value="2" />
+        <set var="tile_length" value="1" />
         <set var="tile_variant" value="floor(random() * 3)" />
         <action filter="direction=${SOUTH}">
             <action filter="tile_variant=0">
                 <paste-structure update="false" x="current_x + 1 + 1" y="current_y + 1" z="current_z + 1" structure="tile-glass-struct-1-s" />
             </action>
             <action filter="tile_variant=1">
-                <set var="tile_length" value="1" />
                 <paste-structure update="false" x="current_x + 1" y="current_y + 1" z="current_z + 1" structure="tile-glass-struct-2-s" />
             </action>
             <action filter="tile_variant=2">
@@ -807,7 +794,6 @@
                 <paste-structure update="false" x="current_x + 1 + 1" y="current_y + 1" z="current_z + 1 + 1" structure="tile-glass-struct-1-n" />
             </action>
             <action filter="tile_variant=1">
-                <set var="tile_length" value="1" />
                 <paste-structure update="false" x="current_x + 1 + 1" y="current_y + 1" z="current_z + 1 + 2" structure="tile-glass-struct-2-n" />
             </action>
             <action filter="tile_variant=2">
@@ -819,7 +805,6 @@
                 <paste-structure update="false" x="current_x + 1" y="current_y + 1" z="current_z + 1 + 1" structure="tile-glass-struct-1-e" />
             </action>
             <action filter="tile_variant=1">
-                <set var="tile_length" value="1" />
                 <paste-structure update="false" x="current_x + 1" y="current_y + 1" z="current_z + 1 + 1" structure="tile-glass-struct-2-e" />
             </action>
             <action filter="tile_variant=2">
@@ -831,7 +816,6 @@
                 <paste-structure update="false" x="current_x + 1 + 1" y="current_y + 1" z="current_z + 1 + 1" structure="tile-glass-struct-1-w" />
             </action>
             <action filter="tile_variant=1">
-                <set var="tile_length" value="1" />
                 <paste-structure update="false" x="current_x + 1 + 2" y="current_y + 1" z="current_z + 1" structure="tile-glass-struct-2-w" />
             </action>
             <action filter="tile_variant=2">
@@ -879,7 +863,7 @@
 
 </actions>
 <consumables>
-    <consumable id="return-to-checkpoint-consumable" action="return-to-checkpoint" on="click" consume="true" />
+    <consumable id="return-to-checkpoint-consumable" action="return-to-checkpoint" on="click" consume="false" />
 </consumables>
 <hunger>
     <depletion>off</depletion>
