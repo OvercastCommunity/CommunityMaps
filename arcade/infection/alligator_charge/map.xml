@@ -1,6 +1,6 @@
 <map proto="1.5.1">
 <name>Alligator Charge</name>
-<version>1.0.0</version>
+<version>1.0.1</version>
 <phase>development</phase>
 <objective>Swimmers must avoid being tagged by the Alligators</objective>
 <created>2026-09-02</created>
@@ -21,7 +21,7 @@
     <constant id="ROUND_RUNNING">3</constant>
     <constant id="ROUND_FINISHED">4</constant>
     <!-- Baselines. Rank 1 = fastest. Alligators clamp 1–10; Swimmers 1–16. Ranks set each round. -->
-    <constant id="SWIMMER_SPEED">5</constant>
+    <constant id="SWIMMER_SPEED">4</constant>
     <constant id="ALLIGATOR_SPEED">9</constant>
 </constants>
 <teams>
@@ -42,7 +42,7 @@
         <clear effects="true"/>
         <foodlevel>6</foodlevel>
         <saturation>0</saturation>
-        <game-mode>adventure</game-mode>
+        <game-mode>survival</game-mode>
     </kit>
     <kit id="swim-rank-1">
         <boots team-color="true" unbreakable="true" material="leather boots">
@@ -217,13 +217,16 @@
         <max-health>8</max-health>
         <health>8</health>
     </kit>
+    <kit id="lily-pad">
+        <item slot="0" amount="2" material="water lily"/>
+    </kit>
     <kit id="alligator-kit" parents="charge-base" force="true" potion-particles="false">
         <helmet team-color="true" unbreakable="true" material="leather helmet">
             <enchantment>respiration</enchantment>
         </helmet>
         <chestplate team-color="true" unbreakable="true" material="leather chestplate"/>
         <leggings team-color="true" unbreakable="true" material="leather leggings"/>
-        <effect amplifier="10" duration="oo">strength</effect>
+        <effect amplifier="2" duration="oo">strength</effect>
     </kit>
     <kit id="alligator-switch-kit" force="true">
         <team-switch team="alligators" show-title="false"/>
@@ -295,7 +298,7 @@
     <variable id="glass_up"/>
     <variable id="side_a" default="1"/>
     <variable id="drop_twin" default="0"/>
-    <variable id="swimmer_rank" default="5"/>
+    <variable id="swimmer_rank" default="4"/>
     <variable id="alligator_rank" default="9"/>
     <variable id="no_tag_rounds"/>
     <variable id="tagged_this_round"/>
@@ -315,6 +318,7 @@
     <variable id="stall_nagging"/>
     <variable id="drop_west"/>
     <variable id="in_round"/>
+    <variable id="got_lily"/>
 </variables>
 <filters>
     <all id="game-tutorial">
@@ -348,6 +352,11 @@
     <variable id="drop-west" var="drop_west">1</variable>
     <variable id="drop-east" var="drop_west">0</variable>
     <variable id="in-round" var="in_round">1</variable>
+    <material id="only-lily">water lily</material>
+    <all id="gator-break-lily">
+        <team>alligators</team>
+        <material>water lily</material>
+    </all>
     <variable id="no-tag-2" var="no_tag_rounds">[2,oo)</variable>
     <variable id="no-tag-3" var="no_tag_rounds">[3,oo)</variable>
     <variable id="ratio-40" var="ratio_40">[0,oo)</variable>
@@ -665,6 +674,7 @@
                 <set var="stall_warned" value="0"/>
                 <set var="stall_nagging" value="0"/>
                 <set var="in_round" value="1"/>
+                <set var="got_lily" value="0"/>
             </switch-scope>
             <action filter="one-gator">
                 <set var="drop_twin" value="0"/>
@@ -708,6 +718,20 @@
                 <message fade-in="0.0s" stay="1.0s" fade-out="0.4s" title="`a`lCharge!" text="`a    `lCharge!"/>
             </action>
         </action>
+    </trigger>
+    <action id="give-lily-pad" scope="player">
+        <kit id="lily-pad"/>
+        <set var="got_lily" value="1"/>
+    </action>
+    <trigger scope="player" action="give-lily-pad">
+        <filter>
+            <all>
+                <filter id="round-starting"/>
+                <team>swimmers</team>
+                <alive/>
+                <variable var="got_lily">0</variable>
+            </all>
+        </filter>
     </trigger>
     <trigger scope="match">
         <filter>
@@ -1015,7 +1039,7 @@
     <apply region="alligator-ok-twin" leave="not(all(game-running,alligators,drop-twin))" message="Stay in the pool!"/>
     <apply region="no-return-a" enter="not(all(side-a,swimmers,in_pool=1))" message="No going back!"/>
     <apply region="no-return-b" enter="not(all(side-b,swimmers,in_pool=1))" message="No going back!"/>
-    <apply block="never"/>
+    <apply block-place="only-lily" block-break="gator-break-lily"/>
 </regions>
 <portals>
     <portal filter="game-tutorial" region="tutorial-void" destination="tutorial-spawn" yaw="@-177.6" pitch="@2" sound="false"/>
@@ -1039,6 +1063,7 @@
     <item>leather chestplate</item>
     <item>leather leggings</item>
     <item>leather boots</item>
+    <item>water lily</item>
 </itemremove>
 <hunger>
     <depletion>off</depletion>
