@@ -1,6 +1,6 @@
 <map proto="1.5.1">
 <name>Alligator Charge</name>
-<version>1.0.1</version>
+<version>1.0.2</version>
 <phase>development</phase>
 <objective>Swimmers must avoid being tagged by the Alligators</objective>
 <created>2026-09-02</created>
@@ -21,7 +21,7 @@
     <constant id="ROUND_RUNNING">3</constant>
     <constant id="ROUND_FINISHED">4</constant>
     <!-- Baselines. Rank 1 = fastest. Alligators clamp 1–10; Swimmers 1–16. Ranks set each round. -->
-    <constant id="SWIMMER_SPEED">4</constant>
+    <constant id="SWIMMER_SPEED">3</constant>
     <constant id="ALLIGATOR_SPEED">9</constant>
 </constants>
 <teams>
@@ -29,8 +29,8 @@
     <team id="swimmers" color="red" min="1" max="100" plural="true">Swimmers</team>
 </teams>
 <broadcasts>
-    <tip after="40s" every="70s" count="5">`eBeware, `aAlligators`r`e and `cSwimmers`r`e swimming speeds may vary by round!</tip>
-    <tip after="95s" every="70s" count="3">`eBeware, `aAlligators`r`e can stay underwater longer than `cSwimmers`r`e!</tip>
+    <tip after="40s" every="110s" count="5">`eBeware, `aAlligators`r`e and `cSwimmers`r`e swimming speeds may vary by round!</tip>
+    <tip after="95s" every="110s" count="3">`eBeware, `aAlligators`r`e can stay underwater longer than `cSwimmers`r`e!</tip>
 </broadcasts>
 <kits>
     <kit id="tutorial-kit">
@@ -218,7 +218,32 @@
         <health>8</health>
     </kit>
     <kit id="lily-pad">
-        <item slot="0" amount="2" material="water lily"/>
+        <item slot="0" unbreakable="true" material="fishing rod"/>
+        <item slot="1" amount="2" material="water lily"/>
+    </kit>
+    <kit id="swimmer-pots-wb-speed">
+        <item slot="2" amount="1" material="potion" damage="8237">
+            <effect duration="5s">water breathing</effect>
+        </item>
+        <item slot="3" amount="1" material="potion" damage="8194">
+            <effect duration="5s">speed</effect>
+        </item>
+    </kit>
+    <kit id="swimmer-pots-wb-regen">
+        <item slot="2" amount="1" material="potion" damage="8237">
+            <effect duration="5s">water breathing</effect>
+        </item>
+        <item slot="3" amount="1" material="potion" damage="8193">
+            <effect duration="5s">regeneration</effect>
+        </item>
+    </kit>
+    <kit id="swimmer-pots-speed-regen">
+        <item slot="2" amount="1" material="potion" damage="8194">
+            <effect duration="5s">speed</effect>
+        </item>
+        <item slot="3" amount="1" material="potion" damage="8193">
+            <effect duration="5s">regeneration</effect>
+        </item>
     </kit>
     <kit id="alligator-kit" parents="charge-base" force="true" potion-particles="false">
         <helmet team-color="true" unbreakable="true" material="leather helmet">
@@ -298,7 +323,7 @@
     <variable id="glass_up"/>
     <variable id="side_a" default="1"/>
     <variable id="drop_twin" default="0"/>
-    <variable id="swimmer_rank" default="4"/>
+    <variable id="swimmer_rank" default="3"/>
     <variable id="alligator_rank" default="9"/>
     <variable id="no_tag_rounds"/>
     <variable id="tagged_this_round"/>
@@ -721,6 +746,16 @@
     </trigger>
     <action id="give-lily-pad" scope="player">
         <kit id="lily-pad"/>
+        <set var="pot_roll" value="floor(random() * 3)"/>
+        <action filter="pot_roll=0">
+            <kit id="swimmer-pots-wb-speed"/>
+        </action>
+        <action filter="pot_roll=1">
+            <kit id="swimmer-pots-wb-regen"/>
+        </action>
+        <action filter="pot_roll=2">
+            <kit id="swimmer-pots-speed-regen"/>
+        </action>
         <set var="got_lily" value="1"/>
     </action>
     <trigger scope="player" action="give-lily-pad">
@@ -1054,7 +1089,7 @@
     <respawn delay="0s" filter="all(alligators,not(wait-filter))"/>
     <respawn delay="2s" filter="all(alligators,wait-filter)"/>
 </respawns>
-<time result="swimmers">5m</time>
+<time result="swimmers">4m</time>
 <blitz filter="never" join-filter="always">
     <broadcastLives>false</broadcastLives>
 </blitz>
