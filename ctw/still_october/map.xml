@@ -1,0 +1,168 @@
+<!--map-->
+<map proto="1.5.1">
+<name>Still October</name>
+<phase>development</phase>
+<version>1.0.0</version>
+<created>2026-09-15</created>
+<objective>You have to capture the wool on the enemy side and place it on your victory monument!</objective>
+<authors>
+	<author uuid="9c14b7e9-8488-427a-bc81-7193becde2d3"/> <!--MrTinyPig-->
+</authors>
+<!--KITS KITS KITS-->
+<kits>
+	<kit id="spawn-kit">
+		<item slot="0" unbreakable="true" material="stone sword"/>
+		<item slot="1" unbreakable="true" material="bow"/>
+		<item slot="2" unbreakable="true" material="iron pickaxe">
+			<enchantment level="2">efficiency</enchantment>
+		</item>
+		<item slot="3" unbreakable="true" material="iron axe">
+			<enchantment level="2">efficiency</enchantment>
+		</item>
+		<item slot="5" material="wood" damage="1" amount="48"/>
+		<item slot="6" material="glass" amount="32"/>
+		<item slot="7" material="arrow" amount="20"/>
+		<item slot="30" material="iron shovel" unbreakable="true">
+			<enchantment level="2">efficiency</enchantment>
+		</item>
+		<item slot="8" material="golden apple"/>
+	<!--ARMOR-->
+		<helmet material="leather helmet" team-color="true" unbreakable="true"/>
+		<chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+		<leggings material="chainmail leggings" unbreakable="true">
+			<enchantment level="2">projectile protection</enchantment>
+		</leggings>
+		<boots material="leather boots" team-color="true" unbreakable="true">
+			<enchantment>feather falling</enchantment>
+		</boots>
+	</kit>
+</kits>
+<!--STUFF FOR uuh stuff-->
+<teams>
+	<team id="orange-team" max="8" color="gold">Orange</team>
+	<team id="magenta-team" max="8" color="light purple">Magenta</team>
+</teams>
+<!--spawns-->
+<spawns>
+	<spawn team="orange-team" kit="spawn-kit">
+		<region>
+			<point>6.5,7.1,-14.5</point>
+		</region>
+	</spawn>
+	<spawn team="magenta-team" kit="spawn-kit" yaw="180">
+		<region>
+			<point>90.5,7.1,137.5</point>
+		</region>
+	</spawn>
+	<default yaw="90">
+		<region>
+			<point>48.5,31.5,61.5</point>
+		</region>
+	</default>
+</spawns>
+<!--wool monument--> y=8
+<wools>
+	<wool team="magenta-team" color="magenta" location="62.5,8,-12.5">
+		<monument>
+			<block>93.5,8,129.5</block>
+		</monument>
+	</wool>
+	<wool team="orange-team" color="orange" location="34.5,8,135.5">
+		<monument>
+			<block>3.5,8,-6.5</block>
+		</monument>
+	</wool>
+</wools>
+<!--FILTERS FILTERS FILTERS-->
+<filters>
+	<all id="iron-renew">
+		<material id="only-iron">iron block</material>
+		<cause>world</cause>
+	</all>
+	<all id="only-wool-room">
+		<blocks region="wool-room-blocks">
+			<not>
+				<material id="chest-place">chest</material>
+			</not>
+		</blocks>
+	</all>
+</filters>		
+<!--REGIONS REGIONS REGIONS-->
+<regions>
+	<negative id="void-area">
+		<union id="gamezone">
+		<!--gamezone-->
+			<cuboid id="magenta-row" min="57.5,0,-10.5" max="67.5,20,128.5"/>
+			<cuboid id="front-orange-wool" min="70.5,0,114.5" max="29.5,20,128.5"/>
+			<cuboid id="orange-row" min="39.5,0,133.5" max="29.5,20,-5.5"/>
+			<cuboid id="front-magenta-wool" min="26.5,0,8.5" max="67.5,20,-5.5"/>
+			<cuboid id="middle1" min="39.5,0,83.5" max="57.5,20,71.5"/>
+			<cuboid id="middle2" min="39.5,0,39.5" max="57.5,20,51.5"/>
+		<!--important areas-->
+			<union id="spawn-areas">
+				<cuboid id="magenta-spawn" min="95.5,0,142.5" max="71.5,20,113.5"/>
+				<cuboid id="orange-spawn" min="1.5,0,-19.5" max="25.5,20,9.5"/>
+			</union>
+			<union id="wool-room-blocks"> <!--where they can place blocks (so no placement in void-->
+				<cuboid id="magenta-wool-room-blocks" min="57.5,0,-21.5" max="67.5,21,-11.5"/>
+				<cuboid id="orange-wool-room-blocks" min="39.5,0,144.5" max="29.5,21,134.5"/>
+			</union>
+		</union>
+	</negative>
+	<!--so they dont get inside their own wool room? its bigger area-->
+		<cuboid id="orange-wool-room" min="28.5,0,134.5" max="40.5,21,145.5"/>
+		<cuboid id="magenta-wool-room" min="68.5,0,-11.5" max="56.5,21,-22.5"/>
+	<!--wool spawner-->
+		<point id="orange-wool-spawner">34.5,8.5,139.5</point>
+		<point id="magenta-wool-spawner">62.5,8.5,-16.5</point>
+<!--APPLY STUFF IN REGIONS-->
+	<apply region="void-area" block="never" message="You may not edit the void!"/>
+		<!--deny entrance-->
+	<apply region="magenta-spawn" enter="deny(orange-team)" message="You may not enter the enemy spawn!"/>
+	<apply region="orange-spawn" enter="deny(magenta-team)" message="You may not enter the enemy spawn!"/>	
+	<apply region="orange-wool-room" enter="deny(magenta-team)" message="You may not enter your own wool room!"/>
+	<apply region="magenta-wool-room" enter="deny(orange-team)" message="You may not enter your own wool room!"/>
+		<!--block placement-->
+	<apply region="spawn-areas" block-break="only-iron" block-place="iron-renew" message="You may not edit the spawn areas!"/>
+	<apply region="wool-room-blocks" block-place="deny(chest-place)" block-break="only-wool-room" message="You may not fuck up the wool rooms!"/>
+</regions>
+<!--the other important stuff-->
+<maxbuildheight>18</maxbuildheight>
+<hunger>
+	<depletion>off</depletion>
+</hunger>
+<itemremove>
+	<item>leather helmet</item>
+	<item>leather chestplate</item>
+	<item>chainmail leggings</item>
+	<item>leather boots</item>
+	<item>glass</item>
+</itemremove>
+<toolrepair>
+	<tool>stone sword</tool>
+	<tool>iron axe</tool>
+	<tool>iron pickaxe</tool>
+	<tool>bow</tool>
+</toolrepair>
+<renewables>
+	<renewable rate="2" region="spawn-areas" renew-filter="only-iron"/>
+</renewables>
+<spawners>
+	<spawner spawn-region="orange-wool-spawner" player-region="orange-wool-room" max-entities="5">
+		<item material="wool" damage="1" amount="1"/>
+	</spawner>
+	<spawner spawn-region="magenta-wool-spawner" player-region="magenta-wool-room" max-entities="5">
+		<item material="wool" damage="2" amount="1"/>
+	</spawner>
+</spawners>
+<world>
+	<timeset>1</timeset>
+</world>
+<kill-rewards>
+	<kill-reward>
+		<item material="golden apple"/>
+		<item material="wood" damage="2" amount="16"/>
+		<item material="arrow" amount="8"/>
+	</kill-reward>
+</kill-rewards>
+</map>
