@@ -27,8 +27,10 @@
           <constant id="SECTION_STAIRS">5</constant>
           <constant id="SECTION_SKULL">6</constant>
           <constant id="SECTION_GLASS">7</constant>
-          <constant id="SECTION_TRAPDOOR">8</constant>
-          <constant id="SECTION_NEOS">9</constant>
+          <constant id="SECTION_SWAP">8</constant>
+          <constant id="SECTION_ICE">9</constant>
+          <constant id="SECTION_TRAPDOOR">10</constant>
+          <constant id="SECTION_NEOS">11</constant>
           <constant id="TILE_BLOCK_WIDE">1</constant>
           <constant id="TILE_BLOCK_NORMAL">2</constant>
           <constant id="TILE_BLOCK_SMALL">3</constant>
@@ -74,6 +76,12 @@
           <constant id="TILE_STAIRS_SIDE_RIGHT">43</constant>
           <constant id="TILE_STAIRS_LONG">44</constant>
           <constant id="TILE_SLIME_SMALL">45</constant>
+          <constant id="TILE_ICE_NORMAL">46</constant>
+          <constant id="TILE_ICE_SMALL">47</constant>
+          <constant id="TILE_ICE_WIDE">48</constant>
+          <constant id="TILE_ICE_LONG">49</constant>
+          <constant id="TILE_ICE_CORRIDOR">50</constant>
+          <constant id="TILE_SWAP_LONG">51</constant>
           <constant id="TILE_CHECKPOINT">100</constant>
           <constant id="TILE_FINISH_LINE">200</constant>
       </constants>
@@ -592,6 +600,7 @@
               <mirror id="tile-stairs-side-right-w" normal="0,0,1" origin="-79,0,4.5" region="tile-stairs-side-right-e"></mirror>
               <mirror id="tile-stairs-long-w" normal="0,0,1" origin="-79,0,4.5" region="tile-stairs-long-e"></mirror>
           </union>
+          <apply use="never"></apply>
       </regions>
       <filters>
           <offset id="on-checkpoint" vector="~0,~-1,~0">
@@ -650,6 +659,13 @@
           <variable id="selected_section"></variable>
           <variable id="prev_section"></variable>
           <variable id="direction" default="${SOUTH}"></variable>
+          <variable id="registered_swap_amount"></variable>
+          <variable id="i"></variable>
+          <variable id="cycle"></variable>
+          <variable id="tile_width"></variable>
+          <variable id="tile_shift"></variable>
+          <variable id="fill_lat"></variable>
+          <variable id="fill_back"></variable>
           <variable id="difficulty" default="0"></variable>
           <variable id="random_tile"></variable>
           <variable id="extra_rng"></variable>
@@ -658,6 +674,10 @@
           <array id="checkpoint" size="4" scope="player" default="-1"></array>
           <array id="calc" size="3" scope="player"></array>
           <array id="checkpoints" size="300"></array>
+          <array id="swap_a" size="300"></array>
+          <array id="swap_b" size="300"></array>
+          <cuboid id="swap_cursor" min="0,0,0" max="1,1,1"></cuboid>
+          <cuboid id="paste_cursor" min="0,0,0" max="1,1,1"></cuboid>
       </variables>
       <actions>
           <action id="return-to-checkpoint" scope="player">
@@ -720,6 +740,12 @@
         <action filter="selected_section=${SECTION_TRAPDOOR}">
             <action id="gen-section-trapdoor" />
         </action>
+        <action filter="selected_section=${SECTION_ICE}">
+            <action id="gen-section-ice" />
+        </action>
+        <action filter="selected_section=${SECTION_SWAP}">
+            <action id="gen-section-swap" />
+        </action>
         <action filter="selected_section=${SECTION_NEOS}">
             <action id="gen-section-neos" />
         </action>
@@ -734,9 +760,9 @@
         <!-- checkpoint -->
         <action filter="should-place-checkpoint">
             <!-- section change -->
-            <action filter="not(all(current_y=180..,checkpoints_generated%2=1))">
+            <action filter="not(all(current_y=200..,checkpoints_generated%2=1))">
                 <action filter="tiles_amount=60..">
-                    <set var="unlocked" value="min(8, unlocked + 1)" />
+                    <set var="unlocked" value="min(10, unlocked + 1)" />
                     <set var="prev_section" value="selected_section" />
                     <set var="selected_section" value="floor(random() * (unlocked - 1)) + 1" />
                     <action filter="selected_section-prev_section=0..">
@@ -752,6 +778,9 @@
             <action filter="prev_tile=${TILE_SLIME_SMALL}">
                 <set var="vertical_distance" value="5" />
             </action>
+            <action filter="prev_tile=${TILE_SKULL}">
+                <set var="vertical_distance" value="(floor(tile_height) - 1)" />
+            </action>
             <set var="difficulty" value="min(100, difficulty + 4)" />
             <set var="side_distance" value="0" />
             <set var="checkpoints_generated" value="checkpoints_generated + 1" />
@@ -760,9 +789,12 @@
             <action filter="selected_section=${SECTION_NEOS}">
                 <set var="selected_tile" value="${TILE_FINISH_LINE}" />
             </action>
-            <action filter="all(current_y=180..,checkpoints_generated%2=1)">
+            <action filter="all(current_y=200..,checkpoints_generated%2=1)">
                 <set var="selected_section" value="${SECTION_NEOS}" />
             </action>
+        </action>
+        <action filter="prev_tile=${TILE_CHECKPOINT}">
+            <set var="jump_length" value="2" />
         </action>
 
         <set var="current_y" value="current_y + vertical_distance" />
@@ -930,6 +962,24 @@
         </action>
         <action filter="selected_tile=${TILE_SLIME_SMALL}">
             <action id="paste-slime-small" />
+        </action>
+        <action filter="selected_tile=${TILE_ICE_NORMAL}">
+            <action id="paste-ice-normal" />
+        </action>
+        <action filter="selected_tile=${TILE_ICE_SMALL}">
+            <action id="paste-ice-small" />
+        </action>
+        <action filter="selected_tile=${TILE_ICE_WIDE}">
+            <action id="paste-ice-wide" />
+        </action>
+        <action filter="selected_tile=${TILE_ICE_LONG}">
+            <action id="paste-ice-long" />
+        </action>
+        <action filter="selected_tile=${TILE_ICE_CORRIDOR}">
+            <action id="paste-ice-corridor" />
+        </action>
+        <action filter="selected_tile=${TILE_SWAP_LONG}">
+            <action id="paste-swap-long" />
         </action>
         <action filter="selected_tile=${TILE_CHECKPOINT}">
             <action id="paste-checkpoint" />
@@ -1860,10 +1910,117 @@
             <paste-structure update="false" x="current_x + 1 + 2" y="current_y + 1" z="current_z + 1 + 1" structure="tile-slime-small-struct" />
         </action>
     </action>
+          <action id="paste-ice-normal" scope="match">
+        <set var="tile_length" value="3" />
+        <set var="tile_height" value="1" />
+        <set var="tile_width" value="3" />
+        <action id="fill-cursor" />
+        <fill material="packed ice" region="paste_cursor" update="false" />
+    </action>
+          <action id="paste-ice-small" scope="match">
+        <set var="tile_length" value="1" />
+        <set var="tile_height" value="1" />
+        <set var="tile_width" value="1" />
+        <action id="fill-cursor" />
+        <fill material="packed ice" region="paste_cursor" update="false" />
+    </action>
+          <action id="paste-ice-wide" scope="match">
+        <set var="tile_length" value="1" />
+        <set var="tile_height" value="1" />
+        <set var="tile_width" value="3" />
+        <action id="fill-cursor" />
+        <fill material="packed ice" region="paste_cursor" update="false" />
+    </action>
+          <action id="paste-ice-long" scope="match">
+        <set var="tile_length" value="5" />
+        <set var="tile_height" value="1" />
+        <set var="tile_width" value="1" />
+        <action id="fill-cursor" />
+        <fill material="packed ice" region="paste_cursor" update="false" />
+    </action>
+          <action id="paste-ice-corridor" scope="match">
+        <set var="tile_length" value="8" />
+        <set var="tile_height" value="1" />
+        <set var="tile_width" value="3" />
+        <action id="fill-cursor" />
+        <fill material="packed ice" region="paste_cursor" update="false" />
+
+        <set var="paste_cursor" index="1" value="paste_cursor[1] + 2" />
+        <set var="paste_cursor" index="4" value="paste_cursor[4] + 2" />
+        <action filter="any(direction=${SOUTH},direction=${NORTH})">
+            <set var="paste_cursor" index="2" value="paste_cursor[2] + 1" />
+            <set var="paste_cursor" index="5" value="paste_cursor[5] - 1" />
+        </action>
+        <action filter="any(direction=${EAST},direction=${WEST})">
+            <set var="paste_cursor" index="0" value="paste_cursor[0] + 1" />
+            <set var="paste_cursor" index="3" value="paste_cursor[3] - 1" />
+        </action>
+        <fill material="iron trapdoor:10" region="paste_cursor" update="false" />
+    </action>
+          <action id="paste-swap-long" scope="match">
+        <set var="tile_length" value="2" />
+        <set var="tile_height" value="1" />
+        <set var="tile_width" value="3" />
+
+        <set var="tile_shift" value="-2" />
+        <action id="fill-cursor" />
+        <fill material="stone button:5" region="paste_cursor" update="false" />
+
+        <set var="swap_a" index="(registered_swap_amount * 6)" value="paste_cursor[0]" />
+        <set var="swap_a" index="(registered_swap_amount * 6) + 1" value="paste_cursor[1]" />
+        <set var="swap_a" index="(registered_swap_amount * 6) + 2" value="paste_cursor[2]" />
+        <set var="swap_a" index="(registered_swap_amount * 6) + 3" value="paste_cursor[3]" />
+        <set var="swap_a" index="(registered_swap_amount * 6) + 4" value="paste_cursor[4]" />
+        <set var="swap_a" index="(registered_swap_amount * 6) + 5" value="paste_cursor[5]" />
+
+        <set var="tile_shift" value="2" />
+        <action id="fill-cursor" />
+        <fill material="stone button:5" region="paste_cursor" update="false" />
+
+        <set var="swap_b" index="(registered_swap_amount * 6)" value="paste_cursor[0]" />
+        <set var="swap_b" index="(registered_swap_amount * 6) + 1" value="paste_cursor[1]" />
+        <set var="swap_b" index="(registered_swap_amount * 6) + 2" value="paste_cursor[2]" />
+        <set var="swap_b" index="(registered_swap_amount * 6) + 3" value="paste_cursor[3]" />
+        <set var="swap_b" index="(registered_swap_amount * 6) + 4" value="paste_cursor[4]" />
+        <set var="swap_b" index="(registered_swap_amount * 6) + 5" value="paste_cursor[5]" />
+
+        <set var="registered_swap_amount" value="registered_swap_amount + 1" />
+    </action>
           <action id="paste-checkpoint" scope="match">
         <set var="tile_length" value="3" />
         <set var="tile_height" value="1" />
         <paste-structure update="false" x="current_x + 1" y="current_y + 1" z="current_z + 1" structure="tile-checkpoint-struct" />
+    </action>
+          <action id="fill-cursor" scope="match">
+        <set var="fill_lat" value="floor((3 - tile_width) / 2) + tile_shift" />
+        <set var="fill_back" value="3 - tile_length" />
+        <set var="paste_cursor" index="1" value="current_y" />
+        <set var="paste_cursor" index="4" value="current_y + 1" />
+        <action filter="direction=${SOUTH}">
+            <set var="paste_cursor" index="0" value="current_x + fill_lat" />
+            <set var="paste_cursor" index="3" value="current_x + fill_lat + tile_width" />
+            <set var="paste_cursor" index="2" value="current_z" />
+            <set var="paste_cursor" index="5" value="current_z + tile_length" />
+        </action>
+        <action filter="direction=${EAST}">
+            <set var="paste_cursor" index="0" value="current_x" />
+            <set var="paste_cursor" index="3" value="current_x + tile_length" />
+            <set var="paste_cursor" index="2" value="current_z + fill_lat" />
+            <set var="paste_cursor" index="5" value="current_z + fill_lat + tile_width" />
+        </action>
+        <action filter="direction=${NORTH}">
+            <set var="paste_cursor" index="0" value="current_x + fill_lat" />
+            <set var="paste_cursor" index="3" value="current_x + fill_lat + tile_width" />
+            <set var="paste_cursor" index="2" value="current_z + fill_back" />
+            <set var="paste_cursor" index="5" value="current_z + fill_back + tile_length" />
+        </action>
+        <action filter="direction=${WEST}">
+            <set var="paste_cursor" index="0" value="current_x + fill_back" />
+            <set var="paste_cursor" index="3" value="current_x + fill_back + tile_length" />
+            <set var="paste_cursor" index="2" value="current_z + fill_lat" />
+            <set var="paste_cursor" index="5" value="current_z + fill_lat + tile_width" />
+        </action>
+        <set var="tile_shift" value="0" />
     </action>
           <action id="gen-section-simple" scope="match">
         <set var="tile_rng" value="random()" />
@@ -1941,9 +2098,12 @@
             <set var="side_distance" value="floor(random() * 3) - 1" />
         </action>
         
-        <action filter="all(
-            any(selected_tile=${TILE_SKULL_NEO},selected_tile=${TILE_SKULL_FOUR}),
-            prev_tile=${TILE_SKULL}
+        <action filter="any(
+            all(
+                any(selected_tile=${TILE_SKULL_NEO},selected_tile=${TILE_SKULL_FOUR}),
+                prev_tile=${TILE_SKULL}
+            ),
+            selected_tile=${TILE_SKULL_PILLAR}
         )">
             <set var="vertical_distance" value="(floor(tile_height) - 1)" />
         </action>
@@ -2400,6 +2560,51 @@
 
         <set var="forward_distance" value="jump_length + tile_length" />
     </action>
+          <action id="gen-section-ice" scope="match">
+        <set var="tile_rng" value="random()" />
+        <set var="random_tile" value="floor(tile_rng * (tile_rng + (1 - tile_rng) * difficulty / 100) * 20) + 1" />
+
+        <action filter="random_tile=1..">
+            <set var="selected_tile" value="${TILE_ICE_NORMAL}" />
+        </action>
+        <action filter="random_tile=5..">
+            <set var="selected_tile" value="${TILE_ICE_SMALL}" />
+        </action>
+        <action filter="random_tile=10..">
+            <set var="selected_tile" value="${TILE_ICE_WIDE}" />
+        </action>
+        <action filter="random_tile=15..">
+            <set var="selected_tile" value="${TILE_ICE_LONG}" />
+        </action>
+        <action filter="random_tile=20">
+            <set var="selected_tile" value="${TILE_ICE_CORRIDOR}" />
+            <action filter="any(difficulty=..80,prev_tile=${TILE_ICE_CORRIDOR})">
+                <set var="selected_tile" value="${TILE_ICE_LONG}" />
+            </action>
+        </action>
+
+        <set var="jump_length" value="3 + floor(random() + difficulty / 200)" />
+        <action filter="prev_tile=${TILE_ICE_CORRIDOR}">
+            <set var="jump_length" value="8" />
+        </action>
+
+        <set var="side_distance" value="floor(random() * 5) - 2" />
+        <set var="vertical_distance" value="(floor(tile_height) - 1) + floor(random() * 2)" />
+        <set var="forward_distance" value="jump_length + tile_length" />
+    </action>
+          <action id="gen-section-swap" scope="match">
+        <set var="tile_rng" value="random()" />
+        <set var="random_tile" value="1" />
+
+        <action filter="random_tile=1..">
+            <set var="selected_tile" value="${TILE_SWAP_LONG}" />
+        </action>
+
+        <set var="jump_length" value="2" />
+        <set var="side_distance" value="floor(random() * 5) - 2" />
+        <set var="vertical_distance" value="(floor(tile_height) - 1)" />
+        <set var="forward_distance" value="jump_length + tile_length" />
+    </action>
           <trigger scope="player">
               <filter>
                   <pulse period="0.2s" duration="0.1s" filter="match-running"></pulse>
@@ -2488,6 +2693,48 @@
                 <action id="generate" />
                 <set var="tiles_to_generate" value="tiles_to_generate - 1" />
             </action>
+        </action>
+          </trigger>
+          <trigger scope="match">
+              <filter>
+                  <pulse period="1s" duration="0.5s" filter="match-running"></pulse>
+              </filter>
+              <action>
+            <set var="i" value="0" />
+            <repeat times="registered_swap_amount">
+                <set var="swap_cursor" index="0" value="swap_a[i]" />
+                <set var="swap_cursor" index="1" value="swap_a[i + 1]" />
+                <set var="swap_cursor" index="2" value="swap_a[i + 2]" />
+                <set var="swap_cursor" index="3" value="swap_a[i + 3]" />
+                <set var="swap_cursor" index="4" value="swap_a[i + 4]" />
+                <set var="swap_cursor" index="5" value="swap_a[i + 5]" />
+                <action filter="cycle=0">
+                    <fill region="swap_cursor" material="stone button:5" update="false" />
+                </action>
+                <action filter="cycle=1">
+                    <fill region="swap_cursor" material="quartz block" update="false" />
+                </action>
+                <set var="i" value="i + 6" />
+            </repeat>
+
+            <set var="i" value="0" />
+            <repeat times="registered_swap_amount">
+                <set var="swap_cursor" index="0" value="swap_b[i]" />
+                <set var="swap_cursor" index="1" value="swap_b[i + 1]" />
+                <set var="swap_cursor" index="2" value="swap_b[i + 2]" />
+                <set var="swap_cursor" index="3" value="swap_b[i + 3]" />
+                <set var="swap_cursor" index="4" value="swap_b[i + 4]" />
+                <set var="swap_cursor" index="5" value="swap_b[i + 5]" />
+                <action filter="cycle=0">
+                    <fill region="swap_cursor" material="quartz block" update="false" />
+                </action>
+                <action filter="cycle=1">
+                    <fill region="swap_cursor" material="stone button:5" update="false" />
+                </action>
+                <set var="i" value="i + 6" />
+            </repeat>
+            
+            <set var="cycle" value="1 - cycle" />
         </action>
           </trigger>
       </actions>
