@@ -1,6 +1,6 @@
   <map proto="1.5.1">
       <name>Infinity Race</name>
-      <version>3.1.1</version>
+      <version>3.2</version>
       <objective>Get as far as you can in the parkour!</objective>
       <created>2026-08-29</created>
       <phase>staging</phase>
@@ -75,7 +75,7 @@
           <constant id="TILE_STAIRS_SIDE_LEFT">42</constant>
           <constant id="TILE_STAIRS_SIDE_RIGHT">43</constant>
           <constant id="TILE_STAIRS_LONG">44</constant>
-          <constant id="TILE_SLIME_SMALL">45</constant>
+          <constant id="TILE_SLIME">45</constant>
           <constant id="TILE_ICE_NORMAL">46</constant>
           <constant id="TILE_ICE_SMALL">47</constant>
           <constant id="TILE_ICE_WIDE">48</constant>
@@ -88,11 +88,15 @@
       <players max="80" show-name-tags="false" colors="true"></players>
       <kits>
           <kit id="default-kit">
+              <clear></clear>
               <item slot="8" name="`e`lReturn to Checkpoint" material="ink sack" consumable="return-to-checkpoint-consumable" damage="10" prevent-sharing="true"></item>
               <boots material="leather boots" team-color="true"></boots>
               <effect duration="oo">invisibility</effect>
               <effect duration="oo">night vision</effect>
               <game-mode>adventure</game-mode>
+          </kit>
+          <kit id="skip-kit">
+              <item slot="7" name="`9`lSkip section" material="ink sack" consumable="skip-checkpoint-consumable" damage="12" prevent-sharing="true"></item>
           </kit>
       </kits>
       <spawns>
@@ -635,7 +639,8 @@
       <variables scope="match">
           <variable id="checkpoint_yaw_index" scope="player"></variable>
           <variable id="checkpoints_triggered" scope="player"></variable>
-          <variable id="max_checkpoint"></variable>
+          <variable id="skip_timer" scope="player"></variable>
+          <variable id="max_reached"></variable>
           <variable id="checkpoint_i"></variable>
           <variable id="checkpoints_generated"></variable>
           <variable id="finished_generation"></variable>
@@ -666,6 +671,12 @@
           <variable id="tile_shift"></variable>
           <variable id="fill_lat"></variable>
           <variable id="fill_back"></variable>
+          <variable id="stair_i"></variable>
+          <variable id="stair_mask"></variable>
+          <variable id="stair_b0"></variable>
+          <variable id="stair_b1"></variable>
+          <variable id="stair_b2"></variable>
+          <variable id="stair_col"></variable>
           <variable id="difficulty" default="0"></variable>
           <variable id="random_tile"></variable>
           <variable id="extra_rng"></variable>
@@ -673,13 +684,51 @@
           <variable id="unlocked" default="3"></variable>
           <array id="checkpoint" size="4" scope="player" default="-1"></array>
           <array id="calc" size="3" scope="player"></array>
-          <array id="checkpoints" size="300"></array>
+          <array id="checkpoints" size="300" default="-1"></array>
           <array id="swap_a" size="300"></array>
           <array id="swap_b" size="300"></array>
           <cuboid id="swap_cursor" min="0,0,0" max="1,1,1"></cuboid>
           <cuboid id="paste_cursor" min="0,0,0" max="1,1,1"></cuboid>
       </variables>
       <actions>
+          <action id="refresh-skip" scope="player">
+        <kit id="default-kit" />
+        <set var="skip_timer" value="0" />
+        <action filter="max_reached-checkpoints_triggered=1..">
+            <set var="skip_timer" value="60" />
+        </action>
+    </action>
+          <action id="skip-checkpoint" scope="player">
+        <action filter="max_reached-checkpoints_triggered=..0">
+            <sound key="note.bassattack" />
+            <message text="`c⚠ Nobody has cleared this section yet!" />
+        </action>
+        <action filter="max_reached-checkpoints_triggered=1..">
+            <set var="checkpoint" index="0" value="checkpoints[checkpoints_triggered * 3]" />
+            <set var="checkpoint" index="1" value="checkpoints[(checkpoints_triggered * 3) + 1]" />
+            <set var="checkpoint" index="2" value="checkpoints[(checkpoints_triggered * 3) + 2]" />
+            <set var="checkpoints_triggered" value="checkpoints_triggered + 1" />
+
+            <action id="refresh-skip" />
+            <message text="`9`lSection skipped! `r`7`o(-15 points)" />
+
+            <set var="checkpoint_yaw_index" value="((checkpoints_triggered - 1) % 8) + 1" />
+            <action filter="any(checkpoint_yaw_index=1,checkpoint_yaw_index=8)">
+                <set var="checkpoint" index="3" value="-90" />
+            </action>
+            <action filter="any(checkpoint_yaw_index=2,checkpoint_yaw_index=3)">
+                <set var="checkpoint" index="3" value="180" />
+            </action>
+            <action filter="any(checkpoint_yaw_index=4,checkpoint_yaw_index=5)">
+                <set var="checkpoint" index="3" value="90" />
+            </action>
+            <action filter="any(checkpoint_yaw_index=6,checkpoint_yaw_index=7)">
+                <set var="checkpoint" index="3" value="0" />
+            </action>
+
+            <teleport x="checkpoint[0]" y="checkpoint[1]" z="checkpoint[2]" yaw="checkpoint[3]" pitch="0" />
+        </action>
+    </action>
           <action id="return-to-checkpoint" scope="player">
         <action filter="checkpoint[1]=-1">
             <teleport x="1.5" y="3" z="-2.5" yaw="0" pitch="0" />
@@ -760,7 +809,7 @@
         <!-- checkpoint -->
         <action filter="should-place-checkpoint">
             <!-- section change -->
-            <action filter="not(all(current_y=200..,checkpoints_generated%2=1))">
+            <action filter="not(all(current_y=210..,checkpoints_generated%2=1))">
                 <action filter="tiles_amount=60..">
                     <set var="unlocked" value="min(10, unlocked + 1)" />
                     <set var="prev_section" value="selected_section" />
@@ -775,7 +824,10 @@
             <set var="forward_distance" value="jump_length + tile_length" />
             <set var="selected_tile" value="${TILE_CHECKPOINT}" />
             <set var="vertical_distance" value="(floor(tile_height) - 1) + 1" />
-            <action filter="prev_tile=${TILE_SLIME_SMALL}">
+            <action filter="selected_tile=${TILE_SKULL_FOUR}">
+                <set var="vertical_distance" value="(floor(tile_height) - 1)" />
+            </action>
+            <action filter="prev_tile=${TILE_SLIME}">
                 <set var="vertical_distance" value="5" />
             </action>
             <action filter="prev_tile=${TILE_SKULL}">
@@ -789,12 +841,13 @@
             <action filter="selected_section=${SECTION_NEOS}">
                 <set var="selected_tile" value="${TILE_FINISH_LINE}" />
             </action>
-            <action filter="all(current_y=200..,checkpoints_generated%2=1)">
+            <action filter="all(current_y=210..,checkpoints_generated%2=1)">
                 <set var="selected_section" value="${SECTION_NEOS}" />
             </action>
         </action>
         <action filter="prev_tile=${TILE_CHECKPOINT}">
             <set var="jump_length" value="2" />
+            <set var="forward_distance" value="jump_length + tile_length" />
         </action>
 
         <set var="current_y" value="current_y + vertical_distance" />
@@ -960,8 +1013,8 @@
         <action filter="selected_tile=${TILE_STAIRS_LONG}">
             <action id="paste-stairs-long" />
         </action>
-        <action filter="selected_tile=${TILE_SLIME_SMALL}">
-            <action id="paste-slime-small" />
+        <action filter="selected_tile=${TILE_SLIME}">
+            <action id="paste-slime" />
         </action>
         <action filter="selected_tile=${TILE_ICE_NORMAL}">
             <action id="paste-ice-normal" />
@@ -1881,34 +1934,73 @@
           <action id="paste-stairs-long" scope="match">
         <set var="tile_length" value="10" />
         <set var="tile_height" value="10" />
+        <set var="tile_width" value="3" />
+
+        <set var="stair_i" value="0" />
+        <repeat times="10">
+            <action id="fill-stair-step" />
+        </repeat>
+    </action>
+          <action id="fill-stair-step" scope="match">
+        <set var="stair_mask" value="1 + floor(random() * 6)" />
+
+        <set var="stair_b0" value="stair_mask % 2" />
+        <set var="stair_b1" value="floor(stair_mask / 2) % 2" />
+        <set var="stair_b2" value="floor(stair_mask / 4) % 2" />
+
+        <action filter="stair_b0=1">
+            <set var="stair_col" value="0" />
+            <action id="fill-stair-col" />
+        </action>
+        <action filter="stair_b1=1">
+            <set var="stair_col" value="1" />
+            <action id="fill-stair-col" />
+        </action>
+        <action filter="stair_b2=1">
+            <set var="stair_col" value="2" />
+            <action id="fill-stair-col" />
+        </action>
+
+        <set var="stair_i" value="stair_i + 1" />
+    </action>
+          <action id="fill-stair-col" scope="match">
+        <set var="paste_cursor" index="1" value="current_y + stair_i" />
+        <set var="paste_cursor" index="4" value="current_y + stair_i + 1" />
         <action filter="direction=${SOUTH}">
-            <paste-structure update="false" x="current_x + 1" y="current_y + 1" z="current_z + 1" structure="tile-stairs-long-s-struct" />
+            <set var="paste_cursor" index="0" value="current_x + stair_col" />
+            <set var="paste_cursor" index="3" value="current_x + stair_col + 1" />
+            <set var="paste_cursor" index="2" value="current_z + stair_i" />
+            <set var="paste_cursor" index="5" value="current_z + stair_i + 1" />
+            <fill material="quartz stairs:2" region="paste_cursor" update="false" />
         </action>
         <action filter="direction=${EAST}">
-            <paste-structure update="false" x="current_x + 1" y="current_y + 1" z="current_z + 1" structure="tile-stairs-long-e-struct" />
+            <set var="paste_cursor" index="0" value="current_x + stair_i" />
+            <set var="paste_cursor" index="3" value="current_x + stair_i + 1" />
+            <set var="paste_cursor" index="2" value="current_z + stair_col" />
+            <set var="paste_cursor" index="5" value="current_z + stair_col + 1" />
+            <fill material="quartz stairs:0" region="paste_cursor" update="false" />
         </action>
         <action filter="direction=${NORTH}">
-            <paste-structure update="false" x="current_x + 1" y="current_y + 1" z="current_z + 1 - 7" structure="tile-stairs-long-n-struct" />
+            <set var="paste_cursor" index="0" value="current_x + stair_col" />
+            <set var="paste_cursor" index="3" value="current_x + stair_col + 1" />
+            <set var="paste_cursor" index="2" value="current_z + 2 - stair_i" />
+            <set var="paste_cursor" index="5" value="current_z + 3 - stair_i" />
+            <fill material="quartz stairs:3" region="paste_cursor" update="false" />
         </action>
         <action filter="direction=${WEST}">
-            <paste-structure update="false" x="current_x + 1 - 7" y="current_y + 1" z="current_z + 1" structure="tile-stairs-long-w-struct" />
+            <set var="paste_cursor" index="0" value="current_x + 2 - stair_i" />
+            <set var="paste_cursor" index="3" value="current_x + 3 - stair_i" />
+            <set var="paste_cursor" index="2" value="current_z + stair_col" />
+            <set var="paste_cursor" index="5" value="current_z + stair_col + 1" />
+            <fill material="quartz stairs:1" region="paste_cursor" update="false" />
         </action>
     </action>
-          <action id="paste-slime-small" scope="match">
-        <set var="tile_length" value="1" />
+          <action id="paste-slime" scope="match">
+        <set var="tile_length" value="3" />
         <set var="tile_height" value="1" />
-        <action filter="direction=${SOUTH}">
-            <paste-structure update="false" x="current_x + 1 + 1" y="current_y + 1" z="current_z + 1" structure="tile-slime-small-struct" />
-        </action>
-        <action filter="direction=${NORTH}">
-            <paste-structure update="false" x="current_x + 1 + 1" y="current_y + 1" z="current_z + 1 + 2" structure="tile-slime-small-struct" />
-        </action>
-        <action filter="direction=${EAST}">
-            <paste-structure update="false" x="current_x + 1" y="current_y + 1" z="current_z + 1 + 1" structure="tile-slime-small-struct" />
-        </action>
-        <action filter="direction=${WEST}">
-            <paste-structure update="false" x="current_x + 1 + 2" y="current_y + 1" z="current_z + 1 + 1" structure="tile-slime-small-struct" />
-        </action>
+        <set var="tile_width" value="3" />
+        <action id="fill-cursor" />
+        <fill material="slime block" region="paste_cursor" update="false" />
     </action>
           <action id="paste-ice-normal" scope="match">
         <set var="tile_length" value="3" />
@@ -2450,9 +2542,15 @@
         </action>
         <action filter="random_tile=30">
             <set var="selected_tile" value="${TILE_FENCE_NEO}" />
+            <action filter="difficulty=..70">
+                <set var="selected_tile" value="${TILE_FENCE_LONG}" />
+            </action>
         </action>
         <action filter="random_tile=31">
             <set var="selected_tile" value="${TILE_WALL_NEO}" />
+            <action filter="difficulty=..70">
+                <set var="selected_tile" value="${TILE_WALL_LONG}" />
+            </action>
         </action>
 
         <set var="jump_length" value="2" />
@@ -2521,10 +2619,14 @@
             <set var="selected_tile" value="${TILE_STAIRS_LONG}" />
         </action>
         <action filter="random_tile=5">
-            <set var="selected_tile" value="${TILE_SLIME_SMALL}" />
-            <action filter="prev_tile=${TILE_SLIME_SMALL}">
+            <set var="selected_tile" value="${TILE_SLIME}" />
+            <action filter="prev_tile=${TILE_SLIME}">
                 <set var="selected_tile" value="${TILE_STAIRS}" />
             </action>
+        </action>
+
+        <action filter="prev_tile=${TILE_STAIRS_LONG}">
+            <set var="selected_tile" value="${TILE_SLIME}" />
         </action>
 
         <set var="jump_length" value="2 + floor(random() + difficulty / 200)" />
@@ -2546,13 +2648,13 @@
             <set var="vertical_distance" value="(floor(tile_height) - 1)" />
         </action>
 
-        <action filter="selected_tile=${TILE_SLIME_SMALL}">
+        <action filter="selected_tile=${TILE_SLIME}">
             <set var="jump_length" value="6" />
             <set var="vertical_distance" value="(floor(tile_height) - 1) - 10" />
         </action>
-        <action filter="prev_tile=${TILE_SLIME_SMALL}">
+        <action filter="prev_tile=${TILE_SLIME}">
             <set var="vertical_distance" value="5" />
-            <set var="jump_length" value="4" />
+            <set var="jump_length" value="3" />
         </action>
         <action filter="all(prev_tile=${TILE_STAIRS},selected_tile=${TILE_STAIRS})">
             <set var="vertical_distance" value="(floor(tile_height) - 1) + 1" />
@@ -2624,10 +2726,22 @@
                     <set var="checkpoint" index="0" value="checkpoints[checkpoints_triggered * 3]" />
                     <set var="checkpoint" index="1" value="checkpoints[(checkpoints_triggered * 3) + 1]" />
                     <set var="checkpoint" index="2" value="checkpoints[(checkpoints_triggered * 3) + 2]" />
-                    
+
                     <set var="checkpoints_triggered" value="checkpoints_triggered + 1" />
-                    <set var="max_checkpoint" value="max(max_checkpoint,checkpoints_triggered)" />
+
+                    <action filter="checkpoints_triggered-max_reached=1..">
+                        <set var="max_reached" value="checkpoints_triggered" />
+                        <set var="tiles_to_generate" value="tiles_to_generate + 15" />
+                        <switch-scope inner="match">
+                            <switch-scope inner="player" filter="all(max_reached-checkpoints_triggered=1..,not(skip_timer=1..20))">
+                                <set var="skip_timer" value="20" />
+                            </switch-scope>
+                        </switch-scope>
+                    </action>
+
+                    <action id="refresh-skip" />
                     <set var="score" value="score + 15" />
+
                     <set var="checkpoint_yaw_index" value="((checkpoints_triggered - 1) % 8) + 1" />
                     <action filter="any(checkpoint_yaw_index=1,checkpoint_yaw_index=8)">
                         <set var="checkpoint" index="3" value="-90" />
@@ -2643,10 +2757,36 @@
                     </action>
                     <message text="`e`lCheckpoint!" />
                     <sound key="random.levelup" volume="0.5" />
-                    <action filter="max_checkpoint-checkpoints_triggered=0">
-                        <set var="tiles_to_generate" value="tiles_to_generate + 15" />
-                        <set var="max_checkpoint" value="max_checkpoint + 1" />
-                    </action>
+                </action>
+            </action>
+        </action>
+          </trigger>
+          <trigger scope="player">
+              <filter>
+                  <pulse period="1s" duration="0.05s" filter="match-running"></pulse>
+              </filter>
+              <action>
+            <action filter="all(skip_timer=1..,max_reached-checkpoints_triggered=1..)">
+                <set var="skip_timer" value="skip_timer - 1" />
+                <action filter="skip_timer=0">
+                    <kit id="skip-kit" />
+                    <message text="`9Skip section available" />
+                    <sound key="random.click" volume="0.5" />
+                </action>
+            </action>
+        </action>
+          </trigger>
+          <trigger scope="player">
+              <filter>
+                  <pulse period="1s" duration="0.5s" filter="match-running"></pulse>
+              </filter>
+              <action>
+            <action filter="all(skip_timer=1..,max_reached-checkpoints_triggered=1..)">
+                <set var="skip_timer" value="skip_timer - 1" />
+                <action filter="skip_timer=0">
+                    <kit id="skip-kit" />
+                    <message text="`9Skip section available" />
+                    <sound key="random.click" volume="0.5" />
                 </action>
             </action>
         </action>
@@ -2745,6 +2885,7 @@
       </actions>
       <consumables>
           <consumable id="return-to-checkpoint-consumable" action="return-to-checkpoint" on="click" consume="false"></consumable>
+          <consumable id="skip-checkpoint-consumable" action="skip-checkpoint" on="click" consume="true"></consumable>
       </consumables>
       <damage>
           <deny>
