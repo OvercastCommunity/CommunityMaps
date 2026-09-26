@@ -1,0 +1,891 @@
+<map proto="1.5.1">
+<name>Nether Run</name>
+<version>1.0.0</version>
+<phase>development</phase>
+<objective>Parkour the pillars over the river of lava.</objective>
+<authors>
+    <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb"/> <!-- arcadeboss -->
+</authors>
+<contributors>
+    <contributor contribution="World generation">GrokBuild</contributor>
+    <contributor uuid="64e840c8-4fb5-4659-a36b-ff93e2f6113a" contribution="Infinity Race generation"/>
+</contributors>
+<gamemode>arcade</gamemode>
+<game>Parkour</game>
+<terrain environment="the end"/>
+<include id="void-death"/>
+<constants>
+    <constant id="TILE_PILLAR">1</constant>
+    <constant id="TILE_CHECKPOINT">100</constant>
+</constants>
+<players max="32" colors="true">Runners</players>
+<kits>
+    <kit id="runner">
+        <clear/>
+        <item slot="8" name="`e`lReturn to Checkpoint" material="ink sack" consumable="return-to-checkpoint-consumable" damage="10" prevent-sharing="true"/>
+        <effect duration="oo">night vision</effect>
+        <game-mode>adventure</game-mode>
+        <boots unbreakable="true" color="4a1c0a" material="leather boots"/>
+    </kit>
+</kits>
+<spawns>
+    <spawn kit="runner" yaw="0">
+        <regions>
+            <cuboid min="-1,93,-1401" max="2,96,-1398"/>
+        </regions>
+    </spawn>
+    <default yaw="0" pitch="10">
+        <regions>
+            <cuboid min="-1,93,-1401" max="2,96,-1398"/>
+        </regions>
+    </default>
+</spawns>
+<respawn delay="0s" auto="true"/>
+<filters>
+    <any id="on-checkpoint">
+        <offset vector="~0,~-1,~0">
+            <material>carpet:5</material>
+        </offset>
+        <offset vector="~0,~0,~0">
+            <material>carpet:5</material>
+        </offset>
+    </any>
+    <any id="on-pillar">
+        <offset vector="~0,~-1,~0">
+            <material>quartz ore</material>
+        </offset>
+        <offset vector="~0,~-1,~0">
+            <material>netherrack</material>
+        </offset>
+        <offset vector="~0,~-1,~0">
+            <material>glowstone</material>
+        </offset>
+        <offset vector="~0,~-1,~0">
+            <material>obsidian</material>
+        </offset>
+        <offset vector="~0,~-1,~0">
+            <material>wool:14</material>
+        </offset>
+    </any>
+    <all id="should-place-checkpoint">
+        <not>
+            <variable var="tiles_amount">0</variable>
+        </not>
+        <variable value="tiles_amount % 25" scope="match">0</variable>
+    </all>
+</filters>
+<variables>
+    <variable id="current_x" default="0" scope="match"/>
+    <variable id="current_y" default="92" scope="match"/>
+    <variable id="current_z" default="-1400" scope="match"/>
+    <variable id="selected_tile" default="1" scope="match"/>
+    <variable id="prev_tile" default="0" scope="match"/>
+    <variable id="jump_length" default="4" scope="match"/>
+    <variable id="side_distance" default="0" scope="match"/>
+    <variable id="vertical_distance" default="0" scope="match"/>
+    <variable id="forward_distance" default="5" scope="match"/>
+    <variable id="tiles_amount" default="0" scope="match"/>
+    <variable id="tiles_to_generate" default="25" scope="match"/>
+    <variable id="finished_generation" default="0" scope="match"/>
+    <variable id="jump_id" default="0" scope="match"/>
+    <variable id="last_jump_id" default="-1" scope="match"/>
+    <variable id="streak" default="0" scope="match"/>
+    <variable id="pace" default="0" scope="match"/>
+    <variable id="height_i" default="0" scope="match"/>
+    <variable id="tall_bonus" default="10" scope="match"/>
+    <variable id="climbed" default="0" scope="match"/>
+    <variable id="pace_t" default="0" scope="match"/>
+    <variable id="start_placed" default="0" scope="match"/>
+    <variable id="vine_length" default="25" scope="match"/>
+    <variable id="vine_use" default="25" scope="match"/>
+    <variable id="vine_y" default="68" scope="match"/>
+    <variable id="vine_over" default="0" scope="match"/>
+    <variable id="pillar_size" default="2" scope="match"/>
+    <variable id="prev_pillar_size" default="2" scope="match"/>
+    <variable id="cap_style" default="0" scope="match"/>
+    <variable id="ones_placed" default="0" scope="match"/>
+    <variable id="mix_mod" default="0" scope="match"/>
+    <variable id="mix_i" default="0" scope="match"/>
+    <variable id="mix_bit" default="0" scope="match"/>
+    <variable id="twos_mod" default="0" scope="match"/>
+    <variable id="size_roll" default="0" scope="match"/>
+    <variable id="roll" default="0" scope="match"/>
+    <variable id="next_x" default="0" scope="match"/>
+    <variable id="cp_mod" default="1" scope="match"/>
+    <variable id="cp_lead" default="1" scope="match"/>
+    <variable id="jump_same" default="1" scope="match"/>
+    <variable id="flow_i" default="0" scope="match"/>
+    <variable id="flow_mod" default="1" scope="match"/>
+    <variable id="checkpoints_generated" default="0" scope="match"/>
+    <variable id="checkpoint_i" default="0" scope="match"/>
+    <variable id="max_checkpoint" default="0" scope="match"/>
+    <variable id="checkpoints_triggered" default="0" scope="player"/>
+    <variable id="last_score_x" default="0" scope="player"/>
+    <variable id="last_score_z" default="0" scope="player"/>
+    <array id="checkpoint" size="4" scope="player" default="-1"/>
+    <array id="calc" size="3" scope="player"/>
+    <array id="checkpoints" size="450" scope="match"/>
+    <cuboid id="fill_region" min="0,0,0" max="0,0,0"/>
+</variables>
+<actions>
+    <action id="return-to-checkpoint" scope="player">
+        <action filter="checkpoint[1]=-1">
+            <teleport x="0.5" y="93" z="-1399.5" yaw="0" pitch="0"/>
+        </action>
+        <action filter="not(checkpoint[1]=-1)">
+            <teleport x="checkpoint[0]" y="checkpoint[1]" z="checkpoint[2]" yaw="0" pitch="0"/>
+        </action>
+        <velocity x="0" y="0" z="0"/>
+        <kit>
+            <health>20</health>
+        </kit>
+    </action>
+    <action id="place-start-pad" scope="match">
+        <set var="fill_region" index="0" value="-4"/>
+        <set var="fill_region" index="1" value="29"/>
+        <set var="fill_region" index="2" value="-1404"/>
+        <set var="fill_region" index="3" value="5"/>
+        <set var="fill_region" index="4" value="33"/>
+        <set var="fill_region" index="5" value="-1396"/>
+        <fill region="fill_region" material="stationary lava" update="false"/>
+        <set var="fill_region" index="0" value="-1"/>
+        <set var="fill_region" index="1" value="24"/>
+        <set var="fill_region" index="2" value="-1401"/>
+        <set var="fill_region" index="3" value="2"/>
+        <set var="fill_region" index="4" value="90"/>
+        <set var="fill_region" index="5" value="-1398"/>
+        <fill region="fill_region" material="nether brick" update="false"/>
+        <set var="fill_region" index="1" value="90"/>
+        <set var="fill_region" index="4" value="93"/>
+        <fill region="fill_region" material="glowstone" update="false"/>
+        <set var="fill_region" index="1" value="93"/>
+        <set var="fill_region" index="4" value="94"/>
+        <fill region="fill_region" material="carpet:14" update="false"/>
+        <set var="fill_region" index="1" value="68"/>
+        <set var="fill_region" index="4" value="93"/>
+        <set var="fill_region" index="0" value="-1"/>
+        <set var="fill_region" index="2" value="-1402"/>
+        <set var="fill_region" index="3" value="2"/>
+        <set var="fill_region" index="5" value="-1401"/>
+        <fill region="fill_region" material="vine:1" update="false"/>
+        <set var="fill_region" index="0" value="2"/>
+        <set var="fill_region" index="2" value="-1401"/>
+        <set var="fill_region" index="3" value="3"/>
+        <set var="fill_region" index="5" value="-1398"/>
+        <fill region="fill_region" material="vine:2" update="false"/>
+        <set var="fill_region" index="0" value="-1"/>
+        <set var="fill_region" index="2" value="-1398"/>
+        <set var="fill_region" index="3" value="2"/>
+        <set var="fill_region" index="5" value="-1397"/>
+        <fill region="fill_region" material="vine:4" update="false"/>
+        <set var="fill_region" index="0" value="-2"/>
+        <set var="fill_region" index="2" value="-1401"/>
+        <set var="fill_region" index="3" value="-1"/>
+        <set var="fill_region" index="5" value="-1398"/>
+        <fill region="fill_region" material="vine:8" update="false"/>
+        <set var="start_placed" value="1"/>
+    </action>
+    <action id="pick-vine-cutoff" scope="match">
+        <set var="vine_use" value="vine_length"/>
+        <action filter="vertical_distance=10..">
+            <set var="vine_use" value="vine_length+vertical_distance+10"/>
+        </action>
+        <set var="vine_y" value="current_y-vine_use+1"/>
+        <action filter="not(vertical_distance=10..)">
+            <set var="vine_y" value="vine_y+floor(random()*3)-1"/>
+        </action>
+        <set var="vine_over" value="vine_y-(current_y-5)"/>
+        <action filter="vine_over=1..">
+            <set var="vine_y" value="current_y-5"/>
+        </action>
+    </action>
+    <action id="fill-shaft" scope="match">
+        <action filter="current_y=25..">
+            <set var="fill_region" index="0" value="current_x"/>
+            <set var="fill_region" index="1" value="24"/>
+            <set var="fill_region" index="2" value="current_z"/>
+            <set var="fill_region" index="3" value="current_x + 1"/>
+            <set var="fill_region" index="4" value="current_y"/>
+            <set var="fill_region" index="5" value="current_z + 1"/>
+            <fill region="fill_region" material="nether brick" update="false"/>
+        </action>
+        <action id="pick-vine-cutoff"/>
+        <action filter="current_y=47..">
+            <set var="fill_region" index="1" value="vine_y"/>
+            <set var="fill_region" index="4" value="current_y + 1"/>
+            <set var="fill_region" index="2" value="current_z - 1"/>
+            <set var="fill_region" index="5" value="current_z"/>
+            <fill region="fill_region" material="vine:1" update="false"/>
+            <set var="fill_region" index="0" value="current_x + 1"/>
+            <set var="fill_region" index="2" value="current_z"/>
+            <set var="fill_region" index="3" value="current_x + 2"/>
+            <set var="fill_region" index="5" value="current_z + 1"/>
+            <fill region="fill_region" material="vine:2" update="false"/>
+            <set var="fill_region" index="0" value="current_x"/>
+            <set var="fill_region" index="2" value="current_z + 1"/>
+            <set var="fill_region" index="3" value="current_x + 1"/>
+            <set var="fill_region" index="5" value="current_z + 2"/>
+            <fill region="fill_region" material="vine:4" update="false"/>
+            <set var="fill_region" index="0" value="current_x - 1"/>
+            <set var="fill_region" index="2" value="current_z"/>
+            <set var="fill_region" index="3" value="current_x"/>
+            <set var="fill_region" index="5" value="current_z + 1"/>
+            <fill region="fill_region" material="vine:8" update="false"/>
+        </action>
+    </action>
+    <action id="pick-mix-bc" scope="match">
+        <set var="mix_mod" value="floor(ones_placed / 6) % 3"/>
+        <set var="mix_i" value="ones_placed % 6"/>
+        <action filter="mix_mod=0">
+            <set var="cap_style" value="1"/>
+            <set var="mix_bit" value="ones_placed % 2"/>
+            <action filter="mix_bit=1">
+                <set var="cap_style" value="2"/>
+            </action>
+        </action>
+        <action filter="mix_mod=1">
+            <set var="cap_style" value="1"/>
+            <action filter="mix_i=3..">
+                <set var="cap_style" value="2"/>
+            </action>
+        </action>
+        <action filter="mix_mod=2">
+            <set var="cap_style" value="2"/>
+            <action filter="mix_i=2..3">
+                <set var="cap_style" value="1"/>
+            </action>
+        </action>
+    </action>
+    <action id="pick-cap-style" scope="match">
+        <set var="ones_placed" value="ones_placed + 1"/>
+        <set var="cap_style" value="0"/>
+        <action filter="checkpoints_generated=3..4">
+            <set var="cap_style" value="1"/>
+        </action>
+        <action filter="checkpoints_generated=5..6">
+            <set var="cap_style" value="2"/>
+        </action>
+        <action filter="checkpoints_generated=7..8">
+            <action id="pick-mix-bc"/>
+        </action>
+        <action filter="checkpoints_generated=9..10">
+            <set var="cap_style" value="0"/>
+        </action>
+        <action filter="checkpoints_generated=11..">
+            <action id="pick-mix-bc"/>
+        </action>
+    </action>
+    <action id="pick-pillar-size" scope="match">
+        <set var="pillar_size" value="2"/>
+        <set var="size_roll" value="floor(random()*10)"/>
+        <action filter="checkpoints_generated=3..4">
+            <action filter="size_roll=8..">
+                <set var="pillar_size" value="1"/>
+            </action>
+        </action>
+        <action filter="checkpoints_generated=5..6">
+            <action filter="size_roll=5..">
+                <set var="pillar_size" value="1"/>
+            </action>
+        </action>
+        <action filter="checkpoints_generated=7..8">
+            <action filter="size_roll=3..">
+                <set var="pillar_size" value="1"/>
+            </action>
+        </action>
+        <action filter="checkpoints_generated=9..">
+            <set var="pillar_size" value="1"/>
+        </action>
+    </action>
+    <action id="paste-pillar-2x2" scope="match">
+        <set var="fill_region" index="0" value="current_x"/>
+        <set var="fill_region" index="1" value="24"/>
+        <set var="fill_region" index="2" value="current_z"/>
+        <set var="fill_region" index="3" value="current_x + 2"/>
+        <set var="fill_region" index="4" value="current_y + 1"/>
+        <set var="fill_region" index="5" value="current_z + 2"/>
+        <fill region="fill_region" material="nether brick" update="false"/>
+        <set var="fill_region" index="1" value="current_y - 1"/>
+        <set var="fill_region" index="4" value="current_y + 1"/>
+        <set var="twos_mod" value="checkpoints_generated % 3"/>
+        <action filter="not(twos_mod=2)">
+            <fill region="fill_region" material="obsidian" update="false"/>
+        </action>
+        <action filter="twos_mod=2">
+            <fill region="fill_region" material="wool:14" update="false"/>
+        </action>
+        <action filter="current_y=47..">
+            <set var="fill_region" index="4" value="current_y + 1"/>
+            <action id="pick-vine-cutoff"/>
+            <set var="fill_region" index="1" value="vine_y"/>
+            <set var="fill_region" index="0" value="current_x"/>
+            <set var="fill_region" index="2" value="current_z - 1"/>
+            <set var="fill_region" index="3" value="current_x + 1"/>
+            <set var="fill_region" index="5" value="current_z"/>
+            <fill region="fill_region" material="vine:1" update="false"/>
+            <action id="pick-vine-cutoff"/>
+            <set var="fill_region" index="1" value="vine_y"/>
+            <set var="fill_region" index="0" value="current_x + 1"/>
+            <set var="fill_region" index="3" value="current_x + 2"/>
+            <fill region="fill_region" material="vine:1" update="false"/>
+            <action id="pick-vine-cutoff"/>
+            <set var="fill_region" index="1" value="vine_y"/>
+            <set var="fill_region" index="0" value="current_x + 2"/>
+            <set var="fill_region" index="2" value="current_z"/>
+            <set var="fill_region" index="3" value="current_x + 3"/>
+            <set var="fill_region" index="5" value="current_z + 1"/>
+            <fill region="fill_region" material="vine:2" update="false"/>
+            <action id="pick-vine-cutoff"/>
+            <set var="fill_region" index="1" value="vine_y"/>
+            <set var="fill_region" index="2" value="current_z + 1"/>
+            <set var="fill_region" index="5" value="current_z + 2"/>
+            <fill region="fill_region" material="vine:2" update="false"/>
+            <action id="pick-vine-cutoff"/>
+            <set var="fill_region" index="1" value="vine_y"/>
+            <set var="fill_region" index="0" value="current_x"/>
+            <set var="fill_region" index="2" value="current_z + 2"/>
+            <set var="fill_region" index="3" value="current_x + 1"/>
+            <set var="fill_region" index="5" value="current_z + 3"/>
+            <fill region="fill_region" material="vine:4" update="false"/>
+            <action id="pick-vine-cutoff"/>
+            <set var="fill_region" index="1" value="vine_y"/>
+            <set var="fill_region" index="0" value="current_x + 1"/>
+            <set var="fill_region" index="3" value="current_x + 2"/>
+            <fill region="fill_region" material="vine:4" update="false"/>
+            <action id="pick-vine-cutoff"/>
+            <set var="fill_region" index="1" value="vine_y"/>
+            <set var="fill_region" index="0" value="current_x - 1"/>
+            <set var="fill_region" index="2" value="current_z"/>
+            <set var="fill_region" index="3" value="current_x"/>
+            <set var="fill_region" index="5" value="current_z + 1"/>
+            <fill region="fill_region" material="vine:8" update="false"/>
+            <action id="pick-vine-cutoff"/>
+            <set var="fill_region" index="1" value="vine_y"/>
+            <set var="fill_region" index="2" value="current_z + 1"/>
+            <set var="fill_region" index="5" value="current_z + 2"/>
+            <fill region="fill_region" material="vine:8" update="false"/>
+            <set var="fill_region" index="1" value="current_y"/>
+            <set var="fill_region" index="4" value="current_y + 1"/>
+            <set var="fill_region" index="0" value="current_x + 2"/>
+            <set var="fill_region" index="2" value="current_z"/>
+            <set var="fill_region" index="3" value="current_x + 3"/>
+            <set var="fill_region" index="5" value="current_z + 2"/>
+            <fill region="fill_region" material="torch:1" update="false"/>
+            <set var="fill_region" index="0" value="current_x - 1"/>
+            <set var="fill_region" index="2" value="current_z"/>
+            <set var="fill_region" index="3" value="current_x"/>
+            <set var="fill_region" index="5" value="current_z + 2"/>
+            <fill region="fill_region" material="torch:2" update="false"/>
+        </action>
+    </action>
+    <action id="paste-pillar" scope="match">
+        <action filter="pillar_size=2">
+            <action id="paste-pillar-2x2"/>
+        </action>
+        <action filter="pillar_size=1">
+            <action id="pick-cap-style"/>
+            <action id="fill-shaft"/>
+            <set var="fill_region" index="0" value="current_x"/>
+            <set var="fill_region" index="1" value="current_y"/>
+            <set var="fill_region" index="2" value="current_z"/>
+            <set var="fill_region" index="3" value="current_x + 1"/>
+            <set var="fill_region" index="4" value="current_y + 1"/>
+            <set var="fill_region" index="5" value="current_z + 1"/>
+            <action filter="cap_style=0">
+                <fill region="fill_region" material="quartz ore" update="false"/>
+            </action>
+            <action filter="cap_style=1">
+                <fill region="fill_region" material="netherrack" update="false"/>
+            </action>
+            <action filter="cap_style=2">
+                <fill region="fill_region" material="glowstone" update="false"/>
+            </action>
+            <set var="fill_region" index="1" value="current_y + 1"/>
+            <set var="fill_region" index="4" value="current_y + 2"/>
+            <action filter="cap_style=1">
+                <fill region="fill_region" material="carpet:14" update="false"/>
+            </action>
+            <action filter="cap_style=2">
+                <fill region="fill_region" material="carpet:4" update="false"/>
+            </action>
+        </action>
+    </action>
+    <action id="paste-checkpoint" scope="match">
+        <set var="fill_region" index="0" value="current_x - 1"/>
+        <set var="fill_region" index="1" value="24"/>
+        <set var="fill_region" index="2" value="current_z - 1"/>
+        <set var="fill_region" index="3" value="current_x + 2"/>
+        <set var="fill_region" index="4" value="current_y - 2"/>
+        <set var="fill_region" index="5" value="current_z + 2"/>
+        <fill region="fill_region" material="nether brick" update="false"/>
+        <set var="fill_region" index="1" value="current_y - 2"/>
+        <set var="fill_region" index="4" value="current_y + 1"/>
+        <fill region="fill_region" material="glowstone" update="false"/>
+        <set var="fill_region" index="1" value="current_y + 1"/>
+        <set var="fill_region" index="4" value="current_y + 2"/>
+        <fill region="fill_region" material="carpet:5" update="false"/>
+        <action id="pick-vine-cutoff"/>
+        <action filter="current_y=47..">
+            <set var="fill_region" index="1" value="vine_y"/>
+            <set var="fill_region" index="4" value="current_y + 1"/>
+            <set var="fill_region" index="2" value="current_z - 2"/>
+            <set var="fill_region" index="5" value="current_z - 1"/>
+            <fill region="fill_region" material="vine:1" update="false"/>
+            <set var="fill_region" index="0" value="current_x + 2"/>
+            <set var="fill_region" index="2" value="current_z - 1"/>
+            <set var="fill_region" index="3" value="current_x + 3"/>
+            <set var="fill_region" index="5" value="current_z + 2"/>
+            <fill region="fill_region" material="vine:2" update="false"/>
+            <set var="fill_region" index="0" value="current_x - 1"/>
+            <set var="fill_region" index="2" value="current_z + 2"/>
+            <set var="fill_region" index="3" value="current_x + 2"/>
+            <set var="fill_region" index="5" value="current_z + 3"/>
+            <fill region="fill_region" material="vine:4" update="false"/>
+            <set var="fill_region" index="0" value="current_x - 2"/>
+            <set var="fill_region" index="2" value="current_z - 1"/>
+            <set var="fill_region" index="3" value="current_x - 1"/>
+            <set var="fill_region" index="5" value="current_z + 2"/>
+            <fill region="fill_region" material="vine:8" update="false"/>
+        </action>
+        <set var="vine_length" value="vine_length-2"/>
+        <action filter="vine_length=..5">
+            <set var="vine_length" value="6"/>
+        </action>
+    </action>
+    <action id="clamp-jump" scope="match">
+        <action filter="all(vertical_distance=1, side_distance=0)">
+            <set var="jump_length" value="min(jump_length, 3)"/>
+        </action>
+        <action filter="all(vertical_distance=1, not(side_distance=0))">
+            <set var="jump_length" value="min(jump_length, 2)"/>
+        </action>
+        <action filter="all(vertical_distance=0, side_distance=0)">
+            <set var="jump_length" value="min(jump_length, 4)"/>
+        </action>
+        <action filter="all(vertical_distance=0, not(side_distance=0))">
+            <set var="jump_length" value="min(jump_length, 3)"/>
+        </action>
+        <action filter="all(vertical_distance=..-1, side_distance=0)">
+            <set var="jump_length" value="min(jump_length, 4)"/>
+        </action>
+        <action filter="all(vertical_distance=..-1, not(side_distance=0))">
+            <set var="jump_length" value="min(jump_length, 3)"/>
+        </action>
+        <action filter="vertical_distance=..-2">
+            <set var="jump_length" value="min(jump_length, 4)"/>
+        </action>
+        <set var="jump_length" value="max(jump_length, 2)"/>
+        <set var="forward_distance" value="jump_length"/>
+    </action>
+    <action id="apply-jump-id" scope="match">
+        <action filter="jump_id=0">
+            <set var="jump_length" value="3"/>
+            <set var="side_distance" value="0"/>
+        </action>
+        <action filter="jump_id=1">
+            <set var="jump_length" value="4"/>
+            <set var="side_distance" value="0"/>
+        </action>
+        <action filter="jump_id=2">
+            <set var="jump_length" value="3"/>
+            <set var="side_distance" value="1"/>
+        </action>
+        <action filter="jump_id=3">
+            <set var="jump_length" value="3"/>
+            <set var="side_distance" value="-1"/>
+        </action>
+        <action filter="jump_id=4">
+            <set var="jump_length" value="3"/>
+            <set var="side_distance" value="1"/>
+        </action>
+        <action filter="jump_id=5">
+            <set var="jump_length" value="3"/>
+            <set var="side_distance" value="-1"/>
+        </action>
+        <action filter="jump_id=6">
+            <set var="jump_length" value="3"/>
+            <set var="side_distance" value="1"/>
+        </action>
+        <action filter="jump_id=7">
+            <set var="jump_length" value="3"/>
+            <set var="side_distance" value="-1"/>
+        </action>
+        <set var="next_x" value="current_x+side_distance"/>
+        <action filter="next_x=51..">
+            <set var="side_distance" value="-1"/>
+        </action>
+        <action filter="next_x=..-51">
+            <set var="side_distance" value="1"/>
+        </action>
+        <action id="clamp-jump"/>
+    </action>
+    <action id="gen-section-pillar" scope="match">
+        <set var="selected_tile" value="${TILE_PILLAR}"/>
+        <set var="pace_t" value="pace_t+1"/>
+        <action filter="pace_t=6">
+            <set var="pace" value="pace+1"/>
+            <set var="pace_t" value="0"/>
+        </action>
+        <action filter="pace=3">
+            <set var="pace" value="0"/>
+        </action>
+        <action filter="pace=0">
+            <set var="jump_id" value="1"/>
+            <action filter="climbed=1">
+                <set var="roll" value="floor(random()*2)"/>
+                <action filter="roll=1">
+                    <set var="jump_id" value="6"/>
+                </action>
+            </action>
+        </action>
+        <action filter="pace=2">
+            <set var="roll" value="floor(random()*6)"/>
+            <action filter="roll=0">
+                <set var="jump_id" value="7"/>
+            </action>
+            <action filter="roll=1">
+                <set var="jump_id" value="2"/>
+            </action>
+            <action filter="roll=2">
+                <set var="jump_id" value="3"/>
+            </action>
+            <action filter="roll=3">
+                <set var="jump_id" value="7"/>
+            </action>
+            <action filter="roll=4">
+                <set var="jump_id" value="2"/>
+            </action>
+            <action filter="roll=5">
+                <set var="jump_id" value="3"/>
+            </action>
+        </action>
+        <action filter="pace=1">
+            <set var="roll" value="floor(random()*10)"/>
+            <action filter="roll=0">
+                <set var="jump_id" value="0"/>
+            </action>
+            <action filter="roll=1">
+                <set var="jump_id" value="1"/>
+            </action>
+            <action filter="roll=2">
+                <set var="jump_id" value="2"/>
+            </action>
+            <action filter="roll=3">
+                <set var="jump_id" value="2"/>
+            </action>
+            <action filter="roll=4">
+                <set var="jump_id" value="3"/>
+            </action>
+            <action filter="roll=5">
+                <set var="jump_id" value="3"/>
+            </action>
+            <action filter="roll=6">
+                <set var="jump_id" value="7"/>
+            </action>
+            <action filter="roll=7">
+                <set var="jump_id" value="7"/>
+            </action>
+            <action filter="roll=8">
+                <set var="jump_id" value="2"/>
+            </action>
+            <action filter="roll=9">
+                <set var="jump_id" value="3"/>
+            </action>
+        </action>
+        <action filter="climbed=0">
+            <action filter="jump_id=5">
+                <set var="jump_id" value="0"/>
+            </action>
+            <action filter="jump_id=6">
+                <set var="jump_id" value="1"/>
+            </action>
+        </action>
+        <set var="jump_same" value="jump_id-last_jump_id"/>
+        <action filter="all(jump_same=0,streak=3..)">
+            <set var="jump_id" value="(jump_id+1+floor(random()*2))%8"/>
+            <set var="streak" value="0"/>
+            <set var="jump_same" value="1"/>
+        </action>
+        <action filter="jump_same=0">
+            <set var="streak" value="streak+1"/>
+        </action>
+        <action filter="not(jump_same=0)">
+            <set var="streak" value="1"/>
+        </action>
+        <set var="last_jump_id" value="jump_id"/>
+        <action id="apply-jump-id"/>
+        <action id="apply-height-pattern"/>
+    </action>
+    <action id="apply-height-pattern" scope="match">
+        <set var="height_i" value="height_i+1"/>
+        <action filter="height_i=12">
+            <set var="height_i" value="0"/>
+        </action>
+        <set var="vertical_distance" value="0"/>
+        <action filter="height_i=0">
+            <set var="vertical_distance" value="0"/>
+        </action>
+        <action filter="height_i=1">
+            <set var="vertical_distance" value="0"/>
+        </action>
+        <action filter="height_i=2">
+            <set var="vertical_distance" value="1"/>
+        </action>
+        <action filter="height_i=3">
+            <set var="vertical_distance" value="0"/>
+        </action>
+        <action filter="height_i=4">
+            <set var="vertical_distance" value="1"/>
+        </action>
+        <action filter="height_i=5">
+            <set var="vertical_distance" value="1"/>
+        </action>
+        <action filter="height_i=6">
+            <set var="vertical_distance" value="0"/>
+        </action>
+        <action filter="height_i=7">
+            <set var="vertical_distance" value="-1"/>
+        </action>
+        <action filter="height_i=8">
+            <set var="vertical_distance" value="0"/>
+        </action>
+        <action filter="height_i=9">
+            <set var="vertical_distance" value="0"/>
+        </action>
+        <action filter="height_i=10">
+            <set var="vertical_distance" value="0"/>
+        </action>
+        <action filter="height_i=11">
+            <set var="vertical_distance" value="1"/>
+        </action>
+        <action filter="climbed=0">
+            <action filter="vertical_distance=..-1">
+                <set var="vertical_distance" value="0"/>
+            </action>
+        </action>
+        <action filter="vertical_distance=1">
+            <set var="jump_length" value="min(jump_length,3)"/>
+            <action filter="not(side_distance=0)">
+                <set var="jump_length" value="2"/>
+            </action>
+        </action>
+        <set var="forward_distance" value="jump_length"/>
+        <set var="next_x" value="current_x+side_distance"/>
+        <action filter="next_x=51..">
+            <set var="side_distance" value="-1"/>
+        </action>
+        <action filter="next_x=..-51">
+            <set var="side_distance" value="1"/>
+        </action>
+    </action>
+    <action id="generate-all" scope="match" expose="true">
+        <repeat times="500">
+            <action id="generate"/>
+        </repeat>
+    </action>
+    <action id="generate" scope="match" filter="finished_generation=0" expose="true">
+        <action filter="start_placed=0">
+            <action id="place-start-pad"/>
+        </action>
+        <set var="tiles_amount" value="tiles_amount + 1"/>
+        <action id="gen-section-pillar"/>
+        <action filter="tiles_amount=1">
+            <set var="selected_tile" value="${TILE_PILLAR}"/>
+            <set var="jump_length" value="4"/>
+            <set var="side_distance" value="0"/>
+            <set var="vertical_distance" value="0"/>
+            <set var="forward_distance" value="4"/>
+        </action>
+        <action filter="prev_tile=${TILE_CHECKPOINT}">
+            <set var="selected_tile" value="${TILE_PILLAR}"/>
+            <set var="jump_length" value="4"/>
+            <set var="side_distance" value="0"/>
+            <set var="vertical_distance" value="0"/>
+            <set var="forward_distance" value="4"/>
+        </action>
+        <action filter="should-place-checkpoint">
+            <set var="selected_tile" value="${TILE_CHECKPOINT}"/>
+            <set var="jump_length" value="4"/>
+            <set var="side_distance" value="0"/>
+            <set var="vertical_distance" value="0"/>
+            <set var="checkpoints_generated" value="checkpoints_generated + 1"/>
+            <set var="cp_mod" value="checkpoints_generated%3"/>
+            <action filter="cp_mod=0">
+                <set var="vertical_distance" value="tall_bonus"/>
+                <set var="climbed" value="1"/>
+                <set var="tall_bonus" value="min(20, tall_bonus + 2)"/>
+            </action>
+            <action filter="prev_pillar_size=2">
+                <set var="jump_length" value="5"/>
+            </action>
+            <action filter="checkpoints_generated=7">
+                <set var="flow_i" value="0"/>
+            </action>
+            <set var="forward_distance" value="jump_length"/>
+        </action>
+        <action filter="all(selected_tile=${TILE_PILLAR},checkpoints_generated=6..,current_y=91..)">
+            <set var="flow_i" value="flow_i+1"/>
+            <set var="flow_mod" value="flow_i%3"/>
+            <action filter="checkpoints_generated=7..">
+                <set var="flow_mod" value="flow_i%2"/>
+            </action>
+            <action filter="checkpoints_generated=10..">
+                <set var="flow_mod" value="0"/>
+            </action>
+            <action filter="flow_mod=0">
+                <set var="vertical_distance" value="-1"/>
+                <set var="jump_length" value="4"/>
+                <set var="forward_distance" value="jump_length"/>
+            </action>
+        </action>
+        <set var="current_y" value="current_y + vertical_distance"/>
+        <action filter="current_y=..90">
+            <set var="current_y" value="90"/>
+        </action>
+        <action id="pick-pillar-size"/>
+        <action filter="all(selected_tile=${TILE_PILLAR},pillar_size=2)">
+            <set var="jump_length" value="jump_length+1"/>
+            <action filter="jump_length=..4">
+                <set var="jump_length" value="5"/>
+            </action>
+            <set var="forward_distance" value="jump_length"/>
+        </action>
+        <action filter="all(selected_tile=${TILE_PILLAR},prev_pillar_size=2,pillar_size=1)">
+            <set var="jump_length" value="jump_length+1"/>
+            <action filter="jump_length=..4">
+                <set var="jump_length" value="5"/>
+            </action>
+            <set var="forward_distance" value="jump_length"/>
+        </action>
+        <action filter="selected_tile=${TILE_CHECKPOINT}">
+            <action filter="prev_pillar_size=2">
+                <action filter="jump_length=..4">
+                    <set var="jump_length" value="5"/>
+                </action>
+            </action>
+            <action filter="prev_pillar_size=1">
+                <action filter="jump_length=..3">
+                    <set var="jump_length" value="4"/>
+                </action>
+            </action>
+            <set var="forward_distance" value="jump_length"/>
+        </action>
+        <set var="current_z" value="current_z + forward_distance"/>
+        <set var="current_x" value="current_x + side_distance"/>
+        <action filter="should-place-checkpoint">
+            <set var="checkpoints" index="checkpoint_i" value="current_x + 0.5"/>
+            <set var="checkpoints" index="checkpoint_i + 1" value="current_y + 1"/>
+            <set var="checkpoints" index="checkpoint_i + 2" value="current_z + 0.5"/>
+            <set var="checkpoint_i" value="checkpoint_i + 3"/>
+        </action>
+        <action filter="selected_tile=${TILE_PILLAR}">
+            <action id="paste-pillar"/>
+        </action>
+        <action filter="selected_tile=${TILE_CHECKPOINT}">
+            <action id="paste-checkpoint"/>
+        </action>
+        <set var="prev_tile" value="selected_tile"/>
+        <set var="prev_pillar_size" value="pillar_size"/>
+    </action>
+    <trigger scope="match">
+        <filter>
+            <pulse period="1s" duration="0.5s" filter="start_placed=0"/>
+        </filter>
+        <action id="place-start-pad"/>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <pulse period="2s" duration="0.5s" filter="all(always,not(match-running),finished_generation=0)"/>
+        </filter>
+        <action>
+            <action filter="tiles_to_generate=1..">
+                <action id="generate"/>
+                <set var="tiles_to_generate" value="tiles_to_generate - 1"/>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="match">
+        <filter>
+            <pulse period="0.5s" duration="0.3s" filter="all(match-running,finished_generation=0)"/>
+        </filter>
+        <action>
+            <action filter="tiles_to_generate=1..">
+                <action id="generate"/>
+                <set var="tiles_to_generate" value="tiles_to_generate - 1"/>
+            </action>
+        </action>
+    </trigger>
+    <trigger scope="player">
+        <filter>
+            <pulse period="0.2s" duration="0.1s" filter="match-running"/>
+        </filter>
+        <action>
+            <action filter="on-checkpoint">
+                <set var="calc" index="0" value="abs(player.x - checkpoints[checkpoints_triggered * 3])"/>
+                <set var="calc" index="1" value="abs(player.y - checkpoints[(checkpoints_triggered * 3) + 1])"/>
+                <set var="calc" index="2" value="abs(player.z - checkpoints[(checkpoints_triggered * 3) + 2])"/>
+                <action filter="all(calc[0]=..2,calc[1]=..2,calc[2]=..2)">
+                    <set var="checkpoint" index="0" value="checkpoints[checkpoints_triggered * 3]"/>
+                    <set var="checkpoint" index="1" value="checkpoints[(checkpoints_triggered * 3) + 1]"/>
+                    <set var="checkpoint" index="2" value="checkpoints[(checkpoints_triggered * 3) + 2]"/>
+                    <set var="checkpoints_triggered" value="checkpoints_triggered + 1"/>
+                    <set var="max_checkpoint" value="max(max_checkpoint,checkpoints_triggered)"/>
+                    <set var="score" value="score + 25"/>
+                    <message text="`e`lCheckpoint #{n}!">
+                        <replacements>
+                            <decimal id="n" value="checkpoints_triggered"/>
+                        </replacements>
+                    </message>
+                    <sound key="random.levelup" volume="0.5"/>
+                    <set var="cp_lead" value="max_checkpoint-checkpoints_triggered"/>
+                    <action filter="cp_lead=0">
+                        <set var="tiles_to_generate" value="tiles_to_generate + 25"/>
+                        <set var="max_checkpoint" value="max_checkpoint + 1"/>
+                        <switch-scope inner="match">
+                            <action filter="tiles_to_generate=1..">
+                                <action id="generate"/>
+                                <set var="tiles_to_generate" value="tiles_to_generate-1"/>
+                            </action>
+                        </switch-scope>
+                    </action>
+                </action>
+            </action>
+            <action filter="all(checkpoints_triggered=10.., not(on-checkpoint), on-pillar)">
+                <set var="calc" index="0" value="abs(player.x - last_score_x)"/>
+                <set var="calc" index="2" value="abs(player.z - last_score_z)"/>
+                <action filter="any(calc[0]=2.., calc[2]=2..)">
+                    <set var="score" value="score + 1"/>
+                    <set var="last_score_x" value="player.x"/>
+                    <set var="last_score_z" value="player.z"/>
+                </action>
+            </action>
+            <action filter="player.y=..61">
+                <action id="return-to-checkpoint"/>
+            </action>
+        </action>
+    </trigger>
+    <trigger filter="alive" action="return-to-checkpoint" scope="player"/>
+</actions>
+<regions>
+    <cuboid id="playable" min="-150,24,-1500" max="150,256,1500"/>
+    <apply block="never" region="everywhere"/>
+</regions>
+<score/>
+<time>5m</time>
+<consumables>
+    <consumable id="return-to-checkpoint-consumable" action="return-to-checkpoint" on="click" consume="false"/>
+</consumables>
+<damage>
+    <deny>
+        <any>
+            <cause>fall</cause>
+            <attacker>
+                <always/>
+            </attacker>
+        </any>
+    </deny>
+</damage>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+</map>
