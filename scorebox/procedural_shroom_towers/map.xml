@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Procedural: Shroom Towers</name>
-<version>2.0.0</version>
+<version>2.0.1</version>
 <created>2023-09-06</created>
 <objective>Runners have 12 minutes to score 300 points. Towers must hold them back.</objective>
 <gamemode>scorebox</gamemode>
@@ -265,169 +265,116 @@
       copyToBackup: Backs up wall array for potential rollback.
     -->
     <action id="copyToBackup" scope="match" expose="true">
-        <set var="i" value="0"/>
-        <repeat times="WALL_COUNT">
+        <repeat times="WALL_COUNT" index="i">
             <set var="wallsBack" index="i" value="walls[i]"/>
-            <set var="i" value="i+1"/>
         </repeat>
     </action>
-    
+
     <!--
       restoreFromBackup: Restores walls from backup after failed change.
     -->
     <action id="restoreFromBackup" scope="match" expose="true">
-        <set var="i" value="0"/>
-        <repeat times="WALL_COUNT">
+        <repeat times="WALL_COUNT" index="i">
             <set var="walls" index="i" value="wallsBack[i]"/>
-            <set var="i" value="i+1"/>
         </repeat>
     </action>
-    
-    <!--
-      resetShadow: Zeros out shadow array for fresh flood fill.
-    -->
-    <action id="resetShadow" scope="match" expose="true">
-        <set var="i" value="0"/>
-        <repeat times="CELL_COUNT">
-            <set var="shadow" index="i" value="0"/>
-            <set var="i" value="i+1"/>
-        </repeat>
-    </action>
-    
-    <!--
-      computeWallIndices: Computes wall array indices from cell coordinates.
-      @input x, z
-      @output leftWall, rightWall, upWall, downWall
-    -->
-    <action id="computeWallIndices" scope="match" expose="true">
-        <set var="leftWall" value="z*V_STRIDE + x"/>
-        <set var="rightWall" value="z*V_STRIDE + x + 1"/>
-        <set var="upWall" value="H_WALL_OFFSET + z*GRID_X + x"/>
-        <set var="downWall" value="H_WALL_OFFSET + (z+1)*GRID_X + x"/>
-    </action>
-    
-    <!--
-      processQueueItem: Dequeues cell and enqueues unvisited neighbors.
-      @input qHead, queue, walls, shadow
-      @output qHead, qTail, shadow
-    -->
-    <action id="processQueueItem" scope="match" expose="true">
-        <set var="queueSize" value="qTail - qHead"/>
-        <action filter="queueNotEmpty">
-            <set var="current" value="queue[qHead]"/>
-            <set var="qHead" value="qHead + 1"/>
-            <set var="x" value="current % GRID_X"/>
-            <set var="z" value="floor(current / GRID_X)"/>
-            <action id="computeWallIndices"/>
-            
-            <set var="neighbor" value="current - 1"/>
-            <action filter="all(x-ge-1, walls[leftWall]=0, shadow[neighbor]=0)">
-                <set var="shadow" index="neighbor" value="1"/>
-                <set var="queue" index="qTail" value="neighbor"/>
-                <set var="qTail" value="qTail + 1"/>
-            </action>
-            
-            <set var="neighbor" value="current + 1"/>
-            <action filter="all(x-le-5, walls[rightWall]=0, shadow[neighbor]=0)">
-                <set var="shadow" index="neighbor" value="1"/>
-                <set var="queue" index="qTail" value="neighbor"/>
-                <set var="qTail" value="qTail + 1"/>
-            </action>
-            
-            <set var="neighbor" value="current - GRID_X"/>
-            <action filter="all(z-ge-1, walls[upWall]=0, shadow[neighbor]=0)">
-                <set var="shadow" index="neighbor" value="1"/>
-                <set var="queue" index="qTail" value="neighbor"/>
-                <set var="qTail" value="qTail + 1"/>
-            </action>
-            
-            <set var="neighbor" value="current + GRID_X"/>
-            <action filter="all(z-le-13, walls[downWall]=0, shadow[neighbor]=0)">
-                <set var="shadow" index="neighbor" value="1"/>
-                <set var="queue" index="qTail" value="neighbor"/>
-                <set var="qTail" value="qTail + 1"/>
-            </action>
-        </action>
-    </action>
-    
+
     <!--
       floodFillBFS: BFS flood fill from cell 0.
-      @output shadowSum (equals reachable cell count)
     -->
-    <action id="floodFillBFS" scope="match" expose="true">
-        <action id="resetShadow"/>
-        <set var="qHead" value="0"/>
-        <set var="qTail" value="1"/>
+    <action id="floodFillBFS" scope="match" expose="true" locals="qHead,qTail">
+        <repeat times="CELL_COUNT" index="i">
+            <set var="shadow" index="i" value="0"/>
+        </repeat>
         <set var="queue" index="0" value="0"/>
         <set var="shadow" index="0" value="1"/>
-        <repeat times="CELL_COUNT">
-            <action id="processQueueItem"/>
+        <set var="qTail" value="1"/>
+        <repeat times="CELL_COUNT" locals="current,x,z,leftWall,rightWall,upWall,downWall">
+            <action filter="qTail-qHead=1..">
+                <set var="current" value="queue[qHead]"/>
+                <set var="qHead" value="qHead + 1"/>
+                <set var="x" value="current % GRID_X"/>
+                <set var="z" value="floor(current / GRID_X)"/>
+                <set var="leftWall" value="z*V_STRIDE + x"/>
+                <set var="rightWall" value="z*V_STRIDE + x + 1"/>
+                <set var="upWall" value="H_WALL_OFFSET + z*GRID_X + x"/>
+                <set var="downWall" value="H_WALL_OFFSET + (z+1)*GRID_X + x"/>
+
+                <action filter="all(x=1.., walls[leftWall]=0, shadow[current-1]=0)">
+                    <set var="shadow" index="current - 1" value="1"/>
+                    <set var="queue" index="qTail" value="current - 1"/>
+                    <set var="qTail" value="qTail + 1"/>
+                </action>
+
+                <action filter="all(x=..5, walls[rightWall]=0, shadow[current+1]=0)">
+                    <set var="shadow" index="current + 1" value="1"/>
+                    <set var="queue" index="qTail" value="current + 1"/>
+                    <set var="qTail" value="qTail + 1"/>
+                </action>
+
+                <action filter="all(z=1.., walls[upWall]=0, shadow[current-GRID_X]=0)">
+                    <set var="shadow" index="current - GRID_X" value="1"/>
+                    <set var="queue" index="qTail" value="current - GRID_X"/>
+                    <set var="qTail" value="qTail + 1"/>
+                </action>
+
+                <action filter="all(z=..13, walls[downWall]=0, shadow[current+GRID_X]=0)">
+                    <set var="shadow" index="current + GRID_X" value="1"/>
+                    <set var="queue" index="qTail" value="current + GRID_X"/>
+                    <set var="qTail" value="qTail + 1"/>
+                </action>
+            </action>
         </repeat>
-        <set var="shadowSum" value="qTail"/>
     </action>
-    
-    <!--
-      computeWallIndex: Converts randWall to wall array index.
-      @input randWall
-      @output wallIndex
-    -->
-    <action id="computeWallIndex" scope="match" expose="true">
-        <action filter="randWall-le-89">
-            <set var="wallIndex" value="floor(randWall / (GRID_X - 1)) * V_STRIDE + (randWall % (GRID_X - 1)) + 1"/>
-        </action>
-        <action filter="randWall-ge-90">
-            <set var="adjustedRand" value="randWall - V_INTERIOR_WALL_COUNT"/>
-            <set var="wallIndex" value="H_WALL_OFFSET + (floor(adjustedRand / GRID_X) + 1) * GRID_X + (adjustedRand % GRID_X)"/>
-        </action>
-    </action>
-    
+
     <!--
       flipMultipleWalls: Flips batchSize random walls without validation.
     -->
     <action id="flipMultipleWalls" scope="match" expose="true">
-        <repeat times="batchSize">
+        <repeat times="batchSize" locals="randWall,wallIndex">
             <set var="randWall" value="floor(random() * INTERIOR_WALL_COUNT)"/>
-            <action id="computeWallIndex"/>
+            <action filter="randWall=..89">
+                <set var="wallIndex" value="floor(randWall / (GRID_X - 1)) * V_STRIDE + (randWall % (GRID_X - 1)) + 1"/>
+            </action>
+            <action filter="randWall=90.." locals="adjustedRand">
+                <set var="adjustedRand" value="randWall - V_INTERIOR_WALL_COUNT"/>
+                <set var="wallIndex" value="H_WALL_OFFSET + (floor(adjustedRand / GRID_X) + 1) * GRID_X + (adjustedRand % GRID_X)"/>
+            </action>
             <set var="walls" index="wallIndex" value="1 - walls[wallIndex]"/>
         </repeat>
     </action>
-    
+
     <!--
       flipBatch: Batch flip walls then validate connectivity.
     -->
-    <action id="flipBatch" scope="match" expose="true">
+    <action id="flipBatch" scope="match" expose="true" locals="reachable">
         <action id="copyToBackup"/>
         <action id="flipMultipleWalls"/>
         <action id="floodFillBFS"/>
-        <action filter="shouldRestore">
+        <repeat times="CELL_COUNT" index="i">
+            <set var="reachable" value="reachable + shadow[i]"/>
+        </repeat>
+        <action filter="CELL_COUNT-reachable=1..">
             <action id="restoreFromBackup"/>
         </action>
     </action>
-    
+
     <!--
       initializeEdgeWalls: Sets boundary walls (except designated entry/exit).
     -->
     <action id="initializeEdgeWalls" scope="match" expose="true">
-        <set var="i" value="0"/>
-        <repeat times="GRID_Z">
-            <set var="walls" index="i * V_STRIDE" value="1"/>
-            <set var="walls" index="i * V_STRIDE + GRID_X" value="1"/>
-            <set var="i" value="i + 1"/>
+        <repeat times="GRID_Z" index="z">
+            <set var="walls" index="z * V_STRIDE" value="1"/>
+            <set var="walls" index="z * V_STRIDE + GRID_X" value="1"/>
         </repeat>
-        <set var="i" value="0"/>
-        <repeat times="3">
-            <set var="walls" index="H_WALL_OFFSET + i" value="1"/>
-            <set var="walls" index="H_WALL_OFFSET + GRID_Z * GRID_X + i" value="1"/>
-            <set var="i" value="i + 1"/>
-        </repeat>
-        <set var="i" value="4"/>
-        <repeat times="3">
-            <set var="walls" index="H_WALL_OFFSET + i" value="1"/>
-            <set var="walls" index="H_WALL_OFFSET + GRID_Z * GRID_X + i" value="1"/>
-            <set var="i" value="i + 1"/>
+        <repeat times="GRID_X" index="x">
+            <action filter="not(x=3)">
+                <set var="walls" index="H_WALL_OFFSET + x" value="1"/>
+                <set var="walls" index="H_WALL_OFFSET + GRID_Z * GRID_X + x" value="1"/>
+            </action>
         </repeat>
     </action>
-    
+
     <!--
       generateMaze: Main entry point for maze generation.
     -->
@@ -446,287 +393,271 @@
             <action id="flipBatch"/>
         </repeat>
     </action>
-    
-    <trigger filter="always" action="generateMaze" scope="match"/>
-    
-    <!--
-      computeCellData: Computes cell/world coordinates and wall configuration.
-      @input i
-      @output x, z, worldX, worldZ, wallConfig, variant
-    -->
-    <action id="computeCellData" scope="match" expose="true">
-        <set var="x" value="i % GRID_X"/>
-        <set var="z" value="floor(i / GRID_X)"/>
-        <set var="worldX" value="x * CELL_SIZE + WORLD_OFFSET_X + 1"/>
-        <set var="worldZ" value="z * CELL_SIZE + WORLD_OFFSET_Z + 1"/>
-        <action id="computeWallIndices"/>
-        <set var="wallConfig" value="walls[rightWall] + walls[downWall] * 2 + walls[leftWall] * 4 + walls[upWall] * 8"/>
-        <set var="variant" value="floor(random() * 4)"/>
-    </action>
-    
-    <!--
-      pasteCell: Pastes structure based on wall configuration.
-      @input wallConfig, variant, worldX, worldZ
-    -->
-    <action id="pasteCell" scope="match" expose="true">
-        <!-- wallConfig=0 (Crossroads) -->
-        <action filter="wallConfig=0">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-0-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-0-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-0-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-0-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=1 (T-junction wall +X) -->
-        <action filter="wallConfig=1">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-1-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-1-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-1-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-1-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=2 (T-junction wall +Z) -->
-        <action filter="wallConfig=2">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-2-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-2-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-2-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-2-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=3 (Corner open -X,-Z) -->
-        <action filter="wallConfig=3">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-3-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-3-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-3-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-3-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=4 (T-junction wall -X) -->
-        <action filter="wallConfig=4">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-4-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-4-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-4-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-4-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=5 (Vertical corridor) -->
-        <action filter="wallConfig=5">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=6 (Corner open +X,-Z) -->
-        <action filter="wallConfig=6">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-6-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-6-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-6-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-6-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=7 (Dead-end open -Z) -->
-        <action filter="wallConfig=7">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-7-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-7-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-7-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-7-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=8 (T-junction wall -Z) -->
-        <action filter="wallConfig=8">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-8-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-8-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-8-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-8-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=9 (Corner open +Z,-X) -->
-        <action filter="wallConfig=9">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-9-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-9-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-9-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-9-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=10 (Horizontal corridor) -->
-        <action filter="wallConfig=10">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-10-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-10-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-10-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-10-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=11 (Dead-end open -X) -->
-        <action filter="wallConfig=11">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-11-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-11-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-11-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-11-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=12 (Corner open +X,+Z) -->
-        <action filter="wallConfig=12">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-12-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-12-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-12-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-12-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=13 (Dead-end open +Z) -->
-        <action filter="wallConfig=13">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-13-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-13-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-13-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-13-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=14 (Dead-end open +X) -->
-        <action filter="wallConfig=14">
-            <action filter="variant=0">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-14-0" update="false"/>
-            </action>
-            <action filter="variant=1">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-14-1" update="false"/>
-            </action>
-            <action filter="variant=2">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-14-2" update="false"/>
-            </action>
-            <action filter="variant=3">
-                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-14-3" update="false"/>
-            </action>
-        </action>
-        
-        <!-- wallConfig=15 (Isolated - should not occur) fallback -->
-        <action filter="wallConfig=15">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5-0" update="false"/>
-        </action>
-    </action>
-    
+
     <!--
       pasteMaze: Iterates cells and pastes maze structures.
     -->
     <action id="pasteMaze" scope="match">
-        <set var="i" value="0"/>
-        <repeat times="CELL_COUNT">
-            <action id="computeCellData"/>
-            <action id="pasteCell"/>
-            <set var="i" value="i + 1"/>
+        <repeat times="CELL_COUNT" index="i" locals="x,z,worldX,worldZ,leftWall,rightWall,upWall,downWall,wallConfig,variant">
+            <set var="x" value="i % GRID_X"/>
+            <set var="z" value="floor(i / GRID_X)"/>
+            <set var="worldX" value="x * CELL_SIZE + WORLD_OFFSET_X + 1"/>
+            <set var="worldZ" value="z * CELL_SIZE + WORLD_OFFSET_Z + 1"/>
+            <set var="leftWall" value="z*V_STRIDE + x"/>
+            <set var="rightWall" value="z*V_STRIDE + x + 1"/>
+            <set var="upWall" value="H_WALL_OFFSET + z*GRID_X + x"/>
+            <set var="downWall" value="H_WALL_OFFSET + (z+1)*GRID_X + x"/>
+            <set var="wallConfig" value="walls[rightWall] + walls[downWall] * 2 + walls[leftWall] * 4 + walls[upWall] * 8"/>
+            <set var="variant" value="floor(random() * 4)"/>
+
+            <!-- wallConfig=0 (Crossroads) -->
+            <action filter="wallConfig=0">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-0-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-0-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-0-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-0-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=1 (T-junction wall +X) -->
+            <action filter="wallConfig=1">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-1-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-1-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-1-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-1-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=2 (T-junction wall +Z) -->
+            <action filter="wallConfig=2">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-2-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-2-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-2-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-2-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=3 (Corner open -X,-Z) -->
+            <action filter="wallConfig=3">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-3-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-3-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-3-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-3-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=4 (T-junction wall -X) -->
+            <action filter="wallConfig=4">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-4-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-4-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-4-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-4-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=5 (Vertical corridor) -->
+            <action filter="wallConfig=5">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=6 (Corner open +X,-Z) -->
+            <action filter="wallConfig=6">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-6-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-6-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-6-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-6-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=7 (Dead-end open -Z) -->
+            <action filter="wallConfig=7">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-7-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-7-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-7-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-7-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=8 (T-junction wall -Z) -->
+            <action filter="wallConfig=8">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-8-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-8-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-8-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-8-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=9 (Corner open +Z,-X) -->
+            <action filter="wallConfig=9">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-9-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-9-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-9-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-9-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=10 (Horizontal corridor) -->
+            <action filter="wallConfig=10">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-10-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-10-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-10-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-10-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=11 (Dead-end open -X) -->
+            <action filter="wallConfig=11">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-11-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-11-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-11-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-11-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=12 (Corner open +X,+Z) -->
+            <action filter="wallConfig=12">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-12-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-12-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-12-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-12-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=13 (Dead-end open +Z) -->
+            <action filter="wallConfig=13">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-13-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-13-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-13-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-13-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=14 (Dead-end open +X) -->
+            <action filter="wallConfig=14">
+                <action filter="variant=0">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-14-0" update="false"/>
+                </action>
+                <action filter="variant=1">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-14-1" update="false"/>
+                </action>
+                <action filter="variant=2">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-14-2" update="false"/>
+                </action>
+                <action filter="variant=3">
+                    <paste-structure x="worldX" y="1" z="worldZ" structure="structure-14-3" update="false"/>
+                </action>
+            </action>
+
+            <!-- wallConfig=15 (Isolated - should not occur) fallback -->
+            <action filter="wallConfig=15">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5-0" update="false"/>
+            </action>
         </repeat>
     </action>
-    
+
+    <trigger filter="always" action="generateMaze" scope="match"/>
     <trigger filter="structure-filter" action="pasteMaze" scope="match"/>
 </actions>
 <filters>
@@ -760,15 +691,6 @@
     <after id="physics-filter" duration="5s">
         <match-started id="structure-filter"/>
     </after>
-    <variable id="x-ge-1" var="x">1..</variable>
-    <variable id="x-le-5" var="x">..5</variable>
-    <variable id="z-ge-1" var="z">1..</variable>
-    <variable id="z-le-13" var="z">..13</variable>
-    <variable id="randWall-le-89" var="randWall">..89</variable>
-    <variable id="randWall-ge-90" var="randWall">90..</variable>
-    <variable id="shouldRestore" var="shadowSum">..104</variable>
-    <variable id="shouldReroll" var="rerollCheck">..60</variable>
-    <variable id="queueNotEmpty" var="queueSize">1..</variable>
 </filters>
 <renewables>
     <renewable region="everywhere" renew-filter="slow-regen" interval="1s" grow="false" particles="true" sound="true" avoid-players="2"></renewable>
@@ -777,53 +699,26 @@
     <variable id="GRID_X" scope="match" default="7"/>
     <variable id="GRID_Z" scope="match" default="15"/>
     <variable id="CELL_COUNT" scope="match" default="105"/>
-    
+
     <variable id="WALL_COUNT" scope="match" default="232"/>
     <variable id="H_WALL_OFFSET" scope="match" default="120"/>
     <variable id="V_STRIDE" scope="match" default="8"/>
     <variable id="INTERIOR_WALL_COUNT" scope="match" default="188"/>
     <variable id="V_INTERIOR_WALL_COUNT" scope="match" default="90"/>
-    
+
     <variable id="CELL_SIZE" scope="match" default="10"/>
     <variable id="WORLD_OFFSET_X" scope="match" default="0"/>
     <variable id="WORLD_OFFSET_Z" scope="match" default="0"/>
-    
+
     <variable id="STAGE1_ITERS" scope="match" default="25"/>
     <variable id="STAGE2_ITERS" scope="match" default="20"/>
     <variable id="STAGE3_ITERS" scope="match" default="60"/>
-    
-    <variable id="i" scope="match" default="0"/>
-    <variable id="x" scope="match" default="0"/>
-    <variable id="z" scope="match" default="0"/>
-    
-    <variable id="leftWall" scope="match" default="0"/>
-    <variable id="rightWall" scope="match" default="0"/>
-    <variable id="upWall" scope="match" default="0"/>
-    <variable id="downWall" scope="match" default="0"/>
-    
-    <variable id="shadowSum" scope="match" default="0"/>
-    <variable id="randWall" scope="match" default="0"/>
-    <variable id="adjustedRand" scope="match" default="0"/>
-    <variable id="wallIndex" scope="match" default="0"/>
-    <variable id="rerollCheck" scope="match" default="0"/>
     <variable id="batchSize" scope="match" default="1"/>
 
-    <variable id="worldX" scope="match" default="0"/>
-    <variable id="worldZ" scope="match" default="0"/>
-    <variable id="wallConfig" scope="match" default="0"/>
-    <variable id="variant" scope="match" default="0"/>
-    
     <array id="walls" scope="match" size="232"/>
     <array id="wallsBack" scope="match" size="232"/>
-    
     <array id="shadow" scope="match" size="105"/>
-    
     <array id="queue" scope="match" size="105"/>
-    <variable id="qHead" scope="match" default="0"/>
-    <variable id="qTail" scope="match" default="0"/>
-    <variable id="queueSize" scope="match" default="0"/>
-    <variable id="current" scope="match" default="0"/>
-    <variable id="neighbor" scope="match" default="0"/>
 </variables>
 <structures>
     <!-- wallConfig=0: Crossroads (Base 14, X=169) -->

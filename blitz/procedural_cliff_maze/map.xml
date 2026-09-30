@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Procedural: Cliff Maze</name>
-<version>3.0.0</version>
+<version>3.0.1</version>
 <created>2023-09-05</created>
 <objective>Kill all player's on the enemy team to win!</objective>
 <include id="gapple-kill-reward"/>
@@ -126,143 +126,69 @@
 </block-drops>
 <actions>
     <!--
-      copyToBackup: Backs up wall array for potential rollback.
-    -->
-    <action id="copyToBackup" scope="match" expose="true">
-        <set var="i" value="0"/>
-        <repeat times="WALL_COUNT">
-            <set var="wallsBack" index="i" value="walls[i]"/>
-            <set var="i" value="i+1"/>
-        </repeat>
-    </action>
-    <!--
-      restoreFromBackup: Restores walls from backup after failed change.
-    -->
-    <action id="restoreFromBackup" scope="match" expose="true">
-        <set var="i" value="0"/>
-        <repeat times="WALL_COUNT">
-            <set var="walls" index="i" value="wallsBack[i]"/>
-            <set var="i" value="i+1"/>
-        </repeat>
-    </action>
-    <!--
-      resetShadow: Zeros out shadow array for fresh flood fill.
-    -->
-    <action id="resetShadow" scope="match" expose="true">
-        <set var="i" value="0"/>
-        <repeat times="CELL_COUNT">
-            <set var="shadow" index="i" value="0"/>
-            <set var="i" value="i+1"/>
-        </repeat>
-    </action>
-    <!--
-      countShadow: Sums shadow array to count reachable cells.
-      @output shadowSum
-    -->
-    <action id="countShadow" scope="match" expose="true">
-        <set var="shadowSum" value="0"/>
-        <set var="i" value="0"/>
-        <repeat times="CELL_COUNT">
-            <set var="shadowSum" value="shadowSum + shadow[i]"/>
-            <set var="i" value="i+1"/>
-        </repeat>
-    </action>
-    <!--
-      computeWallIndices: Computes wall array indices from cell coordinates.
-      @input x, y
-      @output leftWall, rightWall, upWall, downWall
-    -->
-    <action id="computeWallIndices" scope="match" expose="true">
-        <set var="leftWall" value="y*V_STRIDE + x"/>
-        <set var="rightWall" value="y*V_STRIDE + x + 1"/>
-        <set var="upWall" value="H_WALL_OFFSET + y*GRID_SIZE + x"/>
-        <set var="downWall" value="H_WALL_OFFSET + (y+1)*GRID_SIZE + x"/>
-    </action>
-    <!--
-      incrementShadow: One iteration of flood fill propagation.
-    -->
-    <action id="incrementShadow" scope="match" expose="true">
-        <set var="i" value="0"/>
-        <repeat times="CELL_COUNT">
-            <set var="x" value="i % GRID_SIZE"/>
-            <set var="y" value="floor(i/GRID_SIZE)"/>
-            <action id="computeWallIndices"/>
-            <action filter="all(shadow[i]=0, any(all(x-ge-1, walls[leftWall]=0, shadow[i-1]=1), all(x-le-3, walls[rightWall]=0, shadow[i+1]=1), all(y-ge-1, walls[upWall]=0, shadow[i-GRID_SIZE]=1), all(y-le-3, walls[downWall]=0, shadow[i+GRID_SIZE]=1)))">
-                <set var="shadow" index="i" value="1"/>
-            </action>
-            <set var="i" value="i+1"/>
-        </repeat>
-    </action>
-    <!--
       floodFill: Runs complete flood fill from cell 0.
     -->
     <action id="floodFill" scope="match" expose="true">
-        <action id="resetShadow"/>
+        <repeat times="CELL_COUNT" index="i">
+            <set var="shadow" index="i" value="0"/>
+        </repeat>
         <set var="shadow" index="0" value="1"/>
         <repeat times="CELL_COUNT - 1">
-            <action id="incrementShadow"/>
+            <repeat times="CELL_COUNT" index="i" locals="x,y,leftWall,rightWall,upWall,downWall">
+                <set var="x" value="i % GRID_SIZE"/>
+                <set var="y" value="floor(i / GRID_SIZE)"/>
+                <set var="leftWall" value="y*V_STRIDE + x"/>
+                <set var="rightWall" value="y*V_STRIDE + x + 1"/>
+                <set var="upWall" value="H_WALL_OFFSET + y*GRID_SIZE + x"/>
+                <set var="downWall" value="H_WALL_OFFSET + (y+1)*GRID_SIZE + x"/>
+                <action filter="all(shadow[i]=0, any(all(x=1.., walls[leftWall]=0, shadow[i-1]=1), all(x=..3, walls[rightWall]=0, shadow[i+1]=1), all(y=1.., walls[upWall]=0, shadow[i-GRID_SIZE]=1), all(y=..3, walls[downWall]=0, shadow[i+GRID_SIZE]=1)))">
+                    <set var="shadow" index="i" value="1"/>
+                </action>
+            </repeat>
         </repeat>
-    </action>
-    <!--
-      computeWallIndex: Converts randWall (0-39) to wall array index.
-      @input randWall
-      @output wallIndex
-    -->
-    <action id="computeWallIndex" scope="match" expose="true">
-        <action filter="randWall-le-19">
-            <set var="wallIndex" value="floor(randWall / (GRID_SIZE - 1)) * V_STRIDE + (randWall % (GRID_SIZE - 1)) + 1"/>
-        </action>
-        <action filter="randWall-ge-20">
-            <set var="adjustedRand" value="randWall - INTERIOR_WALL_COUNT / 2"/>
-            <set var="wallIndex" value="H_WALL_OFFSET + (floor(adjustedRand / GRID_SIZE) + 1) * GRID_SIZE + (adjustedRand % GRID_SIZE)"/>
-        </action>
     </action>
     <!--
       flipRandomWall: Randomly toggles a wall, validates connectivity.
     -->
-    <action id="flipRandomWall" scope="match" expose="true">
-        <set var="randWall" value="floor(random() * INTERIOR_WALL_COUNT)"/>
-        <action id="computeWallIndex"/>
-        <set var="rerollCheck" value="floor(random() * 100)"/>
-        <action filter="all(walls[wallIndex]=1, shouldReroll)">
-            <set var="randWall" value="floor(random() * INTERIOR_WALL_COUNT)"/>
-            <action id="computeWallIndex"/>
-        </action>
-        <action id="copyToBackup"/>
+    <action id="flipRandomWall" scope="match" expose="true" locals="randWall,wallIndex,pickAgain,reachable">
+        <set var="pickAgain" value="1"/>
+        <repeat times="2">
+            <action filter="pickAgain=1">
+                <set var="randWall" value="floor(random() * INTERIOR_WALL_COUNT)"/>
+                <action filter="randWall=..19">
+                    <set var="wallIndex" value="floor(randWall / (GRID_SIZE - 1)) * V_STRIDE + (randWall % (GRID_SIZE - 1)) + 1"/>
+                </action>
+                <action filter="randWall=20.." locals="adjustedRand">
+                    <set var="adjustedRand" value="randWall - INTERIOR_WALL_COUNT / 2"/>
+                    <set var="wallIndex" value="H_WALL_OFFSET + (floor(adjustedRand / GRID_SIZE) + 1) * GRID_SIZE + (adjustedRand % GRID_SIZE)"/>
+                </action>
+                <set var="pickAgain" value="walls[wallIndex] * floor(random() + 0.61)"/>
+            </action>
+        </repeat>
         <set var="walls" index="wallIndex" value="1 - walls[wallIndex]"/>
         <action id="floodFill"/>
-        <action id="countShadow"/>
+        <repeat times="CELL_COUNT" index="i">
+            <set var="reachable" value="reachable + shadow[i]"/>
+        </repeat>
         <!-- Restore if not all cells reachable -->
-        <action filter="shouldRestore">
-            <action id="restoreFromBackup"/>
+        <action filter="CELL_COUNT-reachable=1..">
+            <set var="walls" index="wallIndex" value="1 - walls[wallIndex]"/>
         </action>
     </action>
     <!--
       initializeEdgeWalls: Sets boundary walls (except spawn entrances).
     -->
     <action id="initializeEdgeWalls" scope="match" expose="true">
-        <!-- Left edge (column 0 of vertical walls) -->
-        <set var="walls" index="0" value="1"/>
-        <set var="walls" index="6" value="1"/>
-        <set var="walls" index="12" value="1"/>
-        <set var="walls" index="18" value="1"/>
-        <set var="walls" index="24" value="1"/>
-        <!-- Right edge (column 5 of vertical walls) -->
-        <set var="walls" index="5" value="1"/>
-        <set var="walls" index="11" value="1"/>
-        <set var="walls" index="17" value="1"/>
-        <set var="walls" index="23" value="1"/>
-        <set var="walls" index="29" value="1"/>
-        <!-- Top edge (row 0 of horizontal walls, skip index 32 for blue spawn) -->
-        <set var="walls" index="30" value="1"/>
-        <set var="walls" index="31" value="1"/>
-        <set var="walls" index="33" value="1"/>
-        <set var="walls" index="34" value="1"/>
-        <!-- Bottom edge (row 5 of horizontal walls, skip index 57 for red spawn) -->
-        <set var="walls" index="55" value="1"/>
-        <set var="walls" index="56" value="1"/>
-        <set var="walls" index="58" value="1"/>
-        <set var="walls" index="59" value="1"/>
+        <repeat times="GRID_SIZE" index="y">
+            <set var="walls" index="y * V_STRIDE" value="1"/>
+            <set var="walls" index="y * V_STRIDE + GRID_SIZE" value="1"/>
+        </repeat>
+        <repeat times="GRID_SIZE" index="x">
+            <action filter="not(x=2)">
+                <set var="walls" index="H_WALL_OFFSET + x" value="1"/>
+                <set var="walls" index="H_WALL_OFFSET + GRID_SIZE * GRID_SIZE + x" value="1"/>
+            </action>
+        </repeat>
     </action>
     <!--
       generateMaze: Main entry point for maze generation.
@@ -274,129 +200,87 @@
         </repeat>
     </action>
     <!--
-      computeCellData: Computes cell/world coordinates and wall configuration.
-      @input i
-      @output x, y, worldX, worldZ, wallConfig
-    -->
-    <action id="computeCellData" scope="match" expose="true">
-        <set var="x" value="i % GRID_SIZE"/>
-        <set var="y" value="floor(i / GRID_SIZE)"/>
-        <set var="worldX" value="x * CELL_SIZE + WORLD_OFFSET"/>
-        <set var="worldZ" value="y * CELL_SIZE + WORLD_OFFSET"/>
-        <action id="computeWallIndices"/>
-        <set var="wallConfig" value="walls[rightWall] + walls[downWall] * 2 + walls[leftWall] * 4 + walls[upWall] * 8"/>
-    </action>
-    <!--
-      pasteCell: Pastes structure based on wall configuration.
-      @input wallConfig, worldX, worldZ
-    -->
-    <action id="pasteCell" scope="match" expose="true">
-        <action filter="wallConfig=0">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-8" update="false"/>
-        </action>
-        <action filter="wallConfig=1">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-6" update="false"/>
-        </action>
-        <action filter="wallConfig=2">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-7" update="false"/>
-        </action>
-        <action filter="wallConfig=3">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-15" update="false"/>
-        </action>
-        <action filter="wallConfig=4">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-4" update="false"/>
-        </action>
-        <action filter="wallConfig=5">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-1" update="false"/>
-        </action>
-        <action filter="wallConfig=6">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-3" update="false"/>
-        </action>
-        <action filter="wallConfig=7">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-9" update="false"/>
-        </action>
-        <action filter="wallConfig=8">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5" update="false"/>
-        </action>
-        <action filter="wallConfig=9">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-12" update="false"/>
-        </action>
-        <action filter="wallConfig=10">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-2" update="false"/>
-        </action>
-        <action filter="wallConfig=11">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-14" update="false"/>
-        </action>
-        <action filter="wallConfig=12">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-0" update="false"/>
-        </action>
-        <action filter="wallConfig=13">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-13" update="false"/>
-        </action>
-        <action filter="wallConfig=14">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-10" update="false"/>
-        </action>
-        <action filter="wallConfig=15">
-            <paste-structure x="worldX" y="1" z="worldZ" structure="structure-11" update="false"/>
-        </action>
-    </action>
-    <!--
       pasteMaze: Iterates cells and pastes maze structures.
     -->
     <action id="pasteMaze" scope="match">
-        <set var="i" value="0"/>
-        <repeat times="CELL_COUNT">
-            <action id="computeCellData"/>
-            <action id="pasteCell"/>
-            <set var="i" value="i + 1"/>
+        <repeat times="CELL_COUNT" index="i" locals="x,y,worldX,worldZ,leftWall,rightWall,upWall,downWall,wallConfig">
+            <set var="x" value="i % GRID_SIZE"/>
+            <set var="y" value="floor(i / GRID_SIZE)"/>
+            <set var="worldX" value="x * CELL_SIZE + WORLD_OFFSET"/>
+            <set var="worldZ" value="y * CELL_SIZE + WORLD_OFFSET"/>
+            <set var="leftWall" value="y*V_STRIDE + x"/>
+            <set var="rightWall" value="y*V_STRIDE + x + 1"/>
+            <set var="upWall" value="H_WALL_OFFSET + y*GRID_SIZE + x"/>
+            <set var="downWall" value="H_WALL_OFFSET + (y+1)*GRID_SIZE + x"/>
+            <set var="wallConfig" value="walls[rightWall] + walls[downWall] * 2 + walls[leftWall] * 4 + walls[upWall] * 8"/>
+            <action filter="wallConfig=0">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-8" update="false"/>
+            </action>
+            <action filter="wallConfig=1">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-6" update="false"/>
+            </action>
+            <action filter="wallConfig=2">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-7" update="false"/>
+            </action>
+            <action filter="wallConfig=3">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-15" update="false"/>
+            </action>
+            <action filter="wallConfig=4">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-4" update="false"/>
+            </action>
+            <action filter="wallConfig=5">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-1" update="false"/>
+            </action>
+            <action filter="wallConfig=6">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-3" update="false"/>
+            </action>
+            <action filter="wallConfig=7">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-9" update="false"/>
+            </action>
+            <action filter="wallConfig=8">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-5" update="false"/>
+            </action>
+            <action filter="wallConfig=9">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-12" update="false"/>
+            </action>
+            <action filter="wallConfig=10">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-2" update="false"/>
+            </action>
+            <action filter="wallConfig=11">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-14" update="false"/>
+            </action>
+            <action filter="wallConfig=12">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-0" update="false"/>
+            </action>
+            <action filter="wallConfig=13">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-13" update="false"/>
+            </action>
+            <action filter="wallConfig=14">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-10" update="false"/>
+            </action>
+            <action filter="wallConfig=15">
+                <paste-structure x="worldX" y="1" z="worldZ" structure="structure-11" update="false"/>
+            </action>
         </repeat>
     </action>
     <trigger filter="always" action="generateMaze" scope="match"/>
     <trigger filter="structure-filter" action="pasteMaze" scope="match"/>
 </actions>
 <filters>
-    <!-- Allows when the t_score variable is greater than or equal to 100 -->
     <after id="physics-filter" duration="5s">
         <match-started id="structure-filter"/>
     </after>
-    <variable id="x-ge-1" var="x">1..</variable>
-    <variable id="x-le-3" var="x">..3</variable>
-    <variable id="y-ge-1" var="y">1..</variable>
-    <variable id="y-le-3" var="y">..3</variable>
-    <variable id="randWall-le-19" var="randWall">..19</variable>
-    <variable id="randWall-ge-20" var="randWall">20..</variable>
-    <variable id="shouldRestore" var="shadowSum">..24</variable>
-    <variable id="shouldReroll" var="rerollCheck">..60</variable>
 </filters>
 <variables>
     <variable id="GRID_SIZE" scope="match" default="5"/>
     <variable id="CELL_COUNT" scope="match" default="25"/>
-    <variable id="WALL_COUNT" scope="match" default="60"/>
     <variable id="H_WALL_OFFSET" scope="match" default="30"/>
     <variable id="V_STRIDE" scope="match" default="6"/>
     <variable id="INTERIOR_WALL_COUNT" scope="match" default="40"/>
     <variable id="CELL_SIZE" scope="match" default="10"/>
     <variable id="WORLD_OFFSET" scope="match" default="1"/>
     <variable id="MAZE_ITERATIONS" scope="match" default="200"/>
-    <variable id="i" scope="match" default="0"/>
-    <variable id="vIndex" scope="match" default="0"/>
-    <variable id="hIndex" scope="match" default="0"/>
-    <variable id="x" scope="match" default="0"/>
-    <variable id="y" scope="match" default="0"/>
-    <variable id="leftWall" scope="match" default="0"/>
-    <variable id="rightWall" scope="match" default="0"/>
-    <variable id="upWall" scope="match" default="0"/>
-    <variable id="downWall" scope="match" default="0"/>
-    <variable id="shadowSum" scope="match" default="0"/>
-    <variable id="randWall" scope="match" default="0"/>
-    <variable id="adjustedRand" scope="match" default="0"/>
-    <variable id="wallIndex" scope="match" default="0"/>
-    <variable id="worldX" scope="match" default="0"/>
-    <variable id="worldZ" scope="match" default="0"/>
-    <variable id="wallConfig" scope="match" default="0"/>
-    <variable id="rerollCheck" scope="match" default="0"/>
     <array id="walls" scope="match" size="60"/>
-    <array id="wallsBack" scope="match" size="60"/>
     <array id="shadow" scope="match" size="25"/>
 </variables>
 <structures>
