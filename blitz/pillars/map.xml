@@ -16,7 +16,11 @@
 <constants>
     <constant id="ANNOUNCER_PREFIX">`a[Announcer]:`r</constant>
     <constant id="N_ITEMS">474</constant>
+    <constant id="ITEM_PULSE_PERIOD">5s</constant>
 </constants>
+<if variant="ffa">
+    <constant id="ITEM_PULSE_PERIOD">3s</constant>
+</if>
 <if min-server-version="26.2">
     <constants>
         <constant id="N_ITEMS">1534</constant>
@@ -133,6 +137,10 @@
     </if>
     <variable id="next_kit" scope="player" />
 </variables>
+<filters>
+    <time id="initial-timeout">5s</time>
+    <countdown duration="${ITEM_PULSE_PERIOD}" filter="all(initial-timeout, not(item-pulse))" message="Next item in {0}" />
+</filters>
 <actions>
     <if variant="ffa">
         <!-- generate pillars -->
@@ -210,21 +218,13 @@
     <!-- randomizer logic -->  
     <trigger action="grant-random-items" scope="player">
         <filter>
-            <if variant="ffa">
-                <pulse period="3s" duration="0.1s">
-                    <time>5s</time>
-                </pulse>
-            </if>
-            <unless variant="ffa">
-                <pulse period="5s" duration="0.1s">
-                    <time>5s</time>
-                </pulse>
-            </unless>
+            <pulse id="item-pulse" period="${ITEM_PULSE_PERIOD}" duration="0.1s" filter="initial-timeout" />
         </filter>
     </trigger>
     <action id="grant-random-items" scope="player">
-        <set var="next_kit" value="floor(random() * ${N_ITEMS}) + 1"/>
+        <set var="next_kit" value="floor(random() * ${N_ITEMS})"/>
         <unless min-server-version="26.2">
+            <action id="next_kit := next_kit + 1" /> <!-- TODO: fix this to use 0-based indexing -->
             <kit filter="next_kit=1" deduct-items="false">
                 <item>stone:0</item>
             </kit>
