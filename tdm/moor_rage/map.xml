@@ -1,6 +1,6 @@
 <map proto="1.5.0">
 <name>Moor RAGE</name>
-<version>1.0.3</version>
+<version>1.0.4</version>
 <objective>Be the team with the most kills after 8 minutes!</objective>
 <created>2022-04-22</created>
 <gamemode>tdm</gamemode>
@@ -9,9 +9,12 @@
     <author uuid="2ca8072f-74be-4798-85b8-bbce03aa91af"/> <!-- Tywnis -->
 </authors>
 <teams>
-    <team id="blue" color="blue" max="10" max-overfill="12">Blue</team>
-    <team id="yellow" color="yellow" max="10" max-overfill="12">Yellow</team>
+    <team id="blue-team" color="blue" max="10" max-overfill="12">Blue</team>
+    <team id="yellow-team" color="yellow" max="10" max-overfill="12">Yellow</team>
 </teams>
+<broadcasts>
+    <tip after="10s" every="2m">Jump into the scoreboxes with Emeralds to score more points!</tip>
+</broadcasts>
 <kits>
     <kit id="spawn-kit">
         <item slot="0" unbreakable="true" enchantment="damage all:10" lore="`aOne hit slice!" material="iron sword"/>
@@ -21,8 +24,8 @@
         <chestplate unbreakable="true" material="chainmail chestplate"/>
         <leggings team-color="true" unbreakable="true" material="leather leggings"/>
         <boots team-color="true" unbreakable="true" enchantment="protection fall" material="leather boots"/>
-        <effect duration="4" amplifier="4">heal</effect>
-        <effect duration="4" amplifier="4">damage resistance</effect>
+        <effect duration="4s" amplifier="25">heal</effect>
+        <effect duration="4s" amplifier="25">damage resistance</effect>
         <game-mode>adventure</game-mode>
     </kit>
     <kit id="obs">
@@ -35,40 +38,43 @@
             <cylinder base="5.5,7,34.5" radius="2" height="0"/>
         </regions>
     </default>
-    <spawn team="blue" kit="spawn-kit" yaw="180">
+    <spawn team="blue-team" kit="spawn-kit" yaw="180">
         <regions>
             <point>8,31,96</point>
         </regions>
     </spawn>
-    <spawn team="yellow" kit="spawn-kit">
+    <spawn team="yellow-team" kit="spawn-kit">
         <regions>
             <point>0,31,-27</point>
         </regions>
     </spawn>
 </spawns>
-<filters>
-    <team id="only-blue">blue</team>
-    <team id="only-yellow">yellow</team>
-</filters>
 <regions>
     <apply block="never"/>
+    <apply enter="yellow-team" region="blue-scorebox" message="You may not enter your own scorebox!"/>
+    <apply enter="blue-team" region="yellow-scorebox" message="You may not enter your own scorebox!"/>
 </regions>
 <time result="score">8m</time>
 <score>
     <!-- Only allow yellow team to use this score box, and give them 1 points -->
-    <box points="1" filter="only-yellow">
-        <region><cylinder base="2.5,20,73.5" radius="1" height="3"/></region>
+    <box points="1" filter="yellow-team">
+        <region>
+            <cylinder id="blue-scorebox" base="2.5,20,73.5" radius="1" height="3"/>
+        </region>
         <redeemables>
-            <item points="5">emerald</item>
+            <item points="2">emerald</item>
         </redeemables>
     </box>
     <!-- Only allow blue team to use this score box, and give them 1 points -->
-    <box points="1" filter="only-blue">
-        <region><cylinder base="6.5,20,-4.5" radius="1" height="3"/></region>
+    <box points="1" filter="blue-team">
+        <region>
+            <cylinder id="yellow-scorebox" base="6.5,20,-4.5" radius="1" height="3"/>
+        </region>
         <redeemables>
-            <item points="5">emerald</item>
+            <item points="2">emerald</item>
         </redeemables>
     </box>
+    <kills>1</kills>
 </score>
 <rage/>
 <portals>
@@ -89,12 +95,13 @@
     <item>chainmail chestplate</item>
     <item>leather leggings</item>
     <item>leather boots</item>
-    <item>stone sword</item>
     <item>emerald</item>
-    <item>bow</item>
     <item>arrow</item>
-    <item>golden apple</item>
 </itemremove>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+</toolrepair>
 <kill-rewards>
     <kill-reward>
         <item material="emerald"/> <!-- Used to score more points in boxes -->
@@ -102,6 +109,9 @@
     </kill-reward>
 </kill-rewards>
 <timelock>on</timelock>
+<disabledamage>
+    <damage>fall</damage>
+</disabledamage>
 <hunger>
     <depletion>off</depletion>
 </hunger>
