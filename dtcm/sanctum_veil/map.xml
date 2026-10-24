@@ -1,0 +1,814 @@
+<map proto="1.5.1">
+<name>Sanctum Veil</name>
+<version>1.0.0</version>
+<phase>development</phase>
+<objective>Destroy the enemy Narthex Reliquary to unseal their Sanctum, then destroy the Sanctum Reliquary.</objective>
+<gamemode>dtm</gamemode>
+<created>2026-10-16</created>
+<authors>
+    <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb"/> <!-- arcadeboss -->
+    <author>GrokBot</author>
+</authors>
+<constants>
+    <constant id="gate-fallback">10m</constant> <!-- every sanctum gate opens -->
+    <constant id="gold-mode">20m</constant> <!-- monuments -> gold block -->
+    <constant id="glass-mode">30m</constant> <!-- monuments -> black stained glass -->
+    <constant id="team-max">20</constant> <!-- players per team (20v20) -->
+</constants>
+<include id="gapple-kill-reward"/>
+<include id="void-death"/>
+<rules>
+    <rule>Each team guards two emerald reliquaries: the Narthex on its temple porch and the Sanctum behind its altar.</rule>
+    <rule>A Sanctum is sealed until its own Narthex is destroyed. At ${gate-fallback} every Sanctum unseals.</rule>
+    <rule>Defenders reach their Sanctum through the ambulatory door behind the altar. Enemies can never use it.</rule>
+    <rule>Boats, buckets, minecarts, TNT and flint and steel cannot be crafted.</rule>
+</rules>
+<teams>
+    <team id="red-team" color="dark red" max="${team-max}">Red</team>
+    <team id="blue-team" color="blue" max="${team-max}">Blue</team>
+</teams>
+<kits>
+    <kit id="spawn-kit">
+        <clear/>
+        <item slot="0" material="iron sword" unbreakable="true"/>
+        <item slot="1" material="bow" unbreakable="true" enchantment="infinity"/>
+        <item slot="2" material="diamond pickaxe" unbreakable="true"/>
+        <item slot="3" material="iron axe" unbreakable="true"/>
+        <item slot="4" material="wood" amount="64"/>
+        <item slot="5" material="glass" amount="32"/>
+        <item slot="8" material="golden apple"/>
+        <item slot="28" material="arrow"/>
+        <item slot="30" material="iron spade" unbreakable="true"/>
+        <item slot="31" material="wood" amount="64"/>
+        <helmet material="leather helmet" team-color="true" unbreakable="true"/>
+        <chestplate material="leather chestplate" team-color="true" unbreakable="true"/>
+        <leggings material="chainmail leggings" unbreakable="true"/>
+        <boots material="leather boots" team-color="true" unbreakable="true"/>
+        <effect duration="3s" amplifier="255">damage resistance</effect>
+    </kit>
+</kits>
+<spawns>
+    <spawn team="red-team" kit="spawn-kit" region="red-spawn-pad" yaw="-90" pitch="0"/>
+    <spawn team="blue-team" kit="spawn-kit" region="blue-spawn-pad" yaw="90" pitch="0"/>
+    <default region="observer-point" yaw="-90" pitch="0"/>
+</spawns>
+<variables>
+    <variable id="gates_crumbled" scope="match" default="0"/>
+</variables>
+<filters>
+    <team id="only-red">red-team</team>
+    <team id="only-blue">blue-team</team>
+    <any id="red-gate-open"> <!-- own narthex destroyed, or the ${gate-fallback} mode -->
+        <completed>red-narthex</completed>
+        <variable var="gates_crumbled">1</variable>
+    </any>
+    <not id="red-gate-closed">
+        <filter id="red-gate-open"/>
+    </not>
+    <any id="blue-gate-open"> <!-- own narthex destroyed, or the ${gate-fallback} mode -->
+        <completed>blue-narthex</completed>
+        <variable var="gates_crumbled">1</variable>
+    </any>
+    <not id="blue-gate-closed">
+        <filter id="blue-gate-open"/>
+    </not>
+    <any id="river-water"> <!-- bank block-break filter: allow (water replaced by a placed block), deny everything else -->
+        <material>water</material>
+        <material>stationary water</material>
+    </any>
+    <blocks id="sanctum-was-air" region="sanctum-build-volume"> <!-- original air only: placed blocks may be removed, map blocks may not -->
+        <material>air</material>
+    </blocks>
+    <blocks id="narthex-was-air" region="narthex-build-volume">
+        <material>air</material>
+    </blocks>
+    <blocks id="cathedral-was-air" region="cathedral-build">
+        <material>air</material>
+    </blocks>
+    <blocks id="hall-door-was-air" region="hall-doors">
+        <material>air</material>
+    </blocks>
+    <all id="hall-door-break"> <!-- doorway loaded as air; the pasted iron-bar seal stays -->
+        <filter id="hall-door-was-air"/>
+        <not>
+            <material>iron fence</material>
+        </not>
+    </all>
+</filters>
+<actions>
+    <action id="intro" scope="match">
+        <message text="`7Destroy the enemy `6`lNarthex`7 to unseal their Sanctum."/>
+        <message text="`7Every Sanctum opens at `6${gate-fallback}`7."/>
+    </action>
+    <trigger scope="match" filter="match-started" action="intro"/>
+    <action id="crumble" scope="match">
+        <set var="gates_crumbled" value="1"/>
+        <message text="`7The Sanctum gates `6`lcrumble`7: every Sanctum is now open." title="`6The gates crumble" subtitle="`7Every Sanctum is open" fade-in="0.5s" stay="2.5s" fade-out="1s"/>
+        <sound preset="alert"/>
+    </action>
+    <action id="red-gate-announce" scope="match" filter="gates_crumbled=0"> <!-- narthex-caused opening only; the crumble mode announces itself -->
+        <message text="`7The `4Red`7 Narthex has fallen: the `4Red`7 Sanctum is `6`lopen`7." title="`4Red Sanctum `6`lopen" subtitle="`7Its Narthex has fallen" fade-in="0.5s" stay="2.5s" fade-out="1s"/>
+        <sound preset="alert"/>
+    </action>
+    <trigger scope="match" filter="red-gate-open" action="red-gate-announce"/>
+    <action id="blue-gate-announce" scope="match" filter="gates_crumbled=0"> <!-- narthex-caused opening only; the crumble mode announces itself -->
+        <message text="`7The `9Blue`7 Narthex has fallen: the `9Blue`7 Sanctum is `6`lopen`7." title="`9Blue Sanctum `6`lopen" subtitle="`7Its Narthex has fallen" fade-in="0.5s" stay="2.5s" fade-out="1s"/>
+        <sound preset="alert"/>
+    </action>
+    <trigger scope="match" filter="blue-gate-open" action="blue-gate-announce"/>
+</actions>
+<structures>
+    <!-- Iron-bar copies sit outside the map. At load they are cleared and pasted into the doorways, which are air. -->
+    <structure id="red-door-seal" region="red-door-stash"/>
+    <structure id="red-clerestory-north-seal" region="red-clerestory-north-stash"/>
+    <structure id="red-clerestory-south-seal" region="red-clerestory-south-stash"/>
+    <structure id="red-ambulatory-seal" region="red-ambulatory-stash"/>
+    <structure id="blue-door-seal" region="blue-door-stash"/>
+    <structure id="blue-clerestory-north-seal" region="blue-clerestory-north-stash"/>
+    <structure id="blue-clerestory-south-seal" region="blue-clerestory-south-stash"/>
+    <structure id="blue-ambulatory-seal" region="blue-ambulatory-stash"/>
+    <dynamic structure="red-door-seal" trigger="red-gate-closed" offset="84,38,0"/>
+    <dynamic structure="red-clerestory-north-seal" trigger="red-gate-closed" offset="80,47,0"/>
+    <dynamic structure="red-clerestory-south-seal" trigger="red-gate-closed" offset="80,47,0"/>
+    <dynamic structure="red-ambulatory-seal" trigger="red-gate-closed" offset="64,32,0"/>
+    <dynamic structure="blue-door-seal" trigger="blue-gate-closed" offset="-84,38,0"/>
+    <dynamic structure="blue-clerestory-north-seal" trigger="blue-gate-closed" offset="-80,47,0"/>
+    <dynamic structure="blue-clerestory-south-seal" trigger="blue-gate-closed" offset="-80,47,0"/>
+    <dynamic structure="blue-ambulatory-seal" trigger="blue-gate-closed" offset="-64,32,0"/>
+</structures>
+<regions>
+    <point id="observer-point">0,57,0</point>
+    <point id="gapple-spawn">0,52,0</point> <!-- sea lantern; the apple drops in the air above -->
+    <cuboid id="buildable" min="-150,0,-76" max="150,256,76"/> <!-- playable world: x=-150..149, y=0..255, z=-76..75 -->
+    <negative id="out-of-bounds">
+        <region id="buildable"/>
+    </negative>
+    <!-- Red -->
+    <cuboid id="red-spawn-pad" min="-135,47,-3" max="-128,48,4"/>
+    <cuboid id="red-door-stash" min="-155,5,-2" max="-154,10,3"/>
+    <cuboid id="red-clerestory-north-stash" min="-156,5,-10" max="-155,8,-9"/>
+    <cuboid id="red-clerestory-south-stash" min="-156,5,10" max="-155,8,11"/>
+    <cuboid id="red-ambulatory-stash" min="-155,11,-1" max="-154,14,2"/>
+    <cuboid id="red-hall-door" min="-71,43,-2" max="-70,48,3"/> <!-- blocks x=-71, y=43..47, z=-2..2 -->
+    <cuboid id="blue-hall-door" min="70,43,-3" max="71,48,2"/> <!-- blocks x=70, y=43..47, z=-3..1 -->
+    <union id="hall-doors">
+        <region id="red-hall-door"/>
+        <region id="blue-hall-door"/>
+    </union>
+    <union id="red-gate-cells"> <!-- 40 cells: door, clerestories, ambulatory -->
+        <region id="red-hall-door"/>
+        <cuboid min="-76,52,-10" max="-75,55,-9"/>
+        <cuboid min="-76,52,10" max="-75,55,11"/>
+        <cuboid min="-91,43,-1" max="-90,46,2"/>
+    </union>
+    <cuboid id="red-ambulatory" min="-91,43,-1" max="-90,46,2"/>
+    <cuboid id="red-narthex-cells" min="-37,45,-1" max="-34,48,2"/>
+    <cuboid id="red-sanctum-cells" min="-83,46,-1" max="-80,51,2"/>
+    <cuboid id="red-narthex-cage" min="-38,45,-2" max="-33,49,3"/> <!-- blocks x=-38..-34, y=45..48, z=-2..2 -->
+    <cuboid id="blue-narthex-cage" min="33,45,-3" max="38,49,2"/> <!-- blocks x=33..37, y=45..48, z=-3..1 -->
+    <complement id="red-narthex-open"> <!-- everyone may break and place here (overrides the porch block-never); x plane -41 -->
+        <cuboid min="-41,45,-12" max="-26,63,13"/>
+        <region id="red-narthex-cells"/>
+        <region id="red-narthex-cage"/>
+        <cuboid min="-41,45,-8" max="-39,52,-6"/>
+        <cuboid min="-32,45,-8" max="-30,52,-6"/>
+        <cuboid min="-41,45,7" max="-39,52,9"/>
+        <cuboid min="-32,45,7" max="-30,52,9"/>
+    </complement>
+    <cuboid id="red-spawn-protection-airspace" min="-139,40,-19" max="-115,256,20"/> <!-- spawn; enemies cannot enter, up to the sky -->
+    <cuboid id="red-sacristy-yard-airspace" min="-124,40,-5" max="-91,256,6"/> <!-- sacristy yard; enemies cannot enter, up to the sky -->
+    <union id="red-protected"> <!-- sacred stone, block never; monument cells, crypt, and ore holes left out -->
+        <complement> <!-- sanctum envelope -->
+            <cuboid min="-92,30,-11" max="-69,67,12"/>
+            <region id="red-sanctum-cells"/>
+        </complement>
+        <cuboid min="-70,30,-34" max="-58,71,35"/> <!-- crossing envelope -->
+        <cuboid min="-68,41,-36" max="-60,43,-34"/> <!-- transept stairs north -->
+        <cuboid min="-68,41,35" max="-60,43,37"/> <!-- transept stairs south -->
+        <cuboid min="-67,60,-2" max="-61,105,4"/> <!-- crossing tower -->
+        <cuboid min="-58,39,-14" max="-42,71,15"/> <!-- nave envelope -->
+        <cuboid min="-52,41,-15" max="-49,43,-14"/> <!-- nave stairs north -->
+        <cuboid min="-52,41,15" max="-49,43,16"/> <!-- nave stairs south -->
+        <cuboid min="-47,39,-14" max="-41,101,-8"/> <!-- side tower north -->
+        <cuboid min="-47,39,9" max="-41,101,15"/> <!-- side tower south -->
+        <complement> <!-- porch -->
+            <cuboid min="-41,36,-12" max="-30,63,13"/> <!-- porch; blocks x=-30..-27 stay with the center corridor -->
+            <region id="red-narthex-cells"/>
+        </complement>
+        <cuboid min="-41,63,2" max="-40,64,4"/> <!-- porch gable cap 4 -->
+        <cuboid min="-41,63,1" max="-40,65,2"/> <!-- porch gable cap 3 -->
+        <cuboid min="-41,64,0" max="-40,65,1"/> <!-- porch gable cap 2 -->
+        <cuboid min="-41,63,-1" max="-40,65,0"/> <!-- porch gable cap 1 -->
+        <cuboid min="-41,63,-3" max="-40,64,-1"/> <!-- porch gable cap 0 -->
+        <cuboid min="-31,63,8" max="-30,64,9"/> <!-- porch finial torch 3 -->
+        <cuboid min="-41,63,8" max="-40,64,9"/> <!-- porch finial torch 2 -->
+        <cuboid min="-31,63,-8" max="-30,64,-7"/> <!-- porch finial torch 1 -->
+        <cuboid min="-41,63,-8" max="-40,64,-7"/> <!-- porch finial torch 0 -->
+        <cuboid min="-43,39,-8" max="-41,48,9"/> <!-- porch stairs -->
+        <cuboid min="-86,43,-4" max="-77,46,5"/> <!-- altar -->
+        <cuboid min="-139,40,-19" max="-115,57,20"/> <!-- spawn protection -->
+        <cuboid min="-138,41,-29" max="-136,45,-26"/> <!-- baffle north -->
+        <cuboid min="-138,41,27" max="-136,45,30"/> <!-- baffle south -->
+        <cuboid min="-124,40,-5" max="-91,51,6"/> <!-- sacristy yard -->
+        <cuboid min="-112,41,-6" max="-97,42,-5"/> <!-- sacristy wall north -->
+        <cuboid min="-112,41,6" max="-97,42,7"/> <!-- sacristy wall south -->
+        <cuboid min="-93,41,-4" max="-91,43,5"/> <!-- ambulatory entry stairs -->
+        <cuboid min="-95,41,-6" max="-92,43,7"/> <!-- ambulatory ferns -->
+        <!-- tight boxes on the stone caps; air left out -->
+        <cuboid min="-76,67,-10" max="-75,68,-9"/>
+        <cuboid min="-71,59,-34" max="-70,60,-32"/>
+        <cuboid min="-71,59,-32" max="-70,62,-30"/>
+        <cuboid min="-71,44,-30" max="-70,67,-29"/>
+        <cuboid min="-71,59,-29" max="-70,62,-26"/>
+        <cuboid min="-71,44,-26" max="-70,67,-25"/>
+        <cuboid min="-71,59,-25" max="-70,62,-22"/>
+        <cuboid min="-71,44,-22" max="-70,67,-21"/>
+        <cuboid min="-71,59,-21" max="-70,62,-18"/>
+        <cuboid min="-71,44,-18" max="-70,67,-17"/>
+        <cuboid min="-71,59,-17" max="-70,62,-14"/>
+        <cuboid min="-71,59,15" max="-70,62,18"/>
+        <cuboid min="-71,44,18" max="-70,67,19"/>
+        <cuboid min="-71,59,19" max="-70,62,22"/>
+        <cuboid min="-71,44,22" max="-70,67,23"/>
+        <cuboid min="-71,59,23" max="-70,62,26"/>
+        <cuboid min="-71,44,26" max="-70,67,27"/>
+        <cuboid min="-71,59,27" max="-70,62,30"/>
+        <cuboid min="-71,44,30" max="-70,67,31"/>
+        <cuboid min="-71,59,31" max="-70,62,33"/>
+        <cuboid min="-71,59,33" max="-70,60,35"/>
+        <cuboid min="-67,46,-35" max="-66,47,-34"/>
+        <cuboid min="-67,46,35" max="-66,47,36"/>
+        <cuboid min="-65,71,-34" max="-64,74,-33"/>
+        <cuboid min="-65,71,-28" max="-64,72,-27"/>
+        <cuboid min="-65,71,-22" max="-64,72,-21"/>
+        <cuboid min="-65,71,-16" max="-64,72,-15"/>
+        <cuboid min="-65,71,-10" max="-64,72,-9"/>
+        <cuboid min="-65,71,-4" max="-64,72,-3"/>
+        <cuboid min="-65,71,8" max="-64,72,9"/>
+        <cuboid min="-65,71,14" max="-64,72,15"/>
+        <cuboid min="-65,71,20" max="-64,72,21"/>
+        <cuboid min="-65,71,26" max="-64,72,27"/>
+        <cuboid min="-65,71,32" max="-64,72,33"/>
+        <cuboid min="-65,71,34" max="-64,74,35"/>
+        <cuboid min="-62,46,-35" max="-61,47,-34"/>
+        <cuboid min="-62,46,35" max="-61,47,36"/>
+        <cuboid min="-58,59,-34" max="-57,60,-32"/>
+        <cuboid min="-58,59,-32" max="-57,62,-30"/>
+        <cuboid min="-58,44,-30" max="-57,67,-29"/>
+        <cuboid min="-58,59,-29" max="-57,62,-26"/>
+        <cuboid min="-58,44,-26" max="-57,67,-25"/>
+        <cuboid min="-58,59,-25" max="-57,62,-22"/>
+        <cuboid min="-58,44,-22" max="-57,67,-21"/>
+        <cuboid min="-58,59,-21" max="-57,62,-18"/>
+        <cuboid min="-58,44,-18" max="-57,67,-17"/>
+        <cuboid min="-58,59,-17" max="-57,62,-14"/>
+        <cuboid min="-58,53,-15" max="-57,54,-14"/>
+        <cuboid min="-58,71,0" max="-57,72,1"/>
+        <cuboid min="-58,53,15" max="-57,54,16"/>
+        <cuboid min="-58,59,15" max="-57,62,18"/>
+        <cuboid min="-58,44,18" max="-57,67,19"/>
+        <cuboid min="-58,59,19" max="-57,62,22"/>
+        <cuboid min="-58,44,22" max="-57,67,23"/>
+        <cuboid min="-58,59,23" max="-57,62,26"/>
+        <cuboid min="-58,44,26" max="-57,67,27"/>
+        <cuboid min="-58,59,27" max="-57,62,30"/>
+        <cuboid min="-58,44,30" max="-57,67,31"/>
+        <cuboid min="-58,59,31" max="-57,62,33"/>
+        <cuboid min="-58,59,33" max="-57,60,35"/>
+        <cuboid min="-57,44,-30" max="-56,53,-29"/>
+        <cuboid min="-57,44,-26" max="-56,53,-25"/>
+        <cuboid min="-57,44,-22" max="-56,53,-21"/>
+        <cuboid min="-57,44,-18" max="-56,53,-17"/>
+        <cuboid min="-57,44,-16" max="-56,51,-15"/>
+        <cuboid min="-57,44,-15" max="-56,69,-14"/>
+        <cuboid min="-57,44,15" max="-56,69,16"/>
+        <cuboid min="-57,44,16" max="-56,51,17"/>
+        <cuboid min="-57,44,18" max="-56,53,19"/>
+        <cuboid min="-57,44,22" max="-56,53,23"/>
+        <cuboid min="-57,44,26" max="-56,53,27"/>
+        <cuboid min="-57,44,30" max="-56,53,31"/>
+        <cuboid min="-56,53,-15" max="-53,54,-14"/>
+        <cuboid min="-56,53,15" max="-53,54,16"/>
+        <cuboid min="-54,71,0" max="-53,72,1"/>
+        <cuboid min="-53,46,-17" max="-52,47,-16"/>
+        <cuboid min="-53,44,-16" max="-52,51,-15"/>
+        <cuboid min="-53,44,-15" max="-52,69,-14"/>
+        <cuboid min="-53,44,15" max="-52,69,16"/>
+        <cuboid min="-53,44,16" max="-52,51,17"/>
+        <cuboid min="-53,46,17" max="-52,47,18"/>
+        <cuboid min="-52,46,-15" max="-51,47,-14"/>
+        <cuboid min="-52,53,-15" max="-49,54,-14"/>
+        <cuboid min="-52,46,15" max="-51,47,16"/>
+        <cuboid min="-52,53,15" max="-49,54,16"/>
+        <cuboid min="-51,46,-15" max="-50,49,-14"/>
+        <cuboid min="-51,46,15" max="-50,49,16"/>
+        <cuboid min="-50,46,-15" max="-49,47,-14"/>
+        <cuboid min="-50,71,0" max="-49,72,1"/>
+        <cuboid min="-50,46,15" max="-49,47,16"/>
+        <cuboid min="-49,46,-17" max="-48,47,-16"/>
+        <cuboid min="-49,44,-16" max="-48,51,-15"/>
+        <cuboid min="-49,44,-15" max="-48,69,-14"/>
+        <cuboid min="-49,44,15" max="-48,69,16"/>
+        <cuboid min="-49,44,16" max="-48,51,17"/>
+        <cuboid min="-49,46,17" max="-48,47,18"/>
+        <cuboid min="-48,53,-15" max="-47,54,-14"/>
+        <cuboid min="-48,80,-14" max="-47,81,-13"/>
+        <cuboid min="-48,80,-9" max="-47,81,-8"/>
+        <cuboid min="-48,80,9" max="-47,81,10"/>
+        <cuboid min="-48,80,14" max="-47,81,15"/>
+        <cuboid min="-48,53,15" max="-47,54,16"/>
+        <cuboid min="-47,80,-15" max="-46,81,-14"/>
+        <cuboid min="-47,80,-8" max="-46,81,-7"/>
+        <cuboid min="-47,80,8" max="-46,81,9"/>
+        <cuboid min="-47,80,15" max="-46,81,16"/>
+        <cuboid min="-46,71,0" max="-44,72,1"/>
+        <cuboid min="-43,71,0" max="-42,74,1"/>
+        <cuboid min="-42,80,-15" max="-41,81,-14"/>
+        <cuboid min="-42,58,-8" max="-41,59,-7"/>
+        <cuboid min="-42,66,-8" max="-41,67,0"/>
+        <cuboid min="-42,69,-8" max="-41,72,-7"/>
+        <cuboid min="-42,80,-8" max="-41,81,-7"/>
+        <cuboid min="-42,70,-7" max="-41,77,-6"/>
+        <cuboid min="-42,69,-6" max="-41,71,-5"/>
+        <cuboid min="-42,72,-6" max="-41,73,-5"/>
+        <cuboid min="-42,70,-5" max="-41,71,-4"/>
+        <cuboid min="-42,72,-5" max="-41,74,-4"/>
+        <cuboid min="-42,69,-4" max="-41,71,-3"/>
+        <cuboid min="-42,73,-4" max="-41,75,-3"/>
+        <cuboid min="-42,50,-3" max="-41,51,4"/>
+        <cuboid min="-42,63,-3" max="-41,64,-2"/>
+        <cuboid min="-42,70,-3" max="-41,71,-2"/>
+        <cuboid min="-42,72,-3" max="-41,76,-2"/>
+        <cuboid min="-42,48,-2" max="-41,49,-1"/>
+        <cuboid min="-42,69,-2" max="-41,71,-1"/>
+        <cuboid min="-42,75,-2" max="-41,77,-1"/>
+        <cuboid min="-42,70,-1" max="-41,71,0"/>
+        <cuboid min="-42,72,-1" max="-41,78,0"/>
+        <cuboid min="-42,52,0" max="-41,53,1"/>
+        <cuboid min="-42,64,0" max="-41,67,1"/>
+        <cuboid min="-42,69,0" max="-41,71,1"/>
+        <cuboid min="-42,74,0" max="-41,83,1"/>
+        <cuboid min="-42,66,1" max="-41,67,9"/>
+        <cuboid min="-42,70,1" max="-41,71,2"/>
+        <cuboid min="-42,72,1" max="-41,78,2"/>
+        <cuboid min="-42,48,2" max="-41,49,3"/>
+        <cuboid min="-42,69,2" max="-41,71,3"/>
+        <cuboid min="-42,75,2" max="-41,77,3"/>
+        <cuboid min="-42,63,3" max="-41,64,4"/>
+        <cuboid min="-42,70,3" max="-41,71,4"/>
+        <cuboid min="-42,72,3" max="-41,76,4"/>
+        <cuboid min="-42,69,4" max="-41,71,5"/>
+        <cuboid min="-42,73,4" max="-41,75,5"/>
+        <cuboid min="-42,70,5" max="-41,71,6"/>
+        <cuboid min="-42,72,5" max="-41,74,6"/>
+        <cuboid min="-42,69,6" max="-41,71,7"/>
+        <cuboid min="-42,72,6" max="-41,73,7"/>
+        <cuboid min="-42,70,7" max="-41,77,8"/>
+        <cuboid min="-42,58,8" max="-41,59,9"/>
+        <cuboid min="-42,69,8" max="-41,72,9"/>
+        <cuboid min="-42,80,8" max="-41,81,9"/>
+        <cuboid min="-42,80,15" max="-41,81,16"/>
+    </union>
+    <!-- Blue -->
+    <cuboid id="blue-spawn-pad" min="128,47,-4" max="135,48,3"/>
+    <cuboid id="blue-door-stash" min="154,5,-3" max="155,10,2"/>
+    <cuboid id="blue-clerestory-north-stash" min="155,5,9" max="156,8,10"/>
+    <cuboid id="blue-clerestory-south-stash" min="155,5,-11" max="156,8,-10"/>
+    <cuboid id="blue-ambulatory-stash" min="154,11,-2" max="155,14,1"/>
+    <union id="blue-gate-cells"> <!-- 40 cells: door, clerestories, ambulatory -->
+        <region id="blue-hall-door"/>
+        <cuboid min="75,52,9" max="76,55,10"/>
+        <cuboid min="75,52,-11" max="76,55,-10"/>
+        <cuboid min="90,43,-2" max="91,46,1"/>
+    </union>
+    <cuboid id="blue-ambulatory" min="90,43,-2" max="91,46,1"/>
+    <cuboid id="blue-narthex-cells" min="34,45,-2" max="37,48,1"/>
+    <cuboid id="blue-sanctum-cells" min="80,46,-2" max="83,51,1"/>
+    <complement id="blue-narthex-open"> <!-- everyone may break and place here (overrides the porch block-never); x plane 40 -->
+        <cuboid min="26,45,-13" max="41,63,12"/>
+        <region id="blue-narthex-cells"/>
+        <region id="blue-narthex-cage"/>
+        <cuboid min="39,45,6" max="41,52,8"/>
+        <cuboid min="30,45,6" max="32,52,8"/>
+        <cuboid min="39,45,-9" max="41,52,-7"/>
+        <cuboid min="30,45,-9" max="32,52,-7"/>
+    </complement>
+    <cuboid id="blue-spawn-protection-airspace" min="115,40,-20" max="139,256,19"/> <!-- spawn; enemies cannot enter, up to the sky -->
+    <cuboid id="blue-sacristy-yard-airspace" min="91,40,-6" max="124,256,5"/> <!-- sacristy yard; enemies cannot enter, up to the sky -->
+    <union id="blue-protected"> <!-- sacred stone, block never; monument cells, crypt, and ore holes left out -->
+        <complement> <!-- sanctum envelope -->
+            <cuboid min="69,30,-12" max="92,67,11"/>
+            <region id="blue-sanctum-cells"/>
+        </complement>
+        <cuboid min="58,30,-35" max="70,71,34"/> <!-- crossing envelope -->
+        <cuboid min="60,41,34" max="68,43,36"/> <!-- transept stairs north -->
+        <cuboid min="60,41,-37" max="68,43,-35"/> <!-- transept stairs south -->
+        <cuboid min="61,60,-4" max="67,105,2"/> <!-- crossing tower -->
+        <cuboid min="42,39,-15" max="58,71,14"/> <!-- nave envelope -->
+        <cuboid min="49,41,14" max="52,43,15"/> <!-- nave stairs north -->
+        <cuboid min="49,41,-16" max="52,43,-15"/> <!-- nave stairs south -->
+        <cuboid min="41,39,8" max="47,101,14"/> <!-- side tower north -->
+        <cuboid min="41,39,-15" max="47,101,-9"/> <!-- side tower south -->
+        <complement> <!-- porch -->
+            <cuboid min="30,36,-13" max="41,63,12"/> <!-- porch; blocks x=26..29 stay with the center corridor -->
+            <region id="blue-narthex-cells"/>
+        </complement>
+        <cuboid min="40,63,-4" max="41,64,-2"/> <!-- porch gable cap 4 -->
+        <cuboid min="40,63,-2" max="41,65,-1"/> <!-- porch gable cap 3 -->
+        <cuboid min="40,64,-1" max="41,65,0"/> <!-- porch gable cap 2 -->
+        <cuboid min="40,63,0" max="41,65,1"/> <!-- porch gable cap 1 -->
+        <cuboid min="40,63,1" max="41,64,3"/> <!-- porch gable cap 0 -->
+        <cuboid min="30,63,-9" max="31,64,-8"/> <!-- porch finial torch 3 -->
+        <cuboid min="40,63,-9" max="41,64,-8"/> <!-- porch finial torch 2 -->
+        <cuboid min="30,63,7" max="31,64,8"/> <!-- porch finial torch 1 -->
+        <cuboid min="40,63,7" max="41,64,8"/> <!-- porch finial torch 0 -->
+        <cuboid min="41,39,-9" max="43,48,8"/> <!-- porch stairs -->
+        <cuboid min="77,43,-5" max="86,46,4"/> <!-- altar -->
+        <cuboid min="115,40,-20" max="139,57,19"/> <!-- spawn protection -->
+        <cuboid min="136,41,26" max="138,45,29"/> <!-- baffle north -->
+        <cuboid min="136,41,-30" max="138,45,-27"/> <!-- baffle south -->
+        <cuboid min="91,40,-6" max="124,51,5"/> <!-- sacristy yard -->
+        <cuboid min="97,41,5" max="112,42,6"/> <!-- sacristy wall north -->
+        <cuboid min="97,41,-7" max="112,42,-6"/> <!-- sacristy wall south -->
+        <cuboid min="91,41,-5" max="93,43,4"/> <!-- ambulatory entry stairs -->
+        <cuboid min="92,41,-7" max="95,43,6"/> <!-- ambulatory ferns -->
+        <!-- tight boxes on the stone caps; air left out -->
+        <cuboid min="75,67,9" max="76,68,10"/>
+        <cuboid min="70,59,32" max="71,60,34"/>
+        <cuboid min="70,59,30" max="71,62,32"/>
+        <cuboid min="70,44,29" max="71,67,30"/>
+        <cuboid min="70,59,26" max="71,62,29"/>
+        <cuboid min="70,44,25" max="71,67,26"/>
+        <cuboid min="70,59,22" max="71,62,25"/>
+        <cuboid min="70,44,21" max="71,67,22"/>
+        <cuboid min="70,59,18" max="71,62,21"/>
+        <cuboid min="70,44,17" max="71,67,18"/>
+        <cuboid min="70,59,14" max="71,62,17"/>
+        <cuboid min="70,59,-18" max="71,62,-15"/>
+        <cuboid min="70,44,-19" max="71,67,-18"/>
+        <cuboid min="70,59,-22" max="71,62,-19"/>
+        <cuboid min="70,44,-23" max="71,67,-22"/>
+        <cuboid min="70,59,-26" max="71,62,-23"/>
+        <cuboid min="70,44,-27" max="71,67,-26"/>
+        <cuboid min="70,59,-30" max="71,62,-27"/>
+        <cuboid min="70,44,-31" max="71,67,-30"/>
+        <cuboid min="70,59,-33" max="71,62,-31"/>
+        <cuboid min="70,59,-35" max="71,60,-33"/>
+        <cuboid min="66,46,34" max="67,47,35"/>
+        <cuboid min="66,46,-36" max="67,47,-35"/>
+        <cuboid min="64,71,33" max="65,74,34"/>
+        <cuboid min="64,71,27" max="65,72,28"/>
+        <cuboid min="64,71,21" max="65,72,22"/>
+        <cuboid min="64,71,15" max="65,72,16"/>
+        <cuboid min="64,71,9" max="65,72,10"/>
+        <cuboid min="64,71,3" max="65,72,4"/>
+        <cuboid min="64,71,-9" max="65,72,-8"/>
+        <cuboid min="64,71,-15" max="65,72,-14"/>
+        <cuboid min="64,71,-21" max="65,72,-20"/>
+        <cuboid min="64,71,-27" max="65,72,-26"/>
+        <cuboid min="64,71,-33" max="65,72,-32"/>
+        <cuboid min="64,71,-35" max="65,74,-34"/>
+        <cuboid min="61,46,34" max="62,47,35"/>
+        <cuboid min="61,46,-36" max="62,47,-35"/>
+        <cuboid min="57,59,32" max="58,60,34"/>
+        <cuboid min="57,59,30" max="58,62,32"/>
+        <cuboid min="57,44,29" max="58,67,30"/>
+        <cuboid min="57,59,26" max="58,62,29"/>
+        <cuboid min="57,44,25" max="58,67,26"/>
+        <cuboid min="57,59,22" max="58,62,25"/>
+        <cuboid min="57,44,21" max="58,67,22"/>
+        <cuboid min="57,59,18" max="58,62,21"/>
+        <cuboid min="57,44,17" max="58,67,18"/>
+        <cuboid min="57,59,14" max="58,62,17"/>
+        <cuboid min="57,53,14" max="58,54,15"/>
+        <cuboid min="57,71,-1" max="58,72,0"/>
+        <cuboid min="57,53,-16" max="58,54,-15"/>
+        <cuboid min="57,59,-18" max="58,62,-15"/>
+        <cuboid min="57,44,-19" max="58,67,-18"/>
+        <cuboid min="57,59,-22" max="58,62,-19"/>
+        <cuboid min="57,44,-23" max="58,67,-22"/>
+        <cuboid min="57,59,-26" max="58,62,-23"/>
+        <cuboid min="57,44,-27" max="58,67,-26"/>
+        <cuboid min="57,59,-30" max="58,62,-27"/>
+        <cuboid min="57,44,-31" max="58,67,-30"/>
+        <cuboid min="57,59,-33" max="58,62,-31"/>
+        <cuboid min="57,59,-35" max="58,60,-33"/>
+        <cuboid min="56,44,29" max="57,53,30"/>
+        <cuboid min="56,44,25" max="57,53,26"/>
+        <cuboid min="56,44,21" max="57,53,22"/>
+        <cuboid min="56,44,17" max="57,53,18"/>
+        <cuboid min="56,44,15" max="57,51,16"/>
+        <cuboid min="56,44,14" max="57,69,15"/>
+        <cuboid min="56,44,-16" max="57,69,-15"/>
+        <cuboid min="56,44,-17" max="57,51,-16"/>
+        <cuboid min="56,44,-19" max="57,53,-18"/>
+        <cuboid min="56,44,-23" max="57,53,-22"/>
+        <cuboid min="56,44,-27" max="57,53,-26"/>
+        <cuboid min="56,44,-31" max="57,53,-30"/>
+        <cuboid min="53,53,14" max="56,54,15"/>
+        <cuboid min="53,53,-16" max="56,54,-15"/>
+        <cuboid min="53,71,-1" max="54,72,0"/>
+        <cuboid min="52,46,16" max="53,47,17"/>
+        <cuboid min="52,44,15" max="53,51,16"/>
+        <cuboid min="52,44,14" max="53,69,15"/>
+        <cuboid min="52,44,-16" max="53,69,-15"/>
+        <cuboid min="52,44,-17" max="53,51,-16"/>
+        <cuboid min="52,46,-18" max="53,47,-17"/>
+        <cuboid min="51,46,14" max="52,47,15"/>
+        <cuboid min="49,53,14" max="52,54,15"/>
+        <cuboid min="51,46,-16" max="52,47,-15"/>
+        <cuboid min="49,53,-16" max="52,54,-15"/>
+        <cuboid min="50,46,14" max="51,49,15"/>
+        <cuboid min="50,46,-16" max="51,49,-15"/>
+        <cuboid min="49,46,14" max="50,47,15"/>
+        <cuboid min="49,71,-1" max="50,72,0"/>
+        <cuboid min="49,46,-16" max="50,47,-15"/>
+        <cuboid min="48,46,16" max="49,47,17"/>
+        <cuboid min="48,44,15" max="49,51,16"/>
+        <cuboid min="48,44,14" max="49,69,15"/>
+        <cuboid min="48,44,-16" max="49,69,-15"/>
+        <cuboid min="48,44,-17" max="49,51,-16"/>
+        <cuboid min="48,46,-18" max="49,47,-17"/>
+        <cuboid min="47,53,14" max="48,54,15"/>
+        <cuboid min="47,80,13" max="48,81,14"/>
+        <cuboid min="47,80,8" max="48,81,9"/>
+        <cuboid min="47,80,-10" max="48,81,-9"/>
+        <cuboid min="47,80,-15" max="48,81,-14"/>
+        <cuboid min="47,53,-16" max="48,54,-15"/>
+        <cuboid min="46,80,14" max="47,81,15"/>
+        <cuboid min="46,80,7" max="47,81,8"/>
+        <cuboid min="46,80,-9" max="47,81,-8"/>
+        <cuboid min="46,80,-16" max="47,81,-15"/>
+        <cuboid min="44,71,-1" max="46,72,0"/>
+        <cuboid min="42,71,-1" max="43,74,0"/>
+        <cuboid min="41,80,14" max="42,81,15"/>
+        <cuboid min="41,58,7" max="42,59,8"/>
+        <cuboid min="41,66,0" max="42,67,8"/>
+        <cuboid min="41,69,7" max="42,72,8"/>
+        <cuboid min="41,80,7" max="42,81,8"/>
+        <cuboid min="41,70,6" max="42,77,7"/>
+        <cuboid min="41,69,5" max="42,71,6"/>
+        <cuboid min="41,72,5" max="42,73,6"/>
+        <cuboid min="41,70,4" max="42,71,5"/>
+        <cuboid min="41,72,4" max="42,74,5"/>
+        <cuboid min="41,69,3" max="42,71,4"/>
+        <cuboid min="41,73,3" max="42,75,4"/>
+        <cuboid min="41,50,-4" max="42,51,3"/>
+        <cuboid min="41,63,2" max="42,64,3"/>
+        <cuboid min="41,70,2" max="42,71,3"/>
+        <cuboid min="41,72,2" max="42,76,3"/>
+        <cuboid min="41,48,1" max="42,49,2"/>
+        <cuboid min="41,69,1" max="42,71,2"/>
+        <cuboid min="41,75,1" max="42,77,2"/>
+        <cuboid min="41,70,0" max="42,71,1"/>
+        <cuboid min="41,72,0" max="42,78,1"/>
+        <cuboid min="41,52,-1" max="42,53,0"/>
+        <cuboid min="41,64,-1" max="42,67,0"/>
+        <cuboid min="41,69,-1" max="42,71,0"/>
+        <cuboid min="41,74,-1" max="42,83,0"/>
+        <cuboid min="41,66,-9" max="42,67,-1"/>
+        <cuboid min="41,70,-2" max="42,71,-1"/>
+        <cuboid min="41,72,-2" max="42,78,-1"/>
+        <cuboid min="41,48,-3" max="42,49,-2"/>
+        <cuboid min="41,69,-3" max="42,71,-2"/>
+        <cuboid min="41,75,-3" max="42,77,-2"/>
+        <cuboid min="41,63,-4" max="42,64,-3"/>
+        <cuboid min="41,70,-4" max="42,71,-3"/>
+        <cuboid min="41,72,-4" max="42,76,-3"/>
+        <cuboid min="41,69,-5" max="42,71,-4"/>
+        <cuboid min="41,73,-5" max="42,75,-4"/>
+        <cuboid min="41,70,-6" max="42,71,-5"/>
+        <cuboid min="41,72,-6" max="42,74,-5"/>
+        <cuboid min="41,69,-7" max="42,71,-6"/>
+        <cuboid min="41,72,-7" max="42,73,-6"/>
+        <cuboid min="41,70,-8" max="42,77,-7"/>
+        <cuboid min="41,58,-9" max="42,59,-8"/>
+        <cuboid min="41,69,-9" max="42,72,-8"/>
+        <cuboid min="41,80,-9" max="42,81,-8"/>
+        <cuboid min="41,80,-16" max="42,81,-15"/>
+    </union>
+    <!-- riverbanks, y=34..38, water plus a margin -->
+    <union id="banks">
+        <!-- west bank -->
+        <cuboid min="-10,34,-75" max="0,39,-22"/>
+        <cuboid min="-12,34,-74" max="-10,39,47"/>
+        <cuboid min="-14,34,-73" max="-12,39,-57"/>
+        <cuboid min="-16,34,-72" max="-14,39,-58"/>
+        <cuboid min="-17,34,-71" max="-16,39,-59"/>
+        <cuboid min="-18,34,-69" max="-17,39,-61"/>
+        <cuboid min="-13,34,-56" max="-12,39,47"/>
+        <cuboid min="-16,34,-39" max="-13,39,39"/>
+        <cuboid min="-18,34,-38" max="-16,39,-18"/>
+        <cuboid min="-19,34,-37" max="-18,39,-18"/>
+        <cuboid min="-20,34,-36" max="-19,39,-18"/>
+        <cuboid min="-21,34,-34" max="-20,39,-18"/>
+        <cuboid min="-22,34,-32" max="-21,39,32"/>
+        <cuboid min="-23,34,-31" max="-22,39,31"/>
+        <cuboid min="-24,34,-29" max="-23,39,29"/>
+        <cuboid min="-25,34,-27" max="-24,39,27"/>
+        <cuboid min="-26,34,-26" max="-25,39,26"/>
+        <cuboid min="-27,34,-24" max="-26,39,24"/>
+        <cuboid min="-28,34,-22" max="-27,39,22"/>
+        <cuboid min="-10,34,-22" max="-2,39,-20"/>
+        <cuboid min="-10,34,-20" max="-3,39,-16"/>
+        <cuboid min="-17,34,-18" max="-16,39,38"/>
+        <cuboid min="-10,34,-16" max="-4,39,75"/>
+        <cuboid min="-21,34,-14" max="-17,39,34"/>
+        <cuboid min="-4,34,16" max="-3,39,75"/>
+        <cuboid min="-3,34,20" max="-2,39,75"/>
+        <cuboid min="-2,34,22" max="0,39,75"/>
+        <cuboid min="-20,34,34" max="-17,39,36"/>
+        <cuboid min="-19,34,36" max="-17,39,37"/>
+        <cuboid min="-18,34,37" max="-17,39,38"/>
+        <cuboid min="-11,34,47" max="-10,39,74"/>
+        <cuboid min="-12,34,51" max="-11,39,74"/>
+        <cuboid min="-14,34,57" max="-12,39,73"/>
+        <cuboid min="-16,34,58" max="-14,39,72"/>
+        <cuboid min="-17,34,59" max="-16,39,71"/>
+        <cuboid min="-18,34,61" max="-17,39,69"/>
+        <!-- east bank -->
+        <cuboid min="0,34,22" max="10,39,75"/>
+        <cuboid min="10,34,-47" max="12,39,74"/>
+        <cuboid min="12,34,57" max="14,39,73"/>
+        <cuboid min="14,34,58" max="16,39,72"/>
+        <cuboid min="16,34,59" max="17,39,71"/>
+        <cuboid min="17,34,61" max="18,39,69"/>
+        <cuboid min="12,34,-47" max="13,39,56"/>
+        <cuboid min="13,34,-39" max="16,39,39"/>
+        <cuboid min="16,34,18" max="18,39,38"/>
+        <cuboid min="18,34,18" max="19,39,37"/>
+        <cuboid min="19,34,18" max="20,39,36"/>
+        <cuboid min="20,34,18" max="21,39,34"/>
+        <cuboid min="21,34,-32" max="22,39,32"/>
+        <cuboid min="22,34,-31" max="23,39,31"/>
+        <cuboid min="23,34,-29" max="24,39,29"/>
+        <cuboid min="24,34,-27" max="25,39,27"/>
+        <cuboid min="25,34,-26" max="26,39,26"/>
+        <cuboid min="26,34,-24" max="27,39,24"/>
+        <cuboid min="27,34,-22" max="28,39,22"/>
+        <cuboid min="2,34,20" max="10,39,22"/>
+        <cuboid min="3,34,16" max="10,39,20"/>
+        <cuboid min="16,34,-38" max="17,39,18"/>
+        <cuboid min="4,34,-75" max="10,39,16"/>
+        <cuboid min="17,34,-34" max="21,39,14"/>
+        <cuboid min="3,34,-75" max="4,39,-16"/>
+        <cuboid min="2,34,-75" max="3,39,-20"/>
+        <cuboid min="0,34,-75" max="2,39,-22"/>
+        <cuboid min="17,34,-36" max="20,39,-34"/>
+        <cuboid min="17,34,-37" max="19,39,-36"/>
+        <cuboid min="17,34,-38" max="18,39,-37"/>
+        <cuboid min="10,34,-74" max="11,39,-47"/>
+        <cuboid min="11,34,-74" max="12,39,-51"/>
+        <cuboid min="12,34,-73" max="14,39,-57"/>
+        <cuboid min="14,34,-72" max="16,39,-58"/>
+        <cuboid min="16,34,-71" max="17,39,-59"/>
+        <cuboid min="17,34,-69" max="18,39,-61"/>
+    </union>
+    <union id="narthex-stairs"> <!-- side-stair landings y=41..44; full edit, both teams -->
+        <cuboid min="30,41,8" max="41,45,12"/> <!-- blue south: blocks x=30..40, z=8..11 -->
+        <cuboid min="30,41,-13" max="41,45,-9"/> <!-- blue north: blocks x=30..40, z=-13..-10 -->
+        <cuboid min="-41,41,-12" max="-30,45,-8"/> <!-- red: blocks x=-41..-31, z=-12..-9 -->
+        <cuboid min="-41,41,9" max="-30,45,13"/> <!-- red: blocks x=-41..-31, z=9..12 -->
+    </union>
+    <complement id="blue-sanctum-build"> <!-- place anywhere; break only where the map was air. Reliquary cells subtracted. -->
+        <cuboid min="71,43,-10" max="91,256,9"/> <!-- blocks x=71..90, z=-10..8, y=43..255 -->
+        <region id="blue-sanctum-cells"/>
+    </complement>
+    <complement id="red-sanctum-build">
+        <cuboid min="-91,43,-9" max="-71,256,10"/> <!-- blocks x=-91..-72, z=-9..9, y=43..255 -->
+        <region id="red-sanctum-cells"/>
+    </complement>
+    <union id="sanctum-build-volume">
+        <region id="blue-sanctum-build"/>
+        <region id="red-sanctum-build"/>
+    </union>
+    <complement id="red-narthex-build"> <!-- place anywhere in the cage; break only original air. Emeralds subtracted. -->
+        <region id="red-narthex-cage"/>
+        <region id="red-narthex-cells"/>
+    </complement>
+    <complement id="blue-narthex-build">
+        <region id="blue-narthex-cage"/>
+        <region id="blue-narthex-cells"/>
+    </complement>
+    <union id="narthex-build-volume">
+        <region id="red-narthex-build"/>
+        <region id="blue-narthex-build"/>
+    </union>
+    <union id="cathedral-build"> <!-- place anywhere; break only where the map was air. y=43..46, plus the porch-stair lip at y=47 -->
+        <cuboid min="59,43,-35" max="69,47,34"/> <!-- blue crossing: x=59..68, z=-35..33 -->
+        <cuboid min="41,43,-14" max="70,47,13"/> <!-- blue nave: x=41..69, z=-14..12 -->
+        <cuboid min="41,47,-3" max="44,48,2"/> <!-- blue porch-stair lip: x=41..43, y=47, z=-3..1 -->
+        <cuboid min="-69,43,-34" max="-59,47,35"/> <!-- red crossing: x=-69..-60, z=-34..34 -->
+        <cuboid min="-70,43,-13" max="-41,47,14"/> <!-- red nave: x=-70..-42, z=-13..13 -->
+        <cuboid min="-44,47,-2" max="-41,48,3"/> <!-- red porch-stair lip: x=-44..-42, y=47, z=-2..2 -->
+        <cuboid min="60,42,35" max="68,43,36"/> <!-- blue transept lip: x=60..67, y=42, z=35 -->
+        <cuboid min="60,42,-37" max="68,43,-36"/> <!-- blue transept lip: x=60..67, y=42, z=-37 -->
+        <cuboid min="-68,42,-36" max="-60,43,-35"/> <!-- red transept lip: x=-68..-61, y=42, z=-36 -->
+        <cuboid min="-68,42,36" max="-60,43,37"/> <!-- red transept lip: x=-68..-61, y=42, z=36 -->
+    </union>
+    <cuboid id="center-open" min="-30,0,-76" max="30,256,76"/> <!-- blocks x=-30..29 (30 west of the origin corner, 30 east), z=-76..75, y=0..255; build and mine -->
+    <!-- apply order = priority: center-open first (ALLOW wins), then hall doors, that team's gate, team-only, narthex open, stair landings, narthex cage, sanctum build, cathedral build, protection, banks, out-of-bounds, void last -->
+    <apply region="center-open" block="always"/>
+    <apply region="hall-doors" block-place="always" block-break="hall-door-break" message="The sanctum gate can't be broken!"/>
+    <apply region="red-gate-cells" block="never" message="The Sanctum gate can't be broken or blocked!"/>
+    <apply region="red-ambulatory" enter="only-red" message="Only Red may use the Red ambulatory door!"/>
+    <apply region="red-spawn-protection-airspace" enter="only-red" message="You may not enter the enemy spawn!"/>
+    <apply region="red-sacristy-yard-airspace" enter="only-red" message="Only Red may enter the Red sacristy yard!"/>
+    <apply region="red-narthex-open" block="always"/> <!-- before red-protected: the first ALLOW/DENY wins -->
+    <apply region="narthex-stairs" block="always"/>
+    <apply region="narthex-build-volume" block-place="always" block-break="narthex-was-air" message="The narthex stone can't be broken!"/>
+    <apply region="red-sanctum-build" block-place="always" block-break="sanctum-was-air" message="This area can't be modified!"/>
+    <apply region="cathedral-build" block-place="always" block-break="cathedral-was-air" message="This area can't be modified!"/>
+    <apply region="red-protected" block="never" message="This area can't be modified!"/>
+    <apply region="blue-gate-cells" block="never" message="The Sanctum gate can't be broken or blocked!"/>
+    <apply region="blue-ambulatory" enter="only-blue" message="Only Blue may use the Blue ambulatory door!"/>
+    <apply region="blue-spawn-protection-airspace" enter="only-blue" message="You may not enter the enemy spawn!"/>
+    <apply region="blue-sacristy-yard-airspace" enter="only-blue" message="Only Blue may enter the Blue sacristy yard!"/>
+    <apply region="blue-narthex-open" block="always"/> <!-- before blue-protected: the first ALLOW/DENY wins -->
+    <apply region="blue-sanctum-build" block-place="always" block-break="sanctum-was-air" message="This area can't be modified!"/>
+    <apply region="blue-protected" block="never" message="This area can't be modified!"/>
+    <apply region="banks" block-break="river-water" message="The riverbanks can't be broken!"/>
+    <apply region="out-of-bounds" block="never" message="You may not build outside the playable area!"/>
+    <apply block="deny(void)" message="You may not build in the void!"/>
+</regions>
+<spawners>
+    <spawner spawn-region="gapple-spawn" player-region="everywhere" delay="20s" max-entities="2">
+        <item material="golden apple"/>
+    </spawner>
+</spawners>
+<destroyables materials="emerald block" show-progress="true" required="true" repairable="false" completion="100%" mode-changes="true" sparks="near">
+    <destroyable id="red-narthex" owner="red-team" name="Narthex Reliquary" region="red-narthex-cells"/>
+    <destroyable id="red-sanctum" owner="red-team" name="Sanctum Reliquary" region="red-sanctum-cells"/>
+    <destroyable id="blue-narthex" owner="blue-team" name="Narthex Reliquary" region="blue-narthex-cells"/>
+    <destroyable id="blue-sanctum" owner="blue-team" name="Sanctum Reliquary" region="blue-sanctum-cells"/>
+</destroyables>
+<modes>
+    <mode id="gates-crumble" after="${gate-fallback}" name="`6The Sanctum gates crumble" action="crumble" show-before="1m"/>
+    <mode id="gold-mode" after="${gold-mode}" material="gold block" name="`6Gold Monument Mode" show-before="1m"/>
+    <mode id="glass-mode" after="${glass-mode}" material="stained glass:15" name="`8Black Glass Monument Mode" show-before="1m"/>
+</modes>
+<crafting>
+    <disable>boat</disable>
+    <disable>bucket</disable>
+    <disable>flint and steel</disable>
+    <disable>minecart</disable>
+    <disable>tnt</disable>
+</crafting>
+<kill-rewards>
+    <kill-reward>
+        <item material="wood" amount="16"/>
+    </kill-reward>
+</kill-rewards>
+<toolrepair>
+    <tool>iron sword</tool>
+    <tool>bow</tool>
+    <tool>diamond pickaxe</tool>
+    <tool>iron axe</tool>
+    <tool>iron spade</tool>
+</toolrepair>
+<itemremove>
+    <item>leather helmet</item>
+    <item>leather chestplate</item>
+    <item>chainmail leggings</item>
+    <item>leather boots</item>
+    <item>iron helmet</item>
+    <item>iron chestplate</item>
+    <item>iron leggings</item>
+    <item>iron boots</item>
+    <item>emerald block</item>
+    <item>gold block</item>
+    <item>obsidian</item>
+    <item>iron fence</item>
+    <item>boat</item>
+    <item>minecart</item>
+    <item>bucket</item>
+    <item>flint and steel</item>
+    <item>seeds</item>
+    <item>sapling</item>
+    <item>string</item>
+</itemremove>
+<itemkeep>
+    <item>iron sword</item>
+    <item>bow</item>
+    <item>diamond pickaxe</item>
+    <item>iron axe</item>
+    <item>iron spade</item>
+    <item>golden apple</item>
+    <item>wood</item>
+    <item>arrow</item>
+    <item>glass</item>
+</itemkeep>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<gamerules>
+    <doFireTick>false</doFireTick>
+    <randomTickSpeed>0</randomTickSpeed> <!-- no grass spread, no crop growth, no leaf decay -->
+    <mobGriefing>false</mobGriefing> <!-- no mob block damage -->
+</gamerules>
+<world>
+    <timeset>1000</timeset> <!-- morning (1000 = 07:00); a full day is 24000 ticks = 20 min -->
+    <timelock>off</timelock> <!-- PGM locks time by default; off = day/night cycle (sets doDaylightCycle) -->
+</world>
+<maxbuildheight>72</maxbuildheight>
+</map>
