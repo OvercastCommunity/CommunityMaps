@@ -1,8 +1,7 @@
 <map proto="1.5.0">
 <name>Red Rover</name>
 <game>Red Rover</game>
-<version>1.0.3</version>
-<phase>staging</phase>
+<version>1.0.4</version>
 <objective>Prepare walls to slow the enemy, then race to the Scorebox.</objective>
 <gamemode>scorebox</gamemode>
 <created>2025-05-01</created>
@@ -39,8 +38,10 @@
             <point yaw="180">0.5,34,32.5</point>
         </regions>
     </default>
-    <spawn team="orange-team" kit="build-kit" yaw="90" region="orange-build-spawn"/>
-    <spawn team="yellow-team" kit="build-kit" yaw="-90" region="yellow-build-spawn"/>
+    <spawn team="orange-team" kit="rover-kit" filter="rover" yaw="90" region="orange-build-spawn"/>
+    <spawn team="yellow-team" kit="rover-kit" filter="rover" yaw="-90" region="yellow-build-spawn"/>
+    <spawn team="orange-team" kit="build-kit" filter="pre-rover" yaw="90" region="orange-build-spawn"/>
+    <spawn team="yellow-team" kit="build-kit" filter="pre-rover" yaw="-90" region="yellow-build-spawn"/>
 </spawns>
 <kits>
     <kit id="build-kit" force="false">
@@ -85,9 +86,27 @@
         <health>20</health>
         <effect>night vision</effect>
         <effect amplifier="255" duration="8s">fire resistance</effect>
+        <kit parents="catchup-haste" filter="yellow-haste"/>
+        <kit parents="catchup-haste" filter="orange-haste"/>
+        <kit parents="catchup-speed" filter="yellow-speed"/>
+        <kit parents="catchup-speed" filter="orange-speed"/>
+    </kit>
+    <kit id="catchup-haste">
+        <effect duration="oo">haste</effect>
+    </kit>
+    <kit id="catchup-speed">
+        <!-- amplifier 0 is Speed I -->
+        <effect duration="oo" amplifier="0">speed</effect>
+    </kit>
+    <kit id="catchup-apple" deduct-items="false" drop-overflow="true">
+        <item amount="1" material="golden apple"/>
     </kit>
     <give filter="all(cage, participating)" kit="cage-kit"/>
     <give filter="all(any(do-yellow-offense-spawn, do-orange-offense-spawn), participating)" kit="rover-kit"/>
+    <give filter="all(yellow-haste, alive)" kit="catchup-haste"/>
+    <give filter="all(orange-haste, alive)" kit="catchup-haste"/>
+    <give filter="all(yellow-speed, alive)" kit="catchup-speed"/>
+    <give filter="all(orange-speed, alive)" kit="catchup-speed"/>
 </kits>
 <regions>
     <cuboid id="no-go" min="-8,12,-20" max="9,200,20"/>
@@ -247,6 +266,36 @@
             <sound preset="alert"/>
         </action>
     </trigger>
+    <!-- First Haste line. Match scope so an empty receiving team still ends the event. -->
+    <trigger scope="match" filter="first-haste">
+        <action>
+            <action filter="orange-at-1">
+                <switch-scope inner="team" filter="yellow-team">
+                    <message text="`eHurry! Your team now has Haste."/>
+                    <sound preset="OBJECTIVE_MODE"/>
+                </switch-scope>
+            </action>
+            <action filter="yellow-at-1">
+                <switch-scope inner="team" filter="orange-team">
+                    <message text="`eHurry! Your team now has Haste."/>
+                    <sound preset="OBJECTIVE_MODE"/>
+                </switch-scope>
+            </action>
+            <set var="haste_told" value="1"/>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="yellow-apple">
+        <action>
+            <kit id="catchup-apple"/>
+            <set var="catchup_apple" value="1"/>
+        </action>
+    </trigger>
+    <trigger scope="player" filter="orange-apple">
+        <action>
+            <kit id="catchup-apple"/>
+            <set var="catchup_apple" value="1"/>
+        </action>
+    </trigger>
 </actions>
 <broadcasts>
     <alert after="25s">`r`6`oBuild walls `r`e`l`o15 blocks wide`r`6`o and `r`e`l`o4 blocks tall`r`6`o.`r</alert>
@@ -264,6 +313,9 @@
         <match-running/>
         <variable var="match_state">${rover-state}</variable>
     </all>
+    <not id="pre-rover">
+        <filter id="rover"/>
+    </not>
     <deny id="original-block-protection-filter">
         <any>
             <!-- List of blocks in the original map that players can not modify -->
@@ -296,11 +348,61 @@
         <region id="orange-offense-spawn-kitzone"/>
         <variable var="match_state">${rover-state}</variable>
     </all>
+    <score id="orange-at-1" team="orange-team">[1,oo)</score>
+    <score id="orange-at-5" team="orange-team">[5,oo)</score>
+    <score id="orange-at-10" team="orange-team">[10,oo)</score>
+    <score id="yellow-at-1" team="yellow-team">[1,oo)</score>
+    <score id="yellow-at-5" team="yellow-team">[5,oo)</score>
+    <score id="yellow-at-10" team="yellow-team">[10,oo)</score>
+    <all id="yellow-haste">
+        <team>yellow-team</team>
+        <filter id="rover"/>
+        <filter id="orange-at-1"/>
+    </all>
+    <all id="orange-haste">
+        <team>orange-team</team>
+        <filter id="rover"/>
+        <filter id="yellow-at-1"/>
+    </all>
+    <all id="yellow-speed">
+        <team>yellow-team</team>
+        <filter id="rover"/>
+        <filter id="orange-at-5"/>
+    </all>
+    <all id="orange-speed">
+        <team>orange-team</team>
+        <filter id="rover"/>
+        <filter id="yellow-at-5"/>
+    </all>
+    <all id="first-haste">
+        <filter id="rover"/>
+        <variable var="haste_told">0</variable>
+        <any>
+            <filter id="orange-at-1"/>
+            <filter id="yellow-at-1"/>
+        </any>
+    </all>
+    <all id="yellow-apple">
+        <team>yellow-team</team>
+        <alive/>
+        <filter id="rover"/>
+        <filter id="orange-at-10"/>
+        <variable var="catchup_apple">0</variable>
+    </all>
+    <all id="orange-apple">
+        <team>orange-team</team>
+        <alive/>
+        <filter id="rover"/>
+        <filter id="yellow-at-10"/>
+        <variable var="catchup_apple">0</variable>
+    </all>
 </filters>
 <variables>
     <timelimit id="timelimit"/>
     <variable id="match_state" scope="match" default="${build-state}"/>
     <score id="team_score"/>
+    <variable id="catchup_apple" scope="player" default="0"/>
+    <variable id="haste_told" scope="match" default="0"/>
 </variables>
 <crafting>
     <disable>stone</disable>
@@ -312,6 +414,9 @@
     <disable>ladder</disable>
     <disable>glass</disable>
 </crafting>
+<itemkeep>
+    <item>golden apple</item>
+</itemkeep>
 <itemremove>
     <item>leather chestplate</item>
     <item>diamond axe</item>
