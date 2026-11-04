@@ -1,6 +1,6 @@
 <map proto="1.5.1">
 <name>ParkourCUBE</name>
-<version>1.0.2</version>
+<version>1.1</version>
 <objective>Complete the parkour!</objective>
 <created>2026-10-31</created>
 <game>2 Player Parkour</game>
@@ -20,15 +20,19 @@
     <contributor uuid="d37bd0ab-17b3-4be0-9e89-c3afa8cdf946" contribution="Original New Discoveries map" /> <!-- Metacognitive -->
 </contributors>
 <teams>
-    <team id="team-a" color="dark red" max="30">Red</team>
-    <team id="team-b" color="blue" max="30">Blue</team>
+    <team id="team-a" color="dark red" max="30" min="2">Red</team>
+    <team id="team-b" color="blue" max="30" min="2">Blue</team>
 </teams>
 <score />
 <kits>
     <kit id="default-kit">
+        <clear />
         <game-mode>adventure</game-mode>
         <item slot="0" material="gold plate" name="`eGo to last Checkpoint" lore="`7Right click to be teleported to your `elast checkpoint!" consumable="last-cp-consumable" />
         <item slot="1" material="wood plate" name="`aGo to previous Checkpoint" lore="`7Right click to be teleported to the `aprevious checkpoint!" consumable="previous-cp-consumable" />
+        <kit filter="checkpoint=21">
+            <item slot="4" material="clock" name="`6Checkpoint selector" lore="`7Use to be teleported to any `9checkpoint!" consumable="cp-selector-consumable" />
+        </kit>
         <item slot="8" material="golden apple" amount="64" />
     </kit>
 </kits>
@@ -159,6 +163,7 @@
         <translate id="b-instakill-zone-1" region="a-instakill-zone-1" offset="-76,0,0" />
         <translate id="b-instakill-zone-2" region="a-instakill-zone-2" offset="-76,0,0" />
     </union>
+    <cuboid id="ice-stage" min="21,76,103" max="-100,124,154" />
 </regions>
 <portals>
     <portal region="a-portal-1" destination="a-spawnpoint-2" yaw="@180" pitch="@0" />
@@ -174,6 +179,11 @@
     <portal region="b-portal-5" destination="b-spawnpoint-6" yaw="@0" pitch="@0" />
     <portal region="b-portal-6" destination="b-spawnpoint-7" yaw="@90" pitch="@0" />
 </portals>
+<filters>
+    <offset id="on-ice" vector="~0,~-1,~0">
+        <material>ice</material>
+    </offset>
+</filters>
 <variables scope="player">
     <variable id="checkpoint" />
     <variable id="cp_offset" />
@@ -181,15 +191,18 @@
     <variable id="time" />
     <timelimit id="tl" />
     <variable id="temp_time" scope="match" />
+    <variable id="request_checkpoint" default="-1" />
+    <variable id="last_touched_checkpoint" /> <!-- used when player already won -->
 </variables>
 <actions>
-    <trigger scope="player" filter="all(match-started,participating)">
+    <trigger scope="player" filter="all(match-started,participating,checkpoint=0)">
         <action>
             <message title="`lStage I" subtitle="`aForest`2CUBE" stay="1s" />
         </action>
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-1,b-checkpoint-1)">
         <action>
+            <set var="last_touched_checkpoint" value="1" />
             <action filter="1-checkpoint=1..">
                 <set var="checkpoint" value="1" />
                 <set var="score" value="score + 1" />
@@ -200,6 +213,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-2,b-checkpoint-2)">
         <action>
+            <set var="last_touched_checkpoint" value="2" />
             <action filter="2-checkpoint=1..">
                 <set var="checkpoint" value="2" />
                 <set var="score" value="score + 1" />
@@ -210,6 +224,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-portal-1,b-portal-1)">
         <action>
+            <set var="last_touched_checkpoint" value="3" />
             <action filter="3-checkpoint=1..">
                 <set var="checkpoint" value="3" />
                 <set var="score" value="score + 3" />
@@ -219,6 +234,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-3,b-checkpoint-3)">
         <action>
+            <set var="last_touched_checkpoint" value="4" />
             <action filter="4-checkpoint=1..">
                 <set var="checkpoint" value="4" />
                 <set var="score" value="score + 1" />
@@ -229,6 +245,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-4,b-checkpoint-4)">
         <action>
+            <set var="last_touched_checkpoint" value="5" />
             <action filter="5-checkpoint=1..">
                 <set var="checkpoint" value="5" />
                 <set var="score" value="score + 1" />
@@ -239,6 +256,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-portal-2,b-portal-2)">
         <action>
+            <set var="last_touched_checkpoint" value="6" />
             <action filter="6-checkpoint=1..">
                 <set var="score" value="score + 3" />
                 <set var="checkpoint" value="6" />
@@ -248,6 +266,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-5,b-checkpoint-5)">
         <action>
+            <set var="last_touched_checkpoint" value="7" />
             <action filter="7-checkpoint=1..">
                 <set var="checkpoint" value="7" />
                 <set var="score" value="score + 1" />
@@ -258,6 +277,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-portal-3,b-portal-3)">
         <action>
+            <set var="last_touched_checkpoint" value="8" />
             <action filter="8-checkpoint=1..">
                 <set var="checkpoint" value="8" />
                 <set var="score" value="score + 3" />
@@ -267,6 +287,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-6,b-checkpoint-6)">
         <action>
+            <set var="last_touched_checkpoint" value="9" />
             <action filter="9-checkpoint=1..">
                 <set var="checkpoint" value="9" />
                 <set var="score" value="score + 1" />
@@ -277,6 +298,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-portal-4,b-portal-4)">
         <action>
+            <set var="last_touched_checkpoint" value="10" />
             <action filter="10-checkpoint=1..">
                 <set var="checkpoint" value="10" />
                 <set var="score" value="score + 3" />
@@ -286,6 +308,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-7,b-checkpoint-7)">
         <action>
+            <set var="last_touched_checkpoint" value="11" />
             <action filter="11-checkpoint=1..">
                 <set var="checkpoint" value="11" />
                 <set var="score" value="score + 1" />
@@ -296,6 +319,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-8,b-checkpoint-8)">
         <action>
+            <set var="last_touched_checkpoint" value="12" />
             <action filter="12-checkpoint=1..">
                 <set var="checkpoint" value="12" />
                 <set var="score" value="score + 1" />
@@ -306,6 +330,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-portal-5,b-portal-5)">
         <action>
+            <set var="last_touched_checkpoint" value="13" />
             <action filter="13-checkpoint=1..">
                 <set var="checkpoint" value="13" />
                 <set var="score" value="score + 3" />
@@ -315,6 +340,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-9,b-checkpoint-9)">
         <action>
+            <set var="last_touched_checkpoint" value="14" />
             <action filter="14-checkpoint=1..">
                 <set var="checkpoint" value="14" />
                 <set var="score" value="score + 1" />
@@ -325,6 +351,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-portal-6,b-portal-6)">
         <action>
+            <set var="last_touched_checkpoint" value="15" />
             <action filter="15-checkpoint=1..">
                 <set var="checkpoint" value="15" />
                 <set var="score" value="score + 3" />
@@ -334,6 +361,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-10,b-checkpoint-10)">
         <action>
+            <set var="last_touched_checkpoint" value="6" />
             <action filter="16-checkpoint=1..">
                 <set var="checkpoint" value="16" />
                 <set var="score" value="score + 1" />
@@ -344,6 +372,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-11,b-checkpoint-11)">
         <action>
+            <set var="last_touched_checkpoint" value="17" />
             <action filter="17-checkpoint=1..">
                 <set var="checkpoint" value="17" />
                 <set var="score" value="score + 1" />
@@ -354,6 +383,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-12,b-checkpoint-12)">
         <action>
+            <set var="last_touched_checkpoint" value="18" />
             <action filter="18-checkpoint=1..">
                 <set var="checkpoint" value="18" />
                 <set var="score" value="score + 1" />
@@ -364,6 +394,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-13,b-checkpoint-13)">
         <action>
+            <set var="last_touched_checkpoint" value="19" />
             <action filter="19-checkpoint=1..">
                 <set var="checkpoint" value="19" />
                 <set var="score" value="score + 1" />
@@ -374,6 +405,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-checkpoint-14,b-checkpoint-14)">
         <action>
+            <set var="last_touched_checkpoint" value="20" />
             <action filter="20-checkpoint=1..">
                 <set var="checkpoint" value="20" />
                 <set var="score" value="score + 1" />
@@ -384,6 +416,7 @@
     </trigger>
     <trigger scope="player" filter="any(a-finish-line,b-finish-line)">
         <action>
+            <set var="last_touched_checkpoint" value="21" />
             <action filter="21-checkpoint=1..">
                 <action filter="tl=-1">
                     <set var="tl" value="600" />
@@ -413,16 +446,21 @@
                     </action>
                 </switch-scope>
                 <sound key="random.levelup" pitch="2" volume="0.5" />
+                <schedule after="2s">
+                    <kit id="default-kit" />
+                    <message text="`7`oFrom `r`aParkourCUBE`r: You can now use the `6checkpoint selector`r to go help your teammates!"/>
+                    <sound key="${entity.experience_orb.pickup}" volume="1" pitch="1.2"/>
+                </schedule>
             </action>
         </action>
     </trigger>
-
+    <!-- time -->
     <trigger scope="player" action="time := time + 1">
         <filter>
             <pulse period="1s" duration="0.5s" filter="all(participating,match-started)" />
         </filter>
     </trigger>
-
+    <!-- insta kill zone -->
     <trigger scope="player">
         <filter>
             <pulse period="0.2s" duration="0.1s" filter="instakill-zone" />
@@ -436,22 +474,50 @@
             </kit>
         </action>
     </trigger>
-
+    <!-- lethal ice -->
+    <trigger scope="player">
+        <filter>
+            <pulse period="0.2s" duration="0.1s" filter="all(ice-stage,participating)" />
+        </filter>
+        <action>
+            <action filter="on-ice">
+                <kit>
+                    <effect duration="0.5s" amplifier="10">instant damage</effect>
+                </kit>
+            </action>
+        </action>
+    </trigger>
     <!-- consumables -->
     <action id="return-to-last-cp" scope="player">
         <set var="cp_offset" value="0" />
         <schedule after="0.1s">
             <set var="player.fire_ticks" value="0" />
-            <call function="teleport-to-cp-or-sp" cp="checkpoint" />
+            <action filter="checkpoint=21">
+                <call function="teleport-to-cp-or-sp" cp="last_touched_checkpoint" />
+            </action>
+            <action filter="not(checkpoint=21)">
+                <call function="teleport-to-cp-or-sp" cp="checkpoint" />
+            </action>
         </schedule>
     </action>
     <action id="return-to-previous-cp" scope="player">
         <set var="cp_offset" value="cp_offset + 1" />
         <schedule after="0.1s">
             <set var="player.fire_ticks" value="0" />
-            <call function="teleport-to-cp-or-sp" cp="max(0, checkpoint - cp_offset)" />
+            <action filter="checkpoint=21">
+                <call function="teleport-to-cp-or-sp" cp="max(0, last_touched_checkpoint - cp_offset)" />
+            </action>
+            <action filter="not(checkpoint=21)">
+                <call function="teleport-to-cp-or-sp" cp="max(0, checkpoint - cp_offset)" />
+            </action>
         </schedule>
     </action>
+    <trigger scope="player" filter="request_checkpoint=0..">
+        <action>
+            <call function="teleport-to-cp-or-sp" cp="request_checkpoint" />
+            <set var="request_checkpoint" value="-1" />
+        </action>
+    </trigger>
 
     <function id="teleport-to-cp-or-sp" scope="player" params="cp">
         <action filter="team-a">
@@ -518,6 +584,9 @@
             <action filter="cp=20">
                 <teleport region="a-checkpoint-14" yaw="-90" pitch="0" />
             </action>
+            <action filter="cp=21">
+                <teleport region="a-spawnpoint-8" yaw="90" pitch="0" />
+            </action>
         </action>
         <action filter="team-b">
             <action filter="cp=0">
@@ -583,18 +652,52 @@
             <action filter="cp=20">
                 <teleport region="b-checkpoint-14" yaw="-90" pitch="0" />
             </action>
+            <action filter="cp=21">
+                <teleport region="b-spawnpoint-8" yaw="90" pitch="0" />
+            </action>
         </action>
     </function>
+
+    <open-shop id="open-cp-selector" shop="checkpoint-selector" />
 </actions>
 <consumables>
     <consumable id="last-cp-consumable" on="right click" consume="false" action="return-to-last-cp" />
     <consumable id="previous-cp-consumable" on="right click" consume="false" action="return-to-previous-cp" />
+    <consumable id="cp-selector-consumable" on="right click" consume="false" action="open-cp-selector" />
 </consumables>
-<itemkeep>
+<shops>
+    <shop id="checkpoint-selector" name="Checkpoint selector">
+        <category id="cat-all-checkpoints" material="gold plate" name="All checkpoints">
+            <item name="`lStage I:`r `aForest`2CUBE" material="leaves" action="request_checkpoint := 0" />
+            <item name="`6Checkpoint #1" material="gold block" action="request_checkpoint := 1" />
+            <item name="`6Checkpoint #2" material="gold block" action="request_checkpoint := 2" />
+            <item name="`lStage II:`r `eDesert`6CUBE" material="sandstone" damage="1" action="request_checkpoint := 3" />
+            <item name="`6Checkpoint #3" material="gold block" action="request_checkpoint := 4" />
+            <item name="`6Checkpoint #4" material="gold block" action="request_checkpoint := 5" />
+            <item name="`lStage III:`r `fSnow`bCUBE" material="ice" action="request_checkpoint := 6" />
+            <item name="`6Checkpoint #5" material="gold block" action="request_checkpoint := 7" />
+            <item name="`lStage IV:`r `7Temple`8CUBE" material="smooth brick" action="request_checkpoint := 8" />
+            <item name="`6Checkpoint #6" material="gold block" action="request_checkpoint := 9" />
+            <item name="`lStage V:`r `6Mineshaft`7CUBE" material="rails" action="request_checkpoint := 10" />
+            <item name="`6Checkpoint #7" material="gold block" action="request_checkpoint := 11" />
+            <item name="`6Checkpoint #8" material="gold block" action="request_checkpoint := 12" />
+            <item name="`lStage VI:`r `eC`ao`cm`6p`9u`dt`ee`ar`cC`6U`9B`dE" material="redstone lamp off" action="request_checkpoint := 13" />
+            <item name="`6Checkpoint #9" material="gold block" action="request_checkpoint := 14" />
+            <item name="`lStage VII:`r `cNether`4CUBE" material="nether brick" action="request_checkpoint := 15" />
+            <item name="`6Checkpoint #10" material="gold block" action="request_checkpoint := 16" />
+            <item name="`6Checkpoint #11" material="gold block" action="request_checkpoint := 17" />
+            <item name="`6Checkpoint #12" material="gold block" action="request_checkpoint := 18" />
+            <item name="`6Checkpoint #13" material="gold block" action="request_checkpoint := 19" />
+            <item name="`6Checkpoint #14" material="gold block" action="request_checkpoint := 20" />
+        </category>
+    </shop>
+</shops>
+<itemremove>
     <item>gold plate</item>
     <item>wood plate</item>
     <item>golden apple</item>
-</itemkeep>
+    <item>clock</item>
+</itemremove>
 <damage>
     <deny>
         <any>
