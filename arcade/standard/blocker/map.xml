@@ -1,0 +1,1477 @@
+<map proto="1.5.1">
+    <name>Blocker</name>
+    <version>1.0.0</version>
+    <phase>development</phase>
+    <gamemode>ffa</gamemode>
+    <game>Blocks Placed</game>
+    <objective>Place the most blocks inside the glass box before time runs out. Every block you place is a point.</objective>
+    <authors>
+        <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb"/> <!-- arcadeboss -->
+        <author>GrokBot</author>
+    </authors>
+    <players max="50" max-overfill="60" colors="true" />
+    <broadcasts>
+        <tip after="15s" count="1">Place wool blocks to score!</tip>
+        <tip after="30s" count="1">Watch out, trapping opponents is a legit strategy!</tip>
+    </broadcasts>
+    <kits>
+        <kit id="spawn">
+            <clear />
+            <item slot="0" material="wool" damage="5" amount="64" locked="true" />
+            <item slot="1" material="tnt" amount="5" locked="true" />
+            <effect duration="oo" amplifier="1">night vision</effect>
+            <effect duration="oo" amplifier="1">speed</effect>
+            <effect duration="oo" amplifier="1">mining fatigue</effect>
+            <effect duration="7s" amplifier="5">damage resistance</effect>
+            <effect duration="7s" amplifier="1">fire resistance</effect>
+            <action id="initialize-inventory" />
+        </kit>
+        <kit id="refill-wool-0" force="true">
+            <item slot="0" material="wool" damage="5" amount="64" locked="true" />
+        </kit>
+        <kit id="refill-wool-1" force="true">
+            <item slot="0" material="wool" damage="4" amount="64" locked="true" />
+        </kit>
+        <kit id="refill-wool-2" force="true">
+            <item slot="0" material="wool" damage="1" amount="64" locked="true" />
+        </kit>
+        <kit id="refill-wool-3" force="true">
+            <item slot="0" material="wool" damage="14" amount="64" locked="true" />
+        </kit>
+        <kit id="refill-wool-4" force="true">
+            <item slot="0" material="wool" damage="2" amount="64" locked="true" />
+        </kit>
+        <kit id="refill-wool-5" force="true">
+            <item slot="0" material="wool" damage="10" amount="64" locked="true" />
+        </kit>
+        <kit id="refill-wool-6" force="true">
+            <item slot="0" material="wool" damage="11" amount="64" locked="true" />
+        </kit>
+        <kit id="refill-wool-7" force="true">
+            <item slot="0" material="wool" damage="3" amount="64" locked="true" />
+        </kit>
+        <kit id="refill-wool-8" force="true">
+            <item slot="0" material="wool" damage="9" amount="64" locked="true" />
+        </kit>
+        <kit id="tnt-grant-one" deduct-items="false">
+            <item slot="1" material="tnt" amount="1" locked="true" />
+        </kit>
+        <give kit="refill-wool-0" filter="all(participating, alive, wool_color=0)" />
+        <give kit="refill-wool-1" filter="all(participating, alive, wool_color=1)" />
+        <give kit="refill-wool-2" filter="all(participating, alive, wool_color=2)" />
+        <give kit="refill-wool-3" filter="all(participating, alive, wool_color=3)" />
+        <give kit="refill-wool-4" filter="all(participating, alive, wool_color=4)" />
+        <give kit="refill-wool-5" filter="all(participating, alive, wool_color=5)" />
+        <give kit="refill-wool-6" filter="all(participating, alive, wool_color=6)" />
+        <give kit="refill-wool-7" filter="all(participating, alive, wool_color=7)" />
+        <give kit="refill-wool-8" filter="all(participating, alive, wool_color=8)" />
+    </kits>
+    <respawn auto="true" delay="2s" />
+    <spawns>
+        <spawn kit="spawn" yaw="0">
+            <region>
+                <cuboid min="-28,52,-28" max="28,52.5,28" />
+            </region>
+        </spawn>
+        <default>
+            <region yaw="180" pitch="5">
+                <point>0,31,60</point>
+            </region>
+        </default>
+    </spawns>
+    <filters>
+        <all id="playing">
+            <match-running />
+            <participating />
+            <alive />
+        </all>
+        <after id="spawn-grace-over" duration="12s">
+            <match-running />
+        </after>
+        <after id="past-30s" duration="30s">
+            <match-running />
+        </after>
+        <after id="past-60s" duration="60s">
+            <match-running />
+        </after>
+        <pulse id="color-pulse" period="30s" duration="0.5s" filter="past-30s" />
+        <pulse id="tnt-grant-pulse" period="60s" duration="0.5s" filter="past-60s" />
+        <not id="no-wool">
+            <carrying ignore-durability="true" ignore-metadata="true">
+                <item material="wool" />
+            </carrying>
+        </not>
+        <carrying id="has-color-0" ignore-metadata="true">
+            <item material="wool" damage="5" />
+        </carrying>
+        <carrying id="has-color-1" ignore-metadata="true">
+            <item material="wool" damage="4" />
+        </carrying>
+        <carrying id="has-color-2" ignore-metadata="true">
+            <item material="wool" damage="1" />
+        </carrying>
+        <carrying id="has-color-3" ignore-metadata="true">
+            <item material="wool" damage="14" />
+        </carrying>
+        <carrying id="has-color-4" ignore-metadata="true">
+            <item material="wool" damage="2" />
+        </carrying>
+        <carrying id="has-color-5" ignore-metadata="true">
+            <item material="wool" damage="10" />
+        </carrying>
+        <carrying id="has-color-6" ignore-metadata="true">
+            <item material="wool" damage="11" />
+        </carrying>
+        <carrying id="has-color-7" ignore-metadata="true">
+            <item material="wool" damage="3" />
+        </carrying>
+        <carrying id="has-color-8" ignore-metadata="true">
+            <item material="wool" damage="9" />
+        </carrying>
+        <not id="no-tnt">
+            <carrying ignore-metadata="true">
+                <item material="tnt" />
+            </carrying>
+        </not>
+        <any id="placeable">
+            <material>wool</material>
+            <material>tnt</material>
+            <material>fire</material>
+        </any>
+        <any id="breakable">
+            <material>wool</material>
+            <material>fire</material>
+        </any>
+        <carrying id="has-wool-1" amount="[1,1]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-2" amount="[2,2]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-3" amount="[3,3]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-4" amount="[4,4]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-5" amount="[5,5]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-6" amount="[6,6]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-7" amount="[7,7]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-8" amount="[8,8]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-9" amount="[9,9]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-10" amount="[10,10]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-11" amount="[11,11]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-12" amount="[12,12]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-13" amount="[13,13]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-14" amount="[14,14]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-15" amount="[15,15]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-16" amount="[16,16]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-17" amount="[17,17]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-18" amount="[18,18]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-19" amount="[19,19]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-20" amount="[20,20]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-21" amount="[21,21]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-22" amount="[22,22]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-23" amount="[23,23]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-24" amount="[24,24]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-25" amount="[25,25]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-26" amount="[26,26]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-27" amount="[27,27]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-28" amount="[28,28]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-29" amount="[29,29]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-30" amount="[30,30]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-31" amount="[31,31]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-32" amount="[32,32]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-33" amount="[33,33]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-34" amount="[34,34]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-35" amount="[35,35]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-36" amount="[36,36]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-37" amount="[37,37]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-38" amount="[38,38]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-39" amount="[39,39]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-40" amount="[40,40]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-41" amount="[41,41]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-42" amount="[42,42]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-43" amount="[43,43]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-44" amount="[44,44]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-45" amount="[45,45]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-46" amount="[46,46]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-47" amount="[47,47]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-48" amount="[48,48]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-49" amount="[49,49]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-50" amount="[50,50]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-51" amount="[51,51]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-52" amount="[52,52]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-53" amount="[53,53]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-54" amount="[54,54]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-55" amount="[55,55]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-56" amount="[56,56]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-57" amount="[57,57]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-58" amount="[58,58]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-59" amount="[59,59]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-60" amount="[60,60]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-61" amount="[61,61]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-62" amount="[62,62]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-63" amount="[63,63]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-wool-64" amount="[64,64]" ignore-metadata="true">
+            <item material="wool" />
+        </carrying>
+        <carrying id="has-tnt-1" amount="[1,1]" ignore-metadata="true">
+            <item material="tnt" />
+        </carrying>
+        <carrying id="has-tnt-2" amount="[2,2]" ignore-metadata="true">
+            <item material="tnt" />
+        </carrying>
+        <carrying id="has-tnt-3" amount="[3,3]" ignore-metadata="true">
+            <item material="tnt" />
+        </carrying>
+        <carrying id="has-tnt-4" amount="[4,4]" ignore-metadata="true">
+            <item material="tnt" />
+        </carrying>
+        <carrying id="has-tnt-5" amount="[5,5]" ignore-metadata="true">
+            <item material="tnt" />
+        </carrying>
+        <carrying id="has-tnt-6" amount="[6,6]" ignore-metadata="true">
+            <item material="tnt" />
+        </carrying>
+        <carrying id="has-tnt-7" amount="[7,7]" ignore-metadata="true">
+            <item material="tnt" />
+        </carrying>
+        <carrying id="has-tnt-8" amount="[8,8]" ignore-metadata="true">
+            <item material="tnt" />
+        </carrying>
+        <carrying id="has-tnt-9" amount="[9,9]" ignore-metadata="true">
+            <item material="tnt" />
+        </carrying>
+        <carrying id="has-tnt-10" amount="[10,10]" ignore-metadata="true">
+            <item material="tnt" />
+        </carrying>
+        <carrying id="has-tnt-11" amount="[11,11]" ignore-metadata="true">
+            <item material="tnt" />
+        </carrying>
+        <carrying id="has-tnt-12" amount="[12,12]" ignore-metadata="true">
+            <item material="tnt" />
+        </carrying>
+        <not id="not-ignition-tool">
+            <holding>
+                <item material="flint and steel" />
+            </holding>
+        </not>
+        <pulse id="drop-pulse" period="60s" duration="59.5s" filter="past-60s" />
+        <pulse id="mob-pulse" period="45s" duration="44.5s" filter="match-running" />
+        <any id="blocker-mob-type">
+            <entity>Slime</entity>
+            <entity>MagmaCube</entity>
+        </any>
+        <any id="natural-liquid-material">
+            <material>water</material>
+            <material>stationary water</material>
+            <material>lava</material>
+            <material>stationary lava</material>
+        </any>
+        <all id="natural-liquid-transform">
+            <cause>world</cause>
+            <any>
+                <filter id="natural-liquid-material" />
+                <material>stone</material>
+                <material>cobblestone</material>
+                <material>obsidian</material>
+            </any>
+        </all>
+        <all id="cause-world-liquid">
+            <cause>world</cause>
+            <filter id="natural-liquid-material" />
+        </all>
+        <pulse id="water-source-clock" period="16s" duration="1.5s" filter="match-running" />
+        <any id="water-source-material">
+            <material>water:0</material>
+            <material>stationary water:0</material>
+        </any>
+        <pulse id="lava-source-clock" period="64s" duration="8s" filter="match-running" />
+        <any id="lava-source-material">
+            <material>lava:0</material>
+            <material>stationary lava:0</material>
+        </any>
+        <material id="initial-rafter-white">stained glass:0</material>
+        <after id="initial-rafters-restore-ready" duration="26s">
+            <match-running />
+        </after>
+    </filters>
+    <score display="numerical" />
+    <time result="score" overtime="20s" max-overtime="1m">4m30s</time>
+    <tnt>
+        <instantignite>on</instantignite>
+    </tnt>
+    <variables>
+        <variable id="wool_seen" scope="player" default="0" />
+        <variable id="tnt_seen" scope="player" default="0" />
+        <variable id="inventory_ready" scope="player" default="0" />
+        <variable id="swapping" scope="player" default="0" />
+        <variable id="tnt_granting" scope="player" default="0" />
+        <variable id="wool_color" scope="match" default="0" />
+        <variable id="swap_arm" scope="match" default="0" />
+        <variable id="tnt_grant_arm" scope="match" default="0" />
+        <variable id="total_placed" scope="match" default="0" />
+        <variable id="cap_fired" scope="match" default="0" />
+        <timelimit id="timelimit" />
+        <variable id="wool_current" scope="player" default="0" />
+        <variable id="wool_delta" scope="player" default="0" />
+        <variable id="tnt_current" scope="player" default="0" />
+        <variable id="tnt_delta" scope="player" default="0" />
+        <variable id="tnt_accounting" scope="player" default="0" />
+        <variable id="drop_band" scope="match" default="0" />
+        <variable id="drop_arm" scope="match" default="0" />
+        <variable id="mob_band" scope="match" default="0" />
+        <variable id="mob_arm" scope="match" default="0" />
+        <variable id="mob_cycle" scope="match" default="0" />
+        <variable id="mobs_started" scope="match" default="0" />
+        <variable id="water_hole" scope="match" default="0" />
+        <variable id="water_on" scope="match" default="0" />
+        <variable id="lava_hole" scope="match" default="1" />
+        <variable id="lava_on" scope="match" default="0" />
+        <variable id="initial_rafter_state" scope="match" default="0" />
+    </variables>
+    <actions>
+        <action scope="player" id="account-wool">
+            <set var="wool_delta" value="max(wool_seen - wool_current, 0)" />
+            <set var="wool_seen" value="wool_current" />
+            <set var="score" value="score + wool_delta" />
+            <set var="total_placed" value="total_placed + wool_delta" />
+        </action>
+        <action scope="player" id="sample-wool">
+            <set var="wool_current" value="-1" />
+            <action filter="no-wool">
+                <set var="wool_current" value="0" />
+            </action>
+            <action filter="has-wool-1">
+                <set var="wool_current" value="1" />
+            </action>
+            <action filter="has-wool-2">
+                <set var="wool_current" value="2" />
+            </action>
+            <action filter="has-wool-3">
+                <set var="wool_current" value="3" />
+            </action>
+            <action filter="has-wool-4">
+                <set var="wool_current" value="4" />
+            </action>
+            <action filter="has-wool-5">
+                <set var="wool_current" value="5" />
+            </action>
+            <action filter="has-wool-6">
+                <set var="wool_current" value="6" />
+            </action>
+            <action filter="has-wool-7">
+                <set var="wool_current" value="7" />
+            </action>
+            <action filter="has-wool-8">
+                <set var="wool_current" value="8" />
+            </action>
+            <action filter="has-wool-9">
+                <set var="wool_current" value="9" />
+            </action>
+            <action filter="has-wool-10">
+                <set var="wool_current" value="10" />
+            </action>
+            <action filter="has-wool-11">
+                <set var="wool_current" value="11" />
+            </action>
+            <action filter="has-wool-12">
+                <set var="wool_current" value="12" />
+            </action>
+            <action filter="has-wool-13">
+                <set var="wool_current" value="13" />
+            </action>
+            <action filter="has-wool-14">
+                <set var="wool_current" value="14" />
+            </action>
+            <action filter="has-wool-15">
+                <set var="wool_current" value="15" />
+            </action>
+            <action filter="has-wool-16">
+                <set var="wool_current" value="16" />
+            </action>
+            <action filter="has-wool-17">
+                <set var="wool_current" value="17" />
+            </action>
+            <action filter="has-wool-18">
+                <set var="wool_current" value="18" />
+            </action>
+            <action filter="has-wool-19">
+                <set var="wool_current" value="19" />
+            </action>
+            <action filter="has-wool-20">
+                <set var="wool_current" value="20" />
+            </action>
+            <action filter="has-wool-21">
+                <set var="wool_current" value="21" />
+            </action>
+            <action filter="has-wool-22">
+                <set var="wool_current" value="22" />
+            </action>
+            <action filter="has-wool-23">
+                <set var="wool_current" value="23" />
+            </action>
+            <action filter="has-wool-24">
+                <set var="wool_current" value="24" />
+            </action>
+            <action filter="has-wool-25">
+                <set var="wool_current" value="25" />
+            </action>
+            <action filter="has-wool-26">
+                <set var="wool_current" value="26" />
+            </action>
+            <action filter="has-wool-27">
+                <set var="wool_current" value="27" />
+            </action>
+            <action filter="has-wool-28">
+                <set var="wool_current" value="28" />
+            </action>
+            <action filter="has-wool-29">
+                <set var="wool_current" value="29" />
+            </action>
+            <action filter="has-wool-30">
+                <set var="wool_current" value="30" />
+            </action>
+            <action filter="has-wool-31">
+                <set var="wool_current" value="31" />
+            </action>
+            <action filter="has-wool-32">
+                <set var="wool_current" value="32" />
+            </action>
+            <action filter="has-wool-33">
+                <set var="wool_current" value="33" />
+            </action>
+            <action filter="has-wool-34">
+                <set var="wool_current" value="34" />
+            </action>
+            <action filter="has-wool-35">
+                <set var="wool_current" value="35" />
+            </action>
+            <action filter="has-wool-36">
+                <set var="wool_current" value="36" />
+            </action>
+            <action filter="has-wool-37">
+                <set var="wool_current" value="37" />
+            </action>
+            <action filter="has-wool-38">
+                <set var="wool_current" value="38" />
+            </action>
+            <action filter="has-wool-39">
+                <set var="wool_current" value="39" />
+            </action>
+            <action filter="has-wool-40">
+                <set var="wool_current" value="40" />
+            </action>
+            <action filter="has-wool-41">
+                <set var="wool_current" value="41" />
+            </action>
+            <action filter="has-wool-42">
+                <set var="wool_current" value="42" />
+            </action>
+            <action filter="has-wool-43">
+                <set var="wool_current" value="43" />
+            </action>
+            <action filter="has-wool-44">
+                <set var="wool_current" value="44" />
+            </action>
+            <action filter="has-wool-45">
+                <set var="wool_current" value="45" />
+            </action>
+            <action filter="has-wool-46">
+                <set var="wool_current" value="46" />
+            </action>
+            <action filter="has-wool-47">
+                <set var="wool_current" value="47" />
+            </action>
+            <action filter="has-wool-48">
+                <set var="wool_current" value="48" />
+            </action>
+            <action filter="has-wool-49">
+                <set var="wool_current" value="49" />
+            </action>
+            <action filter="has-wool-50">
+                <set var="wool_current" value="50" />
+            </action>
+            <action filter="has-wool-51">
+                <set var="wool_current" value="51" />
+            </action>
+            <action filter="has-wool-52">
+                <set var="wool_current" value="52" />
+            </action>
+            <action filter="has-wool-53">
+                <set var="wool_current" value="53" />
+            </action>
+            <action filter="has-wool-54">
+                <set var="wool_current" value="54" />
+            </action>
+            <action filter="has-wool-55">
+                <set var="wool_current" value="55" />
+            </action>
+            <action filter="has-wool-56">
+                <set var="wool_current" value="56" />
+            </action>
+            <action filter="has-wool-57">
+                <set var="wool_current" value="57" />
+            </action>
+            <action filter="has-wool-58">
+                <set var="wool_current" value="58" />
+            </action>
+            <action filter="has-wool-59">
+                <set var="wool_current" value="59" />
+            </action>
+            <action filter="has-wool-60">
+                <set var="wool_current" value="60" />
+            </action>
+            <action filter="has-wool-61">
+                <set var="wool_current" value="61" />
+            </action>
+            <action filter="has-wool-62">
+                <set var="wool_current" value="62" />
+            </action>
+            <action filter="has-wool-63">
+                <set var="wool_current" value="63" />
+            </action>
+            <action filter="has-wool-64">
+                <set var="wool_current" value="64" />
+            </action>
+            <action filter="wool_current=0..64">
+                <action id="account-wool" />
+            </action>
+        </action>
+        <action scope="player" id="account-tnt">
+            <set var="tnt_accounting" value="1" />
+            <set var="tnt_delta" value="max(tnt_seen - tnt_current, 0)" />
+            <set var="tnt_seen" value="tnt_current" />
+            <set var="score" value="score + tnt_delta" />
+            <set var="total_placed" value="total_placed + tnt_delta" />
+            <set var="tnt_accounting" value="0" />
+        </action>
+        <action scope="player" id="sample-tnt">
+            <set var="tnt_current" value="-1" />
+            <action filter="no-tnt">
+                <set var="tnt_current" value="0" />
+            </action>
+            <action filter="has-tnt-1">
+                <set var="tnt_current" value="1" />
+            </action>
+            <action filter="has-tnt-2">
+                <set var="tnt_current" value="2" />
+            </action>
+            <action filter="has-tnt-3">
+                <set var="tnt_current" value="3" />
+            </action>
+            <action filter="has-tnt-4">
+                <set var="tnt_current" value="4" />
+            </action>
+            <action filter="has-tnt-5">
+                <set var="tnt_current" value="5" />
+            </action>
+            <action filter="has-tnt-6">
+                <set var="tnt_current" value="6" />
+            </action>
+            <action filter="has-tnt-7">
+                <set var="tnt_current" value="7" />
+            </action>
+            <action filter="has-tnt-8">
+                <set var="tnt_current" value="8" />
+            </action>
+            <action filter="has-tnt-9">
+                <set var="tnt_current" value="9" />
+            </action>
+            <action filter="has-tnt-10">
+                <set var="tnt_current" value="10" />
+            </action>
+            <action filter="has-tnt-11">
+                <set var="tnt_current" value="11" />
+            </action>
+            <action filter="has-tnt-12">
+                <set var="tnt_current" value="12" />
+            </action>
+            <action filter="tnt_current=0..12">
+                <action id="account-tnt" />
+            </action>
+        </action>
+        <action scope="player" id="refill-current">
+            <action filter="wool_color=0">
+                <kit id="refill-wool-0" />
+            </action>
+            <action filter="wool_color=1">
+                <kit id="refill-wool-1" />
+            </action>
+            <action filter="wool_color=2">
+                <kit id="refill-wool-2" />
+            </action>
+            <action filter="wool_color=3">
+                <kit id="refill-wool-3" />
+            </action>
+            <action filter="wool_color=4">
+                <kit id="refill-wool-4" />
+            </action>
+            <action filter="wool_color=5">
+                <kit id="refill-wool-5" />
+            </action>
+            <action filter="wool_color=6">
+                <kit id="refill-wool-6" />
+            </action>
+            <action filter="wool_color=7">
+                <kit id="refill-wool-7" />
+            </action>
+            <action filter="wool_color=8">
+                <kit id="refill-wool-8" />
+            </action>
+        </action>
+        <action scope="player" id="initialize-inventory">
+            <set var="inventory_ready" value="0" />
+            <set var="swapping" value="1" />
+            <action id="refill-current" />
+            <set var="wool_seen" value="64" />
+            <set var="tnt_seen" value="5" />
+            <set var="swapping" value="0" />
+            <set var="inventory_ready" value="1" />
+        </action>
+        <action scope="player" id="clear-baselines-on-death">
+            <set var="inventory_ready" value="0" />
+            <set var="wool_seen" value="0" />
+            <set var="tnt_seen" value="0" />
+        </action>
+        <action scope="player" id="wool-place">
+            <set var="swapping" value="1" />
+            <action id="sample-wool" />
+            <action id="refill-current" />
+            <set var="wool_seen" value="64" />
+            <set var="swapping" value="0" />
+        </action>
+        <action scope="match" expose="true" id="advance-color">
+            <set var="wool_color" value="(wool_color + 1) % 9" />
+            <set var="swap_arm" value="1" />
+            <switch-scope inner="player" observers="false">
+                <action filter="all(playing, inventory_ready=1, any(wool_color=0, wool_color=1, wool_color=2, wool_color=3, wool_color=4, wool_color=5, wool_color=6, wool_color=7, wool_color=8))">
+                    <action id="wool-place" />
+                </action>
+            </switch-scope>
+        </action>
+        <action scope="player" id="tnt-grant-one-player">
+            <set var="tnt_granting" value="1" />
+            <action id="sample-tnt" />
+            <action filter="tnt_seen=0..63">
+                <kit id="tnt-grant-one" />
+                <set var="tnt_seen" value="tnt_seen + 1" />
+            </action>
+            <set var="tnt_granting" value="0" />
+        </action>
+        <action scope="match" expose="true" id="tnt-minute-grant">
+            <set var="tnt_grant_arm" value="1" />
+            <switch-scope inner="player" observers="false">
+                <action filter="all(playing, inventory_ready=1)">
+                    <action id="tnt-grant-one-player" />
+                </action>
+            </switch-scope>
+        </action>
+        <trigger scope="player" filter="any(dead, not(participating))" action="clear-baselines-on-death" />
+        <trigger scope="player" filter="all(playing, inventory_ready=1, swapping=0, not(has-wool-64))" action="wool-place" />
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, no-tnt, not(tnt_seen=0))">
+            <action>
+                <set var="tnt_current" value="0" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, has-tnt-1, not(tnt_seen=1))">
+            <action>
+                <set var="tnt_current" value="1" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, has-tnt-2, not(tnt_seen=2))">
+            <action>
+                <set var="tnt_current" value="2" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, has-tnt-3, not(tnt_seen=3))">
+            <action>
+                <set var="tnt_current" value="3" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, has-tnt-4, not(tnt_seen=4))">
+            <action>
+                <set var="tnt_current" value="4" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, has-tnt-5, not(tnt_seen=5))">
+            <action>
+                <set var="tnt_current" value="5" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, has-tnt-6, not(tnt_seen=6))">
+            <action>
+                <set var="tnt_current" value="6" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, has-tnt-7, not(tnt_seen=7))">
+            <action>
+                <set var="tnt_current" value="7" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, has-tnt-8, not(tnt_seen=8))">
+            <action>
+                <set var="tnt_current" value="8" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, has-tnt-9, not(tnt_seen=9))">
+            <action>
+                <set var="tnt_current" value="9" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, has-tnt-10, not(tnt_seen=10))">
+            <action>
+                <set var="tnt_current" value="10" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, has-tnt-11, not(tnt_seen=11))">
+            <action>
+                <set var="tnt_current" value="11" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, tnt_granting=0, tnt_accounting=0, has-tnt-12, not(tnt_seen=12))">
+            <action>
+                <set var="tnt_current" value="12" />
+                <action id="account-tnt" />
+            </action>
+        </trigger>
+        <trigger scope="match" filter="all(color-pulse, swap_arm=0)" action="advance-color" />
+        <trigger scope="match" filter="all(not(color-pulse), swap_arm=1)">
+            <action>
+                <set var="swap_arm" value="0" />
+            </action>
+        </trigger>
+        <trigger scope="match" filter="all(tnt-grant-pulse, tnt_grant_arm=0)" action="tnt-minute-grant" />
+        <trigger scope="match" filter="all(not(tnt-grant-pulse), tnt_grant_arm=1)">
+            <action>
+                <set var="tnt_grant_arm" value="0" />
+            </action>
+        </trigger>
+        <trigger scope="player" filter="all(playing, inventory_ready=1, swapping=0, wool_color=0, not(has-color-0))" action="wool-place" />
+        <trigger scope="player" filter="all(playing, inventory_ready=1, swapping=0, wool_color=1, not(has-color-1))" action="wool-place" />
+        <trigger scope="player" filter="all(playing, inventory_ready=1, swapping=0, wool_color=2, not(has-color-2))" action="wool-place" />
+        <trigger scope="player" filter="all(playing, inventory_ready=1, swapping=0, wool_color=3, not(has-color-3))" action="wool-place" />
+        <trigger scope="player" filter="all(playing, inventory_ready=1, swapping=0, wool_color=4, not(has-color-4))" action="wool-place" />
+        <trigger scope="player" filter="all(playing, inventory_ready=1, swapping=0, wool_color=5, not(has-color-5))" action="wool-place" />
+        <trigger scope="player" filter="all(playing, inventory_ready=1, swapping=0, wool_color=6, not(has-color-6))" action="wool-place" />
+        <trigger scope="player" filter="all(playing, inventory_ready=1, swapping=0, wool_color=7, not(has-color-7))" action="wool-place" />
+        <trigger scope="player" filter="all(playing, inventory_ready=1, swapping=0, wool_color=8, not(has-color-8))" action="wool-place" />
+        <trigger scope="player" filter="all(playing, spawn-grace-over, spawn-deck)">
+            <action>
+                <teleport x="0.0" y="52.5" z="0.0" />
+                <velocity x="0" y="-0.5" z="0" />
+            </action>
+        </trigger>
+        <trigger scope="match" filter="all(total_placed=80000.., cap_fired=0)">
+            <action>
+                <set var="cap_fired" value="1" />
+                <set var="timelimit" value="5" />
+                <message text="`6`lThe box is nearly full! `eMatch ending in 5 seconds." />
+                <sound preset="OBJECTIVE_GOOD" />
+            </action>
+        </trigger>
+        <action id="select-drop-band" scope="match">
+            <set var="drop_band" value="floor(random() * 3)" />
+            <set var="drop_arm" value="1" />
+        </action>
+        <trigger scope="match" filter="all(drop-pulse, drop_arm=0)" action="select-drop-band" />
+        <trigger scope="match" filter="all(not(drop-pulse), drop_arm=1)">
+            <action>
+                <set var="drop_arm" value="0" />
+            </action>
+        </trigger>
+        <action id="select-mob-band" scope="match">
+            <set var="mob_band" value="floor(random() * 3)" />
+            <set var="mob_cycle" value="mob_cycle + 1" />
+            <set var="mobs_started" value="1" />
+            <set var="mob_arm" value="1" />
+        </action>
+        <trigger scope="match" filter="all(mob-pulse, mob_arm=0)" action="select-mob-band" />
+        <trigger scope="match" filter="all(not(mob-pulse), mob_arm=1)">
+            <action>
+                <set var="mob_arm" value="0" />
+            </action>
+        </trigger>
+        <action id="cleanup-blocker-mobs" scope="match">
+            <kill-entities filter="blocker-mob-type" />
+            <set var="mobs_started" value="0" />
+        </action>
+        <trigger scope="match" filter="all(not(match-running), mobs_started=1)" action="cleanup-blocker-mobs" />
+        <action id="remove-water-source" scope="match">
+            <action filter="water_hole=0">
+                <fill region="liquid-source-0" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=2">
+                <fill region="liquid-source-2" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=4">
+                <fill region="liquid-source-4" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=6">
+                <fill region="liquid-source-6" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=8">
+                <fill region="liquid-source-8" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=10">
+                <fill region="liquid-source-10" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=12">
+                <fill region="liquid-source-12" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=14">
+                <fill region="liquid-source-14" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=16">
+                <fill region="liquid-source-16" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=18">
+                <fill region="liquid-source-18" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=20">
+                <fill region="liquid-source-20" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=22">
+                <fill region="liquid-source-22" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=24">
+                <fill region="liquid-source-24" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=26">
+                <fill region="liquid-source-26" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=28">
+                <fill region="liquid-source-28" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=30">
+                <fill region="liquid-source-30" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=32">
+                <fill region="liquid-source-32" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=34">
+                <fill region="liquid-source-34" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=36">
+                <fill region="liquid-source-36" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=38">
+                <fill region="liquid-source-38" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=40">
+                <fill region="liquid-source-40" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=42">
+                <fill region="liquid-source-42" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=44">
+                <fill region="liquid-source-44" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=46">
+                <fill region="liquid-source-46" material="air" filter="water-source-material" update="true" />
+            </action>
+            <action filter="water_hole=48">
+                <fill region="liquid-source-48" material="air" filter="water-source-material" update="true" />
+            </action>
+            <set var="water_on" value="0" />
+        </action>
+        <action id="start-water-source" scope="match">
+            <set var="water_hole" value="2 * floor(random() * 25)" />
+            <action filter="water_hole=0">
+                <fill region="liquid-source-0" material="water" update="true" />
+            </action>
+            <action filter="water_hole=2">
+                <fill region="liquid-source-2" material="water" update="true" />
+            </action>
+            <action filter="water_hole=4">
+                <fill region="liquid-source-4" material="water" update="true" />
+            </action>
+            <action filter="water_hole=6">
+                <fill region="liquid-source-6" material="water" update="true" />
+            </action>
+            <action filter="water_hole=8">
+                <fill region="liquid-source-8" material="water" update="true" />
+            </action>
+            <action filter="water_hole=10">
+                <fill region="liquid-source-10" material="water" update="true" />
+            </action>
+            <action filter="water_hole=12">
+                <fill region="liquid-source-12" material="water" update="true" />
+            </action>
+            <action filter="water_hole=14">
+                <fill region="liquid-source-14" material="water" update="true" />
+            </action>
+            <action filter="water_hole=16">
+                <fill region="liquid-source-16" material="water" update="true" />
+            </action>
+            <action filter="water_hole=18">
+                <fill region="liquid-source-18" material="water" update="true" />
+            </action>
+            <action filter="water_hole=20">
+                <fill region="liquid-source-20" material="water" update="true" />
+            </action>
+            <action filter="water_hole=22">
+                <fill region="liquid-source-22" material="water" update="true" />
+            </action>
+            <action filter="water_hole=24">
+                <fill region="liquid-source-24" material="water" update="true" />
+            </action>
+            <action filter="water_hole=26">
+                <fill region="liquid-source-26" material="water" update="true" />
+            </action>
+            <action filter="water_hole=28">
+                <fill region="liquid-source-28" material="water" update="true" />
+            </action>
+            <action filter="water_hole=30">
+                <fill region="liquid-source-30" material="water" update="true" />
+            </action>
+            <action filter="water_hole=32">
+                <fill region="liquid-source-32" material="water" update="true" />
+            </action>
+            <action filter="water_hole=34">
+                <fill region="liquid-source-34" material="water" update="true" />
+            </action>
+            <action filter="water_hole=36">
+                <fill region="liquid-source-36" material="water" update="true" />
+            </action>
+            <action filter="water_hole=38">
+                <fill region="liquid-source-38" material="water" update="true" />
+            </action>
+            <action filter="water_hole=40">
+                <fill region="liquid-source-40" material="water" update="true" />
+            </action>
+            <action filter="water_hole=42">
+                <fill region="liquid-source-42" material="water" update="true" />
+            </action>
+            <action filter="water_hole=44">
+                <fill region="liquid-source-44" material="water" update="true" />
+            </action>
+            <action filter="water_hole=46">
+                <fill region="liquid-source-46" material="water" update="true" />
+            </action>
+            <action filter="water_hole=48">
+                <fill region="liquid-source-48" material="water" update="true" />
+            </action>
+            <set var="water_on" value="1" />
+        </action>
+        <trigger scope="match" filter="all(match-running, water-source-clock, water_on=0)" action="start-water-source" />
+        <trigger scope="match" filter="all(not(water-source-clock), water_on=1)" action="remove-water-source" />
+        <action id="remove-lava-source" scope="match">
+            <action filter="lava_hole=1">
+                <fill region="liquid-source-1" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=3">
+                <fill region="liquid-source-3" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=5">
+                <fill region="liquid-source-5" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=7">
+                <fill region="liquid-source-7" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=9">
+                <fill region="liquid-source-9" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=11">
+                <fill region="liquid-source-11" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=13">
+                <fill region="liquid-source-13" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=15">
+                <fill region="liquid-source-15" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=17">
+                <fill region="liquid-source-17" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=19">
+                <fill region="liquid-source-19" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=21">
+                <fill region="liquid-source-21" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=23">
+                <fill region="liquid-source-23" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=25">
+                <fill region="liquid-source-25" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=27">
+                <fill region="liquid-source-27" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=29">
+                <fill region="liquid-source-29" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=31">
+                <fill region="liquid-source-31" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=33">
+                <fill region="liquid-source-33" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=35">
+                <fill region="liquid-source-35" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=37">
+                <fill region="liquid-source-37" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=39">
+                <fill region="liquid-source-39" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=41">
+                <fill region="liquid-source-41" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=43">
+                <fill region="liquid-source-43" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=45">
+                <fill region="liquid-source-45" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <action filter="lava_hole=47">
+                <fill region="liquid-source-47" material="air" filter="lava-source-material" update="true" />
+            </action>
+            <set var="lava_on" value="0" />
+        </action>
+        <action id="start-lava-source" scope="match">
+            <set var="lava_hole" value="2 * floor(random() * 24) + 1" />
+            <action filter="lava_hole=1">
+                <fill region="liquid-source-1" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=3">
+                <fill region="liquid-source-3" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=5">
+                <fill region="liquid-source-5" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=7">
+                <fill region="liquid-source-7" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=9">
+                <fill region="liquid-source-9" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=11">
+                <fill region="liquid-source-11" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=13">
+                <fill region="liquid-source-13" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=15">
+                <fill region="liquid-source-15" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=17">
+                <fill region="liquid-source-17" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=19">
+                <fill region="liquid-source-19" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=21">
+                <fill region="liquid-source-21" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=23">
+                <fill region="liquid-source-23" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=25">
+                <fill region="liquid-source-25" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=27">
+                <fill region="liquid-source-27" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=29">
+                <fill region="liquid-source-29" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=31">
+                <fill region="liquid-source-31" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=33">
+                <fill region="liquid-source-33" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=35">
+                <fill region="liquid-source-35" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=37">
+                <fill region="liquid-source-37" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=39">
+                <fill region="liquid-source-39" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=41">
+                <fill region="liquid-source-41" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=43">
+                <fill region="liquid-source-43" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=45">
+                <fill region="liquid-source-45" material="lava" update="true" />
+            </action>
+            <action filter="lava_hole=47">
+                <fill region="liquid-source-47" material="lava" update="true" />
+            </action>
+            <set var="lava_on" value="1" />
+        </action>
+        <trigger scope="match" filter="all(match-running, lava-source-clock, lava_on=0)" action="start-lava-source" />
+        <trigger scope="match" filter="all(not(lava-source-clock), lava_on=1)" action="remove-lava-source" />
+        <action id="remove-initial-rafters" scope="match">
+            <fill region="rafters" material="air" filter="initial-rafter-white" update="true" />
+            <set var="initial_rafter_state" value="1" />
+        </action>
+        <action id="restore-initial-rafters" scope="match">
+            <fill region="rafters" material="stained glass:0" update="true" />
+            <set var="initial_rafter_state" value="2" />
+        </action>
+        <trigger scope="match" filter="all(match-running, initial_rafter_state=0)" action="remove-initial-rafters" />
+        <trigger scope="match" filter="all(match-running, initial_rafter_state=1, initial-rafters-restore-ready)" action="restore-initial-rafters" />
+        <action id="reset-initial-rafters" scope="match">
+            <action filter="initial_rafter_state=1">
+                <action id="restore-initial-rafters" />
+            </action>
+            <set var="initial_rafter_state" value="0" />
+        </action>
+        <trigger scope="match" filter="all(not(match-running), initial_rafter_state=1..2)" action="reset-initial-rafters" />
+    </actions>
+    <regions>
+        <cuboid id="interior" min="-28,11,-28" max="28,51,28" />
+        <negative id="outside">
+            <region id="interior" />
+        </negative>
+        <cuboid id="world-footprint" min="-35,7,-67" max="35,58,67" />
+        <negative id="out-of-bounds">
+            <region id="world-footprint" />
+        </negative>
+        <complement id="shell">
+            <region id="world-footprint" />
+            <region id="interior" />
+        </complement>
+        <union id="rafters">
+            <cuboid min="-11,24,-28" max="-8,25,28" />
+            <cuboid min="-28,24,-11" max="28,25,-8" />
+            <cuboid min="8,24,-28" max="11,25,28" />
+            <cuboid min="-28,24,8" max="28,25,11" />
+            <cuboid min="-11,37,-28" max="-8,38,28" />
+            <cuboid min="-28,37,-11" max="28,38,-8" />
+            <cuboid min="8,37,-28" max="11,38,28" />
+            <cuboid min="-28,37,8" max="28,38,11" />
+        </union>
+        <union id="world-extras">
+            <cuboid min="-12,26,56" max="12,34,67" />
+            <cuboid min="-12,26,-67" max="12,34,-55" />
+            <cuboid min="-26,38,-31" max="26,51,-28" />
+            <cuboid min="-26,38,28" max="26,51,31" />
+        </union>
+        <cuboid id="spawn-deck" min="-28,52,-28" max="28,56,28" />
+        <below id="void-below" y="5" />
+        <apply region="overhead-liquid-shafts" block-place="allow(all(cause-world-liquid, natural-liquid-material))" block-break="allow(all(cause-world-liquid, natural-liquid-material))" block-physics="allow(natural-liquid-material)" />
+        <apply region="rafters" block="never" message="Rafters are permanent." use="not-ignition-tool" block-physics="never" />
+        <apply region="world-extras" block="never" message="The galleries and logos are permanent." use="not-ignition-tool" block-physics="never" />
+        <apply region="spawn-deck" block="never" message="You may not modify the spawn deck." use="not-ignition-tool" block-physics="never" />
+        <apply region="out-of-bounds" block="never" message="You may not build outside the map." use="not-ignition-tool" block-physics="never" />
+        <apply region="shell" block="never" message="The glass box is permanent." use="not-ignition-tool" block-physics="never" />
+        <apply region="interior" block-place="allow(natural-liquid-transform)" block-break="allow(natural-liquid-transform)" />
+        <apply region="interior" block-place="placeable" message="You can only place your kit blocks." />
+        <apply region="interior" block-break="breakable" message="You can only break placed wool." />
+        <apply block-place="never" message="You can only place inside the glass box." />
+        <apply block-break="never" message="You can only break placed wool." />
+        <apply region="void-below" block="never" message="You may not build in the void!" use="not-ignition-tool" block-physics="never" />
+        <everywhere id="igniter-presence" />
+        <apply region="interior" block-physics="always" />
+        <cuboid id="igniter-band-0" min="-26,12,-26" max="26,23.5,26" />
+        <cuboid id="igniter-band-1" min="-26,26,-26" max="26,36.5,26" />
+        <cuboid id="igniter-band-2" min="-26,39,-26" max="26,50.5,26" />
+        <cuboid id="mob-band-0" min="-26,11.05,-26" max="-9,11.2,26" />
+        <cuboid id="mob-band-1" min="-9,11.05,-26" max="9,11.2,26" />
+        <cuboid id="mob-band-2" min="9,11.05,-26" max="26,11.2,26" />
+        <union id="overhead-liquid-shafts">
+            <cuboid min="-25,51,-25" max="-23,77,-23" />
+            <cuboid min="-25,51,-17" max="-23,77,-15" />
+            <cuboid min="-25,51,-9" max="-23,77,-7" />
+            <cuboid min="-25,51,-1" max="-23,77,1" />
+            <cuboid min="-25,51,7" max="-23,77,9" />
+            <cuboid min="-25,51,15" max="-23,77,17" />
+            <cuboid min="-25,51,23" max="-23,77,25" />
+            <cuboid min="-17,51,-25" max="-15,77,-23" />
+            <cuboid min="-17,51,-17" max="-15,77,-15" />
+            <cuboid min="-17,51,-9" max="-15,77,-7" />
+            <cuboid min="-17,51,-1" max="-15,77,1" />
+            <cuboid min="-17,51,7" max="-15,77,9" />
+            <cuboid min="-17,51,15" max="-15,77,17" />
+            <cuboid min="-17,51,23" max="-15,77,25" />
+            <cuboid min="-9,51,-25" max="-7,77,-23" />
+            <cuboid min="-9,51,-17" max="-7,77,-15" />
+            <cuboid min="-9,51,-9" max="-7,77,-7" />
+            <cuboid min="-9,51,-1" max="-7,77,1" />
+            <cuboid min="-9,51,7" max="-7,77,9" />
+            <cuboid min="-9,51,15" max="-7,77,17" />
+            <cuboid min="-9,51,23" max="-7,77,25" />
+            <cuboid min="-1,51,-25" max="1,77,-23" />
+            <cuboid min="-1,51,-17" max="1,77,-15" />
+            <cuboid min="-1,51,-9" max="1,77,-7" />
+            <cuboid min="-1,51,-1" max="1,77,1" />
+            <cuboid min="-1,51,7" max="1,77,9" />
+            <cuboid min="-1,51,15" max="1,77,17" />
+            <cuboid min="-1,51,23" max="1,77,25" />
+            <cuboid min="7,51,-25" max="9,77,-23" />
+            <cuboid min="7,51,-17" max="9,77,-15" />
+            <cuboid min="7,51,-9" max="9,77,-7" />
+            <cuboid min="7,51,-1" max="9,77,1" />
+            <cuboid min="7,51,7" max="9,77,9" />
+            <cuboid min="7,51,15" max="9,77,17" />
+            <cuboid min="7,51,23" max="9,77,25" />
+            <cuboid min="15,51,-25" max="17,77,-23" />
+            <cuboid min="15,51,-17" max="17,77,-15" />
+            <cuboid min="15,51,-9" max="17,77,-7" />
+            <cuboid min="15,51,-1" max="17,77,1" />
+            <cuboid min="15,51,7" max="17,77,9" />
+            <cuboid min="15,51,15" max="17,77,17" />
+            <cuboid min="15,51,23" max="17,77,25" />
+            <cuboid min="23,51,-25" max="25,77,-23" />
+            <cuboid min="23,51,-17" max="25,77,-15" />
+            <cuboid min="23,51,-9" max="25,77,-7" />
+            <cuboid min="23,51,-1" max="25,77,1" />
+            <cuboid min="23,51,7" max="25,77,9" />
+            <cuboid min="23,51,15" max="25,77,17" />
+            <cuboid min="23,51,23" max="25,77,25" />
+        </union>
+        <cuboid id="liquid-source-0" min="-25,76,-25" max="-24,77,-24" />
+        <cuboid id="liquid-source-1" min="-25,76,-17" max="-24,77,-16" />
+        <cuboid id="liquid-source-2" min="-25,76,-9" max="-24,77,-8" />
+        <cuboid id="liquid-source-3" min="-25,76,-1" max="-24,77,0" />
+        <cuboid id="liquid-source-4" min="-25,76,7" max="-24,77,8" />
+        <cuboid id="liquid-source-5" min="-25,76,15" max="-24,77,16" />
+        <cuboid id="liquid-source-6" min="-25,76,23" max="-24,77,24" />
+        <cuboid id="liquid-source-7" min="-17,76,-25" max="-16,77,-24" />
+        <cuboid id="liquid-source-8" min="-17,76,-17" max="-16,77,-16" />
+        <cuboid id="liquid-source-9" min="-17,76,-9" max="-16,77,-8" />
+        <cuboid id="liquid-source-10" min="-17,76,-1" max="-16,77,0" />
+        <cuboid id="liquid-source-11" min="-17,76,7" max="-16,77,8" />
+        <cuboid id="liquid-source-12" min="-17,76,15" max="-16,77,16" />
+        <cuboid id="liquid-source-13" min="-17,76,23" max="-16,77,24" />
+        <cuboid id="liquid-source-14" min="-9,76,-25" max="-8,77,-24" />
+        <cuboid id="liquid-source-15" min="-9,76,-17" max="-8,77,-16" />
+        <cuboid id="liquid-source-16" min="-9,76,-9" max="-8,77,-8" />
+        <cuboid id="liquid-source-17" min="-9,76,-1" max="-8,77,0" />
+        <cuboid id="liquid-source-18" min="-9,76,7" max="-8,77,8" />
+        <cuboid id="liquid-source-19" min="-9,76,15" max="-8,77,16" />
+        <cuboid id="liquid-source-20" min="-9,76,23" max="-8,77,24" />
+        <cuboid id="liquid-source-21" min="-1,76,-25" max="0,77,-24" />
+        <cuboid id="liquid-source-22" min="-1,76,-17" max="0,77,-16" />
+        <cuboid id="liquid-source-23" min="-1,76,-9" max="0,77,-8" />
+        <cuboid id="liquid-source-24" min="-1,76,-1" max="0,77,0" />
+        <cuboid id="liquid-source-25" min="-1,76,7" max="0,77,8" />
+        <cuboid id="liquid-source-26" min="-1,76,15" max="0,77,16" />
+        <cuboid id="liquid-source-27" min="-1,76,23" max="0,77,24" />
+        <cuboid id="liquid-source-28" min="7,76,-25" max="8,77,-24" />
+        <cuboid id="liquid-source-29" min="7,76,-17" max="8,77,-16" />
+        <cuboid id="liquid-source-30" min="7,76,-9" max="8,77,-8" />
+        <cuboid id="liquid-source-31" min="7,76,-1" max="8,77,0" />
+        <cuboid id="liquid-source-32" min="7,76,7" max="8,77,8" />
+        <cuboid id="liquid-source-33" min="7,76,15" max="8,77,16" />
+        <cuboid id="liquid-source-34" min="7,76,23" max="8,77,24" />
+        <cuboid id="liquid-source-35" min="15,76,-25" max="16,77,-24" />
+        <cuboid id="liquid-source-36" min="15,76,-17" max="16,77,-16" />
+        <cuboid id="liquid-source-37" min="15,76,-9" max="16,77,-8" />
+        <cuboid id="liquid-source-38" min="15,76,-1" max="16,77,0" />
+        <cuboid id="liquid-source-39" min="15,76,7" max="16,77,8" />
+        <cuboid id="liquid-source-40" min="15,76,15" max="16,77,16" />
+        <cuboid id="liquid-source-41" min="15,76,23" max="16,77,24" />
+        <cuboid id="liquid-source-42" min="23,76,-25" max="24,77,-24" />
+        <cuboid id="liquid-source-43" min="23,76,-17" max="24,77,-16" />
+        <cuboid id="liquid-source-44" min="23,76,-9" max="24,77,-8" />
+        <cuboid id="liquid-source-45" min="23,76,-1" max="24,77,0" />
+        <cuboid id="liquid-source-46" min="23,76,7" max="24,77,8" />
+        <cuboid id="liquid-source-47" min="23,76,15" max="24,77,16" />
+        <cuboid id="liquid-source-48" min="23,76,23" max="24,77,24" />
+    </regions>
+    <portals>
+        <portal filter="playing" x="@0.5" y="@-40" z="@0.5" sound="false" region="void-below" />
+    </portals>
+    <maxbuildheight place="deny(not(all(overhead-liquid-shafts, cause-world-liquid)))">60</maxbuildheight>
+    <gamerules>
+        <doTileDrops>false</doTileDrops>
+        <doFireTick>true</doFireTick>
+        <randomTickSpeed>0</randomTickSpeed>
+        <mobGriefing>false</mobGriefing>
+    </gamerules>
+    <hunger>
+        <depletion>off</depletion>
+    </hunger>
+    <disabledamage>
+        <damage>fall</damage>
+    </disabledamage>
+    <kill-rewards>
+        <kill-reward>
+            <item material="potion" amount="1" damage="16384">
+                <effect duration="10s" amplifier="1">slowness</effect>
+            </item>
+        </kill-reward>
+    </kill-rewards>
+    <spawners>
+        <spawner id="worn-igniter-0" spawn-region="igniter-band-0" player-region="igniter-presence" delay="60s" max-entities="2147483647" filter="all(match-running, drop-pulse, drop_arm=1, drop_band=0)">
+            <item material="flint and steel" amount="1" damage="61" />
+        </spawner>
+        <spawner id="large-mobs-initial-0" spawn-region="mob-band-0" player-region="igniter-presence" delay="1d" max-entities="2147483647" filter="all(match-running, mob-pulse, mob_arm=1, mob_band=0, mob_cycle=1)">
+            <mob type="Slime" size="4" remove-when-far-away="false" />
+            <mob type="Slime" size="4" remove-when-far-away="false" />
+            <mob type="MagmaCube" size="4" remove-when-far-away="false" />
+            <mob type="MagmaCube" size="4" remove-when-far-away="false" />
+        </spawner>
+        <spawner id="large-mobs-repeat-0" spawn-region="mob-band-0" player-region="igniter-presence" delay="45s" max-entities="2147483647" filter="all(match-running, mob-pulse, mob_arm=1, mob_band=0, mob_cycle=2..)">
+            <mob type="Slime" size="4" remove-when-far-away="false" />
+            <mob type="MagmaCube" size="4" remove-when-far-away="false" />
+        </spawner>
+        <spawner id="worn-igniter-1" spawn-region="igniter-band-1" player-region="igniter-presence" delay="60s" max-entities="2147483647" filter="all(match-running, drop-pulse, drop_arm=1, drop_band=1)">
+            <item material="flint and steel" amount="1" damage="61" />
+        </spawner>
+        <spawner id="large-mobs-initial-1" spawn-region="mob-band-1" player-region="igniter-presence" delay="1d" max-entities="2147483647" filter="all(match-running, mob-pulse, mob_arm=1, mob_band=1, mob_cycle=1)">
+            <mob type="Slime" size="4" remove-when-far-away="false" />
+            <mob type="Slime" size="4" remove-when-far-away="false" />
+            <mob type="MagmaCube" size="4" remove-when-far-away="false" />
+            <mob type="MagmaCube" size="4" remove-when-far-away="false" />
+        </spawner>
+        <spawner id="large-mobs-repeat-1" spawn-region="mob-band-1" player-region="igniter-presence" delay="45s" max-entities="2147483647" filter="all(match-running, mob-pulse, mob_arm=1, mob_band=1, mob_cycle=2..)">
+            <mob type="Slime" size="4" remove-when-far-away="false" />
+            <mob type="MagmaCube" size="4" remove-when-far-away="false" />
+        </spawner>
+        <spawner id="worn-igniter-2" spawn-region="igniter-band-2" player-region="igniter-presence" delay="60s" max-entities="2147483647" filter="all(match-running, drop-pulse, drop_arm=1, drop_band=2)">
+            <item material="flint and steel" amount="1" damage="61" />
+        </spawner>
+        <spawner id="large-mobs-initial-2" spawn-region="mob-band-2" player-region="igniter-presence" delay="1d" max-entities="2147483647" filter="all(match-running, mob-pulse, mob_arm=1, mob_band=2, mob_cycle=1)">
+            <mob type="Slime" size="4" remove-when-far-away="false" />
+            <mob type="Slime" size="4" remove-when-far-away="false" />
+            <mob type="MagmaCube" size="4" remove-when-far-away="false" />
+            <mob type="MagmaCube" size="4" remove-when-far-away="false" />
+        </spawner>
+        <spawner id="large-mobs-repeat-2" spawn-region="mob-band-2" player-region="igniter-presence" delay="45s" max-entities="2147483647" filter="all(match-running, mob-pulse, mob_arm=1, mob_band=2, mob_cycle=2..)">
+            <mob type="Slime" size="4" remove-when-far-away="false" />
+            <mob type="MagmaCube" size="4" remove-when-far-away="false" />
+        </spawner>
+    </spawners>
+</map>
