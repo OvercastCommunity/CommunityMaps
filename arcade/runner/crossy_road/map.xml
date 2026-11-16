@@ -1,0 +1,422 @@
+<map proto="1.5.1">
+<name>Crossy Road</name>
+<version>1.0</version>
+<objective>Get to the end without getting hit!</objective>
+<created>2026-11-12</created>
+<game>Race</game>
+<phase>staging</phase>
+<include id="countdown" />
+<constants>
+    <constant id="LANES_AMOUNT">29</constant>
+    <constant id="LOGS_AMOUNT">6</constant>
+    <constant id="LOG_TRACK">40</constant>
+    <constant id="LOG_SLOTS">24</constant>
+    <constant id="SOUTH">0</constant>
+    <constant id="NORTH">1</constant>
+</constants>
+<authors>
+    <author uuid="1af9f952-e33e-42a5-8e1e-296757747fdc" /> <!-- Alphaboy98yt -->
+</authors>
+<contributors>
+    <contributor uuid="64e840c8-4fb5-4659-a36b-ff93e2f6113a" contribution="XML" /> <!-- Javg_ -->
+</contributors>
+<players max="40" />
+<kits>
+    <kit id="default-kit">
+        <game-mode>adventure</game-mode>
+        <kit filter="started">
+            <effect>invisibility</effect>
+            <boots material="leather boots" team-color="true" />
+            <max-health>1</max-health>
+        </kit>
+    </kit>
+    <give kit="default-kit" filter="all(started,participating)" />
+</kits>
+<spawns>
+    <default>
+        <region yaw="-90">
+            <point>-25.5,71,155.5</point>
+        </region>
+    </default>
+    <spawn kit="default-kit">
+        <region yaw="-90">
+            <point>-44.5,22,146.5</point>
+        </region>
+        <region yaw="-90">
+            <point>-44.5,22,164.5</point>
+        </region>
+    </spawn>
+</spawns>
+<regions>
+    <cuboid id="finish-line" min="180,23,153" max="189,25,158" />
+    <apply block="never" use="never" />
+</regions>
+<filters>
+    <material id="log-block">log 2:9</material>
+    <any id="river-water">
+        <material>water</material>
+        <material>stationary water</material>
+    </any>
+    <after id="countdown-start" duration="7s" filter="match-started" />
+    <after id="started" duration="10s" filter="match-started" />
+    <material id="air">air</material>
+    <any id="should-lose-z">
+        <offset vector="^1,^0,^0">
+            <material id="red-stained-clay">stained clay:14</material>
+        </offset>
+        <offset vector="^-1,^0,^0">
+            <material>stained clay:14</material>
+        </offset>
+        <offset vector="~0,~-1,~0">
+            <material>stained clay:14</material>
+        </offset>
+        <offset vector="~0,~0,~0">
+            <material>water</material>
+        </offset>
+    </any>
+    <any id="should-lose-x">
+        <offset vector="^0,^0,^1">
+            <material>stained clay:14</material>
+        </offset>
+        <offset vector="^0,^0,^-1">
+            <material>stained clay:14</material>
+        </offset>
+        <offset vector="~0,~-1,~0">
+            <material>stained clay:14</material>
+        </offset>
+        <offset vector="~0,~0,~0">
+            <material>water</material>
+        </offset>
+    </any>
+</filters>
+<score />
+<variables scope="match">
+    <cuboid id="log_place" min="0,20,0" max="1,21,1" />
+    <cuboid id="log_remove" min="0,20,0" max="1,21,1" />
+    <array id="log_lanes" size="${LOGS_AMOUNT}" />
+    <array id="log_lanes_amount" size="${LOGS_AMOUNT}" />
+    <array id="log_lanes_current_z" size="${LOGS_AMOUNT}" default="138" />
+    <array id="log_lanes_separation" size="${LOGS_AMOUNT}" />
+    <array id="log_lanes_limits" size="2" />
+    <array id="log_lanes_wobble" size="${LOGS_AMOUNT}" />
+    <array id="log_x_offset" size="${LOG_SLOTS}" />
+    <block id="cursor_place">0,21.5,0</block>
+    <block id="cursor_remove">0,21.5,0</block>
+    <array id="lanes" size="${LANES_AMOUNT}" />
+    <array id="lanes_current_z" size="${LANES_AMOUNT}" />
+    <array id="lanes_blocks_amount" size="${LANES_AMOUNT}" />
+    <array id="lanes_blocks_separation" size="${LANES_AMOUNT}" />
+    <array id="lanes_current_direction" size="${LANES_AMOUNT}" />
+    <array id="lanes_limits" size="2" />
+    <timelimit id="tl" />
+    <variable id="last_position" />
+    <variable id="target" scope="player" exclusive="1" />
+    <variable id="finished" scope="player" />
+</variables>
+<actions>
+    <trigger scope="match" filter="match-started">
+        <action>
+            <schedule after="2s">
+                <message text="`e`lHow to play: `rCross the road without getting hit by the red blocks! Watch out for the traps along the way!" />
+                <sound key="random.click" />
+            </schedule>
+        </action>
+    </trigger>
+
+    <trigger scope="match">
+        <filter>
+            <after duration="10s" filter="match-started" message="Race starting in {0}" />
+        </filter>
+        <action>
+            <fill material="air">
+                <cuboid min="-38,23,139" max="-37,25,172" />
+            </fill>
+        </action>
+    </trigger>
+
+    <trigger scope="player">
+        <filter>
+            <after duration="0.1s" filter="all(finish-line,participating,started,finished=0)" />
+        </filter>
+        <action>
+            <set var="finished" value="1" />
+            <set var="target" value="1" />
+            <set var="last_position" value="last_position + 1" />
+            <action filter="last_position=1">
+                <set var="score" value="1" />
+            </action>
+            <switch-scope inner="match">
+                <message text="{player} has finished in `a`l{place}{ordinal}`r place!">
+                    <replacements>
+                        <player id="player" var="target" />
+                        <decimal id="place" value="last_position" />
+                        <switch id="ordinal" value="last_position">
+                            <case match="1" result="st"/>
+                            <case match="21" result="st"/>
+                            <case match="31" result="st"/>
+                            <case match="41" result="st"/>
+                            <case match="51" result="st"/>
+                            <case match="61" result="st"/>
+                            <case match="71" result="st"/>
+                            <case match="81" result="st"/>
+                            <case match="91" result="st"/>
+                            <case match="2" result="nd"/>
+                            <case match="22" result="nd"/>
+                            <case match="32" result="nd"/>
+                            <case match="42" result="nd"/>
+                            <case match="52" result="nd"/>
+                            <case match="62" result="nd"/>
+                            <case match="72" result="nd"/>
+                            <case match="82" result="nd"/>
+                            <case match="92" result="nd"/>
+                            <case match="3" result="rd"/>
+                            <case match="23" result="rd"/>
+                            <case match="33" result="rd"/>
+                            <case match="43" result="rd"/>
+                            <case match="53" result="rd"/>
+                            <case match="63" result="rd"/>
+                            <case match="73" result="rd"/>
+                            <case match="83" result="rd"/>
+                            <case match="93" result="rd"/>
+                            <fallback>th</fallback>
+                        </switch>
+                    </replacements>
+                </message>
+                <action filter="tl=-1">
+                    <set var="tl" value="60" />
+                </action>
+            </switch-scope>
+        </action>
+    </trigger>
+
+    <!-- killing player -->
+    <trigger scope="player">
+        <filter>
+            <pulse duration="0.05s" period="0.1s" filter="match-running" />
+        </filter>
+        <action locals="yaw">
+            <set var="yaw" value="((player.yaw + 180) % 360 + 360) % 360 - 180" />
+            <action filter="any(all(yaw=-135..,yaw=..-45),all(yaw=45..,yaw=..135))">
+                <action filter="should-lose-z">
+                    <kit>
+                        <effect duration="1s" amplifier="10">instant damage</effect>
+                    </kit>
+                </action>
+            </action>
+            <action filter="any(all(yaw=-180..,yaw=..-135),all(yaw=135..,yaw=..180),all(yaw=-45..,yaw=..45))">
+                <action filter="should-lose-x">
+                    <kit>
+                        <effect duration="1s" amplifier="10">instant damage</effect>
+                    </kit>
+                </action>
+            </action>
+        </action>
+    </trigger>
+
+    <!-- block and log placing -->
+    <trigger scope="match" filter="always">
+        <action>
+            <set var="lanes_limits" index="0" value="136.5" />
+            <set var="lanes_limits" index="1" value="174.5" />
+
+            <set var="lanes" index="0" value="-35.5" />
+            <set var="lanes" index="1" value="-33.5" />
+            <set var="lanes" index="2" value="-28.5" />
+            <set var="lanes" index="3" value="-26.5" />
+            <set var="lanes" index="4" value="-13.5" />
+            <set var="lanes" index="5" value="5.5" />
+            <set var="lanes" index="6" value="7.5" />
+            <set var="lanes" index="7" value="12.5" />
+            <set var="lanes" index="8" value="14.5" />
+            <set var="lanes" index="9" value="26.5" />
+            <set var="lanes" index="10" value="28.5" />
+            <set var="lanes" index="11" value="33.5" />
+            <set var="lanes" index="12" value="35.5" />
+            <set var="lanes" index="13" value="76.5" />
+            <set var="lanes" index="14" value="78.5" />
+            <set var="lanes" index="15" value="83.5" />
+            <set var="lanes" index="16" value="85.5" />
+            <set var="lanes" index="17" value="97.5" />
+            <set var="lanes" index="18" value="99.5" />
+            <set var="lanes" index="19" value="104.5" />
+            <set var="lanes" index="20" value="106.5" />
+            <set var="lanes" index="22" value="126.5" />
+            <set var="lanes" index="23" value="128.5" />
+            <set var="lanes" index="24" value="147.5" />
+            <set var="lanes" index="25" value="160.5" />
+            <set var="lanes" index="26" value="162.5" />
+            <set var="lanes" index="27" value="167.5" />
+            <set var="lanes" index="28" value="169.5" />
+
+            <set var="log_lanes_limits" index="0" value="138" />
+            <set var="log_lanes_limits" index="1" value="173" />
+
+            <set var="log_lanes" index="0" value="60.5" />
+            <set var="log_lanes" index="1" value="62.5" />
+            <set var="log_lanes" index="2" value="65.5" />
+            <set var="log_lanes" index="3" value="117.5" />
+            <set var="log_lanes" index="4" value="119.5" />
+            <set var="log_lanes" index="5" value="122.5" />
+
+            <set var="log_lanes_wobble" index="1" value="1" />
+            <set var="log_lanes_wobble" index="4" value="1" />
+
+            <repeat times="${LOGS_AMOUNT}" index="i">
+                <set var="log_lanes_amount" index="i" value="floor(random() * 3) + 2" />
+                <set var="log_lanes_separation" index="i" value="6 + floor(random() * (floor(${LOG_TRACK} / log_lanes_amount[i]) - 5))" />
+                <set var="log_lanes_current_z" index="i" value="floor(random() * ${LOG_TRACK})" />
+                <repeat times="4" index="j">
+                    <set var="log_x_offset" index="i * 4 + j" value="floor(random() * 2) * log_lanes_wobble[i]" />
+                </repeat>
+            </repeat>
+
+            <repeat times="${LANES_AMOUNT}" index="i">
+                <set var="lanes_current_direction" index="i" value="i % 2" />
+                <set var="lanes_blocks_amount" index="i" value="floor(random() * 5) + 2" />
+                <set var="lanes_blocks_separation" index="i" value="floor(random() * 4) + 2" />
+                <action filter="i%2=0">
+                    <set var="lanes_current_z" index="i" value="lanes_limits[0]" />
+                </action>
+                <action filter="i%2=1">
+                    <set var="lanes_current_z" index="i" value="lanes_limits[1]" />
+                </action>
+            </repeat>
+        </action>
+    </trigger>
+
+    <trigger scope="match" action="move-blocks">
+        <filter>
+            <pulse duration="0.05s" period="0.1s" filter="match-running" />
+        </filter>
+    </trigger>
+
+    <trigger scope="match" action="move-logs">
+        <filter>
+            <pulse duration="0.1s" period="0.2s" filter="match-running" />
+        </filter>
+    </trigger>
+
+    <action id="move-logs" scope="match" locals="pos">
+        <repeat times="${LOGS_AMOUNT}" index="i">
+            <!-- remove -->
+            <repeat times="log_lanes_amount[i]" index="j">
+                <set var="pos" value="log_lanes_limits[0] - 4 + (log_lanes_current_z[i] + j * log_lanes_separation[i]) % ${LOG_TRACK}" />
+                <set var="log_remove" index="0" value="log_lanes[i] + log_x_offset[i * 4 + j] - 0.5" />
+                <set var="log_remove" index="2" value="pos" />
+                <set var="log_remove" index="3" value="log_lanes[i] + log_x_offset[i * 4 + j] + 0.5" />
+                <set var="log_remove" index="5" value="pos + 4" />
+                <fill region="log_remove" material="stationary water" filter="log-block" />
+            </repeat>
+
+            <set var="log_lanes_current_z" index="i" value="(log_lanes_current_z[i] + 1) % ${LOG_TRACK}" />
+
+            <!-- place -->
+            <repeat times="log_lanes_amount[i]" index="j">
+                <action filter="[log_lanes_current_z[i] + j * log_lanes_separation[i]] % ${LOG_TRACK}=0">
+                    <set var="log_x_offset" index="i * 4 + j" value="floor(random() * 2) * log_lanes_wobble[i]" />
+                </action>
+
+                <set var="pos" value="log_lanes_limits[0] - 4 + (log_lanes_current_z[i] + j * log_lanes_separation[i]) % ${LOG_TRACK}" />
+                <set var="log_place" index="0" value="log_lanes[i] + log_x_offset[i * 4 + j] - 0.5" />
+                <set var="log_place" index="2" value="pos" />
+                <set var="log_place" index="3" value="log_lanes[i] + log_x_offset[i * 4 + j] + 0.5" />
+                <set var="log_place" index="5" value="pos + 4" />
+                <fill region="log_place" material="log 2:9" filter="river-water" />
+            </repeat>
+        </repeat>
+    </action>
+
+    <action id="move-blocks" scope="match" locals="lane">
+        <repeat times="${LANES_AMOUNT}" index="i">
+            <!-- delete previous block -->
+            <repeat times="lanes_blocks_amount[i]" index="j">
+                <set var="cursor_remove" index="0" value="lanes[i]" />
+
+                <action filter="lanes_current_direction[i]=${NORTH}">
+                    <set var="cursor_remove" index="2" value="lanes_current_z[i] + (lanes_blocks_separation[i] * j)" />
+                </action>
+                <action filter="lanes_current_direction[i]=${SOUTH}">
+                    <set var="cursor_remove" index="2" value="lanes_current_z[i] - (lanes_blocks_separation[i] * j)" />
+                </action>
+
+                <fill region="cursor_remove" material="air" filter="red-stained-clay" />
+            </repeat>
+
+            <!-- swap direction if it reached the end -->
+            <action filter="any(
+                all(
+                    lanes_current_direction[i]=${SOUTH},
+                    lanes_limits[1]-lanes_current_z[i]+lanes_blocks_amount[i]=..0
+                ),
+                all(
+                    lanes_current_direction[i]=${NORTH},
+                    lanes_current_z[i]+lanes_blocks_amount[i]-lanes_limits[0]=..0
+                )
+        )">
+                <set var="lanes_blocks_amount" index="i" value="floor(random() * 5) + 2" />
+                <set var="lanes_current_direction" index="i" value="1 - lanes_current_direction[i]" />
+                <set var="lanes_blocks_separation" index="i" value="floor(random() * 4) + 2" />
+            </action>
+
+            <action filter="lanes_current_direction[i]=${SOUTH}">
+                <set var="lanes_current_z" index="i" value="lanes_current_z[i] + 1" />
+            </action>
+            <action filter="lanes_current_direction[i]=${NORTH}">
+                <set var="lanes_current_z" index="i" value="lanes_current_z[i] - 1" />
+            </action>
+
+            <repeat times="lanes_blocks_amount[i]" index="j">
+                <set var="cursor_place" index="0" value="lanes[i]" />
+
+                <action filter="lanes_current_direction[i]=${NORTH}">
+                    <set var="cursor_place" index="2" value="lanes_current_z[i] + (lanes_blocks_separation[i] * j)" />
+                </action>
+                <action filter="lanes_current_direction[i]=${SOUTH}">
+                    <set var="cursor_place" index="2" value="lanes_current_z[i] - (lanes_blocks_separation[i] * j)" />
+                </action>
+
+                <fill region="cursor_place" material="stained clay:14" filter="air" />
+            </repeat>
+        </repeat>
+    </action>
+</actions>
+<spawners>
+    <spawner player-region="everywhere" delay="5s" filter="started">
+        <spawn-region>
+            <point>48.5,24.1,156.5</point>
+        </spawn-region>
+        <potion damage="4">
+            <effect amplifier="2" duration="10">poison</effect>
+        </potion>
+    </spawner>
+    <spawner player-region="everywhere" delay="5s" filter="started">
+        <spawn-region>
+            <point>48.5,24.1,158.5</point>
+        </spawn-region>
+        <potion damage="4">
+            <effect amplifier="2" duration="10">poison</effect>
+        </potion>
+    </spawner>
+    <spawner player-region="everywhere" delay="5s" filter="started">
+        <spawn-region>
+            <point>48.5,24.1,160.5</point>
+        </spawn-region>
+        <potion damage="4">
+            <effect amplifier="2" duration="10">poison</effect>
+        </potion>
+    </spawner>
+</spawners>
+<itemremove>
+    <item>leather boots</item>
+</itemremove>
+<hunger>
+    <depletion>off</depletion>
+</hunger>
+<damage>
+    <deny>
+        <attacker>
+            <always />
+        </attacker>
+    </deny>
+</damage>
+</map>
