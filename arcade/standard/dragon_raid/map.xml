@@ -1,0 +1,351 @@
+<?xml version="1.0"?>
+<map proto="1.5.1">
+    <name>Dragon Raid</name>
+    <version>1.0.0</version>
+    <phase>development</phase>
+    <created>2026-11-22</created>
+    <objective>Slay the Ender Dragon, then be the first to stand on the portal!</objective>
+    <rules>
+        <rule>Destroy the 13 End Crystals on the towers: they heal the dragon.</rule>
+        <rule>Be the first to stand on the bedrock portal to win. If time runs out with no one on the bedrock, the match is a tie.</rule>
+    </rules>
+    <authors>
+        <author uuid="c25a6f7b-4c42-40da-8cd6-add53f0c84eb"/> <!-- arcadeboss -->
+    </authors>
+    <contributors>
+        <contributor>Grok Bot</contributor>
+    </contributors>
+    <players min="1" max="50" max-overfill="62" colors="true"/>
+    <friendlyfire>off</friendlyfire>
+    <damage>
+        <deny>
+            <relation>enemy</relation>
+        </deny>
+    </damage>
+    <time result="score">15m</time>
+    <score>
+        <limit>1</limit>
+    </score>
+    <terrain environment="the end"/>
+    <gamerules>
+        <mobGriefing>true</mobGriefing>
+        <doMobSpawning>true</doMobSpawning>
+        <doDaylightCycle>false</doDaylightCycle>
+    </gamerules>
+    <maxbuildheight>108</maxbuildheight>
+    <!-- natural spawns: endermen only, never inside the portal-room shell (spawner silverfish are reason SPAWNER: always allowed) -->
+    <mobs filter="flt-dr-mob-spawns"/>
+    <variables>
+        <variable id="var_dr_won" scope="match" default="0"/>
+        <variable id="var_dr_crystals" scope="match" default="13"/>
+        <variable id="var_dr_entered" scope="player" default="0"/>
+        <variable id="var_dr_claimer" scope="player" exclusive="1" default="0"/>
+    </variables>
+    <kits>
+        <kit id="kit-slayer" force="true" reset-ender-pearls="true">
+            <clear/>
+            <item slot="0" material="diamond sword" enchantment="sharpness:3" unbreakable="true"/>
+            <item slot="1" material="bow" enchantment="power:2;infinity" unbreakable="true"/>
+            <item slot="2" material="diamond pickaxe" unbreakable="true"/>
+            <item slot="3" material="torch" amount="20"/>
+            <item slot="4" material="smooth brick" amount="64"/>
+            <item slot="5" material="smooth brick" amount="64"/>
+            <item slot="6" material="cooked beef" amount="32"/>
+            <item slot="7" material="ender pearl" amount="4"/>
+            <item slot="8" material="golden apple" amount="3"/>
+            <item slot="28" material="arrow"/>
+            <helmet material="diamond helmet" enchantment="protection:2" unbreakable="true"/>
+            <chestplate material="diamond chestplate" enchantment="protection:2" unbreakable="true"/>
+            <leggings material="diamond leggings" enchantment="protection:3" unbreakable="true"/>
+            <boots material="diamond boots" enchantment="protection:3" unbreakable="true"/>
+        </kit>
+    </kits>
+    <!-- Luxor (Bedwars) fireball, verbatim: the only source is the loot-chest fire charges tagged PGM:projectile=prj-dr-fireball -->
+    <projectiles>
+        <projectile id="prj-dr-fireball" name="Fireball" projectile="Fireball" velocity=".6" click="right" power="4" damage="1" cooldown="1s"/>
+    </projectiles>
+    <spawns>
+        <!-- first spawn: the windowless entry room of the Stronghold scene -->
+        <spawn kit="kit-slayer" yaw="180" pitch="0" filter="flt-dr-not-entered">
+            <region>
+                <cuboid min="1492,27,30" max="1497,28,34"/>
+            </region>
+        </spawn>
+        <!-- after using the room portal (and every respawn): the End pad -->
+        <spawn kit="kit-slayer" yaw="180" pitch="0" filter="flt-dr-entered">
+            <region>
+                <cuboid min="-6,65,48" max="6,66,56"/>
+            </region>
+        </spawn>
+        <default yaw="180" pitch="14.2">
+            <region>
+                <point>-0.5,127,119.5</point>
+            </region>
+        </default>
+    </spawns>
+    <regions>
+        <!-- where the death portal can be: whole arena (+portal radius) horizontally; vertically only the portal's standing
+             blocks (y 63..68), which keeps the pillar tops and the portal room (y < 41) out of it -->
+        <cuboid id="reg-dr-portal-band" min="-181,63,-202" max="188,69,180"/>
+        <!-- crystal markers (ender stone): the block under each End Crystal; 1.8 dragon cannot break it -->
+        <union id="reg-dr-markers">
+            <block>42,76,0</block>
+            <block>33,80,25</block>
+            <block>12,82,39</block>
+            <block>-13,85,39</block>
+            <block>-34,88,24</block>
+            <block>-42,91,-1</block>
+            <block>-33,94,-25</block>
+            <block>-13,97,-40</block>
+            <block>12,100,-40</block>
+            <block>33,103,-25</block>
+            <block>92,100,30</block>
+            <block>-80,104,56</block>
+            <block>-14,108,-97</block>
+        </union>
+        <!-- the Stronghold scene: entry room + portal room + water + seabed (sand / sandstone, barrier walls) -->
+        <cuboid id="reg-dr-rooms" min="1472,23,0" max="1517,41,70"/>
+        <!-- the 3x3 End portal in the portal room (feet in the portal block or one above it) -->
+        <cuboid id="reg-dr-room-portal" min="1493,29,46" max="1496,31,49"/>
+        <!-- 0.0.10/14/1.0.0: the 8x8 obsidian pad (x -4..3, z 48..55): a rectangle is infinite in Y, so block="never" blocks placing and breaking at every height over it (t267u); walking and spawning are unaffected -->
+        <rectangle id="reg-dr-end-pad" min="-4,48" max="4,56"/>
+        <!-- 0.0.13: the 8 corner torches (y65) on top of the obsidian pad floor -->
+        <union id="reg-dr-end-pad-torches">
+            <block>-3,65,48</block>
+            <block>-4,65,49</block>
+            <block>-3,65,55</block>
+            <block>-4,65,54</block>
+            <block>2,65,48</block>
+            <block>3,65,49</block>
+            <block>2,65,55</block>
+            <block>3,65,54</block>
+        </union>
+        <!-- players cannot break a marker by hand; deny() abstains for the crystal explosion (actor = EnderCrystal) -->
+        <apply region="reg-dr-markers" block-break="flt-dr-no-player-break"/>
+        <apply region="reg-dr-rooms" block="never" message="`cThe Stronghold is protected. Jump into the End Portal!"/>
+        <apply region="reg-dr-end-pad" block="never" message="`cThe spawn pad is protected."/>
+        <apply region="reg-dr-end-pad-torches" block="never" message="`cThe spawn pad is protected."/>
+    </regions>
+    <filters>
+        <time id="flt-dr-intro">5s</time>
+        <all id="flt-dr-mob-spawns">
+            <mob>enderman</mob>
+            <not>
+                <region id="reg-dr-rooms"/>
+            </not>
+        </all>
+        <variable id="flt-dr-entered" var="var_dr_entered">[1,oo)</variable>
+        <variable id="flt-dr-not-entered" var="var_dr_entered">(-oo,0]</variable>
+        <!-- room portal: a region filter is dynamic on PlayerCoarseMoveEvent -->
+        <all id="flt-dr-in-room-portal">
+            <participating/>
+            <region id="reg-dr-room-portal"/>
+        </all>
+        <!-- block under the player's feet is bedrock inside the portal band (region INSIDE the offset keeps it dynamic) -->
+        <all id="flt-dr-on-bedrock">
+            <participating/>
+            <offset vector="~0,~-1,~0">
+                <all>
+                    <material>bedrock</material>
+                    <region id="reg-dr-portal-band"/>
+                </all>
+            </offset>
+        </all>
+        <!-- dragon's death portal: feet block or the block below is an end portal block in the portal band -->
+        <all id="flt-dr-in-portal">
+            <participating/>
+            <any>
+                <offset vector="~0,~0,~0">
+                    <all>
+                        <material>ender portal</material>
+                        <region id="reg-dr-portal-band"/>
+                    </all>
+                </offset>
+                <offset vector="~0,~-1,~0">
+                    <all>
+                        <material>ender portal</material>
+                        <region id="reg-dr-portal-band"/>
+                    </all>
+                </offset>
+            </any>
+        </all>
+        <variable id="flt-dr-won" var="var_dr_won">[1,oo)</variable>
+        <all id="flt-dr-first-claim">
+            <filter id="flt-dr-on-bedrock"/>
+            <not>
+                <filter id="flt-dr-won"/>
+            </not>
+        </all>
+        <variable id="flt-dr-no-crystals" var="var_dr_crystals">(-oo,0]</variable>
+        <deny id="flt-dr-no-player-break">
+            <cause>player</cause>
+        </deny>
+        <all id="flt-dr-crystal-0-gone">
+            <match-running/>
+            <not>
+                <offset vector="42,76,0">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+        <all id="flt-dr-crystal-1-gone">
+            <match-running/>
+            <not>
+                <offset vector="33,80,25">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+        <all id="flt-dr-crystal-2-gone">
+            <match-running/>
+            <not>
+                <offset vector="12,82,39">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+        <all id="flt-dr-crystal-3-gone">
+            <match-running/>
+            <not>
+                <offset vector="-13,85,39">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+        <all id="flt-dr-crystal-4-gone">
+            <match-running/>
+            <not>
+                <offset vector="-34,88,24">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+        <all id="flt-dr-crystal-5-gone">
+            <match-running/>
+            <not>
+                <offset vector="-42,91,-1">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+        <all id="flt-dr-crystal-6-gone">
+            <match-running/>
+            <not>
+                <offset vector="-33,94,-25">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+        <all id="flt-dr-crystal-7-gone">
+            <match-running/>
+            <not>
+                <offset vector="-13,97,-40">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+        <all id="flt-dr-crystal-8-gone">
+            <match-running/>
+            <not>
+                <offset vector="12,100,-40">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+        <all id="flt-dr-crystal-9-gone">
+            <match-running/>
+            <not>
+                <offset vector="33,103,-25">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+        <all id="flt-dr-crystal-10-gone">
+            <match-running/>
+            <not>
+                <offset vector="92,100,30">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+        <all id="flt-dr-crystal-11-gone">
+            <match-running/>
+            <not>
+                <offset vector="-80,104,56">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+        <all id="flt-dr-crystal-12-gone">
+            <match-running/>
+            <not>
+                <offset vector="-14,108,-97">
+                    <material>ender stone</material>
+                </offset>
+            </not>
+        </all>
+    </filters>
+    <actions>
+        <action id="act-dr-intro" scope="match">
+            <message text="`5`l▶ The Ender Dragon awakens... `r`7jump into the End Portal, destroy the End Crystals, slay the dragon, then be first to the bedrock!"/>
+            <sound preset="TIP"/>
+        </action>
+        <action id="act-dr-room-portal" scope="player">
+            <set var="var_dr_entered" value="1"/>
+            <teleport x="0.5" y="65" z="52.5" yaw="180" pitch="0"/>
+            <velocity x="0" y="0" z="0"/>
+            <message text="`d▶ You step through the portal `r`7into the End. Slay the Dragon!"/>
+            <sound preset="PORTAL"/>
+            <sound key="mob.enderdragon.growl" volume="1" pitch="0.8"/>
+        </action>
+        <action id="act-dr-claim" scope="player">
+            <set var="var_dr_won" value="1"/>
+            <set var="var_dr_claimer" value="1"/>
+            <switch-scope inner="match">
+                <message text="`a`l▶ {claimer} claimed the portal!">
+                    <replacements>
+                        <player id="claimer" var="var_dr_claimer"/>
+                    </replacements>
+                </message>
+                <sound preset="OBJECTIVE_FIREWORKS_TWINKLE"/>
+            </switch-scope>
+            <set var="score" value="1"/>
+        </action>
+        <action id="act-dr-portal" scope="player">
+            <teleport x="-0.5" y="127" z="119.5" yaw="180" pitch="14.2"/>
+            <velocity x="0" y="0" z="0"/>
+            <message text="`d▶ The End portal flings you `r`7up to the overlook."/>
+            <sound preset="PORTAL"/>
+        </action>
+        <action id="act-dr-crystal-down" scope="match">
+            <set var="var_dr_crystals" value="var_dr_crystals - 1"/>
+            <message text="`d`l▶ An End Crystal was destroyed! `r`7({left} left)">
+                <replacements>
+                    <decimal id="left" value="var_dr_crystals" format="0"/>
+                </replacements>
+            </message>
+            <sound preset="OBJECTIVE_GOOD"/>
+            <action filter="flt-dr-no-crystals">
+                <message text="`a`l▶ All End Crystals are down! `r`7The dragon can no longer heal."/>
+                <sound preset="OBJECTIVE_FIREWORKS_FAR"/>
+            </action>
+        </action>
+        <trigger scope="match" filter="flt-dr-intro" action="act-dr-intro"/>
+        <trigger scope="player" filter="flt-dr-in-room-portal" action="act-dr-room-portal"/>
+        <trigger scope="player" filter="flt-dr-first-claim" action="act-dr-claim"/>
+        <trigger scope="player" filter="flt-dr-in-portal" action="act-dr-portal"/>
+        <trigger scope="match" filter="flt-dr-crystal-0-gone" action="act-dr-crystal-down"/>
+        <trigger scope="match" filter="flt-dr-crystal-1-gone" action="act-dr-crystal-down"/>
+        <trigger scope="match" filter="flt-dr-crystal-2-gone" action="act-dr-crystal-down"/>
+        <trigger scope="match" filter="flt-dr-crystal-3-gone" action="act-dr-crystal-down"/>
+        <trigger scope="match" filter="flt-dr-crystal-4-gone" action="act-dr-crystal-down"/>
+        <trigger scope="match" filter="flt-dr-crystal-5-gone" action="act-dr-crystal-down"/>
+        <trigger scope="match" filter="flt-dr-crystal-6-gone" action="act-dr-crystal-down"/>
+        <trigger scope="match" filter="flt-dr-crystal-7-gone" action="act-dr-crystal-down"/>
+        <trigger scope="match" filter="flt-dr-crystal-8-gone" action="act-dr-crystal-down"/>
+        <trigger scope="match" filter="flt-dr-crystal-9-gone" action="act-dr-crystal-down"/>
+        <trigger scope="match" filter="flt-dr-crystal-10-gone" action="act-dr-crystal-down"/>
+        <trigger scope="match" filter="flt-dr-crystal-11-gone" action="act-dr-crystal-down"/>
+        <trigger scope="match" filter="flt-dr-crystal-12-gone" action="act-dr-crystal-down"/>
+    </actions>
+</map>
